@@ -36,15 +36,17 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
     };
 
     // Helper functions matching old component
-    const formatDate = (date: Date): string => {
+    const formatDateTime = (date: Date): string => {
         return new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
         }).format(date);
     };
 
-    console.log('rendering NoteGrid with notes:');
     const getTypeColor = (type?: string): 'primary' | 'warning' | 'info' | 'error' | 'default' => {
         const colors: Record<string, 'primary' | 'warning' | 'info' | 'error' | 'default'> = {
             'Meeting': 'primary',
@@ -75,7 +77,7 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
         {
             field: 'name',
             headerName: 'Note Name',
-            width: 400,
+            width: 300,
             renderCell: (params) => (
                 <Box
                     sx={{
@@ -86,38 +88,7 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
                     }}
                     onClick={() => onNoteClick?.(params.row)}
                 >
-                    {params.value}
-                </Box>
-            )
-        },
-        {
-            field: 'type',
-            headerName: 'Type',
-            width: 120,
-            renderCell: (params) => (
-                <Chip 
-                    label={params.value || 'N/A'} 
-                    color={getTypeColor(params.value) as any}
-                    size="small"
-                    variant="outlined"
-                />
-            )
-        },
-        {
-            field: 'description',
-            width: 500,
-            headerName: 'Description',
-            renderCell: (params) => (
-                <Box sx={{
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical'
-                }}>
-                    {params.value || 'No description'}
+                    {params.value || '-'}
                 </Box>
             )
         },
@@ -127,7 +98,7 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
             width: 200,
             renderCell: (params) => {
                 if (!params.value || (Array.isArray(params.value) && params.value.length === 0)) {
-                    return <Box sx={{ padding: '4px' }}>No tags</Box>;
+                    return <Box sx={{ padding: '4px' }}>-</Box>;
                 }
 
                 // Handle both array and string format for backward compatibility
@@ -168,29 +139,63 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
                 );
             }
         },
+        // {
+        //     field: 'type',
+        //     headerName: 'Type',
+        //     width: 120,
+        //     renderCell: (params) => (
+        //         <Chip 
+        //             label={params.value || 'N/A'} 
+        //             color={getTypeColor(params.value) as any}
+        //             size="small"
+        //             variant="outlined"
+        //         />
+        //     )
+        // },
+        {
+            field: 'description',
+            width: 500,
+            headerName: 'Description',
+            renderCell: (params) => (
+                <Box sx={{
+                    whiteSpace: 'normal',
+                    wordWrap: 'break-word',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical'
+                }}>
+                    {params.value || '-'}
+                </Box>
+            )
+        },
         {
             field: 'createdBy',
             headerName: 'Created By',
-            width: 160
+            width: 160,
+            renderCell: (params) => params.value || '-'
         },
         {
             field: 'createdAt',
             headerName: 'Created Date',
-            width: 140,
-            renderCell: (params) => formatDate(new Date(params.value))
+            width: 180,
+            renderCell: (params) => params.value ? formatDateTime(new Date(params.value)) : '-'
         },
         {
             field: 'isArchived',
             headerName: 'Status',
             flex: 1,
-            minWidth: 100,
+            minWidth: 100, 
             renderCell: (params) => (
-                <Chip 
-                    label={params.value ? 'Archived' : 'Active'} 
-                    color={params.value ? 'default' : 'success'}
-                    size="small"
-                    variant={params.value ? 'outlined' : 'filled'}
-                />
+                <Typography
+                    variant="body2" 
+                    sx={{
+                        fontWeight: 500
+                    }}
+                >
+                    {params.value ? 'Inactive' : 'Active'}
+                </Typography>
             )
         }
     ], [onNoteClick]);

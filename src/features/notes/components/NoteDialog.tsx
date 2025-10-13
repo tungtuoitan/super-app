@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { useNoteUI } from '../store/NoteUIContext';
 import type { Note } from '../types/note.types';
+import type { Tag } from '@/features/tags/types/tag.types';
 
 /**
  * NoteDialog component for displaying note details
@@ -86,10 +87,10 @@ export function NoteDialog() {
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                                 {Array.isArray(selectedNote.tags) 
-                                    ? selectedNote.tags.map((tag: string, index: number) => (
+                                    ? selectedNote.tags.map((tag: Tag, index: number) => (
                                         <Chip
-                                            key={index}
-                                            label={tag}
+                                            key={tag.id || tag.tagId || index}
+                                            label={tag.name}
                                             size="small"
                                             variant="outlined"
                                         />

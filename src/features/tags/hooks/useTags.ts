@@ -1,0 +1,162 @@
+/**
+ * Tag React Query Hooks
+ * Data fetching hooks following the same pattern as notes
+ */
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { tagService } from '../services/tagService';
+import type { 
+    Tag, 
+    CreateTagDTO, 
+    UpdateTagDTO, 
+    GetTagsParams 
+} from '../types/tag.types';
+
+// Query Keys
+export const tagKeys = {
+    all: ['tags'] as const,
+    lists: () => [...tagKeys.all, 'list'] as const,
+    list: (params?: GetTagsParams) => [...tagKeys.lists(), params] as const,
+    tree: () => [...tagKeys.all, 'tree'] as const,
+    details: () => [...tagKeys.all, 'detail'] as const,
+    detail: (id: number) => [...tagKeys.details(), id] as const,
+    children: (parentId: number) => [...tagKeys.all, 'children', parentId] as const,
+    roots: () => [...tagKeys.all, 'roots'] as const,
+};
+
+/**
+ * Hook to fetch all tags with optional filtering
+ */
+export function useTags(params?: GetTagsParams) {
+    return useQuery({
+        queryKey: tagKeys.list(params),
+        queryFn: () => tagService.getTags(params),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+}
+
+/**
+ * Hook to fetch tags as tree structure
+ */
+export function useTagTree() {
+    return useQuery({
+        queryKey: tagKeys.tree(),
+        queryFn: () => tagService.getTagTree(),
+        staleTime: 5 * 60 * 1000,
+    });
+}
+
+/**
+ * Hook to fetch single tag by ID
+ */
+export function useTag(id: number, enabled = true) {
+    return useQuery({
+        queryKey: tagKeys.detail(id),
+        queryFn: () => tagService.getTagById(id),
+        enabled,
+        staleTime: 5 * 60 * 1000,
+    });
+}
+
+/**
+ * Hook to fetch children of specific tag
+ */
+export function useTagChildren(parentId: number, enabled = true) {
+    return useQuery({
+        queryKey: tagKeys.children(parentId),
+        queryFn: () => tagService.getTagChildren(parentId),
+        enabled,
+        staleTime: 5 * 60 * 1000,
+    });
+}
+
+/**
+ * Hook to fetch root level tags only
+ */
+export function useRootTags() {
+    return useQuery({
+        queryKey: tagKeys.roots(),
+        queryFn: () => tagService.getRootTags(),
+        staleTime: 5 * 60 * 1000,
+    });
+}
+
+/**
+ * Hook to create new tag
+ */
+export function useCreateTag() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: (data: CreateTagDTO) => tagService.createTag(data),
+        onSuccess: () => {
+            // Invalidate all tag queries to refetch
+            queryClient.invalidateQueries({ queryKey: tagKeys.all });
+        },
+    });
+}
+
+/**
+ * Hook to update existing tag
+ */
+export function useUpdateTag() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: ({ id, data }: { id: number; data: UpdateTagDTO }) =>
+            tagService.updateTag(id, data),
+        onSuccess: (_, { id }) => {
+            // Invalidate specific tag and related queries
+            queryClient.invalidateQueries({ queryKey: tagKeys.detail(id) });
+            queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+        },
+    });
+}
+
+/**
+ * Hook to delete tag
+ */
+export function useDeleteTag() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: (id: number) => tagService.deleteTag(id),
+        onSuccess: () => {
+            // Invalidate all tag queries
+            queryClient.invalidateQueries({ queryKey: tagKeys.all });
+        },
+    });
+}
+
+/**
+ * Hook to archive tag
+ */
+export function useArchiveTag() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: (id: number) => tagService.archiveTag(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: tagKeys.detail(id) });
+            queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+        },
+    });
+}
+
+/**
+ * Hook to unarchive tag
+ */
+export function useUnarchiveTag() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: (id: number) => tagService.unarchiveTag(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: tagKeys.detail(id) });
+            queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+        },
+    });
+}

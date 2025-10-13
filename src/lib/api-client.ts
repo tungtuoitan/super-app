@@ -50,8 +50,10 @@ class ApiClient {
                 // Handle common errors
                 if (error.response?.status === 401) {
                     // Unauthorized - clear token and redirect
-                    localStorage.removeItem('userToken')
-                    window.location.href = '/login'
+                    // TEMPORARILY DISABLED: User hasn't implemented login yet
+                    // localStorage.removeItem('userToken')
+                    // window.location.href = '/login'
+                    console.warn('401 Unauthorized - Login redirect disabled for development')
                 }
 
                 if (error.response?.status === 403) {

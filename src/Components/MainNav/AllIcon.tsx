@@ -13,6 +13,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import LinkIcon from '@mui/icons-material/Link';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import LoginIcon from '@mui/icons-material/Login';
 import NearMeIcon from '@mui/icons-material/NearMe';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -112,6 +113,12 @@ export const sitemaps = [
     //     link: '/practice',
     //     open: true,
     // } as SAModule,
+    {
+        id: (sitemapId++).toString(),
+        name: "Tags",
+        code: "tags",
+        link: "/tags",
+    } as SAModule,
     {
         id: (sitemapId++).toString(),
         name: "Notes",
@@ -264,6 +271,7 @@ export const allIcons = (props: any) => [
     { code: 'link', icon: <LinkIcon {...props} /> },
     { code: 'knowledge', icon: <LibraryBooksIcon {...props} /> },
     { code: 'notes', icon: <EditNoteIcon {...props} /> },
+    { code: 'tags', icon: <LocalOfferIcon {...props} /> },
 
     { code: 'open-in-new', icon: <OpenInNewIcon {...props} /> },
     { code: 'skip', icon: <SkipNextIcon {...props} /> },
@@ -282,4 +290,4 @@ export const allIcons = (props: any) => [
 ];
 
 export type iconType = 'accounts' | 'conversation' | 'finance' | 'folder' | 'gratefulList' | 
-'health' | 'home' | 'it' | 'playground' | 'practice' | 'principle' | 'schedule' | 'self-discipline' | 'link' | 'knowledge' | 'open-in-new' | 'skip' | 'pass' | 'fail' | 'unknown-icon';
+'health' | 'home' | 'it' | 'playground' | 'practice' | 'principle' | 'schedule' | 'self-discipline' | 'link' | 'knowledge' | 'notes' | 'tags' | 'open-in-new' | 'skip' | 'pass' | 'fail' | 'unknown-icon';

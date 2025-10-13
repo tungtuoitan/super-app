@@ -58,6 +58,12 @@ export const API_ENDPOINTS = {
         update: '/api/Notes',
         delete: '/api/Notes',
     },
+    tags: {
+        getAll: '/api/Tags',
+        create: '/api/Tags',
+        update: '/api/Tags',
+        delete: '/api/Tags',
+    },
     events: {
         getAll: '/Ev/GetEvs',
         createOrUpdate: '/Ev/IuEv',

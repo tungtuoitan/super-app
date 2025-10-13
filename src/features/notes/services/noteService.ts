@@ -13,9 +13,26 @@ import type {
     NotesResponse,
     NoteResponse
 } from '../types/note.types';
+import type { Tag } from '@/features/tags/types/tag.types';
 
 class NoteService {
     private readonly basePath = '/api/notes';
+
+    /**
+     * Transform Tag DTO from backend to frontend model
+     */
+    private transformTag(tagDto: any): Tag {
+        return {
+            ...tagDto,
+            // Ensure required properties are set
+            tagId: tagDto.id || tagDto.tagId, // Alias for backward compatibility
+            isArchived: !!tagDto.deletedAt, // Compute from deletedAt
+            userId: tagDto.userId || 0, // Ensure userId is set
+            createdAt: tagDto.createdAt ? new Date(tagDto.createdAt) : undefined,
+            updatedAt: tagDto.updatedAt ? new Date(tagDto.updatedAt) : undefined,
+            deletedAt: tagDto.deletedAt ? new Date(tagDto.deletedAt) : undefined,
+        };
+    }
 
     /**
      * Transform NoteDTO to domain model
@@ -23,10 +40,8 @@ class NoteService {
     private transformNote(dto: NoteDTO): Note {
         return {
             ...dto,
-            // Transform tags string to array if needed
-            tags: typeof dto.tags === 'string' 
-                ? (dto.tags as string).split(',').filter(tag => tag.trim() !== '') 
-                : dto.tags,
+            // Transform tags array with proper type conversion
+            tags: dto.tags?.map(tag => this.transformTag(tag)) || [],
             createdAt: new Date(dto.createdAt),
             updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
         };
@@ -104,13 +119,7 @@ class NoteService {
      */
     async createNote(data: CreateNoteDTO): Promise<Note> {
         try {
-            // Transform tags array to comma-separated string for API
-            const apiData = {
-                ...data,
-                tags: data.tags ? data.tags.join(',') : undefined
-            };
-
-            const response = await apiClient.post<NoteResponse>(this.basePath, apiData);
+            const response = await apiClient.post<NoteResponse>(this.basePath, data);
             
             const noteDTO = response.data || response;
             
@@ -130,13 +139,7 @@ class NoteService {
      */
     async updateNote(id: number, data: UpdateNoteDTO): Promise<Note> {
         try {
-            // Transform tags array to comma-separated string for API
-            const apiData = {
-                ...data,
-                tags: data.tags ? data.tags.join(',') : undefined
-            };
-
-            const response = await apiClient.put<NoteResponse>(`${this.basePath}/${id}`, apiData);
+            const response = await apiClient.put<NoteResponse>(`${this.basePath}/${id}`, data);
             
             const noteDTO = response.data || response;
             
@@ -152,13 +155,13 @@ class NoteService {
     }
 
     /**
-     * Delete note
+     * Delete single or multiple notes
      */
-    async deleteNote(id: number): Promise<void> {
+    async deleteNote(id: number | string): Promise<void> {
         try {
             await apiClient.delete(`${this.basePath}/${id}`);
         } catch (error) {
-            console.error(`Failed to delete note ${id}:`, error);
+            console.error(`Failed to delete note(s) ${id}:`, error);
             throw error;
         }
     }
@@ -189,9 +192,9 @@ class NoteService {
      */
     async deleteNotes(ids: number[]): Promise<void> {
         try {
-            await apiClient.delete(`${this.basePath}/bulk`, {
-                data: { noteIds: ids }
-            });
+            // Convert array to comma-separated string
+            const noteIds = ids.join(',');
+            await apiClient.delete(`${this.basePath}/${noteIds}`);
         } catch (error) {
             console.error('Failed to delete notes:', error);
             throw error;

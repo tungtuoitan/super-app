@@ -3,6 +3,8 @@
  * Domain models and DTOs for the notes feature
  */
 
+import type { Tag } from '@/features/tags/types/tag.types';
+
 // Note types
 export type NoteType = 'meeting' | 'brainstorm' | 'research' | 'bug' | 'task' | 'idea';
 
@@ -21,8 +23,8 @@ export interface Note {
     noteId: number;
     name: string;
     description?: string;
-    tags?: string[];
-    type?: NoteType;
+    tags: Tag[]; // Array of Tag objects
+    type?: string; // Changed from NoteType to string to match backend
     createdBy?: string;
     createdAt: Date;
     updatedAt?: Date;
@@ -34,8 +36,8 @@ export interface NoteDTO {
     noteId: number;
     name: string;
     description?: string;
-    tags?: string[] | string; // Can be array or comma-separated string
-    type?: NoteType;
+    tags: Tag[]; // Array of Tag objects from backend
+    type?: string; // String type to match backend response
     createdBy?: string;
     createdAt: string; // ISO string
     updatedAt?: string; // ISO string
@@ -46,15 +48,15 @@ export interface NoteDTO {
 export interface CreateNoteDTO {
     name: string;
     description?: string;
-    tags?: string[];
-    type?: NoteType;
+    tags?: number[]; // Tag IDs when creating/updating
+    type?: string;
 }
 
 export interface UpdateNoteDTO {
     name?: string;
     description?: string;
-    tags?: string[];
-    type?: NoteType;
+    tags?: number[]; // Tag IDs when creating/updating
+    type?: string;
     isArchived?: boolean;
 }
 
@@ -64,7 +66,7 @@ export interface GetNotesParams {
     pageSize?: number;
     searchText?: string;
     getAll?: boolean;
-    type?: NoteType;
+    type?: string;
     isArchived?: boolean;
 }
 

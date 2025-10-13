@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { NotesPage } from '../../pages/NotesPage';
+import { TagsPage } from '../../pages/TagsPage';
 import { SideMenu } from './SideMenu';
 import { BodyWrapper, SideNavRoot } from './SideMenuItem.styles';
 
@@ -42,6 +43,7 @@ function MainNav() {
                 >
                     <Routes>
                         <Route path="/" Component={NotesPage} />
+                        <Route path="/tags" Component={TagsPage} />
                         <Route path="/notes" Component={NotesPage} />
                     </Routes>
                 </BodyWrapper>

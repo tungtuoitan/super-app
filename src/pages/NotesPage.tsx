@@ -45,7 +45,7 @@ function NotesPageContent() {
 
     
     return (
-        <div style={{ height: '100%', width: '100%' }}>
+        <div style={{ height: '100%', width: '100%'  }}>
             {/* Toolbar with fixed height */}
             <Box sx={{ flexShrink: 0 }}>
                 <ToolbarContainer>
@@ -60,7 +60,7 @@ function NotesPageContent() {
             {/* Note Grid Container that takes remaining height */}
             <Box sx={{ 
                 flex: 1,
-                margin: '20px 20px 0',
+                margin: '20px 0 0 20px',
                 height: 'calc(100% - 64px - 20px)', // 64px toolbar + 20px margin
                 overflow: 'auto',
                 display: 'flex',

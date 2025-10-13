@@ -36,7 +36,8 @@ export const ToolbarContainer = ({ children }: { children: React.ReactNode, sxBo
                 <Toolbar style={{
                     backgroundColor: '#fff',
                     color: '#000', //#000
-                    paddingLeft: '18px!important'
+                    paddingLeft: '18px!important',
+                    
                 }}>
                     {children}
                 </Toolbar>

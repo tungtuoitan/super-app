@@ -101,7 +101,7 @@ export function NoteContentToolbar() {
                     name: selectedNote.name,
                     description: selectedNote.description,
                     type: selectedNote.type,
-                    tags: selectedNote.tags,
+                    tags: selectedNote.tags?.map(tag => tag.id || tag.tagId) || [],
                 };
                 
                 const createdNote = await createNote.mutateAsync(createData);
@@ -119,7 +119,7 @@ export function NoteContentToolbar() {
                     name: selectedNote.name,
                     description: selectedNote.description,
                     type: selectedNote.type,
-                    tags: selectedNote.tags,
+                    tags: selectedNote.tags?.map(tag => tag.id || tag.tagId) || [],
                     isArchived: selectedNote.isArchived,
                 };
                 

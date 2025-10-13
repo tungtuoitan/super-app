@@ -1,6 +1,12 @@
 const path = require('path');
 
 module.exports = {
+  devServer: {
+    // Ensure Fast Refresh is enabled
+    hot: true,
+    // Live reload as fallback
+    liveReload: true,
+  },
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

@@ -109,7 +109,7 @@ export function NoteGridView({ notes, loading, error, onNoteClick }: NoteGridVie
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical'
                 }}>
-                    {params.value || 'No description'}
+                    {params.value || '-'}
                 </Box>
             )
         },
@@ -118,7 +118,7 @@ export function NoteGridView({ notes, loading, error, onNoteClick }: NoteGridVie
             headerName: 'Tags',
             width: 200,
             renderCell: (params) => {
-                if (!params.value) return <Box sx={{ padding: '4px' }}>No tags</Box>;
+                if (!params.value) return <Box sx={{ padding: '4px' }}>-</Box>;
 
                 const tags = params.value.split(',');
                 const displayTags = tags.slice(0, 2);

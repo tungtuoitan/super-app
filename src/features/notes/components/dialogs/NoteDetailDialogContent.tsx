@@ -142,8 +142,8 @@ export function NoteDetailDialogContent() {
                                 size="small"
                             />
 
-                            {/* Note Type */}
-                            <GenericAutoComplete
+                            {/* Note Type - Temporarily Hidden */}
+                            {/* <GenericAutoComplete
                                 value={currentTypeValue}
                                 onChange={handleTypeChange}
                                 allOptions={typeOptions}
@@ -153,7 +153,7 @@ export function NoteDetailDialogContent() {
                                     required: false,
                                 }}
                                 sx={{ mb: '16px' }}
-                            />
+                            /> */}
 
                             {/* Status */}
                             <GenericAutoComplete
@@ -191,7 +191,14 @@ export function NoteDetailDialogContent() {
                                 
                                 <GenericTextField
                                     label="Created"
-                                    value={selectedNote?.createdAt ? selectedNote.createdAt.toLocaleDateString() : 'N/A'}
+                                    value={selectedNote?.createdAt ? new Intl.DateTimeFormat('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }).format(selectedNote.createdAt) : '-'}
                                     disabled
                                     sx={{ mb: '16px' }}
                                     size="small"
@@ -199,7 +206,14 @@ export function NoteDetailDialogContent() {
                                 
                                 <GenericTextField
                                     label="Updated"
-                                    value={selectedNote?.updatedAt ? selectedNote.updatedAt.toLocaleDateString() : 'N/A'}
+                                    value={selectedNote?.updatedAt ? new Intl.DateTimeFormat('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }).format(selectedNote.updatedAt) : '-'}
                                     disabled
                                     sx={{ mb: '16px' }}
                                     size="small"
@@ -207,7 +221,7 @@ export function NoteDetailDialogContent() {
                                 
                                 <GenericTextField
                                     label="Created by"
-                                    value={selectedNote?.createdBy || 'Unknown'}
+                                    value={selectedNote?.createdBy || '-'}
                                     disabled
                                     size="small"
                                 />

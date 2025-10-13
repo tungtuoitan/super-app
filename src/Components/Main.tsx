@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NoteUIProvider } from '@/features/notes';
+import { TagUIProvider } from '@/features/tags/store/TagUIContext';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 
@@ -37,11 +38,13 @@ export function Main() {
             >
                 <SnackbarProvider autoHideDuration={3000}>
                     <AuthProvider>
-                        <NoteUIProvider>
-                            <DialogProvider>
-                                <MainNav />
-                            </DialogProvider>
-                        </NoteUIProvider>
+                        <TagUIProvider>
+                            <NoteUIProvider>
+                                <DialogProvider>
+                                    <MainNav />
+                                </DialogProvider>
+                            </NoteUIProvider>
+                        </TagUIProvider>
                     </AuthProvider>
                 </SnackbarProvider>
             </Box>
