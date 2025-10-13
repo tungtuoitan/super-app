@@ -12,22 +12,18 @@ export const TagCreate = () => {
     const { auth } = useAuthStore();
 
     const handleCreateTag = () => {
-        // Create a new tag object with id = 0 for create mode
+        // Create a new tag object with tagId = 0 for create mode
         const newTag: Tag = {
-            id: 0,
-            tagId: 0, // Alias for backward compatibility
-            userId: 1, // TODO: Get actual user ID from auth when available
+            tagId: 0,
             name: '',
             description: '',
             color: '#1976d2', // Default primary color
-            parentId: undefined,
-            level: 0,
-            createdBy: 1, // TODO: Get actual user ID from auth when available
             createdAt: new Date(),
-            updatedAt: new Date(),
-            isArchived: false,
-            children: undefined,
+            isActive: true,
+            depth: 0,
+            children: [],
             isExpanded: false,
+            isArchived: false,
         };
         
         openDialog(newTag);

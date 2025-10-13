@@ -3,9 +3,20 @@
  * Domain models and DTOs for the tag feature
  */
 
-// Domain model (what we use in app)
-export interface Tag {
-    id: number; // Changed from tagId to match backend
+// API Response DTO (from backend TagResponse)
+export interface TagDTO {
+    tagId: number;
+    name: string;
+    description?: string;
+    color?: string;
+    createdAt: string; // ISO string from API
+    isActive: boolean;
+    depth?: number; // Depth in hierarchy (0 = root, 1 = child, etc.)
+}
+
+// API Response DTO for Tag Tree (from backend TagTreeResponse)
+export interface TagTreeResponseDTO {
+    tagId: number;
     userId: number;
     name: string;
     parentId?: number;
@@ -13,28 +24,43 @@ export interface Tag {
     slug?: string;
     color?: string;
     icon?: string;
-    description?: string;
-    isPublic?: boolean;
-    publicSlug?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-    deletedAt?: Date;
-    createdBy?: number;
-    // Computed properties for backward compatibility and UI
-    tagId: number; // Alias for id for backward compatibility
-    isArchived: boolean; // Computed from deletedAt
-    // Frontend-only properties for tree UI
-    level?: number; // Depth in tree (0 = root, 1 = child, etc.)
-    children?: Tag[]; // Child tags for tree structure
-    isExpanded?: boolean; // For tree UI state
+    accessType: string; // 'owner' or 'shared'
+    level: number;
+    usageCount: number;
+    childrenCount: number;
+    children: TagTreeResponseDTO[];
+    isExpanded: boolean;
+    isSelected: boolean;
 }
 
-// Create request
+// Domain model (what we use in app)
+export interface Tag {
+    tagId: number; // Primary key from backend
+    name: string;
+    description?: string;
+    color?: string;
+    createdAt: Date;
+    isActive: boolean;
+    depth?: number; // Depth in hierarchy from backend (0 = root, 1 = child, etc.)
+    
+    // Frontend-only properties for tree UI and backward compatibility
+    id?: number; // Alias for tagId for some components
+    children?: Tag[]; // Child tags for tree structure (built from depth)
+    isExpanded?: boolean; // For tree UI state
+    isArchived?: boolean; // Computed from isActive (!isActive)
+}
+
+// Create request (matches backend CreateTagRequest)
 export interface CreateTagDTO {
     name: string;
     description?: string;
     color?: string;
     parentId?: number;
+    slug?: string;
+    icon?: string;
+    isPublic?: boolean;
+    publicSlug?: string;
+    userId?: number; // Optional in frontend, defaults to 14 in service for development
 }
 
 // Update request

@@ -20,7 +20,7 @@ export const tagKeys = {
     tree: () => [...tagKeys.all, 'tree'] as const,
     details: () => [...tagKeys.all, 'detail'] as const,
     detail: (id: number) => [...tagKeys.details(), id] as const,
-    children: (parentId: number) => [...tagKeys.all, 'children', parentId] as const,
+    depth: (depth: number) => [...tagKeys.all, 'depth', depth] as const,
     roots: () => [...tagKeys.all, 'roots'] as const,
 };
 
@@ -38,10 +38,10 @@ export function useTags(params?: GetTagsParams) {
 /**
  * Hook to fetch tags as tree structure
  */
-export function useTagTree() {
+export function useTagTree(includeShared: boolean = true) {
     return useQuery({
-        queryKey: tagKeys.tree(),
-        queryFn: () => tagService.getTagTree(),
+        queryKey: [...tagKeys.tree(), includeShared],
+        queryFn: () => tagService.getTagTree(includeShared),
         staleTime: 5 * 60 * 1000,
     });
 }
@@ -59,12 +59,12 @@ export function useTag(id: number, enabled = true) {
 }
 
 /**
- * Hook to fetch children of specific tag
+ * Hook to fetch tags at a specific depth level
  */
-export function useTagChildren(parentId: number, enabled = true) {
+export function useTagsByDepth(depth: number, enabled = true) {
     return useQuery({
-        queryKey: tagKeys.children(parentId),
-        queryFn: () => tagService.getTagChildren(parentId),
+        queryKey: tagKeys.depth(depth),
+        queryFn: () => tagService.getTagsByDepth(depth),
         enabled,
         staleTime: 5 * 60 * 1000,
     });
@@ -89,9 +89,18 @@ export function useCreateTag() {
     
     return useMutation({
         mutationFn: (data: CreateTagDTO) => tagService.createTag(data),
-        onSuccess: () => {
-            // Invalidate all tag queries to refetch
+        onSuccess: (newTag) => {
+            // Invalidate all tag queries to refetch fresh data
             queryClient.invalidateQueries({ queryKey: tagKeys.all });
+            
+            // Also specifically invalidate tree queries since hierarchy may have changed
+            queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+            
+            // If the tag has a parent, invalidate queries for that depth level
+            if (newTag && (newTag.depth || 0) > 0) {
+                queryClient.invalidateQueries({ queryKey: tagKeys.depth(newTag.depth || 0) });
+                queryClient.invalidateQueries({ queryKey: tagKeys.roots() });
+            }
         },
     });
 }

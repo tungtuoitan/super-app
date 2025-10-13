@@ -2,6 +2,7 @@
 
 // Components
 export { TagTree } from './components/TagTree';
+export { TagCreateDialog } from './components/TagCreateDialog';
 
 // Toolbar Components  
 export { TagCreate } from './components/toolbars/items/TagCreate';

@@ -5,6 +5,8 @@
 import { apiClient } from '@/lib/api-client'
 import type { 
     Tag, 
+    TagDTO,
+    TagTreeResponseDTO,
     CreateTagDTO, 
     UpdateTagDTO, 
     GetTagsParams,
@@ -13,7 +15,7 @@ import type {
 
 
 class TagService {
-    private readonly basePath = '/api/Tags'
+    private readonly basePath = '/api/tags'
 
     /**
      * Get all tags with optional filtering
@@ -38,7 +40,7 @@ class TagService {
                 searchParams.sortOrder = params.sortOrder
             }
 
-            const response = await apiClient.get<Tag[]>(this.basePath, {
+            const response = await apiClient.get<TagDTO[]>(this.basePath, {
                 params: searchParams
             })
 
@@ -53,37 +55,56 @@ class TagService {
     /**
      * Transform API DTO to domain model
      */
-    private transformTag(dto: any): Tag {
+    private transformTag(dto: TagDTO): Tag {
         return {
-            id: dto.id || dto.tagId,
-            tagId: dto.id || dto.tagId, // Alias for backward compatibility
-            userId: dto.userId || 1, // Default if not provided
+            tagId: dto.tagId,
             name: dto.name,
-            parentId: dto.parentId,
-            path: dto.path,
-            slug: dto.slug,
-            color: dto.color,
-            icon: dto.icon,
             description: dto.description,
-            isPublic: dto.isPublic,
-            publicSlug: dto.publicSlug,
-            createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
-            updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
-            deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : undefined,
-            createdBy: dto.createdBy,
-            isArchived: dto.isArchived ?? false,
-            level: dto.level,
-            children: dto.children,
-            isExpanded: dto.isExpanded,
+            color: dto.color,
+            createdAt: new Date(dto.createdAt),
+            isActive: dto.isActive,
+            depth: dto.depth,
+            // Computed properties
+            id: dto.tagId, // Alias for backward compatibility
+            isArchived: !dto.isActive, // isArchived is inverse of isActive
+            children: [], // Will be populated by tree building logic
+            isExpanded: false,
         }
     }
 
     /**
-     * Get tags organized as tree structure
+     * Get tags organized as tree structure from the /tree endpoint
      */
-    async getTagTree(): Promise<Tag[]> {
-        const allTags = await this.getTags();
-        return this.buildTagTree(allTags);
+    async getTagTree(includeShared: boolean = true): Promise<Tag[]> {
+        try {
+            const response = await apiClient.get<TagTreeResponseDTO[]>(`${this.basePath}/tree`, {
+                params: { includeShared }
+            });
+            return response.map(dto => this.transformTagTreeResponse(dto));
+        } catch (error) {
+            console.error('Failed to fetch tag tree:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Transform TagTreeResponseDTO to Tag with children structure
+     */
+    private transformTagTreeResponse(dto: TagTreeResponseDTO): Tag {
+        return {
+            tagId: dto.tagId,
+            name: dto.name,
+            description: undefined, // Not available in tree response
+            color: dto.color,
+            createdAt: new Date(), // Not available in tree response
+            isActive: true, // Assuming active tags only in tree
+            depth: dto.level,
+            // Computed properties
+            id: dto.tagId, // Alias for backward compatibility
+            isArchived: false, // Assuming no archived tags in tree
+            children: dto.children?.map(child => this.transformTagTreeResponse(child)) || [],
+            isExpanded: dto.isExpanded,
+        };
     }
 
     /**
@@ -91,7 +112,7 @@ class TagService {
      */
     async getTagById(id: number): Promise<Tag> {
         try {
-            const response = await apiClient.get<Tag>(`${this.basePath}/${id}`)
+            const response = await apiClient.get<TagDTO>(`${this.basePath}/${id}`)
             return this.transformTag(response)
         } catch (error) {
             console.error(`Failed to fetch tag ${id}:`, error)
@@ -104,7 +125,14 @@ class TagService {
      */
     async createTag(data: CreateTagDTO): Promise<Tag> {
         try {
-            const response = await apiClient.post<Tag>(this.basePath, data)
+            // Ensure userId is provided - using hardcoded value for development
+            // TODO: Replace with actual user ID from auth context when auth is implemented
+            const createPayload = {
+                ...data,
+                userId: data.userId || 14 // Default to 14 for development
+            }
+            
+            const response = await apiClient.post<TagDTO>(this.basePath, createPayload)
             return this.transformTag(response)
         } catch (error) {
             console.error('Failed to create tag:', error)
@@ -117,7 +145,7 @@ class TagService {
      */
     async updateTag(id: number, data: UpdateTagDTO): Promise<Tag> {
         try {
-            const response = await apiClient.put<Tag>(`${this.basePath}/${id}`, data)
+            const response = await apiClient.put<TagDTO>(`${this.basePath}/${id}`, data)
             return this.transformTag(response)
         } catch (error) {
             console.error('Failed to update tag:', error)
@@ -149,49 +177,65 @@ class TagService {
     }
 
     /**
-     * Build hierarchical tree structure from flat array
+     * Build hierarchical tree structure from flat array using depth property
      */
     private buildTagTree(tags: Tag[]): Tag[] {
-        const tagMap = new Map<number, Tag>();
-        const rootTags: Tag[] = [];
+        if (!tags || tags.length === 0) return [];
 
-        // Create map for quick lookup
-        tags.forEach(tag => {
-            tagMap.set(tag.tagId, { ...tag, children: [] });
-        });
+        // Sort tags by depth to ensure parents come before children
+        const sortedTags = [...tags].sort((a, b) => (a.depth || 0) - (b.depth || 0));
+        
+        const result: Tag[] = [];
+        const tagStack: Tag[] = [];
 
-        // Build tree structure
-        tags.forEach(tag => {
-            const tagWithChildren = tagMap.get(tag.tagId)!;
-            
-            if (tag.parentId) {
-                const parent = tagMap.get(tag.parentId);
-                if (parent) {
-                    parent.children = parent.children || [];
-                    parent.children.push(tagWithChildren);
-                }
+        sortedTags.forEach(tag => {
+            const tagWithChildren: Tag = { 
+                ...tag, 
+                children: [],
+                isExpanded: false 
+            };
+
+            const currentDepth = tag.depth || 0;
+
+            // Remove items from stack that are not ancestors of current tag
+            while (tagStack.length > 0 && (tagStack[tagStack.length - 1].depth || 0) >= currentDepth) {
+                tagStack.pop();
+            }
+
+            // If this is a root level tag (depth 0 or undefined)
+            if (currentDepth === 0) {
+                result.push(tagWithChildren);
+                tagStack.length = 0; // Clear stack for new root
+                tagStack.push(tagWithChildren);
+            } else if (tagStack.length > 0) {
+                // Add as child to the last item in stack (which should be the parent)
+                const parent = tagStack[tagStack.length - 1];
+                parent.children = parent.children || [];
+                parent.children.push(tagWithChildren);
+                tagStack.push(tagWithChildren);
             } else {
-                rootTags.push(tagWithChildren);
+                // Fallback: treat as root if no valid parent found
+                result.push(tagWithChildren);
+                tagStack.push(tagWithChildren);
             }
         });
 
-        return rootTags;
+        return result;
     }
 
     /**
-     * Get children of specific tag
+     * Get tags at a specific depth level
      */
-    async getTagChildren(parentId: number): Promise<Tag[]> {
-        return this.getTags({ parentId });
+    async getTagsByDepth(depth: number): Promise<Tag[]> {
+        const allTags = await this.getTags();
+        return allTags.filter(tag => (tag.depth || 0) === depth);
     }
 
     /**
-     * Get root level tags only
+     * Get root level tags only (depth 0)
      */
     async getRootTags(): Promise<Tag[]> {
-        return this.getTags({ parentId: undefined }).then(tags =>
-            tags.filter(tag => !tag.parentId)
-        );
+        return this.getTagsByDepth(0);
     }
 }
 

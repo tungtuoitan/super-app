@@ -15,6 +15,12 @@ interface TagUIContextValue {
     closeDialog: () => void;
     updateSelectedTag: (tag: Tag) => void;
     
+    // Create dialog state
+    isCreateDialogOpen: boolean;
+    openCreateDialog: (parentTag?: Tag) => void;
+    closeCreateDialog: () => void;
+    parentTagForCreate: Tag | null;
+    
     // Row selection state
     selectedRowIds: number[];
     setSelectedRowIds: (ids: number[]) => void;
@@ -52,6 +58,10 @@ export function TagUIProvider({ children }: { children: React.ReactNode }) {
     const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     
+    // Create dialog state
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [parentTagForCreate, setParentTagForCreate] = useState<Tag | null>(null);
+    
     // Layout state
     const [currentLayout, setCurrentLayout] = useState<TagLayoutType>('tree');
     
@@ -79,6 +89,17 @@ export function TagUIProvider({ children }: { children: React.ReactNode }) {
 
     const updateSelectedTag = useCallback((tag: Tag) => {
         setSelectedTag(tag);
+    }, []);
+
+    // Create dialog actions
+    const openCreateDialog = useCallback((parentTag?: Tag) => {
+        setParentTagForCreate(parentTag || null);
+        setIsCreateDialogOpen(true);
+    }, []);
+
+    const closeCreateDialog = useCallback(() => {
+        setIsCreateDialogOpen(false);
+        setTimeout(() => setParentTagForCreate(null), 200); // Clear after animation
     }, []);
 
     // Tree expansion actions
@@ -148,6 +169,12 @@ export function TagUIProvider({ children }: { children: React.ReactNode }) {
         openDialog,
         closeDialog,
         updateSelectedTag,
+        
+        // Create dialog state
+        isCreateDialogOpen,
+        openCreateDialog,
+        closeCreateDialog,
+        parentTagForCreate,
         
         // Row selection state
         selectedRowIds,

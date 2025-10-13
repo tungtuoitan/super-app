@@ -10,7 +10,7 @@ import { Grow } from '@/shared/components/styles/commonStyles';
 import { useTagUI } from '../features/tags/store/TagUIContext';
 import { useCallback } from 'react';
 import { Tag } from '../features/tags/types/tag.types';
-import {TagLayoutSelector} from '@/features/tags';
+import { TagLayoutSelector, TagCreateDialog } from '@/features/tags';
 
 /**
  * Tags page with proper error boundary
@@ -34,8 +34,8 @@ export function TagsPage() {
  */
 function TagsPageContent() {
     
-    // ✅ Get openDialog from context at page level to pass as prop
-    const { openDialog } = useTagUI();
+    // ✅ Get dialog state from context 
+    const { openDialog, isCreateDialogOpen, closeCreateDialog } = useTagUI();
 
     
     return (
@@ -64,6 +64,12 @@ function TagsPageContent() {
             }}>
                 <TagTree />
             </Box>
+
+            {/* Tag Creation Dialog from Context Menu */}
+            <TagCreateDialog
+                open={isCreateDialogOpen}
+                onClose={closeCreateDialog}
+            />
         </div>
     );
 }
