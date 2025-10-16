@@ -58,13 +58,14 @@ export function GenericTagAutoComplete({
 }: GenericTagAutoCompleteProps) {
     
     // Convert comma-separated string to array of selected options
-    const selectedOptions = value 
-        ? options.filter(option => value.includes(String(option.id)))
+    const selectedIds = value ? value.split(',').filter(Boolean) : [];
+    const selectedOptions = selectedIds.length > 0 
+        ? options.filter(option => selectedIds.includes(String(option.id)))
         : [];
 
     // Filter out already selected options from available options
-    const availableOptions = value 
-        ? options.filter(option => !value.includes(String(option.id)))
+    const availableOptions = selectedIds.length > 0 
+        ? options.filter(option => !selectedIds.includes(String(option.id)))
         : options;
 
     // Render custom option with disabled state support
@@ -76,7 +77,9 @@ export function GenericTagAutoComplete({
         if (option.isActive === false) {
             props['aria-disabled'] = true;
         }
-        return <AutoCompleteOption {...props as any}>{option.label || option.desc}</AutoCompleteOption>;
+        // Extract key from props to avoid React warning
+        const { key, ...restProps } = props as any;
+        return <AutoCompleteOption key={key} {...restProps}>{option.label || option.desc}</AutoCompleteOption>;
     };
 
     // Handle selection change

@@ -42,31 +42,82 @@ interface TreeTag {
 }
 
 /**
+ * Helper function to get all visible tag IDs in tree order
+ */
+function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
+    const result: number[] = [];
+    
+    function traverse(nodes: TreeTag[]) {
+        for (const node of nodes) {
+            result.push(node.data.tagId);
+            if (node.children && node.children.length > 0) {
+                traverse(node.children);
+            }
+        }
+    }
+    
+    traverse(treeData);
+    return result;
+}
+
+/**
  * Node component for react-arborist tree
  */
-function TagNode({ node, style, dragHandle }: { 
+function TagNode({ node, style, dragHandle, treeData }: { 
     node: NodeApi<TreeTag>; 
     style: React.CSSProperties;
-    dragHandle?: (el: HTMLDivElement | null) => void;
+    dragHandle?: any; // Let's use any for now to avoid type conflicts
+    treeData: TreeTag[];
 }) {
-    const { isTagSelected, toggleTagSelection } = useTagUI();
+    const { 
+        selectedTagIds, 
+        setSelectedTagIds, 
+        lastSelectedTagId, 
+        setLastSelectedTagId,
+        isTagSelected 
+    } = useTagUI();
     const { showContextMenu } = useContextMenu();
     
     const tag = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isTagSelected(tag.tagId);
-    
-    const handleSelectToggle = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault(); // Prevent any default behavior
-        toggleTagSelection(tag.tagId);
-    };
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault(); // Prevent tree activation that causes scrolling
-        // Handle tag selection or other actions here if needed
-        toggleTagSelection(tag.tagId);
+        
+        // Focus the tree container for keyboard navigation
+        const treeContainer = document.querySelector('[data-tag-tree]') as HTMLElement;
+        treeContainer?.focus();
+        
+        if (e.ctrlKey || e.metaKey) {
+            // Ctrl+Click: Toggle selection (like VS Code)
+            if (isSelected) {
+                setSelectedTagIds(prev => prev.filter(id => id !== tag.tagId));
+            } else {
+                setSelectedTagIds(prev => [...prev, tag.tagId]);
+            }
+            setLastSelectedTagId(tag.tagId);
+        } else if (e.shiftKey && lastSelectedTagId) {
+            // Shift+Click: Range selection (like VS Code)
+            const allVisibleTags = getAllVisibleTagIds(treeData);
+            const lastIndex = allVisibleTags.indexOf(lastSelectedTagId);
+            const currentIndex = allVisibleTags.indexOf(tag.tagId);
+            
+            if (lastIndex !== -1 && currentIndex !== -1) {
+                const startIndex = Math.min(lastIndex, currentIndex);
+                const endIndex = Math.max(lastIndex, currentIndex);
+                const rangeSelection = allVisibleTags.slice(startIndex, endIndex + 1);
+                setSelectedTagIds(rangeSelection);
+            } else {
+                setSelectedTagIds([tag.tagId]);
+            }
+            setLastSelectedTagId(tag.tagId);
+        } else {
+            // Regular click: Single selection (like VS Code)
+            setSelectedTagIds([tag.tagId]);
+            setLastSelectedTagId(tag.tagId);
+        }
     };
 
     const handleRightClick = (e: React.MouseEvent) => {
@@ -85,31 +136,61 @@ function TagNode({ node, style, dragHandle }: {
                 display: 'flex',
                 alignItems: 'center',
                 height: '100%',
+                width: '100%',
                 paddingY: '4px',
                 paddingRight: '8px',
                 cursor: 'pointer',
                 borderRadius: '4px',
-                backgroundColor: isSelected ? 'action.selected' : 'transparent',
+                backgroundColor: isSelected ? 'primary.main' : 'transparent',
+                color: isSelected ? 'primary.contrastText' : 'inherit',
                 '&:hover': {
-                    backgroundColor: isSelected ? 'action.selected' : 'action.hover',
+                    backgroundColor: isSelected ? 'primary.dark' : 'action.hover',
                 },
-                transition: 'background-color 0.2s',
+                transition: 'all 0.2s',
+                // VS Code-like selection styling
+                ...(isSelected && {
+                    boxShadow: 'inset 3px 0 0 currentColor',
+                }),
             }}
         >
-            {/* Drag Handle */}
-            <Box
-                ref={(el) => dragHandle?.(el as HTMLDivElement | null)}
-                onClick={(e) => e.stopPropagation()} // Prevent click from bubbling
-                sx={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginRight: '4px',
-                    cursor: 'grab',
-                    '&:active': { cursor: 'grabbing' }
-                }}
-            >
-                <DragIcon fontSize="small" sx={{ color: 'action.disabled' }} />
-            </Box>
+            {/* Drag Handle - Only show if dragHandle is available */}
+            {dragHandle && (
+                <div
+                    ref={(el) => {
+                        // Only handle dragHandle if it exists and is a function
+                        // This prevents the React DnD error by ensuring we only pass DOM elements
+                        try {
+                            if (dragHandle && typeof dragHandle === 'function' && el) {
+                                dragHandle(el);
+                            }
+                        } catch (error) {
+                            console.warn('Error setting dragHandle:', error);
+                            // Safely ignore dragHandle errors to prevent React DnD crashes
+                        }
+                    }}
+                    onClick={(e) => e.stopPropagation()} // Prevent click from bubbling
+                    style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginRight: '4px',
+                        cursor: 'grab',
+                    }}
+                    onMouseDown={(e) => {
+                        e.currentTarget.style.cursor = 'grabbing';
+                    }}
+                    onMouseUp={(e) => {
+                        e.currentTarget.style.cursor = 'grab';
+                    }}
+                >
+                    <DragIcon 
+                        fontSize="small" 
+                        sx={{ 
+                            color: isSelected ? 'primary.contrastText' : 'action.disabled',
+                            opacity: isSelected ? 0.7 : 1,
+                        }} 
+                    />
+                </div>
+            )}
 
             {/* Expand/Collapse Button */}
             <IconButton
@@ -123,6 +204,7 @@ function TagNode({ node, style, dragHandle }: {
                     marginRight: '4px',
                     padding: '2px',
                     visibility: hasChildren ? 'visible' : 'hidden',
+                    color: isSelected ? 'primary.contrastText' : 'inherit',
                 }}
             >
                 {hasChildren ? (
@@ -133,12 +215,20 @@ function TagNode({ node, style, dragHandle }: {
             {/* Tag Icon */}
             <Box sx={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>
                 {hasChildren ? (
-                    node.isOpen ? <FolderOpenIcon fontSize="small" /> : <FolderIcon fontSize="small" />
+                    node.isOpen ? 
+                        <FolderOpenIcon 
+                            fontSize="small" 
+                            sx={{ color: isSelected ? 'primary.contrastText' : 'inherit' }}
+                        /> : 
+                        <FolderIcon 
+                            fontSize="small" 
+                            sx={{ color: isSelected ? 'primary.contrastText' : 'inherit' }}
+                        />
                 ) : (
                     <TagIcon 
                         fontSize="small" 
                         sx={{ 
-                            color: tag.color || 'action.active' 
+                            color: isSelected ? 'primary.contrastText' : (tag.color || 'action.active')
                         }} 
                     />
                 )}
@@ -158,7 +248,7 @@ function TagNode({ node, style, dragHandle }: {
                         variant="body2"
                         sx={{
                             fontWeight: hasChildren ? 600 : 400,
-                            color: 'text.primary',
+                            color: isSelected ? 'primary.contrastText' : 'text.primary',
                         }}
                         noWrap
                     >
@@ -187,8 +277,12 @@ function TagNode({ node, style, dragHandle }: {
                     {tag.description && (
                         <Typography
                             variant="caption"
-                            color="text.secondary"
-                            sx={{ display: 'block', textAlign: 'left' }}
+                            sx={{ 
+                                display: 'block', 
+                                textAlign: 'left',
+                                color: isSelected ? 'primary.contrastText' : 'text.secondary',
+                                opacity: isSelected ? 0.8 : 1,
+                            }}
                             noWrap
                         >
                             {tag.description}
@@ -197,38 +291,7 @@ function TagNode({ node, style, dragHandle }: {
                 </Box>
             </Box>
 
-            {/* Selection Checkbox */}
-            <Tooltip title="Select tag">
-                <IconButton
-                    size="small"
-                    onClick={handleSelectToggle}
-                    sx={{ 
-                        marginLeft: '8px',
-                        opacity: isSelected ? 1 : 0.5,
-                        '&:hover': { opacity: 1 }
-                    }}
-                >
-                    <Box
-                        sx={{
-                            width: '16px',
-                            height: '16px',
-                            borderRadius: '2px',
-                            border: '2px solid',
-                            borderColor: isSelected ? 'primary.main' : 'grey.400',
-                            backgroundColor: isSelected ? 'primary.main' : 'transparent',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        {isSelected && (
-                            <Typography color="primary.contrastText" sx={{ fontSize: '10px', lineHeight: 1 }}>
-                                ✓
-                            </Typography>
-                        )}
-                    </Box>
-                </IconButton>
-            </Tooltip>
+
         </Box>
     );
 }
@@ -288,12 +351,46 @@ function transformTagsToTreeData(tags: Tag[]): TreeTag[] {
 }
 
 /**
+ * Selection info component
+ */
+function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; totalCount: number }) {
+    if (selectedCount === 0) return null;
+    
+    return (
+        <Box sx={{ 
+            padding: '8px 16px',
+            backgroundColor: 'primary.light',
+            color: 'primary.contrastText',
+            borderRadius: '4px',
+            marginBottom: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+        }}>
+            <Typography variant="caption">
+                {selectedCount} of {totalCount} tags selected
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                Ctrl+Click to toggle • Shift+Click for range • Ctrl+A to select all
+            </Typography>
+        </Box>
+    );
+}
+
+/**
  * Main TagTree component using react-arborist
  */
 export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
     const { data: tags, isLoading, error } = useTagTree(includeShared);
-    const { searchText } = useTagUI();
+    const { 
+        searchText, 
+        selectedTagIds, 
+        setSelectedTagIds, 
+        setLastSelectedTagId,
+        clearSelection 
+    } = useTagUI();
     const [draggedNode, setDraggedNode] = useState<NodeApi<TreeTag> | null>(null);
+    const treeContainerRef = React.useRef<HTMLDivElement>(null);
 
     // Transform and filter tags based on search text
     const treeData = useMemo(() => {
@@ -326,6 +423,82 @@ export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
         return transformTagsToTreeData(filteredTags);
     }, [tags, searchText]);
 
+    // Get all visible tag IDs for keyboard navigation
+    const allVisibleTagIds = useMemo(() => {
+        return getAllVisibleTagIds(treeData);
+    }, [treeData]);
+
+    // Keyboard navigation (VS Code-like)
+    React.useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target !== document.body && !(e.target as Element).closest('[data-tag-tree]')) {
+                return; // Only handle when tree is focused
+            }
+
+            const currentSelection = selectedTagIds;
+            const lastSelected = currentSelection.length > 0 ? currentSelection[currentSelection.length - 1] : null;
+            const currentIndex = lastSelected ? allVisibleTagIds.indexOf(lastSelected) : -1;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentIndex > 0) {
+                        const newTagId = allVisibleTagIds[currentIndex - 1];
+                        if (e.shiftKey && currentSelection.length > 0) {
+                            // Extend selection upward
+                            const firstSelected = currentSelection[0];
+                            const firstIndex = allVisibleTagIds.indexOf(firstSelected);
+                            const startIndex = Math.min(firstIndex, currentIndex - 1);
+                            const endIndex = Math.max(firstIndex, currentIndex - 1);
+                            const rangeSelection = allVisibleTagIds.slice(startIndex, endIndex + 1);
+                            setSelectedTagIds(rangeSelection);
+                        } else {
+                            setSelectedTagIds([newTagId]);
+                        }
+                        setLastSelectedTagId(newTagId);
+                    }
+                    break;
+
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentIndex < allVisibleTagIds.length - 1) {
+                        const newTagId = allVisibleTagIds[currentIndex + 1];
+                        if (e.shiftKey && currentSelection.length > 0) {
+                            // Extend selection downward
+                            const firstSelected = currentSelection[0];
+                            const firstIndex = allVisibleTagIds.indexOf(firstSelected);
+                            const startIndex = Math.min(firstIndex, currentIndex + 1);
+                            const endIndex = Math.max(firstIndex, currentIndex + 1);
+                            const rangeSelection = allVisibleTagIds.slice(startIndex, endIndex + 1);
+                            setSelectedTagIds(rangeSelection);
+                        } else {
+                            setSelectedTagIds([newTagId]);
+                        }
+                        setLastSelectedTagId(newTagId);
+                    }
+                    break;
+
+                case 'a':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        // Ctrl+A: Select all
+                        setSelectedTagIds(allVisibleTagIds);
+                        setLastSelectedTagId(allVisibleTagIds[allVisibleTagIds.length - 1]);
+                    }
+                    break;
+
+                case 'Escape':
+                    // Clear selection
+                    clearSelection();
+                    setLastSelectedTagId(null);
+                    break;
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [selectedTagIds, allVisibleTagIds, setSelectedTagIds, setLastSelectedTagId, clearSelection]);
+
     // Handle drag and drop
     const handleMove = (args: { dragIds: string[]; parentId: string | null; index: number }) => {
         console.log('Moving tags:', args);
@@ -353,7 +526,26 @@ export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
 
     // Main tree render with react-arborist
     return (
-        <Box sx={{ padding: '16px', height: '100%' }}>
+        <Box 
+            ref={treeContainerRef}
+            data-tag-tree 
+            tabIndex={0}
+            sx={{ 
+                padding: '16px', 
+                height: '100%',
+                '&:focus': {
+                    outline: 'none',
+                },
+                '&:focus-within': {
+                    backgroundColor: 'action.hover',
+                    transition: 'background-color 0.2s',
+                },
+            }}
+        >
+            <SelectionInfo 
+                selectedCount={selectedTagIds.length} 
+                totalCount={allVisibleTagIds.length} 
+            />
             <Tree<TreeTag>
                 data={treeData}
                 openByDefault={true}
@@ -362,17 +554,24 @@ export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
                 indent={24}
                 rowHeight={40}
                 overscanCount={8}
-                onMove={handleMove}
+                // onMove={handleMove} // Temporarily disable drag & drop to fix React DnD error
                 disableMultiSelection={false}
+                disableEdit={true}  // Disable editing to prevent DnD issues
                 selection="" // Disable internal selection to prevent auto-scrolling
             >
-                {({ node, style, dragHandle }) => (
-                    <TagNode 
-                        node={node} 
-                        style={style} 
-                        dragHandle={dragHandle}
-                    />
-                )}
+                {({ node, style, dragHandle }) => {
+                    // Wrap in div to ensure native DOM element for DnD
+                    return (
+                        <div style={style}>
+                            <TagNode 
+                                node={node} 
+                                style={{ height: '100%' }}
+                                dragHandle={undefined} // Disable dragHandle temporarily
+                                treeData={treeData}
+                            />
+                        </div>
+                    );
+                }}
             </Tree>
         </Box>
     );

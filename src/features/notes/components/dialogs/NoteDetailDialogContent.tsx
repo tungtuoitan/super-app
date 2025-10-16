@@ -9,6 +9,7 @@ import { styled, Box, Typography, Grid2, TextField } from '@mui/material';
 import { useNoteUI } from '../../store/NoteUIContext';
 import { Note, NOTE_TYPES, NoteType } from '../../types/note.types';
 import {GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions} from '@/shared/components';
+import { useTagsForAutocomplete } from '@/features/tags';
 
 const NoteDetailWrapper = styled('div')({
     display: 'flex',
@@ -42,35 +43,56 @@ const NoteDetailWrapper = styled('div')({
  */
 export function NoteDetailDialogContent() {
     const { selectedNote, isDialogOpen, closeDialog, updateSelectedNote } = useNoteUI();
-        const [loading, setLoading] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
     
-        // Create options for type autocomplete
-        const typeOptions: IAutoCompleteOptions[] = NOTE_TYPES.map((type) => ({
-            id: type,
-            label: type.charAt(0).toUpperCase() + type.slice(1),
-            desc: type.charAt(0).toUpperCase() + type.slice(1),
-            active: true,
-        }));
+    // Fetch tags from API for use in autocomplete
+    const { tagOptions, isLoading: tagsLoading, error: tagsError } = useTagsForAutocomplete();
     
-        // Create current type value for autocomplete
-        const currentTypeValue = selectedNote?.type 
-            ? typeOptions.find(option => option.id === selectedNote.type) || null
-            : null;
+    // Fallback tags if API fails
+    const fallbackTagOptions: IAutoCompleteOptions[] = [
+        { id: 'work', label: 'Work', desc: 'Work', active: true },
+        { id: 'personal', label: 'Personal', desc: 'Personal', active: true },
+        { id: 'important', label: 'Important', desc: 'Important', active: true },
+        { id: 'urgent', label: 'Urgent', desc: 'Urgent', active: true },
+    ];
     
-        // Mock tag options (in real app, this would come from a service)
-        const tagOptions: IAutoCompleteOptions[] = [
-            { id: 'urgent', label: 'Urgent', desc: 'Urgent', active: true },
-            { id: 'important', label: 'Important', desc: 'Important', active: true },
-            { id: 'work', label: 'Work', desc: 'Work', active: true },
-            { id: 'personal', label: 'Personal', desc: 'Personal', active: true },
-            { id: 'project', label: 'Project', desc: 'Project', active: true },
-            { id: 'follow-up', label: 'Follow-up', desc: 'Follow-up', active: true },
-        ];
+    // Use API tags if available, otherwise fallback tags
+    const finalTagOptions = tagsError ? fallbackTagOptions : tagOptions;
     
-        // Convert tags array to comma-separated string for TagAutoComplete
-        const currentTagsValue = selectedNote?.tags?.join(',') || '';
+    // Log error if tags failed to load
+    React.useEffect(() => {
+        if (tagsError) {
+            console.error('Failed to load tags for autocomplete:', tagsError);
+        }
+    }, [tagsError]);
     
-        // Handlers for form interactions
+    // Create options for type autocomplete
+    const typeOptions: IAutoCompleteOptions[] = NOTE_TYPES.map((type) => ({
+        id: type,
+        label: type.charAt(0).toUpperCase() + type.slice(1),
+        desc: type.charAt(0).toUpperCase() + type.slice(1),
+        active: true,
+    }));
+
+    // Create current type value for autocomplete
+    const currentTypeValue = selectedNote?.type 
+        ? typeOptions.find(option => option.id === selectedNote.type) || null
+        : null;
+    
+    // Convert tags array to comma-separated string of IDs for TagAutoComplete
+        // Map selected tags to match the format expected by the component (comma-separated string of IDs)
+    const currentTagsValue = selectedNote?.tags
+        ? selectedNote.tags.map(tag => tag.tagId.toString()).filter(Boolean).join(',')
+        : '';
+    
+    // Debug logging
+    console.log('Debug - Tag display data:', {
+        selectedNoteTags: selectedNote?.tags,
+        currentTagsValue,
+        finalTagOptions,
+        tagsLoading,
+        tagsError
+    });        // Handlers for form interactions
         const handleFieldChange = (field: keyof Note, value: any) => {
             updateSelectedNote({ [field]: value });
             console.log(`Field ${field} changed to:`, value);
@@ -81,13 +103,29 @@ export function NoteDetailDialogContent() {
             handleFieldChange('type', typeValue);
         };
     
-        const handleTagsChange = (tagsString: string) => {
-            // Convert comma-separated string back to tags array
-            const tagsArray = tagsString ? tagsString.split(',') : [];
-            handleFieldChange('tags', tagsArray);
-        };
-    
-        const handleDuplicate = () => {
+    const handleTagsChange = (tagsString: string) => {
+        // Convert comma-separated string of IDs back to tags array
+        const tagIds = tagsString ? tagsString.split(',').map(id => id.trim()).filter(id => id) : [];
+        
+        // Convert tag IDs to Tag objects by finding them in the options
+        const tagObjects = tagIds.map(tagId => {
+            const foundOption = finalTagOptions.find(option => option.id === tagId);
+            if (foundOption) {
+                return {
+                    tagId: parseInt(foundOption.id as string),
+                    name: foundOption.label,
+                    description: foundOption.desc,
+                    isActive: foundOption.active,
+                    createdAt: new Date(),
+                    id: parseInt(foundOption.id as string), // Add alias for backward compatibility
+                };
+            }
+            return null;
+        }).filter(tag => tag !== null);
+        
+        handleFieldChange('tags', tagObjects);
+        console.log('Tags changed:', { tagsString, tagIds, tagObjects });
+    };        const handleDuplicate = () => {
             // TODO: Implement duplicate logic
             console.log('Duplicating note');
         };
@@ -173,14 +211,15 @@ export function NoteDetailDialogContent() {
 
                             {/* Tags */}
                             <GenericTagAutoComplete
-                                options={tagOptions}
+                                options={finalTagOptions}
                                 value={currentTagsValue}
                                 onChange={handleTagsChange}
                                 label="Tags"
-                                placeholder="+ Add Tag"
+                                placeholder={tagsLoading ? "Loading tags..." : "+ Add Tag"}
                                 sx={{ mb: '16px' }}
                                 size="small"
                                 data-testid="note-tags"
+                                disabled={tagsLoading}
                             />
 
                             {/* Created/Updated Info */}

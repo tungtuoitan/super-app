@@ -5,6 +5,8 @@ import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { NotesPage } from '../../pages/NotesPage';
 import { TagsPage } from '../../pages/TagsPage';
+import { FlexibleLayoutDemo } from '../../pages/FlexibleLayoutDemo';
+import { FlexibleLayout } from '../Layout/FlexibleLayout';
 import { SideMenu } from './SideMenu';
 import { BodyWrapper, SideNavRoot } from './SideMenuItem.styles';
 
@@ -39,12 +41,14 @@ function MainNav() {
                     ref={bodyWrapperRef}
                     sx={{
                         width: expanded ? 'calc(100% - 200px)' : 'calc(100% - 48px)',
+                        height: 'calc(100vh - 64px)', // Account for TopNav height
                     }}
                 >
                     <Routes>
-                        <Route path="/" Component={NotesPage} />
+                        <Route path="/" element={<FlexibleLayout />} />
                         <Route path="/tags" Component={TagsPage} />
-                        <Route path="/notes" Component={NotesPage} />
+                        <Route path="/notes" element={<FlexibleLayout />} />
+                        <Route path="/demo" element={<FlexibleLayoutDemo />} />
                     </Routes>
                 </BodyWrapper>
             </SideNavRoot>

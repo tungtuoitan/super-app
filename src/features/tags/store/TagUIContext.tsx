@@ -43,8 +43,11 @@ interface TagUIContextValue {
     showArchived: boolean;
     setShowArchived: (show: boolean) => void;
     
-    // Selection state (for bulk operations)
-    selectedTagIds: Set<number>;
+    // Selection state (VS Code-like selection behavior)
+    selectedTagIds: number[];
+    setSelectedTagIds: (ids: number[] | ((prev: number[]) => number[])) => void;
+    lastSelectedTagId: number | null;
+    setLastSelectedTagId: (tagId: number | null) => void;
     toggleTagSelection: (tagId: number) => void;
     selectAllTags: (tagIds: number[]) => void;
     clearSelection: () => void;
@@ -72,8 +75,9 @@ export function TagUIProvider({ children }: { children: React.ReactNode }) {
     const [searchText, setSearchText] = useState('');
     const [showArchived, setShowArchived] = useState(false);
     
-    // Selection state
-    const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(new Set());
+    // Selection state (VS Code-like)
+    const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+    const [lastSelectedTagId, setLastSelectedTagId] = useState<number | null>(null);
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
     // Dialog actions
@@ -137,29 +141,27 @@ export function TagUIProvider({ children }: { children: React.ReactNode }) {
         setExpandedNodes(new Set());
     }, []);
 
-    // Selection actions
+    // Selection actions (VS Code-like)
     const toggleTagSelection = useCallback((tagId: number) => {
         setSelectedTagIds(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(tagId)) {
-                newSet.delete(tagId);
+            if (prev.includes(tagId)) {
+                return prev.filter(id => id !== tagId);
             } else {
-                newSet.add(tagId);
+                return [...prev, tagId];
             }
-            return newSet;
         });
     }, []);
 
     const selectAllTags = useCallback((tagIds: number[]) => {
-        setSelectedTagIds(new Set(tagIds));
+        setSelectedTagIds(tagIds);
     }, []);
 
     const clearSelection = useCallback(() => {
-        setSelectedTagIds(new Set());
+        setSelectedTagIds([]);
     }, []);
 
     const isTagSelected = useCallback((tagId: number) => {
-        return selectedTagIds.has(tagId);
+        return selectedTagIds.includes(tagId);
     }, [selectedTagIds]);
 
     const value: TagUIContextValue = {
@@ -200,6 +202,9 @@ export function TagUIProvider({ children }: { children: React.ReactNode }) {
         
         // Selection state
         selectedTagIds,
+        setSelectedTagIds,
+        lastSelectedTagId,
+        setLastSelectedTagId,
         toggleTagSelection,
         selectAllTags,
         clearSelection,

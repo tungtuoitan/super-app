@@ -5,7 +5,10 @@
       "Read(//mnt/c/Users/Admin/source/SuperApp-backend/SuperAppAPI/Controllers/**)",
       "Read(//mnt/c/Users/Admin/source/SuperApp-backend/**)",
       "Bash(dotnet user-secrets:*)",
-      "Bash(/mnt/c/Program Files/dotnet/dotnet.exe user-secrets set \"ConnectionStrings:SuperAppConnection\" \"Server=TUNGHOMEPC\\MSSQLSERVER03;Database=Timeline-dev;User Id=sa;Password=***REDACTED-ROTATED-PASSWORD***;TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;\")"
+      "Bash(/mnt/c/Program Files/dotnet/dotnet.exe user-secrets set \"ConnectionStrings:SuperAppConnection\" \"Server=TUNGHOMEPC\\MSSQLSERVER03;Database=Timeline-dev;User Id=sa;Password=***REDACTED-ROTATED-PASSWORD***;TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;\")",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

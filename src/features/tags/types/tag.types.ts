@@ -4,6 +4,7 @@
  */
 
 // API Response DTO (from backend TagResponse)
+// Backend returns: TagId, Name, Description, Color, CreatedAt, IsActive, Depth
 export interface TagDTO {
     tagId: number;
     name: string;
@@ -12,6 +13,7 @@ export interface TagDTO {
     createdAt: string; // ISO string from API
     isActive: boolean;
     depth?: number; // Depth in hierarchy (0 = root, 1 = child, etc.)
+    // Note: Backend does NOT return userId, updatedAt, or deletedAt for security
 }
 
 // API Response DTO for Tag Tree (from backend TagTreeResponse)
@@ -42,12 +44,16 @@ export interface Tag {
     createdAt: Date;
     isActive: boolean;
     depth?: number; // Depth in hierarchy from backend (0 = root, 1 = child, etc.)
-    
+
     // Frontend-only properties for tree UI and backward compatibility
     id?: number; // Alias for tagId for some components
     children?: Tag[]; // Child tags for tree structure (built from depth)
     isExpanded?: boolean; // For tree UI state
     isArchived?: boolean; // Computed from isActive (!isActive)
+    noteCount?: number; // Number of notes associated with this tag
+
+    // Note: userId, updatedAt, deletedAt are NOT returned by backend (removed for security)
+    // These fields should not be accessed in new code
 }
 
 // Create request (matches backend CreateTagRequest)

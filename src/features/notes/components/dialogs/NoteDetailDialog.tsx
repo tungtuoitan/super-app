@@ -110,7 +110,7 @@ export function NoteDetailDialog() {
                             {!isCreateMode && (
                                 <Typography variant="caption" sx={{ fontSize: 11.5 }}>
                                     Created: {selectedNote.createdAt.toLocaleDateString()}
-                                    {selectedNote.createdBy && ` • Created by: ${selectedNote.createdBy}`}
+                            {selectedNote.createdBy && ` • Created by: ${selectedNote.createdBy}`}
                                 </Typography>
                             )}
                         </Box>

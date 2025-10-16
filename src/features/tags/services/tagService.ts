@@ -54,6 +54,7 @@ class TagService {
 
     /**
      * Transform API DTO to domain model
+     * Backend only returns: tagId, name, description, color, createdAt, isActive, depth
      */
     private transformTag(dto: TagDTO): Tag {
         return {
@@ -64,7 +65,7 @@ class TagService {
             createdAt: new Date(dto.createdAt),
             isActive: dto.isActive,
             depth: dto.depth,
-            // Computed properties
+            // Computed/frontend-only properties
             id: dto.tagId, // Alias for backward compatibility
             isArchived: !dto.isActive, // isArchived is inverse of isActive
             children: [], // Will be populated by tree building logic

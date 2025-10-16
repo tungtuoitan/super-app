@@ -1,0 +1,129 @@
+/* Custom styles for react-mosaic-component to integrate with MUI */
+
+/* Override mosaic styles to match MUI theme */
+.mosaic-blueprint-theme {
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif !important;
+}
+
+.mosaic-window {
+  border: 1px solid #e0e0e0;
+  box-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
+}
+
+.mosaic-window-title {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  color: #424242;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 12px;
+  height: auto;
+  min-height: 32px;
+}
+
+.mosaic-window-body {
+  background-color: #ffffff;
+  padding: 0;
+}
+
+.mosaic-drop-target {
+  background-color: rgba(25, 118, 210, 0.12) !important;
+  /* border: 2px dashed #1976d2 !important; */
+}
+
+.mosaic-split {
+  background-color: #e0e0e0;
+}
+
+.mosaic-split:hover {
+  background-color: #bdbdbd;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .mosaic-window {
+  border-color: #424242;
+  background-color: #121212;
+}
+
+[data-theme="dark"] .mosaic-window-title {
+  background-color: #1e1e1e;
+  border-bottom-color: #424242;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .mosaic-window-body {
+  background-color: #121212;
+}
+
+[data-theme="dark"] .mosaic-split {
+  background-color: #424242;
+}
+
+[data-theme="dark"] .mosaic-split:hover {
+  background-color: #616161;
+}
+
+/* Remove default mosaic toolbar */
+.mosaic-window-toolbar {
+  display: none;
+}
+
+/* Custom toolbar styles */
+.mosaic-window-title .MuiIconButton-root {
+  padding: 4px;
+  margin-left: 8px;
+}
+
+.mosaic-window-title .MuiTypography-root {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Resize handle styles */
+.mosaic-split-line {
+  background-color: transparent;
+}
+
+.mosaic-split-line:hover {
+  background-color: #1976d2;
+}
+
+/* Window controls */
+.mosaic-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mosaic-window-title {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .mosaic-split {
+    width: 6px !important;
+  }
+}
+
+/* Animation for smooth transitions */
+.mosaic-window,
+.mosaic-split {
+  transition: all 0.2s ease;
+}
+
+/* Focus styles for accessibility */
+.mosaic-window:focus-within {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.mosaic-window.loading {
+  opacity: 0.6;
+}
+
+.mosaic-window.loading .mosaic-window-body {
+  pointer-events: none;
+}

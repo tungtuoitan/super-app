@@ -15,6 +15,7 @@ export { TagUIProvider, useTagUI } from './store/TagUIContext';
 
 // Hooks
 export { useTags } from './hooks/useTags';
+export { useTagsForAutocomplete } from './hooks/useTagsForAutocomplete';
 
 // Service
 export { tagService } from './services/tagService';

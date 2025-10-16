@@ -1,5 +1,14 @@
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
-import { User } from "../../types/models";
+
+/**
+ * User interface representing authenticated user data
+ * Contains user credentials and authentication token
+ */
+export interface User {
+    userName: string;
+    password: string;
+    userToken: string;
+}
 
 export interface AuthContextData {
     // Core auth data
@@ -7,19 +16,19 @@ export interface AuthContextData {
     setAuth: Dispatch<SetStateAction<User>>;
     isAuthenticated: boolean;
     setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
-    
+
     // Auth operation states
     loading: boolean;
     setLoading: Dispatch<SetStateAction<boolean>>;
     error: string | null;
     setError: Dispatch<SetStateAction<string | null>>;
-    
+
     // Login specific states
     loginLoading: boolean;
     setLoginLoading: Dispatch<SetStateAction<boolean>>;
     loginError: string | null;
     setLoginError: Dispatch<SetStateAction<string | null>>;
-    
+
     // Token exchange states
     tokenExchangeLoading: boolean;
     setTokenExchangeLoading: Dispatch<SetStateAction<boolean>>;

@@ -20,17 +20,22 @@ class NoteService {
 
     /**
      * Transform Tag DTO from backend to frontend model
+     * Backend only returns: tagId, name, description, color, createdAt, isActive, depth
      */
     private transformTag(tagDto: any): Tag {
         return {
-            ...tagDto,
-            // Ensure required properties are set
-            tagId: tagDto.id || tagDto.tagId, // Alias for backward compatibility
-            isArchived: !!tagDto.deletedAt, // Compute from deletedAt
-            userId: tagDto.userId || 0, // Ensure userId is set
-            createdAt: tagDto.createdAt ? new Date(tagDto.createdAt) : undefined,
-            updatedAt: tagDto.updatedAt ? new Date(tagDto.updatedAt) : undefined,
-            deletedAt: tagDto.deletedAt ? new Date(tagDto.deletedAt) : undefined,
+            tagId: tagDto.tagId,
+            name: tagDto.name,
+            description: tagDto.description,
+            color: tagDto.color,
+            createdAt: tagDto.createdAt ? new Date(tagDto.createdAt) : new Date(),
+            isActive: tagDto.isActive !== undefined ? tagDto.isActive : true,
+            depth: tagDto.depth,
+            // Computed/frontend-only properties
+            id: tagDto.tagId, // Alias for backward compatibility
+            isArchived: tagDto.isActive !== undefined ? !tagDto.isActive : false,
+            children: [],
+            isExpanded: false,
         };
     }
 
@@ -119,7 +124,17 @@ class NoteService {
      */
     async createNote(data: CreateNoteDTO): Promise<Note> {
         try {
-            const response = await apiClient.post<NoteResponse>(this.basePath, data);
+            // Backend CreateNoteRequest has JsonPropertyName("tags") mapping to TagIds
+            // So we send 'tags' in JSON, not 'tagIds'
+            const requestPayload = {
+                name: data.name,
+                description: data.description,
+                type: data.type,
+                tags: data.tags, // Backend expects 'tags' in JSON (JsonPropertyName mapping)
+            };
+
+            console.log('Creating note - Request payload:', requestPayload);
+            const response = await apiClient.post<NoteResponse>(this.basePath, requestPayload);
             
             const noteDTO = response.data || response;
             
@@ -139,7 +154,19 @@ class NoteService {
      */
     async updateNote(id: number, data: UpdateNoteDTO): Promise<Note> {
         try {
-            const response = await apiClient.put<NoteResponse>(`${this.basePath}/${id}`, data);
+            // Backend UpdateNoteRequest has JsonPropertyName("tags") mapping to TagIds
+            // So we send 'tags' in JSON, not 'tagIds'
+            const requestPayload = {
+                noteId: id, // Backend expects noteId in the request body
+                name: data.name,
+                description: data.description,
+                type: data.type,
+                tags: data.tags, // Backend expects 'tags' in JSON (JsonPropertyName mapping)
+                isArchived: data.isArchived,
+            };
+
+            console.log('Updating note - Request payload:', requestPayload);
+            const response = await apiClient.put<NoteResponse>(`${this.basePath}/${id}`, requestPayload);
             
             const noteDTO = response.data || response;
             

@@ -95,15 +95,18 @@ export function NoteContentToolbar() {
         const isNewNote = selectedNote.noteId === 0;
         
         try { 
+            console.log('Saving note:', { selectedNote, isNewNote });
+            
             if (isNewNote) {
-                // Create new note
+                // Create new note using POST /api/notes
                 const createData: CreateNoteDTO = {
                     name: selectedNote.name,
                     description: selectedNote.description,
                     type: selectedNote.type,
-                    tags: selectedNote.tags?.map(tag => tag.id || tag.tagId) || [],
+                    tags: selectedNote.tags?.map(tag => tag.tagId || tag.id).filter((id): id is number => id !== undefined) || [],
                 };
                 
+                console.log('Creating note with data:', createData);
                 const createdNote = await createNote.mutateAsync(createData);
                 
                 enqueueSnackbar('Note created successfully', { 
@@ -114,15 +117,16 @@ export function NoteContentToolbar() {
                 // Update the dialog with the fresh server data (now with real ID)
                 updateSelectedNote(createdNote);
             } else {
-                // Update existing note
+                // Update existing note using PUT /api/notes/{id}
                 const updateData: UpdateNoteDTO = {
                     name: selectedNote.name,
                     description: selectedNote.description,
                     type: selectedNote.type,
-                    tags: selectedNote.tags?.map(tag => tag.id || tag.tagId) || [],
+                    tags: selectedNote.tags?.map(tag => tag.tagId || tag.id).filter((id): id is number => id !== undefined) || [],
                     isArchived: selectedNote.isArchived,
                 };
                 
+                console.log('Updating note with data:', { id: selectedNote.noteId, data: updateData });
                 const updatedNote = await updateNote.mutateAsync({ 
                     id: selectedNote.noteId, 
                     data: updateData 
