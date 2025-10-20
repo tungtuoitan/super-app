@@ -23,12 +23,12 @@ const getBaseUrl = (): string => {
 
     // Safe development fallback
     if (window.location.hostname === 'localhost') {
-        return 'https://localhost:5000';
+        return 'http://localhost:5000';
     }
 
-    // Default to HTTPS for security
-    console.warn('REACT_APP_API_URL not set. Using default HTTPS endpoint.');
-    return 'https://localhost:5000';
+    // Default to HTTP for development (change to HTTPS in production)
+    console.warn('REACT_APP_API_URL not set. Using default HTTP endpoint.');
+    return 'http://localhost:5000';
 };
 
 /**

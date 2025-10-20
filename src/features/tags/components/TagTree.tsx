@@ -5,6 +5,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Tree, NodeApi } from 'react-arborist';
+import { useDragDropManager } from 'react-dnd';
 import { 
     Box, 
     Typography, 
@@ -23,7 +24,7 @@ import {
     DragIndicator as DragIcon
 } from '@mui/icons-material';
 
-import { useTagTree } from '../hooks/useTags';
+import { useTagTree, useWorkspaceTagTree } from '../hooks/useTags';
 import { useTagUI } from '../store/TagUIContext';
 import { useContextMenu } from '@/shared/contexts';
 import type { Tag } from '../types/tag.types';
@@ -31,6 +32,8 @@ import type { Tag } from '../types/tag.types';
 interface TagTreeProps {
     onTagClick?: (tag: Tag) => void;
     includeShared?: boolean;
+    workspaceId?: number; // Optional workspace ID for workspace-specific tree
+    userId?: number; // Optional user ID for workspace tree
 }
 
 // Transform Tag to tree data structure for react-arborist
@@ -46,7 +49,7 @@ interface TreeTag {
  */
 function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
     const result: number[] = [];
-    
+
     function traverse(nodes: TreeTag[]) {
         for (const node of nodes) {
             result.push(node.data.tagId);
@@ -55,7 +58,26 @@ function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
             }
         }
     }
-    
+
+    traverse(treeData);
+    return result;
+}
+
+/**
+ * Helper function to flatten tree data for lookup
+ */
+function getAllTagsFlattened(treeData: TreeTag[]): TreeTag[] {
+    const result: TreeTag[] = [];
+
+    function traverse(nodes: TreeTag[]) {
+        for (const node of nodes) {
+            result.push(node);
+            if (node.children && node.children.length > 0) {
+                traverse(node.children);
+            }
+        }
+    }
+
     traverse(treeData);
     return result;
 }
@@ -238,9 +260,10 @@ function TagNode({ node, style, dragHandle, treeData }: {
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '8px', height: '100%' }}>
                 {/* Item 1: Main tag info (icon, name, indicators) - 30% width */}
                 <Box sx={{ 
-                    width: '30%', 
+                    width: '100%', 
                     minWidth: 0,
                     display: 'flex', 
+                    // border: '1px solid red',
                     alignItems: 'center', 
                     gap: '8px' 
                 }}>
@@ -255,25 +278,10 @@ function TagNode({ node, style, dragHandle, treeData }: {
                         {tag.name}
                     </Typography>
 
-                    {/* Color Indicator */}
-                    {/* {tag.color && (
-                        <Box
-                            sx={{
-                                width: '14px',
-                                height: '14px',
-                                borderRadius: '50%',
-                                backgroundColor: tag.color,
-                                border: '2px solid',
-                                borderColor: 'background.paper',
-                                boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
-                                flexShrink: 0,
-                            }}
-                        />
-                    )} */}
                 </Box>
 
                 {/* Item 2: Description - remaining width */}
-                <Box sx={{ flex: 1, minWidth: 0 }}>
+                {/* <Box sx={{ flex: 1, minWidth: 0 }}>
                     {tag.description && (
                         <Typography
                             variant="caption"
@@ -288,7 +296,7 @@ function TagNode({ node, style, dragHandle, treeData }: {
                             {tag.description}
                         </Typography>
                     )}
-                </Box>
+                </Box> */}
             </Box>
 
 
@@ -380,8 +388,21 @@ function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; t
 /**
  * Main TagTree component using react-arborist
  */
-export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
-    const { data: tags, isLoading, error } = useTagTree(includeShared);
+export function TagTree({ onTagClick, includeShared = true, workspaceId, userId }: TagTreeProps) {
+    // Conditionally use workspace tree or regular tree based on props
+    const shouldUseWorkspaceTree = workspaceId !== undefined && userId !== undefined;
+    
+    const regularTreeQuery = useTagTree(includeShared);
+    const workspaceTreeQuery = useWorkspaceTagTree(
+        workspaceId || 0, 
+        userId || 0
+    );
+    
+    // Use the appropriate query based on whether workspaceId is provided
+    const { data: tags, isLoading, error } = shouldUseWorkspaceTree 
+        ? workspaceTreeQuery 
+        : regularTreeQuery;
+    
     const { 
         searchText, 
         selectedTagIds, 
@@ -391,6 +412,7 @@ export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
     } = useTagUI();
     const [draggedNode, setDraggedNode] = useState<NodeApi<TreeTag> | null>(null);
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
+    const manager = useDragDropManager();
 
     // Transform and filter tags based on search text
     const treeData = useMemo(() => {
@@ -501,8 +523,28 @@ export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
 
     // Handle drag and drop
     const handleMove = (args: { dragIds: string[]; parentId: string | null; index: number }) => {
-        console.log('Moving tags:', args);
-        // TODO: Implement tag hierarchy update via API
+        console.log('🔄 Tree Node Move Event:', {
+            draggedTagIds: args.dragIds,
+            newParentId: args.parentId || 'root',
+            newIndex: args.index,
+        });
+
+        // Find the dragged tag name for better logging
+        const draggedTag = treeData.find(t => t.id === args.dragIds[0]);
+        const parentTag = args.parentId ?
+            getAllTagsFlattened(treeData).find(t => t.id === args.parentId) : null;
+
+        console.log(`📦 Moving "${draggedTag?.name || 'Unknown'}" to ${parentTag ? `"${parentTag.name}"` : 'root'} at position ${args.index}`);
+
+        // TODO: Implement API call
+        // await tagService.moveTag({
+        //     tagId: parseInt(args.dragIds[0]),
+        //     newParentId: args.parentId ? parseInt(args.parentId) : null,
+        //     newIndex: args.index
+        // });
+
+        // TODO: Invalidate queries to refetch
+        // queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
     };
 
     // Loading state
@@ -542,10 +584,10 @@ export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
                 },
             }}
         >
-            <SelectionInfo 
+            {/* <SelectionInfo 
                 selectedCount={selectedTagIds.length} 
                 totalCount={allVisibleTagIds.length} 
-            />
+            /> */}
             <Tree<TreeTag>
                 data={treeData}
                 openByDefault={true}
@@ -554,19 +596,20 @@ export function TagTree({ onTagClick, includeShared = true }: TagTreeProps) {
                 indent={24}
                 rowHeight={40}
                 overscanCount={8}
-                // onMove={handleMove} // Temporarily disable drag & drop to fix React DnD error
+                dndManager={manager}
+                onMove={handleMove}
                 disableMultiSelection={false}
-                disableEdit={true}  // Disable editing to prevent DnD issues
-                selection="" // Disable internal selection to prevent auto-scrolling
+                disableEdit={true}
+                selection=""
             >
                 {({ node, style, dragHandle }) => {
                     // Wrap in div to ensure native DOM element for DnD
                     return (
                         <div style={style}>
-                            <TagNode 
-                                node={node} 
+                            <TagNode
+                                node={node}
                                 style={{ height: '100%' }}
-                                dragHandle={undefined} // Disable dragHandle temporarily
+                                dragHandle={dragHandle}
                                 treeData={treeData}
                             />
                         </div>

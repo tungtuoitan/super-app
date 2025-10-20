@@ -18,6 +18,8 @@ export const tagKeys = {
     lists: () => [...tagKeys.all, 'list'] as const,
     list: (params?: GetTagsParams) => [...tagKeys.lists(), params] as const,
     tree: () => [...tagKeys.all, 'tree'] as const,
+    workspaceTree: (workspaceId: number, userId: number) => 
+        [...tagKeys.all, 'workspace', workspaceId, 'tree', userId] as const,
     details: () => [...tagKeys.all, 'detail'] as const,
     detail: (id: number) => [...tagKeys.details(), id] as const,
     depth: (depth: number) => [...tagKeys.all, 'depth', depth] as const,
@@ -43,6 +45,18 @@ export function useTagTree(includeShared: boolean = true) {
         queryKey: [...tagKeys.tree(), includeShared],
         queryFn: () => tagService.getTagTree(includeShared),
         staleTime: 5 * 60 * 1000,
+    });
+}
+
+/**
+ * Hook to fetch workspace tag tree with notes
+ */
+export function useWorkspaceTagTree(workspaceId: number, userId: number) {
+    return useQuery({
+        queryKey: tagKeys.workspaceTree(workspaceId, userId),
+        queryFn: () => tagService.getWorkspaceTagTree(workspaceId, userId),
+        staleTime: 5 * 60 * 1000,
+        enabled: workspaceId > 0 && userId > 0, // Only fetch if IDs are valid
     });
 }
 

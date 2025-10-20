@@ -3,15 +3,19 @@
  */
 
 import { apiClient } from '@/lib/api-client'
-import type { 
-    Tag, 
+import type {
+    Tag,
     TagDTO,
     TagTreeResponseDTO,
-    CreateTagDTO, 
-    UpdateTagDTO, 
+    CreateTagDTO,
+    UpdateTagDTO,
     GetTagsParams,
-    TagTreeNode 
+    TagTreeNode
 } from '../types/tag.types'
+import { tagsDumpData } from '../data/tagsDumpData'
+
+// Toggle between dump data and real API
+const USE_DUMP_DATA = true;
 
 
 class TagService {
@@ -21,6 +25,35 @@ class TagService {
      * Get all tags with optional filtering
      */
     async getTags(params?: GetTagsParams): Promise<Tag[]> {
+        // Use dump data if enabled
+        if (USE_DUMP_DATA) {
+            console.log('📦 Using dump data for tags');
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            // Flatten tree to get all tags
+            const flattenTags = (tags: Tag[]): Tag[] => {
+                return tags.flatMap(tag => [tag, ...flattenTags(tag.children || [])]);
+            };
+
+            let allTags = flattenTags(tagsDumpData);
+
+            // Apply filtering
+            if (params?.search) {
+                const searchLower = params.search.toLowerCase();
+                allTags = allTags.filter(tag =>
+                    tag.name.toLowerCase().includes(searchLower) ||
+                    tag.description?.toLowerCase().includes(searchLower)
+                );
+            }
+
+            if (params?.isArchived !== undefined) {
+                allTags = allTags.filter(tag => tag.isArchived === params.isArchived);
+            }
+
+            return allTags;
+        }
+
         try {
             const searchParams: Record<string, string | number | boolean> = {}
 
@@ -77,6 +110,14 @@ class TagService {
      * Get tags organized as tree structure from the /tree endpoint
      */
     async getTagTree(includeShared: boolean = true): Promise<Tag[]> {
+        // Use dump data if enabled
+        if (USE_DUMP_DATA) {
+            console.log('📦 Using dump data for tag tree');
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+            return tagsDumpData;
+        }
+
         try {
             const response = await apiClient.get<TagTreeResponseDTO[]>(`${this.basePath}/tree`, {
                 params: { includeShared }
@@ -237,6 +278,28 @@ class TagService {
      */
     async getRootTags(): Promise<Tag[]> {
         return this.getTagsByDepth(0);
+    }
+
+    /**
+     * Get workspace tag tree with notes
+     */
+    async getWorkspaceTagTree(workspaceId: number, userId: number): Promise<Tag[]> {
+        try {
+            console.log(`📦 Fetching workspace tag tree for workspaceId: ${workspaceId}, userId: ${userId}`);
+            
+            const response = await apiClient.get<TagTreeResponseDTO[]>(
+                `${this.basePath}/workspace/${workspaceId}/tree`,
+                {
+                    params: { userId }
+                }
+            );
+            
+            console.log('✅ Workspace tag tree response:', response);
+            return response.map(dto => this.transformTagTreeResponse(dto));
+        } catch (error) {
+            console.error('Failed to fetch workspace tag tree:', error);
+            throw error;
+        }
     }
 }
 

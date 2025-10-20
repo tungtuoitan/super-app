@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { 
   Mosaic, 
   MosaicNode, 
@@ -10,7 +10,7 @@ import { Box, Typography } from '@mui/material'
 
 // Import real components
 import { NoteGridPanel } from './NoteGridPanel';
-import { TagsPanel as TagsPanelReal } from './TagsPanelReal';
+import { TagTree } from '@/features/tags/components/TagTree';
 import { NoteDetailPanel } from './NoteDetailPanelReal';
 
 // Import CSS cho mosaic
@@ -27,7 +27,12 @@ export type ViewId = 'notes' | 'tags' | 'noteDetail' | 'properties'
 // Real components
 const NotesComponent = () => <NoteGridPanel />
 
-const TagsComponent = () => <TagsPanelReal />
+const TagsComponent = () => (
+  <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    {/* Using workspace tag tree API with workspaceId=1 and userId=1 for testing */}
+    <TagTree workspaceId={1} userId={1} includeShared={true} />
+  </Box>
+)
 
 const NoteDetailComponent = () => <NoteDetailPanel />
 

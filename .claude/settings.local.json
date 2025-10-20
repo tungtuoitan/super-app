@@ -8,7 +8,18 @@
       "Bash(/mnt/c/Program Files/dotnet/dotnet.exe user-secrets set \"ConnectionStrings:SuperAppConnection\" \"Server=TUNGHOMEPC\\MSSQLSERVER03;Database=Timeline-dev;User Id=sa;Password=***REDACTED-ROTATED-PASSWORD***;TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;\")",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(npm start)",
+      "Bash(npm install:*)",
+      "Bash(timeout:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(where:*)",
+      "WebSearch",
+      "Bash(npm ls:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm info:*)",
+      "Bash(npm view:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

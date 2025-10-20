@@ -14,7 +14,7 @@ export { TagLayoutSelector } from './components/toolbars/items/TagLayoutSelector
 export { TagUIProvider, useTagUI } from './store/TagUIContext';
 
 // Hooks
-export { useTags } from './hooks/useTags';
+export { useTags, useWorkspaceTagTree } from './hooks/useTags';
 export { useTagsForAutocomplete } from './hooks/useTagsForAutocomplete';
 
 // Service

@@ -110,7 +110,7 @@
 /* Animation for smooth transitions */
 .mosaic-window,
 .mosaic-split {
-  transition: all 0.2s ease;
+  /* transition: all 0.2s ease; */
 }
 
 /* Focus styles for accessibility */
