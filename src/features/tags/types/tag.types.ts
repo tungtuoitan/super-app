@@ -98,6 +98,50 @@ export interface TagTreeNode extends Tag {
     isLoading?: boolean;
 }
 
+// Workspace with Tag Tree Response (from backend WorkspaceWithTagTreeResponse)
+export interface WorkspaceWithTagTreeDTO {
+    workspaceId: number;
+    userId: number;
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    type?: string;
+    maxDepth?: number;
+    isDefault: boolean;
+    isPublic: boolean;
+    isTemplate: boolean;
+    isArchived: boolean;
+    tagCount: number;
+    memberCount: number;
+    settings?: string;
+    createdAt: string;
+    updatedAt?: string;
+    tags: TagTreeResponseDTO[]; // Hierarchical tag tree
+}
+
+// Workspace domain model for frontend
+export interface WorkspaceWithTagTree {
+    workspaceId: number;
+    userId: number;
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    type?: string;
+    maxDepth?: number;
+    isDefault: boolean;
+    isPublic: boolean;
+    isTemplate: boolean;
+    isArchived: boolean;
+    tagCount: number;
+    memberCount: number;
+    settings?: string;
+    createdAt: Date;
+    updatedAt?: Date;
+    tags: Tag[]; // Transformed tags
+}
+
 // Tag with hierarchy path (for breadcrumbs, etc.)
 export interface TagWithPath extends Tag {
     hierarchyPath: Tag[]; // Array from root to current tag (renamed to avoid conflict)

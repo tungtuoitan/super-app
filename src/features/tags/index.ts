@@ -3,9 +3,10 @@
 // Components
 export { TagTree } from './components/TagTree';
 export { TagCreateDialog } from './components/TagCreateDialog';
+export { AddTagDialog } from './components/AddTagDialog';
 
 // Toolbar Components  
-export { TagCreate } from './components/toolbars/items/TagCreate';
+export { TagAdd } from './components/toolbars/items/TagAdd';
 export { TagSearch } from './components/toolbars/items/TagSearch';
 export { TagFilter } from './components/toolbars/items/TagFilter';
 export { TagLayoutSelector } from './components/toolbars/items/TagLayoutSelector';

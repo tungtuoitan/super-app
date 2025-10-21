@@ -10,12 +10,14 @@ import type {
     CreateTagDTO,
     UpdateTagDTO,
     GetTagsParams,
-    TagTreeNode
+    TagTreeNode,
+    WorkspaceWithTagTreeDTO,
+    WorkspaceWithTagTree
 } from '../types/tag.types'
 import { tagsDumpData } from '../data/tagsDumpData'
 
 // Toggle between dump data and real API
-const USE_DUMP_DATA = true;
+const USE_DUMP_DATA = false;
 
 
 class TagService {
@@ -37,6 +39,13 @@ class TagService {
             };
 
             let allTags = flattenTags(tagsDumpData);
+
+            console.log('📦 Flattened tags count:', allTags.length);
+            console.log('📦 First 3 tags:', allTags.slice(0, 3).map(t => ({ 
+                tagId: t.tagId, 
+                id: t.id, 
+                name: t.name 
+            })));
 
             // Apply filtering
             if (params?.search) {
@@ -107,27 +116,9 @@ class TagService {
     }
 
     /**
-     * Get tags organized as tree structure from the /tree endpoint
+     * REMOVED: Old /tree endpoint is deprecated
+     * Use getWorkspaceTagTree(workspaceId) instead which calls workspace/{workspaceId}/tree
      */
-    async getTagTree(includeShared: boolean = true): Promise<Tag[]> {
-        // Use dump data if enabled
-        if (USE_DUMP_DATA) {
-            console.log('📦 Using dump data for tag tree');
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 300));
-            return tagsDumpData;
-        }
-
-        try {
-            const response = await apiClient.get<TagTreeResponseDTO[]>(`${this.basePath}/tree`, {
-                params: { includeShared }
-            });
-            return response.map(dto => this.transformTagTreeResponse(dto));
-        } catch (error) {
-            console.error('Failed to fetch tag tree:', error);
-            throw error;
-        }
-    }
 
     /**
      * Transform TagTreeResponseDTO to Tag with children structure
@@ -281,21 +272,40 @@ class TagService {
     }
 
     /**
-     * Get workspace tag tree with notes
+     * Get workspace tag tree with hierarchy
+     * Returns workspace as root node with tags as children
      */
-    async getWorkspaceTagTree(workspaceId: number, userId: number): Promise<Tag[]> {
+    async getWorkspaceTagTree(workspaceId: number): Promise<WorkspaceWithTagTree> {
         try {
-            console.log(`📦 Fetching workspace tag tree for workspaceId: ${workspaceId}, userId: ${userId}`);
+            console.log(`📦 Fetching workspace tag tree for workspaceId: ${workspaceId}`);
             
-            const response = await apiClient.get<TagTreeResponseDTO[]>(
-                `${this.basePath}/workspace/${workspaceId}/tree`,
-                {
-                    params: { userId }
-                }
+            const response = await apiClient.get<WorkspaceWithTagTreeDTO>(
+                `${this.basePath}/workspace/${workspaceId}/tree`
             );
             
             console.log('✅ Workspace tag tree response:', response);
-            return response.map(dto => this.transformTagTreeResponse(dto));
+            
+            // Transform the response
+            return {
+                workspaceId: response.workspaceId,
+                userId: response.userId,
+                name: response.name,
+                description: response.description,
+                color: response.color,
+                icon: response.icon,
+                type: response.type,
+                maxDepth: response.maxDepth,
+                isDefault: response.isDefault,
+                isPublic: response.isPublic,
+                isTemplate: response.isTemplate,
+                isArchived: response.isArchived,
+                tagCount: response.tagCount,
+                memberCount: response.memberCount,
+                settings: response.settings,
+                createdAt: new Date(response.createdAt),
+                updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined,
+                tags: response.tags.map((dto: TagTreeResponseDTO) => this.transformTagTreeResponse(dto))
+            };
         } catch (error) {
             console.error('Failed to fetch workspace tag tree:', error);
             throw error;

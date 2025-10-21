@@ -29,8 +29,8 @@ const NotesComponent = () => <NoteGridPanel />
 
 const TagsComponent = () => (
   <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-    {/* Using workspace tag tree API with workspaceId=1 and userId=1 for testing */}
-    <TagTree workspaceId={1} userId={1} includeShared={true} />
+    {/* Using workspace tag tree API with workspaceId=1 for testing */}
+    <TagTree workspaceId={1} includeShared={true} />
   </Box>
 )
 

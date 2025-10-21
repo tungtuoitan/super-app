@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
 import { TagTree } from '../features/tags/components/TagTree';
-import { TagCreate } from '../features/tags/components/toolbars/items/TagCreate';
+import { TagAdd } from '../features/tags/components/toolbars/items/TagAdd';
 import { TagSearch } from '../features/tags/components/toolbars/items/TagSearch';
 import { TagFilter } from '../features/tags/components/toolbars/items/TagFilter';
 import { TagDeleteSelected } from '../features/tags/components/toolbars/items/TagDeleteSelected';
@@ -10,7 +10,7 @@ import { Grow } from '@/shared/components/styles/commonStyles';
 import { useTagUI } from '../features/tags/store/TagUIContext';
 import { useCallback } from 'react';
 import { Tag } from '../features/tags/types/tag.types';
-import { TagLayoutSelector, TagCreateDialog } from '@/features/tags';
+import { TagLayoutSelector, TagCreateDialog, AddTagDialog } from '@/features/tags';
 
 /**
  * Tags page with proper error boundary
@@ -43,7 +43,7 @@ function TagsPageContent() {
             {/* Toolbar with fixed height */}
             <Box sx={{ flexShrink: 0 }}>
                 <ToolbarContainer>
-                    <TagCreate />
+                    <TagAdd />
                     <Grow />
                     <TagSearch />
                     <TagDeleteSelected />
@@ -62,7 +62,7 @@ function TagsPageContent() {
                 flexDirection: 'column',
                 backgroundColor: 'background.paper',
             }}>
-                <TagTree />
+                {/* <TagTree /> */}
             </Box>
 
             {/* Tag Creation Dialog from Context Menu */}

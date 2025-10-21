@@ -50,9 +50,10 @@ export function ContextMenuProvider({ children, onCreateTag }: ContextMenuProvid
     }, []);
 
     const handleCreateTag = useCallback(() => {
-        console.log('Create tag clicked', contextData);
+        console.log('📁 Context Menu: Add tag clicked for parent:', contextData);
         closeContextMenu();
         if (onCreateTag) {
+            // Pass the tag that was right-clicked as the parent
             onCreateTag(contextData);
         }
     }, [closeContextMenu, onCreateTag, contextData]);
@@ -82,7 +83,7 @@ export function ContextMenuProvider({ children, onCreateTag }: ContextMenuProvid
                     <>
                         <MenuItem onClick={handleCreateTag}>
                             <AddIcon style={{ fontSize: 16, marginRight: 8 }} />
-                            Create Tag
+                            Add Tag
                         </MenuItem>
                         <MenuDivider />
                         <MenuItem onClick={handleEditItem}>

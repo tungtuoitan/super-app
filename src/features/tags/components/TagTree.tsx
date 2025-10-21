@@ -21,19 +21,22 @@ import {
     LocalOffer as TagIcon,
     FolderOpen as FolderOpenIcon,
     Folder as FolderIcon,
-    DragIndicator as DragIcon
+    WorkspacesOutlined as WorkspaceIcon,
+    Add as AddIcon,
+    Refresh as RefreshIcon,
+    UnfoldLess as CollapseAllIcon
 } from '@mui/icons-material';
 
-import { useTagTree, useWorkspaceTagTree } from '../hooks/useTags';
+import { useWorkspaceTagTree } from '../hooks/useTags';
 import { useTagUI } from '../store/TagUIContext';
 import { useContextMenu } from '@/shared/contexts';
 import type { Tag } from '../types/tag.types';
+import { AddTagDialog } from './AddTagDialog';
 
 interface TagTreeProps {
     onTagClick?: (tag: Tag) => void;
-    includeShared?: boolean;
-    workspaceId?: number; // Optional workspace ID for workspace-specific tree
-    userId?: number; // Optional user ID for workspace tree
+    includeShared?: boolean; // DEPRECATED: No longer used, kept for backward compatibility
+    workspaceId: number; // REQUIRED: Workspace ID for workspace-specific tree
 }
 
 // Transform Tag to tree data structure for react-arborist
@@ -64,6 +67,22 @@ function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
 }
 
 /**
+ * Helper function to find a tag by ID in the tag array
+ */
+function findTagById(tags: Tag[], targetId: number): Tag | undefined {
+    for (const tag of tags) {
+        if (tag.tagId === targetId) {
+            return tag;
+        }
+        if (tag.children && tag.children.length > 0) {
+            const found = findTagById(tag.children, targetId);
+            if (found) return found;
+        }
+    }
+    return undefined;
+}
+
+/**
  * Helper function to flatten tree data for lookup
  */
 function getAllTagsFlattened(treeData: TreeTag[]): TreeTag[] {
@@ -85,11 +104,22 @@ function getAllTagsFlattened(treeData: TreeTag[]): TreeTag[] {
 /**
  * Node component for react-arborist tree
  */
-function TagNode({ node, style, dragHandle, treeData }: { 
+function TagNode({ 
+    node, 
+    style, 
+    dragHandle, 
+    treeData, 
+    onNewFolder, 
+    onRefresh, 
+    onCollapseAll
+}: { 
     node: NodeApi<TreeTag>; 
     style: React.CSSProperties;
     dragHandle?: any; // Let's use any for now to avoid type conflicts
     treeData: TreeTag[];
+    onNewFolder?: () => void;
+    onRefresh?: () => void;
+    onCollapseAll?: () => void;
 }) {
     const { 
         selectedTagIds, 
@@ -103,10 +133,20 @@ function TagNode({ node, style, dragHandle, treeData }: {
     const tag = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isTagSelected(tag.tagId);
+    const isWorkspaceRoot = tag.tagId < 0; // Workspace root node has negative ID
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault(); // Prevent tree activation that causes scrolling
+        
+        // Don't allow selection of workspace root node
+        if (isWorkspaceRoot) {
+            // Only allow expand/collapse for workspace root
+            if (hasChildren) {
+                node.toggle();
+            }
+            return;
+        }
         
         // Focus the tree container for keyboard navigation
         const treeContainer = document.querySelector('[data-tag-tree]') as HTMLElement;
@@ -136,21 +176,42 @@ function TagNode({ node, style, dragHandle, treeData }: {
             }
             setLastSelectedTagId(tag.tagId);
         } else {
-            // Regular click: Single selection (like VS Code)
+            // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
             setSelectedTagIds([tag.tagId]);
             setLastSelectedTagId(tag.tagId);
+            
+            // Toggle expand/collapse if node has children
+            if (hasChildren) {
+                node.toggle();
+            }
         }
     };
 
     const handleRightClick = (e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent bubbling to parent
         e.preventDefault(); // Prevent default context menu
+        
+        // Don't show context menu for workspace root
+        if (isWorkspaceRoot) {
+            return;
+        }
+        
         // Open tag-specific context menu with tag data
         showContextMenu(e, 'tag', tag);
     };
     
     return (
         <Box
+            ref={(el) => {
+                // Make entire node draggable (VS Code style - no special cursor)
+                if (dragHandle && typeof dragHandle === 'function' && el) {
+                    try {
+                        dragHandle(el);
+                    } catch (error) {
+                        console.warn('Error setting dragHandle:', error);
+                    }
+                }
+            }}
             style={style}
             onClick={handleMainClick}
             onContextMenu={handleRightClick}
@@ -161,58 +222,20 @@ function TagNode({ node, style, dragHandle, treeData }: {
                 width: '100%',
                 paddingY: '4px',
                 paddingRight: '8px',
-                cursor: 'pointer',
+                cursor: 'pointer', // Always pointer cursor like VS Code
                 borderRadius: '4px',
-                backgroundColor: isSelected ? 'primary.main' : 'transparent',
+                backgroundColor: isSelected ? 'primary.main' : (isWorkspaceRoot ? 'action.hover' : 'transparent'),
                 color: isSelected ? 'primary.contrastText' : 'inherit',
+                fontWeight: isWorkspaceRoot ? 600 : 'inherit',
                 '&:hover': {
-                    backgroundColor: isSelected ? 'primary.dark' : 'action.hover',
+                    backgroundColor: isSelected ? 'primary.dark' : (isWorkspaceRoot ? 'action.selected' : 'action.hover'),
                 },
-                transition: 'all 0.2s',
                 // VS Code-like selection styling
                 ...(isSelected && {
                     boxShadow: 'inset 3px 0 0 currentColor',
                 }),
             }}
         >
-            {/* Drag Handle - Only show if dragHandle is available */}
-            {dragHandle && (
-                <div
-                    ref={(el) => {
-                        // Only handle dragHandle if it exists and is a function
-                        // This prevents the React DnD error by ensuring we only pass DOM elements
-                        try {
-                            if (dragHandle && typeof dragHandle === 'function' && el) {
-                                dragHandle(el);
-                            }
-                        } catch (error) {
-                            console.warn('Error setting dragHandle:', error);
-                            // Safely ignore dragHandle errors to prevent React DnD crashes
-                        }
-                    }}
-                    onClick={(e) => e.stopPropagation()} // Prevent click from bubbling
-                    style={{ 
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginRight: '4px',
-                        cursor: 'grab',
-                    }}
-                    onMouseDown={(e) => {
-                        e.currentTarget.style.cursor = 'grabbing';
-                    }}
-                    onMouseUp={(e) => {
-                        e.currentTarget.style.cursor = 'grab';
-                    }}
-                >
-                    <DragIcon 
-                        fontSize="small" 
-                        sx={{ 
-                            color: isSelected ? 'primary.contrastText' : 'action.disabled',
-                            opacity: isSelected ? 0.7 : 1,
-                        }} 
-                    />
-                </div>
-            )}
 
             {/* Expand/Collapse Button */}
             <IconButton
@@ -236,7 +259,15 @@ function TagNode({ node, style, dragHandle, treeData }: {
 
             {/* Tag Icon */}
             <Box sx={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>
-                {hasChildren ? (
+                {/* Workspace root node */}
+                {tag.tagId < 0 ? (
+                    <WorkspaceIcon 
+                        fontSize="small" 
+                        sx={{ 
+                            color: isSelected ? 'primary.contrastText' : (tag.color || 'primary.main')
+                        }} 
+                    />
+                ) : hasChildren ? (
                     node.isOpen ? 
                         <FolderOpenIcon 
                             fontSize="small" 
@@ -272,6 +303,8 @@ function TagNode({ node, style, dragHandle, treeData }: {
                         sx={{
                             fontWeight: hasChildren ? 600 : 400,
                             color: isSelected ? 'primary.contrastText' : 'text.primary',
+                            textTransform: isWorkspaceRoot ? 'uppercase' : 'none',
+                            letterSpacing: isWorkspaceRoot ? '0.5px' : 'normal',
                         }}
                         noWrap
                     >
@@ -298,6 +331,79 @@ function TagNode({ node, style, dragHandle, treeData }: {
                     )}
                 </Box> */}
             </Box>
+
+            {/* Action Buttons (only for workspace root) */}
+            {isWorkspaceRoot && (
+                <Box 
+                    sx={{ 
+                        display: 'flex', 
+                        gap: '2px',
+                        marginLeft: 'auto',
+                        opacity: 0.7,
+                        '&:hover': {
+                            opacity: 1,
+                        },
+                    }}
+                    onClick={(e) => e.stopPropagation()} // Prevent node selection when clicking buttons
+                >
+                    <Tooltip title="Add Tag">
+                        <IconButton
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onNewFolder?.(); // Unified "Add Tag" action
+                            }}
+                            sx={{
+                                padding: '4px',
+                                color: isSelected ? 'primary.contrastText' : 'inherit',
+                                '&:hover': {
+                                    backgroundColor: isSelected ? 'rgba(255,255,255,0.1)' : 'action.hover',
+                                },
+                            }}
+                        >
+                            <AddIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Refresh">
+                        <IconButton
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onRefresh?.();
+                            }}
+                            sx={{
+                                padding: '4px',
+                                color: isSelected ? 'primary.contrastText' : 'inherit',
+                                '&:hover': {
+                                    backgroundColor: isSelected ? 'rgba(255,255,255,0.1)' : 'action.hover',
+                                },
+                            }}
+                        >
+                            <RefreshIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Collapse All">
+                        <IconButton
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onCollapseAll?.();
+                            }}
+                            sx={{
+                                padding: '4px',
+                                color: isSelected ? 'primary.contrastText' : 'inherit',
+                                '&:hover': {
+                                    backgroundColor: isSelected ? 'rgba(255,255,255,0.1)' : 'action.hover',
+                                },
+                            }}
+                        >
+                            <CollapseAllIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            )}
 
 
         </Box>
@@ -388,31 +494,55 @@ function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; t
 /**
  * Main TagTree component using react-arborist
  */
-export function TagTree({ onTagClick, includeShared = true, workspaceId, userId }: TagTreeProps) {
-    // Conditionally use workspace tree or regular tree based on props
-    const shouldUseWorkspaceTree = workspaceId !== undefined && userId !== undefined;
+export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTreeProps) {
+    // Only use workspace tree API - the old /tree endpoint is deprecated
+    if (!workspaceId) {
+        throw new Error('workspaceId is required. The old /tree endpoint is no longer supported.');
+    }
     
-    const regularTreeQuery = useTagTree(includeShared);
-    const workspaceTreeQuery = useWorkspaceTagTree(
-        workspaceId || 0, 
-        userId || 0
-    );
+    const workspaceTreeQuery = useWorkspaceTagTree(workspaceId);
+    const { data, isLoading, error } = workspaceTreeQuery;
     
-    // Use the appropriate query based on whether workspaceId is provided
-    const { data: tags, isLoading, error } = shouldUseWorkspaceTree 
-        ? workspaceTreeQuery 
-        : regularTreeQuery;
+    // Extract tags from workspace or use directly
+    const tags = useMemo(() => {
+        if (!data) return undefined;
+        
+        // If workspace data, extract tags
+        if ('tags' in data && 'workspaceId' in data) {
+            return data.tags;
+        }
+        
+        // Otherwise it's already Tag[]
+        return data as Tag[];
+    }, [data]);
     
     const { 
         searchText, 
         selectedTagIds, 
         setSelectedTagIds, 
         setLastSelectedTagId,
-        clearSelection 
+        clearSelection,
+        // Use context state for create dialog
+        isCreateDialogOpen,
+        openCreateDialog,
+        closeCreateDialog,
+        parentTagForCreate,
     } = useTagUI();
     const [draggedNode, setDraggedNode] = useState<NodeApi<TreeTag> | null>(null);
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
+    const treeRef = React.useRef<any>(null);
     const manager = useDragDropManager();
+    
+    // Extract workspace info (always in workspace mode now)
+    const workspaceInfo = useMemo(() => {
+        if (data && 'workspaceId' in data) {
+            return {
+                name: data.name,
+                workspaceId: data.workspaceId,
+            };
+        }
+        return null;
+    }, [data]);
 
     // Transform and filter tags based on search text
     const treeData = useMemo(() => {
@@ -442,8 +572,29 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId, userId 
         };
 
         const filteredTags = filterTree(tags);
+        
+        // Always wrap tags under a workspace root node (workspace mode only)
+        if (data && 'workspaceId' in data) {
+            const workspaceData = data;
+            const workspaceRootTag: Tag = {
+                tagId: -workspaceData.workspaceId, // Negative ID to distinguish from real tags
+                name: workspaceData.name,
+                description: workspaceData.description,
+                color: workspaceData.color,
+                createdAt: workspaceData.createdAt,
+                isActive: !workspaceData.isArchived,
+                depth: 0,
+                id: -workspaceData.workspaceId,
+                isArchived: workspaceData.isArchived,
+                children: filteredTags,
+                isExpanded: true,
+            };
+            
+            return transformTagsToTreeData([workspaceRootTag]);
+        }
+        
         return transformTagsToTreeData(filteredTags);
-    }, [tags, searchText]);
+    }, [tags, searchText, data]);
 
     // Get all visible tag IDs for keyboard navigation
     const allVisibleTagIds = useMemo(() => {
@@ -546,6 +697,41 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId, userId 
         // TODO: Invalidate queries to refetch
         // queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
     };
+    
+    // Handle workspace action buttons
+    const handleNewFolder = () => {
+        console.log('📁 Add Tag clicked');
+        
+        // Use currently selected tag as parent (VS Code-like behavior)
+        // If a tag is selected, use it as parent
+        // Otherwise, default to root level (undefined)
+        const parentId = selectedTagIds.length > 0 
+            ? selectedTagIds[0] // Use first selected tag as parent
+            : undefined; // Root level if nothing selected
+            
+        // Find the parent tag object if parentId exists
+        const parentTag = parentId 
+            ? findTagById(tags || [], parentId)
+            : undefined;
+            
+        openCreateDialog(parentTag);
+        
+        console.log('📁 Parent tag for new item:', parentTag?.name || 'root');
+    };
+    
+    const handleRefresh = () => {
+        console.log('🔄 Refresh clicked');
+        // Re-fetch the workspace tree data
+        workspaceTreeQuery.refetch();
+    };
+    
+    const handleCollapseAll = () => {
+        console.log('📂 Collapse All clicked');
+        // Close all nodes in the tree
+        if (treeRef.current) {
+            treeRef.current.closeAll();
+        }
+    };
 
     // Loading state
     if (isLoading) {
@@ -573,8 +759,10 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId, userId 
             data-tag-tree 
             tabIndex={0}
             sx={{ 
-                padding: '16px', 
                 height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '16px',
                 '&:focus': {
                     outline: 'none',
                 },
@@ -589,6 +777,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId, userId 
                 totalCount={allVisibleTagIds.length} 
             /> */}
             <Tree<TreeTag>
+                ref={treeRef}
                 data={treeData}
                 openByDefault={true}
                 width="100%"
@@ -611,11 +800,24 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId, userId 
                                 style={{ height: '100%' }}
                                 dragHandle={dragHandle}
                                 treeData={treeData}
+                                onNewFolder={handleNewFolder}
+                                onRefresh={handleRefresh}
+                                onCollapseAll={handleCollapseAll}
                             />
                         </div>
                     );
                 }}
             </Tree>
+
+            {/* Add Tag Dialog */}
+            {workspaceId && (
+                <AddTagDialog
+                    open={isCreateDialogOpen}
+                    onClose={closeCreateDialog}
+                    workspaceId={workspaceId}
+                    parentTagId={parentTagForCreate?.tagId}
+                />
+            )}
         </Box>
     );
 }
