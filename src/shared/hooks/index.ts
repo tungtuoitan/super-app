@@ -4,3 +4,4 @@
  */
 
 export { useConfirmationPopover } from './useConfirmationPopover';
+export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from './useKeyboardShortcut';

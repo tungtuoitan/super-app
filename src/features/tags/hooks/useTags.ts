@@ -177,3 +177,23 @@ export function useUnarchiveTag() {
         },
     });
 }
+
+/**
+ * Hook to move tag to new parent or position
+ */
+export function useMoveTag() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: ({ tagId, newParentId, newIndex }: { 
+            tagId: number; 
+            newParentId?: number; 
+            newIndex?: number;
+        }) => tagService.moveTag(tagId, newParentId, newIndex),
+        onSuccess: () => {
+            // Invalidate all tag tree queries since hierarchy has changed
+            queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+            queryClient.invalidateQueries({ queryKey: tagKeys.all });
+        },
+    });
+}

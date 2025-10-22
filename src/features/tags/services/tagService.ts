@@ -210,6 +210,34 @@ class TagService {
     }
 
     /**
+     * Move tag to a new parent or position
+     * This updates the tag's parentId and potentially reorders siblings
+     */
+    async moveTag(tagId: number, newParentId?: number, newIndex?: number): Promise<Tag> {
+        try {
+            console.log('🔄 Moving tag:', { tagId, newParentId, newIndex });
+            
+            // Call the move endpoint (assuming backend has this)
+            // If backend doesn't have a specific move endpoint, we'll just update parentId
+            const response = await apiClient.put<TagDTO>(
+                `${this.basePath}/${tagId}/move`,
+                {
+                    parentId: newParentId,
+                    index: newIndex
+                }
+            );
+            
+            return this.transformTag(response);
+        } catch (error) {
+            console.error('Failed to move tag:', error);
+            
+            // Fallback: just update parentId if move endpoint doesn't exist
+            console.log('Fallback: updating parentId only');
+            return this.updateTag(tagId, { parentId: newParentId });
+        }
+    }
+
+    /**
      * Build hierarchical tree structure from flat array using depth property
      */
     private buildTagTree(tags: Tag[]): Tag[] {

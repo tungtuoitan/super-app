@@ -78,6 +78,13 @@ export interface UpdateTagDTO {
     isArchived?: boolean;
 }
 
+// Move tag request
+export interface MoveTagDTO {
+    tagId: number;
+    newParentId?: number; // null or undefined for root level
+    newIndex?: number; // Position in the new parent's children array
+}
+
 // Query parameters
 export interface GetTagsParams {
     page?: number;

@@ -4,7 +4,7 @@
  * Replaces CreateFolderDialog with full API integration
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -30,6 +30,7 @@ import { useTags, useWorkspaceTagTree } from '../hooks/useTags';
 import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../hooks/useWorkspace';
 import type { Tag } from '../types/tag.types';
 import { useSnackbar } from 'notistack';
+import { useKeyboardShortcut } from '@/shared/hooks';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
@@ -147,7 +148,7 @@ export function AddTagDialog({
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmitExisting = async () => {
+    const handleSubmitExisting = useCallback(async () => {
         if (!validateExistingTag() || !selectedTag) {
             return;
         }
@@ -172,9 +173,9 @@ export function AddTagDialog({
             console.error('Failed to add existing tag:', error);
             enqueueSnackbar(error?.message || 'Failed to add tag to workspace', { variant: 'error' });
         }
-    };
+    }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose]);
 
-    const handleSubmitNew = async () => {
+    const handleSubmitNew = useCallback(async () => {
         if (!validateNewTag()) {
             return;
         }
@@ -197,7 +198,7 @@ export function AddTagDialog({
             console.error('Failed to create and add tag:', error);
             enqueueSnackbar(error?.message || 'Failed to create tag', { variant: 'error' });
         }
-    };
+    }, [newTagName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose]);
 
     const handleSubmit = () => {
         if (activeTab === 'existing') {
@@ -212,6 +213,24 @@ export function AddTagDialog({
     };
 
     const isSubmitting = addExistingTag.isPending || createAndAddTag.isPending;
+
+    // ✅ Keyboard Shortcuts - Safe minimal approach
+    // Enter to submit when dialog is open and has valid input
+    useKeyboardShortcut({
+        key: 'Enter',
+        enabled: open && !isSubmitting && (
+            (activeTab === 'existing' && !!selectedTag) ||
+            (activeTab === 'new' && !!newTagName.trim())
+        ),
+        callback: handleSubmit,
+    });
+
+    // Escape to close dialog
+    useKeyboardShortcut({
+        key: 'Escape',
+        enabled: open && !isSubmitting,
+        callback: handleCancel,
+    });
 
     const colorOptions = [
         { value: '#1976D2', label: 'Blue' },
@@ -431,7 +450,7 @@ export function AddTagDialog({
                     onClick={handleCancel}
                     disabled={isSubmitting}
                 >
-                    Cancel
+                    Cancel (Esc)
                 </Button>
                 <Button 
                     onClick={handleSubmit}
@@ -442,8 +461,8 @@ export function AddTagDialog({
                     {isSubmitting 
                         ? 'Adding...' 
                         : activeTab === 'existing' 
-                            ? 'Add Tag' 
-                            : 'Create & Add'
+                            ? 'Add Tag (Enter)' 
+                            : 'Create & Add (Enter)'
                     }
                 </Button>
             </DialogActions>

@@ -27,7 +27,7 @@ import {
     UnfoldLess as CollapseAllIcon
 } from '@mui/icons-material';
 
-import { useWorkspaceTagTree } from '../hooks/useTags';
+import { useWorkspaceTagTree, useMoveTag } from '../hooks/useTags';
 import { useTagUI } from '../store/TagUIContext';
 import { useContextMenu } from '@/shared/contexts';
 import type { Tag } from '../types/tag.types';
@@ -502,6 +502,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
     
     const workspaceTreeQuery = useWorkspaceTagTree(workspaceId);
     const { data, isLoading, error } = workspaceTreeQuery;
+    const moveTagMutation = useMoveTag();
     
     // Extract tags from workspace or use directly
     const tags = useMemo(() => {
@@ -529,6 +530,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
         parentTagForCreate,
     } = useTagUI();
     const [draggedNode, setDraggedNode] = useState<NodeApi<TreeTag> | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);
     const manager = useDragDropManager();
@@ -673,7 +675,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
     }, [selectedTagIds, allVisibleTagIds, setSelectedTagIds, setLastSelectedTagId, clearSelection]);
 
     // Handle drag and drop
-    const handleMove = (args: { dragIds: string[]; parentId: string | null; index: number }) => {
+    const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }) => {
         console.log('🔄 Tree Node Move Event:', {
             draggedTagIds: args.dragIds,
             newParentId: args.parentId || 'root',
@@ -687,15 +689,55 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
 
         console.log(`📦 Moving "${draggedTag?.name || 'Unknown'}" to ${parentTag ? `"${parentTag.name}"` : 'root'} at position ${args.index}`);
 
-        // TODO: Implement API call
-        // await tagService.moveTag({
-        //     tagId: parseInt(args.dragIds[0]),
-        //     newParentId: args.parentId ? parseInt(args.parentId) : null,
-        //     newIndex: args.index
-        // });
-
-        // TODO: Invalidate queries to refetch
-        // queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+        try {
+            // Set dragging state
+            setIsDragging(true);
+            
+            // Get the tagId from the dragged node
+            const tagId = parseInt(args.dragIds[0]);
+            
+            // Workspace root node has negative ID - don't allow moving it
+            if (tagId < 0) {
+                console.warn('⚠️ Cannot move workspace root node');
+                setIsDragging(false);
+                return;
+            }
+            
+            // Get new parent ID (null for root level)
+            const newParentId = args.parentId ? parseInt(args.parentId) : undefined;
+            
+            // Don't allow moving to workspace root
+            if (newParentId && newParentId < 0) {
+                console.warn('⚠️ Cannot move to workspace root');
+                setIsDragging(false);
+                return;
+            }
+            
+            // Don't allow moving to itself
+            if (tagId === newParentId) {
+                console.warn('⚠️ Cannot move tag to itself');
+                setIsDragging(false);
+                return;
+            }
+            
+            // Optimistic update would go here if needed
+            console.log('📤 Calling API to move tag:', { tagId, newParentId, newIndex: args.index });
+            
+            // Call the mutation
+            await moveTagMutation.mutateAsync({
+                tagId,
+                newParentId,
+                newIndex: args.index,
+            });
+            
+            console.log('✅ Tag moved successfully');
+        } catch (error) {
+            console.error('❌ Failed to move tag:', error);
+            // Error will be handled by React Query's onError
+            // Tree will revert to previous state on refetch
+        } finally {
+            setIsDragging(false);
+        }
     };
     
     // Handle workspace action buttons
@@ -763,6 +805,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '16px',
+                position: 'relative', // For loading overlay
                 '&:focus': {
                     outline: 'none',
                 },
@@ -772,6 +815,54 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
                 },
             }}
         >
+            {/* Loading overlay when dragging */}
+            {(isDragging || moveTagMutation.isPending) && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        pointerEvents: 'none',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            backgroundColor: 'background.paper',
+                            padding: '16px 24px',
+                            borderRadius: '8px',
+                            boxShadow: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                width: '20px',
+                                height: '20px',
+                                border: '3px solid',
+                                borderColor: 'primary.main',
+                                borderTopColor: 'transparent',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite',
+                                '@keyframes spin': {
+                                    '0%': { transform: 'rotate(0deg)' },
+                                    '100%': { transform: 'rotate(360deg)' },
+                                },
+                            }}
+                        />
+                        <Typography variant="body2">Moving tag...</Typography>
+                    </Box>
+                </Box>
+            )}
+
             {/* <SelectionInfo 
                 selectedCount={selectedTagIds.length} 
                 totalCount={allVisibleTagIds.length} 
