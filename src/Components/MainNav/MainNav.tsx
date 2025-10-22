@@ -5,8 +5,7 @@ import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { TagsPage } from '../../pages/TagsPage';
 import { FlexibleLayoutDemo } from '../../pages/FlexibleLayoutDemo';
-import { FlexibleLayout } from '../Layout/FlexibleLayout';
-import { SideMenu } from './SideMenu';
+import { VSCodeLayout } from '../Layout/NotesLayout';
 import { BodyWrapper, SideNavRoot } from './SideMenuItem.styles';
 
 /**
@@ -15,17 +14,16 @@ import { BodyWrapper, SideNavRoot } from './SideMenuItem.styles';
  * This component provides the primary navigation structure for the application,
  * including:
  * - Top navigation bar
- * - Collapsible side navigation menu
  * - Main content area with routing
- * - Responsive layout that adjusts based on sidebar expansion state
+ * - VSCode-style layout with integrated sidebar
  * 
- * The component manages the layout between the sidebar and main content area,
- * dynamically adjusting widths based on the navigation expansion state.
+ * The sidebar (Explorer, Tags, Notes) is now integrated into the VSCodeLayout
+ * component, removing the need for a separate side menu.
  * 
  * @returns The main navigation layout component
  */
 function MainNav() {
-    const { bodyWrapperRef, expanded } = useNavigationStore();
+    const { bodyWrapperRef } = useNavigationStore();
 
     return (
         <Box
@@ -34,20 +32,18 @@ function MainNav() {
         >
             <TopNav />
             <SideNavRoot className="side-tabs">
-                <SideMenu />
                 <BodyWrapper 
                     id="bodyWrapper"
                     ref={bodyWrapperRef}
                     sx={{
-                        width: expanded ? 'calc(100% - 200px)' : 'calc(100% - 48px)',
+                        width: '100%',
                         height: 'calc(100vh - 64px)', // Account for TopNav height
                     }}
                 >
                     <Routes>
-                        <Route path="/" element={<FlexibleLayout />} />
+                        <Route path="/" element={<VSCodeLayout />} />
                         <Route path="/tags" Component={TagsPage} />
-                        <Route path="/notes" element={<FlexibleLayout />} />
-                        <Route path="/demo" element={<FlexibleLayoutDemo />} />
+                        <Route path="/notes" element={<VSCodeLayout />} />
                     </Routes>
                 </BodyWrapper>
             </SideNavRoot>

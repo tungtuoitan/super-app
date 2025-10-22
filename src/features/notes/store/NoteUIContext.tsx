@@ -24,6 +24,7 @@ interface NoteUIContextValue {
     updateSelectedNote: (updatedNote: Partial<Note>) => void;
     markAsSaved: () => void;
     resetChanges: () => void;
+    setSelectedNote: (note: Note | null) => void; // For VSCode layout panel
 
     // Search UI state
     searchText: string;
@@ -208,6 +209,7 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
         updateSelectedNote,
         markAsSaved,
         resetChanges,
+        setSelectedNote, // Expose for VSCode layout panel
 
         // Search UI state
         searchText,

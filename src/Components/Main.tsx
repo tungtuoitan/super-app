@@ -9,17 +9,49 @@ import { NoteUIProvider } from '@/features/notes';
 import { TagUIProvider } from '@/features/tags/store/TagUIContext';
 import { ContextMenuProvider, useContextMenu } from '@/shared/contexts';
 import { useTagUI } from '@/features/tags/store/TagUIContext';
+import { useRemoveWorkspaceItem } from '@/features/tags/hooks/useTags';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
+import { useCallback } from 'react';
+import { Tag } from '@/features/tags/types/tag.types';
+
+// HARDCODED workspace ID for development
+// TODO: Get from context/route when workspace selection is implemented
+const CURRENT_WORKSPACE_ID = 1;
 
 /**
- * Context Menu Wrapper that provides tag creation callback
+ * Context Menu Wrapper that provides tag creation and deletion callbacks
  */
 function ContextMenuWrapper() {
     const { openCreateDialog } = useTagUI();
-    
+    const removeWorkspaceItemMutation = useRemoveWorkspaceItem();
+
+    const handleDeleteTag = useCallback((tag: Tag) => {
+        console.log('🗑️ Removing tag from workspace:', tag.tagId, tag.name, 'itemId:', tag.itemId);
+
+        // Validate itemId exists
+        if (!tag.itemId) {
+            console.error('❌ Cannot remove tag: missing itemId');
+            alert('Cannot remove tag: missing workspace item information');
+            return;
+        }
+
+        removeWorkspaceItemMutation.mutate({
+            workspaceId: CURRENT_WORKSPACE_ID,
+            itemId: tag.itemId
+        }, {
+            onSuccess: () => {
+                console.log('✅ Tag removed from workspace successfully:', tag.name);
+            },
+            onError: (error) => {
+                console.error('❌ Failed to remove tag from workspace:', error);
+                alert(`Failed to remove tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            },
+        });
+    }, [removeWorkspaceItemMutation]);
+
     return (
-        <ContextMenuProvider onCreateTag={openCreateDialog}>
+        <ContextMenuProvider onCreateTag={openCreateDialog} onDeleteTag={handleDeleteTag}>
             <AppContent />
         </ContextMenuProvider>
     );

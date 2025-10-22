@@ -10,7 +10,7 @@ import { Box, Typography } from '@mui/material'
 
 // Import real components
 import { NoteGridPanel } from './NoteGridPanel';
-import { TagTree } from '@/features/tags/components/TagTree';
+import { WorkspaceTree } from '@/features/tags/components/WorkspaceTree';
 import { NoteDetailPanel } from './NoteDetailPanelReal';
 
 // Import CSS cho mosaic
@@ -30,7 +30,7 @@ const NotesComponent = () => <NoteGridPanel />
 const TagsComponent = () => (
   <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
     {/* Using workspace tag tree API with workspaceId=1 for testing */}
-    <TagTree workspaceId={1} includeShared={true} />
+    <WorkspaceTree workspaceId={1} includeShared={true} />
   </Box>
 )
 

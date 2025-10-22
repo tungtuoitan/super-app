@@ -12,7 +12,9 @@ import type {
     GetTagsParams,
     TagTreeNode,
     WorkspaceWithTagTreeDTO,
-    WorkspaceWithTagTree
+    WorkspaceWithTagTree,
+    WorkspaceWithTreeDTO,
+    WorkspaceTreeItemDTO
 } from '../types/tag.types'
 import { tagsDumpData } from '../data/tagsDumpData'
 
@@ -187,7 +189,7 @@ class TagService {
     }
 
     /**
-     * Delete tag
+     * Delete tag (removes tag from tags table)
      */
     async deleteTag(id: number): Promise<void> {
         try {
@@ -195,6 +197,21 @@ class TagService {
         } catch (error) {
             console.error('Failed to delete tag:', error)
             throw error
+        }
+    }
+
+    /**
+     * Remove item from workspace (removes from workspace_items table only)
+     * Does NOT delete the actual tag/note from the database
+     */
+    async removeWorkspaceItem(workspaceId: number, itemId: number): Promise<void> {
+        try {
+            console.log(`🗑️ [tagService] Removing workspace item ${itemId} from workspace ${workspaceId}`);
+            await apiClient.delete(`/api/workspace/${workspaceId}/items/${itemId}`);
+            console.log(`✅ [tagService] Successfully removed workspace item ${itemId}`);
+        } catch (error) {
+            console.error('Failed to remove workspace item:', error);
+            throw error;
         }
     }
 
@@ -216,7 +233,7 @@ class TagService {
     async moveTag(tagId: number, newParentId?: number, newIndex?: number): Promise<Tag> {
         try {
             console.log('🔄 Moving tag:', { tagId, newParentId, newIndex });
-            
+
             // Call the move endpoint (assuming backend has this)
             // If backend doesn't have a specific move endpoint, we'll just update parentId
             const response = await apiClient.put<TagDTO>(
@@ -226,14 +243,38 @@ class TagService {
                     index: newIndex
                 }
             );
-            
+
             return this.transformTag(response);
         } catch (error) {
             console.error('Failed to move tag:', error);
-            
+
             // Fallback: just update parentId if move endpoint doesn't exist
             console.log('Fallback: updating parentId only');
             return this.updateTag(tagId, { parentId: newParentId });
+        }
+    }
+
+    /**
+     * Batch move multiple tags to a new parent/position
+     * Much more efficient than moving tags one by one
+     */
+    async batchMoveTag(tagIds: number[], newParentId?: number, startIndex: number = 0): Promise<void> {
+        try {
+            console.log('🔄 Batch moving tags:', { tagIds, newParentId, startIndex });
+
+            await apiClient.post(
+                `${this.basePath}/batch-move`,
+                {
+                    tagIds,
+                    newParentId,
+                    startIndex
+                }
+            );
+
+            console.log('✅ Batch move successful');
+        } catch (error) {
+            console.error('Failed to batch move tags:', error);
+            throw error;
         }
     }
 
@@ -285,6 +326,82 @@ class TagService {
     }
 
     /**
+     * Build hierarchical tree from flat tags using parentId and childId relationship
+     * Relationship: item.parentId === parent.childId
+     */
+    private buildTreeFromParentChild(flatTags: Tag[], originalItems: any[]): Tag[] {
+        if (!flatTags || flatTags.length === 0) return [];
+
+        console.log('🌲 [buildTreeFromParentChild] Building tree from:', {
+            flatTagsCount: flatTags.length,
+            originalItemsCount: originalItems.length
+        });
+
+        // Create a map of childId -> tag for quick lookup
+        const tagByChildId = new Map<number, Tag>();
+        const tagByItemId = new Map<number, Tag>();
+        
+        flatTags.forEach(tag => {
+            tagByChildId.set(tag.tagId, tag);
+            if (tag.itemId) {
+                tagByItemId.set(tag.itemId, tag);
+            }
+            // Initialize children array
+            tag.children = [];
+        });
+
+        // Create a map of original items for parent lookup
+        const itemByChildId = new Map<number, any>();
+        originalItems.forEach(item => {
+            itemByChildId.set(item.childId, item);
+        });
+
+        const rootTags: Tag[] = [];
+
+        // Build parent-child relationships
+        flatTags.forEach(tag => {
+            const originalItem = itemByChildId.get(tag.tagId);
+            
+            if (!originalItem) {
+                console.warn(`⚠️ No original item found for tag ${tag.tagId}`);
+                rootTags.push(tag);
+                return;
+            }
+
+            console.log(`🔍 Processing tag "${tag.name}":`, {
+                tagId: tag.tagId,
+                childId: originalItem.childId,
+                parentId: originalItem.parentId
+            });
+
+            // If parentId is null, this is a root tag
+            if (originalItem.parentId === null || originalItem.parentId === undefined) {
+                console.log(`✅ "${tag.name}" is ROOT (parentId: null)`);
+                rootTags.push(tag);
+            } else {
+                // Find parent tag by matching: parent.childId === item.parentId
+                const parentTag = tagByChildId.get(originalItem.parentId);
+                
+                if (parentTag) {
+                    console.log(`✅ "${tag.name}" is CHILD of "${parentTag.name}" (parentId: ${originalItem.parentId})`);
+                    parentTag.children = parentTag.children || [];
+                    parentTag.children.push(tag);
+                } else {
+                    console.warn(`⚠️ Parent not found for tag "${tag.name}" (parentId: ${originalItem.parentId}), treating as root`);
+                    rootTags.push(tag);
+                }
+            }
+        });
+
+        console.log('🌲 [buildTreeFromParentChild] Tree built:', {
+            rootCount: rootTags.length,
+            roots: rootTags.map(t => ({ name: t.name, childrenCount: t.children?.length || 0 }))
+        });
+
+        return rootTags;
+    }
+
+    /**
      * Get tags at a specific depth level
      */
     async getTagsByDepth(depth: number): Promise<Tag[]> {
@@ -302,16 +419,41 @@ class TagService {
     /**
      * Get workspace tag tree with hierarchy
      * Returns workspace as root node with tags as children
+     * NEW: Uses WorkspaceWithTreeDTO (polymorphic items: tags, notes, files)
      */
     async getWorkspaceTagTree(workspaceId: number): Promise<WorkspaceWithTagTree> {
         try {
-            console.log(`📦 Fetching workspace tag tree for workspaceId: ${workspaceId}`);
+            console.log(`📦 [tagService] Fetching workspace tree for workspaceId: ${workspaceId}`);
+            console.log(`📦 [tagService] API URL: ${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/workspace/${workspaceId}/tree`);
             
-            const response = await apiClient.get<WorkspaceWithTagTreeDTO>(
-                `${this.basePath}/workspace/${workspaceId}/tree`
+            const response = await apiClient.get<WorkspaceWithTreeDTO>(
+                `/api/workspace/${workspaceId}/tree`
             );
             
-            console.log('✅ Workspace tag tree response:', response);
+            console.log('✅ [tagService] Workspace tree response:', response);
+            console.log('✅ [tagService] Response items count:', response.items?.length || 0);
+            
+            // Filter only tags from polymorphic items (case-insensitive)
+            const tagItems = response.items.filter(item =>
+                item.itemType?.toLowerCase() === 'tag'
+            );
+
+            console.log('✅ [tagService] Filtered tag items:', tagItems.length);
+            console.log('✅ [tagService] First tag item:', tagItems[0]);
+
+            // Transform workspace tree items to tags (flat array first)
+            const flatTags = tagItems.map((item: WorkspaceTreeItemDTO) =>
+                this.transformWorkspaceTreeItemToTag(item)
+            );
+
+            console.log('✅ [tagService] Flat tags:', flatTags.length);
+            console.log('✅ [tagService] First flat tag:', flatTags[0]);
+
+            // Build hierarchical tree structure based on parentId and childId
+            const tags = this.buildTreeFromParentChild(flatTags, tagItems);
+
+            console.log('✅ [tagService] Hierarchical tags:', tags.length);
+            console.log('✅ [tagService] First hierarchical tag:', tags[0]);
             
             // Transform the response
             return {
@@ -332,12 +474,46 @@ class TagService {
                 settings: response.settings,
                 createdAt: new Date(response.createdAt),
                 updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined,
-                tags: response.tags.map((dto: TagTreeResponseDTO) => this.transformTagTreeResponse(dto))
+                tags: tags
             };
         } catch (error) {
-            console.error('Failed to fetch workspace tag tree:', error);
+            console.error('Failed to fetch workspace tree:', error);
             throw error;
         }
+    }
+
+    /**
+     * Transform WorkspaceTreeItemDTO to Tag (flat, without children)
+     * Children will be built separately using buildTreeFromParentChild
+     */
+    private transformWorkspaceTreeItemToTag(item: any): Tag {
+        // WorkspaceTreeItemDTO structure from backend:
+        // - id / itemId: workspace_items.item_id (PK for deletion)
+        // - childId: actual tag_id/note_id (FK to tags/notes table)
+        const workspaceItemId = item.id || item.itemId; // workspace_items.item_id
+        const actualTagId = item.childId; // tags.tag_id
+
+        console.log('🔍 [transformWorkspaceTreeItemToTag]', {
+            name: item.name,
+            workspaceItemId,
+            tagId: actualTagId,
+            parentId: item.parentId
+        });
+
+        return {
+            tagId: actualTagId,
+            id: actualTagId,
+            itemId: workspaceItemId, // Store workspace_items.item_id for deletion
+            name: item.name,
+            description: item.notes,
+            color: item.color,
+            createdAt: new Date(item.createdAt || new Date()),
+            isActive: true,
+            depth: item.depth || 0,
+            children: [], // Will be populated by buildTreeFromParentChild
+            isExpanded: false,
+            isArchived: false
+        };
     }
 }
 

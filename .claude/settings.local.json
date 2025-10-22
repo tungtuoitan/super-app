@@ -19,7 +19,15 @@
       "WebFetch(domain:www.npmjs.com)",
       "Bash(npm info:*)",
       "Bash(npm view:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Read(//c/Users/Admin/source/super-app/SuperApp-backend/SuperAppAPI/Controllers/**)",
+      "Read(//c/Users/Admin/source/super-app/SuperApp-backend/**)",
+      "Bash(dir:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:blog.logrocket.com)",
+      "WebFetch(domain:react-arborist.netlify.app)",
+      "WebFetch(domain:codesandbox.io)",
+      "Bash(dotnet build:*)"
     ],
     "deny": [],
     "ask": []

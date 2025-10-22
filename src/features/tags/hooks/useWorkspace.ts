@@ -103,13 +103,15 @@ export function useCreateAndAddTagToWorkspace() {
         ),
         
         onSuccess: (_, variables) => {
+            // Invalidate workspace tree - primary update
             queryClient.invalidateQueries({ 
                 queryKey: tagKeys.workspaceTree(variables.workspaceId) 
             });
             
-            // Invalidate all tags list since a new tag was created
+            // Invalidate tag lists only (not all tag queries)
+            // This updates the tag dropdown without causing double fetch of workspace tree
             queryClient.invalidateQueries({ 
-                queryKey: tagKeys.all 
+                queryKey: tagKeys.lists() 
             });
         },
     });

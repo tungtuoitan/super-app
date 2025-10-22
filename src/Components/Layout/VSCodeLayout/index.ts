@@ -1,0 +1,5 @@
+export { ActivityBar, type ActivityBarView } from './ActivityBar'
+export { SideBar } from './SideBar'
+export { EditorArea } from './EditorArea'
+export { Panel } from './Panel'
+export { StatusBar } from './StatusBar'

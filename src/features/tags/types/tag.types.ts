@@ -47,6 +47,7 @@ export interface Tag {
 
     // Frontend-only properties for tree UI and backward compatibility
     id?: number; // Alias for tagId for some components
+    itemId?: number; // WorkspaceItems.item_id (when loaded from workspace tree)
     children?: Tag[]; // Child tags for tree structure (built from depth)
     isExpanded?: boolean; // For tree UI state
     isArchived?: boolean; // Computed from isActive (!isActive)
@@ -105,7 +106,50 @@ export interface TagTreeNode extends Tag {
     isLoading?: boolean;
 }
 
-// Workspace with Tag Tree Response (from backend WorkspaceWithTagTreeResponse)
+// Workspace Tree Item Response (from backend WorkspaceTreeItemResponse)
+// Polymorphic - can be Tag, Note, or File
+export interface WorkspaceTreeItemDTO {
+    id: number; // workspace_items.item_id (for deletion)
+    itemId: number; // workspace_items.item_id (alias for id)
+    childId: number; // Actual tag_id/note_id/file_id
+    itemType: 'Tag' | 'Note' | 'File';
+    name: string;
+    parentId?: number; // parent_tag_id (null for root items)
+    label?: string;
+    notes?: string;
+    color?: string;
+    icon?: string;
+    sortOrder?: number;
+    relationshipType?: string;
+    children: WorkspaceTreeItemDTO[]; // Hierarchical children
+}
+
+// Workspace with Tree Response (from backend WorkspaceWithTreeResponse)
+// NEW: Replaces WorkspaceWithTagTreeResponse
+export interface WorkspaceWithTreeDTO {
+    workspaceId: number;
+    userId: number;
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    type?: string;
+    maxDepth?: number;
+    isDefault: boolean;
+    isPublic: boolean;
+    isTemplate: boolean;
+    isArchived: boolean;
+    tagCount: number;
+    noteCount: number;
+    fileCount: number;
+    memberCount: number;
+    settings?: string;
+    createdAt: string;
+    updatedAt?: string;
+    items: WorkspaceTreeItemDTO[]; // Polymorphic tree items (tags, notes, files)
+}
+
+// DEPRECATED: Old workspace with tag tree (keeping for backward compatibility)
 export interface WorkspaceWithTagTreeDTO {
     workspaceId: number;
     userId: number;

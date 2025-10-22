@@ -183,16 +183,56 @@ export function useUnarchiveTag() {
  */
 export function useMoveTag() {
     const queryClient = useQueryClient();
-    
+
     return useMutation({
-        mutationFn: ({ tagId, newParentId, newIndex }: { 
-            tagId: number; 
-            newParentId?: number; 
+        mutationFn: ({ tagId, newParentId, newIndex }: {
+            tagId: number;
+            newParentId?: number;
             newIndex?: number;
         }) => tagService.moveTag(tagId, newParentId, newIndex),
         onSuccess: () => {
             // Invalidate all tag tree queries since hierarchy has changed
             queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+            queryClient.invalidateQueries({ queryKey: tagKeys.all });
+        },
+    });
+}
+
+/**
+ * Hook to batch move multiple tags to new parent or position
+ * Much more efficient than moving tags one by one
+ */
+export function useBatchMoveTag() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ tagIds, newParentId, startIndex }: {
+            tagIds: number[];
+            newParentId?: number;
+            startIndex?: number;
+        }) => tagService.batchMoveTag(tagIds, newParentId, startIndex),
+        onSuccess: () => {
+            // Invalidate all tag tree queries since hierarchy has changed
+            queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
+            queryClient.invalidateQueries({ queryKey: tagKeys.all });
+        },
+    });
+}
+
+/**
+ * Hook to remove item from workspace (removes workspace_items relationship only)
+ * Does NOT delete the actual tag from tags table
+ */
+export function useRemoveWorkspaceItem() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ workspaceId, itemId }: {
+            workspaceId: number;
+            itemId: number;
+        }) => tagService.removeWorkspaceItem(workspaceId, itemId),
+        onSuccess: () => {
+            // Invalidate workspace tree queries
             queryClient.invalidateQueries({ queryKey: tagKeys.all });
         },
     });

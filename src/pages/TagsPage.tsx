@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
-import { TagTree } from '../features/tags/components/TagTree';
+import { WorkspaceTree } from '../features/tags/components/WorkspaceTree';
 import { TagAdd } from '../features/tags/components/toolbars/items/TagAdd';
 import { TagSearch } from '../features/tags/components/toolbars/items/TagSearch';
 import { TagFilter } from '../features/tags/components/toolbars/items/TagFilter';

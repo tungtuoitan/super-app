@@ -1,7 +1,7 @@
 // Tags Feature Public Exports
 
 // Components
-export { TagTree } from './components/TagTree';
+export { WorkspaceTree } from './components/WorkspaceTree';
 export { TagCreateDialog } from './components/TagCreateDialog';
 export { AddTagDialog } from './components/AddTagDialog';
 

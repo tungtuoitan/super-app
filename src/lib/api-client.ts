@@ -47,6 +47,17 @@ class ApiClient {
                 return response
             },
             (error: AxiosError) => {
+                // Log error in development
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('❌ API Error:', {
+                        url: error.config?.url,
+                        method: error.config?.method,
+                        status: error.response?.status,
+                        message: error.message,
+                        response: error.response?.data
+                    })
+                }
+
                 // Handle common errors
                 if (error.response?.status === 401) {
                     // Unauthorized - clear token and redirect
@@ -64,6 +75,14 @@ class ApiClient {
                 if (error.response?.status && error.response?.status >= 500) {
                     // Server error
                     console.error('Server error:', error.response.status)
+                }
+
+                // Check for CORS/Network errors
+                if (!error.response) {
+                    console.error('🌐 Network Error - Backend may not be running:', {
+                        message: error.message,
+                        code: error.code
+                    })
                 }
 
                 return Promise.reject(error)

@@ -14,11 +14,15 @@ import { useNotes, useNoteUI, type Note } from '../../features/notes';
 /**
  * NoteGridPanel - A flexible layout panel for displaying notes in a data grid
  */
-export function NoteGridPanel() {
+export function NoteGridPanel({ 
+    onNoteClick 
+}: { 
+    onNoteClick?: (note: Note) => void 
+} = {}) {
     // Get data from React Query
     const { data: notes, isLoading, error } = useNotes();
     
-    // Get UI state for interactions
+    // Get UI state for interactions (fallback)
     const { openDialog } = useNoteUI();
 
     // Define columns for the data grid
@@ -77,7 +81,12 @@ export function NoteGridPanel() {
 
     // Handle row click
     const handleRowClick = (params: GridRowParams<Note>) => {
-        openDialog(params.row);
+        // Use custom handler if provided, otherwise open dialog
+        if (onNoteClick) {
+            onNoteClick(params.row);
+        } else {
+            openDialog(params.row);
+        }
     };
 
     // Loading state

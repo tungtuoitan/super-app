@@ -1,16 +1,15 @@
 /**
- * TagTree Component - Hierarchical tree view of tags using react-arborist
+ * WorkspaceTree Component - Hierarchical tree view of tags using react-arborist
  * Similar to NoteGrid but displays tags in a tree structure with advanced tree functionality
  */
 
 import React, { useMemo, useState } from 'react';
 import { Tree, NodeApi } from 'react-arborist';
 import { useDragDropManager } from 'react-dnd';
-import { 
-    Box, 
-    Typography, 
-    Skeleton, 
-    Chip,
+import {
+    Box,
+    Typography,
+    Skeleton,
     IconButton,
     Tooltip,
     Alert
@@ -27,13 +26,13 @@ import {
     UnfoldLess as CollapseAllIcon
 } from '@mui/icons-material';
 
-import { useWorkspaceTagTree, useMoveTag } from '../hooks/useTags';
+import { useWorkspaceTagTree, useBatchMoveTag } from '../hooks/useTags';
 import { useTagUI } from '../store/TagUIContext';
 import { useContextMenu } from '@/shared/contexts';
 import type { Tag } from '../types/tag.types';
 import { AddTagDialog } from './AddTagDialog';
 
-interface TagTreeProps {
+interface WorkspaceTreeProps {
     onTagClick?: (tag: Tag) => void;
     includeShared?: boolean; // DEPRECATED: No longer used, kept for backward compatibility
     workspaceId: number; // REQUIRED: Workspace ID for workspace-specific tree
@@ -64,6 +63,32 @@ function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
 
     traverse(treeData);
     return result;
+}
+
+/**
+ * Helper function to check if targetId is a descendant of parentId
+ * Used to prevent circular dependencies when moving tags
+ */
+function isDescendant(targetId: number, potentialParentId: number, treeData: TreeTag[]): boolean {
+    // Find the potential parent node
+    const parentNode = getAllTagsFlattened(treeData).find(t => t.data.tagId === potentialParentId);
+
+    if (!parentNode) return false;
+
+    // Recursively check if targetId exists in the subtree of parentNode
+    function checkSubtree(node: TreeTag): boolean {
+        if (node.data.tagId === targetId) {
+            return true; // Found targetId in descendants
+        }
+
+        if (node.children && node.children.length > 0) {
+            return node.children.some(child => checkSubtree(child));
+        }
+
+        return false;
+    }
+
+    return checkSubtree(parentNode);
 }
 
 /**
@@ -121,19 +146,25 @@ function TagNode({
     onRefresh?: () => void;
     onCollapseAll?: () => void;
 }) {
-    const { 
-        selectedTagIds, 
-        setSelectedTagIds, 
-        lastSelectedTagId, 
+    const {
+        selectedTagIds,
+        setSelectedTagIds,
+        lastSelectedTagId,
         setLastSelectedTagId,
-        isTagSelected 
+        isTagSelected
     } = useTagUI();
     const { showContextMenu } = useContextMenu();
-    
+
     const tag = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isTagSelected(tag.tagId);
     const isWorkspaceRoot = tag.tagId < 0; // Workspace root node has negative ID
+
+    // Check if this node is being dragged
+    const isDragging = node.state.isDragging;
+    
+    // Check if this node is a valid drop target (being dragged over)
+    const isDropTarget = node.state.willReceiveDrop;
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -149,15 +180,19 @@ function TagNode({
         }
         
         // Focus the tree container for keyboard navigation
-        const treeContainer = document.querySelector('[data-tag-tree]') as HTMLElement;
+        const treeContainer = document.querySelector('[data-workspace-tree]') as HTMLElement;
         treeContainer?.focus();
         
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
                 setSelectedTagIds(prev => prev.filter(id => id !== tag.tagId));
+                // Sync with react-arborist
+                node.deselect();
             } else {
                 setSelectedTagIds(prev => [...prev, tag.tagId]);
+                // Sync with react-arborist (multi-select mode)
+                node.selectMulti();
             }
             setLastSelectedTagId(tag.tagId);
         } else if (e.shiftKey && lastSelectedTagId) {
@@ -165,21 +200,26 @@ function TagNode({
             const allVisibleTags = getAllVisibleTagIds(treeData);
             const lastIndex = allVisibleTags.indexOf(lastSelectedTagId);
             const currentIndex = allVisibleTags.indexOf(tag.tagId);
-            
+
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
                 const endIndex = Math.max(lastIndex, currentIndex);
                 const rangeSelection = allVisibleTags.slice(startIndex, endIndex + 1);
                 setSelectedTagIds(rangeSelection);
+                // Sync with react-arborist (select range ending at this node)
+                node.selectMulti();
             } else {
                 setSelectedTagIds([tag.tagId]);
+                node.select();
             }
             setLastSelectedTagId(tag.tagId);
         } else {
             // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
             setSelectedTagIds([tag.tagId]);
             setLastSelectedTagId(tag.tagId);
-            
+            // Sync with react-arborist (single select - clears others)
+            node.select();
+
             // Toggle expand/collapse if node has children
             if (hasChildren) {
                 node.toggle();
@@ -224,15 +264,32 @@ function TagNode({
                 paddingRight: '8px',
                 cursor: 'pointer', // Always pointer cursor like VS Code
                 borderRadius: '4px',
-                backgroundColor: isSelected ? 'primary.main' : (isWorkspaceRoot ? 'action.hover' : 'transparent'),
-                color: isSelected ? 'primary.contrastText' : 'inherit',
+                // Dragging state: Semi-transparent for selected items being dragged
+                opacity: isDragging ? 0.4 : 1,
+                transition: 'opacity 0.2s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
+                // Selected: Slightly lighter than hover
+                backgroundColor: isSelected ? 'rgba(90, 93, 94, 0.45)' : (isWorkspaceRoot ? 'transparent' : 'transparent'),
+                color: isSelected ? '#ffffff' : 'inherit',
                 fontWeight: isWorkspaceRoot ? 600 : 'inherit',
+                // Hover: Base hover state
                 '&:hover': {
-                    backgroundColor: isSelected ? 'primary.dark' : (isWorkspaceRoot ? 'action.selected' : 'action.hover'),
+                    backgroundColor: isSelected ? 'rgba(90, 93, 94, 0.45)' : (isWorkspaceRoot ? 'rgba(90, 93, 94, 0.31)' : 'rgba(90, 93, 94, 0.31)'),
                 },
-                // VS Code-like selection styling
+                // VS Code-like selection styling with subtle border
                 ...(isSelected && {
-                    boxShadow: 'inset 3px 0 0 currentColor',
+                    border: '1px solid rgba(255, 255, 255, 0.12)', // Subtle light border
+                    boxShadow: 'inset 3px 0 0 #007acc',
+                }),
+                // Dragging indicator - blue highlight for all selected items
+                ...(isDragging && isSelected && {
+                    backgroundColor: 'rgba(0, 122, 204, 0.3)',
+                    border: '1px solid rgba(0, 122, 204, 0.6)',
+                }),
+                // Drop target indicator - hover-like highlight (same as hover state)
+                ...(isDropTarget && {
+                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
+                    border: '1px solid rgba(0, 122, 204, 0.5)',
+                    boxShadow: 'inset 0 0 0 1px rgba(0, 122, 204, 0.3)',
                 }),
             }}
         >
@@ -249,7 +306,7 @@ function TagNode({
                     marginRight: '4px',
                     padding: '2px',
                     visibility: hasChildren ? 'visible' : 'hidden',
-                    color: isSelected ? 'primary.contrastText' : 'inherit',
+                    color: '#cccccc', // Keep icon color consistent
                 }}
             >
                 {hasChildren ? (
@@ -261,27 +318,28 @@ function TagNode({
             <Box sx={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>
                 {/* Workspace root node */}
                 {tag.tagId < 0 ? (
-                    <WorkspaceIcon 
+        
+        <WorkspaceIcon 
                         fontSize="small" 
                         sx={{ 
-                            color: isSelected ? 'primary.contrastText' : (tag.color || 'primary.main')
+                            color: tag.color || '#75beff' // Keep original color
                         }} 
                     />
                 ) : hasChildren ? (
                     node.isOpen ? 
                         <FolderOpenIcon 
                             fontSize="small" 
-                            sx={{ color: isSelected ? 'primary.contrastText' : 'inherit' }}
+                            sx={{ color: '#dcb67a' }} // Keep folder color
                         /> : 
                         <FolderIcon 
                             fontSize="small" 
-                            sx={{ color: isSelected ? 'primary.contrastText' : 'inherit' }}
+                            sx={{ color: '#dcb67a' }} // Keep folder color
                         />
                 ) : (
                     <TagIcon 
                         fontSize="small" 
                         sx={{ 
-                            color: isSelected ? 'primary.contrastText' : (tag.color || 'action.active')
+                            color: tag.color || '#75beff' // Keep original tag color
                         }} 
                     />
                 )}
@@ -302,7 +360,7 @@ function TagNode({
                         variant="body2"
                         sx={{
                             fontWeight: hasChildren ? 600 : 400,
-                            color: isSelected ? 'primary.contrastText' : 'text.primary',
+                            color: '#cccccc', // Keep text color consistent
                             textTransform: isWorkspaceRoot ? 'uppercase' : 'none',
                             letterSpacing: isWorkspaceRoot ? '0.5px' : 'normal',
                         }}
@@ -355,9 +413,9 @@ function TagNode({
                             }}
                             sx={{
                                 padding: '4px',
-                                color: isSelected ? 'primary.contrastText' : 'inherit',
+                                color: '#cccccc', // Keep icon color consistent
                                 '&:hover': {
-                                    backgroundColor: isSelected ? 'rgba(255,255,255,0.1)' : 'action.hover',
+                                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
                                 },
                             }}
                         >
@@ -374,9 +432,9 @@ function TagNode({
                             }}
                             sx={{
                                 padding: '4px',
-                                color: isSelected ? 'primary.contrastText' : 'inherit',
+                                color: '#cccccc', // Keep icon color consistent
                                 '&:hover': {
-                                    backgroundColor: isSelected ? 'rgba(255,255,255,0.1)' : 'action.hover',
+                                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
                                 },
                             }}
                         >
@@ -393,9 +451,9 @@ function TagNode({
                             }}
                             sx={{
                                 padding: '4px',
-                                color: isSelected ? 'primary.contrastText' : 'inherit',
+                                color: '#cccccc', // Keep icon color consistent
                                 '&:hover': {
-                                    backgroundColor: isSelected ? 'rgba(255,255,255,0.1)' : 'action.hover',
+                                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
                                 },
                             }}
                         >
@@ -411,9 +469,9 @@ function TagNode({
 }
 
 /**
- * Loading skeleton for TagTree
+ * Loading skeleton for WorkspaceTree
  */
-function TagTreeSkeleton() {
+function WorkspaceTreeSkeleton() {
     return (
         <Box sx={{ padding: '16px' }}>
             {Array.from({ length: 5 }).map((_, i) => (
@@ -427,9 +485,9 @@ function TagTreeSkeleton() {
 }
 
 /**
- * Empty state for TagTree
+ * Empty state for WorkspaceTree
  */
-function TagTreeEmpty() {
+function WorkspaceTreeEmpty() {
     return (
         <Box
             sx={{
@@ -454,13 +512,15 @@ function TagTreeEmpty() {
 
 /**
  * Transform tag hierarchy to react-arborist tree data
+ * NOTE: All nodes must have children array (even if empty) to allow drop into them
  */
 function transformTagsToTreeData(tags: Tag[]): TreeTag[] {
     return tags.map(tag => ({
         id: tag.tagId.toString(),
         name: tag.name,
         data: tag,
-        children: tag.children && tag.children.length > 0 ? transformTagsToTreeData(tag.children) : undefined,
+        // Always provide children array (empty if no children) to enable drop into nodes
+        children: tag.children && tag.children.length > 0 ? transformTagsToTreeData(tag.children) : [],
     }));
 }
 
@@ -469,9 +529,9 @@ function transformTagsToTreeData(tags: Tag[]): TreeTag[] {
  */
 function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; totalCount: number }) {
     if (selectedCount === 0) return null;
-    
+
     return (
-        <Box sx={{ 
+        <Box sx={{
             padding: '8px 16px',
             backgroundColor: 'primary.light',
             color: 'primary.contrastText',
@@ -492,9 +552,95 @@ function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; t
 }
 
 /**
- * Main TagTree component using react-arborist
+ * Custom Drag Preview Component (VS Code style)
+ * Shows tag name when dragging 1 item, shows count when dragging multiple items
  */
-export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTreeProps) {
+function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }: {
+    offset: { x: number; y: number } | null;
+    mouse: { x: number; y: number } | null;
+    id: string | null;
+    dragIds: string[];
+    isDragging: boolean;
+    treeData: TreeTag[];
+}) {
+    if (!isDragging || !offset) return null;
+
+    // Count of items being dragged
+    const itemCount = dragIds?.length || 0;
+    
+    // Determine display text based on count
+    const getDisplayText = (): string => {
+        // Multiple items: show count only
+        if (itemCount > 1) {
+            return `${itemCount}`;
+        }
+        
+        // Single item: show tag name
+        if (itemCount === 1 && id) {
+            const allTags = getAllTagsFlattened(treeData);
+            const tag = allTags.find(t => t.id === id);
+            return tag?.name || 'Moving...';
+        }
+        
+        return 'Moving...';
+    };
+
+    const displayText = getDisplayText();
+
+    return (
+        <Box
+            sx={{
+                position: 'fixed',
+                pointerEvents: 'none',
+                zIndex: 10000,
+                left: 0,
+                top: 0,
+                width: '100%',
+                height: '100%',
+            }}
+        >
+            {/* Preview */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    transform: `translate(${offset.x}px, ${offset.y}px)`,
+                    backgroundColor: 'rgba(30, 30, 30, 0.95)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    minWidth: itemCount > 1 ? '60px' : '200px',
+                    maxWidth: '300px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+                }}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: itemCount > 1 ? 'center' : 'flex-start' }}>
+                    {/* Icon */}
+                    <TagIcon sx={{ fontSize: '16px', color: '#75beff' }} />
+
+                    {/* Text: Show tag name for single item, count for multiple */}
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            color: '#cccccc',
+                            fontWeight: itemCount > 1 ? 700 : 500,
+                            fontSize: itemCount > 1 ? '16px' : '14px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {displayText}
+                    </Typography>
+                </Box>
+            </Box>
+        </Box>
+    );
+}
+
+/**
+ * Main WorkspaceTree component using react-arborist
+ */
+export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
     // Only use workspace tree API - the old /tree endpoint is deprecated
     if (!workspaceId) {
         throw new Error('workspaceId is required. The old /tree endpoint is no longer supported.');
@@ -502,7 +648,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
     
     const workspaceTreeQuery = useWorkspaceTagTree(workspaceId);
     const { data, isLoading, error } = workspaceTreeQuery;
-    const moveTagMutation = useMoveTag();
+    const batchMoveTagMutation = useBatchMoveTag();
     
     // Extract tags from workspace or use directly
     const tags = useMemo(() => {
@@ -517,10 +663,10 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
         return data as Tag[];
     }, [data]);
     
-    const { 
-        searchText, 
-        selectedTagIds, 
-        setSelectedTagIds, 
+    const {
+        searchText,
+        selectedTagIds,
+        setSelectedTagIds,
         setLastSelectedTagId,
         clearSelection,
         // Use context state for create dialog
@@ -529,22 +675,12 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
         closeCreateDialog,
         parentTagForCreate,
     } = useTagUI();
-    const [draggedNode, setDraggedNode] = useState<NodeApi<TreeTag> | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);
     const manager = useDragDropManager();
     
-    // Extract workspace info (always in workspace mode now)
-    const workspaceInfo = useMemo(() => {
-        if (data && 'workspaceId' in data) {
-            return {
-                name: data.name,
-                workspaceId: data.workspaceId,
-            };
-        }
-        return null;
-    }, [data]);
+    // Workspace info is available in data directly when needed
 
     // Transform and filter tags based on search text
     const treeData = useMemo(() => {
@@ -606,7 +742,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
     // Keyboard navigation (VS Code-like)
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.target !== document.body && !(e.target as Element).closest('[data-tag-tree]')) {
+            if (e.target !== document.body && !(e.target as Element).closest('[data-workspace-tree]')) {
                 return; // Only handle when tree is focused
             }
 
@@ -674,65 +810,94 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [selectedTagIds, allVisibleTagIds, setSelectedTagIds, setLastSelectedTagId, clearSelection]);
 
-    // Handle drag and drop
+    // Handle selection changes from react-arborist
+    const handleSelectionChange = (nodes: NodeApi<TreeTag>[]) => {
+        const selectedIds = nodes.map(node => node.id);
+        console.log('🎯 Tree selection changed:', selectedIds);
+        const tagIds = selectedIds.map(id => parseInt(id)).filter(id => id > 0); // Filter out workspace nodes
+        setSelectedTagIds(tagIds);
+        if (tagIds.length > 0) {
+            setLastSelectedTagId(tagIds[tagIds.length - 1]);
+        }
+    };
+
+    // Handle drag and drop - NOW SUPPORTS MULTI-ITEM DRAG
     const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }) => {
-        console.log('🔄 Tree Node Move Event:', {
+        console.log('🔄 Tree Node Move Event (Multi-Drag):', {
             draggedTagIds: args.dragIds,
+            dragCount: args.dragIds.length,
             newParentId: args.parentId || 'root',
             newIndex: args.index,
         });
 
-        // Find the dragged tag name for better logging
-        const draggedTag = treeData.find(t => t.id === args.dragIds[0]);
-        const parentTag = args.parentId ?
-            getAllTagsFlattened(treeData).find(t => t.id === args.parentId) : null;
-
-        console.log(`📦 Moving "${draggedTag?.name || 'Unknown'}" to ${parentTag ? `"${parentTag.name}"` : 'root'} at position ${args.index}`);
-
         try {
             // Set dragging state
             setIsDragging(true);
-            
-            // Get the tagId from the dragged node
-            const tagId = parseInt(args.dragIds[0]);
-            
-            // Workspace root node has negative ID - don't allow moving it
-            if (tagId < 0) {
+
+            // Convert string IDs to numbers
+            const tagIds = args.dragIds.map(id => parseInt(id));
+
+            // Parse newParentId: null means workspace root level (valid)
+            // Negative ID means workspace node itself (invalid)
+            let newParentId: number | undefined = undefined;
+            if (args.parentId) {
+                const parsedParentId = parseInt(args.parentId);
+                // Negative IDs are workspace nodes - convert to null for root level
+                if (parsedParentId < 0) {
+                    newParentId = undefined; // Root level in workspace
+                } else {
+                    newParentId = parsedParentId;
+                }
+            }
+
+            // VALIDATION: Prevent invalid moves
+
+            // 1. Check for workspace root nodes (negative IDs) - cannot move workspace itself
+            const hasWorkspaceRoot = tagIds.some(id => id < 0);
+            if (hasWorkspaceRoot) {
                 console.warn('⚠️ Cannot move workspace root node');
                 setIsDragging(false);
                 return;
             }
-            
-            // Get new parent ID (null for root level)
-            const newParentId = args.parentId ? parseInt(args.parentId) : undefined;
-            
-            // Don't allow moving to workspace root
-            if (newParentId && newParentId < 0) {
-                console.warn('⚠️ Cannot move to workspace root');
-                setIsDragging(false);
-                return;
-            }
-            
-            // Don't allow moving to itself
-            if (tagId === newParentId) {
+
+            // 3. Don't allow moving tag to itself (only relevant for single drag)
+            if (tagIds.length === 1 && tagIds[0] === newParentId) {
                 console.warn('⚠️ Cannot move tag to itself');
                 setIsDragging(false);
                 return;
             }
-            
-            // Optimistic update would go here if needed
-            console.log('📤 Calling API to move tag:', { tagId, newParentId, newIndex: args.index });
-            
-            // Call the mutation
-            await moveTagMutation.mutateAsync({
-                tagId,
+
+            // 4. Don't allow moving parent into its own children (circular dependency check)
+            if (newParentId !== undefined) {
+                const isCircularMove = tagIds.some(draggedId => {
+                    // Check if newParent is a descendant of any dragged tag
+                    return isDescendant(newParentId!, draggedId, treeData);
+                });
+
+                if (isCircularMove) {
+                    console.warn('⚠️ Cannot move parent into its own children (circular dependency)');
+                    setIsDragging(false);
+                    return;
+                }
+            }
+
+            // BATCH MOVE: Move all selected items using optimized batch API
+            console.log(`📤 Batch moving ${tagIds.length} tag(s) to parent ${newParentId || 'root'} at index ${args.index}`);
+
+            await batchMoveTagMutation.mutateAsync({
+                tagIds,
                 newParentId,
-                newIndex: args.index,
+                startIndex: args.index,
             });
-            
-            console.log('✅ Tag moved successfully');
+
+            console.log(`✅ Successfully batch moved ${tagIds.length} tag(s)`);
+
+            // Clear selection after successful move (VS Code behavior)
+            clearSelection();
+            setLastSelectedTagId(null);
+
         } catch (error) {
-            console.error('❌ Failed to move tag:', error);
+            console.error('❌ Failed to move tag(s):', error);
             // Error will be handled by React Query's onError
             // Tree will revert to previous state on refetch
         } finally {
@@ -777,7 +942,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
 
     // Loading state
     if (isLoading) {
-        return <TagTreeSkeleton />;
+        return <WorkspaceTreeSkeleton />;
     }
 
     // Error state
@@ -791,14 +956,14 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
 
     // Empty state
     if (!treeData || treeData.length === 0) {
-        return <TagTreeEmpty />;
+        return <WorkspaceTreeEmpty />;
     }
 
     // Main tree render with react-arborist
     return (
         <Box 
             ref={treeContainerRef}
-            data-tag-tree 
+            data-workspace-tree 
             tabIndex={0}
             sx={{ 
                 height: '100%',
@@ -816,7 +981,7 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
             }}
         >
             {/* Loading overlay when dragging */}
-            {(isDragging || moveTagMutation.isPending) && (
+            {(isDragging || batchMoveTagMutation.isPending) && (
                 <Box
                     sx={{
                         position: 'absolute',
@@ -878,9 +1043,10 @@ export function TagTree({ onTagClick, includeShared = true, workspaceId }: TagTr
                 overscanCount={8}
                 dndManager={manager}
                 onMove={handleMove}
+                onSelect={handleSelectionChange}
                 disableMultiSelection={false}
                 disableEdit={true}
-                selection=""
+                renderDragPreview={(props) => <CustomDragPreview {...props} treeData={treeData} />}
             >
                 {({ node, style, dragHandle }) => {
                     // Wrap in div to ensure native DOM element for DnD
