@@ -4,7 +4,12 @@
  */
 
 import { apiClient } from '@/lib/api-client';
-import type { AddItemToWorkspaceRequest, WorkspaceItemResponse } from '../types/workspace.types';
+import type { 
+    AddItemToWorkspaceRequest, 
+    WorkspaceItemResponse,
+    UpdateWorkspaceItemRequest,
+    UpdateWorkspaceItemResponse
+} from '../types/workspace.types';
 
 class WorkspaceService {
     private readonly basePath = '/api/workspace';
@@ -120,6 +125,40 @@ class WorkspaceService {
         };
 
         return this.addItemToWorkspace(workspaceId, request);
+    }
+
+    /**
+     * Update workspace item metadata (label, notes, color, icon, sort order)
+     * PUT /api/workspace/{workspaceId}/items/{itemId}
+     * 
+     * @param workspaceId - The workspace ID
+     * @param itemId - The workspace item ID to update
+     * @param request - Update request with fields to change
+     * @returns Updated workspace item details
+     */
+    async updateWorkspaceItem(
+        workspaceId: number,
+        itemId: number,
+        request: UpdateWorkspaceItemRequest
+    ): Promise<UpdateWorkspaceItemResponse> {
+        try {
+            console.log('📝 Updating workspace item:', {
+                workspaceId,
+                itemId,
+                request
+            });
+
+            const response = await apiClient.put<UpdateWorkspaceItemResponse>(
+                `${this.basePath}/${workspaceId}/items/${itemId}`,
+                request
+            );
+            
+            console.log('✅ Workspace item updated:', response);
+            return response;
+        } catch (error: any) {
+            console.error('❌ Failed to update workspace item:', error);
+            throw error;
+        }
     }
 }
 

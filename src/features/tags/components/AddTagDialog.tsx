@@ -31,6 +31,7 @@ import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../
 import type { Tag } from '../types/tag.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
+import { useTagUI } from '../store/TagUIContext';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
@@ -87,6 +88,7 @@ export function AddTagDialog({
     const addExistingTag = useAddExistingTagToWorkspace();
     const createAndAddTag = useCreateAndAddTagToWorkspace();
     const { enqueueSnackbar } = useSnackbar();
+    const { setSelectedTagIds, setLastSelectedTagId } = useTagUI();
 
     // Find parent tag info for display (VS Code-like)
     const parentTag = React.useMemo(() => {
@@ -158,7 +160,7 @@ export function AddTagDialog({
         console.log('🔍 Selected tag.id:', selectedTag.id);
 
         try {
-            await addExistingTag.mutateAsync({
+            const result = await addExistingTag.mutateAsync({
                 workspaceId,
                 tagId: selectedTag.tagId,
                 parentTagId: parentTagId || null,
@@ -166,14 +168,18 @@ export function AddTagDialog({
                     label: label.trim() || undefined,
                 },
             });
-            
+
+            // VS Code behavior: Select the newly added tag
+            setSelectedTagIds([result.childId]);
+            setLastSelectedTagId(result.childId);
+
             enqueueSnackbar(`Tag "${selectedTag.name}" added to workspace!`, { variant: 'success' });
             onClose();
         } catch (error: any) {
             console.error('Failed to add existing tag:', error);
             enqueueSnackbar(error?.message || 'Failed to add tag to workspace', { variant: 'error' });
         }
-    }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose]);
+    }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
 
     const handleSubmitNew = useCallback(async () => {
         if (!validateNewTag()) {
@@ -181,7 +187,7 @@ export function AddTagDialog({
         }
 
         try {
-            await createAndAddTag.mutateAsync({
+            const result = await createAndAddTag.mutateAsync({
                 workspaceId,
                 tagName: newTagName.trim(),
                 parentTagId: parentTagId || null,
@@ -191,14 +197,18 @@ export function AddTagDialog({
                     description: description.trim() || undefined,
                 },
             });
-            
+
+            // VS Code behavior: Select the newly created tag
+            setSelectedTagIds([result.childId]);
+            setLastSelectedTagId(result.childId);
+
             enqueueSnackbar(`New tag "${newTagName}" created and added!`, { variant: 'success' });
             onClose();
         } catch (error: any) {
             console.error('Failed to create and add tag:', error);
             enqueueSnackbar(error?.message || 'Failed to create tag', { variant: 'error' });
         }
-    }, [newTagName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose]);
+    }, [newTagName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
 
     const handleSubmit = () => {
         if (activeTab === 'existing') {

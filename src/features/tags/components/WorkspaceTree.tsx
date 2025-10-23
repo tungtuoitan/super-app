@@ -261,12 +261,13 @@ function TagNode({
                 height: '100%',
                 width: '100%',
                 paddingY: '4px',
+                paddingLeft: `${node.level * 8}px`, // VSCode-style indentation: 8px per level
                 paddingRight: '8px',
                 cursor: 'pointer', // Always pointer cursor like VS Code
                 borderRadius: '4px',
                 // Dragging state: Semi-transparent for selected items being dragged
                 opacity: isDragging ? 0.4 : 1,
-                transition: 'opacity 0.2s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out',
+                transition: 'opacity 0.2s ease-in-out, background-color 0.15s ease-in-out, outline-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
                 // Selected: Slightly lighter than hover
                 backgroundColor: isSelected ? 'rgba(90, 93, 94, 0.45)' : (isWorkspaceRoot ? 'transparent' : 'transparent'),
                 color: isSelected ? '#ffffff' : 'inherit',
@@ -275,20 +276,21 @@ function TagNode({
                 '&:hover': {
                     backgroundColor: isSelected ? 'rgba(90, 93, 94, 0.45)' : (isWorkspaceRoot ? 'rgba(90, 93, 94, 0.31)' : 'rgba(90, 93, 94, 0.31)'),
                 },
-                // VS Code-like selection styling with subtle border
-                ...(isSelected && {
-                    border: '1px solid rgba(255, 255, 255, 0.12)', // Subtle light border
-                    boxShadow: 'inset 3px 0 0 #007acc',
-                }),
+                // VS Code-like selection styling with outline (no UI shift)
+                outline: isSelected ? '1px solid rgba(255, 255, 255, 0.12)' : 'none',
+                outlineOffset: '-1px', // Keep outline inside the box
+                boxShadow: isSelected ? 'inset 3px 0 0 #007acc' : 'none',
                 // Dragging indicator - blue highlight for all selected items
                 ...(isDragging && isSelected && {
                     backgroundColor: 'rgba(0, 122, 204, 0.3)',
-                    border: '1px solid rgba(0, 122, 204, 0.6)',
+                    outline: '1px solid rgba(0, 122, 204, 0.6)',
+                    outlineOffset: '-1px',
                 }),
                 // Drop target indicator - hover-like highlight (same as hover state)
                 ...(isDropTarget && {
                     backgroundColor: 'rgba(90, 93, 94, 0.31)',
-                    border: '1px solid rgba(0, 122, 204, 0.5)',
+                    outline: '1px solid rgba(0, 122, 204, 0.5)',
+                    outlineOffset: '-1px',
                     boxShadow: 'inset 0 0 0 1px rgba(0, 122, 204, 0.3)',
                 }),
             }}
@@ -303,7 +305,7 @@ function TagNode({
                     node.toggle();
                 }}
                 sx={{ 
-                    marginRight: '4px',
+                    // marginRight: '4px',
                     padding: '2px',
                     visibility: hasChildren ? 'visible' : 'hidden',
                     color: '#cccccc', // Keep icon color consistent
@@ -835,7 +837,31 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             setIsDragging(true);
 
             // Convert string IDs to numbers
-            const tagIds = args.dragIds.map(id => parseInt(id));
+            let tagIds = args.dragIds.map(id => parseInt(id));
+
+            // VS CODE BEHAVIOR: Filter out descendants of selected nodes
+            // If moving both parent P and child t1, only move P (t1 will follow automatically)
+            tagIds = tagIds.filter(tagId => {
+                // Check if this tag is a descendant of any other selected tag
+                const isDescendantOfOtherSelected = tagIds.some(otherTagId => {
+                    if (otherTagId === tagId) return false; // Don't compare with itself
+                    return isDescendant(tagId, otherTagId, treeData);
+                });
+                return !isDescendantOfOtherSelected; // Keep only if NOT a descendant
+            });
+
+            console.log('📊 Filtered tag IDs (excluding descendants):', {
+                original: args.dragIds,
+                filtered: tagIds,
+                removedCount: args.dragIds.length - tagIds.length
+            });
+
+            // If all selected items are descendants of other selected items, nothing to move
+            if (tagIds.length === 0) {
+                console.log('⚠️ All selected tags are descendants of other selected tags - nothing to move');
+                setIsDragging(false);
+                return;
+            }
 
             // Parse newParentId: null means workspace root level (valid)
             // Negative ID means workspace node itself (invalid)
@@ -850,7 +876,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 }
             }
 
-            // VALIDATION: Prevent invalid moves
+            // VALIDATION: Prevent invalid moves (VS Code behavior)
 
             // 1. Check for workspace root nodes (negative IDs) - cannot move workspace itself
             const hasWorkspaceRoot = tagIds.some(id => id < 0);
@@ -860,22 +886,64 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 return;
             }
 
-            // 3. Don't allow moving tag to itself (only relevant for single drag)
-            if (tagIds.length === 1 && tagIds[0] === newParentId) {
-                console.warn('⚠️ Cannot move tag to itself');
+            // 2. VS CODE: Don't allow moving into one of the items being moved
+            // If target parent is one of the selected items, abort
+            if (newParentId !== undefined && tagIds.includes(newParentId)) {
+                console.warn('⚠️ Cannot move items into one of the selected items');
                 setIsDragging(false);
                 return;
             }
 
-            // 4. Don't allow moving parent into its own children (circular dependency check)
+            // 3. VS CODE: Don't allow moving into a child of any selected item
+            // If target parent is a descendant of any item being moved, abort
             if (newParentId !== undefined) {
-                const isCircularMove = tagIds.some(draggedId => {
-                    // Check if newParent is a descendant of any dragged tag
+                const isTargetDescendantOfSelected = tagIds.some(draggedId => {
                     return isDescendant(newParentId!, draggedId, treeData);
                 });
 
-                if (isCircularMove) {
-                    console.warn('⚠️ Cannot move parent into its own children (circular dependency)');
+                if (isTargetDescendantOfSelected) {
+                    console.warn('⚠️ Cannot move items into a descendant of selected items');
+                    setIsDragging(false);
+                    return;
+                }
+            }
+
+            // 4. VS CODE: Don't allow dropping between items in the same selection
+            // Get siblings at target position to check if we're dropping within selection
+            const targetParentNode = newParentId !== undefined
+                ? getAllTagsFlattened(treeData).find(t => t.data.tagId === newParentId)
+                : null;
+
+            // Get siblings (children of target parent, or root level if no parent)
+            const targetSiblings = targetParentNode
+                ? (targetParentNode.children || [])
+                : treeData.filter(t => parseInt(t.id) > 0); // Exclude workspace nodes
+
+            // Check if we're trying to drop between selected items
+            if (args.index >= 0 && args.index <= targetSiblings.length) {
+                // Get items around the drop position
+                const itemBefore = args.index > 0 ? targetSiblings[args.index - 1] : null;
+                const itemAfter = args.index < targetSiblings.length ? targetSiblings[args.index] : null;
+
+                const itemBeforeId = itemBefore ? parseInt(itemBefore.id) : null;
+                const itemAfterId = itemAfter ? parseInt(itemAfter.id) : null;
+
+                // Check if both surrounding items are in the selection
+                const bothInSelection =
+                    (itemBeforeId && tagIds.includes(itemBeforeId)) &&
+                    (itemAfterId && tagIds.includes(itemAfterId));
+
+                // Check if either surrounding item is in the selection and we're moving to same parent
+                const allOriginalIds = args.dragIds.map(id => parseInt(id)); // Use original IDs before filtering
+                const isSameParent = targetSiblings.some(sibling =>
+                    allOriginalIds.includes(parseInt(sibling.id))
+                );
+
+                if (bothInSelection || (isSameParent && (
+                    (itemBeforeId && tagIds.includes(itemBeforeId)) ||
+                    (itemAfterId && tagIds.includes(itemAfterId))
+                ))) {
+                    console.warn('⚠️ Cannot drop between items in the same selection');
                     setIsDragging(false);
                     return;
                 }
@@ -892,9 +960,13 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
 
             console.log(`✅ Successfully batch moved ${tagIds.length} tag(s)`);
 
-            // Clear selection after successful move (VS Code behavior)
-            clearSelection();
-            setLastSelectedTagId(null);
+            // VS Code behavior: Re-select the moved items after move completes
+            // If single item moved, select it; if multiple items moved, select all of them
+            setSelectedTagIds(tagIds);
+            if (tagIds.length > 0) {
+                setLastSelectedTagId(tagIds[tagIds.length - 1]);
+            }
+            console.log(`✅ Re-selected moved item(s): ${tagIds.join(', ')}`);
 
         } catch (error) {
             console.error('❌ Failed to move tag(s):', error);

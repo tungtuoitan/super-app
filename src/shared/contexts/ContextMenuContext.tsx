@@ -6,9 +6,18 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { ControlledMenu, MenuItem, MenuDivider } from '@szhsin/react-menu';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Info as InfoIcon } from '@mui/icons-material';
+import { 
+    Add as AddIcon, 
+    Edit as EditIcon, 
+    Delete as DeleteIcon, 
+    Info as InfoIcon,
+    InsertDriveFile as FileIcon,
+    Note as NoteIcon
+} from '@mui/icons-material';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+import { useTagUI } from '@/features/tags/store/TagUIContext';
+import { EditWorkspaceItemDialog } from '@/features/tags/components/EditWorkspaceItemDialog';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
 
@@ -38,6 +47,13 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
     const [anchorPoint, setAnchorPoint] = useState<ContextMenuPosition>({ x: 0, y: 0 });
     const [contextType, setContextType] = useState<'default' | 'tag' | 'note'>('default');
     const [contextData, setContextData] = useState<any>(null);
+
+    // Edit dialog state
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [editItemData, setEditItemData] = useState<any>(null);
+
+    // Get selected tags from TagUIContext
+    const { selectedTagIds } = useTagUI();
 
     // Confirmation popover for delete actions
     const deleteConfirmation = useConfirmationPopover({
@@ -72,9 +88,26 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
     }, [closeContextMenu, onCreateTag, contextData]);
 
     const handleEditItem = useCallback(() => {
-        console.log('Edit item clicked');
+        console.log('✏️ Context Menu: Edit item clicked', contextData);
         closeContextMenu();
-        // TODO: Implement edit functionality
+        
+        // Set edit data and open dialog
+        if (contextData) {
+            setEditItemData(contextData);
+            setIsEditDialogOpen(true);
+        }
+    }, [closeContextMenu, contextData]);
+
+    const handleAddFile = useCallback(() => {
+        console.log('📄 Context Menu: Add file clicked');
+        closeContextMenu();
+        // TODO: Implement add file functionality
+    }, [closeContextMenu]);
+
+    const handleAddNote = useCallback(() => {
+        console.log('📝 Context Menu: Add note clicked');
+        closeContextMenu();
+        // TODO: Implement add note functionality
     }, [closeContextMenu]);
 
     const handleDeleteItem = useCallback((event: any) => {
@@ -94,20 +127,50 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
             // Get the native event for the confirmation popover
             const nativeEvent = event.syntheticEvent || event;
 
+            const selectedCount = selectedTagIds.length;
+            const isMultipleSelected = selectedCount > 1;
+
+            let message: string;
+
+            if (isMultipleSelected) {
+                // Multiple tags selected
+                message = `Are you sure you want to delete ${selectedCount} selected tags?\n\nThis action cannot be undone.`;
+            } else {
+                // Single tag - count children recursively
+                const countChildren = (tag: any): number => {
+                    if (!tag.children || tag.children.length === 0) return 0;
+                    return tag.children.length + tag.children.reduce((sum: number, child: any) => sum + countChildren(child), 0);
+                };
+
+                const childCount = countChildren(contextData);
+                message = childCount > 0
+                    ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child tag(s).`
+                    : `Are you sure you want to delete "${contextData.name}"?`;
+            }
+
             // Show confirmation popover
             deleteConfirmation.show({
                 event: nativeEvent,
-                message: `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete all child tags and their associations.`,
+                message,
                 onConfirm: () => {
                     if (onDeleteTag) {
-                        onDeleteTag(contextData);
+                        if (isMultipleSelected) {
+                            // Delete all selected tags
+                            console.log('🗑️ Deleting multiple tags:', selectedTagIds);
+                            // For now, just delete the right-clicked tag
+                            // TODO: Implement bulk delete functionality
+                            onDeleteTag(contextData);
+                        } else {
+                            // Delete single tag
+                            onDeleteTag(contextData);
+                        }
                     }
                 }
             });
         } else {
             closeContextMenu();
         }
-    }, [closeContextMenu, onDeleteTag, contextType, contextData, deleteConfirmation]);
+    }, [closeContextMenu, onDeleteTag, contextType, contextData, deleteConfirmation, selectedTagIds]);
 
     const handleViewInfo = useCallback(() => {
         console.log('View info clicked');
@@ -120,22 +183,47 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
             case 'tag':
                 // Check if this is a workspace root node
                 const isWorkspaceRoot = contextData && contextData.tagId < 0;
+                const selectedCount = selectedTagIds.length;
+                const isMultipleSelected = selectedCount > 1;
+
+                // Determine what we're editing/deleting
+                let itemType = 'Tag';
+                let itemTypePlural = 'Tags';
+                
+                // If multiple items selected, use plural
+                if (isMultipleSelected) {
+                    itemType = itemTypePlural;
+                }
 
                 return (
                     <>
+                        {/* Add submenu */}
                         <MenuItem onClick={handleCreateTag}>
                             <AddIcon style={{ fontSize: 16, marginRight: 8 }} />
                             Add Tag
                         </MenuItem>
-                        <MenuDivider />
-                        <MenuItem onClick={handleEditItem}>
-                            <EditIcon style={{ fontSize: 16, marginRight: 8 }} />
-                            Edit Tag
+                        <MenuItem onClick={handleAddFile} disabled>
+                            <FileIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            Add File
                         </MenuItem>
+                        <MenuItem onClick={handleAddNote} disabled>
+                            <NoteIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            Add Note
+                        </MenuItem>
+                        
+                        <MenuDivider />
+                        
+                        {/* Edit - disabled if multiple items selected */}
+                        <MenuItem onClick={handleEditItem} disabled={isMultipleSelected}>
+                            <EditIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            Edit {isMultipleSelected ? 'Tags' : 'Tag'}
+                        </MenuItem>
+                        
+                        {/* Delete - show count if multiple selected */}
                         {!isWorkspaceRoot && (
                             <MenuItem onClick={handleDeleteItem}>
                                 <DeleteIcon style={{ fontSize: 16, marginRight: 8 }} />
-                                Delete Tag
+                                Delete {isMultipleSelected ? `${selectedCount} Tags` : 'Tag'}
                             </MenuItem>
                         )}
                     </>
@@ -200,6 +288,26 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
 
             {/* Confirmation Popover for delete actions */}
             <ConfirmationPopover {...deleteConfirmation.getPopoverProps()} />
+
+            {/* Edit Workspace Item Dialog */}
+            {editItemData && (
+                <EditWorkspaceItemDialog
+                    open={isEditDialogOpen}
+                    onClose={() => {
+                        setIsEditDialogOpen(false);
+                        setTimeout(() => setEditItemData(null), 200);
+                    }}
+                    workspaceId={editItemData.workspaceId || 1} // CURRENT_WORKSPACE_ID = 1
+                    itemId={editItemData.itemId || editItemData.tagId}
+                    currentName={editItemData.name || ''}
+                    currentLabel={editItemData.label || ''}
+                    currentNotes={editItemData.notes || ''}
+                    currentColor={editItemData.color || ''}
+                    currentIcon={editItemData.icon || ''}
+                    currentSortOrder={editItemData.sortOrder || 0}
+                    itemName={editItemData.name || 'Item'}
+                />
+            )}
         </ContextMenuContext.Provider>
     );
 }

@@ -27,7 +27,8 @@
       "WebFetch(domain:blog.logrocket.com)",
       "WebFetch(domain:react-arborist.netlify.app)",
       "WebFetch(domain:codesandbox.io)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Read(//c/Users/Admin/source/super-app/**)"
     ],
     "deny": [],
     "ask": []

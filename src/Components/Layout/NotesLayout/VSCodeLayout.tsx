@@ -83,7 +83,6 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
           <VSSideBar
             activeView={activeView}
             isVisible={isSideBarVisible}
-            onClose={() => setIsSideBarVisible(false)}
             onCollapse={() => setIsSideBarVisible(false)}
             onExpand={() => setIsSideBarVisible(true)}
           />

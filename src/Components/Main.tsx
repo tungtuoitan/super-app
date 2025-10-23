@@ -9,7 +9,7 @@ import { NoteUIProvider } from '@/features/notes';
 import { TagUIProvider } from '@/features/tags/store/TagUIContext';
 import { ContextMenuProvider, useContextMenu } from '@/shared/contexts';
 import { useTagUI } from '@/features/tags/store/TagUIContext';
-import { useRemoveWorkspaceItem } from '@/features/tags/hooks/useTags';
+import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/features/tags/hooks/useTags';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import { useCallback } from 'react';
@@ -23,8 +23,44 @@ const CURRENT_WORKSPACE_ID = 1;
  * Context Menu Wrapper that provides tag creation and deletion callbacks
  */
 function ContextMenuWrapper() {
-    const { openCreateDialog } = useTagUI();
+    const { openCreateDialog, setSelectedTagIds, setLastSelectedTagId } = useTagUI();
     const removeWorkspaceItemMutation = useRemoveWorkspaceItem();
+    const { data: workspaceTree } = useWorkspaceTagTree(CURRENT_WORKSPACE_ID);
+
+    /**
+     * Recursively collect all descendant tags (children, grandchildren, etc.)
+     * Returns array of all tags in the subtree including the root tag
+     */
+    const collectAllDescendants = useCallback((tag: Tag): Tag[] => {
+        const descendants: Tag[] = [tag];
+
+        if (tag.children && tag.children.length > 0) {
+            for (const child of tag.children) {
+                descendants.push(...collectAllDescendants(child));
+            }
+        }
+
+        return descendants;
+    }, []);
+
+    /**
+     * Get all visible tag IDs in tree order (for VS Code-like navigation)
+     */
+    const getAllVisibleTagIds = useCallback((tags: Tag[]): number[] => {
+        const result: number[] = [];
+
+        function traverse(nodes: Tag[]) {
+            for (const node of nodes) {
+                result.push(node.tagId);
+                if (node.children && node.children.length > 0) {
+                    traverse(node.children);
+                }
+            }
+        }
+
+        traverse(tags);
+        return result;
+    }, []);
 
     const handleDeleteTag = useCallback((tag: Tag) => {
         console.log('🗑️ Removing tag from workspace:', tag.tagId, tag.name, 'itemId:', tag.itemId);
@@ -36,19 +72,88 @@ function ContextMenuWrapper() {
             return;
         }
 
-        removeWorkspaceItemMutation.mutate({
-            workspaceId: CURRENT_WORKSPACE_ID,
-            itemId: tag.itemId
-        }, {
-            onSuccess: () => {
-                console.log('✅ Tag removed from workspace successfully:', tag.name);
-            },
-            onError: (error) => {
-                console.error('❌ Failed to remove tag from workspace:', error);
-                alert(`Failed to remove tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            },
+        // VS Code behavior: Find next item to select after deletion
+        let nextTagIdToSelect: number | null = null;
+        if (workspaceTree?.tags) {
+            const allVisibleTagIds = getAllVisibleTagIds(workspaceTree.tags);
+            const currentIndex = allVisibleTagIds.indexOf(tag.tagId);
+
+            if (currentIndex !== -1) {
+                // Try to select the next item (below)
+                if (currentIndex < allVisibleTagIds.length - 1) {
+                    nextTagIdToSelect = allVisibleTagIds[currentIndex + 1];
+                }
+                // If it's the last item, select the previous one (above)
+                else if (currentIndex > 0) {
+                    nextTagIdToSelect = allVisibleTagIds[currentIndex - 1];
+                }
+            }
+        }
+
+        // Collect all descendants (children, grandchildren, etc.) for cascade deletion
+        const allTags = collectAllDescendants(tag);
+        console.log(`🗑️ Cascade delete: removing ${allTags.length} tag(s) (including ${allTags.length - 1} descendants)`);
+
+        // Filter out tags without itemId and warn about them
+        const tagsToDelete = allTags.filter(t => {
+            if (!t.itemId) {
+                console.warn(`⚠️ Skipping tag without itemId: ${t.name} (tagId: ${t.tagId})`);
+                return false;
+            }
+            return true;
         });
-    }, [removeWorkspaceItemMutation]);
+
+        console.log(`🗑️ Deleting ${tagsToDelete.length} workspace items:`,
+            tagsToDelete.map(t => ({ name: t.name, itemId: t.itemId }))
+        );
+
+        // Delete all tags in sequence (parent and all descendants)
+        // We delete them one by one to ensure proper cleanup
+        let deletedCount = 0;
+        const totalCount = tagsToDelete.length;
+
+        const deleteNext = (index: number) => {
+            if (index >= tagsToDelete.length) {
+                console.log(`✅ Successfully removed ${deletedCount}/${totalCount} tag(s) from workspace`);
+
+                // VS Code behavior: Select next item after deletion completes
+                if (nextTagIdToSelect !== null) {
+                    setSelectedTagIds([nextTagIdToSelect]);
+                    setLastSelectedTagId(nextTagIdToSelect);
+                    console.log(`✅ Selected next item: ${nextTagIdToSelect}`);
+                } else {
+                    // Clear selection if no next item
+                    setSelectedTagIds([]);
+                    setLastSelectedTagId(null);
+                }
+
+                return;
+            }
+
+            const currentTag = tagsToDelete[index];
+            console.log(`🗑️ Deleting ${index + 1}/${totalCount}: ${currentTag.name} (itemId: ${currentTag.itemId})`);
+
+            removeWorkspaceItemMutation.mutate({
+                workspaceId: CURRENT_WORKSPACE_ID,
+                itemId: currentTag.itemId!
+            }, {
+                onSuccess: () => {
+                    deletedCount++;
+                    console.log(`✅ Deleted ${currentTag.name} (${deletedCount}/${totalCount})`);
+                    // Continue with next tag
+                    deleteNext(index + 1);
+                },
+                onError: (error) => {
+                    console.error(`❌ Failed to remove tag ${currentTag.name}:`, error);
+                    // Continue with next tag even if one fails
+                    deleteNext(index + 1);
+                },
+            });
+        };
+
+        // Start cascade deletion
+        deleteNext(0);
+    }, [removeWorkspaceItemMutation, collectAllDescendants, getAllVisibleTagIds, workspaceTree, setSelectedTagIds, setLastSelectedTagId]);
 
     return (
         <ContextMenuProvider onCreateTag={openCreateDialog} onDeleteTag={handleDeleteTag}>

@@ -1,5 +1,4 @@
-import { Box, Typography, IconButton } from '@mui/material'
-import { Close as CloseIcon } from '@mui/icons-material'
+import { Box, Typography } from '@mui/material'
 import { useState } from 'react'
 import { Panel } from 'react-resizable-panels'
 import type { ActivityBarView } from '../VSCodeLayout/ActivityBar'
@@ -8,7 +7,6 @@ import { WorkspaceTree } from '@/features/tags/components/WorkspaceTree'
 interface VSSideBarProps {
   activeView: ActivityBarView
   isVisible: boolean
-  onClose: () => void
   onCollapse?: () => void
   onExpand?: () => void
 }
@@ -28,7 +26,7 @@ interface VSSideBarProps {
  * - When collapsed, panel size goes to 0 but resize handle remains visible
  * - User can drag the resize handle to expand the panel again (like VSCode)
  */
-export function VSSideBar({ activeView, isVisible, onClose, onCollapse, onExpand }: VSSideBarProps) {
+export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSideBarProps) {
   return (
     <Panel
       id="sidebar"
@@ -67,18 +65,6 @@ export function VSSideBar({ activeView, isVisible, onClose, onCollapse, onExpand
           }}
         >
           <span>{getViewTitle(activeView)}</span>
-          <IconButton
-            size="small"
-            onClick={onClose}
-            sx={{
-              color: 'rgba(255, 255, 255, 0.6)',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              },
-            }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
         </Box>
 
         {/* Content */}

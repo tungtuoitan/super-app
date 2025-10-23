@@ -66,3 +66,32 @@ export interface WorkspaceItemResponse {
     childName?: string;
     addedByUserName?: string;
 }
+
+/**
+ * Request to update workspace item metadata
+ * Maps to backend UpdateWorkspaceItemRequest
+ */
+export interface UpdateWorkspaceItemRequest {
+    /** Custom label for this item */
+    label?: string;
+    
+    /** Additional notes about this item */
+    notes?: string;
+    
+    /** Color for visual distinction (hex format #RRGGBB) */
+    color?: string;
+    
+    /** Icon identifier */
+    icon?: string;
+    
+    /** Sort order for display */
+    sortOrder?: number;
+}
+
+/**
+ * Response from update workspace item operation
+ * Maps to backend UpdateWorkspaceItemResponse
+ */
+export interface UpdateWorkspaceItemResponse extends WorkspaceItemResponse {
+    message?: string;
+}

@@ -1,18 +1,16 @@
-import { Box, Typography, IconButton, TextField, InputAdornment, Collapse, List, ListItem, ListItemText, ListItemButton } from '@mui/material'
+import { Box, Typography, TextField, InputAdornment, Collapse, List, ListItem, ListItemText, ListItemButton } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FolderIcon from '@mui/icons-material/Folder'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import CloseIcon from '@mui/icons-material/Close'
 import { useState } from 'react'
 import type { ActivityBarView } from './ActivityBar'
 
 interface SideBarProps {
   activeView: ActivityBarView
   isVisible: boolean
-  onClose: () => void
 }
 
 // Explorer view component
@@ -123,7 +121,7 @@ function NotesView() {
   )
 }
 
-export function SideBar({ activeView, isVisible, onClose }: SideBarProps) {
+export function SideBar({ activeView, isVisible }: SideBarProps) {
   if (!isVisible) return null
 
   const viewComponents = {
@@ -163,18 +161,6 @@ export function SideBar({ activeView, isVisible, onClose }: SideBarProps) {
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
           {viewTitles[activeView]}
         </Typography>
-        <IconButton
-          size="small"
-          onClick={onClose}
-          sx={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            '&:hover': {
-              color: '#fff',
-            },
-          }}
-        >
-          <CloseIcon sx={{ fontSize: '18px' }} />
-        </IconButton>
       </Box>
 
       {/* Content */}

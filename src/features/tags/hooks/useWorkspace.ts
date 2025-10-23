@@ -5,7 +5,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { workspaceService } from '../services/workspaceService';
-import type { AddItemToWorkspaceRequest } from '../types/workspace.types';
+import type { 
+    AddItemToWorkspaceRequest,
+    UpdateWorkspaceItemRequest
+} from '../types/workspace.types';
 import { tagKeys } from './useTags';
 
 /**
@@ -112,6 +115,32 @@ export function useCreateAndAddTagToWorkspace() {
             // This updates the tag dropdown without causing double fetch of workspace tree
             queryClient.invalidateQueries({ 
                 queryKey: tagKeys.lists() 
+            });
+        },
+    });
+}
+
+/**
+ * Hook to update workspace item metadata
+ */
+export function useUpdateWorkspaceItem() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            workspaceId,
+            itemId,
+            request,
+        }: {
+            workspaceId: number;
+            itemId: number;
+            request: UpdateWorkspaceItemRequest;
+        }) => workspaceService.updateWorkspaceItem(workspaceId, itemId, request),
+        
+        onSuccess: (_, variables) => {
+            // Invalidate workspace tree to refetch
+            queryClient.invalidateQueries({ 
+                queryKey: tagKeys.workspaceTree(variables.workspaceId) 
             });
         },
     });
