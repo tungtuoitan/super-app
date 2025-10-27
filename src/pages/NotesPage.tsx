@@ -15,6 +15,7 @@ import { NoteFilter } from '@/features/notes/components/toolbars/items/NoteFilte
 import { NoteDeleteSelected } from '@/features/notes/components/toolbars/items/NoteDeleteSelected';
 import { Grow } from '@/shared/components/styles/commonStyles';
 import { useNoteUI } from '@/features/notes/store/NoteUIContext';
+import { useEditorTabs } from '@/features/editor';
 import {useCallback} from 'react';
 import { Note } from '@/features/notes/types/note.types';
 
@@ -36,12 +37,12 @@ export function NotesPage() {
 /**
  * Internal content component with toolbar and grid layout
  * Uses common GridContainer with fixed toolbar height and flexible grid area
- * Performance optimized: Only subscribes to context at this level to pass openDialog prop
+ * Performance optimized: Only subscribes to context at this level to pass callbacks
  */
 function NotesPageContent() {
     
-    // ✅ Get openDialog from context at page level to pass as prop
-    const { openDialog } = useNoteUI();
+    // ✅ Open note in editor tab instead of dialog
+    const { openNoteTab } = useEditorTabs();
 
     
     return (
@@ -67,7 +68,7 @@ function NotesPageContent() {
                 flexDirection: 'column',
                 backgroundColor: 'background.paper',
             }}>
-                <NoteGrid onNoteClick={openDialog} />
+                <NoteGrid onNoteClick={openNoteTab} />
                 <NoteDetailDialog />
             </Box>
         </div>

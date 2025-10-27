@@ -7,6 +7,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NoteUIProvider } from '@/features/notes';
 import { TagUIProvider } from '@/features/tags/store/TagUIContext';
+import { EditorTabProvider } from '@/features/editor';
 import { ContextMenuProvider, useContextMenu } from '@/shared/contexts';
 import { useTagUI } from '@/features/tags/store/TagUIContext';
 import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/features/tags/hooks/useTags';
@@ -219,9 +220,11 @@ export function Main() {
                     <AuthProvider>
                         <TagUIProvider>
                             <NoteUIProvider>
-                                <DialogProvider>
-                                    <ContextMenuWrapper />
-                                </DialogProvider>
+                                <EditorTabProvider>
+                                    <DialogProvider>
+                                        <ContextMenuWrapper />
+                                    </DialogProvider>
+                                </EditorTabProvider>
                             </NoteUIProvider>
                         </TagUIProvider>
                     </AuthProvider>

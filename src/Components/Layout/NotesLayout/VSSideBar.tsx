@@ -1,8 +1,10 @@
-import { Box, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Box } from '@mui/material'
 import { Panel } from 'react-resizable-panels'
 import type { ActivityBarView } from '../VSCodeLayout/ActivityBar'
 import { WorkspaceTree } from '@/features/tags/components/WorkspaceTree'
+import { NoteGridPanel } from '../NoteGridPanel'
+import { type Note } from '@/features/notes'
+import { useEditorTabs } from '@/features/editor'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -102,40 +104,25 @@ function TagsView() {
 }
 
 /**
- * Notes View - Notes list interface
+ * Notes View - Notes list interface with grid
  */
 function NotesView() {
-  const [searchText, setSearchText] = useState('')
+  const { openNoteTab } = useEditorTabs()
+
+  const handleNoteClick = (note: Note) => {
+    console.log('🎯 VSSideBar - Note clicked:', note)
+    openNoteTab(note)
+  }
 
   return (
-    <Box sx={{ padding: '12px' }}>
-      <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.8)' }}>
-        NOTES
-      </Typography>
-      
-      <input
-        type="text"
-        placeholder="Search notes..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '8px',
-          marginBottom: '8px',
-          backgroundColor: 'rgb(60, 60, 60)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '4px',
-          color: '#cccccc',
-          fontSize: '13px',
-          outline: 'none',
-        }}
-      />
-
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-          Notes list will be displayed here
-        </Typography>
-      </Box>
+    <Box sx={{
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }}>
+      {/* NoteGrid takes full height */}
+      <NoteGridPanel onNoteClick={handleNoteClick} />
     </Box>
   )
 }

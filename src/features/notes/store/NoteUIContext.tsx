@@ -14,6 +14,13 @@ interface DialogProps {
     loading: boolean;
 }
 
+interface TabItem {
+    id: string;
+    noteId: number;
+    title: string;
+    note: Note;
+}
+
 interface NoteUIContextValue {
     // Dialog state
     selectedNote: Note | null;
@@ -59,16 +66,45 @@ interface NoteUIContextValue {
     // Preview dialog state
     previewDialogProps: DialogProps;
     setPreviewDialogProps: (props: DialogProps) => void;
+
+    // Tab management
+    openTabs: TabItem[];
+    activeTabId: string | null;
+    openTab: (note: Note) => void;
+    closeTab: (tabId: string) => void;
+    setActiveTab: (tabId: string) => void;
+    closeAllTabs: () => void;
 }
 
 const NoteUIContext = createContext<NoteUIContextValue | null>(null);
 
 export function NoteUIProvider({ children }: { children: React.ReactNode }) {
     // Dialog state
-    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+    const [selectedNoteState, setSelectedNoteState] = useState<Note | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const originalNoteRef = useRef<Note | null>(null);
+
+    // Wrapper for setSelectedNote that also initializes originalNoteRef
+    const setSelectedNote = useCallback((note: Note | null) => {
+        console.log('🎯 setSelectedNote called:', note);
+        setSelectedNoteState(note);
+        
+        // Initialize originalNoteRef when a note is selected
+        if (note) {
+            // Only set originalNoteRef if it's null or different note
+            if (!originalNoteRef.current || originalNoteRef.current.noteId !== note.noteId) {
+                console.log('📌 Initializing originalNoteRef:', note);
+                originalNoteRef.current = { ...note };
+                setHasUnsavedChanges(false); // Reset changes for new note
+            }
+        } else {
+            // Clear originalNoteRef when note is deselected
+            console.log('🗑️ Clearing originalNoteRef');
+            originalNoteRef.current = null;
+            setHasUnsavedChanges(false);
+        }
+    }, []);
 
     // Search UI state
     const [searchText, setSearchText] = useState('');
@@ -99,9 +135,13 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
         loading: false,
     });
 
+    // Tab state
+    const [openTabs, setOpenTabs] = useState<TabItem[]>([]);
+    const [activeTabId, setActiveTabId] = useState<string | null>(null);
+
     const openDialog = useCallback((note: Note) => {
-        setSelectedNote(note);
-        originalNoteRef.current = { ...note }; // Store original state
+        console.log('🚪 openDialog called:', note);
+        setSelectedNote(note); // This will also set originalNoteRef via the wrapper
         
         // For new notes, set hasUnsavedChanges based on existing content
         const isNewNote = note.noteId === 0;
@@ -116,7 +156,7 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
         }
         
         setIsDialogOpen(true);
-    }, []);
+    }, [setSelectedNote]);
 
     const closeDialog = () => {
         setIsDialogOpen(false);
@@ -128,9 +168,15 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
     };
 
     const updateSelectedNote = (updatedNote: Partial<Note>) => {
-        setSelectedNote((prev) => {
+        console.log('🔄 updateSelectedNote called with:', updatedNote);
+        
+        setSelectedNoteState((prev) => {
             if (!prev) return null;
             const updated = { ...prev, ...updatedNote };
+            
+            console.log('📝 Previous state:', prev);
+            console.log('✨ Updated state:', updated);
+            console.log('📌 Original ref:', originalNoteRef.current);
             
             // Check if this was originally a new note (originalRef has noteId === 0)
             const wasNewNote = originalNoteRef.current?.noteId === 0;
@@ -151,7 +197,7 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
                                  (updated.tags && updated.tags.length > 0) ||
                                  updated.type;
                 
-                console.log('New note content check:', {
+                console.log('📄 New note content check:', {
                     name: updated.name,
                     description: updated.description,
                     tags: updated.tags,
@@ -163,16 +209,32 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
             } else {
                 // For existing notes, compare with original
                 if (originalNoteRef.current) {
-                    const hasChanges = Object.keys(updatedNote).some((key) => {
-                        const originalValue = originalNoteRef.current![key as keyof Note];
-                        const updatedValue = updated[key as keyof Note];
+                    // Compare all relevant fields, not just updated ones
+                    const fieldsToCheck: (keyof Note)[] = ['name', 'description', 'type', 'tags', 'isArchived'];
+                    
+                    const hasChanges = fieldsToCheck.some((key) => {
+                        const originalValue = originalNoteRef.current![key];
+                        const updatedValue = updated[key];
                         
                         // Deep comparison for arrays (tags)
                         if (Array.isArray(originalValue) && Array.isArray(updatedValue)) {
-                            return JSON.stringify(originalValue.sort()) !== JSON.stringify(updatedValue.sort());
+                            // Sort and compare tag IDs
+                            const originalTagIds = originalValue.map((t: any) => t.tagId || t.id).sort();
+                            const updatedTagIds = updatedValue.map((t: any) => t.tagId || t.id).sort();
+                            const isDifferent = JSON.stringify(originalTagIds) !== JSON.stringify(updatedTagIds);
+                            console.log(`  🏷️  ${key} comparison:`, { originalTagIds, updatedTagIds, isDifferent });
+                            return isDifferent;
                         }
                         
-                        return originalValue !== updatedValue;
+                        // For other values, direct comparison
+                        const isDifferent = originalValue !== updatedValue;
+                        console.log(`  📊 ${key} comparison:`, { originalValue, updatedValue, isDifferent });
+                        return isDifferent;
+                    });
+                    
+                    console.log('✅ Existing note change check result:', {
+                        hasChanges,
+                        checkedFields: fieldsToCheck
                     });
                     
                     setHasUnsavedChanges(hasChanges);
@@ -185,8 +247,8 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
 
     const markAsSaved = () => {
         // Update original reference with current state and clear changes
-        if (selectedNote) {
-            originalNoteRef.current = { ...selectedNote };
+        if (selectedNoteState) {
+            originalNoteRef.current = { ...selectedNoteState };
             setHasUnsavedChanges(false);
         }
     };
@@ -194,14 +256,76 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
     const resetChanges = () => {
         // Restore to original state
         if (originalNoteRef.current) {
-            setSelectedNote({ ...originalNoteRef.current });
+            setSelectedNoteState({ ...originalNoteRef.current });
             setHasUnsavedChanges(false);
         }
     };
 
+    // Tab management functions
+    const openTab = useCallback((note: Note) => {
+        const tabId = `tab-${note.noteId}-${Date.now()}`;
+
+        // Check if tab already exists
+        const existingTab = openTabs.find(tab => tab.noteId === note.noteId);
+
+        if (existingTab) {
+            // Tab already exists, just switch to it
+            setActiveTabId(existingTab.id);
+            setSelectedNote(note);
+        } else {
+            // Create new tab
+            const newTab: TabItem = {
+                id: tabId,
+                noteId: note.noteId,
+                title: note.name || 'Untitled',
+                note: note
+            };
+
+            setOpenTabs(prev => [...prev, newTab]);
+            setActiveTabId(tabId);
+            setSelectedNote(note);
+        }
+    }, [openTabs]);
+
+    const closeTab = useCallback((tabId: string) => {
+        setOpenTabs(prev => {
+            const newTabs = prev.filter(tab => tab.id !== tabId);
+
+            // If closing active tab, switch to another tab
+            if (activeTabId === tabId) {
+                if (newTabs.length > 0) {
+                    // Switch to the last tab
+                    const newActiveTab = newTabs[newTabs.length - 1];
+                    setActiveTabId(newActiveTab.id);
+                    setSelectedNote(newActiveTab.note);
+                } else {
+                    // No tabs left
+                    setActiveTabId(null);
+                    setSelectedNote(null);
+                }
+            }
+
+            return newTabs;
+        });
+    }, [activeTabId]);
+
+    const handleSetActiveTab = useCallback((tabId: string) => {
+        const tab = openTabs.find(t => t.id === tabId);
+        if (tab) {
+            setActiveTabId(tabId);
+            setSelectedNote(tab.note);
+        }
+    }, [openTabs]);
+
+    const closeAllTabs = useCallback(() => {
+        setOpenTabs([]);
+        setActiveTabId(null);
+        setSelectedNote(null);
+    }, [setSelectedNote]);
+
     const value = {
         // Dialog state
-        selectedNote,
+        selectedNote: selectedNoteState,
         isDialogOpen,
         hasUnsavedChanges,
         openDialog,
@@ -244,6 +368,14 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
         // Preview dialog state
         previewDialogProps,
         setPreviewDialogProps,
+
+        // Tab management
+        openTabs,
+        activeTabId,
+        openTab,
+        closeTab,
+        setActiveTab: handleSetActiveTab,
+        closeAllTabs,
     };
 
     return (

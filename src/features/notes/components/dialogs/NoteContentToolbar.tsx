@@ -75,6 +75,13 @@ export function NoteContentToolbar() {
     const { isAuthenticated } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     
+    // Debug log
+    console.log('🎨 NoteContentToolbar render:', { 
+        hasUnsavedChanges, 
+        noteId: selectedNote?.noteId,
+        noteName: selectedNote?.name 
+    });
+    
     // React Query hooks
     const createNote = useCreateNote();
     const updateNote = useUpdateNote();

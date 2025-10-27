@@ -45,6 +45,20 @@ export function NoteDetailDialogContent() {
     const { selectedNote, isDialogOpen, closeDialog, updateSelectedNote } = useNoteUI();
     const [loading, setLoading] = React.useState(false);
     
+    // ✅ FIX: Log when selectedNote changes to verify updates
+    React.useEffect(() => {
+        console.log('🔄 NoteDetailDialogContent - selectedNote changed:', selectedNote);
+    }, [selectedNote]);
+    
+    // ✅ FIX: Force re-render when note ID changes (after save)
+    const [noteKey, setNoteKey] = React.useState(0);
+    React.useEffect(() => {
+        if (selectedNote) {
+            console.log('🔑 Updating noteKey for note:', selectedNote.noteId);
+            setNoteKey(prev => prev + 1);
+        }
+    }, [selectedNote?.noteId]);
+    
     // Fetch tags from API for use in autocomplete
     const { tagOptions, isLoading: tagsLoading, error: tagsError } = useTagsForAutocomplete();
     
@@ -147,86 +161,83 @@ export function NoteDetailDialogContent() {
         const isCreateMode = selectedNote.noteId === 0;
 
     return (
-        <NoteDetailWrapper>
-            <Grid2 container spacing={1}>
-                {/* Left Column - Form Fields */}
-                <Grid2 size={{ xs: 12, sm: 12, md: 6, lg: 4 }}>
-                    <div style={{ 
-                        height: 'calc(100vh - 160px)', 
-                        background: '#fff', 
-                        padding: '12px 24px 0 24px', 
-                        overflowY: 'auto'
-                    }}>
-                        <Box sx={{ padding: '16px 0' }}>
-                            <b className='title-container'>
-                                NOTE DETAILS
-                            </b>
-                            
-                            {/* ID */}
-                            <GenericTextField
-                                label="ID"
-                                value={selectedNote?.noteId ? `${selectedNote.noteId}` : '0'}
-                                disabled
-                                sx={{ mb: '16px' }}
-                                size="small"
-                            />
+        <NoteDetailWrapper key={noteKey}>
+            <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                height: 'calc(100vh - 160px)',
+                gap: 1
+            }}>
+                {/* Top Section - Note Details (50%) */}
+                <Box sx={{ 
+                    flex: '0 0 50%',
+                    background: '#fff', 
+                    padding: '12px 24px 0 24px', 
+                    overflowY: 'auto'
+                }}>
+                    <Box sx={{ padding: '16px 0' }}>
+                        <b className='title-container'>
+                            NOTE DETAILS
+                        </b>
+                        
+                        <Grid2 container spacing={2}>
+                            {/* Left side - Main fields */}
+                            <Grid2 size={{ xs: 12, md: 6 }}>
+                                {/* ID */}
+                                <GenericTextField
+                                    label="ID"
+                                    value={selectedNote?.noteId ? `${selectedNote.noteId}` : '0'}
+                                    disabled
+                                    sx={{ mb: '16px' }}
+                                    size="small"
+                                />
 
-                            {/* Note Name */}
-                            <GenericTextField
-                                label="Note Name"
-                                value={selectedNote?.name || ''}
-                                onChange={(e) => handleFieldChange('name', e.target.value)}
-                                sx={{ mb: '16px' }}
-                                size="small"
-                            />
+                                {/* Note Name */}
+                                <GenericTextField
+                                    label="Note Name"
+                                    value={selectedNote?.name || ''}
+                                    onChange={(e) => handleFieldChange('name', e.target.value)}
+                                    sx={{ mb: '16px' }}
+                                    size="small"
+                                />
 
-                            {/* Note Type - Temporarily Hidden */}
-                            {/* <GenericAutoComplete
-                                value={currentTypeValue}
-                                onChange={handleTypeChange}
-                                allOptions={typeOptions}
-                                inputProps={{
-                                    name: 'type',
-                                    label: 'Type',
-                                    required: false,
-                                }}
-                                sx={{ mb: '16px' }}
-                            /> */}
+                                {/* Status */}
+                                <GenericAutoComplete
+                                    value={selectedNote?.isArchived ? { id: 'archived', label: 'Archived', desc: 'Archived', active: true } : { id: 'active', label: 'Active', desc: 'Active', active: true }}
+                                    onChange={(event, newValue) => handleFieldChange('isArchived', newValue?.id === 'archived')}
+                                    allOptions={[
+                                        { id: 'active', label: 'Active', desc: 'Active', active: true },
+                                        { id: 'archived', label: 'Archived', desc: 'Archived', active: true },
+                                    ]}
+                                    inputProps={{
+                                        name: 'status',
+                                        label: 'Status',
+                                        required: false,
+                                    }}
+                                    sx={{ mb: '16px' }}
+                                />
 
-                            {/* Status */}
-                            <GenericAutoComplete
-                                value={selectedNote?.isArchived ? { id: 'archived', label: 'Archived', desc: 'Archived', active: true } : { id: 'active', label: 'Active', desc: 'Active', active: true }}
-                                onChange={(event, newValue) => handleFieldChange('isArchived', newValue?.id === 'archived')}
-                                allOptions={[
-                                    { id: 'active', label: 'Active', desc: 'Active', active: true },
-                                    { id: 'archived', label: 'Archived', desc: 'Archived', active: true },
-                                ]}
-                                inputProps={{
-                                    name: 'status',
-                                    label: 'Status',
-                                    required: false,
-                                }}
-                                sx={{ mb: '16px' }}
-                            />
+                                {/* Tags */}
+                                <GenericTagAutoComplete
+                                    options={finalTagOptions}
+                                    value={currentTagsValue}
+                                    onChange={handleTagsChange}
+                                    label="Tags"
+                                    placeholder={tagsLoading ? "Loading tags..." : "+ Add Tag"}
+                                    sx={{ mb: '16px' }}
+                                    size="small"
+                                    data-testid="note-tags"
+                                    disabled={tagsLoading}
+                                />
+                            </Grid2>
 
-                            {/* Tags */}
-                            <GenericTagAutoComplete
-                                options={finalTagOptions}
-                                value={currentTagsValue}
-                                onChange={handleTagsChange}
-                                label="Tags"
-                                placeholder={tagsLoading ? "Loading tags..." : "+ Add Tag"}
-                                sx={{ mb: '16px' }}
-                                size="small"
-                                data-testid="note-tags"
-                                disabled={tagsLoading}
-                            />
-
-                            {/* Created/Updated Info */}
-                            <Box sx={{ mt: '24px', pt: '16px' }}>
-                                <b className='title-container'>
-                                    INFORMATION
-                                </b>
+                            {/* Right side - Information */}
+                            <Grid2 size={{ xs: 12, md: 6 }}>
+                                <Box sx={{ mb: '16px' }}>
+                                    <b className='title-container'>
+                                        INFORMATION
+                                    </b>
+                                </Box>
                                 
                                 <GenericTextField
                                     label="Created"
@@ -264,64 +275,48 @@ export function NoteDetailDialogContent() {
                                     disabled
                                     size="small"
                                 />
-                            </Box>
-                        </Box>
-                    </div>
-                </Grid2>
+                            </Grid2>
+                        </Grid2>
+                    </Box>
+                </Box>
 
-                {/* Center Column - Content */}
-                <Grid2 size={{ xs: 12, sm: 12, md: 6, lg: 4 }}>
-                    <div style={{ 
-                        height: 'calc(100vh - 160px)', 
-                        background: '#fff', 
-                        padding: '12px 24px 0 24px', 
-                        overflowY: 'auto'
-                    }}>
-                        <Box sx={{ padding: '16px 0', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                            <b className='title-container'>
-                                CONTENT
-                            </b>
-                            
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={25}
-                                label="Description"
-                                value={selectedNote?.description || ''}
-                                onChange={(e) => handleFieldChange('description', e.target.value)}
-                                variant="outlined"
-                                sx={{ 
-                                    flex: 1,
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: '4px !important',
-                                        height: '100%',
-                                        alignItems: 'flex-start'
-                                    },
-                                    '& .MuiInputBase-input': {
-                                        height: '100% !important',
-                                        overflow: 'auto !important'
-                                    }
-                                }}
-                            />
-                        </Box>
-                    </div>
-                </Grid2>
-
-                {/* Right Column - Actions & Metadata */}
-                <Grid2 size={{ xs: 12, sm: 12, md: 6, lg: 4 }}>
-                    <div style={{ 
-                        height: 'calc(100vh - 170px)', 
-                        background: '#fff', 
-                        padding: '12px 0 0 0' 
-                    }}>
-                        <Box sx={{ padding: '16px' }}>
-                            <b className='title-container'>
-                                TAG TREE
-                            </b>
-                        </Box>
-                    </div>
-                </Grid2>
-            </Grid2>
+                {/* Bottom Section - Content (50%) */}
+                <Box sx={{ 
+                    flex: '0 0 50%',
+                    background: '#fff', 
+                    padding: '12px 24px 0 24px', 
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    <Box sx={{ padding: '16px 0', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                        <b className='title-container'>
+                            CONTENT
+                        </b>
+                        
+                        <TextField
+                            fullWidth
+                            multiline
+                            label="Description"
+                            value={selectedNote?.description || ''}
+                            onChange={(e) => handleFieldChange('description', e.target.value)}
+                            variant="outlined"
+                            sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '4px !important',
+                                    height: '100%',
+                                    alignItems: 'flex-start'
+                                },
+                                '& .MuiInputBase-input': {
+                                    height: '100% !important',
+                                    overflow: 'auto !important'
+                                }
+                            }}
+                        />
+                    </Box>
+                </Box>
+            </Box>
         </NoteDetailWrapper>
     );
 }
