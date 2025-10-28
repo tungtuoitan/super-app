@@ -238,7 +238,7 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
                         <Button
                             type="submit"
                             disabled={createTag.isPending || !tagName.trim()}
-                            className="bg-clickup-blue hover:bg-clickup-blue/90"
+                            className="bg-primary hover:bg-primary/90"
                         >
                             {createTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {createTag.isPending ? 'Creating...' : 'Create Tag'}

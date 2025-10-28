@@ -47,12 +47,7 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // ClickUp Accent Colors
-        'clickup-pink': "hsl(var(--accent-pink))",
-        'clickup-blue': "hsl(var(--accent-blue))",
-        'clickup-yellow': "hsl(var(--accent-yellow))",
-        'clickup-dark': "hsl(var(--dark-base))",
-        // VS Code-style Editor Colors
+        // VS Code-style Editor Colors (for VSCodeLayout components)
         'editor-bg': "hsl(var(--editor-background))",
         'editor-fg': "hsl(var(--editor-foreground))",
         'editor-sidebar': "hsl(var(--editor-sidebar))",

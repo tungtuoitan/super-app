@@ -169,10 +169,10 @@ export function NoteDetailDialogContent() {
                 {/* Two Column Layout - Details and Metadata */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column - Note Details */}
-                    <Card className="border-clickup-blue/20 hover:border-clickup-blue/40 transition-colors">
+                    <Card className="border-primary/20 hover:border-primary/40 transition-colors">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-lg flex items-center gap-2">
-                                <Info className="w-5 h-5 text-clickup-blue" />
+                                <Info className="w-5 h-5 text-primary" />
                                 Note Details
                             </CardTitle>
                         </CardHeader>
@@ -257,10 +257,10 @@ export function NoteDetailDialogContent() {
                     </Card>
 
                     {/* Right Column - Metadata */}
-                    <Card className="border-clickup-pink/20 hover:border-clickup-pink/40 transition-colors">
+                    <Card className="border-accent/20 hover:border-accent/40 transition-colors">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-lg flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-clickup-pink" />
+                                <Calendar className="w-5 h-5 text-accent-foreground" />
                                 Metadata
                             </CardTitle>
                         </CardHeader>

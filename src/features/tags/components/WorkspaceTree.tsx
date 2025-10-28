@@ -259,11 +259,11 @@ function TagNode({
                 }
                 ${isWorkspaceRoot ? 'font-semibold' : ''}
                 ${isDragging && isSelected
-                    ? 'bg-clickup-blue/30 outline outline-1 outline-clickup-blue/60 -outline-offset-1'
+                    ? 'bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1'
                     : ''
                 }
                 ${isDropTarget
-                    ? 'bg-editor-hover outline outline-1 outline-clickup-blue/50 -outline-offset-1'
+                    ? 'bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1'
                     : ''
                 }
             `}
@@ -293,8 +293,8 @@ function TagNode({
                     />
                 ) : hasChildren ? (
                     node.isOpen ?
-                        <FolderOpen className="w-4 h-4 text-clickup-yellow" /> :
-                        <Folder className="w-4 h-4 text-clickup-yellow" />
+                        <FolderOpen className="w-4 h-4 text-yellow-500" /> :
+                        <Folder className="w-4 h-4 text-yellow-500" />
                 ) : (
                     <TagIcon
                         className="w-4 h-4"
@@ -483,7 +483,7 @@ function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }:
             >
                 <div className={`flex items-center gap-2 ${itemCount > 1 ? 'justify-center' : 'justify-start'}`}>
                     {/* Icon */}
-                    <TagIcon className="w-4 h-4 text-clickup-blue" />
+                    <TagIcon className="w-4 h-4 text-primary" />
 
                     {/* Text: Show tag name for single item, count for multiple */}
                     <span
@@ -906,7 +906,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             {(isDragging || batchMoveTagMutation.isPending) && (
                 <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
                     <div className="bg-editor-sidebar p-4 px-6 rounded-lg shadow-lg flex items-center gap-3">
-                        <Loader2 className="w-5 h-5 text-clickup-blue animate-spin" />
+                        <Loader2 className="w-5 h-5 text-primary animate-spin" />
                         <span className="text-sm text-editor-fg">Moving tag...</span>
                     </div>
                 </div>

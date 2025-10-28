@@ -5,7 +5,6 @@ import { TopNav } from '../TopNav';
 import { TagsPage } from '../../pages/TagsPage';
 import { VSCodeLayout } from '../Layout/NotesLayout';
 import { ShadcnTestPage } from '../../pages/ShadcnTestPage';
-import { ClickUpThemePage } from '../../pages/ClickUpThemePage';
 
 /**
  * Main navigation component.
@@ -41,7 +40,6 @@ function MainNav() {
                         <Route path="/tags" Component={TagsPage} />
                         <Route path="/notes" element={<VSCodeLayout />} />
                         <Route path="/test" element={<ShadcnTestPage />} />
-                        <Route path="/clickup-theme" element={<ClickUpThemePage />} />
                     </Routes>
                 </div>
             </div>

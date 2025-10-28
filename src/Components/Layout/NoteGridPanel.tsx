@@ -57,7 +57,7 @@ export function NoteGridPanel({
                     minWidth: 200,
                     renderCell: (params) => (
                         <div className="flex items-center h-full">
-                            <span className="text-sm text-clickup-blue font-medium cursor-pointer hover:underline">
+                            <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
                                 {params.value || '—'}
                             </span>
                         </div>
@@ -83,7 +83,7 @@ export function NoteGridPanel({
                 minWidth: 250,
                 renderCell: (params) => (
                     <div className="flex items-center h-full">
-                        <span className="text-sm text-clickup-blue font-medium cursor-pointer hover:underline">
+                        <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
                             {params.value || '—'}
                         </span>
                     </div>
@@ -159,7 +159,7 @@ export function NoteGridPanel({
             width: 100,
             renderCell: (params) => (
                 <div className="flex items-center h-full">
-                    <span className={`text-xs font-medium ${params.value ? 'text-muted-foreground' : 'text-clickup-blue'}`}>
+                    <span className={`text-xs font-medium ${params.value ? 'text-muted-foreground' : 'text-primary'}`}>
                         {params.value ? 'Archived' : 'Active'}
                     </span>
                 </div>
@@ -182,7 +182,7 @@ export function NoteGridPanel({
         return (
             <div className="h-full flex items-center justify-center bg-editor-bg">
                 <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="w-8 h-8 text-clickup-blue animate-spin" />
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     <span className="text-sm text-editor-fg">Loading notes...</span>
                 </div>
             </div>
@@ -288,9 +288,9 @@ export function NoteGridPanel({
                                 backgroundColor: 'hsl(var(--editor-hover))',
                             },
                             '&.Mui-selected': {
-                                backgroundColor: 'hsl(var(--clickup-blue)) / 0.1',
+                                backgroundColor: 'hsl(var(--primary)) / 0.1',
                                 '&:hover': {
-                                    backgroundColor: 'hsl(var(--clickup-blue)) / 0.15',
+                                    backgroundColor: 'hsl(var(--primary)) / 0.15',
                                 }
                             }
                         },

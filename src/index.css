@@ -4,56 +4,76 @@
 
 @layer base {
   :root {
-    /* ClickUp Brand Colors */
-    --primary: 259 70% 67%; /* #7B68EE - Purple */
-    --primary-foreground: 0 0% 100%; /* White */
+    /* shadcn/ui - Zinc Theme (Light Mode) */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
-    /* Accent Colors */
-    --accent-pink: 333 98% 72%; /* #FD71AF */
-    --accent-blue: 195 93% 65%; /* #49CCF9 */
-    --accent-yellow: 45 100% 50%; /* #FFC800 */
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
 
-    /* Dark Base */
-    --dark-base: 220 14% 19%; /* #292D34 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+
+    --radius: 0.5rem;
 
     /* VS Code-style Editor Colors (Light Mode) */
     --editor-background: 0 0% 100%;
-    --editor-foreground: 220 14% 19%;
+    --editor-foreground: 240 10% 3.9%;
     --editor-sidebar: 0 0% 96%;
     --editor-panel: 0 0% 98%;
-    --editor-border: 0 0% 88%;
-    --editor-hover: 259 70% 97%;
-
-    /* Semantic Colors */
-    --background: 0 0% 100%;
-    --foreground: 220 14% 19%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 220 14% 19%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 14% 19%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 259 70% 97%; /* Light purple tint */
-    --accent-foreground: 259 70% 67%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 259 70% 67%; /* Primary purple */
-
-    --radius: 0.5rem;
+    --editor-border: 240 5.9% 90%;
+    --editor-hover: 240 4.8% 95.9%;
   }
 
   .dark {
+    /* shadcn/ui - Zinc Theme (Dark Mode) */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+
     /* VS Code-style Editor Colors (Dark Mode) */
     --editor-background: 220 13% 12%; /* rgb(30,30,30) ≈ #1E1E1E */
     --editor-foreground: 0 0% 80%; /* #CCCCCC */
@@ -63,35 +83,6 @@
     --editor-border: 0 0% 100% / 0.1; /* rgba(255,255,255,0.1) */
     --editor-hover: 0 0% 100% / 0.1;
     --editor-active-border: 195 100% 42%; /* #007acc - VS Code blue */
-
-    /* ClickUp Dark Theme */
-    --background: 220 14% 19%; /* #292D34 - ClickUp dark base */
-    --foreground: 0 0% 80%; /* #CCCCCC */
-
-    --card: 218 11% 15%; /* Slightly lighter than background */
-    --card-foreground: 0 0% 80%;
-
-    --popover: 218 11% 15%;
-    --popover-foreground: 0 0% 80%;
-
-    --primary: 259 70% 67%; /* #7B68EE - ClickUp purple */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 0 0% 80%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 0 0% 60%; /* rgba(255,255,255,0.6) */
-
-    --accent: 259 70% 67%; /* ClickUp purple for accents */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 63% 31%; /* Darker red for dark mode */
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 100% / 0.1;
-    --input: 0 0% 100% / 0.1;
-    --ring: 259 70% 67%;
   }
 }
 

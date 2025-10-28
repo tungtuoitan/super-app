@@ -43,7 +43,7 @@ export function NoteDialog() {
                         )}
                         <Badge
                             variant={selectedNote.isArchived ? 'secondary' : 'default'}
-                            className={selectedNote.isArchived ? '' : 'bg-clickup-blue'}
+                            className={selectedNote.isArchived ? '' : 'bg-primary'}
                         >
                             {selectedNote.isArchived ? 'Archived' : 'Active'}
                         </Badge>
@@ -86,7 +86,7 @@ export function NoteDialog() {
                                               <Badge
                                                   key={tag.id || tag.tagId || index}
                                                   variant="outline"
-                                                  className="border-clickup-blue/40 text-clickup-blue"
+                                                  className="border-primary/40 text-primary"
                                               >
                                                   {tag.name}
                                               </Badge>
@@ -102,7 +102,7 @@ export function NoteDialog() {
                     <Button variant="outline" onClick={closeDialog}>
                         Close
                     </Button>
-                    <Button onClick={closeDialog} className="bg-clickup-blue hover:bg-clickup-blue/90">
+                    <Button onClick={closeDialog} className="bg-primary hover:bg-primary/90">
                         Edit Note
                     </Button>
                 </DialogFooter>
