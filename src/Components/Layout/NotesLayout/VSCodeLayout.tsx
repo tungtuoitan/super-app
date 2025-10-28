@@ -5,7 +5,7 @@ import { VSCodeResizeHandle } from '../VSCodeLayout/VSCodeResizeHandle'
 import { VSSideBar } from './VSSideBar'
 import { VSEditorArea } from './VSEditorArea'
 import { VSPanel } from './VSPanel'
-import { StatusBar } from '../VSCodeLayout/StatusBar'
+import { StatusBar } from '../VSCodeLayout/StatusBar' 
 
 interface VSCodeLayoutProps {
   className?: string

@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { TagsPage } from '../../pages/TagsPage';
-import { FlexibleLayoutDemo } from '../../pages/FlexibleLayoutDemo';
 import { VSCodeLayout } from '../Layout/NotesLayout';
 import { ShadcnTestPage } from '../../pages/ShadcnTestPage';
 import { ClickUpThemePage } from '../../pages/ClickUpThemePage';
