@@ -1,8 +1,10 @@
-import { Box, IconButton, Tooltip } from '@mui/material'
-import FolderIcon from '@mui/icons-material/Folder'
-import LocalOfferIcon from '@mui/icons-material/LocalOffer'
-import DescriptionIcon from '@mui/icons-material/Description'
-import SettingsIcon from '@mui/icons-material/Settings'
+import { Folder, Tag, FileText, Settings } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/Components/ui/tooltip'
 
 export type ActivityBarView = 'explorer' | 'tags' | 'notes'
 
@@ -12,74 +14,59 @@ interface ActivityBarProps {
 }
 
 const activities = [
-  { id: 'explorer' as const, icon: FolderIcon, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
-  { id: 'tags' as const, icon: LocalOfferIcon, label: 'Tags', shortcut: 'Ctrl+Shift+T' },
-  { id: 'notes' as const, icon: DescriptionIcon, label: 'Notes', shortcut: 'Ctrl+Shift+N' },
+  { id: 'explorer' as const, icon: Folder, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
+  { id: 'tags' as const, icon: Tag, label: 'Tags', shortcut: 'Ctrl+Shift+T' },
+  { id: 'notes' as const, icon: FileText, label: 'Notes', shortcut: 'Ctrl+Shift+N' },
 ]
 
 export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
   return (
-    <Box
-      sx={{
-        width: '48px',
-        height: '100%',
-        backgroundColor: 'rgb(51, 51, 51)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        paddingTop: '4px',
-        borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-      }}
-    >
+    <div className="w-12 h-full bg-editor-activitybar flex flex-col items-center pt-1 border-r border-editor-border">
       {/* Activity icons */}
-      <Box sx={{ flex: 1 }}>
-        {activities.map((activity) => {
-          const Icon = activity.icon
-          const isActive = activeView === activity.id
-          
-          return (
-            <Tooltip key={activity.id} title={`${activity.label} (${activity.shortcut})`} placement="right">
-              <IconButton
-                onClick={() => onViewChange(activity.id)}
-                sx={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: 0,
-                  color: isActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                  borderLeft: isActive ? '2px solid #007acc' : '2px solid transparent',
-                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    color: '#fff',
-                  },
-                }}
-              >
-                <Icon />
-              </IconButton>
-            </Tooltip>
-          )
-        })}
-      </Box>
+      <div className="flex-1">
+        <TooltipProvider>
+          {activities.map((activity) => {
+            const Icon = activity.icon
+            const isActive = activeView === activity.id
+
+            return (
+              <Tooltip key={activity.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onViewChange(activity.id)}
+                    className={`w-12 h-12 rounded-none transition-colors ${
+                      isActive
+                        ? 'text-editor-fg bg-editor-hover border-l-2 border-editor-active'
+                        : 'text-muted-foreground border-l-2 border-transparent hover:bg-editor-hover hover:text-editor-fg'
+                    }`}
+                  >
+                    <Icon className="w-6 h-6 mx-auto" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>{activity.label} ({activity.shortcut})</p>
+                </TooltipContent>
+              </Tooltip>
+            )
+          })}
+        </TooltipProvider>
+      </div>
 
       {/* Settings at bottom */}
-      <Box sx={{ paddingBottom: '4px' }}>
-        <Tooltip title="Settings (Ctrl+,)" placement="right">
-          <IconButton
-            sx={{
-              width: '48px',
-              height: '48px',
-              borderRadius: 0,
-              color: 'rgba(255, 255, 255, 0.6)',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-              },
-            }}
-          >
-            <SettingsIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    </Box>
+      <div className="pb-1">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="w-12 h-12 rounded-none text-muted-foreground hover:bg-editor-hover hover:text-editor-fg transition-colors">
+                <Settings className="w-6 h-6 mx-auto" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Settings (Ctrl+,)</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    </div>
   )
 }

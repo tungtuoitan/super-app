@@ -1,38 +1,19 @@
 /**
  * Note Detail Dialog Content Component
- * 3-column layout content for note details dialog
- * Replicates RFDDetailDialogContent UI structure but follows SuperApp architecture guidelines
+ * Modern card-based layout with ClickUp theme
+ * Clean, organized design with shadcn/ui components
  */
 
 import React from 'react';
-import { styled, Box, Typography, Grid2, TextField } from '@mui/material';
 import { useNoteUI } from '../../store/NoteUIContext';
 import { Note, NOTE_TYPES, NoteType } from '../../types/note.types';
-import {GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions} from '@/shared/components';
+import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from '@/shared/components';
 import { useTagsForAutocomplete } from '@/features/tags';
-
-const NoteDetailWrapper = styled('div')({
-    display: 'flex',
-    flexFlow: 'column',
-    margin: 0,
-    padding: 8,
-    flex: 1,
-    height: '100%',
-    background: '#f6f6f6',
-    overflowY: 'auto',
-    [`& .card-content`]: {
-        margin: '10px 0',
-        [`& .MuiPaper-root.MuiPaper-elevation`]: {
-            marginBottom: 0,
-        }
-    },
-    [`& .title-container`]: {
-        display: 'flex',
-        alignItems: 'flex-start',
-        height: '30px',
-        marginBottom: '16px',
-    }
-});
+import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
+import { Textarea } from '@/Components/ui/textarea';
+import { Badge } from '@/Components/ui/badge';
+import { ScrollArea } from '@/Components/ui/scroll-area';
+import { FileText, Calendar, User, Tag as TagIcon, Info } from 'lucide-react';
 
 /**
  * Note Detail Dialog Content
@@ -161,162 +142,224 @@ export function NoteDetailDialogContent() {
         const isCreateMode = selectedNote.noteId === 0;
 
     return (
-        <NoteDetailWrapper key={noteKey}>
-            <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                height: 'calc(100vh - 160px)',
-                gap: 1
-            }}>
-                {/* Top Section - Note Details (50%) */}
-                <Box sx={{ 
-                    flex: '0 0 50%',
-                    background: '#fff', 
-                    padding: '12px 24px 0 24px', 
-                    overflowY: 'auto'
-                }}>
-                    <Box sx={{ padding: '16px 0' }}>
-                        <b className='title-container'>
-                            NOTE DETAILS
-                        </b>
-                        
-                        <Grid2 container spacing={2}>
-                            {/* Left side - Main fields */}
-                            <Grid2 size={{ xs: 12, md: 6 }}>
-                                {/* ID */}
-                                <GenericTextField
-                                    label="ID"
-                                    value={selectedNote?.noteId ? `${selectedNote.noteId}` : '0'}
-                                    disabled
-                                    sx={{ mb: '16px' }}
-                                    size="small"
-                                />
+        <ScrollArea className="h-full w-full bg-background">
+            <div key={noteKey} className="p-6 space-y-6">
+                {/* Header with Note Name */}
+                <div className="border-b border-editor-border pb-4">
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-2xl font-bold text-foreground mb-2">
+                                {selectedNote?.name || 'Untitled Note'}
+                            </h2>
+                            <div className="flex items-center gap-2">
+                                <Badge variant={selectedNote?.isArchived ? "secondary" : "default"} className="text-xs">
+                                    {selectedNote?.isArchived ? 'Archived' : 'Active'}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                    ID: {selectedNote?.noteId || '0'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                {/* Note Name */}
-                                <GenericTextField
-                                    label="Note Name"
-                                    value={selectedNote?.name || ''}
-                                    onChange={(e) => handleFieldChange('name', e.target.value)}
-                                    sx={{ mb: '16px' }}
-                                    size="small"
-                                />
+                {/* Two Column Layout - Details and Metadata */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left Column - Note Details */}
+                    <Card className="border-clickup-blue/20 hover:border-clickup-blue/40 transition-colors">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Info className="w-5 h-5 text-clickup-blue" />
+                                Note Details
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {/* Note Name */}
+                            <GenericTextField
+                                label="Note Name"
+                                value={selectedNote?.name || ''}
+                                onChange={(e) => handleFieldChange('name', e.target.value)}
+                                size="small"
+                                sx={{
+                                    '& .MuiInputBase-root': {
+                                        color: 'hsl(var(--foreground))',
+                                        backgroundColor: 'hsl(var(--input))',
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'hsl(var(--border))',
+                                    },
+                                }}
+                            />
 
-                                {/* Status */}
-                                <GenericAutoComplete
-                                    value={selectedNote?.isArchived ? { id: 'archived', label: 'Archived', desc: 'Archived', active: true } : { id: 'active', label: 'Active', desc: 'Active', active: true }}
-                                    onChange={(event, newValue) => handleFieldChange('isArchived', newValue?.id === 'archived')}
-                                    allOptions={[
-                                        { id: 'active', label: 'Active', desc: 'Active', active: true },
-                                        { id: 'archived', label: 'Archived', desc: 'Archived', active: true },
-                                    ]}
-                                    inputProps={{
-                                        name: 'status',
-                                        label: 'Status',
-                                        required: false,
-                                    }}
-                                    sx={{ mb: '16px' }}
-                                />
+                            {/* Status */}
+                            <GenericAutoComplete
+                                value={selectedNote?.isArchived ? { id: 'archived', label: 'Archived', desc: 'Archived', active: true } : { id: 'active', label: 'Active', desc: 'Active', active: true }}
+                                onChange={(event, newValue) => handleFieldChange('isArchived', newValue?.id === 'archived')}
+                                allOptions={[
+                                    { id: 'active', label: 'Active', desc: 'Active', active: true },
+                                    { id: 'archived', label: 'Archived', desc: 'Archived', active: true },
+                                ]}
+                                inputProps={{
+                                    name: 'status',
+                                    label: 'Status',
+                                    required: false,
+                                }}
+                                sx={{
+                                    '& .MuiInputBase-root': {
+                                        color: 'hsl(var(--foreground))',
+                                        backgroundColor: 'hsl(var(--input))',
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'hsl(var(--border))',
+                                    },
+                                }}
+                            />
 
-                                {/* Tags */}
+                            {/* Tags */}
+                            <div className="space-y-2">
                                 <GenericTagAutoComplete
                                     options={finalTagOptions}
                                     value={currentTagsValue}
                                     onChange={handleTagsChange}
                                     label="Tags"
                                     placeholder={tagsLoading ? "Loading tags..." : "+ Add Tag"}
-                                    sx={{ mb: '16px' }}
                                     size="small"
                                     data-testid="note-tags"
                                     disabled={tagsLoading}
+                                    sx={{
+                                        '& .MuiInputBase-root': {
+                                            color: 'hsl(var(--foreground))',
+                                            backgroundColor: 'hsl(var(--input))',
+                                        },
+                                        '& .MuiInputLabel-root': {
+                                            color: 'hsl(var(--muted-foreground))',
+                                        },
+                                        '& .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: 'hsl(var(--border))',
+                                        },
+                                        '& .MuiChip-root': {
+                                            color: 'hsl(var(--foreground))',
+                                            backgroundColor: 'hsl(var(--primary))',
+                                        },
+                                    }}
                                 />
-                            </Grid2>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                            {/* Right side - Information */}
-                            <Grid2 size={{ xs: 12, md: 6 }}>
-                                <Box sx={{ mb: '16px' }}>
-                                    <b className='title-container'>
-                                        INFORMATION
-                                    </b>
-                                </Box>
-                                
-                                <GenericTextField
-                                    label="Created"
-                                    value={selectedNote?.createdAt ? new Intl.DateTimeFormat('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: true
-                                    }).format(selectedNote.createdAt) : '-'}
-                                    disabled
-                                    sx={{ mb: '16px' }}
-                                    size="small"
-                                />
-                                
-                                <GenericTextField
-                                    label="Updated"
-                                    value={selectedNote?.updatedAt ? new Intl.DateTimeFormat('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: true
-                                    }).format(selectedNote.updatedAt) : '-'}
-                                    disabled
-                                    sx={{ mb: '16px' }}
-                                    size="small"
-                                />
-                                
-                                <GenericTextField
-                                    label="Created by"
-                                    value={selectedNote?.createdBy || '-'}
-                                    disabled
-                                    size="small"
-                                />
-                            </Grid2>
-                        </Grid2>
-                    </Box>
-                </Box>
+                    {/* Right Column - Metadata */}
+                    <Card className="border-clickup-pink/20 hover:border-clickup-pink/40 transition-colors">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-clickup-pink" />
+                                Metadata
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <GenericTextField
+                                label="Created"
+                                value={selectedNote?.createdAt ? new Intl.DateTimeFormat('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                }).format(selectedNote.createdAt) : '-'}
+                                disabled
+                                size="small"
+                                sx={{
+                                    '& .MuiInputBase-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                        backgroundColor: 'hsl(var(--muted))',
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'hsl(var(--border))',
+                                    },
+                                }}
+                            />
 
-                {/* Bottom Section - Content (50%) */}
-                <Box sx={{ 
-                    flex: '0 0 50%',
-                    background: '#fff', 
-                    padding: '12px 24px 0 24px', 
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}>
-                    <Box sx={{ padding: '16px 0', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                        <b className='title-container'>
-                            CONTENT
-                        </b>
-                        
-                        <TextField
-                            fullWidth
-                            multiline
-                            label="Description"
+                            <GenericTextField
+                                label="Updated"
+                                value={selectedNote?.updatedAt ? new Intl.DateTimeFormat('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                }).format(selectedNote.updatedAt) : '-'}
+                                disabled
+                                size="small"
+                                sx={{
+                                    '& .MuiInputBase-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                        backgroundColor: 'hsl(var(--muted))',
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'hsl(var(--border))',
+                                    },
+                                }}
+                            />
+
+                            <GenericTextField
+                                label="Created by"
+                                value={selectedNote?.createdBy || '-'}
+                                disabled
+                                size="small"
+                                sx={{
+                                    '& .MuiInputBase-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                        backgroundColor: 'hsl(var(--muted))',
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'hsl(var(--border))',
+                                    },
+                                }}
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Full Width - Description */}
+                <Card className="border-primary/20 hover:border-primary/40 transition-colors">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-primary" />
+                            Description
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Textarea
                             value={selectedNote?.description || ''}
                             onChange={(e) => handleFieldChange('description', e.target.value)}
-                            variant="outlined"
-                            sx={{ 
-                                flex: 1,
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: '4px !important',
-                                    height: '100%',
-                                    alignItems: 'flex-start'
-                                },
-                                '& .MuiInputBase-input': {
-                                    height: '100% !important',
-                                    overflow: 'auto !important'
-                                }
-                            }}
+                            placeholder="Enter note description..."
+                            className="min-h-[200px] resize-none font-mono text-sm"
                         />
-                    </Box>
-                </Box>
-            </Box>
-        </NoteDetailWrapper>
+                        <p className="text-xs text-muted-foreground mt-2">
+                            {selectedNote?.description?.length || 0} characters
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+        </ScrollArea>
     );
 }

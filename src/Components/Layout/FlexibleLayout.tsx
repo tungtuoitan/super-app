@@ -6,7 +6,6 @@ import {
   MosaicBranch,
   getLeaves,
 } from 'react-mosaic-component'
-import { Box, Typography } from '@mui/material'
 
 // Import real components
 import { NoteGridPanel } from './NoteGridPanel';
@@ -28,21 +27,21 @@ export type ViewId = 'notes' | 'tags' | 'noteDetail' | 'properties'
 const NotesComponent = () => <NoteGridPanel />
 
 const TagsComponent = () => (
-  <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+  <div className="h-full overflow-hidden flex flex-col">
     {/* Using workspace tag tree API with workspaceId=1 for testing */}
     <WorkspaceTree workspaceId={1} includeShared={true} />
-  </Box>
+  </div>
 )
 
 const NoteDetailComponent = () => <NoteDetailPanel />
 
 const PropertiesComponent = () => (
-  <Box sx={{ p: 2, height: '100%', overflow: 'auto' }}>
-    <Typography variant="h6" gutterBottom>Properties</Typography>
-    <Typography variant="body2">
+  <div className="p-2 h-full overflow-auto">
+    <h2 className="text-lg font-semibold mb-4">Properties</h2>
+    <p className="text-sm text-muted-foreground">
       This is where properties will be displayed
-    </Typography>
-  </Box>
+    </p>
+  </div>
 )
 
 // Component registry
@@ -131,43 +130,14 @@ export function FlexibleLayout({ className }: FlexibleLayoutProps) {
   }
 
   return (
-    <Box 
-      className={className}
-      sx={{ 
-        width: '100%', 
-        height: '100%',
-        overflow: 'hidden',
-        '& .mosaic': {
-          height: '100%',
-        },
-        '& .mosaic-window': {
-          backgroundColor: 'background.paper',
-        },
-        '& .mosaic-window-title': {
-          backgroundColor: 'background.default',
-          borderBottom: 1,
-          borderColor: 'divider',
-          color: 'text.primary',
-        },
-        '& .mosaic-window-body': {
-          backgroundColor: 'background.paper',
-        },
-        '& .mosaic-drop-target': {
-          backgroundColor: 'primary.main',
-        //   opacity: 0.3,
-        },
-        '& .mosaic-split': {
-          backgroundColor: 'divider',
-        },
-      }}
-    >
+    <div className={`w-full h-full overflow-hidden mosaic-theme ${className || ''}`}>
       <Mosaic<ViewId>
         renderTile={renderTile}
         value={currentNode}
         onChange={setCurrentNode}
         blueprintNamespace="bp5"
       />
-    </Box>
+    </div>
   )
 }
 

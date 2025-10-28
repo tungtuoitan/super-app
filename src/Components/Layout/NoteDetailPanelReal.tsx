@@ -1,25 +1,5 @@
 import React, { useState } from 'react';
-import {
-    Paper,
-    Box,
-    Typography,
-    TextField,
-    Button,
-    Card,
-    CardContent,
-    CardActions,
-    Chip,
-    Stack,
-    CircularProgress,
-    Alert,
-    IconButton,
-    Divider
-} from '@mui/material';
-import {
-    Edit as EditIcon,
-    Save as SaveIcon,
-    Cancel as CancelIcon
-} from '@mui/icons-material';
+import { Loader2, Edit, Save, X } from 'lucide-react';
 
 // Import hooks and services from notes feature
 import { useNoteUI, useUpdateNote, type Note, type UpdateNoteDTO } from '../../features/notes';
@@ -40,16 +20,12 @@ export function NoteDetailPanel() {
     // No note selected
     if (!selectedNote) {
         return (
-            <Paper sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Box textAlign="center">
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
-                        No note selected
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Select a note from the grid to view its details
-                    </Typography>
-                </Box>
-            </Paper>
+            <div className="h-full flex items-center justify-center bg-white">
+                <div className="text-center">
+                    <h2 className="text-xl font-semibold text-gray-600 mb-2">No note selected</h2>
+                    <p className="text-sm text-gray-500">Select a note from the grid to view its details</p>
+                </div>
+            </div>
         );
     }
 
@@ -94,142 +70,127 @@ export function NoteDetailPanel() {
     };
 
     return (
-        <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div className="h-full flex flex-col bg-white shadow-sm">
             {/* Header */}
-            <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Typography variant="h6">Note Details</Typography>
+            <div className="p-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">Note Details</h2>
                     {!isEditing ? (
-                        <IconButton onClick={handleEdit} size="small">
-                            <EditIcon />
-                        </IconButton>
+                        <button
+                            onClick={handleEdit}
+                            className="p-2 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
+                        >
+                            <Edit className="w-5 h-5" />
+                        </button>
                     ) : (
-                        <Box display="flex" gap={1}>
-                            <IconButton 
-                                onClick={handleSave} 
-                                size="small" 
-                                color="primary"
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleSave}
                                 disabled={updateNote.isPending}
+                                className="p-2 rounded hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50"
                             >
                                 {updateNote.isPending ? (
-                                    <CircularProgress size={16} />
+                                    <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
-                                    <SaveIcon />
+                                    <Save className="w-5 h-5" />
                                 )}
-                            </IconButton>
-                            <IconButton onClick={handleCancel} size="small">
-                                <CancelIcon />
-                            </IconButton>
-                        </Box>
+                            </button>
+                            <button
+                                onClick={handleCancel}
+                                className="p-2 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
                     )}
-                </Box>
-            </Box>
+                </div>
+            </div>
 
             {/* Content */}
-            <Box sx={{ flex: 1, p: 2, overflow: 'auto' }}>
+            <div className="flex-1 p-4 overflow-auto">
                 {updateNote.error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
+                    <div className="p-4 mb-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
                         Failed to update note
-                    </Alert>
+                    </div>
                 )}
 
-                <Card>
-                    <CardContent>
+                <div className="border border-gray-200 rounded-lg">
+                    <div className="p-6">
                         {/* Note Name */}
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                Name
-                            </Typography>
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-500 mb-2">Name</label>
                             {isEditing ? (
-                                <TextField
-                                    fullWidth
+                                <input
+                                    type="text"
                                     value={editedNote.name || ''}
                                     onChange={(e) => setEditedNote(prev => ({ 
                                         ...prev, 
                                         name: e.target.value 
                                     }))}
-                                    variant="outlined"
-                                    size="small"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                                 />
                             ) : (
-                                <Typography variant="h6">
-                                    {selectedNote.name}
-                                </Typography>
+                                <h3 className="text-2xl font-semibold text-gray-900">{selectedNote.name}</h3>
                             )}
-                        </Box>
+                        </div>
 
-                        <Divider sx={{ my: 2 }} />
+                        <hr className="my-4 border-gray-200" />
 
                         {/* Description */}
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                Description
-                            </Typography>
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-500 mb-2">Description</label>
                             {isEditing ? (
-                                <TextField
-                                    fullWidth
-                                    multiline
+                                <textarea
                                     rows={4}
                                     value={editedNote.description || ''}
                                     onChange={(e) => setEditedNote(prev => ({ 
                                         ...prev, 
                                         description: e.target.value 
                                     }))}
-                                    variant="outlined"
-                                    size="small"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
                                 />
                             ) : (
-                                <Typography variant="body1">
+                                <p className="text-base text-gray-700">
                                     {selectedNote.description || 'No description'}
-                                </Typography>
+                                </p>
                             )}
-                        </Box>
+                        </div>
 
-                        <Divider sx={{ my: 2 }} />
+                        <hr className="my-4 border-gray-200" />
 
                         {/* Metadata */}
-                        <Stack spacing={2}>
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Created
-                                </Typography>
-                                <Typography variant="body2">
-                                    {formatDate(selectedNote.createdAt)}
-                                </Typography>
-                            </Box>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-500 mb-1">Created</label>
+                                <p className="text-sm text-gray-700">{formatDate(selectedNote.createdAt)}</p>
+                            </div>
 
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Last Modified
-                                </Typography>
-                                <Typography variant="body2">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-500 mb-1">Last Modified</label>
+                                <p className="text-sm text-gray-700">
                                     {selectedNote.updatedAt ? formatDate(selectedNote.updatedAt) : 'Never'}
-                                </Typography>
-                            </Box>
+                                </p>
+                            </div>
 
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Created By
-                                </Typography>
-                                <Typography variant="body2">
-                                    {selectedNote.createdBy}
-                                </Typography>
-                            </Box>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-500 mb-1">Created By</label>
+                                <p className="text-sm text-gray-700">{selectedNote.createdBy}</p>
+                            </div>
 
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Status
-                                </Typography>
-                                <Chip 
-                                    label={selectedNote.isArchived ? 'Archived' : 'Active'}
-                                    color={selectedNote.isArchived ? 'default' : 'success'}
-                                    size="small"
-                                />
-                            </Box>
-                        </Stack>
-                    </CardContent>
-                </Card>
-            </Box>
-        </Paper>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    selectedNote.isArchived 
+                                        ? 'bg-gray-100 text-gray-800' 
+                                        : 'bg-green-100 text-green-800'
+                                }`}>
+                                    {selectedNote.isArchived ? 'Archived' : 'Active'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

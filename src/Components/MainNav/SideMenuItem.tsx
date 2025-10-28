@@ -1,14 +1,15 @@
-import { Tooltip } from '@mui/material';
+import { Link } from 'react-router-dom';
+
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '../ui/tooltip';
 
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { getIcon } from './AllIcon';
 import { SAModule } from './SAModule';
-import {
-    MenuItemWrapper,
-    Wink,
-    IconWrapper,
-    ItemLabel
-} from './SideMenuItem.styles';
 
 /**
  * Props interface for the SideMenuItem component.
@@ -49,29 +50,64 @@ export function SideMenuItem(props: ISideMenuProps) {
     
     const isSelected = selectedItemId === props.item.id;
     
+    const linkClasses = `
+        flex w-full flex-row items-center relative flex-grow
+        py-0.5 px-2.5 min-h-9
+        text-white no-underline rounded
+        transition-colors duration-200
+        hover:bg-black/30
+        active:bg-black/30
+        ${isSelected ? 'bg-black/30' : ''}
+    `.trim().replace(/\s+/g, ' ');
+    
+    const wrapperClasses = `
+        flex-shrink-0 flex flex-col relative items-start w-full
+    `.trim().replace(/\s+/g, ' ');
+    
+    const iconWrapperClasses = `
+        min-w-6 w-6 h-6 text-white
+        flex flex-row items-center justify-center
+    `.trim().replace(/\s+/g, ' ');
+    
+    const labelClasses = `
+        text-white text-[0.95rem] flex-grow
+        flex flex-row items-center pl-3
+        font-normal no-underline
+        whitespace-nowrap overflow-hidden text-ellipsis
+    `.trim().replace(/\s+/g, ' ');
+    
+    const menuItemContent = (
+        <Link 
+            id={props.item.id} 
+            className={linkClasses}
+            to={props.item.link}
+            onClick={handleClick}
+        >
+            <div className={iconWrapperClasses}>
+                {getIcon({ code: props.item.code, type: 'sidebar' })}
+            </div>
+            <span className={labelClasses}>
+                {props.item.name}
+            </span>
+        </Link>
+    );
+    
     return (
-        <MenuItemWrapper>
-            <Tooltip 
-                title={props.expanded ? '' : props.item.name} 
-                placement="right"
-                disableHoverListener={props.expanded}
-            >
-                <Wink 
-                    id={props.item.id} 
-                    className={`single-link ${isSelected ? 'selected' : ''}`}
-                    to={props.item.link}
-                    onClick={handleClick}
-                >
-                    <IconWrapper>
-                        {getIcon({ code: props.item.code, type: 'sidebar' })}
-                    </IconWrapper>
-                    <ItemLabel 
-                        className={props.expanded ? 'expanded' : 'collapsed'}
-                    >
-                        {props.item.name}
-                    </ItemLabel>
-                </Wink>
-            </Tooltip>
-        </MenuItemWrapper>
+        <div className={wrapperClasses}>
+            {props.expanded ? (
+                menuItemContent
+            ) : (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            {menuItemContent}
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                            <p>{props.item.name}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+        </div>
     );
 }

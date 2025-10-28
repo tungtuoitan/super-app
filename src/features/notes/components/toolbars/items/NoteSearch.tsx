@@ -1,33 +1,6 @@
-import { styled } from '@mui/material/styles';
-import { InputBase } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Search as SearchIcon } from 'lucide-react';
 import { useState, useRef } from "react";
-
-const Search = styled('div')({
-    position: 'relative',
-    marginTop: '12px',
-    marginLeft: 0,
-    width: '300px',
-    '& .MuiSvgIcon-root': {
-        marginTop: '-5px',
-    }
-});
-
-const SearchIconRoot = styled('div')({
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-});
-
-const InputBaseRoot = styled(InputBase)({
-    // vertical padding + font size from searchIcon
-    width: '100%',
-    color: 'inherit',
-    paddingLeft: 30
-});
+import { Input } from '@/Components/ui/input';
 
 /**
  * Note Search toolbar component
@@ -60,18 +33,18 @@ export const NoteSearch = () => {
     };
 
     return (
-        <Search>
-            <SearchIconRoot>
-                <SearchIcon />
-            </SearchIconRoot>
-            <InputBaseRoot
-                className={"search-input"}
-                inputRef={searchInputRef}
+        <div className="relative mt-3 w-[300px]">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+                <SearchIcon className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <Input
+                ref={searchInputRef}
                 autoFocus={true}
                 placeholder="Search…"
-                inputProps={{ 'aria-label': 'search' }}
+                aria-label="search"
+                className="pl-10"
                 onKeyUp={onKeyUpHandlerSearch}
             />
-        </Search>
+        </div>
     );
 };

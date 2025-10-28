@@ -1,6 +1,5 @@
 import React from 'react';
-import { IconButton } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { X } from 'lucide-react';
 import { SnackbarKey } from 'notistack';
 
 export interface CloseNotiBtnProps {
@@ -12,10 +11,10 @@ export interface CloseNotiBtnProps {
 
 /**
  * Custom close button for notistack snackbars
- * 
+ *
  * @example
  * ```tsx
- * <SnackbarProvider 
+ * <SnackbarProvider
  *   action={(key) => (
  *     <CloseNotiBtn snackbarKey={key} closeSnackbar={closeSnackbar} />
  *   )}
@@ -24,14 +23,13 @@ export interface CloseNotiBtnProps {
  */
 export function CloseNotiBtn({ snackbarKey, closeSnackbar }: CloseNotiBtnProps) {
     return (
-        <IconButton
-            size="small"
+        <button
+            className="p-1 rounded hover:bg-white/10 inline-flex items-center justify-center"
             aria-label="close"
-            color="inherit"
             onClick={() => closeSnackbar(snackbarKey)}
         >
-            <Close fontSize="small" />
-        </IconButton>
+            <X className="w-4 h-4" />
+        </button>
     );
 }
 

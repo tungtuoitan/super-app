@@ -1,161 +1,67 @@
-import { Box } from '@mui/material'
-import GitBranchIcon from '@mui/icons-material/CallSplit'
-import ErrorIcon from '@mui/icons-material/Error'
-import WarningIcon from '@mui/icons-material/Warning'
-import NotificationsIcon from '@mui/icons-material/Notifications'
+import { GitBranch, AlertCircle, AlertTriangle, Bell } from 'lucide-react'
 
 export function StatusBar() {
   return (
-    <Box
-      sx={{
-        height: '22px',
-        backgroundColor: '#007acc',
-        color: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 8px',
-        fontSize: '12px',
-        borderTop: '1px solid rgba(0, 0, 0, 0.2)',
-      }}
-    >
+    <div className="h-[22px] bg-editor-active text-white flex items-center justify-between px-2 text-xs border-t border-black/20">
       {/* Left side */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="flex items-center gap-4">
         {/* Git branch */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            cursor: 'pointer',
-            padding: '0 4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
-          <GitBranchIcon sx={{ fontSize: '14px' }} />
+        <div className="flex items-center gap-1 cursor-pointer px-1 hover:bg-black/20 transition-colors">
+          <GitBranch className="w-3.5 h-3.5" />
           <span>master-dev</span>
-        </Box>
+        </div>
 
         {/* Sync status */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            cursor: 'pointer',
-            padding: '0 4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
+        <div className="flex items-center gap-1 cursor-pointer px-1 hover:bg-black/20 transition-colors">
           <span>↓0</span>
           <span>↑0</span>
-        </Box>
+        </div>
 
         {/* Errors and warnings */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <ErrorIcon sx={{ fontSize: '14px' }} />
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5" />
             <span>1</span>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <WarningIcon sx={{ fontSize: '14px' }} />
+          </div>
+          <div className="flex items-center gap-1">
+            <AlertTriangle className="w-3.5 h-3.5" />
             <span>1</span>
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       {/* Right side */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="flex items-center gap-4">
         {/* Line/Column */}
-        <Box
-          sx={{
-            cursor: 'pointer',
-            padding: '0 4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
+        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           Ln 45, Col 12
-        </Box>
+        </div>
 
         {/* Spaces */}
-        <Box
-          sx={{
-            cursor: 'pointer',
-            padding: '0 4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
+        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           Spaces: 2
-        </Box>
+        </div>
 
         {/* Encoding */}
-        <Box
-          sx={{
-            cursor: 'pointer',
-            padding: '0 4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
+        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           UTF-8
-        </Box>
+        </div>
 
         {/* Line ending */}
-        <Box
-          sx={{
-            cursor: 'pointer',
-            padding: '0 4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
+        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           CRLF
-        </Box>
+        </div>
 
         {/* Language */}
-        <Box
-          sx={{
-            cursor: 'pointer',
-            padding: '0 4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
+        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           TypeScript React
-        </Box>
+        </div>
 
         {/* Notifications */}
-        <Box
-          sx={{
-            cursor: 'pointer',
-            padding: '0 4px',
-            display: 'flex',
-            alignItems: 'center',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
-        >
-          <NotificationsIcon sx={{ fontSize: '14px' }} />
-        </Box>
-      </Box>
-    </Box>
+        <div className="cursor-pointer px-1 flex items-center hover:bg-black/20 transition-colors">
+          <Bell className="w-3.5 h-3.5" />
+        </div>
+      </div>
+    </div>
   )
 }

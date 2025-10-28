@@ -1,20 +1,22 @@
-import { Button, TextField, Box, Alert } from '@mui/material';
-
 import { useAuthStore } from '../../contexts/AuthContext';
 import { useAuthHelpers } from '../../hooks';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 /**
  * Authentication container component.
- * 
+ *
  * This component provides a complete authentication interface with:
  * - Username and password input fields
  * - Form validation and error display
  * - Loading state management during authentication
  * - Integration with authentication context and hooks
- * 
+ *
  * The component uses a centered modal-style layout with form controls
  * for user login functionality.
- * 
+ *
  * @returns The authentication container with login form
  */
 export function AuthContainer() {
@@ -47,99 +49,48 @@ export function AuthContainer() {
     };
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'black',
-                width: '100%',
-            }}
-        >
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '300px',
-                    minHeight: '300px',
-                    backgroundColor: 'white',
-                    padding: '20px',
-                    borderRadius: '10px',
-                    gap: '20px',
-                }}
-            >
-                <TextField
-                    id="userName"
-                    label="User Name"
-                    value={auth.userName}
-                    onChange={(e) => handleUsernameChange(e.target.value)}
-                    fullWidth
-                    sx={{
-                        '& label[data-shrink="true"]': {
-                            fontSize: '16px',
-                            top: 3,
-                        },
-                        '& label[data-shrink="false"]': {
-                            fontSize: '16px',
-                            top: -9,
-                        },
-                        '& div input': {
-                            fontSize: '16px',
-                            height: 50,
-                            padding: '0px 10px 0 10px',
-                        },
-                        '& div fieldset legend': {
-                            width: '77px',
-                        },
-                    }}
-                />
+        <div className="flex flex-col items-center justify-center bg-background w-full min-h-screen">
+            <div className="flex flex-col items-center justify-center w-[300px] min-h-[300px] bg-card p-5 rounded-lg gap-5 border shadow-lg">
+                <div className="w-full space-y-2">
+                    <label htmlFor="userName" className="text-sm font-medium text-foreground">
+                        User Name
+                    </label>
+                    <Input
+                        id="userName"
+                        value={auth.userName}
+                        onChange={(e) => handleUsernameChange(e.target.value)}
+                        className="h-[50px] text-base"
+                    />
+                </div>
 
-                <TextField
-                    id="password"
-                    label="Password"
-                    type="password"
-                    value={auth.password}
-                    onChange={(e) => handlePasswordChange(e.target.value)}
-                    fullWidth
-                    sx={{
-                        '& label[data-shrink="true"]': {
-                            fontSize: '16px',
-                            top: 3,
-                        },
-                        '& label[data-shrink="false"]': {
-                            fontSize: '16px',
-                            top: -9,
-                        },
-                        '& div input': {
-                            fontSize: '16px',
-                            height: 50,
-                            padding: '0px 10px 0 10px',
-                        },
-                        '& div fieldset legend': {
-                            width: '77px',
-                        },
-                    }}
-                />
+                <div className="w-full space-y-2">
+                    <label htmlFor="password" className="text-sm font-medium text-foreground">
+                        Password
+                    </label>
+                    <Input
+                        id="password"
+                        type="password"
+                        value={auth.password}
+                        onChange={(e) => handlePasswordChange(e.target.value)}
+                        className="h-[50px] text-base"
+                    />
+                </div>
 
                 {error && (
-                    <Alert severity="error" sx={{ width: '100%' }}>
-                        {error}
+                    <Alert variant="destructive" className="w-full">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 )}
 
-                <Button 
-                    variant="contained" 
-                    color="primary"
+                <Button
                     disabled={loading}
                     onClick={handleLogin}
-                    fullWidth
+                    className="w-full bg-primary hover:bg-primary/90"
                 >
                     {loading ? 'Logging in...' : 'Login'}
                 </Button>
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 }

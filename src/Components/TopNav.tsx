@@ -1,10 +1,7 @@
 import { MouseEvent, useEffect } from 'react';
-import { AppBar, Breadcrumbs, Toolbar, Box } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSnackbar } from 'notistack';
 
 import { useAuthStore } from '@/contexts/AuthContext';
-import { classes } from './MainNav/AllIcon';
 
 /**
  * Top navigation component.
@@ -24,11 +21,11 @@ export function TopNav() {
     const { auth } = useAuthStore();
 
     return (
-        <Box className="top-navigation" sx={classes.root}>
-            <AppBar sx={classes.appBar} position="sticky">
+        <div className="top-navigation flex-grow bg-white h-[54px] z-[10000000000]">
+            <nav className="bg-white sticky top-0 h-[54px]">
                 {/* TODO: Replace with actual navigation content */}
                 xxx
-            </AppBar>
-        </Box>
+            </nav>
+        </div>
     );
 }

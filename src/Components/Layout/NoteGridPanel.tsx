@@ -1,12 +1,6 @@
 import React, { useMemo } from 'react';
-import {
-    Box,
-    Typography,
-    CircularProgress,
-    Alert,
-    Chip
-} from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
+import { Loader2 } from 'lucide-react';
 
 // Import hooks and services from notes feature
 import { useNotes, useNoteUI, type Note } from '../../features/notes';
@@ -62,21 +56,11 @@ export function NoteGridPanel({
             flex: 1,
             minWidth: 250,
             renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: '#4FC3F7',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            '&:hover': {
-                                textDecoration: 'underline'
-                            }
-                        }}
-                    >
+                <div className="flex items-center h-full">
+                    <span className="text-sm text-[#4FC3F7] font-medium cursor-pointer hover:underline">
                         {params.value || '—'}
-                    </Typography>
-                </Box>
+                    </span>
+                </div>
             ),
         },
         {
@@ -86,9 +70,9 @@ export function NoteGridPanel({
             renderCell: (params) => {
                 if (!params.value || (Array.isArray(params.value) && params.value.length === 0)) {
                     return (
-                        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                            <Typography variant="body2" sx={{ color: '#858585' }}>—</Typography>
-                        </Box>
+                        <div className="flex items-center h-full">
+                            <span className="text-sm text-[#858585]">—</span>
+                        </div>
                     );
                 }
 
@@ -100,34 +84,21 @@ export function NoteGridPanel({
                 const remainingCount = tags.length - 2;
 
                 return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', height: '100%' }}>
+                    <div className="flex items-center gap-1 flex-wrap h-full">
                         {displayTags.map((tag: any, index: number) => (
-                            <Chip
+                            <span
                                 key={`${params.row.noteId}-${index}`}
-                                label={`#${typeof tag === 'string' ? tag.trim() : tag.name || tag}`}
-                                size="small"
-                                sx={{ 
-                                    fontSize: '0.7rem', 
-                                    height: '20px',
-                                    backgroundColor: 'rgba(79, 195, 247, 0.1)',
-                                    color: '#4FC3F7',
-                                    border: '1px solid rgba(79, 195, 247, 0.3)'
-                                }}
-                            />
+                                className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.7rem] h-5 bg-[#4FC3F7]/10 text-[#4FC3F7] border border-[#4FC3F7]/30"
+                            >
+                                #{typeof tag === 'string' ? tag.trim() : tag.name || tag}
+                            </span>
                         ))}
                         {remainingCount > 0 && (
-                            <Chip
-                                label={`+${remainingCount}`}
-                                size="small"
-                                sx={{ 
-                                    fontSize: '0.7rem', 
-                                    height: '20px',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    color: '#858585'
-                                }}
-                            />
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.7rem] h-5 bg-white/5 text-[#858585]">
+                                +{remainingCount}
+                            </span>
                         )}
-                    </Box>
+                    </div>
                 );
             }
         },
@@ -137,19 +108,11 @@ export function NoteGridPanel({
             flex: 2,
             minWidth: 300,
             renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            color: '#cccccc'
-                        }}
-                    >
+                <div className="flex items-center h-full">
+                    <span className="text-sm text-[#cccccc] overflow-hidden text-ellipsis whitespace-nowrap">
                         {params.value || '—'}
-                    </Typography>
-                </Box>
+                    </span>
+                </div>
             ),
         },
         {
@@ -157,11 +120,11 @@ export function NoteGridPanel({
             headerName: 'Created',
             width: 180,
             renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                    <Typography variant="body2" sx={{ color: '#858585', fontSize: '0.8rem' }}>
+                <div className="flex items-center h-full">
+                    <span className="text-xs text-[#858585]">
                         {params.value ? formatDateTime(new Date(params.value)) : '—'}
-                    </Typography>
-                </Box>
+                    </span>
+                </div>
             ),
         },
         {
@@ -169,18 +132,11 @@ export function NoteGridPanel({
             headerName: 'Status',
             width: 100,
             renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                    <Typography
-                        variant="body2" 
-                        sx={{
-                            color: params.value ? '#858585' : '#4EC9B0',
-                            fontWeight: 500,
-                            fontSize: '0.8rem'
-                        }}
-                    >
+                <div className="flex items-center h-full">
+                    <span className={`text-xs font-medium ${params.value ? 'text-[#858585]' : 'text-[#4EC9B0]'}`}>
                         {params.value ? 'Archived' : 'Active'}
-                    </Typography>
-                </Box>
+                    </span>
+                </div>
             )
         }
     ], []);
@@ -198,78 +154,50 @@ export function NoteGridPanel({
     // Loading state
     if (isLoading) {
         return (
-            <Box sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                backgroundColor: 'rgb(30, 30, 30)'
-            }}>
-                <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                    <CircularProgress sx={{ color: '#4FC3F7' }} />
-                    <Typography variant="body2" sx={{ color: '#cccccc' }}>
-                        Loading notes...
-                    </Typography>
-                </Box>
-            </Box>
+            <div className="h-full flex items-center justify-center bg-[rgb(30,30,30)]">
+                <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-8 h-8 text-[#4FC3F7] animate-spin" />
+                    <span className="text-sm text-[#cccccc]">Loading notes...</span>
+                </div>
+            </div>
         );
     }
 
     // Error state
     if (error) {
         return (
-            <Box sx={{ height: '100%', p: 2, backgroundColor: 'rgb(30, 30, 30)' }}>
-                <Alert severity="error" sx={{ mb: 2 }}>
+            <div className="h-full p-4 bg-[rgb(30,30,30)]">
+                <div className="p-4 mb-4 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-sm">
                     Failed to load notes: {error.message}
-                </Alert>
-            </Box>
+                </div>
+            </div>
         );
     }
 
     // Empty state
     if (!sortedNotes || sortedNotes.length === 0) {
         return (
-            <Box sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                backgroundColor: 'rgb(30, 30, 30)'
-            }}>
-                <Box textAlign="center">
-                    <Typography variant="h6" sx={{ color: '#858585' }} gutterBottom>
-                        No notes found
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#858585' }}>
-                        Create your first note to get started
-                    </Typography>
-                </Box>
-            </Box>
+            <div className="h-full flex items-center justify-center bg-[rgb(30,30,30)]">
+                <div className="text-center">
+                    <h2 className="text-lg text-[#858585] mb-2">No notes found</h2>
+                    <p className="text-sm text-[#858585]">Create your first note to get started</p>
+                </div>
+            </div>
         );
     }
 
     // Main content - VSCode-style dark DataGrid
     return (
-        <Box sx={{ 
-            height: '100%', 
-            width: '100%',
-            display: 'flex', 
-            flexDirection: 'column',
-            backgroundColor: 'rgb(30, 30, 30)'
-        }}>
+        <div className="h-full w-full flex flex-col bg-[rgb(30,30,30)]">
             {/* Header with count */}
-            <Box sx={{ 
-                p: 1.5, 
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: 'rgb(37, 37, 38)'
-            }}>
-                <Typography variant="body2" sx={{ color: '#cccccc', fontSize: '0.85rem' }}>
+            <div className="p-3 border-b border-white/10 bg-[rgb(37,37,38)]">
+                <span className="text-sm text-[#cccccc]">
                     {sortedNotes.length} note{sortedNotes.length !== 1 ? 's' : ''}
-                </Typography>
-            </Box>
+                </span>
+            </div>
             
             {/* DataGrid */}
-            <Box sx={{ flex: 1, width: '100%' }}>
+            <div className="flex-1 w-full">
                 <DataGrid
                     rows={sortedNotes}
                     columns={columns}
@@ -359,7 +287,7 @@ export function NoteGridPanel({
                         }
                     }}
                 />
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 }

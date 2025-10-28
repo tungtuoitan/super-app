@@ -1,9 +1,4 @@
-import { Box, Typography, Tab, Tabs, IconButton } from '@mui/material'
-import {
-  Close as CloseIcon,
-  Description as DescriptionIcon,
-  Settings as SettingsIcon,
-} from '@mui/icons-material'
+import { X, FileText, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Panel } from 'react-resizable-panels'
 import { useNoteUI } from '@/features/notes'
@@ -43,82 +38,48 @@ export function VSPanel({ isVisible, onClose, onCollapse, onExpand }: VSPanelPro
       onExpand={onExpand}
     >
       {isVisible && (
-        <Box
-          sx={{
-            height: '100%',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'rgb(30, 30, 30)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="h-full border-t border-editor-border bg-editor-bg flex flex-col overflow-hidden">
           {/* Tabs Header */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-              height: '35px',
-            }}
-          >
-            <Tabs
-              value={activeTab}
-              onChange={(_, newValue) => setActiveTab(newValue)}
-              sx={{
-                minHeight: '35px',
-                '& .MuiTab-root': {
-                  minHeight: '35px',
-                  padding: '0 12px',
-                  fontSize: '13px',
-                  textTransform: 'none',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  minWidth: 'auto',
-                  '&.Mui-selected': {
-                    color: '#fff',
-                  },
-                },
-                '& .MuiTabs-indicator': {
-                  backgroundColor: '#007acc',
-                },
-              }}
-            >
-              <Tab
-                icon={<DescriptionIcon sx={{ fontSize: 16, mr: 0.5 }} />}
-                iconPosition="start"
-                label="Note Detail"
-                value="noteDetail"
-              />
-              <Tab
-                icon={<SettingsIcon sx={{ fontSize: 16, mr: 0.5 }} />}
-                iconPosition="start"
-                label="Properties"
-                value="properties"
-              />
-            </Tabs>
+          <div className="flex items-center justify-between border-b border-editor-border h-[35px]">
+            <div className="flex h-full">
+              <button
+                onClick={() => setActiveTab('noteDetail')}
+                className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
+                  activeTab === 'noteDetail'
+                    ? 'border-editor-active text-editor-fg'
+                    : 'border-transparent text-muted-foreground hover:text-editor-fg'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>Note Detail</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('properties')}
+                className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
+                  activeTab === 'properties'
+                    ? 'border-editor-active text-editor-fg'
+                    : 'border-transparent text-muted-foreground hover:text-editor-fg'
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Properties</span>
+              </button>
+            </div>
 
-            <IconButton
-              size="small"
+            <button
               onClick={onClose}
-              sx={{
-                mr: 1,
-                color: 'rgba(255, 255, 255, 0.6)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-              }}
+              className="p-1 mr-2 text-muted-foreground hover:text-editor-fg hover:bg-editor-hover rounded transition-colors"
             >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Box>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
           {/* Panel Content */}
-          <Box sx={{ flex: 1, overflow: 'auto', padding: '12px' }}>
+          <div className="flex-1 overflow-auto p-3">
             {activeTab === 'noteDetail' && <NoteDetailTab />}
             {activeTab === 'properties' && <PropertiesTab />}
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
     </Panel>
   )
@@ -132,71 +93,35 @@ function NoteDetailTab() {
 
   if (!selectedNote) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          color: 'rgba(255, 255, 255, 0.6)',
-        }}
-      >
-        <Typography variant="body2">
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <p className="text-sm">
           Select a note to view details
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box>
-      <Typography
-        variant="h6"
-        sx={{
-          fontSize: '16px',
-          fontWeight: 600,
-          mb: 2,
-          color: '#fff',
-        }}
-      >
+    <div>
+      <h3 className="text-base font-semibold mb-2 text-editor-fg">
         {selectedNote.name}
-      </Typography>
+      </h3>
 
-      <Typography
-        variant="body2"
-        sx={{
-          color: 'rgba(255, 255, 255, 0.8)',
-          mb: 2,
-          lineHeight: 1.6,
-        }}
-      >
+      <p className="text-sm text-editor-fg/80 mb-2 leading-relaxed">
         {selectedNote.description || 'No description'}
-      </Typography>
+      </p>
 
-      <Box sx={{ mt: 3 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            color: 'rgba(255, 255, 255, 0.6)',
-            mb: 0.5,
-          }}
-        >
+      <div className="mt-3">
+        <span className="block text-xs text-muted-foreground mb-0.5">
           Created: {new Date(selectedNote.createdAt).toLocaleString()}
-        </Typography>
+        </span>
         {selectedNote.updatedAt && (
-          <Typography
-            variant="caption"
-            sx={{
-              display: 'block',
-              color: 'rgba(255, 255, 255, 0.6)',
-            }}
-          >
+          <span className="block text-xs text-muted-foreground">
             Updated: {new Date(selectedNote.updatedAt).toLocaleString()}
-          </Typography>
+          </span>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
@@ -208,44 +133,29 @@ function PropertiesTab() {
 
   if (!selectedNote) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          color: 'rgba(255, 255, 255, 0.6)',
-        }}
-      >
-        <Typography variant="body2">
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <p className="text-sm">
           Select a note to view properties
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box>
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 600,
-          mb: 2,
-          color: '#fff',
-        }}
-      >
+    <div>
+      <p className="text-sm font-semibold mb-2 text-editor-fg">
         Note Properties
-      </Typography>
+      </p>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <div className="flex flex-col gap-1">
         <PropertyRow label="ID" value={selectedNote.noteId.toString()} />
         <PropertyRow label="Name" value={selectedNote.name} />
         <PropertyRow label="Type" value={selectedNote.type || 'N/A'} />
         <PropertyRow label="Archived" value={selectedNote.isArchived ? 'Yes' : 'No'} />
         <PropertyRow label="Created By" value={selectedNote.createdBy || 'Unknown'} />
         <PropertyRow label="Tags" value={selectedNote.tags?.join(', ') || 'No tags'} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
@@ -254,26 +164,13 @@ function PropertiesTab() {
  */
 function PropertyRow({ label, value }: { label: string; value: string }) {
   return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
-      <Typography
-        variant="body2"
-        sx={{
-          minWidth: '100px',
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: '12px',
-        }}
-      >
+    <div className="flex gap-2">
+      <span className="min-w-[100px] text-muted-foreground text-xs">
         {label}:
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#cccccc',
-          fontSize: '12px',
-        }}
-      >
+      </span>
+      <span className="text-editor-fg text-xs">
         {value}
-      </Typography>
-    </Box>
+      </span>
+    </div>
   )
 }

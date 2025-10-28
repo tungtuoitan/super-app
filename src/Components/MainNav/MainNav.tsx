@@ -1,12 +1,12 @@
 import { Route, Routes } from 'react-router-dom';
-import { Box } from '@mui/material';
 
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { TagsPage } from '../../pages/TagsPage';
 import { FlexibleLayoutDemo } from '../../pages/FlexibleLayoutDemo';
 import { VSCodeLayout } from '../Layout/NotesLayout';
-import { BodyWrapper, SideNavRoot } from './SideMenuItem.styles';
+import { ShadcnTestPage } from '../../pages/ShadcnTestPage';
+import { ClickUpThemePage } from '../../pages/ClickUpThemePage';
 
 /**
  * Main navigation component.
@@ -26,28 +26,27 @@ function MainNav() {
     const { bodyWrapperRef } = useNavigationStore();
 
     return (
-        <Box
-            sx={{ outline: 'none' }}
+        <div
+            className="outline-none"
             tabIndex={0} // Enable keyboard navigation
         >
             <TopNav />
-            <SideNavRoot className="side-tabs">
-                <BodyWrapper 
+            <div className="side-tabs">
+                <div 
                     id="bodyWrapper"
                     ref={bodyWrapperRef}
-                    sx={{
-                        width: '100%',
-                        height: 'calc(100vh - 64px)', // Account for TopNav height
-                    }}
+                    className="w-full h-[calc(100vh-64px)]"
                 >
                     <Routes>
                         <Route path="/" element={<VSCodeLayout />} />
                         <Route path="/tags" Component={TagsPage} />
                         <Route path="/notes" element={<VSCodeLayout />} />
+                        <Route path="/test" element={<ShadcnTestPage />} />
+                        <Route path="/clickup-theme" element={<ClickUpThemePage />} />
                     </Routes>
-                </BodyWrapper>
-            </SideNavRoot>
-        </Box>
+                </div>
+            </div>
+        </div>
     );
 }
 

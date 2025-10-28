@@ -1,17 +1,10 @@
 import React from 'react';
-import {
-    Paper,
-    Box,
-    Typography,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemText,
-    Chip,
-    CircularProgress,
-    Alert,
-    Divider
-} from '@mui/material';
+import { Loader2 } from 'lucide-react';
+
+// shadcn components
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Alert, AlertDescription } from '../ui/alert';
 
 // Import hooks and services from tags feature
 import { useTags, useTagUI, type Tag } from '../../features/tags';
@@ -43,90 +36,84 @@ export function TagsPanel({ onTagSelect }: TagsPanelProps) {
     // Loading state
     if (isLoading) {
         return (
-            <Paper sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                    <CircularProgress size={24} />
-                    <Typography variant="body2" color="text.secondary">
+            <Card className="h-full flex items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
                         Loading tags...
-                    </Typography>
-                </Box>
-            </Paper>
+                    </p>
+                </div>
+            </Card>
         );
     }
 
     // Error state
     if (error) {
         return (
-            <Paper sx={{ height: '100%', p: 2 }}>
-                <Alert severity="error" sx={{ mb: 2 }}>
-                    Failed to load tags
+            <Card className="h-full p-4">
+                <Alert variant="destructive">
+                    <AlertDescription>
+                        Failed to load tags
+                    </AlertDescription>
                 </Alert>
-            </Paper>
+            </Card>
         );
     }
 
     // Empty state
     if (!tags || tags.length === 0) {
         return (
-            <Paper sx={{ height: '100%', p: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                    Tags
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    No tags available
-                </Typography>
-            </Paper>
+            <Card className="h-full p-4">
+                <CardHeader>
+                    <CardTitle>Tags</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                        No tags available
+                    </p>
+                </CardContent>
+            </Card>
         );
     }
 
     return (
-        <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                <Typography variant="h6">Tags</Typography>
-                <Typography variant="body2" color="text.secondary">
+        <Card className="h-full flex flex-col">
+            <CardHeader className="border-b">
+                <CardTitle>Tags</CardTitle>
+                <CardDescription>
                     {tags.length} tag{tags.length !== 1 ? 's' : ''}
-                </Typography>
-            </Box>
+                </CardDescription>
+            </CardHeader>
             
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
-                <List dense>
+            <CardContent className="flex-1 overflow-auto p-0">
+                <div className="divide-y">
                     {tags.map((tag) => (
-                        <React.Fragment key={tag.tagId}>
-                            <ListItem disablePadding>
-                                <ListItemButton
-                                    onClick={() => handleTagClick(tag)}
-                                    sx={{
-                                        py: 1,
-                                        px: 2,
-                                        '&:hover': {
-                                            backgroundColor: 'action.hover',
-                                        },
+                        <button
+                            key={tag.tagId}
+                            onClick={() => handleTagClick(tag)}
+                            className="w-full px-4 py-3 text-left hover:bg-accent transition-colors"
+                        >
+                            <div className="flex items-center gap-2 mb-1">
+                                <Badge 
+                                    variant="outline"
+                                    style={{
+                                        backgroundColor: tag.color || 'hsl(var(--primary))',
+                                        borderColor: tag.color || 'hsl(var(--primary))',
+                                        color: 'white'
                                     }}
                                 >
-                                    <ListItemText
-                                        primary={
-                                            <Box display="flex" alignItems="center" gap={1}>
-                                                <Chip 
-                                                    label={tag.name}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    sx={{
-                                                        backgroundColor: tag.color || 'primary.light',
-                                                        borderColor: tag.color || 'primary.main',
-                                                    }}
-                                                />
-                                                {/* Show usage count if available from tree data */}
-                                            </Box>
-                                        }
-                                        secondary={tag.description}
-                                    />
-                                </ListItemButton>
-                            </ListItem>
-                            <Divider variant="inset" component="li" />
-                        </React.Fragment>
+                                    {tag.name}
+                                </Badge>
+                            </div>
+                            {tag.description && (
+                                <p className="text-sm text-muted-foreground">
+                                    {tag.description}
+                                </p>
+                            )}
+                        </button>
                     ))}
-                </List>
-            </Box>
-        </Paper>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

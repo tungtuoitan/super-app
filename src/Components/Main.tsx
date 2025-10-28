@@ -1,6 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
-import { Box } from '@mui/material';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -176,19 +175,12 @@ function AppContent() {
     };
 
     return (
-        <Box
-            sx={{
-                overflow: 'hidden',
-                height: '100%',
-                width: '100%',
-                margin: 0,
-                padding: 0,
-                overflowX: 'hidden',
-            }}
+        <div
+            className="overflow-hidden h-full w-full m-0 p-0"
             onContextMenu={handleGlobalRightClick} // Global right-click handler
         >
             <MainNav />
-        </Box>
+        </div>
     );
 }
 

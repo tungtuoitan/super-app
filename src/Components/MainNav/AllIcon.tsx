@@ -1,35 +1,35 @@
 
-import { styled } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import BlockIcon from '@mui/icons-material/Block';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CodeIcon from '@mui/icons-material/Code';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import FolderIcon from '@mui/icons-material/Folder';
-import HelpIcon from '@mui/icons-material/Help';
-import HomeIcon from '@mui/icons-material/Home';
-import HourglassFullIcon from '@mui/icons-material/HourglassFull';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import LinkIcon from '@mui/icons-material/Link';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import LoginIcon from '@mui/icons-material/Login';
-import NearMeIcon from '@mui/icons-material/NearMe';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SavingsIcon from '@mui/icons-material/Savings';
-import SelectAllIcon from '@mui/icons-material/SelectAll';
-import SelfImprovementIcon from '@mui/icons-material/SelfImprovement';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
-import SmsIcon from '@mui/icons-material/Sms';
-import SpaIcon from '@mui/icons-material/Spa';
-import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
-import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
-import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import WeekendIcon from '@mui/icons-material/Weekend';
+import { 
+    ArrowRight,
+    Ban,
+    Calendar,
+    Code,
+    FileText,
+    Folder,
+    HelpCircle,
+    Home,
+    Hourglass,
+    BookOpen,
+    Link,
+    Cross,
+    Library,
+    Tag,
+    LogIn,
+    Navigation,
+    ExternalLink,
+    Play,
+    PiggyBank,
+    LayoutGrid,
+    User,
+    SkipForward,
+    MessageSquare,
+    Sparkles,
+    Users,
+    ThumbsDown,
+    ThumbsUp,
+    Heart,
+    Armchair
+} from 'lucide-react';
 
 import { SAModule } from './SAModule';
 
@@ -208,18 +208,6 @@ export const sitemaps = [
 ] as SAModule[];
 
 /**
- * Styled wrapper component for icons.
- * Provides consistent centering and alignment for icon display.
- */
-const Wicon = styled('div')({
-    display: 'flex', 
-    flexDirection: 'row', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    position: 'relative', 
-});
-
-/**
  * Props interface for the getIcon function.
  */
 type getIconProps = {
@@ -245,47 +233,49 @@ export function getIcon(_props: getIconProps) {
 
     switch(_props.type){
         case 'sidebar': 
-            return <Wicon>{
-                allIcons({sx: { fontSize:20, color: 'white' }})
-                .find(x => x.code === _props.code)?.icon ?? null}
-            </Wicon>
+            return (
+                <div className="flex flex-row justify-center items-center relative">
+                    {allIcons({ className: 'text-white', size: 20 })
+                        .find(x => x.code === _props.code)?.icon ?? null}
+                </div>
+            );
         default:
             return null;
     }
 }
 
 export const allIcons = (props: any) => [
-    { code: 'accounts', icon: <SwitchAccountIcon {...props} /> },
-    { code: 'conversation', icon: <SmsIcon {...props} /> },
-    { code: 'finance', icon: <SavingsIcon {...props} /> },
-    { code: 'folder', icon: <FolderIcon {...props} /> },
-    { code: 'gratefulList', icon: <VolunteerActivismIcon {...props} /> },
-    { code: 'health', icon: <LocalHospitalIcon {...props} /> },
-    { code: 'home', icon: <HomeIcon {...props} /> },
-    { code: 'it', icon: <CodeIcon {...props} /> },
-    { code: 'playground', icon: <WeekendIcon {...props} /> },
-    { code: 'practice', icon: <NearMeIcon {...props} /> },
-    { code: 'principle', icon: <BlockIcon {...props} /> },
-    { code: 'schedule', icon: <CalendarMonthIcon {...props} /> },
-    { code: 'self-discipline', icon: <SelfImprovementIcon {...props} /> },
-    { code: 'link', icon: <LinkIcon {...props} /> },
-    { code: 'knowledge', icon: <LibraryBooksIcon {...props} /> },
-    { code: 'notes', icon: <EditNoteIcon {...props} /> },
-    { code: 'tags', icon: <LocalOfferIcon {...props} /> },
+    { code: 'accounts', icon: <Users {...props} /> },
+    { code: 'conversation', icon: <MessageSquare {...props} /> },
+    { code: 'finance', icon: <PiggyBank {...props} /> },
+    { code: 'folder', icon: <Folder {...props} /> },
+    { code: 'gratefulList', icon: <Heart {...props} /> },
+    { code: 'health', icon: <Cross {...props} /> },
+    { code: 'home', icon: <Home {...props} /> },
+    { code: 'it', icon: <Code {...props} /> },
+    { code: 'playground', icon: <Armchair {...props} /> },
+    { code: 'practice', icon: <Navigation {...props} /> },
+    { code: 'principle', icon: <Ban {...props} /> },
+    { code: 'schedule', icon: <Calendar {...props} /> },
+    { code: 'self-discipline', icon: <User {...props} /> },
+    { code: 'link', icon: <Link {...props} /> },
+    { code: 'knowledge', icon: <BookOpen {...props} /> },
+    { code: 'notes', icon: <FileText {...props} /> },
+    { code: 'tags', icon: <Tag {...props} /> },
 
-    { code: 'open-in-new', icon: <OpenInNewIcon {...props} /> },
-    { code: 'skip', icon: <SkipNextIcon {...props} /> },
-    { code: 'pass', icon: <ThumbUpAltIcon {...props} /> },
-    { code: 'fail', icon: <ThumbDownAltIcon {...props} /> },
-    { code: 'unknown-icon', icon: <HelpIcon {...props} /> },
-    { code: 'come-in', icon: <ArrowForwardIcon {...props} /> },
-    { code: 'review', icon: <ThumbsUpDownIcon {...props} /> },
-    { code: 'learn-today', icon: <LocalLibraryIcon {...props} /> },
-    { code: 'open-knowledge', icon: <SpaIcon {...props} /> },
-    { code: 'all-knowledge', icon: <SelectAllIcon {...props} /> },
-    { code: 'play-review', icon: <PlayArrowIcon {...props} /> },
-    { code: 'inprogress-review-later', icon: <HourglassFullIcon {...props} /> },
-    { code: 'login', icon: <LoginIcon {...props} /> },
+    { code: 'open-in-new', icon: <ExternalLink {...props} /> },
+    { code: 'skip', icon: <SkipForward {...props} /> },
+    { code: 'pass', icon: <ThumbsUp {...props} /> },
+    { code: 'fail', icon: <ThumbsDown {...props} /> },
+    { code: 'unknown-icon', icon: <HelpCircle {...props} /> },
+    { code: 'come-in', icon: <ArrowRight {...props} /> },
+    { code: 'review', icon: <ThumbsUp {...props} /> },
+    { code: 'learn-today', icon: <Library {...props} /> },
+    { code: 'open-knowledge', icon: <Sparkles {...props} /> },
+    { code: 'all-knowledge', icon: <LayoutGrid {...props} /> },
+    { code: 'play-review', icon: <Play {...props} /> },
+    { code: 'inprogress-review-later', icon: <Hourglass {...props} /> },
+    { code: 'login', icon: <LogIn {...props} /> },
 
 ];
 

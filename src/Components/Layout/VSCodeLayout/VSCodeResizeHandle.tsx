@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import { PanelResizeHandle } from 'react-resizable-panels'
 
 interface VSCodeResizeHandleProps {
@@ -17,42 +16,33 @@ interface VSCodeResizeHandleProps {
  * - Always visible even when panel is collapsed (allows re-expanding)
  */
 export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
+  const isHorizontal = direction === 'horizontal'
+  
   return (
     <PanelResizeHandle id={id}>
-      <Box
-        sx={{
-          // Size based on direction
-          width: direction === 'horizontal' ? '4px' : '100%',
-          height: direction === 'vertical' ? '4px' : '100%',
-          
-          // Visual styling - slightly visible by default
-          background: 'rgba(255, 255, 255, 0.05)',
-          cursor: direction === 'horizontal' ? 'col-resize' : 'row-resize',
-          position: 'relative',
-          transition: 'background 0.1s ease',
-          zIndex: 10,
-          
-          // Hover and active states
-          '&:hover, &[data-resize-handle-active]': {
-            background: '#007acc', // VS Code blue
-          },
-          
-          // Larger hit area for easier grabbing
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            // Expand hit area
-            ...(direction === 'horizontal' ? {
-              transform: 'translateX(-4px)',
-              width: '12px',
-            } : {
-              transform: 'translateY(-4px)',
-              height: '12px',
-            }),
-          },
+      <div
+        className={`
+          ${isHorizontal ? 'w-1' : 'w-full'}
+          ${isHorizontal ? 'h-full' : 'h-1'}
+          bg-white/5
+          ${isHorizontal ? 'cursor-col-resize' : 'cursor-row-resize'}
+          relative
+          transition-colors duration-100
+          z-10
+          hover:bg-[#007acc]
+          data-[resize-handle-active]:bg-[#007acc]
+        `}
+        style={{
+          // Larger hit area for easier grabbing (pseudo-element simulation via padding trick)
         }}
-      />
+      >
+        <div 
+          className={`
+            absolute inset-0
+            ${isHorizontal ? '-translate-x-1 w-3' : '-translate-y-1 h-3'}
+          `}
+        />
+      </div>
     </PanelResizeHandle>
   )
 }

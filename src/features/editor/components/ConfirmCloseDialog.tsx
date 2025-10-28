@@ -4,15 +4,16 @@
  */
 
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 import {
     Dialog,
-    DialogTitle,
     DialogContent,
-    DialogActions,
-    Button,
-    Typography,
-} from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
 
 interface ConfirmCloseDialogProps {
     open: boolean;
@@ -28,56 +29,37 @@ export function ConfirmCloseDialog({
     onCancel,
 }: ConfirmCloseDialogProps) {
     return (
-        <Dialog
-            open={open}
-            onClose={onCancel}
-            maxWidth="sm"
-            fullWidth
-            PaperProps={{
-                sx: {
-                    backgroundColor: 'rgb(37, 37, 38)',
-                    color: '#cccccc',
-                },
-            }}
-        >
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <WarningIcon sx={{ color: '#FFA726' }} />
-                <span>Unsaved Changes</span>
-            </DialogTitle>
-            <DialogContent>
-                <Typography variant="body1">
-                    Do you want to close <strong>"{tabTitle}"</strong> without saving changes?
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 1, color: 'rgba(255, 255, 255, 0.6)' }}>
-                    Your changes will be lost if you don't save them.
-                </Typography>
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+            <DialogContent className="bg-card text-foreground border sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-clickup-yellow" />
+                        <span>Unsaved Changes</span>
+                    </DialogTitle>
+                    <DialogDescription className="text-left">
+                        <p className="text-base text-foreground">
+                            Do you want to close <strong>"{tabTitle}"</strong> without saving changes?
+                        </p>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Your changes will be lost if you don't save them.
+                        </p>
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2">
+                    <Button
+                        onClick={onCancel}
+                        variant="ghost"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={onConfirm}
+                        variant="destructive"
+                    >
+                        Close Without Saving
+                    </Button>
+                </DialogFooter>
             </DialogContent>
-            <DialogActions sx={{ padding: '16px 24px' }}>
-                <Button
-                    onClick={onCancel}
-                    sx={{
-                        color: '#cccccc',
-                        '&:hover': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        },
-                    }}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={onConfirm}
-                    variant="contained"
-                    sx={{
-                        backgroundColor: '#f44336',
-                        color: '#fff',
-                        '&:hover': {
-                            backgroundColor: '#d32f2f',
-                        },
-                    }}
-                >
-                    Close Without Saving
-                </Button>
-            </DialogActions>
         </Dialog>
     );
 }

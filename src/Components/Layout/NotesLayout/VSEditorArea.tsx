@@ -1,6 +1,5 @@
 import React from 'react'
-import { Box, Typography, Tabs, Tab, IconButton } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { X } from 'lucide-react'
 import { useEditorTabs, NoteEditorPanel, ConfirmCloseDialog } from '@/features/editor'
 import { useNoteUI } from '@/features/notes'
 
@@ -14,10 +13,6 @@ import { useNoteUI } from '@/features/notes'
 export function VSEditorArea() {
   const { openTabs, activeTabId, setActiveTab, closeTab, confirmCloseTabId, setConfirmCloseTabId, getTabById } = useEditorTabs()
   const { selectedNote, setSelectedNote } = useNoteUI()
-
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
-    setActiveTab(newValue)
-  }
 
   const handleCloseTab = (event: React.MouseEvent, tabId: string) => {
     event.stopPropagation()
@@ -48,162 +43,72 @@ export function VSEditorArea() {
   }, [activeTab, setSelectedNote])
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgb(30, 30, 30)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
       {/* Tab bar */}
-      <Box
-        sx={{
-          height: '35px',
-          display: 'flex',
-          alignItems: 'center',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          backgroundColor: 'rgb(37, 37, 38)',
-          overflow: 'hidden',
-        }}
-      >
+      <div className="h-[35px] flex items-center border-b border-editor-border bg-editor-sidebar overflow-hidden">
         {openTabs.length > 0 ? (
-          <Tabs
-            value={activeTabId || false}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              minHeight: '35px',
-              height: '35px',
-              flex: 1,
-              '& .MuiTabs-indicator': {
-                backgroundColor: '#4FC3F7',
-                height: '2px',
-              },
-              '& .MuiTabs-scrollButtons': {
-                color: 'rgba(255, 255, 255, 0.6)',
-                '&.Mui-disabled': {
-                  opacity: 0.3,
-                },
-              },
-            }}
-          >
+          <div className="flex-1 flex items-center overflow-x-auto">
             {openTabs.map((tab) => (
-              <Tab
+              <button
                 key={tab.id}
-                value={tab.id}
-                label={
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      textTransform: 'none',
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: '13px',
-                        fontWeight: activeTabId === tab.id ? 500 : 400,
-                      }}
-                    >
-                      {tab.title}
-                      {tab.hasUnsavedChanges && ' ●'}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleCloseTab(e, tab.id)}
-                      sx={{
-                        padding: '2px',
-                        color: 'inherit',
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        },
-                      }}
-                    >
-                      <CloseIcon sx={{ fontSize: '16px' }} />
-                    </IconButton>
-                  </Box>
-                }
-                sx={{
-                  minHeight: '35px',
-                  height: '35px',
-                  padding: '0 12px',
-                  color: activeTabId === tab.id ? '#cccccc' : 'rgba(255, 255, 255, 0.6)',
-                  backgroundColor: activeTabId === tab.id ? 'rgb(30, 30, 30)' : 'transparent',
-                  borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-                  minWidth: 'auto',
-                  '&:hover': {
-                    backgroundColor: activeTabId === tab.id
-                      ? 'rgb(30, 30, 30)'
-                      : 'rgba(255, 255, 255, 0.05)',
-                  },
-                }}
-              />
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  min-h-[35px] h-[35px] px-3 flex items-center gap-2
+                  border-r border-editor-border min-w-max
+                  ${activeTabId === tab.id
+                    ? 'bg-editor-bg text-editor-fg'
+                    : 'bg-transparent text-muted-foreground hover:bg-editor-hover'
+                  }
+                `}
+              >
+                <span className={`text-[13px] ${activeTabId === tab.id ? 'font-medium' : 'font-normal'}`}>
+                  {tab.title}
+                  {tab.hasUnsavedChanges && ' ●'}
+                </span>
+                <button
+                  onClick={(e) => handleCloseTab(e, tab.id)}
+                  className="p-0.5 hover:bg-editor-hover rounded"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </button>
             ))}
-          </Tabs>
+          </div>
         ) : (
-          <Box sx={{ padding: '0 16px', width: '100%' }}>
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: '13px',
-                color: 'rgba(255, 255, 255, 0.4)',
-                fontStyle: 'italic',
-              }}
-            >
+          <div className="px-4 w-full">
+            <p className="text-[13px] text-muted-foreground/70 italic">
               No tabs open
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
-      </Box>
+      </div>
 
       {/* Main content area */}
-      <Box sx={{ 
-        flex: 1, 
-        overflow: 'hidden',
-        display: 'flex',
-      }}>
+      <div className="flex-1 overflow-hidden flex">
         {activeTab ? (
           // Render appropriate editor based on tab type
           <>
             {activeTab.type === 'note' && <NoteEditorPanel tab={activeTab} />}
             {activeTab.type === 'tag' && (
-              <Box sx={{ 
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'rgba(255, 255, 255, 0.4)',
-              }}>
-                <Typography variant="body1">Tag editor coming soon...</Typography>
-              </Box>
+              <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
+                <p className="text-base">Tag editor coming soon...</p>
+              </div>
             )}
           </>
         ) : (
           // Welcome/empty state
-          <Box sx={{ 
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(255, 255, 255, 0.4)',
-          }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
+          <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold mb-1">
                 Welcome to Notes
-              </Typography>
-              <Typography variant="body2">
+              </h2>
+              <p className="text-sm">
                 Select a note from the sidebar to view its details
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
         )}
-      </Box>
+      </div>
 
       {/* Confirm close dialog */}
       <ConfirmCloseDialog
@@ -212,6 +117,6 @@ export function VSEditorArea() {
         onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
       />
-    </Box>
+    </div>
   )
 }

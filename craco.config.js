@@ -17,6 +17,7 @@ module.exports = {
       '@/types': path.resolve(__dirname, 'src/types'),
       '@/utils': path.resolve(__dirname, 'src/utils'),
       '@/components': path.resolve(__dirname, 'src/Components'),
+      '@/Components': path.resolve(__dirname, 'src/Components'),
       '@/shared': path.resolve(__dirname, 'src/shared'),
       '@/lib': path.resolve(__dirname, 'src/lib'),
       '@/features': path.resolve(__dirname, 'src/features'),

@@ -1,11 +1,15 @@
-import KeyboardDoubleArrowLeftOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowLeftOutlined';
-import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined';
-import { Tooltip } from '@mui/material';
+import { ChevronsLeft, ChevronsRight } from 'lucide-react';
+
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '../ui/tooltip';
 
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { sitemaps } from './AllIcon';
 import { SideMenuItem } from './SideMenuItem';
-import { Expander, ExpanderArrow, NavigationList, SideMenuWrapper } from './SideMenuItem.styles';
 
 /**
  * Side navigation menu component.
@@ -33,9 +37,31 @@ export function SideMenu() {
         setExpanded(!expanded);
     };
 
+    const menuWrapperClasses = `
+        flex flex-col h-full bg-[#36454f] relative
+        transition-all duration-[400ms]
+        ${expanded ? 'w-[200px]' : 'w-12'}
+    `.trim().replace(/\s+/g, ' ');
+
+    const navigationListClasses = `
+        flex-grow flex flex-col pt-2.5
+    `.trim().replace(/\s+/g, ' ');
+
+    const expanderClasses = `
+        p-2.5 relative text-white
+        flex justify-end items-center w-full
+        mt-auto z-10 pointer-events-auto
+    `.trim().replace(/\s+/g, ' ');
+
+    const expanderArrowClasses = `
+        flex items-center justify-center p-1
+        rounded transition-colors duration-200
+        hover:bg-white/10 cursor-pointer
+    `.trim().replace(/\s+/g, ' ');
+
     return (
-        <SideMenuWrapper className={expanded ? 'expanded' : 'collapsed'}>
-            <NavigationList>
+        <div className={menuWrapperClasses}>
+            <div className={navigationListClasses}>
                 {sitemaps.map(item => (
                     <SideMenuItem 
                         key={item.code} 
@@ -43,25 +69,29 @@ export function SideMenu() {
                         expanded={expanded} 
                     />
                 ))}
-            </NavigationList>
+            </div>
             
-            <Expander className={`expander ${expanded ? 'expanded' : ''}`}>
-                <Tooltip 
-                    title={expanded ? 'Show Less' : 'Show More'} 
-                    placement="right"
-                >
-                    <ExpanderArrow
-                        onClick={handleToggleExpansion}
-                        sx={{ cursor: 'pointer' }}
-                    >
-                        {expanded ? (
-                            <KeyboardDoubleArrowLeftOutlinedIcon />
-                        ) : (
-                            <KeyboardDoubleArrowRightOutlinedIcon />
-                        )}
-                    </ExpanderArrow>
-                </Tooltip>
-            </Expander>
-        </SideMenuWrapper>
+            <div className={expanderClasses}>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div
+                                className={expanderArrowClasses}
+                                onClick={handleToggleExpansion}
+                            >
+                                {expanded ? (
+                                    <ChevronsLeft className="h-5 w-5" />
+                                ) : (
+                                    <ChevronsRight className="h-5 w-5" />
+                                )}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                            <p>{expanded ? 'Show Less' : 'Show More'}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
+        </div>
     );
 }

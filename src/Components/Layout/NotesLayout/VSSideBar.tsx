@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import { Panel } from 'react-resizable-panels'
 import type { ActivityBarView } from '../VSCodeLayout/ActivityBar'
 import { WorkspaceTree } from '@/features/tags/components/WorkspaceTree'
@@ -41,41 +40,19 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
       onExpand={onExpand}
     >
       {isVisible && (
-        <Box
-          sx={{
-            height: '100%',
-            backgroundColor: 'rgb(37, 37, 38)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
         {/* Header */}
-        <Box
-          sx={{
-            height: '35px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 12px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            fontSize: '11px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            color: 'rgba(255, 255, 255, 0.6)',
-          }}
-        >
+        <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground">
           <span>{getViewTitle(activeView)}</span>
-        </Box>
+        </div>
 
         {/* Content */}
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
+        <div className="flex-1 overflow-auto">
           {activeView === 'explorer' && <ExplorerView />}
           {activeView === 'tags' && <TagsView />}
           {activeView === 'notes' && <NotesView />}
-        </Box>
-      </Box>
+        </div>
+      </div>
       )}
     </Panel>
   )
@@ -86,10 +63,10 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
  */
 function ExplorerView() {
   return (
-    <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div className="h-full overflow-hidden flex flex-col">
       {/* Using workspace tag tree API with workspaceId=1 */}
       <WorkspaceTree workspaceId={1} includeShared={true} />
-    </Box>
+    </div>
   )
 }
 
@@ -98,8 +75,8 @@ function ExplorerView() {
  */
 function TagsView() {
   return (
-    <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-    </Box>
+    <div className="h-full overflow-hidden flex flex-col">
+    </div>
   )
 }
 
@@ -115,15 +92,10 @@ function NotesView() {
   }
 
   return (
-    <Box sx={{
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
-    }}>
+    <div className="h-full flex flex-col overflow-hidden">
       {/* NoteGrid takes full height */}
       <NoteGridPanel onNoteClick={handleNoteClick} />
-    </Box>
+    </div>
   )
 }
 
