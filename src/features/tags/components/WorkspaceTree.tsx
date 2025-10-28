@@ -7,24 +7,18 @@ import React, { useMemo, useState } from 'react';
 import { Tree, NodeApi } from 'react-arborist';
 import { useDragDropManager } from 'react-dnd';
 import {
-    Box,
-    Typography,
-    Skeleton,
-    IconButton,
-    Tooltip,
-    Alert
-} from '@mui/material';
-import { 
-    ExpandMore as ExpandMoreIcon,
-    ChevronRight as ChevronRightIcon,
-    LocalOffer as TagIcon,
-    FolderOpen as FolderOpenIcon,
-    Folder as FolderIcon,
-    WorkspacesOutlined as WorkspaceIcon,
-    Add as AddIcon,
-    Refresh as RefreshIcon,
-    UnfoldLess as CollapseAllIcon
-} from '@mui/icons-material';
+    ChevronDown,
+    ChevronRight,
+    Tag as TagIcon,
+    FolderOpen,
+    Folder,
+    Layers,
+    Plus,
+    RefreshCw,
+    ChevronsUp,
+    Loader2
+} from 'lucide-react';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
 
 import { useWorkspaceTagTree, useBatchMoveTag } from '../hooks/useTags';
 import { useTagUI } from '../store/TagUIContext';
@@ -241,7 +235,7 @@ function TagNode({
     };
     
     return (
-        <Box
+        <div
             ref={(el) => {
                 // Make entire node draggable (VS Code style - no special cursor)
                 if (dragHandle && typeof dragHandle === 'function' && el) {
@@ -252,221 +246,121 @@ function TagNode({
                     }
                 }
             }}
-            style={style}
+            style={{ ...style, paddingLeft: `${node.level * 8}px` }}
             onClick={handleMainClick}
             onContextMenu={handleRightClick}
-            sx={{
-                display: 'flex',
-                alignItems: 'center',
-                height: '100%',
-                width: '100%',
-                paddingY: '4px',
-                paddingLeft: `${node.level * 8}px`, // VSCode-style indentation: 8px per level
-                paddingRight: '8px',
-                cursor: 'pointer', // Always pointer cursor like VS Code
-                borderRadius: '4px',
-                // Dragging state: Semi-transparent for selected items being dragged
-                opacity: isDragging ? 0.4 : 1,
-                transition: 'opacity 0.2s ease-in-out, background-color 0.15s ease-in-out, outline-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
-                // Selected: Slightly lighter than hover
-                backgroundColor: isSelected ? 'rgba(90, 93, 94, 0.45)' : (isWorkspaceRoot ? 'transparent' : 'transparent'),
-                color: isSelected ? '#ffffff' : 'inherit',
-                fontWeight: isWorkspaceRoot ? 600 : 'inherit',
-                // Hover: Base hover state
-                '&:hover': {
-                    backgroundColor: isSelected ? 'rgba(90, 93, 94, 0.45)' : (isWorkspaceRoot ? 'rgba(90, 93, 94, 0.31)' : 'rgba(90, 93, 94, 0.31)'),
-                },
-                // VS Code-like selection styling with outline (no UI shift)
-                outline: isSelected ? '1px solid rgba(255, 255, 255, 0.12)' : 'none',
-                outlineOffset: '-1px', // Keep outline inside the box
-                boxShadow: isSelected ? 'inset 3px 0 0 #007acc' : 'none',
-                // Dragging indicator - blue highlight for all selected items
-                ...(isDragging && isSelected && {
-                    backgroundColor: 'rgba(0, 122, 204, 0.3)',
-                    outline: '1px solid rgba(0, 122, 204, 0.6)',
-                    outlineOffset: '-1px',
-                }),
-                // Drop target indicator - hover-like highlight (same as hover state)
-                ...(isDropTarget && {
-                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
-                    outline: '1px solid rgba(0, 122, 204, 0.5)',
-                    outlineOffset: '-1px',
-                    boxShadow: 'inset 0 0 0 1px rgba(0, 122, 204, 0.3)',
-                }),
-            }}
+            className={`
+                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
+                transition-all duration-150 ease-in-out
+                ${isDragging ? 'opacity-40' : 'opacity-100'}
+                ${isSelected
+                    ? 'bg-editor-hover text-white border-l-2 border-editor-active'
+                    : 'bg-transparent hover:bg-editor-hover'
+                }
+                ${isWorkspaceRoot ? 'font-semibold' : ''}
+                ${isDragging && isSelected
+                    ? 'bg-clickup-blue/30 outline outline-1 outline-clickup-blue/60 -outline-offset-1'
+                    : ''
+                }
+                ${isDropTarget
+                    ? 'bg-editor-hover outline outline-1 outline-clickup-blue/50 -outline-offset-1'
+                    : ''
+                }
+            `}
         >
 
             {/* Expand/Collapse Button */}
-            <IconButton
-                size="small"
+            <button
                 onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     node.toggle();
                 }}
-                sx={{ 
-                    // marginRight: '4px',
-                    padding: '2px',
-                    visibility: hasChildren ? 'visible' : 'hidden',
-                    color: '#cccccc', // Keep icon color consistent
-                }}
+                className={`p-0.5 ${hasChildren ? 'visible' : 'invisible'} text-editor-fg`}
             >
                 {hasChildren ? (
-                    node.isOpen ? <ExpandMoreIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />
+                    node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
                 ) : null}
-            </IconButton>
+            </button>
 
             {/* Tag Icon */}
-            <Box sx={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>
+            <div className="mr-2 flex items-center">
                 {/* Workspace root node */}
                 {tag.tagId < 0 ? (
-        
-        <WorkspaceIcon 
-                        fontSize="small" 
-                        sx={{ 
-                            color: tag.color || '#75beff' // Keep original color
-                        }} 
+                    <Layers
+                        className="w-4 h-4"
+                        style={{ color: tag.color || '#75beff' }}
                     />
                 ) : hasChildren ? (
-                    node.isOpen ? 
-                        <FolderOpenIcon 
-                            fontSize="small" 
-                            sx={{ color: '#dcb67a' }} // Keep folder color
-                        /> : 
-                        <FolderIcon 
-                            fontSize="small" 
-                            sx={{ color: '#dcb67a' }} // Keep folder color
-                        />
+                    node.isOpen ?
+                        <FolderOpen className="w-4 h-4 text-clickup-yellow" /> :
+                        <Folder className="w-4 h-4 text-clickup-yellow" />
                 ) : (
-                    <TagIcon 
-                        fontSize="small" 
-                        sx={{ 
-                            color: tag.color || '#75beff' // Keep original tag color
-                        }} 
+                    <TagIcon
+                        className="w-4 h-4"
+                        style={{ color: tag.color || '#75beff' }}
                     />
                 )}
-            </Box>
+            </div>
 
-            {/* Tag Info - Flexbox with 2 items */}
-            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '8px', height: '100%' }}>
-                {/* Item 1: Main tag info (icon, name, indicators) - 30% width */}
-                <Box sx={{ 
-                    width: '100%', 
-                    minWidth: 0,
-                    display: 'flex', 
-                    // border: '1px solid red',
-                    alignItems: 'center', 
-                    gap: '8px' 
-                }}>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            fontWeight: hasChildren ? 600 : 400,
-                            color: '#cccccc', // Keep text color consistent
-                            textTransform: isWorkspaceRoot ? 'uppercase' : 'none',
-                            letterSpacing: isWorkspaceRoot ? '0.5px' : 'normal',
-                        }}
-                        noWrap
+            {/* Tag Info */}
+            <div className="flex-1 min-w-0 flex items-center gap-2 h-full">
+                <div className="w-full min-w-0 flex items-center gap-2">
+                    <span
+                        className={`
+                            text-sm truncate
+                            ${hasChildren ? 'font-semibold' : 'font-normal'}
+                            ${isWorkspaceRoot ? 'uppercase tracking-wide' : ''}
+                            text-editor-fg
+                        `}
                     >
                         {tag.name}
-                    </Typography>
-
-                </Box>
-
-                {/* Item 2: Description - remaining width */}
-                {/* <Box sx={{ flex: 1, minWidth: 0 }}>
-                    {tag.description && (
-                        <Typography
-                            variant="caption"
-                            sx={{ 
-                                display: 'block', 
-                                textAlign: 'left',
-                                color: isSelected ? 'primary.contrastText' : 'text.secondary',
-                                opacity: isSelected ? 0.8 : 1,
-                            }}
-                            noWrap
-                        >
-                            {tag.description}
-                        </Typography>
-                    )}
-                </Box> */}
-            </Box>
+                    </span>
+                </div>
+            </div>
 
             {/* Action Buttons (only for workspace root) */}
             {isWorkspaceRoot && (
-                <Box 
-                    sx={{ 
-                        display: 'flex', 
-                        gap: '2px',
-                        marginLeft: 'auto',
-                        opacity: 0.7,
-                        '&:hover': {
-                            opacity: 1,
-                        },
-                    }}
+                <div
+                    className="flex gap-0.5 ml-auto opacity-70 hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()} // Prevent node selection when clicking buttons
                 >
-                    <Tooltip title="Add Tag">
-                        <IconButton
-                            size="small"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onNewFolder?.(); // Unified "Add Tag" action
-                            }}
-                            sx={{
-                                padding: '4px',
-                                color: '#cccccc', // Keep icon color consistent
-                                '&:hover': {
-                                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
-                                },
-                            }}
-                        >
-                            <AddIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    <button
+                        title="Add Tag"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onNewFolder?.(); // Unified "Add Tag" action
+                        }}
+                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
 
-                    <Tooltip title="Refresh">
-                        <IconButton
-                            size="small"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onRefresh?.();
-                            }}
-                            sx={{
-                                padding: '4px',
-                                color: '#cccccc', // Keep icon color consistent
-                                '&:hover': {
-                                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
-                                },
-                            }}
-                        >
-                            <RefreshIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    <button
+                        title="Refresh"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onRefresh?.();
+                        }}
+                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
 
-                    <Tooltip title="Collapse All">
-                        <IconButton
-                            size="small"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onCollapseAll?.();
-                            }}
-                            sx={{
-                                padding: '4px',
-                                color: '#cccccc', // Keep icon color consistent
-                                '&:hover': {
-                                    backgroundColor: 'rgba(90, 93, 94, 0.31)',
-                                },
-                            }}
-                        >
-                            <CollapseAllIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
+                    <button
+                        title="Collapse All"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onCollapseAll?.();
+                        }}
+                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                    >
+                        <ChevronsUp className="w-4 h-4" />
+                    </button>
+                </div>
             )}
 
-
-        </Box>
+        </div>
     );
 }
 
@@ -475,14 +369,17 @@ function TagNode({
  */
 function WorkspaceTreeSkeleton() {
     return (
-        <Box sx={{ padding: '16px' }}>
+        <div className="p-4">
             {Array.from({ length: 5 }).map((_, i) => (
-                <Box key={i} sx={{ display: 'flex', alignItems: 'center', mb: '8px' }}>
-                    <Skeleton variant="rectangular" width={20} height={20} sx={{ mr: '8px' }} />
-                    <Skeleton variant="text" width={`${Math.random() * 200 + 100}px`} height={20} />
-                </Box>
+                <div key={i} className="flex items-center mb-2 animate-pulse">
+                    <div className="w-5 h-5 bg-editor-hover rounded mr-2" />
+                    <div
+                        className="h-5 bg-editor-hover rounded"
+                        style={{ width: `${Math.random() * 200 + 100}px` }}
+                    />
+                </div>
             ))}
-        </Box>
+        </div>
     );
 }
 
@@ -491,24 +388,15 @@ function WorkspaceTreeSkeleton() {
  */
 function WorkspaceTreeEmpty() {
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '48px 16px',
-                textAlign: 'center',
-            }}
-        >
-            <TagIcon sx={{ fontSize: '48px', color: 'grey.400', mb: '16px' }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
+        <div className="flex flex-col items-center justify-center p-12 text-center">
+            <TagIcon className="w-12 h-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">
                 No Tags Found
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
+            </h3>
+            <p className="text-sm text-muted-foreground">
                 Create your first tag to organize your content
-            </Typography>
-        </Box>
+            </p>
+        </div>
     );
 }
 
@@ -533,23 +421,14 @@ function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; t
     if (selectedCount === 0) return null;
 
     return (
-        <Box sx={{
-            padding: '8px 16px',
-            backgroundColor: 'primary.light',
-            color: 'primary.contrastText',
-            borderRadius: '4px',
-            marginBottom: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-        }}>
-            <Typography variant="caption">
+        <div className="p-2 px-4 bg-primary/20 text-primary-foreground rounded mb-2 flex items-center justify-between">
+            <span className="text-xs">
                 {selectedCount} of {totalCount} tags selected
-            </Typography>
-            <Typography variant="caption" sx={{ opacity: 0.8 }}>
+            </span>
+            <span className="text-xs opacity-80">
                 Ctrl+Click to toggle • Shift+Click for range • Ctrl+A to select all
-            </Typography>
-        </Box>
+            </span>
+        </div>
     );
 }
 
@@ -590,52 +469,34 @@ function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }:
     const displayText = getDisplayText();
 
     return (
-        <Box
-            sx={{
-                position: 'fixed',
-                pointerEvents: 'none',
-                zIndex: 10000,
-                left: 0,
-                top: 0,
-                width: '100%',
-                height: '100%',
-            }}
-        >
+        <div className="fixed pointer-events-none z-[10000] left-0 top-0 w-full h-full">
             {/* Preview */}
-            <Box
-                sx={{
-                    position: 'absolute',
+            <div
+                style={{
                     transform: `translate(${offset.x}px, ${offset.y}px)`,
-                    backgroundColor: 'rgba(30, 30, 30, 0.95)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '6px',
-                    padding: '8px 12px',
-                    minWidth: itemCount > 1 ? '60px' : '200px',
-                    maxWidth: '300px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
                 }}
+                className={`
+                    absolute bg-editor-bg/95 border border-editor-border rounded-md p-2 px-3
+                    ${itemCount > 1 ? 'min-w-[60px]' : 'min-w-[200px]'}
+                    max-w-[300px] shadow-lg
+                `}
             >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: itemCount > 1 ? 'center' : 'flex-start' }}>
+                <div className={`flex items-center gap-2 ${itemCount > 1 ? 'justify-center' : 'justify-start'}`}>
                     {/* Icon */}
-                    <TagIcon sx={{ fontSize: '16px', color: '#75beff' }} />
+                    <TagIcon className="w-4 h-4 text-clickup-blue" />
 
                     {/* Text: Show tag name for single item, count for multiple */}
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: '#cccccc',
-                            fontWeight: itemCount > 1 ? 700 : 500,
-                            fontSize: itemCount > 1 ? '16px' : '14px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
+                    <span
+                        className={`
+                            text-editor-fg truncate
+                            ${itemCount > 1 ? 'font-bold text-base' : 'font-medium text-sm'}
+                        `}
                     >
                         {displayText}
-                    </Typography>
-                </Box>
-            </Box>
-        </Box>
+                    </span>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -1020,8 +881,10 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
     // Error state
     if (error) {
         return (
-            <Alert severity="error" sx={{ m: 2 }}>
-                Failed to load tags: {error instanceof Error ? error.message : 'Unknown error occurred'}
+            <Alert variant="destructive" className="m-4">
+                <AlertDescription>
+                    Failed to load tags: {error instanceof Error ? error.message : 'Unknown error occurred'}
+                </AlertDescription>
             </Alert>
         );
     }
@@ -1033,71 +896,20 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
 
     // Main tree render with react-arborist
     return (
-        <Box 
+        <div
             ref={treeContainerRef}
-            data-workspace-tree 
+            data-workspace-tree
             tabIndex={0}
-            sx={{ 
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '16px',
-                position: 'relative', // For loading overlay
-                '&:focus': {
-                    outline: 'none',
-                },
-                '&:focus-within': {
-                    backgroundColor: 'action.hover',
-                    transition: 'background-color 0.2s',
-                },
-            }}
+            className="h-full flex flex-col p-4 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors"
         >
             {/* Loading overlay when dragging */}
             {(isDragging || batchMoveTagMutation.isPending) && (
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                        zIndex: 1000,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        pointerEvents: 'none',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            backgroundColor: 'background.paper',
-                            padding: '16px 24px',
-                            borderRadius: '8px',
-                            boxShadow: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                width: '20px',
-                                height: '20px',
-                                border: '3px solid',
-                                borderColor: 'primary.main',
-                                borderTopColor: 'transparent',
-                                borderRadius: '50%',
-                                animation: 'spin 1s linear infinite',
-                                '@keyframes spin': {
-                                    '0%': { transform: 'rotate(0deg)' },
-                                    '100%': { transform: 'rotate(360deg)' },
-                                },
-                            }}
-                        />
-                        <Typography variant="body2">Moving tag...</Typography>
-                    </Box>
-                </Box>
+                <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
+                    <div className="bg-editor-sidebar p-4 px-6 rounded-lg shadow-lg flex items-center gap-3">
+                        <Loader2 className="w-5 h-5 text-clickup-blue animate-spin" />
+                        <span className="text-sm text-editor-fg">Moving tag...</span>
+                    </div>
+                </div>
             )}
 
             {/* <SelectionInfo 
@@ -1147,6 +959,6 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                     parentTagId={parentTagForCreate?.tagId}
                 />
             )}
-        </Box>
+        </div>
     );
 }

@@ -1,19 +1,21 @@
 /**
  * Mini Tag Creation Dialog
  * A compact dialog for quickly creating new tags from the context menu
+ * Migrated to ClickUp theme with shadcn/ui components
  */
 
 import React, { useState, useEffect } from 'react';
 import {
     Dialog,
-    DialogTitle,
     DialogContent,
-    DialogActions,
-    TextField,
-    Button,
-    Box,
-    CircularProgress,
-} from '@mui/material';
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Textarea } from '@/Components/ui/textarea';
+import { Loader2 } from 'lucide-react';
 import { useTagUI } from '../store/TagUIContext';
 import { useCreateTag } from '../hooks/useTags';
 import { useSnackbar } from 'notistack';
@@ -110,116 +112,140 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
     };
 
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            maxWidth="sm"
-            fullWidth
-            PaperProps={{
-                sx: { minHeight: '450px' }
-            }}
-        >
-            <DialogTitle>Create New Tag</DialogTitle>
-            
-            <form onSubmit={handleSubmit}>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+            <DialogContent className="sm:max-w-md min-h-[450px]">
+                <DialogHeader>
+                    <DialogTitle>Create New Tag</DialogTitle>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Parent Tag Display */}
                     {parentTagForCreate && (
-                        <TextField
-                            label="Parent Tag"
-                            value={parentTagForCreate.name}
-                            disabled
-                            fullWidth
-                            size="small"
-                            helperText="This tag will be created as a child of the selected parent"
-                        />
-                    )}
-                    
-                    <TextField
-                        autoFocus
-                        label="Tag Name"
-                        value={tagName}
-                        onChange={(e) => setTagName(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        fullWidth
-                        required
-                        disabled={createTag.isPending}
-                        placeholder="Enter tag name..."
-                    />
-                    
-                    <TextField
-                        label="Description (Optional)"
-                        value={tagDescription}
-                        onChange={(e) => setTagDescription(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        fullWidth
-                        multiline
-                        rows={2}
-                        disabled={createTag.isPending}
-                        placeholder="Enter tag description..."
-                    />
-                    
-                    {/* Icon Selection */}
-                    <GenericAutoComplete
-                        value={selectedIcon}
-                        allOptions={ICON_OPTIONS}
-                        onChange={(event, newValue) => setSelectedIcon(newValue)}
-                        inputProps={{
-                            name: 'icon',
-                            label: 'Icon',
-                            required: false,
-                        }}
-                        sx={{ width: '100%' }}
-                    />
-                    
-                    {/* Color Selection */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {selectedColor && (
-                            <Box
-                                sx={{
-                                    width: 24,
-                                    height: 24,
-                                    borderRadius: '50%',
-                                    backgroundColor: selectedColor.id,
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    flexShrink: 0,
-                                }}
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-muted-foreground">Parent Tag</label>
+                            <Input
+                                value={parentTagForCreate.name}
+                                disabled
+                                className="bg-muted"
                             />
-                        )}
+                            <p className="text-xs text-muted-foreground">
+                                This tag will be created as a child of the selected parent
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">
+                            Tag Name <span className="text-destructive">*</span>
+                        </label>
+                        <Input
+                            autoFocus
+                            value={tagName}
+                            onChange={(e) => setTagName(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            required
+                            disabled={createTag.isPending}
+                            placeholder="Enter tag name..."
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">Description (Optional)</label>
+                        <Textarea
+                            value={tagDescription}
+                            onChange={(e) => setTagDescription(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            disabled={createTag.isPending}
+                            placeholder="Enter tag description..."
+                            rows={2}
+                            className="resize-none"
+                        />
+                    </div>
+
+
+                    {/* Icon Selection */}
+                    <div className="space-y-1.5">
                         <GenericAutoComplete
-                            value={selectedColor}
-                            allOptions={COLOR_OPTIONS}
-                            onChange={(event, newValue) => setSelectedColor(newValue)}
+                            value={selectedIcon}
+                            allOptions={ICON_OPTIONS}
+                            onChange={(event, newValue) => setSelectedIcon(newValue)}
                             inputProps={{
-                                name: 'color',
-                                label: 'Color',
+                                name: 'icon',
+                                label: 'Icon',
                                 required: false,
                             }}
-                            sx={{ flex: 1 }}
+                            sx={{
+                                width: '100%',
+                                '& .MuiInputBase-root': {
+                                    color: 'hsl(var(--foreground))',
+                                    backgroundColor: 'hsl(var(--input))',
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'hsl(var(--muted-foreground))',
+                                },
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: 'hsl(var(--border))',
+                                },
+                            }}
                         />
-                    </Box>
-                </DialogContent>
+                    </div>
 
-                <DialogActions sx={{ p: 2, pt: 1 }}>
-                    <Button
-                        onClick={onClose}
-                        disabled={createTag.isPending}
-                        color="inherit"
-                    >
-                        Cancel
-                    </Button>
-                    
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        disabled={createTag.isPending || !tagName.trim()}
-                        startIcon={createTag.isPending ? <CircularProgress size={16} /> : null}
-                    >
-                        {createTag.isPending ? 'Creating...' : 'Create Tag'}
-                    </Button>
-                </DialogActions>
-            </form>
+                    {/* Color Selection */}
+                    <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                            {selectedColor && (
+                                <div
+                                    className="w-6 h-6 rounded-full border border-border flex-shrink-0"
+                                    style={{ backgroundColor: selectedColor.id as string }}
+                                />
+                            )}
+                            <GenericAutoComplete
+                                value={selectedColor}
+                                allOptions={COLOR_OPTIONS}
+                                onChange={(event, newValue) => setSelectedColor(newValue)}
+                                inputProps={{
+                                    name: 'color',
+                                    label: 'Color',
+                                    required: false,
+                                }}
+                                sx={{
+                                    flex: 1,
+                                    '& .MuiInputBase-root': {
+                                        color: 'hsl(var(--foreground))',
+                                        backgroundColor: 'hsl(var(--input))',
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'hsl(var(--muted-foreground))',
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'hsl(var(--border))',
+                                    },
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter className="gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onClose}
+                            disabled={createTag.isPending}
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            disabled={createTag.isPending || !tagName.trim()}
+                            className="bg-clickup-blue hover:bg-clickup-blue/90"
+                        >
+                            {createTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {createTag.isPending ? 'Creating...' : 'Create Tag'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
         </Dialog>
     );
 }

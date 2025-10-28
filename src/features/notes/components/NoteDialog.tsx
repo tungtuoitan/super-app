@@ -1,19 +1,20 @@
 /**
  * Note Dialog Component
  * Simple dialog to display note details when clicked from the grid
+ * Migrated to ClickUp theme with shadcn/ui components
  */
 
 import React from 'react';
 import {
     Dialog,
-    DialogTitle,
     DialogContent,
-    DialogActions,
-    Typography,
-    Button,
-    Chip,
-    Box,
-} from '@mui/material';
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Badge } from '@/Components/ui/badge';
 import { useNoteUI } from '../store/NoteUIContext';
 import type { Note } from '../types/note.types';
 import type { Tag } from '@/features/tags/types/tag.types';
@@ -30,87 +31,82 @@ export function NoteDialog() {
     }
 
     return (
-        <Dialog
-            open={isDialogOpen}
-            onClose={closeDialog}
-            maxWidth="md"
-            fullWidth
-        >
-            <DialogTitle>
-                <Typography variant="h5" component="div">
-                    {selectedNote.name}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                    {selectedNote.type && (
-                        <Chip
-                            label={selectedNote.type}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                        />
-                    )}
-                    <Chip
-                        label={selectedNote.isArchived ? 'Archived' : 'Active'}
-                        size="small"
-                        color={selectedNote.isArchived ? 'default' : 'success'}
-                        variant={selectedNote.isArchived ? 'outlined' : 'filled'}
-                    />
-                </Box>
-            </DialogTitle>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => !open && closeDialog()}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle className="text-2xl">{selectedNote.name}</DialogTitle>
+                    <div className="flex gap-2 mt-2">
+                        {selectedNote.type && (
+                            <Badge variant="outline" className="border-primary text-primary">
+                                {selectedNote.type}
+                            </Badge>
+                        )}
+                        <Badge
+                            variant={selectedNote.isArchived ? 'secondary' : 'default'}
+                            className={selectedNote.isArchived ? '' : 'bg-clickup-blue'}
+                        >
+                            {selectedNote.isArchived ? 'Archived' : 'Active'}
+                        </Badge>
+                    </div>
+                </DialogHeader>
 
-            <DialogContent>
-                {selectedNote.description && (
-                    <Box sx={{ mb: 2 }}>
-                        <Typography variant="subtitle2" gutterBottom>
-                            Description
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            {selectedNote.description}
-                        </Typography>
-                    </Box>
-                )}
-
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography variant="body2">
-                        <strong>Created:</strong> {selectedNote.createdAt.toLocaleString()}
-                    </Typography>
-                    <Typography variant="body2">
-                        <strong>Updated:</strong> {selectedNote.updatedAt?.toLocaleString() || 'N/A'}
-                    </Typography>
-                    <Typography variant="body2">
-                        <strong>Created by:</strong> {selectedNote.createdBy}
-                    </Typography>
-                    {selectedNote.tags && selectedNote.tags.length > 0 && (
-                        <Box>
-                            <Typography variant="body2" component="span">
-                                <strong>Tags:</strong>
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-                                {Array.isArray(selectedNote.tags) 
-                                    ? selectedNote.tags.map((tag: Tag, index: number) => (
-                                        <Chip
-                                            key={tag.id || tag.tagId || index}
-                                            label={tag.name}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    ))
-                                    : null
-                                }
-                            </Box>
-                        </Box>
+                <div className="space-y-4 py-4">
+                    {selectedNote.description && (
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-semibold text-foreground">Description</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                {selectedNote.description}
+                            </p>
+                        </div>
                     )}
-                </Box>
+
+                    <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground">Created:</span>
+                            <span className="text-muted-foreground">
+                                {selectedNote.createdAt.toLocaleString()}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground">Updated:</span>
+                            <span className="text-muted-foreground">
+                                {selectedNote.updatedAt?.toLocaleString() || 'N/A'}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground">Created by:</span>
+                            <span className="text-muted-foreground">{selectedNote.createdBy}</span>
+                        </div>
+                        {selectedNote.tags && selectedNote.tags.length > 0 && (
+                            <div className="space-y-1.5">
+                                <span className="font-semibold text-foreground">Tags:</span>
+                                <div className="flex gap-1.5 flex-wrap">
+                                    {Array.isArray(selectedNote.tags)
+                                        ? selectedNote.tags.map((tag: Tag, index: number) => (
+                                              <Badge
+                                                  key={tag.id || tag.tagId || index}
+                                                  variant="outline"
+                                                  className="border-clickup-blue/40 text-clickup-blue"
+                                              >
+                                                  {tag.name}
+                                              </Badge>
+                                          ))
+                                        : null}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" onClick={closeDialog}>
+                        Close
+                    </Button>
+                    <Button onClick={closeDialog} className="bg-clickup-blue hover:bg-clickup-blue/90">
+                        Edit Note
+                    </Button>
+                </DialogFooter>
             </DialogContent>
-
-            <DialogActions>
-                <Button onClick={closeDialog}>
-                    Close
-                </Button>
-                <Button variant="contained" onClick={closeDialog}>
-                    Edit Note
-                </Button>
-            </DialogActions>
         </Dialog>
     );
 }

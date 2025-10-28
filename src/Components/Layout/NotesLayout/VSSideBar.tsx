@@ -82,6 +82,7 @@ function TagsView() {
 
 /**
  * Notes View - Notes list interface with grid
+ * Shows compact sidebar view with only name column
  */
 function NotesView() {
   const { openNoteTab } = useEditorTabs()
@@ -93,8 +94,8 @@ function NotesView() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* NoteGrid takes full height */}
-      <NoteGridPanel onNoteClick={handleNoteClick} />
+      {/* NoteGrid in sidebar mode - only shows name column */}
+      <NoteGridPanel onNoteClick={handleNoteClick} sidebarMode={true} />
     </div>
   )
 }

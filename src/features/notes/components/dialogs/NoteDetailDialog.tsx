@@ -1,55 +1,15 @@
 /**
  * Note Detail Dialog Component
  * Main dialog container for note details with fullscreen layout
- * Replicates RFDDetailDialog UI structure but follows SuperApp architecture guidelines
+ * Migrated to ClickUp theme with shadcn/ui components
  */
 
 import React from 'react';
-import { 
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    Typography,
-    IconButton,
-    AppBar,
-    Toolbar,
-    Box,
-    Backdrop,
-    CircularProgress,
-    styled,
-    Grid2,
-    TextField,
-    Button,
-    Chip,
-} from '@mui/material';
-import { GenericTextField } from '@/shared/components/ui/GenericTextField';
-import { GenericTagAutoComplete } from '@/shared/components/ui/TagAutoComplete';
-import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components/ui/GenericAutoComplete';
-import CloseIcon from '@mui/icons-material/Close';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Dialog, DialogContent } from '@/Components/ui/dialog';
+import { X, Loader2 } from 'lucide-react';
 import { useNoteUI } from '../../store/NoteUIContext';
 import { NoteContentToolbar } from './NoteContentToolbar';
-import {NoteDetailDialogContent} from './NoteDetailDialogContent';
-
-const StyledDialog = styled(Dialog)(({ theme }) => ({
-    '& .MuiDialog-paper': {
-        margin: 0,
-        maxWidth: 'none',
-        maxHeight: 'none',
-        width: '100vw',
-        height: '100vh',
-        borderRadius: 0,
-    },
-    '& .MuiDialogContent-root': {
-        padding: 0,
-        overflowY: 'hidden',
-        height: '100%',
-        background: 'rgb(246, 246, 246)',
-    },
-}));
+import { NoteDetailDialogContent } from './NoteDetailDialogContent';
 
 
 
@@ -68,86 +28,48 @@ export function NoteDetailDialog() {
     const isCreateMode = selectedNote.noteId === 0;
 
     return (
-        <StyledDialog
-            open={isDialogOpen}
-            onClose={closeDialog}
-            fullScreen
-            disableEnforceFocus
-        >
-            {/* Dialog Header */}
-            <Box sx={{
-                flexGrow: 1,
-                display: 'flex',
-                maxHeight: '64px',
-                zIndex: 1300,
-                '& header.MuiPaper-root': {
-                    height: '64px',
-                    boxShadow: 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px',
-                    '& .MuiToolbar-root': {
-                        backgroundColor: '#fff!important',
-                        color: '#000',
-                        minHeight: 64,
-                    }
-                }
-            }}>
-                {/* Note Detail Dialog Header */}
-                <AppBar 
-                    position="static" 
-                    elevation={2}
-                    sx={{ 
-                        backgroundColor: '#fff',
-                        color: '#000',
-                        borderBottom: '1px solid #e0e0e0',
-                        height: '64px',
-                        boxShadow: 'rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px'
-                    }}
-                >
-                    <Toolbar variant="dense" sx={{ minHeight: '64px !important' }}>
-                        <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="h5" sx={{ lineHeight: 1 }}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => !open && closeDialog()}>
+            <DialogContent className="max-w-none w-screen h-screen m-0 p-0 rounded-none flex flex-col">
+                {/* Dialog Header */}
+                <header className="flex-shrink-0 bg-card border-b border-border shadow-sm">
+                    <div className="flex items-center justify-between h-16 px-6">
+                        <div className="flex-1">
+                            <h2 className="text-xl font-bold text-foreground leading-tight">
                                 {isCreateMode ? 'Create New Note' : `${selectedNote.name || 'Untitled Note'}`}
-                            </Typography>
+                            </h2>
                             {!isCreateMode && (
-                                <Typography variant="caption" sx={{ fontSize: 11.5 }}>
+                                <p className="text-xs text-muted-foreground mt-0.5">
                                     Created: {selectedNote.createdAt.toLocaleDateString()}
-                            {selectedNote.createdBy && ` • Created by: ${selectedNote.createdBy}`}
-                                </Typography>
+                                    {selectedNote.createdBy && ` • Created by: ${selectedNote.createdBy}`}
+                                </p>
                             )}
-                        </Box>
-                        
-                        <IconButton
-                            edge="end"
-                            color="inherit"
+                        </div>
+
+                        <button
                             onClick={closeDialog}
+                            className="p-2 hover:bg-editor-hover rounded-md transition-colors"
                             aria-label="close"
-                            sx={{ color: '#000' }}
                         >
-                            <CloseIcon />
-                        </IconButton>
-                    </Toolbar>
-                </AppBar>
-            </Box>
+                            <X className="w-5 h-5 text-foreground" />
+                        </button>
+                    </div>
+                </header>
 
-            {/* Toolbar Section */}
-            <NoteContentToolbar />
+                {/* Toolbar Section */}
+                <NoteContentToolbar />
 
-            {/* Loading Backdrop */}
-            <Backdrop 
-                open={loading} 
-                sx={{ 
-                    color: '#fff', 
-                    zIndex: 9999999 
-                }}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
-
-            {/* Dialog Content */}
-            <DialogContent className="note-dialog-content">
-                {selectedNote && (
-                    <NoteDetailDialogContent />
+                {/* Loading Backdrop */}
+                {loading && (
+                    <div className="absolute inset-0 bg-black/50 z-[9999] flex items-center justify-center">
+                        <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    </div>
                 )}
+
+                {/* Dialog Content */}
+                <div className="flex-1 overflow-hidden bg-background">
+                    {selectedNote && <NoteDetailDialogContent />}
+                </div>
             </DialogContent>
-        </StyledDialog>
+        </Dialog>
     );
 }
