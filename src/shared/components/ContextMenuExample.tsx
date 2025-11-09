@@ -3,79 +3,53 @@
  */
 
 import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
 import { useContextMenu } from '../contexts/ContextMenuContext';
 
 export function ContextMenuExample() {
     const { showContextMenu } = useContextMenu();
 
     return (
-        <Box sx={{ p: 3, maxWidth: 600 }}>
-            <Typography variant="h5" gutterBottom>
+        <div className="p-6 max-w-2xl">
+            <h2 className="text-2xl font-semibold mb-4">
                 Context Menu Examples
-            </Typography>
+            </h2>
             
-            <Typography variant="body1" sx={{ mb: 2 }}>
+            <p className="mb-4 text-muted-foreground">
                 Right-click on the areas below to see different context menus:
-            </Typography>
+            </p>
 
             {/* Default context menu */}
-            <Paper
-                sx={{
-                    p: 3,
-                    mb: 2,
-                    cursor: 'context-menu',
-                    '&:hover': {
-                        backgroundColor: 'action.hover',
-                    },
-                }}
+            <div
+                className="p-6 mb-4 rounded-lg border bg-card cursor-context-menu hover:bg-accent transition-colors"
                 onContextMenu={(e) => showContextMenu(e, 'default')}
             >
-                <Typography variant="h6">Default Menu Area</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <h3 className="text-lg font-semibold mb-2">Default Menu Area</h3>
+                <p className="text-sm text-muted-foreground">
                     Right-click here for the default context menu
-                </Typography>
-            </Paper>
+                </p>
+            </div>
 
             {/* Tag context menu */}
-            <Paper
-                sx={{
-                    p: 3,
-                    mb: 2,
-                    cursor: 'context-menu',
-                    backgroundColor: 'primary.light',
-                    color: 'primary.contrastText',
-                    '&:hover': {
-                        backgroundColor: 'primary.main',
-                    },
-                }}
+            <div
+                className="p-6 mb-4 rounded-lg bg-primary text-primary-foreground cursor-context-menu hover:bg-primary/90 transition-colors"
                 onContextMenu={(e) => showContextMenu(e, 'tag')}
             >
-                <Typography variant="h6">Tag Menu Area</Typography>
-                <Typography variant="body2">
+                <h3 className="text-lg font-semibold mb-2">Tag Menu Area</h3>
+                <p className="text-sm">
                     Right-click here for tag-specific context menu
-                </Typography>
-            </Paper>
+                </p>
+            </div>
 
             {/* Note context menu */}
-            <Paper
-                sx={{
-                    p: 3,
-                    mb: 2,
-                    cursor: 'context-menu',
-                    backgroundColor: 'secondary.light',
-                    color: 'secondary.contrastText',
-                    '&:hover': {
-                        backgroundColor: 'secondary.main',
-                    },
-                }}
+            <div
+                className="p-6 mb-4 rounded-lg bg-secondary text-secondary-foreground cursor-context-menu hover:bg-secondary/90 transition-colors"
                 onContextMenu={(e) => showContextMenu(e, 'note')}
             >
-                <Typography variant="h6">Note Menu Area</Typography>
-                <Typography variant="body2">
+                <h3 className="text-lg font-semibold mb-2">Note Menu Area</h3>
+                <p className="text-sm">
                     Right-click here for note-specific context menu
-                </Typography>
-            </Paper>
-        </Box>
+                </p>
+            </div>
+        </div>
     );
 }

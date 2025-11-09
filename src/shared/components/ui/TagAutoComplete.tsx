@@ -1,13 +1,22 @@
-import React from 'react';
-import { 
-    Autocomplete, 
-    TextField, 
-    Stack,
-    AutocompleteRenderOptionState
-} from '@mui/material';
-import { HTMLAttributes } from 'react';
+import React, { useState } from 'react';
+import { X, Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/Components/ui/badge';
+import { Button } from '@/Components/ui/button';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+} from '@/Components/ui/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/Components/ui/popover';
+import { Label } from '@/Components/ui/label';
 import { IAutoCompleteOptions } from './GenericAutoComplete';
-import { AutoCompleteOption } from './AutoCompleteOption';
 
 export interface GenericTagAutoCompleteProps {
     /** Array of available tag options */
@@ -22,8 +31,8 @@ export interface GenericTagAutoCompleteProps {
     label?: string;
     /** Placeholder text */
     placeholder?: string;
-    /** Additional styling */
-    sx?: any;
+    /** Additional CSS class */
+    className?: string;
     /** Size of the component */
     size?: 'small' | 'medium';
     /** Test ID for testing purposes */
@@ -52,10 +61,11 @@ export function GenericTagAutoComplete({
     disabled = false,
     label = 'Tags',
     placeholder = '+ Add Tag',
-    sx = { marginTop: '15px' },
+    className,
     size = 'small',
     'data-testid': testId,
 }: GenericTagAutoCompleteProps) {
+    const [open, setOpen] = useState(false);
     
     // Convert comma-separated string to array of selected options
     const selectedIds = value ? value.split(',').filter(Boolean) : [];
@@ -68,74 +78,114 @@ export function GenericTagAutoComplete({
         ? options.filter(option => !selectedIds.includes(String(option.id)))
         : options;
 
-    // Render custom option with disabled state support
-    const renderOption = (
-        props: HTMLAttributes<HTMLLIElement>, 
-        option: IAutoCompleteOptions, 
-        state: AutocompleteRenderOptionState
-    ) => {
-        if (option.isActive === false) {
-            props['aria-disabled'] = true;
-        }
-        // Extract key from props to avoid React warning
-        const { key, ...restProps } = props as any;
-        return <AutoCompleteOption key={key} {...restProps}>{option.label || option.desc}</AutoCompleteOption>;
+    // Handle adding a tag
+    const handleSelect = (option: IAutoCompleteOptions) => {
+        const newSelectedOptions = [...selectedOptions, option];
+        const idsString = newSelectedOptions.map(opt => opt.id).join(',');
+        onChange(idsString);
     };
 
-    // Handle selection change
-    const handleChange = (
-        event: React.SyntheticEvent,
-        newValue: IAutoCompleteOptions[] | null
-    ) => {
-        if (newValue === null) {
-            onChange('');
-        } else {
-            const idsString = newValue.map((option) => option.id).join(',');
-            onChange(idsString);
-        }
+    // Handle removing a tag
+    const handleRemove = (optionId: number | string) => {
+        const newSelectedOptions = selectedOptions.filter(opt => opt.id !== optionId);
+        const idsString = newSelectedOptions.map(opt => opt.id).join(',');
+        onChange(idsString);
     };
+
+    const sizeClasses = size === 'small' ? 'h-9 text-sm' : 'h-10 text-base';
 
     return (
-        <Stack>
-            <Autocomplete
-                multiple
-                disabled={disabled}
-                size={size}
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                        borderRadius: '4px !important',
-                    },
-                    '& .MuiSvgIcon-root': {
-                        color: '#9e9e9e', // Default gray color for dropdown arrow
-                    },
-                    '& .MuiChip-root': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.08)', // Gray background for tag chips
-                        color: '#000000DE', // White text for contrast
-                        '& .MuiChip-deleteIcon': {
-                            color: 'rgba(0, 0, 0, 0.15)', // White delete icon
-                            '&:hover': {
-                                color: '#fff', // Slightly lighter on hover
-                            }
-                        }
-                    },
-                    ...sx
-                }}
-                options={availableOptions}
-                value={selectedOptions}
-                onChange={handleChange}
-                renderOption={renderOption}
-                getOptionLabel={(option) => option.label || option.desc || ''}
-                renderInput={(params) => (
-                    <TextField 
-                        {...params} 
-                        label={label} 
-                        placeholder={placeholder}
-                        data-testid={testId}
-                    />
-                )}
-                data-testid={testId ? `${testId}-autocomplete` : undefined}
-            />
-        </Stack>
+        <div className={cn("w-full space-y-2", className)} data-testid={testId}>
+            {label && (
+                <Label className="text-sm font-medium">{label}</Label>
+            )}
+            
+            {/* Selected tags display */}
+            {selectedOptions.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-background min-h-[40px]">
+                    {selectedOptions.map((option) => (
+                        <Badge 
+                            key={option.id} 
+                            variant="secondary"
+                            className="gap-1 pl-2 pr-1"
+                        >
+                            <span>{option.label || option.desc}</span>
+                            {!disabled && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemove(option.id);
+                                    }}
+                                    className="hover:bg-muted rounded-sm p-0.5 ml-1"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            )}
+                        </Badge>
+                    ))}
+                </div>
+            )}
+            
+            {/* Add tag dropdown */}
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        disabled={disabled || availableOptions.length === 0}
+                        className={cn(
+                            "w-full justify-between",
+                            sizeClasses,
+                            !selectedOptions.length && "text-muted-foreground"
+                        )}
+                        data-testid={testId ? `${testId}-trigger` : undefined}
+                    >
+                        <span className="truncate">
+                            {selectedOptions.length === 0 ? placeholder : `${selectedOptions.length} selected`}
+                        </span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[300px] p-0" align="start">
+                    <Command>
+                        <CommandInput placeholder="Search tags..." />
+                        <CommandEmpty>No tag found.</CommandEmpty>
+                        <CommandGroup className="max-h-[200px] overflow-auto">
+                            {availableOptions.map((option) => {
+                                const isDisabled = option.isActive === false;
+                                const label = option.label || option.desc || '';
+
+                                return (
+                                    <CommandItem
+                                        key={option.id}
+                                        value={`${option.id}-${label}`}
+                                        onSelect={() => {
+                                            if (!isDisabled) {
+                                                handleSelect(option);
+                                                // Keep popover open for multiple selections
+                                            }
+                                        }}
+                                        disabled={isDisabled}
+                                        className={cn(
+                                            isDisabled && "opacity-50 cursor-not-allowed"
+                                        )}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4 opacity-0"
+                                            )}
+                                        />
+                                        <span>{label}</span>
+                                    </CommandItem>
+                                );
+                            })}
+                        </CommandGroup>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+        </div>
     );
 }
 

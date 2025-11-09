@@ -1,21 +1,15 @@
-import React, { MouseEventHandler } from 'react';
-import { 
-    AppBar, 
-    Box, 
-    Dialog, 
-    DialogContent, 
-    IconButton, 
-    SxProps, 
-    Theme, 
-    Toolbar, 
-    Tooltip, 
-    Typography, 
-    styled, 
-    useMediaQuery, 
-    useTheme 
-} from '@mui/material';
-import { CSSProperties } from '@mui/styles';
-import CloseIcon from '@mui/icons-material/Close';
+import React, { MouseEventHandler, useEffect } from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/ui/tooltip';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { CSSProperties } from 'react';
 
 /**
  * Props interface for dialog content customization.
@@ -25,8 +19,8 @@ export interface IDialogContentProps {
     children: React.ReactNode | null;
     /** Optional inline styles for dialog content */
     style?: CSSProperties;
-    /** Optional MUI sx prop for dialog content styling */
-    sx?: SxProps<Theme>;
+    /** Optional class name for dialog content styling */
+    className?: string;
 }
 
 /**
@@ -52,7 +46,7 @@ export interface IDialogContainerProps {
     /** Custom toolbar content */
     toolbarContent?: React.ReactNode;
     /** Additional styling for dialog */
-    sx?: SxProps<Theme>;
+    className?: string;
     /** Inline styles for dialog */
     style?: CSSProperties;
     /** Whether to disable backdrop click close */
@@ -62,39 +56,20 @@ export interface IDialogContainerProps {
 }
 
 /**
- * Styled dialog content component with custom padding and styling.
- */
-const StyledDialogContent = styled(DialogContent)({
-    padding: '16px 24px',
-    minHeight: '200px',
-    display: 'flex',
-    flexDirection: 'column',
-});
-
-/**
- * Styled toolbar with responsive design and consistent spacing.
- */
-const StyledToolbar = styled(Toolbar)({
-    paddingLeft: '16px !important',
-    paddingRight: '8px !important',
-    minHeight: '56px',
-});
-
-/**
  * DialogContainer - A reusable dialog wrapper component.
- * 
+ *
  * This component provides a consistent dialog interface with:
  * - Responsive design with mobile fullscreen support
  * - Customizable header with title and close button
  * - Flexible content area with proper spacing
  * - Configurable backdrop and escape key behavior
  * - Built-in accessibility features
- * 
+ *
  * The component automatically adapts to mobile screens by using
  * fullscreen mode on smaller devices for better user experience.
- * 
+ *
  * @param props - Dialog configuration props
- * @returns Configured Material-UI Dialog component
+ * @returns Configured Dialog component
  */
 export function DialogContainer({
     open,
@@ -106,24 +81,29 @@ export function DialogContainer({
     fullWidth = true,
     dialogContentProps,
     toolbarContent,
-    sx,
+    className,
     style,
     disableBackdropClick = false,
     disableEscapeKeyDown = false,
+    children,
     ...props
 }: IDialogContainerProps & { children?: React.ReactNode }) {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // Detect mobile for responsive fullscreen
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     const fullScreen = forceFullScreen || isMobile;
 
-    const handleClose = (_event: {}, reason: string) => {
-        if (disableBackdropClick && reason === 'backdropClick') {
-            return;
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
+            onClose?.();
         }
-        if (disableEscapeKeyDown && reason === 'escapeKeyDown') {
-            return;
-        }
-        onClose?.();
     };
 
     const handleCloseClick: MouseEventHandler = (event) => {
@@ -131,93 +111,95 @@ export function DialogContainer({
         onClose?.();
     };
 
+    // Map maxWidth to Tailwind classes
+    const getMaxWidthClass = () => {
+        if (maxWidth === false) return 'max-w-none';
+        const widthMap = {
+            xs: 'max-w-xs',
+            sm: 'max-w-sm',
+            md: 'max-w-md',
+            lg: 'max-w-lg',
+            xl: 'max-w-xl',
+        };
+        return widthMap[maxWidth] || 'max-w-md';
+    };
+
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
-            fullScreen={fullScreen}
-            maxWidth={maxWidth}
-            fullWidth={fullWidth}
-            sx={{
-                '& .MuiDialog-paper': {
-                    margin: fullScreen ? 0 : '32px',
-                    maxHeight: fullScreen ? '100vh' : 'calc(100vh - 64px)',
-                },
-                ...sx,
-            }}
-            style={style}
-            PaperProps={{
-                sx: {
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                },
-            }}
+            onOpenChange={handleOpenChange}
         >
-            {(title || showCloseButton || toolbarContent) && (
-                <AppBar
-                    position="static"
-                    color="default"
-                    elevation={1}
-                    sx={{
-                        backgroundColor: 'background.paper',
-                        color: 'text.primary',
-                    }}
-                >
-                    <StyledToolbar>
+            <DialogContent
+                className={cn(
+                    'flex flex-col overflow-hidden p-0',
+                    fullScreen && 'w-screen h-screen max-w-none m-0 rounded-none',
+                    !fullScreen && getMaxWidthClass(),
+                    fullWidth && !fullScreen && 'w-full',
+                    className
+                )}
+                style={style}
+                onEscapeKeyDown={(e) => {
+                    if (disableEscapeKeyDown) {
+                        e.preventDefault();
+                    }
+                }}
+                onPointerDownOutside={(e) => {
+                    if (disableBackdropClick) {
+                        e.preventDefault();
+                    }
+                }}
+                {...props}
+            >
+                {/* Header with title and close button */}
+                {(title || showCloseButton || toolbarContent) && (
+                    <div className="flex items-center justify-between border-b bg-background px-4 py-3 min-h-[56px]">
                         {/* Title section */}
-                        <Typography
-                            variant="h6"
-                            component="div"
-                            sx={{
-                                flexGrow: 1,
-                                fontWeight: 500,
-                                fontSize: '1.1rem',
-                            }}
-                        >
+                        <h2 className="text-lg font-medium flex-grow">
                             {title}
-                        </Typography>
+                        </h2>
 
                         {/* Custom toolbar content */}
                         {toolbarContent && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                            <div className="flex items-center mr-2">
                                 {toolbarContent}
-                            </Box>
+                            </div>
                         )}
 
                         {/* Close button */}
                         {showCloseButton && onClose && (
-                            <Tooltip title="Close">
-                                <IconButton
-                                    aria-label="close"
-                                    onClick={handleCloseClick}
-                                    size="small"
-                                    sx={{
-                                        color: 'text.secondary',
-                                        '&:hover': {
-                                            backgroundColor: 'action.hover',
-                                        },
-                                    }}
-                                >
-                                    <CloseIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={handleCloseClick}
+                                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                            aria-label="close"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Close</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         )}
-                    </StyledToolbar>
-                </AppBar>
-            )}
+                    </div>
+                )}
 
-            {/* Dialog content */}
-            <StyledDialogContent
-                style={dialogContentProps?.style}
-                sx={{
-                    flex: 1,
-                    overflow: 'auto',
-                    ...dialogContentProps?.sx,
-                }}
-            >
-                {dialogContentProps?.children || props.children}
-            </StyledDialogContent>
+                {/* Dialog content */}
+                <div
+                    className={cn(
+                        'flex-1 overflow-auto p-6 min-h-[200px] flex flex-col',
+                        dialogContentProps?.className
+                    )}
+                    style={dialogContentProps?.style}
+                >
+                    {dialogContentProps?.children || children}
+                </div>
+            </DialogContent>
         </Dialog>
     );
 }

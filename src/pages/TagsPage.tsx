@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
 import { WorkspaceTree } from '../features/tags/components/WorkspaceTree';
@@ -39,9 +38,9 @@ function TagsPageContent() {
 
     
     return (
-        <div style={{ height: '100%', width: '100%'  }}>
+        <div className="h-full w-full">
             {/* Toolbar with fixed height */}
-            <Box sx={{ flexShrink: 0 }}>
+            <div className="shrink-0">
                 <ToolbarContainer>
                     <TagAdd />
                     <Grow />
@@ -50,20 +49,12 @@ function TagsPageContent() {
                     <TagLayoutSelector />
                     <TagFilter />
                 </ToolbarContainer>
-            </Box>
-            
+            </div>
+
             {/* Tag Tree Container that takes remaining height */}
-            <Box sx={{ 
-                flex: 1,
-                margin: '20px 0 0 20px',
-                height: 'calc(100% - 64px - 20px)', // 64px toolbar + 20px margin
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: 'background.paper',
-            }}>
+            <div className="flex-1 mt-5 ml-5 h-[calc(100%-64px-20px)] overflow-auto flex flex-col bg-background">
                 {/* <TagTree /> */}
-            </Box>
+            </div>
 
             {/* Tag Creation Dialog from Context Menu */}
             <TagCreateDialog

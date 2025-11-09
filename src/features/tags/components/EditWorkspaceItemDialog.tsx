@@ -4,53 +4,52 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    Button,
-    Box,
-    CircularProgress,
-    Alert,
-    Typography,
-    InputAdornment,
-} from '@mui/material';
-import { 
-    Edit as EditIcon,
-    ColorLens as ColorIcon,
-    Notes as NotesIcon,
-    Label as LabelIcon,
-    DriveFileRenameOutline as NameIcon,
-} from '@mui/icons-material';
+import { Edit, Palette, FileText, Tag as TagIcon, Type, Loader2 } from 'lucide-react';
 import { useUpdateWorkspaceItem } from '../hooks/useWorkspace';
 import { useSnackbar } from 'notistack';
-import { GenericAutoComplete, IAutoCompleteOptions } from '@/shared/components/ui/GenericAutoComplete';
 import type { UpdateWorkspaceItemRequest } from '../types/workspace.types';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Textarea } from '@/Components/ui/textarea';
+import { Label } from '@/Components/ui/label';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/ui/select';
 
 // Predefined color options
-const COLOR_OPTIONS: IAutoCompleteOptions[] = [
-    { id: 1, code: '#F44336', label: 'Red', desc: 'Red' },
-    { id: 2, code: '#E91E63', label: 'Pink', desc: 'Pink' },
-    { id: 3, code: '#9C27B0', label: 'Purple', desc: 'Purple' },
-    { id: 4, code: '#673AB7', label: 'Deep Purple', desc: 'Deep Purple' },
-    { id: 5, code: '#3F51B5', label: 'Indigo', desc: 'Indigo' },
-    { id: 6, code: '#2196F3', label: 'Blue', desc: 'Blue' },
-    { id: 7, code: '#03A9F4', label: 'Light Blue', desc: 'Light Blue' },
-    { id: 8, code: '#00BCD4', label: 'Cyan', desc: 'Cyan' },
-    { id: 9, code: '#009688', label: 'Teal', desc: 'Teal' },
-    { id: 10, code: '#4CAF50', label: 'Green', desc: 'Green' },
-    { id: 11, code: '#8BC34A', label: 'Light Green', desc: 'Light Green' },
-    { id: 12, code: '#CDDC39', label: 'Lime', desc: 'Lime' },
-    { id: 13, code: '#FFEB3B', label: 'Yellow', desc: 'Yellow' },
-    { id: 14, code: '#FFC107', label: 'Amber', desc: 'Amber' },
-    { id: 15, code: '#FF9800', label: 'Orange', desc: 'Orange' },
-    { id: 16, code: '#FF5722', label: 'Deep Orange', desc: 'Deep Orange' },
-    { id: 17, code: '#795548', label: 'Brown', desc: 'Brown' },
-    { id: 18, code: '#9E9E9E', label: 'Grey', desc: 'Grey' },
-    { id: 19, code: '#607D8B', label: 'Blue Grey', desc: 'Blue Grey' },
-    { id: 20, code: '#000000', label: 'Black', desc: 'Black' },
+const COLOR_OPTIONS = [
+    { value: '#F44336', label: 'Red' },
+    { value: '#E91E63', label: 'Pink' },
+    { value: '#9C27B0', label: 'Purple' },
+    { value: '#673AB7', label: 'Deep Purple' },
+    { value: '#3F51B5', label: 'Indigo' },
+    { value: '#2196F3', label: 'Blue' },
+    { value: '#03A9F4', label: 'Light Blue' },
+    { value: '#00BCD4', label: 'Cyan' },
+    { value: '#009688', label: 'Teal' },
+    { value: '#4CAF50', label: 'Green' },
+    { value: '#8BC34A', label: 'Light Green' },
+    { value: '#CDDC39', label: 'Lime' },
+    { value: '#FFEB3B', label: 'Yellow' },
+    { value: '#FFC107', label: 'Amber' },
+    { value: '#FF9800', label: 'Orange' },
+    { value: '#FF5722', label: 'Deep Orange' },
+    { value: '#795548', label: 'Brown' },
+    { value: '#9E9E9E', label: 'Grey' },
+    { value: '#607D8B', label: 'Blue Grey' },
+    { value: '#000000', label: 'Black' },
 ];
 
 interface EditWorkspaceItemDialogProps {
@@ -85,7 +84,6 @@ export function EditWorkspaceItemDialog({
     const [label, setLabel] = useState(currentLabel);
     const [notes, setNotes] = useState(currentNotes);
     const [color, setColor] = useState(currentColor);
-    const [selectedColorOption, setSelectedColorOption] = useState<IAutoCompleteOptions | null>(null);
     const [icon, setIcon] = useState(currentIcon);
     const [sortOrder, setSortOrder] = useState(currentSortOrder);
     const [errors, setErrors] = useState<{ 
@@ -111,10 +109,6 @@ export function EditWorkspaceItemDialog({
             setIcon(currentIcon);
             setSortOrder(currentSortOrder);
             setErrors({});
-            
-            // Find and set selected color option
-            const colorOpt = COLOR_OPTIONS.find(opt => opt.code === currentColor);
-            setSelectedColorOption(colorOpt || null);
         }
     }, [open, currentName, currentLabel, currentNotes, currentColor, currentIcon, currentSortOrder]);
 
@@ -218,170 +212,184 @@ export function EditWorkspaceItemDialog({
     };
 
     return (
-        <Dialog 
-            open={open} 
-            onClose={handleClose}
-            maxWidth="sm"
-            fullWidth
-        >
-            <DialogTitle>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <EditIcon />
-                    <span>Edit: {itemName}</span>
-                </Box>
-            </DialogTitle>
+        <Dialog open={open} onOpenChange={handleClose}>
+            <DialogContent className="sm:max-w-[525px]">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Edit className="h-5 w-5" />
+                        <span>Edit: {itemName}</span>
+                    </DialogTitle>
+                </DialogHeader>
 
-            <DialogContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                <div className="flex flex-col gap-4 py-4">
                     {/* Name */}
-                    <TextField
-                        label="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        error={!!errors.name}
-                        helperText={errors.name || 'The name of this item'}
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <NameIcon fontSize="small" />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="name" className="flex items-center gap-2">
+                            <Type className="h-4 w-4" />
+                            Name
+                        </Label>
+                        <Input
+                            id="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className={errors.name ? 'border-red-500' : ''}
+                        />
+                        {errors.name ? (
+                            <p className="text-sm text-red-500">{errors.name}</p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">The name of this item</p>
+                        )}
+                    </div>
 
                     {/* Label */}
-                    <TextField
-                        label="Custom Label"
-                        value={label}
-                        onChange={(e) => setLabel(e.target.value)}
-                        error={!!errors.label}
-                        helperText={errors.label || 'Optional custom label for this item'}
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <LabelIcon fontSize="small" />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="label" className="flex items-center gap-2">
+                            <TagIcon className="h-4 w-4" />
+                            Custom Label
+                        </Label>
+                        <Input
+                            id="label"
+                            value={label}
+                            onChange={(e) => setLabel(e.target.value)}
+                            className={errors.label ? 'border-red-500' : ''}
+                        />
+                        {errors.label ? (
+                            <p className="text-sm text-red-500">{errors.label}</p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Optional custom label for this item</p>
+                        )}
+                    </div>
 
                     {/* Notes */}
-                    <TextField
-                        label="Notes"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        error={!!errors.notes}
-                        helperText={errors.notes || 'Additional notes about this item'}
-                        multiline
-                        rows={3}
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <NotesIcon fontSize="small" />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="notes" className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Notes
+                        </Label>
+                        <Textarea
+                            id="notes"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            rows={3}
+                            className={errors.notes ? 'border-red-500' : ''}
+                        />
+                        {errors.notes ? (
+                            <p className="text-sm text-red-500">{errors.notes}</p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Additional notes about this item</p>
+                        )}
+                    </div>
 
-                    {/* Color - Using GenericAutoComplete */}
-                    <GenericAutoComplete
-                        value={selectedColorOption}
-                        allOptions={COLOR_OPTIONS}
-                        inputProps={{
-                            name: 'color',
-                            label: 'Color',
-                            error: !!errors.color,
-                        }}
-                        onChange={(event, newValue) => {
-                            setSelectedColorOption(newValue);
-                            setColor(newValue?.code || '');
-                        }}
-                        renderOptionProps={{
-                            sx: {
-                                '& .MuiAutocomplete-option': {
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                },
-                            },
-                        }}
-                        sx={{ width: '100%' }}
-                    />
-                    {errors.color && (
-                        <Typography variant="caption" color="error" sx={{ mt: -1, ml: 2 }}>
-                            {errors.color}
-                        </Typography>
-                    )}
-
-                    {/* Color Preview */}
-                    {color && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
-                            <Box
-                                sx={{
-                                    width: 24,
-                                    height: 24,
-                                    borderRadius: 1,
-                                    backgroundColor: color,
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                }}
-                            />
-                            <Typography variant="caption" color="text.secondary">
-                                {color}
-                            </Typography>
-                        </Box>
-                    )}
+                    {/* Color */}
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="color" className="flex items-center gap-2">
+                            <Palette className="h-4 w-4" />
+                            Color
+                        </Label>
+                        <Select value={color} onValueChange={setColor}>
+                            <SelectTrigger id="color" className={errors.color ? 'border-red-500' : ''}>
+                                <SelectValue placeholder="Select a color" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {COLOR_OPTIONS.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="h-4 w-4 rounded border"
+                                                style={{ backgroundColor: option.value }}
+                                            />
+                                            <span>{option.label}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.color && (
+                            <p className="text-sm text-red-500">{errors.color}</p>
+                        )}
+                        
+                        {/* Color Preview */}
+                        {color && (
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className="h-6 w-6 rounded border"
+                                    style={{ backgroundColor: color }}
+                                />
+                                <span className="text-sm text-muted-foreground">{color}</span>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Icon */}
-                    <TextField
-                        label="Icon"
-                        value={icon}
-                        onChange={(e) => setIcon(e.target.value)}
-                        error={!!errors.icon}
-                        helperText={errors.icon || 'Icon identifier (optional)'}
-                        fullWidth
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="icon">Icon</Label>
+                        <Input
+                            id="icon"
+                            value={icon}
+                            onChange={(e) => setIcon(e.target.value)}
+                            className={errors.icon ? 'border-red-500' : ''}
+                        />
+                        {errors.icon ? (
+                            <p className="text-sm text-red-500">{errors.icon}</p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Icon identifier (optional)</p>
+                        )}
+                    </div>
 
                     {/* Sort Order */}
-                    <TextField
-                        label="Sort Order"
-                        type="number"
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(Number(e.target.value))}
-                        error={!!errors.sortOrder}
-                        helperText={errors.sortOrder || 'Display order (lower numbers appear first)'}
-                        fullWidth
-                        inputProps={{ min: 0 }}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="sortOrder">Sort Order</Label>
+                        <Input
+                            id="sortOrder"
+                            type="number"
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(Number(e.target.value))}
+                            min={0}
+                            className={errors.sortOrder ? 'border-red-500' : ''}
+                        />
+                        {errors.sortOrder ? (
+                            <p className="text-sm text-red-500">{errors.sortOrder}</p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Display order (lower numbers appear first)</p>
+                        )}
+                    </div>
 
                     {/* Error Alert */}
                     {updateItem.isError && (
-                        <Alert severity="error">
-                            Failed to update item. Please try again.
+                        <Alert variant="destructive">
+                            <AlertDescription>
+                                Failed to update item. Please try again.
+                            </AlertDescription>
                         </Alert>
                     )}
-                </Box>
-            </DialogContent>
+                </div>
 
-            <DialogActions sx={{ px: 3, pb: 2 }}>
-                <Button 
-                    onClick={handleClose}
-                    disabled={updateItem.isPending}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={handleSave}
-                    variant="contained"
-                    disabled={updateItem.isPending}
-                    startIcon={updateItem.isPending ? <CircularProgress size={20} /> : <EditIcon />}
-                >
-                    {updateItem.isPending ? 'Saving...' : 'Save Changes'}
-                </Button>
-            </DialogActions>
+                <DialogFooter>
+                    <Button 
+                        variant="outline"
+                        onClick={handleClose}
+                        disabled={updateItem.isPending}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSave}
+                        disabled={updateItem.isPending}
+                    >
+                        {updateItem.isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Save Changes
+                            </>
+                        )}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
         </Dialog>
     );
 }

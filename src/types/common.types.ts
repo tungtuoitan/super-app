@@ -3,7 +3,6 @@
  * Reusable type definitions for props, components, and shared interfaces
  */
 
-import type { SxProps, Theme } from '@mui/material';
 import type { CSSProperties, ReactNode } from 'react';
 
 /**
@@ -16,7 +15,6 @@ import type { CSSProperties, ReactNode } from 'react';
  */
 export interface BaseComponentProps {
     children?: ReactNode;
-    sx?: SxProps<Theme>;
     style?: CSSProperties;
     className?: string;
 }
@@ -37,7 +35,7 @@ export interface DialogProps extends BaseComponentProps {
  */
 export interface ToolbarProps {
     children: ReactNode;
-    sxBoxToolbar?: SxProps<Theme>;
+    className?: string;
 }
 
 /**

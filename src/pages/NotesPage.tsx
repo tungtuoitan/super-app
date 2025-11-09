@@ -3,7 +3,6 @@
  * Main page for notes management using the new architecture
  */
 
-import { Box } from '@mui/material';
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { GridContainer } from '@/shared/components/ui/GridContainer';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
@@ -46,9 +45,9 @@ function NotesPageContent() {
 
     
     return (
-        <div style={{ height: '100%', width: '100%'  }}>
+        <div className="h-full w-full">
             {/* Toolbar with fixed height */}
-            <Box sx={{ flexShrink: 0 }}>
+            <div className="shrink-0">
                 <ToolbarContainer>
                     <NoteCreate />
                     <Grow />
@@ -56,21 +55,13 @@ function NotesPageContent() {
                     <NoteDeleteSelected />
                     <NoteFilter />
                 </ToolbarContainer>
-            </Box>
-            
+            </div>
+
             {/* Note Grid Container that takes remaining height */}
-            <Box sx={{ 
-                flex: 1,
-                margin: '20px 0 0 20px',
-                height: 'calc(100% - 64px - 20px)', // 64px toolbar + 20px margin
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: 'background.paper',
-            }}>
+            <div className="flex-1 mt-5 ml-5 h-[calc(100%-64px-20px)] overflow-auto flex flex-col bg-background">
                 <NoteGrid onNoteClick={openNoteTab} />
                 <NoteDetailDialog />
-            </Box>
+            </div>
         </div>
     );
 }

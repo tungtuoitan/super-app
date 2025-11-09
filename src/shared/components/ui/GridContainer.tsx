@@ -1,39 +1,5 @@
 import { CSSProperties, LegacyRef, ReactNode } from 'react';
-import { SxProps, Theme, styled } from '@mui/material';
-
-/**
- * Styled root container component for grid layouts.
- * 
- * Provides a full-width, full-height container with:
- * - Vertical flex layout
- * - Light gray background
- * - Proper overflow handling
- * - Responsive design support
- */
-export const ContainerRoot = styled('div')({
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    // border: '1px solid red',
-    flexDirection: 'column',
-    backgroundColor: 'rgb(246, 246, 246)',
-    overflowX: 'auto',
-    overflowY: 'hidden',
-});
-
-/**
- * Styled wrapper component for grid content.
- * 
- * Provides a flexible content area with:
- * - Flex-grow behavior to fill available space
- * - Consistent margin spacing
- * - Auto overflow handling
- */
-export const ContainerWrapper = styled('div')({
-    flex: 1,
-    margin: '6px',
-    overflow: 'auto',
-});
+import { cn } from '@/lib/utils';
 
 /**
  * Props interface for the GridContainer component.
@@ -45,8 +11,6 @@ export interface GridContainerProps {
     className?: string;
     /** Optional inline styles for the container */
     style?: CSSProperties;
-    /** Optional MUI sx prop for advanced styling */
-    sx?: SxProps<Theme>;
     /** Optional ref for direct DOM access */
     ref?: LegacyRef<HTMLDivElement>;
     /** Optional identifier for the container */
@@ -59,17 +23,17 @@ export interface GridContainerProps {
 
 /**
  * GridContainer - A layout container component for data grids and tables.
- * 
+ *
  * This component provides a standardized container for grid layouts with:
  * - Consistent background and spacing
  * - Proper overflow handling for large datasets
  * - Flexible content area that adapts to available space
  * - Support for custom styling and theming
- * 
+ *
  * The container uses a two-layer structure:
- * 1. ContainerRoot - Provides the main layout structure
- * 2. ContainerWrapper - Provides the content area with margins
- * 
+ * 1. Root - Provides the main layout structure
+ * 2. Wrapper - Provides the content area with margins
+ *
  * @param props - Grid container configuration props
  * @returns Styled container component for grid layouts
  */
@@ -77,7 +41,6 @@ export function GridContainer({
     children,
     className,
     style,
-    sx,
     ref,
     id,
     noBackground = false,
@@ -85,24 +48,25 @@ export function GridContainer({
     ...props
 }: GridContainerProps) {
     return (
-        <ContainerRoot
+        <div
             ref={ref}
             id={id}
-            className={className}
+            className={cn(
+                'w-full h-full flex flex-col overflow-x-auto overflow-y-hidden',
+                !noBackground && 'bg-[rgb(246,246,246)]',
+                className
+            )}
             style={style}
-            sx={{
-                backgroundColor: noBackground ? 'transparent' : undefined,
-                ...sx,
-            }}
             {...props}
         >
-            <ContainerWrapper
-                sx={{
-                    margin: noPadding ? 0 : undefined,
-                }}
+            <div
+                className={cn(
+                    'flex-1 overflow-auto',
+                    !noPadding && 'm-1.5'
+                )}
             >
                 {children}
-            </ContainerWrapper>
-        </ContainerRoot>
+            </div>
+        </div>
     );
 }

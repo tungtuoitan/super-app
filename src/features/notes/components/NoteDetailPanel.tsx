@@ -1,16 +1,12 @@
 import React, { useState } from 'react'
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  CardActions,
-  Button,
-  Chip,
-  Divider,
-  TextField,
-} from '@mui/material'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/Components/ui/card'
+import { Button } from '@/Components/ui/button'
+import { Badge } from '@/Components/ui/badge'
+import { Separator } from '@/Components/ui/separator'
+import { Input } from '@/Components/ui/input'
+import { Textarea } from '@/Components/ui/textarea'
+import { Label } from '@/Components/ui/label'
 import { noteService } from '@/features/notes/services/noteService'
 import { formatDate } from '@/utils/formatters'
 import type { UpdateNoteDTO } from '@/features/notes/types/note.types'
@@ -69,122 +65,113 @@ export function NoteDetailPanel({ selectedNoteId }: NoteDetailPanelProps) {
 
   if (!selectedNoteId) {
     return (
-      <Box 
-        sx={{ 
-          height: '100%', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          p: 2,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
+      <div className="h-full flex items-center justify-center p-4">
+        <p className="text-sm text-muted-foreground">
           Select a note to view details
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography>Loading note details...</Typography>
-      </Box>
+      <div className="p-4">
+        <p className="text-sm">Loading note details...</p>
+      </div>
     )
   }
 
   if (!note) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography color="error">Note not found</Typography>
-      </Box>
+      <div className="p-4">
+        <p className="text-sm text-destructive">Note not found</p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ height: '100%', overflow: 'auto', p: 2 }}>
+    <div className="h-full overflow-auto p-4">
       <Card>
-        <CardContent>
+        <CardHeader>
           {isEditing ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <TextField
-                label="Title"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-              <TextField
-                label="Content"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                fullWidth
-                multiline
-                rows={8}
-                variant="outlined"
-              />
-            </Box>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="Enter note title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="content">Content</Label>
+                <Textarea
+                  id="content"
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  placeholder="Enter note content"
+                  rows={8}
+                  className="resize-none"
+                />
+              </div>
+            </div>
           ) : (
             <>
-              <Typography variant="h5" component="h2" gutterBottom>
-                {note.name}
-              </Typography>
-              
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <CardTitle className="text-2xl">{note.name}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
                 Created: {formatDate(note.createdAt)} | 
                 Updated: {note.updatedAt ? formatDate(note.updatedAt) : 'Never'}
-              </Typography>
-
-              <Divider sx={{ my: 2 }} />
-
-              {note.description && (
-                <Typography variant="body1" paragraph>
-                  {note.description}
-                </Typography>
-              )}
-
-              {note.tags && note.tags.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Tags:
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {note.tags.map((tag, index) => (
-                      <Chip
-                        key={index}
-                        label={tag.name}
-                        size="small"
-                        variant="outlined"
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              )}
+              </p>
             </>
           )}
-        </CardContent>
+        </CardHeader>
 
-        <CardActions>
+        {!isEditing && (
+          <CardContent className="space-y-4">
+            <Separator />
+
+            {note.description && (
+              <p className="text-sm leading-relaxed">
+                {note.description}
+              </p>
+            )}
+
+            {note.tags && note.tags.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Tags:</p>
+                <div className="flex gap-2 flex-wrap">
+                  {note.tags.map((tag, index) => (
+                    <Badge key={index} variant="outline">
+                      {tag.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        )}
+
+        <CardFooter>
           {isEditing ? (
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <div className="flex gap-2">
               <Button 
-                size="small" 
                 onClick={handleSave}
                 disabled={updateNoteMutation.isPending}
               >
                 Save
               </Button>
-              <Button size="small" onClick={handleCancel}>
+              <Button variant="secondary" onClick={handleCancel}>
                 Cancel
               </Button>
-            </Box>
+            </div>
           ) : (
-            <Button size="small" onClick={handleEdit}>
+            <Button onClick={handleEdit}>
               Edit
             </Button>
           )}
-        </CardActions>
+        </CardFooter>
       </Card>
-    </Box>
+    </div>
   )
 }

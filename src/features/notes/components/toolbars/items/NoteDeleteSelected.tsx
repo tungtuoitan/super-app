@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/Components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/ui/tooltip';
 import { useNoteUI } from '@/features/notes/store/NoteUIContext';
 import { useDeleteNotes } from '@/features/notes/hooks/useNotes';
 import { useSnackbar } from 'notistack';
@@ -26,8 +27,8 @@ export function NoteDeleteSelected() {
     const deleteConfirmation = useConfirmationPopover({
         confirmText: 'Ok',
         cancelText: 'Cancel',
-        confirmColor: 'primary',
-        buttonVariant: 'text'
+        confirmColor: 'default',
+        buttonVariant: 'ghost'
     });
 
     const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -75,30 +76,24 @@ export function NoteDeleteSelected() {
 
     return (
         <>
-            <Tooltip
-                title={`Delete ${selectedRowIds.length} selected note${selectedRowIds.length > 1 ? 's' : ''}`}
-                disableInteractive
-                slotProps={{
-                    tooltip: {
-                        sx: {
-                            fontSize: '10px',
-                            borderRadius: '2px'
-                        }
-                    }
-                }}
-            >
-                <span>
-                    <IconButton
-                        onClick={handleDeleteClick}
-                        disabled={deleteNotes.isPending}
-                        sx={{
-                            color: 'rgba(0, 0, 0, 0.54)',
-                        }}
-                    >
-                        <DeleteForeverOutlinedIcon />
-                    </IconButton>
-                </span>
-            </Tooltip>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleDeleteClick}
+                            disabled={deleteNotes.isPending}
+                            className="text-muted-foreground hover:text-destructive"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Delete {selectedRowIds.length} selected note{selectedRowIds.length > 1 ? 's' : ''}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
 
             {/* Confirmation Popover */}
             <ConfirmationPopover {...deleteConfirmation.getPopoverProps()} />

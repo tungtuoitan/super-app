@@ -1,13 +1,23 @@
-import React, { useMemo } from 'react';
-import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
+import React, { useMemo, useState } from 'react';
+import {
+    useReactTable,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    ColumnDef,
+    flexRender,
+    SortingState
+} from '@tanstack/react-table';
 import { Loader2 } from 'lucide-react';
+import { Button } from '@/Components/ui/button';
+import { Badge } from '@/Components/ui/badge';
 
 // Import hooks and services from notes feature
 import { useNotes, useNoteUI, type Note } from '../../features/notes';
 
 /**
- * NoteGridPanel - A flexible layout panel for displaying notes in a data grid
- * VSCode-style dark theme grid for notes
+ * NoteGridPanel - A flexible layout panel for displaying notes in a data table
+ * VSCode-style dark theme table for notes
  *
  * @param onNoteClick - Callback when a note is clicked
  * @param sidebarMode - If true, shows only name column for compact sidebar view
@@ -24,6 +34,10 @@ export function NoteGridPanel({
     
     // Get UI state for interactions (fallback)
     const { openDialog } = useNoteUI();
+
+    // State for table
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
 
     // Helper function to format date/time
     const formatDateTime = (date: Date): string => {
@@ -45,22 +59,18 @@ export function NoteGridPanel({
         );
     }, [notes]);
 
-    // Define columns for the data grid
-    const columns: GridColDef[] = useMemo(() => {
+    // Define columns for the data table
+    const columns = useMemo<ColumnDef<Note>[]>(() => {
         // Sidebar mode: only show name column
         if (sidebarMode) {
             return [
                 {
-                    field: 'name',
-                    headerName: 'Name',
-                    flex: 1,
-                    minWidth: 200,
-                    renderCell: (params) => (
-                        <div className="flex items-center h-full">
-                            <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
-                                {params.value || '—'}
-                            </span>
-                        </div>
+                    accessorKey: 'name',
+                    header: 'Name',
+                    cell: ({ getValue }) => (
+                        <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+                            {(getValue() as string) || '—'}
+                        </span>
                     ),
                 },
             ];
@@ -69,111 +79,115 @@ export function NoteGridPanel({
         // Full mode: show all columns
         return [
             {
-                field: 'noteId',
-                headerName: 'ID',
-                width: 60,
-                type: 'number',
-                align: 'center',
-                headerAlign: 'center'
-            },
-            {
-                field: 'name',
-                headerName: 'Name',
-                flex: 1,
-                minWidth: 250,
-                renderCell: (params) => (
-                    <div className="flex items-center h-full">
-                        <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
-                            {params.value || '—'}
-                        </span>
+                accessorKey: 'noteId',
+                header: 'ID',
+                size: 60,
+                cell: ({ getValue }) => (
+                    <div className="text-center text-sm">
+                        {getValue() as number}
                     </div>
                 ),
             },
-        {
-            field: 'tags',
-            headerName: 'Tags',
-            width: 200,
-            renderCell: (params) => {
-                if (!params.value || (Array.isArray(params.value) && params.value.length === 0)) {
+            {
+                accessorKey: 'name',
+                header: 'Name',
+                size: 250,
+                cell: ({ getValue }) => (
+                    <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+                        {(getValue() as string) || '—'}
+                    </span>
+                ),
+            },
+            {
+                accessorKey: 'tags',
+                header: 'Tags',
+                size: 200,
+                cell: ({ getValue, row }) => {
+                    const tags = getValue();
+                    if (!tags || (Array.isArray(tags) && tags.length === 0)) {
+                        return <span className="text-sm text-[#858585]">—</span>;
+                    }
+
+                    const tagArray = Array.isArray(tags) ? tags : (tags as string).split(',');
+                    const displayTags = tagArray.slice(0, 2);
+                    const remainingCount = tagArray.length - 2;
+
                     return (
-                        <div className="flex items-center h-full">
-                            <span className="text-sm text-[#858585]">—</span>
+                        <div className="flex items-center gap-1 flex-wrap">
+                            {displayTags.map((tag: any, index: number) => (
+                                <Badge
+                                    key={`${row.original.noteId}-${index}`}
+                                    variant="secondary"
+                                    className="text-[0.7rem] h-5 bg-[#4FC3F7]/10 text-[#4FC3F7] border-[#4FC3F7]/30"
+                                >
+                                    #{typeof tag === 'string' ? tag.trim() : tag.name || tag}
+                                </Badge>
+                            ))}
+                            {remainingCount > 0 && (
+                                <Badge variant="outline" className="text-[0.7rem] h-5 text-[#858585]">
+                                    +{remainingCount}
+                                </Badge>
+                            )}
                         </div>
                     );
                 }
-
-                const tags = Array.isArray(params.value) 
-                    ? params.value 
-                    : params.value.split(',');
-                
-                const displayTags = tags.slice(0, 2);
-                const remainingCount = tags.length - 2;
-
-                return (
-                    <div className="flex items-center gap-1 flex-wrap h-full">
-                        {displayTags.map((tag: any, index: number) => (
-                            <span
-                                key={`${params.row.noteId}-${index}`}
-                                className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.7rem] h-5 bg-[#4FC3F7]/10 text-[#4FC3F7] border border-[#4FC3F7]/30"
-                            >
-                                #{typeof tag === 'string' ? tag.trim() : tag.name || tag}
-                            </span>
-                        ))}
-                        {remainingCount > 0 && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.7rem] h-5 bg-white/5 text-[#858585]">
-                                +{remainingCount}
-                            </span>
-                        )}
-                    </div>
-                );
-            }
-        },
-        {
-            field: 'description',
-            headerName: 'Description', 
-            flex: 2,
-            minWidth: 300,
-            renderCell: (params) => (
-                <div className="flex items-center h-full">
-                    <span className="text-sm text-[#cccccc] overflow-hidden text-ellipsis whitespace-nowrap">
-                        {params.value || '—'}
+            },
+            {
+                accessorKey: 'description',
+                header: 'Description',
+                size: 300,
+                cell: ({ getValue }) => (
+                    <span className="text-sm text-[#cccccc] overflow-hidden text-ellipsis whitespace-nowrap block">
+                        {(getValue() as string) || '—'}
                     </span>
-                </div>
-            ),
-        },
-        {
-            field: 'createdAt',
-            headerName: 'Created',
-            width: 180,
-            renderCell: (params) => (
-                <div className="flex items-center h-full">
+                ),
+            },
+            {
+                accessorKey: 'createdAt',
+                header: 'Created',
+                size: 180,
+                cell: ({ getValue }) => (
                     <span className="text-xs text-[#858585]">
-                        {params.value ? formatDateTime(new Date(params.value)) : '—'}
+                        {getValue() ? formatDateTime(new Date(getValue() as string)) : '—'}
                     </span>
-                </div>
-            ),
-        },
-        {
-            field: 'isArchived',
-            headerName: 'Status',
-            width: 100,
-            renderCell: (params) => (
-                <div className="flex items-center h-full">
-                    <span className={`text-xs font-medium ${params.value ? 'text-muted-foreground' : 'text-primary'}`}>
-                        {params.value ? 'Archived' : 'Active'}
+                ),
+            },
+            {
+                accessorKey: 'isArchived',
+                header: 'Status',
+                size: 100,
+                cell: ({ getValue }) => (
+                    <span className={`text-xs font-medium ${(getValue() as boolean) ? 'text-muted-foreground' : 'text-primary'}`}>
+                        {(getValue() as boolean) ? 'Archived' : 'Active'}
                     </span>
-                </div>
-            )
-        }];
+                )
+            }
+        ];
     }, [sidebarMode]);
 
+    // Create table instance
+    const table = useReactTable({
+        data: sortedNotes,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: setSorting,
+        onPaginationChange: setPagination,
+        state: {
+            sorting,
+            pagination,
+        },
+        getRowId: (row) => String(row.noteId),
+    });
+
     // Handle row click
-    const handleRowClick = (params: GridRowParams<Note>) => {
+    const handleRowClick = (note: Note) => {
         // Use custom handler if provided, otherwise open dialog
         if (onNoteClick) {
-            onNoteClick(params.row);
+            onNoteClick(note);
         } else {
-            openDialog(params.row);
+            openDialog(note);
         }
     };
 
@@ -212,7 +226,7 @@ export function NoteGridPanel({
         );
     }
 
-    // Main content - VSCode-style dark DataGrid
+    // Main content - VSCode-style dark table
     return (
         <div className="h-full w-full flex flex-col bg-editor-bg">
             {/* Header with count - hide in sidebar mode */}
@@ -224,102 +238,82 @@ export function NoteGridPanel({
                 </div>
             )}
             
-            {/* DataGrid */}
-            <div className="flex-1 w-full">
-                <DataGrid
-                    rows={sortedNotes}
-                    columns={columns}
-                    getRowId={(row) => row.noteId}
-                    onRowClick={handleRowClick}
-                    disableRowSelectionOnClick
-                    rowHeight={sidebarMode ? 36 : 42}
-                    columnHeaderHeight={sidebarMode ? 32 : 40}
-                    hideFooter={sidebarMode}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 50,
-                            },
-                        },
-                    }}
-                    pageSizeOptions={[25, 50, 100]}
-                    sx={{
-                        border: 0,
-                        color: 'hsl(var(--editor-foreground))',
-                        '& .MuiDataGrid-main': {
-                            backgroundColor: 'hsl(var(--editor-background))',
-                        },
-                        '& .MuiDataGrid-columnHeaders': {
-                            backgroundColor: 'hsl(var(--editor-sidebar))',
-                            borderBottom: '1px solid hsl(var(--editor-border))',
-                            color: 'hsl(var(--editor-foreground))',
-                            fontSize: sidebarMode ? '0.7rem' : '0.8rem',
-                            fontWeight: 600,
-                            textTransform: 'uppercase',
-                            minHeight: sidebarMode ? '32px !important' : '40px !important',
-                            maxHeight: sidebarMode ? '32px !important' : '40px !important',
-                        },
-                        '& .MuiDataGrid-columnHeader': {
-                            outline: 'none !important',
-                            '&:focus': {
-                                outline: 'none',
-                            },
-                            '&:focus-within': {
-                                outline: 'none',
-                            }
-                        },
-                        '& .MuiDataGrid-columnHeaderTitle': {
-                            fontWeight: 600,
-                            color: 'hsl(var(--muted-foreground))',
-                        },
-                        '& .MuiDataGrid-cell': {
-                            borderBottom: '1px solid hsl(var(--editor-border))',
-                            outline: 'none !important',
-                            '&:focus': {
-                                outline: 'none',
-                            },
-                            '&:focus-within': {
-                                outline: 'none',
-                            }
-                        },
-                        '& .MuiDataGrid-row': {
-                            cursor: 'pointer',
-                            '&:hover': {
-                                backgroundColor: 'hsl(var(--editor-hover))',
-                            },
-                            '&.Mui-selected': {
-                                backgroundColor: 'hsl(var(--primary)) / 0.1',
-                                '&:hover': {
-                                    backgroundColor: 'hsl(var(--primary)) / 0.15',
-                                }
-                            }
-                        },
-                        '& .MuiDataGrid-footerContainer': {
-                            backgroundColor: 'hsl(var(--editor-sidebar))',
-                            borderTop: '1px solid hsl(var(--editor-border))',
-                            color: 'hsl(var(--editor-foreground))',
-                            display: sidebarMode ? 'none' : 'flex', // Hide footer in sidebar mode
-                        },
-                        '& .MuiTablePagination-root': {
-                            color: 'hsl(var(--editor-foreground))',
-                        },
-                        '& .MuiTablePagination-selectIcon': {
-                            color: 'hsl(var(--editor-foreground))',
-                        },
-                        '& .MuiDataGrid-iconButtonContainer': {
-                            '& .MuiIconButton-root': {
-                                color: 'hsl(var(--editor-foreground))',
-                            }
-                        },
-                        '& .MuiDataGrid-sortIcon': {
-                            color: 'hsl(var(--editor-foreground))',
-                        },
-                        '& .MuiDataGrid-menuIconButton': {
-                            color: 'hsl(var(--editor-foreground))',
-                        }
-                    }}
-                />
+            {/* Table */}
+            <div className="flex-1 w-full overflow-auto">
+                <table className="w-full border-collapse">
+                    <thead className="bg-editor-sidebar sticky top-0 z-10">
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <tr key={headerGroup.id} className="border-b border-editor-border">
+                                {headerGroup.headers.map(header => (
+                                    <th
+                                        key={header.id}
+                                        className={`px-4 text-left align-middle font-semibold text-muted-foreground uppercase ${
+                                            sidebarMode ? 'text-[0.7rem] h-8' : 'text-[0.8rem] h-10'
+                                        }`}
+                                        style={{ width: header.getSize() }}
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {table.getRowModel().rows.map(row => (
+                            <tr
+                                key={row.id}
+                                className={`border-b border-editor-border cursor-pointer hover:bg-editor-hover ${
+                                    sidebarMode ? 'h-9' : 'h-[42px]'
+                                }`}
+                                onClick={() => handleRowClick(row.original)}
+                            >
+                                {row.getVisibleCells().map(cell => (
+                                    <td key={cell.id} className="px-4 align-middle">
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
+
+            {/* Pagination - hide in sidebar mode */}
+            {!sidebarMode && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-editor-border bg-editor-sidebar">
+                    <div className="text-sm text-editor-fg">
+                        Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+                        {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, sortedNotes.length)} of{' '}
+                        {sortedNotes.length} results
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

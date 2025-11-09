@@ -1177,4 +1177,3 @@ Before adding state, ask:
     )
 }
 
-function NotesPage

@@ -1,24 +1,31 @@
 /**
  * CreateFolderDialog - Dialog for creating new tag/folder in workspace
- * Follows the design system and patterns from the project
+ * Migrated from MUI to shadcn/ui
  */
 
 import React, { useState, useEffect } from 'react';
+import { Loader2, FolderPlus } from 'lucide-react';
 import {
     Dialog,
-    DialogTitle,
     DialogContent,
-    DialogActions,
-    TextField,
-    Button,
-    Box,
-    FormControl,
-    InputLabel,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Label } from '@/Components/ui/label';
+import { Textarea } from '@/Components/ui/textarea';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
+import {
     Select,
-    MenuItem,
-    CircularProgress,
-    Alert,
-} from '@mui/material';
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/ui/select';
+import { cn } from '@/lib/utils';
 import { useCreateTag } from '../hooks/useTags';
 import { useWorkspaceTagTree } from '../hooks/useTags';
 import type { CreateTagDTO } from '../types/tag.types';
@@ -127,118 +134,118 @@ export function CreateFolderDialog({
     ];
 
     return (
-        <Dialog 
-            open={open} 
-            onClose={onClose}
-            maxWidth="sm"
-            fullWidth
-            PaperProps={{
-                sx: {
-                    borderRadius: '12px',
-                }
-            }}
-        >
-            <DialogTitle sx={{ fontSize: '1.25rem', fontWeight: 600 }}>
-                Create New Folder
-            </DialogTitle>
+        <Dialog open={open} onOpenChange={(newOpen) => !newOpen && onClose()}>
+            <DialogContent className="sm:max-w-[500px] rounded-xl">
+                <DialogHeader>
+                    <DialogTitle className="text-xl font-semibold">
+                        Create New Folder
+                    </DialogTitle>
+                </DialogHeader>
 
-            <DialogContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingTop: '8px' }}>
+                <div className="flex flex-col gap-6 pt-2">
                     {/* Folder Name */}
-                    <TextField
-                        label="Folder Name"
-                        value={folderName}
-                        onChange={(e) => setFolderName(e.target.value)}
-                        error={!!errors.name}
-                        helperText={errors.name}
-                        fullWidth
-                        autoFocus
-                        required
-                        placeholder="Enter folder name"
-                    />
+                    <div className="space-y-2">
+                        <Label htmlFor="folder-name">Folder Name *</Label>
+                        <Input
+                            id="folder-name"
+                            value={folderName}
+                            onChange={(e) => setFolderName(e.target.value)}
+                            placeholder="Enter folder name"
+                            autoFocus
+                        />
+                        {errors.name && (
+                            <p className="text-sm text-destructive">{errors.name}</p>
+                        )}
+                    </div>
 
                     {/* Description */}
-                    <TextField
-                        label="Description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        fullWidth
-                        multiline
-                        rows={3}
-                        placeholder="Optional description"
-                    />
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Optional description"
+                            rows={3}
+                        />
+                    </div>
 
                     {/* Parent Folder Selection */}
-                    <FormControl fullWidth>
-                        <InputLabel>Parent Folder</InputLabel>
-                        <Select
-                            value={selectedParentId || ''}
-                            onChange={(e) => setSelectedParentId(e.target.value ? Number(e.target.value) : null)}
-                            label="Parent Folder"
+                    <div className="space-y-2">
+                        <Label htmlFor="parent-folder">Parent Folder</Label>
+                        <Select 
+                            value={selectedParentId?.toString() || ''} 
+                            onValueChange={(value) => setSelectedParentId(value ? Number(value) : null)}
                         >
-                            <MenuItem value="">
-                                <em>Root Level (No Parent)</em>
-                            </MenuItem>
-                            {availableParents.map((tag) => (
-                                <MenuItem key={tag.tagId} value={tag.tagId}>
-                                    {'—'.repeat(tag.depth || 0)} {tag.name}
-                                </MenuItem>
-                            ))}
+                            <SelectTrigger id="parent-folder">
+                                <SelectValue placeholder="Root Level (No Parent)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">
+                                    <em>Root Level (No Parent)</em>
+                                </SelectItem>
+                                {availableParents.map((tag) => (
+                                    <SelectItem key={tag.tagId} value={tag.tagId.toString()}>
+                                        {'—'.repeat(tag.depth || 0)} {tag.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
                         </Select>
-                    </FormControl>
+                    </div>
 
                     {/* Color Selection */}
-                    <FormControl fullWidth>
-                        <InputLabel>Color</InputLabel>
-                        <Select
-                            value={color}
-                            onChange={(e) => setColor(e.target.value)}
-                            label="Color"
-                        >
+                    <div className="space-y-2">
+                        <Label>Color</Label>
+                        <div className="grid grid-cols-4 gap-2">
                             {colorOptions.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <Box
-                                            sx={{
-                                                width: '20px',
-                                                height: '20px',
-                                                backgroundColor: option.value,
-                                                borderRadius: '4px',
-                                                border: '1px solid rgba(0,0,0,0.1)',
-                                            }}
-                                        />
-                                        {option.label}
-                                    </Box>
-                                </MenuItem>
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={() => setColor(option.value)}
+                                    className={cn(
+                                        "flex items-center justify-center gap-2 p-3 rounded-md border-2 transition-all",
+                                        color === option.value 
+                                            ? "border-primary ring-2 ring-primary ring-offset-2" 
+                                            : "border-border hover:border-primary/50"
+                                    )}
+                                >
+                                    <div
+                                        className="w-5 h-5 rounded border border-border/20"
+                                        style={{ backgroundColor: option.value }}
+                                    />
+                                    <span className="text-xs">{option.label}</span>
+                                </button>
                             ))}
-                        </Select>
-                    </FormControl>
+                        </div>
+                    </div>
 
                     {/* Error Alert */}
                     {createTag.isError && (
-                        <Alert severity="error">
-                            Failed to create folder. Please try again.
+                        <Alert variant="destructive">
+                            <AlertDescription>
+                                Failed to create folder. Please try again.
+                            </AlertDescription>
                         </Alert>
                     )}
-                </Box>
-            </DialogContent>
+                </div>
 
-            <DialogActions sx={{ padding: '16px 24px' }}>
-                <Button 
-                    onClick={handleCancel}
-                    disabled={createTag.isPending}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={handleSubmit}
-                    variant="contained"
-                    disabled={createTag.isPending || !folderName.trim()}
-                    startIcon={createTag.isPending && <CircularProgress size={20} />}
-                >
-                    {createTag.isPending ? 'Creating...' : 'Create Folder'}
-                </Button>
-            </DialogActions>
+                <DialogFooter className="gap-2">
+                    <Button 
+                        variant="outline"
+                        onClick={handleCancel}
+                        disabled={createTag.isPending}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={createTag.isPending || !folderName.trim()}
+                    >
+                        {createTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {createTag.isPending ? 'Creating...' : 'Create Folder'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
         </Dialog>
     );
 }

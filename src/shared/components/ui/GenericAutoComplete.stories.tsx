@@ -54,7 +54,6 @@ export const Small: Story = {
     size: 'small',
     disableClearable: false,
     disabled: false,
-    renderOptionProps: { sx: { fontSize: '12px' } },
     style: { marginBottom: '16px' },
   },
 };
@@ -73,7 +72,6 @@ export const SmallWithValue: Story = {
     size: 'small',
     disableClearable: true,
     disabled: false,
-    renderOptionProps: { sx: { fontSize: '12px' } },
     style: { marginBottom: '16px' },
   },
 };
@@ -124,7 +122,6 @@ export const SmallDisabled: Story = {
     size: 'small',
     disableClearable: true,
     disabled: true,
-    renderOptionProps: { sx: { fontSize: '12px' } },
     style: { marginBottom: '16px' },
   },
 };
@@ -141,7 +138,6 @@ export const RFDStatusExample: Story = {
     disabled: false,
     size: 'small',
     style: { marginBottom: '16px' },
-    renderOptionProps: { sx: { fontSize: '12px' } },
     allOptions: [
       { id: 'P', label: 'Pending', desc: 'Pending status' },
       { id: 'A', label: 'Approved', desc: 'Approved status' },

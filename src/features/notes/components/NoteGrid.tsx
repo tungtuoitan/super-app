@@ -1,16 +1,28 @@
 /**
  * Modern NoteGrid Component
  * Uses React Query hooks and follows new architecture patterns
+ * Migrated from MUI DataGrid to TanStack Table with shadcn/ui
  */
 
-import React, { useMemo } from 'react';
-import { DataGrid, GridColDef, GridRowParams, GridRowSelectionModel } from '@mui/x-data-grid';
-import { Box, Chip, Typography, Alert } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import {
+    useReactTable,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    ColumnDef,
+    flexRender,
+    SortingState
+} from '@tanstack/react-table';
+import { Loader2 } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { useNoteUI } from '../store/NoteUIContext';
 import { Spinner } from '@/shared/components/ui/Spinner';
+import { Badge } from '@/Components/ui/badge';
+import { Button } from '@/Components/ui/button';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
+import { Checkbox } from '@/Components/ui/checkbox';
 import type { Note } from '@/features/notes/types/note.types';
-import { dataGridStyles } from '@/config/theme';
 
 interface NoteGridProps {
     onNoteClick?: (note: Note) => void;
@@ -30,10 +42,9 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
     // ✅ Get row selection state from context
     const { selectedRowIds, setSelectedRowIds } = useNoteUI();
 
-    // Handle row selection change
-    const handleRowSelectionChange = (newSelection: GridRowSelectionModel) => {
-        setSelectedRowIds(newSelection as number[]);
-    };
+    // Table state
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
 
     // Helper functions matching old component
     const formatDateTime = (date: Date): string => {
@@ -47,17 +58,6 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
         }).format(date);
     };
 
-    const getTypeColor = (type?: string): 'primary' | 'warning' | 'info' | 'error' | 'default' => {
-        const colors: Record<string, 'primary' | 'warning' | 'info' | 'error' | 'default'> = {
-            'Meeting': 'primary',
-            'Brainstorm': 'warning',
-            'Research': 'info',
-            'Bug': 'error',
-            'default': 'default'
-        };
-        return colors[type || 'default'] || colors.default;
-    };
-
     // ✅ NEW: Memoized sorted data (derived state)
     const sortedNotes = useMemo(() => {
         if (!notes) return [];
@@ -66,206 +66,258 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
         );
     }, [notes]);
 
-    // Column definitions matching old component exactly
-    const columns: GridColDef[] = useMemo(() => [
+    // Row selection handlers
+    const toggleRowSelection = (noteId: number) => {
+        if (selectedRowIds.includes(noteId)) {
+            setSelectedRowIds(selectedRowIds.filter((id: number) => id !== noteId));
+        } else {
+            setSelectedRowIds([...selectedRowIds, noteId]);
+        }
+    };
+
+    const toggleAllRows = () => {
+        if (selectedRowIds.length === sortedNotes.length) {
+            setSelectedRowIds([]);
+        } else {
+            setSelectedRowIds(sortedNotes.map((note: Note) => note.noteId));
+        }
+    };
+
+    // Column definitions with shadcn/ui components
+    const columns = useMemo<ColumnDef<Note>[]>(() => [
+        {
+            id: 'select',
+            size: 40,
+            header: () => (
+                <Checkbox
+                    checked={sortedNotes.length > 0 && selectedRowIds.length === sortedNotes.length}
+                    onCheckedChange={toggleAllRows}
+                    aria-label="Select all"
+                />
+            ),
+            cell: ({ row }) => (
+                <Checkbox
+                    checked={selectedRowIds.includes(row.original.noteId)}
+                    onCheckedChange={() => toggleRowSelection(row.original.noteId)}
+                    aria-label="Select row"
+                />
+            ),
+        },
         { 
-            field: 'noteId', 
-            headerName: 'ID', 
-            width: 40,
-            type: 'number'
+            accessorKey: 'noteId',
+            header: 'ID', 
+            size: 40,
+            cell: ({ getValue }) => (
+                <div className="text-center">{getValue() as number}</div>
+            ),
         },
         {
-            field: 'name',
-            headerName: 'Note Name',
-            width: 300,
-            renderCell: (params) => (
-                <Box
-                    sx={{
-                        cursor: onNoteClick ? 'pointer' : 'default',
-                        color: 'primary.main',
-                        textDecoration: onNoteClick ? 'underline' : 'none',
-                        fontWeight: 500
-                    }}
-                    onClick={() => onNoteClick?.(params.row)}
+            accessorKey: 'name',
+            header: 'Note Name',
+            size: 300,
+            cell: ({ getValue, row }) => (
+                <div
+                    className="cursor-pointer text-primary underline font-medium hover:text-primary/80"
+                    onClick={() => onNoteClick?.(row.original)}
                 >
-                    {params.value || '-'}
-                </Box>
+                    {(getValue() as string) || '-'}
+                </div>
             )
         },
         {
-            field: 'tags',
-            headerName: 'Tags',
-            width: 200,
-            renderCell: (params) => {
-                if (!params.value || (Array.isArray(params.value) && params.value.length === 0)) {
-                    return <Box sx={{ padding: '4px' }}>-</Box>;
+            accessorKey: 'tags',
+            header: 'Tags',
+            size: 200,
+            cell: ({ getValue, row }) => {
+                const tags = getValue();
+                if (!tags || (Array.isArray(tags) && tags.length === 0)) {
+                    return <div className="p-1">-</div>;
                 }
 
                 // Handle both array and string format for backward compatibility
-                const tags = Array.isArray(params.value) 
-                    ? params.value 
-                    : params.value.split(',');
+                const tagArray = Array.isArray(tags) 
+                    ? tags 
+                    : (tags as string).split(',');
                 
-                const displayTags = tags.slice(0, 2);
-                const remainingCount = tags.length - 2;
+                const displayTags = tagArray.slice(0, 2);
+                const remainingCount = tagArray.length - 2;
 
                 return (
-                    <Box sx={{
-                        display: 'flex',
-                        gap: '4px',
-                        flexWrap: 'wrap',
-                        padding: '4px',
-                        alignItems: 'center'
-                    }}>
+                    <div className="flex gap-1 flex-wrap p-1 items-center">
                         {displayTags.map((tag: string, index: number) => (
-                            <Chip
-                                key={`${params.row.noteId}-${index}`}
-                                label={`#${tag.trim()}`}
-                                size="small"
-                                variant="outlined"
-                                color="secondary"
-                                sx={{ fontSize: '0.7rem', height: '20px' }}
-                            />
+                            <Badge
+                                key={`${row.original.noteId}-${index}`}
+                                variant="secondary"
+                                className="text-[0.7rem] h-5"
+                            >
+                                #{tag.trim()}
+                            </Badge>
                         ))}
                         {remainingCount > 0 && (
-                            <Chip
-                                label={`+${remainingCount}`}
-                                size="small"
-                                variant="outlined"
-                                sx={{ fontSize: '0.7rem', height: '20px' }}
-                            />
+                            <Badge variant="outline" className="text-[0.7rem] h-5">
+                                +{remainingCount}
+                            </Badge>
                         )}
-                    </Box>
+                    </div>
                 );
             }
         },
-        // {
-        //     field: 'type',
-        //     headerName: 'Type',
-        //     width: 120,
-        //     renderCell: (params) => (
-        //         <Chip 
-        //             label={params.value || 'N/A'} 
-        //             color={getTypeColor(params.value) as any}
-        //             size="small"
-        //             variant="outlined"
-        //         />
-        //     )
-        // },
         {
-            field: 'description',
-            width: 500,
-            headerName: 'Description',
-            renderCell: (params) => (
-                <Box sx={{
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical'
-                }}>
-                    {params.value || '-'}
-                </Box>
+            accessorKey: 'description',
+            header: 'Description',
+            size: 500,
+            cell: ({ getValue }) => (
+                <div className="line-clamp-2 overflow-hidden text-ellipsis">
+                    {(getValue() as string) || '-'}
+                </div>
             )
         },
         {
-            field: 'createdBy',
-            headerName: 'Created By',
-            width: 160,
-            renderCell: (params) => params.value || '-'
+            accessorKey: 'createdBy',
+            header: 'Created By',
+            size: 160,
+            cell: ({ getValue }) => (getValue() as string) || '-'
         },
         {
-            field: 'createdAt',
-            headerName: 'Created Date',
-            width: 180,
-            renderCell: (params) => params.value ? formatDateTime(new Date(params.value)) : '-'
+            accessorKey: 'createdAt',
+            header: 'Created Date',
+            size: 180,
+            cell: ({ getValue }) => {
+                const value = getValue();
+                return value ? formatDateTime(new Date(value as string)) : '-';
+            }
         },
         {
-            field: 'isArchived',
-            headerName: 'Status',
-            flex: 1,
-            minWidth: 100, 
-            renderCell: (params) => (
-                <Typography
-                    variant="body2" 
-                    sx={{
-                        fontWeight: 500
-                    }}
-                >
-                    {params.value ? 'Inactive' : 'Active'}
-                </Typography>
+            accessorKey: 'isArchived',
+            header: 'Status',
+            size: 100,
+            cell: ({ getValue }) => (
+                <span className="text-sm font-medium">
+                    {(getValue() as boolean) ? 'Inactive' : 'Active'}
+                </span>
             )
         }
-    ], [onNoteClick]);
+    ], [onNoteClick, selectedRowIds, sortedNotes.length]);
+
+    // Create table instance
+    const table = useReactTable({
+        data: sortedNotes,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: setSorting,
+        onPaginationChange: setPagination,
+        state: {
+            sorting,
+            pagination,
+        },
+        getRowId: (row) => String(row.noteId),
+    });
 
     // Handle error state
     if (error) {
-        return <Alert severity="error">{error instanceof Error ? error.message : 'Unknown error occurred'}</Alert>;
+        return (
+            <Alert variant="destructive">
+                <AlertDescription>
+                    {error instanceof Error ? error.message : 'Unknown error occurred'}
+                </AlertDescription>
+            </Alert>
+        );
     }
 
     return (
-        <Box sx={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'background.paper'
-        }}>
-            <DataGrid
-                getRowId={(row) => row.noteId}
-                rows={sortedNotes || []}
-                columns={columns}
-                rowHeight={50}
-                loading={isLoading}
-                disableRowSelectionOnClick
-                initialState={{
-                    pagination: {
-                        paginationModel: {
-                            pageSize: 25,
-                        },
-                    },
-                }}
-                pageSizeOptions={[25, 50, 100]}
-                getRowClassName={(params) =>
-                    params.row.isArchived ? "row-archived" : ""
-                }
-                checkboxSelection
-                rowSelectionModel={selectedRowIds}
-                onRowSelectionModelChange={handleRowSelectionChange}
-                rowBufferPx={250}
-                columnBufferPx={150}
-                disableVirtualization={false}
-                sx={{
-                    ...dataGridStyles.root,
-                    '& .MuiDataGrid-columnHeaders': {
-                        borderBottom: '1px solid #e0e0e0 !important',
-                    },
-                    '& .MuiDataGrid-columnHeader': {
-                        height: '52px',
-                        minHeight: '52px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        backgroundColor: 'white',
-                    },
-                    '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': {
-                        outline: 'none',
-                    },
-                    '& .MuiDataGrid-row': {
-                        height: '50px',
-                        minHeight: '50px',
-                        maxHeight: '50px',
-                        borderBottom: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-cell': {
-                        display: 'flex',
-                        alignItems: 'center',
-                        lineHeight: '22px',
-                    },
-                    '& .MuiDataGrid-columnHeaderTitle': {
-                        fontWeight: 600,
-                    },
-                }}
-            />
-        </Box>
+        <div className="w-full h-full bg-background">
+            {/* Table */}
+            <div className="rounded-md border">
+                <table className="w-full">
+                    <thead className="bg-muted/50">
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <tr key={headerGroup.id} className="border-b">
+                                {headerGroup.headers.map(header => (
+                                    <th
+                                        key={header.id}
+                                        className="h-[52px] px-4 text-left align-middle font-semibold text-muted-foreground"
+                                        style={{ width: header.getSize() }}
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={columns.length} className="h-24 text-center">
+                                    <div className="flex items-center justify-center">
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : table.getRowModel().rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={columns.length} className="h-24 text-center">
+                                    No results.
+                                </td>
+                            </tr>
+                        ) : (
+                            table.getRowModel().rows.map(row => (
+                                <tr
+                                    key={row.id}
+                                    className={`border-b h-[50px] ${row.original.isArchived ? 'opacity-60 row-archived' : ''}`}
+                                >
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 align-middle">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-2 py-4">
+                <div className="flex items-center gap-2">
+                    <div className="text-sm text-muted-foreground">
+                        {selectedRowIds.length > 0 && (
+                            <span>{selectedRowIds.length} of {sortedNotes.length} row(s) selected. </span>
+                        )}
+                        Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+                        {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, sortedNotes.length)} of{' '}
+                        {sortedNotes.length} results
+                    </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </div>
+        </div>
     );
 });

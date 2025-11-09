@@ -5,8 +5,6 @@
  */
 
 import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
-import type { GridApi } from '@mui/x-data-grid';
-import type { SxProps } from '@mui/material';
 import type { Note } from '../types/note.types';
 
 interface DialogProps {
@@ -43,7 +41,7 @@ interface NoteUIContextValue {
     setLoadingMasterGrid: (loading: boolean) => void;
     refreshMasterGrid: boolean;
     setRefreshMasterGrid: (refresh: boolean) => void;
-    apiRef: React.RefObject<GridApi>;
+    apiRef: React.RefObject<any>; // Generic ref for grid API
 
     // Row selection state
     selectedRowIds: number[];
@@ -60,8 +58,8 @@ interface NoteUIContextValue {
     noteDetailDialogRef: React.RefObject<HTMLDivElement>;
 
     // Dialog styling
-    noteDetailDialogSxProps: SxProps;
-    setNoteDetailDialogSxProps: (sx: SxProps) => void;
+    noteDetailDialogSxProps: React.CSSProperties;
+    setNoteDetailDialogSxProps: (sx: React.CSSProperties) => void;
 
     // Preview dialog state
     previewDialogProps: DialogProps;
@@ -113,7 +111,7 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
     // Grid UI state
     const [loadingMasterGrid, setLoadingMasterGrid] = useState(false);
     const [refreshMasterGrid, setRefreshMasterGrid] = useState(false);
-    const apiRef = useRef<GridApi>(null!);
+    const apiRef = useRef<any>(null); // Generic ref for grid API
 
     // Row selection state
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
@@ -127,7 +125,7 @@ export function NoteUIProvider({ children }: { children: React.ReactNode }) {
     const noteDetailDialogRef = useRef<HTMLDivElement>(null);
 
     // Dialog styling
-    const [noteDetailDialogSxProps, setNoteDetailDialogSxProps] = useState<SxProps>({});
+    const [noteDetailDialogSxProps, setNoteDetailDialogSxProps] = useState<React.CSSProperties>({});
 
     // Preview dialog state
     const [previewDialogProps, setPreviewDialogProps] = useState<DialogProps>({

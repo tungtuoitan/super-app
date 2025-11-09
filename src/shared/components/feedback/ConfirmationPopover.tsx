@@ -2,32 +2,14 @@
  * ConfirmationPopover Component
  * Shared confirmation popover component based on Portal's PopoverBox pattern
  * Following SuperApp architecture guidelines
+ * 
+ * Note: Using native implementation since shadcn Popover component is not available.
+ * This provides a positioned confirmation dialog near the trigger element.
  */
 
-import React from 'react';
-import {
-    Popover,
-    PopoverOrigin,
-    Typography,
-    Button,
-    Paper,
-    styled
-} from '@mui/material';
-
-// Styled components matching Portal's PopoverBox exactly
-const FooterButtons = styled('div')({
-    display: 'flex',
-    flexFlow: 'row',
-    justifyContent: 'flex-end',
-    '& button': {
-        textTransform: 'none'
-    },  
-});
-
-const PopoverRoot = styled('div')({
-    padding: '15px 10px 3px',
-    margin: '10px 10px 3px',
-});
+import React, { useEffect, useRef } from 'react';
+import { Button } from '@/Components/ui/button';
+import { cn } from '@/lib/utils';
 
 export interface ConfirmationPopoverProps {
     /** Whether the popover is open */
@@ -41,11 +23,11 @@ export interface ConfirmationPopoverProps {
     /** Text for the cancel button */
     cancelText?: string;
     /** Color for the confirm button */
-    confirmColor?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+    confirmColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
     /** Color for the cancel button */
-    cancelColor?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+    cancelColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
     /** Variant for buttons */
-    buttonVariant?: 'text' | 'outlined' | 'contained';
+    buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
     /** Custom width for the popover */
     width?: string;
     /** Z-index for the popover */
@@ -102,15 +84,60 @@ export function ConfirmationPopover({
     message,
     confirmText = 'Ok',
     cancelText = 'Cancel',
-    confirmColor = 'primary',
-    cancelColor = 'inherit',
-    buttonVariant = 'text',
-    width,
+    confirmColor = 'default',
+    cancelColor = 'ghost',
+    buttonVariant,
+    width = '300px',
     zIndex = 10000,
     onConfirm,
     onCancel,
     onClose,
 }: ConfirmationPopoverProps) {
+    const popoverRef = useRef<HTMLDivElement>(null);
+    const [position, setPosition] = React.useState({ top: 0, left: 0 });
+
+    // Calculate position based on anchor element
+    useEffect(() => {
+        if (open && anchorEl && popoverRef.current) {
+            const anchorRect = anchorEl.getBoundingClientRect();
+            const popoverRect = popoverRef.current.getBoundingClientRect();
+            
+            let top = anchorRect.bottom + window.scrollY + 8; // 8px gap
+            let left = anchorRect.left + window.scrollX;
+
+            // Check if popover goes off right edge
+            if (left + popoverRect.width > window.innerWidth) {
+                left = window.innerWidth - popoverRect.width - 16;
+            }
+
+            // Check if popover goes off bottom edge
+            if (top + popoverRect.height > window.innerHeight + window.scrollY) {
+                top = anchorRect.top + window.scrollY - popoverRect.height - 8;
+            }
+
+            setPosition({ top, left });
+        }
+    }, [open, anchorEl]);
+
+    // Handle click outside
+    useEffect(() => {
+        if (!open) return;
+
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                popoverRef.current &&
+                !popoverRef.current.contains(event.target as Node) &&
+                anchorEl &&
+                !anchorEl.contains(event.target as Node)
+            ) {
+                handleClose();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [open, anchorEl]);
+
     const handleClose = () => {
         onClose?.();
         onCancel();
@@ -124,44 +151,52 @@ export function ConfirmationPopover({
         onCancel();
     };
 
+    if (!open) return null;
+
     return (
-        <Popover
-            anchorOrigin={{ 
-                vertical: 'bottom', 
-                horizontal: 'left' 
-            } as PopoverOrigin}
-            open={open}
-            anchorEl={anchorEl}
-            style={{ zIndex }}
-            PaperProps={{
-                style: { boxShadow: '0px 2px 8px rgba(200, 200, 200, 0.3)' }
-            }}
-            onClose={handleClose}
-        >
-            <PopoverRoot>
-                <Paper elevation={0}>
-                    <Typography style={width ? { width } : {}}>{message}</Typography><br />
-                    <hr />
-                    <FooterButtons>
-                        <Button 
-                            size='small' 
-                            variant={buttonVariant} 
-                            color={confirmColor} 
-                            onClick={handleConfirm}
-                        >
-                            {confirmText}
-                        </Button>&nbsp;&nbsp;
-                        <Button 
-                            size='small' 
-                            variant={buttonVariant} 
-                            color={cancelColor}
-                            onClick={handleCancel}
-                        >
-                            {cancelText}
-                        </Button>
-                    </FooterButtons>
-                </Paper>
-            </PopoverRoot>
-        </Popover>
+        <>
+            {/* Backdrop */}
+            <div
+                className="fixed inset-0 bg-transparent"
+                style={{ zIndex: zIndex - 1 }}
+                onClick={handleClose}
+            />
+
+            {/* Popover */}
+            <div
+                ref={popoverRef}
+                className={cn(
+                    "fixed bg-white rounded-lg shadow-lg border border-gray-200",
+                    "px-4 py-3"
+                )}
+                style={{
+                    top: position.top,
+                    left: position.left,
+                    width,
+                    zIndex,
+                }}
+            >
+                <p className="text-sm mb-3">{message}</p>
+                <hr className="border-gray-200 mb-3" />
+                <div className="flex justify-end gap-2">
+                    <Button
+                        size="sm"
+                        variant={buttonVariant || confirmColor}
+                        onClick={handleConfirm}
+                        className="normal-case"
+                    >
+                        {confirmText}
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant={cancelColor}
+                        onClick={handleCancel}
+                        className="normal-case"
+                    >
+                        {cancelText}
+                    </Button>
+                </div>
+            </div>
+        </>
     );
 }

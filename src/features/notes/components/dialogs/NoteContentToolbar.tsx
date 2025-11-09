@@ -5,19 +5,14 @@
  */
 
 import React, { useState } from 'react';
+import { Check, X, Trash2, Link } from 'lucide-react';
+import { Button } from '@/Components/ui/button';
 import { 
-    AppBar, 
-    IconButton, 
-    styled, 
-    Toolbar, 
     Tooltip, 
-    Typography,
-    Box 
-} from '@mui/material';
-import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import LinkIcon from '@mui/icons-material/Link';
+    TooltipContent, 
+    TooltipProvider, 
+    TooltipTrigger 
+} from '@/Components/ui/tooltip';
 import { useNoteUI } from '../../store/NoteUIContext';
 import { useAuthStore } from '../../../../contexts/AuthContext';
 import { useCreateNote, useUpdateNote, useDeleteNote } from '../../hooks/useNotes';
@@ -25,45 +20,6 @@ import { useSnackbar } from 'notistack';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import type { CreateNoteDTO, UpdateNoteDTO } from '../../types/note.types';
-
-// Grow spacer component
-const Grow = styled('div')({
-    flexGrow: 1,
-});
-
-// Styled wrapper for tooltips
-export const TooltipContainer = styled('div')({
-    display: 'inline-flex', 
-    '& .hide': {
-        display: 'none',
-    }
-});
-
-// Main toolbar panel wrapper matching RFD structure
-export const ToolbarPanelWrapper = styled(Toolbar)({
-    backgroundColor: '#fff',
-    color: 'rgba(0, 0, 0, 0.6)!important',
-    paddingLeft: '24px!important',
-    paddingRight: '20px!important',
-    height: '61px',
-    maxHeight: '61px !important',
-    minHeight: '61px !important',
-
-    '& .MuiBox-root ': {
-        maxHeight: '61px !important',
-
-        '& .MuiPaper-root': {
-            height: '61px !important',
-
-            ' & .MuiToolbar-root': {
-                minHeight: '61px !important',
-            }
-        }
-    },
-    '& .MuiPaper-elevation4': {
-        boxShadow: 'none',
-    }
-});
 
 /**
  * Note Content Toolbar
@@ -92,8 +48,8 @@ export function NoteContentToolbar() {
     const deleteConfirmation = useConfirmationPopover({
         confirmText: 'Ok',
         cancelText: 'Cancel',
-        confirmColor: 'primary',
-        buttonVariant: 'text'
+        confirmColor: 'default',
+        buttonVariant: 'ghost'
     });
 
     const handleSave = async () => {
@@ -231,149 +187,107 @@ export function NoteContentToolbar() {
     // Render save/cancel/delete buttons matching RFD structure
     const renderSaveCancel = () => {
         return (
-            <TooltipContainer>
-                <div style={{ display: 'inline-flex' }}>
-                    <div id={`saving-cancel-note`}>
-                        {/* Show Save/Cancel when there are changes or new content */}
-                        {(hasUnsavedChanges || isNewNote) &&
-                            <>
-                                <Tooltip 
-                                    title="Save"
-                                    disableInteractive
-                                    slotProps={{
-                                        tooltip: {
-                                            sx: {
-                                                fontSize: '10px',
-                                                borderRadius: '2px'
-                                            }
-                                        }
-                                    }}
-                                >
-                                    <span>
-                                        <IconButton
+            <div className="inline-flex">
+                <div id={`saving-cancel-note`}>
+                    {/* Show Save/Cancel when there are changes or new content */}
+                    {(hasUnsavedChanges || isNewNote) &&
+                        <>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
                                             onClick={handleSave}
                                             disabled={inProgressSaving}
-                                            style={{ 
-                                                color: 'rgba(0, 0, 0, 0.54)',
-                                                width: '48px',
-                                                height: '48px'
-                                            }}
+                                            className="h-12 w-12 text-muted-foreground hover:text-foreground"
                                         >
-                                            <CheckOutlinedIcon />
-                                        </IconButton>
-                                    </span>
+                                            <Check className="h-5 w-5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">
+                                        <p className="text-xs">Save</p>
+                                    </TooltipContent>
                                 </Tooltip>
-                                <Tooltip 
-                                    title="Cancel"
-                                    disableInteractive
-                                    slotProps={{
-                                        tooltip: {
-                                            sx: {
-                                                fontSize: '10px',
-                                                borderRadius: '2px'
-                                            }
-                                        }
-                                    }}
-                                >
-                                    <span>
-                                        <IconButton
+                            </TooltipProvider>
+                            
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
                                             onClick={handleCancel}
                                             disabled={inProgressSaving}
-                                            style={{ 
-                                                color: 'rgba(0, 0, 0, 0.54)',
-                                                width: '48px',
-                                                height: '48px'
-                                            }}
+                                            className="h-12 w-12 text-muted-foreground hover:text-foreground"
                                         >
-                                            <CloseOutlinedIcon />
-                                        </IconButton>
-                                    </span>
+                                            <X className="h-5 w-5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">
+                                        <p className="text-xs">Cancel</p>
+                                    </TooltipContent>
                                 </Tooltip>
-                            </>
-                        }
-                        {/* Show Delete for existing notes with proper conditions */}
-                        {(() => {
-                            const shouldShowDelete = !hasUnsavedChanges && !isNewNote && selectedNote && selectedNote.noteId > 0;
-                            
-                            return shouldShowDelete && (
-                                <Tooltip 
-                                    title="Delete Note"
-                                    slotProps={{
-                                        tooltip: {
-                                            sx: {
-                                                fontSize: '10px',
-                                                borderRadius: '2px'
-                                            }
-                                        }
-                                    }}
-                                >
-                                    <span>
-                                        <IconButton
+                            </TooltipProvider>
+                        </>
+                    }
+                    {/* Show Delete for existing notes with proper conditions */}
+                    {(() => {
+                        const shouldShowDelete = !hasUnsavedChanges && !isNewNote && selectedNote && selectedNote.noteId > 0;
+                        
+                        return shouldShowDelete && (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
                                             onClick={handleDelete}
                                             disabled={inProgressSaving}
-                                            style={{ 
-                                                color: 'rgba(0, 0, 0, 0.54)',
-                                                width: '48px',
-                                                height: '48px'
-                                            }}
+                                            className="h-12 w-12 text-muted-foreground hover:text-foreground"
                                         >
-                                            <DeleteForeverOutlinedIcon />
-                                        </IconButton>
-                                    </span>
+                                            <Trash2 className="h-5 w-5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">
+                                        <p className="text-xs">Delete Note</p>
+                                    </TooltipContent>
                                 </Tooltip>
-                            );
-                        })()}
-                    </div>
+                            </TooltipProvider>
+                        );
+                    })()}
                 </div>
-            </TooltipContainer>
+            </div>
         )
     };
 
     return (
         <>
-            <AppBar
-                style={{ zIndex: 'auto', backgroundColor: '#fff' }}
-                position="static"
-                elevation={2}
-                variant="elevation"
+            <div 
+                className="static z-auto bg-white shadow-sm border-b"
             >
-                <ToolbarPanelWrapper>
-                    <div style={{ 
-                        display: 'flex', 
-                        flexWrap: 'wrap', 
-                        flexDirection: 'column', 
-                        marginTop: 6 
-                    }}>
-                        <Typography 
-                            variant="h6" 
-                            className="MuiTypography-root MuiTypography-h6"
-                            style={{ 
-                                display: 'flex', 
-                                color: '#000000',
-                                fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
-                                fontSize: '20px',
-                                fontWeight: 400,
-                                lineHeight: 1.6,
-                                letterSpacing: '0.0075em'
-                            }}
-                        >
+                <div className="flex items-center justify-between bg-white text-muted-foreground px-6 pr-5 h-[61px] min-h-[61px]">
+                    <div className="flex flex-wrap flex-col mt-1.5">
+                        <h2 className="text-xl font-normal text-black flex items-center tracking-wide">
                             {`NOTE ID: ${selectedNote?.noteId || '0'}`}
                             {selectedNote && selectedNote.noteId > 0 && (
-                                <div style={{ display: 'flex' }}>
-                                    <IconButton 
-                                        style={{ padding: '0 16px' }}
+                                <div className="flex">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="px-4 py-0"
                                         onClick={copyNoteLink}
                                     >
-                                        <LinkIcon />
-                                    </IconButton>
+                                        <Link className="h-5 w-5" />
+                                    </Button>
                                 </div>
                             )}
-                        </Typography>
+                        </h2>
                     </div>
-                    <Grow />
+                    <div className="flex-grow" />
                     {isAuthenticated && !inProgressSaving && renderSaveCancel()}
-                </ToolbarPanelWrapper>
-            </AppBar>
+                </div>
+            </div>
             
             {/* Confirmation Popover for Delete */}
             <ConfirmationPopover {...deleteConfirmation.getPopoverProps()} />

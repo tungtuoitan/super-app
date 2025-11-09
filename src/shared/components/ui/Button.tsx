@@ -4,13 +4,14 @@
  */
 
 import React from 'react';
-import { Button as MuiButton, CircularProgress } from '@mui/material';
-import type { ButtonProps as MuiButtonProps } from '@mui/material';
+import { Button as ShadcnButton } from '@/Components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils'; 
 
-interface ButtonProps extends Omit<MuiButtonProps, 'variant'> {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
     onClick?: () => void;
-    variant?: 'primary' | 'secondary' | 'danger' | 'text';
+    variant?: 'primary' | 'secondary' | 'danger' | 'text' | 'ghost';
     disabled?: boolean;
     loading?: boolean;
     fullWidth?: boolean;
@@ -23,42 +24,43 @@ export function Button({
     disabled = false,
     loading = false,
     fullWidth = false,
+    className,
     ...props
 }: ButtonProps) {
-    const getVariantProps = () => {
+    const getShadcnVariant = () => {
         switch (variant) {
             case 'primary':
-                return { variant: 'contained' as const, color: 'primary' as const };
+                return 'default';
             case 'secondary':
-                return { variant: 'outlined' as const, color: 'primary' as const };
+                return 'outline';
             case 'danger':
-                return { variant: 'contained' as const, color: 'error' as const };
+                return 'destructive';
             case 'text':
-                return { variant: 'text' as const, color: 'primary' as const };
+                return 'link';
+            case 'ghost':
+                return 'ghost';
             default:
-                return { variant: 'contained' as const, color: 'primary' as const };
+                return 'default';
         }
     };
 
     return (
-        <MuiButton
-            {...getVariantProps()}
+        <ShadcnButton
+            variant={getShadcnVariant()}
             onClick={onClick}
             disabled={disabled || loading}
-            fullWidth={fullWidth}
-            sx={{
-                minWidth: '100px',
-                textTransform: 'none',
-                fontWeight: 500,
-                ...props.sx,
-            }}
+            className={cn(
+                'min-w-[100px]',
+                fullWidth && 'w-full',
+                className
+            )}
             {...props}
         >
             {loading ? (
-                <CircularProgress size={20} color="inherit" />
+                <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
                 children
             )}
-        </MuiButton>
+        </ShadcnButton>
     );
 }

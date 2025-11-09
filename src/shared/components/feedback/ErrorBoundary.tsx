@@ -4,7 +4,6 @@
  */
 
 import React from 'react';
-import { Box, Typography } from '@mui/material';
 import { Button } from '../ui/Button';
 
 interface Props {
@@ -28,7 +27,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         console.error('Error caught by boundary:', error, errorInfo);
-        
+
         // Here you could log to an error reporting service
         // logErrorToService(error, errorInfo);
     }
@@ -36,30 +35,20 @@ export class ErrorBoundary extends React.Component<Props, State> {
     render() {
         if (this.state.hasError) {
             return (
-                <Box 
-                    sx={{ 
-                        padding: '24px', 
-                        textAlign: 'center',
-                        minHeight: '200px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Typography variant="h5" color="error" gutterBottom>
+                <div className="p-6 text-center min-h-[200px] flex flex-col justify-center items-center">
+                    <h2 className="text-2xl font-semibold text-destructive mb-4">
                         Something went wrong
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: '8px', mb: '16px' }}>
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-2 mb-4">
                         {this.state.error?.message || 'An unexpected error occurred'}
-                    </Typography>
+                    </p>
                     <Button
                         onClick={() => window.location.reload()}
                         variant="primary"
                     >
                         Reload Page
                     </Button>
-                </Box>
+                </div>
             );
         }
 

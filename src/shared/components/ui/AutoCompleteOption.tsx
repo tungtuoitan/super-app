@@ -1,16 +1,18 @@
-import React from 'react';
-import { Box, BoxProps } from '@mui/material';
+import React, { CSSProperties } from 'react';
+import { cn } from '@/lib/utils';
 
-export interface AutoCompleteOptionProps extends BoxProps {
+export interface AutoCompleteOptionProps extends React.HTMLAttributes<HTMLLIElement> {
     /** Child content to display in the option */
     children: React.ReactNode;
     /** Whether the option is disabled */
     disabled?: boolean;
+    /** Optional inline styles */
+    style?: CSSProperties;
 }
 
 /**
  * Reusable option component for autocomplete items
- * 
+ *
  * @example
  * ```tsx
  * <AutoCompleteOption {...props}>
@@ -18,23 +20,24 @@ export interface AutoCompleteOptionProps extends BoxProps {
  * </AutoCompleteOption>
  * ```
  */
-export function AutoCompleteOption({ 
-    children, 
-    disabled, 
-    ...props 
+export function AutoCompleteOption({
+    children,
+    disabled,
+    className,
+    style,
+    ...props
 }: AutoCompleteOptionProps) {
     return (
-        <Box 
-            component="li" 
+        <li
             {...props}
-            sx={{
-                opacity: disabled ? 0.5 : 1,
-                pointerEvents: disabled ? 'none' : 'auto',
-                ...props.sx,
-            }}
+            className={cn(
+                disabled && 'opacity-50 pointer-events-none',
+                className
+            )}
+            style={style}
         >
             {children}
-        </Box>
+        </li>
     );
 }
 

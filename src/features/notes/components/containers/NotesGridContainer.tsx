@@ -1,62 +1,51 @@
-import { SxProps, Theme, styled } from "@mui/material";
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
-import { CSSProperties } from "@mui/styles";
-import { LegacyRef } from "react";
-
-export const ContainerRoot = styled('div')({
-    width: '100%',
-    overflowX: 'auto',
-    overflowY: 'hidden',
-    backgroundColor: 'rgb(246, 246, 246)',
-});
-
-const GridWrapper = styled('div')({
-    margin: '20px 20px 0',
-});
+import { LegacyRef, CSSProperties } from 'react';
+import { cn } from '@/lib/utils';
 
 export interface INotesGridContainer {
     toolbar?: React.ReactNode;
     toolbarItems?: React.ReactNode;
     grid: React.ReactNode;
-    sx?: SxProps<Theme> | undefined;
-    style?: CSSProperties | undefined;
-    ref?: LegacyRef<HTMLDivElement> | undefined;
-    sxGridWrapper?: SxProps<Theme> | undefined;
-    sxBoxToolbar?: SxProps<Theme> | undefined;
+    className?: string;
+    style?: CSSProperties;
+    ref?: LegacyRef<HTMLDivElement>;
+    gridWrapperClassName?: string;
+    toolbarClassName?: string;
 }
-
-export const ToolbarWrapper = styled('div')({
-    display: 'flex',
-    flexFlow: 'column',
-    '& .MuiPaper-root': {
-        backgroundColor: '#fff',
-        color: '#000'
-    }
-});
 
 /**
  * Notes Grid Container component matching portal's GridContainer pattern
  * Provides a consistent layout for notes with toolbar and grid sections
  */
-export const NotesGridContainer = ({ toolbar, toolbarItems, grid, sx, style, ref, sxGridWrapper, sxBoxToolbar }: INotesGridContainer) => {
+export const NotesGridContainer = ({ 
+    toolbar, 
+    toolbarItems, 
+    grid, 
+    className, 
+    style, 
+    ref, 
+    gridWrapperClassName,
+    toolbarClassName 
+}: INotesGridContainer) => {
     return (
-        <ContainerRoot 
-            ref={ref ?? undefined}
-            sx={sx ?? undefined}
-            style={style ?? undefined}>
+        <div 
+            ref={ref}
+            className={cn("w-full overflow-x-auto overflow-y-hidden bg-[#f6f6f6]", className)}
+            style={style}
+        >
             {toolbar != null && 
-                <ToolbarWrapper sx={sxBoxToolbar ?? undefined}>
+                <div className={cn("flex flex-col [&_.paper-root]:bg-white [&_.paper-root]:text-black", toolbarClassName)}>
                     {toolbar}
-                </ToolbarWrapper>
+                </div>
             }
             {toolbarItems != null && 
                 <ToolbarContainer>
                     {toolbarItems}
                 </ToolbarContainer>
             }
-            <GridWrapper sx={sxGridWrapper ?? undefined}>
+            <div className={cn("mx-5 mt-5", gridWrapperClassName)}>
                 {grid}
-            </GridWrapper>
-        </ContainerRoot>
+            </div>
+        </div>
     );
 };

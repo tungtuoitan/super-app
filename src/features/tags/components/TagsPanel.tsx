@@ -1,71 +1,66 @@
-import React from 'react'
-import { Box, Typography, List, ListItem, ListItemText, Chip } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
-import { tagService } from '@/features/tags/services/tagService'
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { tagService } from '@/features/tags/services/tagService';
+import { Badge } from '@/Components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface TagsPanelProps {
-  onTagSelect?: (tagId: string) => void
+  onTagSelect?: (tagId: string) => void;
 }
 
 export function TagsPanel({ onTagSelect }: TagsPanelProps) {
   const { data: tags, isLoading } = useQuery({
     queryKey: ['tags'],
     queryFn: () => tagService.getTags(),
-  })
+  });
 
   const handleTagClick = (tagId: string) => {
-    onTagSelect?.(tagId)
-  }
+    onTagSelect?.(tagId);
+  };
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography>Loading tags...</Typography>
-      </Box>
-    )
+      <div className="p-4">
+        <p className="text-muted-foreground">Loading tags...</p>
+      </div>
+    );
   }
 
   return (
-    <Box sx={{ height: '100%', overflow: 'auto' }}>
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6">Tags</Typography>
-      </Box>
+    <div className="h-full overflow-auto">
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-semibold">Tags</h2>
+      </div>
       
-      <List dense>
+      <div className="py-2">
         {tags?.map((tag) => (
-          <ListItem
+          <div
             key={tag.tagId}
-            component="div"
             onClick={() => handleTagClick(tag.tagId.toString())}
-            sx={{
-              cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: 'action.hover',
-              },
-            }}
+            className={cn(
+              "px-4 py-2 cursor-pointer",
+              "hover:bg-accent transition-colors"
+            )}
           >
-            <ListItemText
-              primary={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    label={tag.name}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      backgroundColor: tag.color || 'primary.light',
-                      color: 'white',
-                      fontWeight: 500,
-                    }}
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    ({tag.noteCount || 0})
-                  </Typography>
-                </Box>
-              }
-            />
-          </ListItem>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="outline"
+                style={{ 
+                  backgroundColor: tag.color || 'hsl(var(--primary) / 0.2)', 
+                  color: 'white',
+                  borderColor: tag.color || 'hsl(var(--primary))'
+                }}
+                className="font-medium"
+              >
+                {tag.name}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                ({tag.noteCount || 0})
+              </span>
+            </div>
+          </div>
         ))}
-      </List>
-    </Box>
-  )
+      </div>
+    </div>
+  );
 }

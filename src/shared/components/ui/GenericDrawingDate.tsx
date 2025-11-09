@@ -1,8 +1,15 @@
-import React, { forwardRef } from 'react';
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { SxProps, Theme } from '@mui/material';
-import { spacing } from '@/lib/theme';
+import React, { forwardRef, useState } from 'react';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/Components/ui/button';
+import { Calendar } from '@/Components/ui/calendar';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/Components/ui/popover';
+import { Label } from '@/Components/ui/label';
 
 /**
  * Props interface for the GenericDrawingDate component.
@@ -52,11 +59,6 @@ export interface GenericDrawingDateProps {
     error?: boolean;
     
     /**
-     * Custom styles for the date picker
-     */
-    sx?: SxProps<Theme>;
-    
-    /**
      * CSS class name
      */
     className?: string;
@@ -75,7 +77,7 @@ export interface GenericDrawingDateProps {
  * - Two size variants: 'small' (default) and 'tiny'
  * - Configurable styling and behavior
  * - Built-in error states and validation
- * - Automatic LocalizationProvider wrapping
+ * - Clearable date selection
  * - Consistent styling with GenericTextField
  * 
  * Size variants:
@@ -88,85 +90,106 @@ export interface GenericDrawingDateProps {
 export const GenericDrawingDate = forwardRef<HTMLDivElement, GenericDrawingDateProps>(
     ({
         size = 'small',
-        format = "MM/dd/yyyy",
+        format: dateFormat = "MM/dd/yyyy",
         name,
         label,
         value,
         onChange,
         disabled = false,
         error = false,
-        sx,
         className,
         clearable = true,
         ...props
     }, ref) => {
-        // Define styles based on size prop
-        const getStyles = (): SxProps<Theme> => {
-            const baseStyles: SxProps<Theme> = {
-                width: '100%',
-                ...sx,
-            };
+        const [open, setOpen] = useState(false);
 
+        // Size-based styles
+        const getSizeClasses = () => {
             if (size === 'tiny') {
-                // Compact styles matching CADDrawings DatePicker
                 return {
-                    ...baseStyles,
-                    '& .MuiInputBase-root': {
-                        height: '29.5px !important',
-                        paddingTop: '3px !important',
-                        paddingBottom: '4px !important',
-                        ...(error && {
-                            border: '1.5px solid red',
-                            borderRadius: '4px',
-                        })
-                    },
-                    '& .MuiInputBase-input': {
-                        fontSize: '12px!important',
-                        marginTop: '5px !important',
-                        padding: '6px 8px 6px 12px',
-                    },
-                    '& .MuiFormLabel-root': {
-                        fontSize: '12px!important',
-                    },
-                    '& .MuiInputBase-root.MuiOutlinedInput-root': {
-                        fontSize: '12px!important',
-                    },
-                };
-            } else {
-                // Small size - standard styling matching GenericTextField
-                return {
-                    ...baseStyles,
-                    '& .MuiTextField-root': {
-                        width: '100%',
-                    },
+                    button: 'h-[29.5px] text-xs px-2',
+                    label: 'text-xs',
+                    popover: 'w-auto p-0'
                 };
             }
+            return {
+                button: 'h-10 text-sm',
+                label: 'text-sm',
+                popover: 'w-auto p-0'
+            };
+        };
+
+        const sizeClasses = getSizeClasses();
+        const displayValue = value ? format(value, dateFormat) : '';
+
+        const handleClear = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            onChange?.(null);
         };
 
         return (
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                    ref={ref}
-                    format={format}
-                    name={name}
-                    label={label}
-                    value={value}
-                    onChange={onChange}
-                    disabled={disabled}
-                    className={className}
-                    slotProps={{
-                        field: { clearable },
-                        textField: {
-                            size: 'small', // Always use MUI's small size as base
-                            variant: 'outlined',
-                            sx: getStyles(),
-                            error,
-                            fullWidth: true,
-                        },
-                    }}
-                    {...props}
-                />
-            </LocalizationProvider>
+            <div className={cn("w-full", className)} ref={ref}>
+                {label && (
+                    <Label 
+                        htmlFor={name}
+                        className={cn(
+                            "block mb-2",
+                            sizeClasses.label,
+                            error && 'text-destructive'
+                        )}
+                    >
+                        {label}
+                    </Label>
+                )}
+                
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            id={name}
+                            variant="outline"
+                            disabled={disabled}
+                            className={cn(
+                                "w-full justify-start font-normal",
+                                sizeClasses.button,
+                                !value && "text-muted-foreground",
+                                error && "border-destructive focus-visible:ring-destructive"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <span className="flex-1 text-left truncate">
+                                {displayValue || "Pick a date"}
+                            </span>
+                            {clearable && value && !disabled && (
+                                <X 
+                                    className="h-4 w-4 hover:bg-accent rounded-sm p-0.5" 
+                                    onClick={handleClear}
+                                />
+                            )}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className={sizeClasses.popover} align="start">
+                        <Calendar
+                            mode="single"
+                            selected={value || undefined}
+                            onSelect={(date) => {
+                                onChange?.(date || null);
+                                setOpen(false);
+                            }}
+                            disabled={disabled}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+                
+                {error && (
+                    <p className={cn(
+                        "mt-1 text-destructive",
+                        size === 'tiny' ? 'text-xs' : 'text-sm'
+                    )}>
+                        This field is required
+                    </p>
+                )}
+            </div>
         );
     }
 );

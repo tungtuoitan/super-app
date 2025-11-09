@@ -1,21 +1,20 @@
 import { CSSProperties, useEffect, useState } from 'react';
-import { 
-    Autocomplete, 
-    AutocompleteClasses, 
-    Box,
-    styled, 
-    SxProps, 
-    TextField, 
-    Theme 
-} from '@mui/material';
-
-/**
- * Styled TextField component for autocomplete inputs.
- * Provides consistent styling for text input fields.
- */
-export const StyledTextfield = styled(TextField)({
-    margin: 0,
-});
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/Components/ui/button';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+} from '@/Components/ui/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/Components/ui/popover';
+import { Label } from '@/Components/ui/label';
 
 /**
  * Utility function to check if a value is empty.
@@ -70,12 +69,10 @@ export interface GenericAutoCompleteProps {
     hidden?: boolean;
     /** Size variant for the component (default: 'small') */
     size?: 'small' | 'tiny';
-    /** CSS classes for styling customization */
-    classes?: Partial<AutocompleteClasses>;
     /** Currently selected value */
     value: IAutoCompleteOptions | null | undefined;
-    /** MUI sx prop for styling */
-    sx?: SxProps<Theme>;
+    /** Additional CSS classes */
+    className?: string;
     /** Input field properties */
     inputProps: {
         /** Input field name */
@@ -86,13 +83,6 @@ export interface GenericAutoCompleteProps {
         required?: boolean;
         /** Whether the field has an error state */
         error?: boolean;
-        /** MUI sx prop for input styling */
-        sx?: SxProps<Theme>;
-    };
-    /** Props for rendering option items */
-    renderOptionProps?: {
-        /** MUI sx prop for option styling */
-        sx?: SxProps<Theme>;
     };
     /** Array of all available options */
     allOptions: IAutoCompleteOptions[];
@@ -130,116 +120,190 @@ export interface GenericAutoCompleteProps {
  * @returns Configured autocomplete component
  */
 export function GenericAutoComplete(props: GenericAutoCompleteProps) {
-    const { id, allOptions, size = 'small', classes, onChange, inputProps, value, sx, style, disabled, renderOptionProps, disableClearable, hidden, getOptionDisabled } = props;
+    const { 
+        id, 
+        allOptions, 
+        size = 'small', 
+        onChange, 
+        inputProps, 
+        value, 
+        className,
+        style, 
+        disabled, 
+        disableClearable, 
+        hidden, 
+        getOptionDisabled 
+    } = props;
+
+    const [open, setOpen] = useState(false);
     const [selectedValue, setSelectedValue] = useState<IAutoCompleteOptions>({} as IAutoCompleteOptions);
 
     useEffect(() => {
         if (!isEmpty(value) && !isEmpty(allOptions)) {
-            var _filteredOption = allOptions.filter(x => x.id === value?.id);
+            const filteredOption = allOptions.filter(x => x.id === value?.id);
             if (value?.id === 0) {
                 setSelectedValue({} as IAutoCompleteOptions);
             }
-            if (_filteredOption.length > 0) {
-                setSelectedValue(_filteredOption[0]);
+            if (filteredOption.length > 0) {
+                setSelectedValue(filteredOption[0]);
             }
         }
     }, [value, allOptions]);
-    // Define styles based on size prop, similar to GenericTextField
-    const getStyles = () => {
-        const baseStyles = {
-            '& .MuiOutlinedInput-root': {
-                borderRadius: '4px !important',
-            },
-            '& .MuiSvgIcon-root': {
-                color: '#9e9e9e', // Default gray color for dropdown arrow
-            },
-            ...sx,
-        };
 
-        if (size === 'tiny') {
-            return {
-                ...baseStyles,
-                '& .MuiInputBase-input': {
-                    fontSize: '12px!important',
-                    paddingTop: '6px',
-                    paddingBottom: '6px',
-                },
-                '& .MuiFormLabel-root': {
-                    fontSize: '12px!important',
-                },
-                '& .MuiInputBase-root.MuiOutlinedInput-root': {
-                    fontSize: '12px!important',
-                    borderRadius: '4px',
-                },
-                '& .MuiAutocomplete-option': {
-                    fontSize: '12px!important',
-                },
-            };
-        } else {
-            // Small size - standard styling (matches TagAutoComplete)
-            return {
-                ...baseStyles,
-            };
+    const handleSelect = (option: IAutoCompleteOptions) => {
+        setSelectedValue(option);
+        setOpen(false);
+        if (onChange) {
+            // Create a synthetic event for compatibility
+            const syntheticEvent = {
+                type: 'change',
+                target: { value: option }
+            } as unknown as React.SyntheticEvent;
+            onChange(syntheticEvent, option);
         }
     };
 
+    const handleClear = () => {
+        setSelectedValue({} as IAutoCompleteOptions);
+        if (onChange) {
+            const syntheticEvent = {
+                type: 'change',
+                target: { value: null }
+            } as unknown as React.SyntheticEvent;
+            onChange(syntheticEvent, null);
+        }
+    };
+
+    // Size-based styles
+    const getSizeClasses = () => {
+        if (size === 'tiny') {
+            return {
+                button: 'h-8 text-xs',
+                popover: 'w-[200px] p-0',
+                command: 'text-xs',
+                item: 'text-xs py-1'
+            };
+        }
+        return {
+            button: 'h-10',
+            popover: 'w-[300px] p-0',
+            command: '',
+            item: ''
+        };
+    };
+
+    const sizeClasses = getSizeClasses();
+    const displayValue = selectedValue?.label || selectedValue?.desc || '';
+
+    if (hidden) {
+        return null;
+    }
+
     return (
-        <Autocomplete
-            id={id}
-            disabled={disabled}
-            options={allOptions}
-            disableClearable={disableClearable}
-            size="small"
-            fullWidth={true}
-            classes={classes}
-            value={selectedValue}
-            hidden={hidden}
-            style={style}
-            sx={getStyles()}
-            getOptionDisabled={getOptionDisabled}
-            getOptionLabel={(option) => option?.label || option?.desc || " "}
-            isOptionEqualToValue={(option, value) => option?.id === value?.id}
-            onChange={(event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
-                if (onChange) {
-                    if (newValue) {
-                        setSelectedValue(newValue);
-                    }
-                    return onChange(event, newValue);
-                }
-            }}
-            renderOption={(props, option) => {
-                if ((typeof (option.active) !== 'undefined' && option.active === false) || 
-                    (typeof (option.isActive) !== 'undefined' && option.isActive === false)) {
-                    props['aria-disabled'] = true;
-                }
-                
-                // Apply font size based on size prop for options
-                const optionStyles = size === 'tiny' ? { fontSize: '12px' } : {};
-                const mergedRenderOptionProps = {
-                    ...renderOptionProps,
-                    sx: {
-                        ...optionStyles,
-                        ...renderOptionProps?.sx,
-                    }
-                };
-                
-                return <Box component="li" {...props} {...mergedRenderOptionProps} >
-                    <span style={{ marginRight: '20px' }}>{option?.label || option?.desc}</span>{option.longDesc}
-                </Box>
-            }}
-            renderInput={(params) => (
-                <StyledTextfield
-                    {...params}
-                    name={inputProps.name}
-                    label={inputProps.label}
-                    required={inputProps.required ?? false}
-                    error={inputProps.error ?? false}
-                    sx={inputProps.sx}
-                    inputProps={{
-                        ...params.inputProps,
-                    }}
-                    fullWidth />
+        <div className={cn("w-full", className)} style={style}>
+            {inputProps.label && (
+                <Label 
+                    htmlFor={id} 
+                    className={cn(
+                        "block mb-2",
+                        size === 'tiny' ? 'text-xs' : 'text-sm',
+                        inputProps.error && 'text-destructive'
+                    )}
+                >
+                    {inputProps.label}
+                    {inputProps.required && <span className="text-destructive ml-1">*</span>}
+                </Label>
             )}
-        />
-    )
+            
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        id={id}
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        disabled={disabled}
+                        className={cn(
+                            "w-full justify-between",
+                            sizeClasses.button,
+                            !displayValue && "text-muted-foreground",
+                            inputProps.error && "border-destructive focus-visible:ring-destructive"
+                        )}
+                    >
+                        <span className="truncate">{displayValue || "Select option..."}</span>
+                        <div className="flex items-center gap-1">
+                            {!disableClearable && displayValue && !disabled && (
+                                <span
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleClear();
+                                    }}
+                                    className="hover:bg-accent rounded-sm p-0.5"
+                                >
+                                    <Check className="h-3 w-3" />
+                                </span>
+                            )}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </div>
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className={sizeClasses.popover} align="start">
+                    <Command className={sizeClasses.command}>
+                        <CommandInput placeholder="Search..." />
+                        <CommandEmpty>No option found.</CommandEmpty>
+                        <CommandGroup>
+                            {allOptions.map((option) => {
+                                const isDisabled = getOptionDisabled?.(option) || 
+                                    option.active === false || 
+                                    option.isActive === false;
+                                const isSelected = selectedValue?.id === option.id;
+                                const label = option.label || option.desc || '';
+
+                                return (
+                                    <CommandItem
+                                        key={option.id}
+                                        value={`${option.id}-${label}`}
+                                        onSelect={() => {
+                                            if (!isDisabled) {
+                                                handleSelect(option);
+                                            }
+                                        }}
+                                        disabled={isDisabled}
+                                        className={cn(
+                                            sizeClasses.item,
+                                            isDisabled && "opacity-50 cursor-not-allowed"
+                                        )}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                isSelected ? "opacity-100" : "opacity-0"
+                                            )}
+                                        />
+                                        <div className="flex items-center justify-between w-full">
+                                            <span>{label}</span>
+                                            {option.longDesc && (
+                                                <span className="text-xs text-muted-foreground ml-2">
+                                                    {option.longDesc}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </CommandItem>
+                                );
+                            })}
+                        </CommandGroup>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+            
+            {inputProps.error && (
+                <p className={cn(
+                    "mt-1 text-destructive",
+                    size === 'tiny' ? 'text-xs' : 'text-sm'
+                )}>
+                    This field is required
+                </p>
+            )}
+        </div>
+    );
 }

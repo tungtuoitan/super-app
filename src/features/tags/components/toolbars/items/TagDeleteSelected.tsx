@@ -4,8 +4,14 @@
  */
 
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import { Button } from '@/Components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/Components/ui/tooltip';
+import { Trash2 } from 'lucide-react';
 import { useTagUI } from '../../../store/TagUIContext';
 import { useSnackbar } from 'notistack';
 
@@ -46,16 +52,22 @@ export function TagDeleteSelected() {
     if (!hasSelection) return null;
 
     return (
-        <Tooltip title={`Delete ${selectedRowIds.length} selected tag${selectedRowIds.length === 1 ? '' : 's'}`}>
-            <IconButton
-                onClick={handleDeleteSelected}
-                sx={{
-                    color: 'rgba(0, 0, 0, 0.54)',
-                }}
-                size="medium"
-            >
-                <DeleteForeverOutlinedIcon />
-            </IconButton>
-        </Tooltip>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDeleteSelected}
+                        className="text-destructive hover:text-destructive"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Delete {selectedRowIds.length} selected tag{selectedRowIds.length === 1 ? '' : 's'}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
 }

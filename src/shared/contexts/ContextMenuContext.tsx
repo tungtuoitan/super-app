@@ -7,13 +7,13 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { ControlledMenu, MenuItem, MenuDivider } from '@szhsin/react-menu';
 import { 
-    Add as AddIcon, 
+    Plus as AddIcon, 
     Edit as EditIcon, 
-    Delete as DeleteIcon, 
+    Trash2 as DeleteIcon, 
     Info as InfoIcon,
-    InsertDriveFile as FileIcon,
-    Note as NoteIcon
-} from '@mui/icons-material';
+    File as FileIcon,
+    FileText as NoteIcon
+} from 'lucide-react';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import { useTagUI } from '@/features/tags/store/TagUIContext';
@@ -59,8 +59,8 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
     const deleteConfirmation = useConfirmationPopover({
         confirmText: 'Delete',
         cancelText: 'Cancel',
-        confirmColor: 'error',
-        buttonVariant: 'contained',
+        confirmColor: 'destructive',
+        buttonVariant: 'default',
         zIndex: 20000 // Higher than menu z-index
     });
 
@@ -199,15 +199,15 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
                     <>
                         {/* Add submenu */}
                         <MenuItem onClick={handleCreateTag}>
-                            <AddIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <AddIcon className="w-4 h-4 mr-2" />
                             Add Tag
                         </MenuItem>
                         <MenuItem onClick={handleAddFile} disabled>
-                            <FileIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <FileIcon className="w-4 h-4 mr-2" />
                             Add File
                         </MenuItem>
                         <MenuItem onClick={handleAddNote} disabled>
-                            <NoteIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <NoteIcon className="w-4 h-4 mr-2" />
                             Add Note
                         </MenuItem>
                         
@@ -215,14 +215,14 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
                         
                         {/* Edit - disabled if multiple items selected */}
                         <MenuItem onClick={handleEditItem} disabled={isMultipleSelected}>
-                            <EditIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <EditIcon className="w-4 h-4 mr-2" />
                             Edit {isMultipleSelected ? 'Tags' : 'Tag'}
                         </MenuItem>
                         
                         {/* Delete - show count if multiple selected */}
                         {!isWorkspaceRoot && (
                             <MenuItem onClick={handleDeleteItem}>
-                                <DeleteIcon style={{ fontSize: 16, marginRight: 8 }} />
+                                <DeleteIcon className="w-4 h-4 mr-2" />
                                 Delete {isMultipleSelected ? `${selectedCount} Tags` : 'Tag'}
                             </MenuItem>
                         )}
@@ -233,16 +233,16 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
                 return (
                     <>
                         <MenuItem onClick={handleEditItem}>
-                            <EditIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <EditIcon className="w-4 h-4 mr-2" />
                             Edit Note
                         </MenuItem>
                         <MenuItem onClick={handleViewInfo}>
-                            <InfoIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <InfoIcon className="w-4 h-4 mr-2" />
                             View Details
                         </MenuItem>
                         <MenuDivider />
                         <MenuItem onClick={handleDeleteItem}>
-                            <DeleteIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <DeleteIcon className="w-4 h-4 mr-2" />
                             Delete Note
                         </MenuItem>
                     </>
@@ -256,7 +256,7 @@ export function ContextMenuProvider({ children, onCreateTag, onDeleteTag }: Cont
                         </MenuItem>
                         <MenuDivider />
                         <MenuItem onClick={handleViewInfo}>
-                            <InfoIcon style={{ fontSize: 16, marginRight: 8 }} />
+                            <InfoIcon className="w-4 h-4 mr-2" />
                             About
                         </MenuItem>
                     </>

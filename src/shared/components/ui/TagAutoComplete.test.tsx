@@ -149,21 +149,6 @@ describe('GenericTagAutoComplete', () => {
         expect(screen.getByLabelText('Tags')).toBeInTheDocument();
     });
 
-    it('applies custom styling', () => {
-        const customSx = { marginTop: '20px', backgroundColor: 'red' };
-
-        render(
-            <GenericTagAutoComplete
-                options={mockOptions}
-                onChange={mockOnChange}
-                sx={customSx}
-            />
-        );
-
-        // The component should render (styling test would need more sophisticated testing)
-        expect(screen.getByLabelText('Tags')).toBeInTheDocument();
-    });
-
     it('supports test id prop', () => {
         render(
             <GenericTagAutoComplete

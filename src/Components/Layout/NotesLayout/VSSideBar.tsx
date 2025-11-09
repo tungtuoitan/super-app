@@ -1,9 +1,10 @@
-import { Panel } from 'react-resizable-panels'
+import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '../VSCodeLayout/ActivityBar'
 import { WorkspaceTree } from '@/features/tags/components/WorkspaceTree'
 import { NoteGridPanel } from '../NoteGridPanel'
 import { type Note } from '@/features/notes'
 import { useEditorTabs } from '@/features/editor'
+import {VSCodeResizeHandle} from '../VSCodeLayout/VSCodeResizeHandle'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -39,20 +40,45 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
       onCollapse={onCollapse}
       onExpand={onExpand}
     >
+      {/* Only render inner panels when visible to avoid mounting when hidden */}
       {isVisible && (
-        <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground">
-          <span>{getViewTitle(activeView)}</span>
-        </div>
+        // Use a vertical PanelGroup to split the sidebar into two stacked panels
+        <PanelGroup direction="vertical" className="h-full">
+          {/* Top panel: original sidebar content */}
+          <Panel defaultSize={70} minSize={20}>
+            <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
+              {/* Header */}
+              <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground">
+                <span>{getViewTitle(activeView)}</span>
+              </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto">
-          {activeView === 'explorer' && <ExplorerView />}
-          {activeView === 'tags' && <TagsView />}
-          {activeView === 'notes' && <NotesView />}
-        </div>
-      </div>
+              {/* Content */}
+              <div className="flex-1 overflow-auto">
+                {activeView === 'explorer' && <ExplorerView />}
+                {activeView === 'tags' && <TagsView />}
+                {activeView === 'notes' && <NotesView />}
+              </div>
+            </div>
+          </Panel>
+
+          <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
+
+          {/* Bottom panel: secondary area (e.g., quick actions, details) */}
+          <Panel defaultSize={30} minSize={5} collapsible collapsedSize={0}>
+            {/* Mirror VSEditorArea structure but leave content empty */}
+            <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden border-1 border-red-0">
+              {/* Tab bar style header */}
+              <div className="h-[35px] flex items-center border-b border-editor-border bg-editor-sidebar overflow-hidden px-3">
+                <div className="text-[13px] text-muted-foreground">Secondary</div>
+              </div>
+
+              {/* Main content area (intentionally empty) */}
+              <div className="flex-1 overflow-hidden flex">
+                {/* Intentionally left blank - secondary panel content goes here */}
+              </div>
+            </div>
+          </Panel>
+        </PanelGroup>
       )}
     </Panel>
   )

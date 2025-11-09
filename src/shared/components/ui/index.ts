@@ -12,7 +12,6 @@ export {
     GenericAutoComplete, 
     type GenericAutoCompleteProps, 
     type IAutoCompleteOptions,
-    StyledTextfield,
     isEmpty
 } from './GenericAutoComplete';
 
@@ -29,9 +28,7 @@ export {
 
 export { 
     GridContainer, 
-    type GridContainerProps,
-    ContainerRoot,
-    ContainerWrapper
+    type GridContainerProps
 } from './GridContainer';
 
 export { Tooltip2 } from './Tooltip2';

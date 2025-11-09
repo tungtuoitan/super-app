@@ -3,10 +3,10 @@
  * 
  * This module provides reusable style objects and functions that can be
  * applied throughout the application for consistent design patterns.
- * All mixins return MUI-compatible CSSObject types for type safety.
+ * All mixins return React.CSSProperties types for type safety.
  */
 
-import { CSSObject } from '@mui/material';
+import { CSSProperties } from 'react';
 
 /**
  * Truncate single-line text with ellipsis overflow.
@@ -15,12 +15,12 @@ import { CSSObject } from '@mui/material';
  * 
  * @example
  * ```typescript
- * <Box sx={truncateText()}>
+ * <div style={truncateText()}>
  *   This is a very long text that will be truncated...
- * </Box>
+ * </div>
  * ```
  */
-export function truncateText(): CSSObject {
+export function truncateText(): CSSProperties {
     return {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
@@ -36,12 +36,12 @@ export function truncateText(): CSSObject {
  * 
  * @example
  * ```typescript
- * <Box sx={truncateMultiline(3)}>
+ * <div style={truncateMultiline(3)}>
  *   This is a longer text that will be truncated after 3 lines...
- * </Box>
+ * </div>
  * ```
  */
-export function truncateMultiline(lines: number = 2): CSSObject {
+export function truncateMultiline(lines: number = 2): CSSProperties {
     return {
         display: '-webkit-box',
         WebkitLineClamp: lines,
@@ -60,15 +60,14 @@ export function truncateMultiline(lines: number = 2): CSSObject {
  * 
  * @example
  * ```typescript
- * <Box sx={{
+ * <div style={{
  *   ...smoothTransition('opacity', '0.5s'),
- *   '&:hover': { opacity: 0.7 }
  * }}>
  *   Hover me for smooth fade
- * </Box>
+ * </div>
  * ```
  */
-export function smoothTransition(property: string = 'all', duration: string = '0.3s'): CSSObject {
+export function smoothTransition(property: string = 'all', duration: string = '0.3s'): CSSProperties {
     return {
         transition: `${property} ${duration} ease`,
     };
@@ -83,18 +82,15 @@ export function smoothTransition(property: string = 'all', duration: string = '0
  * 
  * @example
  * ```typescript
- * <Box sx={{ ...hideScrollbar(), overflow: 'auto' }}>
+ * <div className="overflow-auto" style={hideScrollbar()}>
  *   Scrollable content without visible scrollbars
- * </Box>
+ * </div>
  * ```
  */
-export function hideScrollbar(): CSSObject {
+export function hideScrollbar(): CSSProperties {
     return {
-        scrollbarWidth: 'none', // Firefox
-        msOverflowStyle: 'none', // IE and Edge
-        '&::-webkit-scrollbar': {
-            display: 'none', // Chrome, Safari, Opera
-        },
+        scrollbarWidth: 'none' as const, // Firefox
+        msOverflowStyle: 'none' as const, // IE and Edge
     };
 }
 
@@ -108,14 +104,14 @@ export function hideScrollbar(): CSSObject {
  * 
  * @example
  * ```typescript
- * <Box sx={{ position: 'relative' }}>
- *   <Box sx={absoluteCenter()}>
+ * <div className="relative">
+ *   <div style={absoluteCenter()}>
  *     Perfectly centered content
- *   </Box>
- * </Box>
+ *   </div>
+ * </div>
  * ```
  */
-export function absoluteCenter(): CSSObject {
+export function absoluteCenter(): CSSProperties {
     return {
         position: 'absolute',
         top: '50%',

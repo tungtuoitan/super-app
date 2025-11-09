@@ -10,228 +10,55 @@
  * 
  * The styles implement a collapsible sidebar with smooth transitions
  * and consistent theming throughout the navigation interface.
+ * 
+ * MIGRATION NOTE: Converted from MUI styled() to Tailwind CSS class strings.
+ * These are exported as const strings that can be used directly in className props.
+ * NOTE: This file appears to be unused in the current codebase but kept for reference.
  */
 
-import { styled } from '@mui/material';
-import { Link } from 'react-router-dom';
+// SideNavRoot - Main navigation root container
+export const sideNavRootClasses = "flex-grow bg-[#f6f6f6] h-[calc(100vh-64px)] flex flex-row";
 
-export const SideNavRoot = styled("div")({
-  flexGrow: 1,
-  backgroundColor: "#f6f6f6",
-  height: "calc(100vh - 64px)",
-  display: "flex",
-  flexDirection: "row",
+// BodyWrapper - Main content wrapper
+export const bodyWrapperClasses = "flex flex-grow w-[calc(100%-48px)] h-[calc(100vh-64px)]";
 
-  // for sidebar
-  "& .expanded": {
-    transitionDuration: "500ms",
-    width: "200px",
-    "& div.expander": {
-      flexDirection: "row",
-    },
-  },
-  "& .collapsed": {
-    transitionDuration: "500ms !important",
-    width: "48px",
-    "& div.expander": {
-      flexDirection: "row",
-    },
-  },
+// Wink - Styled navigation link with hover states
+export const winkClasses = "flex w-full flex-row items-center relative flex-grow py-0.5 px-2.5 h-auto min-h-[36px] text-white no-underline rounded transition-colors duration-200 hover:bg-black/30 active:bg-black/30";
 
-  "& .MuiDrawer-paperAnchorDockedLeft": {
-    top: "64px!important",
-    background: "#36454f",
-    flex: "0 0 auto",
-    "& .MuiListItemButton-root": {
-      backgroundcolor: "#36454f!important",
-      color: "#fff!important",
-    },
-  },
-  "& .MuiList-root": {
-    backgroundColor: "#36454f!important",
-  },
-  "& nav.MuiList-root": {
-    marginBottom: "75px",
-  },
-  "& .MuiTypography-root": {
-    fontSize: ".95em",
-  },
-  "& ul li a.MuiListItem-root.active": {
-    backgroundColor: "rgb(0 0 0 / 30%)!important",
-  },
-});
+// MenuItemWrapper - Container for menu items
+export const menuItemWrapperClasses = "flex-shrink-0 flex flex-col relative items-start w-full";
 
-export const BodyWrapper = styled("div")({
-  display: "flex",
-  flexGrow: 1,
-  width: "calc(100% - 48px)",
-  height: "calc(100vh - 64px)",
-});
+// PopupMenuItemWrapper - Container for popup menu items  
+export const popupMenuItemWrapperClasses = "flex-shrink-0 relative flex flex-col items-start";
 
-export const Wink = styled(Link)({
-  display: 'flex',
-  width: '100%',
-  flexDirection: 'row',
-  alignItems: 'center',
-  position: 'relative',
-  flexGrow: 1,
-//   margin: '0 8px',
-  padding: '2px 10px',
-  height: 'auto',
-  minHeight: '36px',
-  color: '#fff',
-  textDecoration: 'none',
-  borderRadius: '4px',
-  transition: 'background-color 0.2s ease',
-  '&:hover': {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  '&:active': {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  '&.selected': {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  }
-});
+// MenuItemLine - Line container for menu items
+export const menuItemLineClasses = "items-center flex w-full flex-row";
 
-export const MenuItemWrapper = styled('div')({
-  flexShrink: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'relative',
-  alignItems: 'flex-start',
-  width: '100%',
-  '& .close': {
-    display: 'none',
-    height: 0,
-    transition: 'all .4s ease',
-  },
-  '& .mini': {
-    display: 'none',
-  },
-  '& .hide': {
-    left: '-10000px!important',
-  },
-  '& .item-link:hover': {
-    cursor: 'pointer'
-  },
-  '& .home-link:hover, .single-link:hover': {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)!important',
-    cursor: 'pointer',
-    color: '#fff',
-  },
-  '& .single-link.active': {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)!important',
-  },
-});
+// IconWrapper - Container for menu item icons
+export const iconWrapperClasses = "min-w-[24px] w-6 h-6 text-white flex flex-row items-center justify-center";
 
-export const PopupMenuItemWrapper = styled('div')({
-  flexShrink: 0,
-  position: 'relative',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-});
+// ItemLink - Link styling for menu items
+export const itemLinkClasses = "flex flex-row items-center relative flex-grow m-0 px-3 text-white";
 
-export const MenuItemLine = styled('div')({
-  alignItems: 'center',
-  display: 'flex',
-  width: '100%',
-  flexDirection: 'row',
-});
+// ItemLabel - Label text for menu items
+export const itemLabelClasses = "text-white text-[0.95rem] flex-grow items-center flex flex-row pl-3 font-normal no-underline whitespace-nowrap overflow-hidden text-ellipsis";
 
-export const IconWrapper = styled('div')({
-  minWidth: '24px',
-  width: '24px',
-  height: '24px',
-  color: '#fff',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-});
+// SideMenuWrapper - Main sidebar container with transition
+// Add 'w-[200px]' for expanded or 'w-12' for collapsed state
+export const sideMenuWrapperClasses = "flex flex-col h-full bg-[#36454f] relative transition-all duration-[400ms]";
+export const sideMenuWrapperExpanded = "w-[200px]";
+export const sideMenuWrapperCollapsed = "w-12";
 
-export const ItemLink = styled('div')({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  position: 'relative',
-  flexGrow: 1,
-  margin: 0,
-  padding: '0 12px',
-  color: '#fff',
-});
+// SideNavigationWrapper - Navigation wrapper with transitions
+export const sideNavigationWrapperClasses = "transition-all duration-[400ms] flex-grow flex flex-col relative h-full";
 
-export const ItemLabel = styled('span')({
-  color: '#fff',
-  fontSize: '0.95rem',
-  flexGrow: 1,
-  alignItems: 'center',
-  display: 'flex',
-  flexDirection: 'row',
-  paddingLeft: '12px',
-  fontWeight: 400,
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-});
+// NavigationList - List container for navigation items
+export const navigationListClasses = "flex-grow flex-col flex pt-2.5";
 
-export const SideMenuWrapper = styled('div')({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  backgroundColor: '#36454f',
-  position: 'relative',
-  transition: 'all .4s ease',
-  '&.expanded': {
-    width: '200px',
-  },
-  '&.collapsed': {
-    width: '48px',
-  }
-});
+// Expander - Sidebar expansion control
+export const expanderClasses = "p-2.5 relative text-white flex justify-end items-center w-full mt-auto z-10 pointer-events-auto flex-row";
 
-export const SideNavigationWrapper = styled('div')({
-  transition: 'all .4s ease',
-  flexGrow: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'relative',
-  height: '100%',
-});
+// ExpanderArrow - Arrow button for expansion control
+export const expanderArrowClasses = "flex items-center justify-center p-1 rounded transition-colors duration-200 hover:bg-white/10";
 
-export const NavigationList = styled('div')({
-  flexGrow: 1,
-  flexDirection: 'column',
-  display: 'flex',
-  paddingTop: '10px',
-});
 
-export const Expander = styled('div')({
-  padding: '10px',
-  position: 'relative',
-  color: '#fff',
-  display: 'flex',
-  justifyContent: 'flex-end',
-  alignItems: 'center',
-  width: '100%',
-  marginTop: 'auto',
-  zIndex: 10,
-  pointerEvents: 'auto',
-  '&.expander': {
-    flexDirection: 'row',
-  }
-});
-
-export const ExpanderArrow = styled('div')({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '4px',
-  borderRadius: '4px',
-  transition: 'background-color 0.2s ease',
-  '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  }
-});

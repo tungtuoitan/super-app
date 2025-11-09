@@ -1,18 +1,13 @@
 import React from 'react';
+import { Button } from '@/Components/ui/button';
 import { 
-    BottomNavigation, 
-    BottomNavigationAction, 
-    ToggleButton,
-    ToggleButtonGroup,
-    Box
-} from '@mui/material';
-import { 
-    GridView as GridIcon,
-    AccountTree as TreeIcon,
-    ViewModule as CardIcon 
-} from '@mui/icons-material';
+    Grid3x3 as GridIcon,
+    Network as TreeIcon,
+    LayoutGrid as CardIcon 
+} from 'lucide-react';
 import { useTagUI } from '../../../store/TagUIContext';
 import type { TagLayoutType } from '../../../types/tag.types';
+import { cn } from '@/lib/utils';
 
 /**
  * Tag Layout Selector component
@@ -20,52 +15,57 @@ import type { TagLayoutType } from '../../../types/tag.types';
  * Currently only Tree is implemented
  */
 export const TagLayoutSelector = () => {
-        const { currentLayout, setCurrentLayout } = useTagUI();
+    const { currentLayout, setCurrentLayout } = useTagUI();
 
-    const handleLayoutChange = (
-        _event: React.MouseEvent<HTMLElement>,
-        newLayout: TagLayoutType | null,
-    ) => {
-        if (newLayout !== null) {
-            setCurrentLayout(newLayout);
-        }
+    const handleLayoutChange = (newLayout: TagLayoutType) => {
+        setCurrentLayout(newLayout);
     };
 
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', margin: '2px 8px 0 0' }}>
-            <ToggleButtonGroup
-                value={currentLayout}
-                exclusive
-                onChange={handleLayoutChange}
-                aria-label="tag layout"
-                size="small"
+        <div className="flex items-center gap-1 mr-2 mt-0.5">
+            <Button
+                variant={currentLayout === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                disabled={true} // TODO: Enable when GridView is implemented
+                title="Grid View (Coming Soon)"
+                aria-label="grid view"
+                onClick={() => handleLayoutChange('grid')}
+                className={cn(
+                    "h-8 w-8 p-0",
+                    currentLayout === 'grid' && "bg-primary text-primary-foreground"
+                )}
             >
-                <ToggleButton 
-                    value="grid" 
-                    aria-label="grid view"
-                    disabled={true} // TODO: Enable when GridView is implemented
-                    title="Grid View (Coming Soon)"
-                >
-                    <GridIcon fontSize="small" />
-                </ToggleButton>
-                
-                <ToggleButton 
-                    value="tree" 
-                    aria-label="tree view"
-                    title="Tree View"
-                >
-                    <TreeIcon fontSize="small" />
-                </ToggleButton>
-                
-                <ToggleButton 
-                    value="card" 
-                    aria-label="card view"
-                    disabled={true} // TODO: Enable when CardView is implemented
-                    title="Card View (Coming Soon)"
-                >
-                    <CardIcon fontSize="small" />
-                </ToggleButton>
-            </ToggleButtonGroup>
-        </Box>
+                <GridIcon className="h-4 w-4" />
+            </Button>
+            
+            <Button
+                variant={currentLayout === 'tree' ? 'default' : 'ghost'}
+                size="sm"
+                title="Tree View"
+                aria-label="tree view"
+                onClick={() => handleLayoutChange('tree')}
+                className={cn(
+                    "h-8 w-8 p-0",
+                    currentLayout === 'tree' && "bg-primary text-primary-foreground"
+                )}
+            >
+                <TreeIcon className="h-4 w-4" />
+            </Button>
+            
+            <Button
+                variant={currentLayout === 'card' ? 'default' : 'ghost'}
+                size="sm"
+                disabled={true} // TODO: Enable when CardView is implemented
+                title="Card View (Coming Soon)"
+                aria-label="card view"
+                onClick={() => handleLayoutChange('card')}
+                className={cn(
+                    "h-8 w-8 p-0",
+                    currentLayout === 'card' && "bg-primary text-primary-foreground"
+                )}
+            >
+                <CardIcon className="h-4 w-4" />
+            </Button>
+        </div>
     );
 };

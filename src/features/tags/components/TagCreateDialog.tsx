@@ -174,19 +174,6 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
                                 label: 'Icon',
                                 required: false,
                             }}
-                            sx={{
-                                width: '100%',
-                                '& .MuiInputBase-root': {
-                                    color: 'hsl(var(--foreground))',
-                                    backgroundColor: 'hsl(var(--input))',
-                                },
-                                '& .MuiInputLabel-root': {
-                                    color: 'hsl(var(--muted-foreground))',
-                                },
-                                '& .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: 'hsl(var(--border))',
-                                },
-                            }}
                         />
                     </div>
 
@@ -207,19 +194,6 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
                                     name: 'color',
                                     label: 'Color',
                                     required: false,
-                                }}
-                                sx={{
-                                    flex: 1,
-                                    '& .MuiInputBase-root': {
-                                        color: 'hsl(var(--foreground))',
-                                        backgroundColor: 'hsl(var(--input))',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: 'hsl(var(--border))',
-                                    },
                                 }}
                             />
                         </div>

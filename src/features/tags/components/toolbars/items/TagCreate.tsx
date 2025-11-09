@@ -1,4 +1,5 @@
-import { BottomNavigation, BottomNavigationAction } from '@mui/material';
+import { Button } from '@/Components/ui/button';
+import { Plus } from 'lucide-react';
 import { useTagUI } from '../../../store/TagUIContext';
 import { useAuthStore } from '@/contexts/AuthContext';
 import type { Tag } from '../../../types/tag.types';
@@ -30,11 +31,14 @@ export const TagAdd = () => {
     };
 
     return (
-        <BottomNavigation onChange={() => {}}
-            value={0}>
-            <BottomNavigationAction
-                label="Add Tag"
-                onClick={handleAddTag} />
-        </BottomNavigation>
+        <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleAddTag}
+            className="flex items-center gap-2"
+        >
+            <Plus className="h-4 w-4" />
+            <span>Add Tag</span>
+        </Button>
     );
 };

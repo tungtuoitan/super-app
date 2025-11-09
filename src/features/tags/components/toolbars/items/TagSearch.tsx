@@ -1,34 +1,8 @@
-import { styled } from '@mui/material/styles';
-import { InputBase } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Input } from '@/Components/ui/input';
+import { Search } from 'lucide-react';
 import { useState, useRef } from "react";
 import { useTagUI } from '../../../store/TagUIContext';
-
-const Search = styled('div')({
-    position: 'relative',
-    marginTop: '12px',
-    marginLeft: 0,
-    width: '300px',
-    '& .MuiSvgIcon-root': {
-        marginTop: '-5px',
-    }
-});
-
-const SearchIconRoot = styled('div')({
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-});
-
-const InputBaseRoot = styled(InputBase)({
-    // vertical padding + font size from searchIcon
-    width: '100%',
-    color: 'inherit',
-    paddingLeft: 30
-});
+import { cn } from '@/lib/utils';
 
 /**
  * Tag Search toolbar component
@@ -65,20 +39,20 @@ export const TagSearch = () => {
     };
 
     return (
-        <Search>
-            <SearchIconRoot>
-                <SearchIcon />
-            </SearchIconRoot>
-            <InputBaseRoot
-                className={"search-input"}
-                inputRef={searchInputRef}
-                autoFocus={true}
+        <div className="relative mt-3 w-[300px]">
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                <Search className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <Input
+                ref={searchInputRef}
+                autoFocus
                 placeholder="Search tags..."
                 value={searchText}
-                inputProps={{ 'aria-label': 'search tags' }}
+                className={cn("pl-8", searchLoading && "opacity-50")}
+                aria-label="search tags"
                 onKeyUp={onKeyUpHandlerSearch}
                 onChange={onChangeHandler}
             />
-        </Search>
+        </div>
     );
 };

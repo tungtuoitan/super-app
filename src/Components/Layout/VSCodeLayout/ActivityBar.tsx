@@ -26,7 +26,7 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
 
   return (
     <>
-      <div className="w-12 h-full bg-editor-activitybar flex flex-col items-center pt-1 border-r border-editor-border">
+      <div className="w-12 h-full bg-editor-activitybar flex flex-col items-center border-r border-editor-border">
         {/* Activity icons */}
         <div className="flex-1">
           <TooltipProvider>
@@ -38,11 +38,12 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
                 <Tooltip key={activity.id}>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => onViewChange(activity.id)}
-                      className={`w-12 h-12 rounded-none transition-colors ${
+                      onClick={isActive ? undefined : () => onViewChange(activity.id)}
+                      disabled={isActive}
+                      className={`w-12 h-12 rounded-none transition-colors border-transparent ${
                         isActive
-                          ? 'text-editor-fg bg-editor-hover border-l-2 border-editor-active'
-                          : 'text-muted-foreground border-l-2 border-transparent hover:bg-editor-hover hover:text-editor-fg'
+                          ? 'text-editor-white border-editor-active cursor-default'
+                          : 'text-muted-foreground hover:text-editor-white hover:bg-transparent cursor-pointer'
                       }`}
                     >
                       <Icon className="w-6 h-6 mx-auto" />
@@ -64,7 +65,7 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setSettingsOpen(true)}
-                  className="w-12 h-12 rounded-none text-muted-foreground hover:bg-editor-hover hover:text-editor-fg transition-colors"
+                  className="w-12 h-12 rounded-none text-muted-foreground hover:text-editor-white hover:bg-transparent transition-colors"
                 >
                   <Settings className="w-6 h-6 mx-auto" />
                 </button>

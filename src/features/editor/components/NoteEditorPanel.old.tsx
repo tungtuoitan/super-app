@@ -5,7 +5,10 @@
  */
 
 import React from 'react';
-import { Save, X, RotateCcw } from 'lucide-react';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { NoteDetailDialogContent } from '@/features/notes/components/dialogs/NoteDetailDialogContent';
 import { useNoteUI } from '@/features/notes/store/NoteUIContext';
 import { useUpdateNote, useCreateNote } from '@/features/notes/hooks/useNotes';
@@ -13,13 +16,6 @@ import { useEditorTabs } from '@/features/editor/store/EditorTabContext';
 import { useSnackbar } from 'notistack';
 import type { NoteTab } from '@/features/editor/types/tab.types';
 import type { Note } from '@/features/notes/types/note.types';
-import { Button } from '@/Components/ui/button';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/Components/ui/tooltip';
 
 interface NoteEditorPanelProps {
     tab: NoteTab;
@@ -121,67 +117,92 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     }, [hasUnsavedChanges, isSaving, selectedNote]);
 
     return (
-        <div className="w-full h-full flex flex-col overflow-hidden bg-[#f6f6f6]">
+        <Box
+            sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                backgroundColor: '#f6f6f6',
+            }}
+        >
             {/* Toolbar */}
-            <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
-                <div className="text-[#cccccc] text-[13px] font-medium">
+            <Box
+                sx={{
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 16px',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                    backgroundColor: 'rgb(37, 37, 38)',
+                    gap: 2,
+                }}
+            >
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: '#cccccc',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                    }}
+                >
                     {isCreateMode ? 'New Note' : 'Edit Note'}
                     {hasUnsavedChanges && (
-                        <span className="text-[#4FC3F7] ml-2">●</span>
+                        <span style={{ color: '#4FC3F7', marginLeft: '8px' }}>●</span>
                     )}
-                </div>
+                </Typography>
 
-                <TooltipProvider>
-                    <div className="flex gap-1">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={handleSave}
-                                        disabled={!hasUnsavedChanges || isSaving}
-                                        className={`h-8 w-8 ${
-                                            hasUnsavedChanges 
-                                                ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
-                                                : 'text-white/40'
-                                        } disabled:text-white/20`}
-                                    >
-                                        <Save className="h-[18px] w-[18px]" />
-                                    </Button>
-                                </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Save (Ctrl+S)</p>
-                            </TooltipContent>
-                        </Tooltip>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title="Save (Ctrl+S)">
+                        <span>
+                            <IconButton
+                                size="small"
+                                onClick={handleSave}
+                                disabled={!hasUnsavedChanges || isSaving}
+                                sx={{
+                                    color: hasUnsavedChanges ? '#4FC3F7' : 'rgba(255, 255, 255, 0.4)',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(79, 195, 247, 0.1)',
+                                    },
+                                    '&.Mui-disabled': {
+                                        color: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                }}
+                            >
+                                <SaveIcon sx={{ fontSize: '18px' }} />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
 
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={handleCancel}
-                                        disabled={!hasUnsavedChanges}
-                                        className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
-                                    >
-                                        <RotateCcw className="h-[18px] w-[18px]" />
-                                    </Button>
-                                </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Discard Changes</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </div>
-                </TooltipProvider>
-            </div>
+                    <Tooltip title="Discard Changes">
+                        <span>
+                            <IconButton
+                                size="small"
+                                onClick={handleCancel}
+                                disabled={!hasUnsavedChanges}
+                                sx={{
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    },
+                                    '&.Mui-disabled': {
+                                        color: 'rgba(255, 255, 255, 0.2)',
+                                    },
+                                }}
+                            >
+                                <RefreshIcon sx={{ fontSize: '18px' }} />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                </Box>
+            </Box>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto">
+            <Box sx={{ flex: 1, overflow: 'auto' }}>
                 <NoteDetailDialogContent />
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 }

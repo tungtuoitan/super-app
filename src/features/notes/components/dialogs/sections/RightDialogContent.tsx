@@ -5,16 +5,9 @@
  */
 
 import React from 'react';
-import { 
-    Box, 
-    Typography,
-    Divider,
-    Chip,
-    Button,
-    Stack,
-    Card,
-    CardContent
-} from '@mui/material';
+import { Button } from '@/Components/ui/button';
+import { Badge } from '@/Components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { useNoteUI } from '../../../store/NoteUIContext';
 
 /**
@@ -27,114 +20,101 @@ export function RightDialogContent() {
     const isNewNote = selectedNote?.noteId === 0;
 
     return (
-        <Box sx={{ padding: '16px', height: '100%', overflowY: 'auto' }}>
+        <div className="p-4 h-full overflow-y-auto space-y-4">
             {/* Status Section */}
-            <Card sx={{ mb: 2 }}>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">Status</CardTitle>
+                </CardHeader>
                 <CardContent>
-                    <Typography variant="h6" sx={{ mb: 1 }}>
-                        Status
-                    </Typography>
-                    <Chip 
-                        label={selectedNote?.isArchived ? 'Archived' : 'Active'} 
-                        color={selectedNote?.isArchived ? 'default' : 'success'}
-                        size="small"
-                    />
+                    <Badge variant={selectedNote?.isArchived ? 'secondary' : 'default'}>
+                        {selectedNote?.isArchived ? 'Archived' : 'Active'}
+                    </Badge>
                 </CardContent>
             </Card>
 
             {/* Actions Section */}
-            <Card sx={{ mb: 2 }}>
-                <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                        Actions
-                    </Typography>
-                    <Stack spacing={1}>
-                        {!isNewNote && (
-                            <>
-                                <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    fullWidth
-                                    onClick={() => console.log('Duplicate note')}
-                                >
-                                    Duplicate
-                                </Button>
-                                <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    fullWidth
-                                    color="warning"
-                                    onClick={() => console.log('Archive note')}
-                                >
-                                    {selectedNote?.isArchived ? 'Unarchive' : 'Archive'}
-                                </Button>
-                                <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    fullWidth
-                                    color="error"
-                                    onClick={() => console.log('Delete note')}
-                                >
-                                    Delete
-                                </Button>
-                            </>
-                        )}
-                    </Stack>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    {!isNewNote && (
+                        <>
+                            <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => console.log('Duplicate note')}
+                            >
+                                Duplicate
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                className="w-full text-warning"
+                                onClick={() => console.log('Archive note')}
+                            >
+                                {selectedNote?.isArchived ? 'Unarchive' : 'Archive'}
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                className="w-full text-destructive hover:text-destructive"
+                                onClick={() => console.log('Delete note')}
+                            >
+                                Delete
+                            </Button>
+                        </>
+                    )}
                 </CardContent>
             </Card>
 
             {/* Metadata Section */}
             {!isNewNote && (
-                <Card sx={{ mb: 2 }}>
-                    <CardContent>
-                        <Typography variant="h6" sx={{ mb: 2 }}>
-                            Information
-                        </Typography>
-                        
-                        <Box sx={{ mb: 2 }}>
-                            <Typography variant="body2" color="text.secondary">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <div>
+                            <p className="text-sm text-muted-foreground mb-1">
                                 Created
-                            </Typography>
-                            <Typography variant="body2">
+                            </p>
+                            <p className="text-sm">
                                 {selectedNote?.createdAt ? 
                                     new Date(selectedNote.createdAt).toLocaleString() : 
                                     'Unknown'
                                 }
-                            </Typography>
-                        </Box>
+                            </p>
+                        </div>
 
                         {selectedNote?.updatedAt && (
-                            <Box sx={{ mb: 2 }}>
-                                <Typography variant="body2" color="text.secondary">
+                            <div>
+                                <p className="text-sm text-muted-foreground mb-1">
                                     Last Modified
-                                </Typography>
-                                <Typography variant="body2">
+                                </p>
+                                <p className="text-sm">
                                     {new Date(selectedNote.updatedAt).toLocaleString()}
-                                </Typography>
-                            </Box>
+                                </p>
+                            </div>
                         )}
 
-                        <Box sx={{ mb: 2 }}>
-                            <Typography variant="body2" color="text.secondary">
+                        <div>
+                            <p className="text-sm text-muted-foreground mb-1">
                                 Created By
-                            </Typography>
-                            <Typography variant="body2">
+                            </p>
+                            <p className="text-sm">
                                 {selectedNote?.createdBy || 'Current User'}
-                            </Typography>
-                        </Box>
+                            </p>
+                        </div>
 
                         {selectedNote?.type && (
-                            <Box sx={{ mb: 2 }}>
-                                <Typography variant="body2" color="text.secondary">
+                            <div>
+                                <p className="text-sm text-muted-foreground mb-1">
                                     Type
-                                </Typography>
-                                <Chip 
-                                    label={selectedNote.type.charAt(0).toUpperCase() + selectedNote.type.slice(1)} 
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                />
-                            </Box>
+                                </p>
+                                <Badge variant="outline">
+                                    {selectedNote.type.charAt(0).toUpperCase() + selectedNote.type.slice(1)}
+                                </Badge>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
@@ -143,16 +123,16 @@ export function RightDialogContent() {
             {/* Additional Info for New Notes */}
             {isNewNote && (
                 <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">New Note</CardTitle>
+                    </CardHeader>
                     <CardContent>
-                        <Typography variant="h6" sx={{ mb: 1 }}>
-                            New Note
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <p className="text-sm text-muted-foreground">
                             Fill in the details on the left and add your content in the center column.
-                        </Typography>
+                        </p>
                     </CardContent>
                 </Card>
             )}
-        </Box>
+        </div>
     );
 }

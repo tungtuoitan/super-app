@@ -183,18 +183,6 @@ export function NoteDetailDialogContent() {
                                 value={selectedNote?.name || ''}
                                 onChange={(e) => handleFieldChange('name', e.target.value)}
                                 size="small"
-                                sx={{
-                                    '& .MuiInputBase-root': {
-                                        color: 'hsl(var(--foreground))',
-                                        backgroundColor: 'hsl(var(--input))',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: 'hsl(var(--border))',
-                                    },
-                                }}
                             />
 
                             {/* Status */}
@@ -210,18 +198,6 @@ export function NoteDetailDialogContent() {
                                     label: 'Status',
                                     required: false,
                                 }}
-                                sx={{
-                                    '& .MuiInputBase-root': {
-                                        color: 'hsl(var(--foreground))',
-                                        backgroundColor: 'hsl(var(--input))',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: 'hsl(var(--border))',
-                                    },
-                                }}
                             />
 
                             {/* Tags */}
@@ -235,22 +211,6 @@ export function NoteDetailDialogContent() {
                                     size="small"
                                     data-testid="note-tags"
                                     disabled={tagsLoading}
-                                    sx={{
-                                        '& .MuiInputBase-root': {
-                                            color: 'hsl(var(--foreground))',
-                                            backgroundColor: 'hsl(var(--input))',
-                                        },
-                                        '& .MuiInputLabel-root': {
-                                            color: 'hsl(var(--muted-foreground))',
-                                        },
-                                        '& .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: 'hsl(var(--border))',
-                                        },
-                                        '& .MuiChip-root': {
-                                            color: 'hsl(var(--foreground))',
-                                            backgroundColor: 'hsl(var(--primary))',
-                                        },
-                                    }}
                                 />
                             </div>
                         </CardContent>
@@ -277,18 +237,6 @@ export function NoteDetailDialogContent() {
                                 }).format(selectedNote.createdAt) : '-'}
                                 disabled
                                 size="small"
-                                sx={{
-                                    '& .MuiInputBase-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                        backgroundColor: 'hsl(var(--muted))',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: 'hsl(var(--border))',
-                                    },
-                                }}
                             />
 
                             <GenericTextField
@@ -303,18 +251,6 @@ export function NoteDetailDialogContent() {
                                 }).format(selectedNote.updatedAt) : '-'}
                                 disabled
                                 size="small"
-                                sx={{
-                                    '& .MuiInputBase-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                        backgroundColor: 'hsl(var(--muted))',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: 'hsl(var(--border))',
-                                    },
-                                }}
                             />
 
                             <GenericTextField
@@ -322,18 +258,6 @@ export function NoteDetailDialogContent() {
                                 value={selectedNote?.createdBy || '-'}
                                 disabled
                                 size="small"
-                                sx={{
-                                    '& .MuiInputBase-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                        backgroundColor: 'hsl(var(--muted))',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'hsl(var(--muted-foreground))',
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: 'hsl(var(--border))',
-                                    },
-                                }}
                             />
                         </CardContent>
                     </Card>

@@ -1,47 +1,40 @@
-import { AppBar, SxProps, Theme, Toolbar, styled } from "@mui/material";
-
-export const ToolbarWrapper = styled('div')({
-    '& .MuiPaper-root': {
-        marginTop: '1px',
-        backgroundColor: '#fff',
-        color: '#000',
-    },
-    flexGrow: 1,
-    '& .isImportant-icon-false': {
-        color: '#D8D8D7'
-    },
-    '& .isImportant-icon-true': {
-        color: '#C70039'
-    },
-    '& .selected-true': {
-        backgroundColor: '#D8D8D7'
-    }
-});
+import { cn } from "@/lib/utils";
+import React from "react";
 
 export interface IToolbarContainer {
     children: React.ReactNode;
+    className?: string;
 }
 
 /**
  * Toolbar container component matching portal's ToolbarContainer
  * Provides a consistent styled toolbar for grid layouts
  */
-export const ToolbarContainer = ({ children }: { children: React.ReactNode, sxBoxToolbar?: SxProps<Theme> | undefined }) => {
+export const ToolbarContainer = ({
+    children,
+    className,
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) => {
     return (
-        <ToolbarWrapper>
-            <AppBar style={{ marginTop: '3px', backgroundColor: '#fff' }}
-                position="static"
-                elevation={2}
-                variant="elevation" >
-                <Toolbar style={{
-                    backgroundColor: '#fff',
-                    color: '#000', //#000
-                    paddingLeft: '18px!important',
-                    
-                }}>
+        <div
+            className={cn(
+                "flex-grow",
+                "[&_.MuiPaper-root]:mt-px [&_.MuiPaper-root]:bg-white [&_.MuiPaper-root]:text-black",
+                "[&_.isImportant-icon-false]:text-[#D8D8D7]",
+                "[&_.isImportant-icon-true]:text-[#C70039]",
+                "[&_.selected-true]:bg-[#D8D8D7]",
+                className
+            )}
+        >
+            <header
+                className="mt-[3px] bg-white shadow-md static"
+            >
+                <div className="bg-white text-black pl-[18px] min-h-[56px] flex items-center">
                     {children}
-                </Toolbar>
-            </AppBar>
-        </ToolbarWrapper>
+                </div>
+            </header>
+        </div>
     );
 };

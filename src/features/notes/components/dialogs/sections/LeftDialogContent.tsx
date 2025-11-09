@@ -5,16 +5,11 @@
  */
 
 import React, { useState } from 'react';
-import { 
-    Box, 
-    TextField, 
-    Typography, 
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem
-} from '@mui/material';
+import { Label } from '@/Components/ui/label';
+import { Input } from '@/Components/ui/input';
+import { Separator } from '@/Components/ui/separator';
 import { useNoteUI } from '../../../store/NoteUIContext';
+
 const NOTE_TYPES = ['meeting', 'brainstorm', 'research', 'bug'] as const;
 
 /**
@@ -37,65 +32,76 @@ export function LeftDialogContent() {
         }));
     };
 
+    // Convert tags to comma-separated string for input
+    const tagsAsString = Array.isArray(formData.tags) 
+        ? formData.tags.map(tag => typeof tag === 'string' ? tag : tag.name).join(', ')
+        : '';
+
     return (
-        <Box sx={{ padding: '16px 0' }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
+        <div className="py-4">
+            <h2 className="text-lg font-semibold mb-4">
                 Note Details
-            </Typography>
+            </h2>
 
             {/* Note Name */}
-            <TextField
-                label="Note Name"
-                variant="outlined"
-                fullWidth
-                value={formData.name}
-                onChange={(e) => handleFieldChange('name', e.target.value)}
-                sx={{ mb: 2 }}
-                required
-            />
+            <div className="space-y-2 mb-4">
+                <Label htmlFor="note-name">
+                    Note Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                    id="note-name"
+                    value={formData.name}
+                    onChange={(e) => handleFieldChange('name', e.target.value)}
+                    placeholder="Enter note name"
+                    required
+                />
+            </div>
 
-            {/* Note Type */}
-            <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Type</InputLabel>
-                <Select
+            {/* Note Type - Temporarily using native select until shadcn Select is added */}
+            <div className="space-y-2 mb-4">
+                <Label htmlFor="note-type">Type</Label>
+                <select
+                    id="note-type"
                     value={formData.type}
                     onChange={(e) => handleFieldChange('type', e.target.value)}
-                    label="Type"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                     {NOTE_TYPES.map(type => (
-                        <MenuItem key={type} value={type}>
+                        <option key={type} value={type}>
                             {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </MenuItem>
+                        </option>
                     ))}
-                </Select>
-            </FormControl>
+                </select>
+            </div>
 
             {/* Tags */}
-            <TextField
-                label="Tags"
-                variant="outlined"
-                fullWidth
-                value={formData.tags}
-                onChange={(e) => handleFieldChange('tags', e.target.value)}
-                sx={{ mb: 2 }}
-                placeholder="Enter tags separated by commas"
-                helperText="Separate multiple tags with commas"
-            />
+            <div className="space-y-2 mb-4">
+                <Label htmlFor="note-tags">Tags</Label>
+                <Input
+                    id="note-tags"
+                    value={tagsAsString}
+                    onChange={(e) => handleFieldChange('tags', e.target.value)}
+                    placeholder="Enter tags separated by commas"
+                />
+                <p className="text-xs text-muted-foreground">
+                    Separate multiple tags with commas
+                </p>
+            </div>
 
             {/* Creation Info */}
-            <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                <Typography variant="body2" color="text.secondary">
+            <div className="mt-6 pt-4 border-t space-y-1">
+                <p className="text-sm text-muted-foreground">
                     Created: {selectedNote?.createdAt ? new Date(selectedNote.createdAt).toLocaleDateString() : 'New'}
-                </Typography>
+                </p>
                 {selectedNote?.updatedAt && (
-                    <Typography variant="body2" color="text.secondary">
+                    <p className="text-sm text-muted-foreground">
                         Updated: {new Date(selectedNote.updatedAt).toLocaleDateString()}
-                    </Typography>
+                    </p>
                 )}
-                <Typography variant="body2" color="text.secondary">
+                <p className="text-sm text-muted-foreground">
                     By: {selectedNote?.createdBy || 'Current User'}
-                </Typography>
-            </Box>
-        </Box>
+                </p>
+            </div>
+        </div>
     );
 }

@@ -111,12 +111,6 @@ export const CustomStyling: Story = {
         label: 'Custom Tags',
         placeholder: '+ Add Custom Tag',
         size: 'small',
-        sx: {
-            marginTop: '20px',
-            '& .MuiOutlinedInput-root': {
-                borderRadius: '12px',
-            },
-        },
     },
 };
 

@@ -4,54 +4,39 @@
  */
 
 import React from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SpinnerProps {
     size?: number;
     fullPage?: boolean;
     message?: string;
+    className?: string;
 }
 
-export function Spinner({ size = 40, fullPage = false, message }: SpinnerProps) {
+export function Spinner({ size = 40, fullPage = false, message, className }: SpinnerProps) {
     const content = (
         <>
-            <CircularProgress size={size} />
+            <Loader2 className={cn("animate-spin text-primary", className)} size={size} />
             {message && (
-                <Box sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
+                <div className="mt-2 text-center text-muted-foreground">
                     {message}
-                </Box>
+                </div>
             )}
         </>
     );
 
     if (fullPage) {
         return (
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100vh',
-                    width: '100%',
-                }}
-            >
+            <div className="flex flex-col justify-center items-center h-screen w-full">
                 {content}
-            </Box>
+            </div>
         );
     }
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '20px',
-            }}
-        >
+        <div className="flex flex-col justify-center items-center p-5">
             {content}
-        </Box>
+        </div>
     );
 }

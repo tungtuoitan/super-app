@@ -11,12 +11,12 @@ export interface UseConfirmationPopoverOptions {
     confirmText?: string;
     /** Text for the cancel button */
     cancelText?: string;
-    /** Color for the confirm button */
-    confirmColor?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
-    /** Color for the cancel button */
-    cancelColor?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+    /** Variant for the confirm button */
+    confirmColor?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
+    /** Variant for the cancel button */
+    cancelColor?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
     /** Variant for buttons */
-    buttonVariant?: 'text' | 'outlined' | 'contained';
+    buttonVariant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
     /** Custom width for the popover */
     width?: string;
     /** Z-index for the popover */

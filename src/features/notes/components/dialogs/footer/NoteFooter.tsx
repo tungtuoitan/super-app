@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import { 
-    Box, 
-    Grid
-} from '@mui/material';
+import { cn } from '@/lib/utils';
 
 /**
  * Note Footer
@@ -16,23 +13,16 @@ import {
  */
 export function NoteFooter() {
     return (
-        <Grid item xs={12}>
-            <Box sx={{ 
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '60px',
-                background: '#fff',
-                borderTop: '1px solid #e0e0e0',
-                zIndex: 1000,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 24px'
-            }}>
+        <div className="col-span-12">
+            <div className={cn(
+                "fixed bottom-0 left-0 right-0",
+                "h-[60px] bg-background border-t",
+                "z-[1000]",
+                "flex items-center justify-center",
+                "px-6"
+            )}>
                 {/* Footer content can be added here if needed */}
-            </Box>
-        </Grid>
+            </div>
+        </div>
     );
 }

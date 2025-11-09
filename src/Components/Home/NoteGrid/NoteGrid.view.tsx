@@ -1,12 +1,21 @@
 // NoteGrid.view.tsx (Dumb Component)
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Chip, Box, Alert } from '@mui/material';
+import { useMemo, useState } from 'react';
+import {
+    useReactTable,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    ColumnDef,
+    flexRender,
+    SortingState
+} from '@tanstack/react-table';
+import { Badge } from '@/Components/ui/badge';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
+import { Button } from '@/Components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 // Internal types
 import type { Note } from '../../../types';
-
-// Internal config
-import { dataGridStyles } from '../../../config/theme';
 
 /**
  * Props interface for the NoteGrid view component.
@@ -26,18 +35,21 @@ interface NoteGridViewProps {
  * NoteGrid view component (Dumb Component).
  * 
  * This component is purely presentational and handles:
- * - Rendering the data grid with notes
+ * - Rendering the data table with notes
  * - Displaying loading and error states
  * - Column definitions and cell rendering
- * - Grid styling and configuration
+ * - Table styling and configuration
  * - Calling event handlers passed from container
  * 
  * All business logic and state management is handled by the container component.
  * 
  * @param props - Component props
- * @returns Data grid view with note display functionality
+ * @returns Data table view with note display functionality
  */
 export function NoteGridView({ notes, loading, error, onNoteClick }: NoteGridViewProps) {
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+
     const formatDate = (date: Date): string => {
         return new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
@@ -46,202 +58,228 @@ export function NoteGridView({ notes, loading, error, onNoteClick }: NoteGridVie
         }).format(date);
     };
 
-    const getTypeColor = (type?: string): 'primary' | 'warning' | 'info' | 'error' | 'default' => {
-        const colors: Record<string, 'primary' | 'warning' | 'info' | 'error' | 'default'> = {
-            'Meeting': 'primary',
-            'Brainstorm': 'warning',
-            'Research': 'info',
-            'Bug': 'error',
-            'default': 'default'
+    const getTypeVariant = (type?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+        const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+            'Meeting': 'default',
+            'Brainstorm': 'secondary',
+            'Research': 'outline',
+            'Bug': 'destructive',
+            'default': 'outline'
         };
-        return colors[type || 'default'] || colors.default;
+        return variants[type || 'default'] || variants.default;
     };
 
-    const columns: GridColDef[] = [
-        { 
-            field: 'noteId', 
-            headerName: 'ID', 
-            width: 40,
-            type: 'number'
+    const columns = useMemo<ColumnDef<Note>[]>(() => [
+        {
+            accessorKey: 'noteId',
+            header: 'ID',
+            size: 40,
+            cell: ({ getValue }) => (
+                <div className="text-center">{getValue() as number}</div>
+            ),
         },
         {
-            field: 'name',
-            headerName: 'Note Name',
-            width: 400,
-            renderCell: (params) => (
-                <Box
-                    sx={{
-                        cursor: 'pointer',
-                        color: 'primary.main',
-                        textDecoration: 'underline',
-                        fontWeight: 500
-                    }}
-                    onClick={() => onNoteClick(params.row)}
+            accessorKey: 'name',
+            header: 'Note Name',
+            size: 400,
+            cell: ({ getValue, row }) => (
+                <div
+                    className="cursor-pointer text-primary underline font-medium hover:text-primary/80"
+                    onClick={() => onNoteClick(row.original)}
                 >
-                    {params.value}
-                </Box>
-            )
+                    {getValue() as string}
+                </div>
+            ),
         },
         {
-            field: 'type',
-            headerName: 'Type',
-            width: 120,
-            renderCell: (params) => (
-                <Chip 
-                    label={params.value || 'N/A'} 
-                    color={getTypeColor(params.value) as any}
-                    size="small"
-                    variant="outlined"
-                />
-            )
+            accessorKey: 'type',
+            header: 'Type',
+            size: 120,
+            cell: ({ getValue }) => (
+                <Badge variant={getTypeVariant(getValue() as string)}>
+                    {(getValue() as string) || 'N/A'}
+                </Badge>
+            ),
         },
         {
-            field: 'description',
-            headerName: 'Description',
-            width: 500,
-            renderCell: (params) => (
-                <Box sx={{
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical'
-                }}>
-                    {params.value || '-'}
-                </Box>
-            )
+            accessorKey: 'description',
+            header: 'Description',
+            size: 500,
+            cell: ({ getValue }) => (
+                <div className="line-clamp-2 overflow-hidden text-ellipsis">
+                    {(getValue() as string) || '-'}
+                </div>
+            ),
         },
         {
-            field: 'tags',
-            headerName: 'Tags',
-            width: 200,
-            renderCell: (params) => {
-                if (!params.value) return <Box sx={{ padding: '4px' }}>-</Box>;
+            accessorKey: 'tags',
+            header: 'Tags',
+            size: 200,
+            cell: ({ getValue, row }) => {
+                const tags = getValue() as string;
+                if (!tags) return <div className="p-1">-</div>;
 
-                const tags = params.value.split(',');
-                const displayTags = tags.slice(0, 2);
-                const remainingCount = tags.length - 2;
+                const tagArray = tags.split(',');
+                const displayTags = tagArray.slice(0, 2);
+                const remainingCount = tagArray.length - 2;
 
                 return (
-                    <Box sx={{
-                        display: 'flex',
-                        gap: '4px',
-                        flexWrap: 'wrap',
-                        padding: '4px',
-                        alignItems: 'center'
-                    }}>
+                    <div className="flex gap-1 flex-wrap p-1 items-center">
                         {displayTags.map((tag: string, index: number) => (
-                            <Chip
-                                key={`${params.row.noteId}-${index}`}
-                                label={`#${tag.trim()}`}
-                                size="small"
-                                variant="outlined"
-                                color="secondary"
-                                sx={{ fontSize: '0.7rem', height: '20px' }}
-                            />
+                            <Badge
+                                key={`${row.original.noteId}-${index}`}
+                                variant="secondary"
+                                className="text-[0.7rem] h-5"
+                            >
+                                #{tag.trim()}
+                            </Badge>
                         ))}
                         {remainingCount > 0 && (
-                            <Chip
-                                label={`+${remainingCount}`}
-                                size="small"
-                                variant="outlined"
-                                sx={{ fontSize: '0.7rem', height: '20px' }}
-                            />
+                            <Badge variant="outline" className="text-[0.7rem] h-5">
+                                +{remainingCount}
+                            </Badge>
                         )}
-                    </Box>
+                    </div>
                 );
-            }
+            },
         },
         {
-            field: 'createdBy',
-            headerName: 'Created By',
-            width: 160
+            accessorKey: 'createdBy',
+            header: 'Created By',
+            size: 160,
         },
         {
-            field: 'createdAt',
-            headerName: 'Created Date',
-            width: 140,
-            renderCell: (params) => formatDate(new Date(params.value))
+            accessorKey: 'createdAt',
+            header: 'Created Date',
+            size: 140,
+            cell: ({ getValue }) => formatDate(new Date(getValue() as string)),
         },
         {
-            field: 'isArchived',
-            headerName: 'Status',
-            width: 100,
-            renderCell: (params) => (
-                <Chip 
-                    label={params.value ? 'Archived' : 'Active'} 
-                    color={params.value ? 'default' : 'success'}
-                    size="small"
-                    variant={params.value ? 'outlined' : 'filled'}
-                />
-            )
-        }
-    ];
+            accessorKey: 'isArchived',
+            header: 'Status',
+            size: 100,
+            cell: ({ getValue }) => {
+                const isArchived = getValue() as boolean;
+                return (
+                    <Badge variant={isArchived ? 'outline' : 'default'}>
+                        {isArchived ? 'Archived' : 'Active'}
+                    </Badge>
+                );
+            },
+        },
+    ], [onNoteClick]);
+
+    const table = useReactTable({
+        data: notes,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: setSorting,
+        onPaginationChange: setPagination,
+        state: {
+            sorting,
+            pagination,
+        },
+        getRowId: (row) => String(row.noteId),
+    });
 
     // Handle error state
     if (error) {
-        return <Alert severity="error">{error}</Alert>;
+        return (
+            <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+            </Alert>
+        );
     }
 
     return (
-        <Box sx={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'background.paper'
-        }}>
-            <DataGrid
-                getRowId={(row) => row.noteId}
-                rows={notes}
-                columns={columns}
-                rowHeight={50}
-                loading={loading}
-                disableRowSelectionOnClick
-                initialState={{
-                    pagination: {
-                        paginationModel: {
-                            pageSize: 25,
-                        },
-                    },
-                }}
-                pageSizeOptions={[25, 50, 100]}
-                getRowClassName={(params) =>
-                    params.row.isArchived ? "row-archived" : ""
-                }
-                rowBufferPx={250}
-                columnBufferPx={150}
-                disableVirtualization={false}
-                sx={{
-                    ...dataGridStyles.root,
-                    '& .MuiDataGrid-columnHeaders': {
-                        borderBottom: '1px solid #e0e0e0 !important',
-                    },
-                    '& .MuiDataGrid-columnHeader': {
-                        height: '52px',
-                        minHeight: '52px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        backgroundColor: 'white',
-                    },
-                    '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': {
-                        outline: 'none',
-                    },
-                    '& .MuiDataGrid-row': {
-                        height: '50px',
-                        minHeight: '50px',
-                        maxHeight: '50px',
-                        borderBottom: '1px solid #e0e0e0',
-                    },
-                    '& .MuiDataGrid-cell': {
-                        display: 'flex',
-                        alignItems: 'center',
-                    },
-                    '& .MuiDataGrid-columnHeaderTitle': {
-                        fontWeight: 600,
-                    },
-                }}
-            />
-        </Box>
+        <div className="w-full h-full bg-background">
+            {/* Table */}
+            <div className="rounded-md border">
+                <table className="w-full">
+                    <thead className="bg-muted/50">
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <tr key={headerGroup.id} className="border-b">
+                                {headerGroup.headers.map(header => (
+                                    <th
+                                        key={header.id}
+                                        className="h-[52px] px-4 text-left align-middle font-semibold text-muted-foreground"
+                                        style={{ width: header.getSize() }}
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {loading ? (
+                            <tr>
+                                <td colSpan={columns.length} className="h-24 text-center">
+                                    <div className="flex items-center justify-center">
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : table.getRowModel().rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={columns.length} className="h-24 text-center">
+                                    No results.
+                                </td>
+                            </tr>
+                        ) : (
+                            table.getRowModel().rows.map(row => (
+                                <tr
+                                    key={row.id}
+                                    className={`border-b h-[50px] ${row.original.isArchived ? 'opacity-60' : ''}`}
+                                >
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 align-middle">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-2 py-4">
+                <div className="text-sm text-muted-foreground">
+                    Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+                    {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, notes.length)} of{' '}
+                    {notes.length} results
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </div>
+        </div>
     );
 }
