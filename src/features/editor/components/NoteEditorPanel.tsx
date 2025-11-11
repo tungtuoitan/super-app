@@ -124,12 +124,6 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
         <div className="w-full h-full flex flex-col overflow-hidden bg-[#f6f6f6]">
             {/* Toolbar */}
             <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
-                <div className="text-[#cccccc] text-[13px] font-medium">
-                    {isCreateMode ? 'New Note' : 'Edit Note'}
-                    {hasUnsavedChanges && (
-                        <span className="text-[#4FC3F7] ml-2">●</span>
-                    )}
-                </div>
 
                 <TooltipProvider>
                     <div className="flex gap-1">

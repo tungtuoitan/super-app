@@ -93,14 +93,3 @@ display: none ;
 }
 
 
-
-.filter-option-grid .MuiDataGrid-root,
-.filter-option-grid .MuiDataGrid-cell {
-    border: 1px solid transparent !important;
-}
-
-
-/* 
-.MuiDialog-root {
-    backdrop-filter: blur(15px);
-} */

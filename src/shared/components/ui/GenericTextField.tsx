@@ -70,6 +70,7 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
                     <Label
                         htmlFor={inputId}
                         className={cn(
+                            'block text-left mb-2',
                             size === 'tiny' && 'text-xs',
                             error && 'text-destructive'
                         )}

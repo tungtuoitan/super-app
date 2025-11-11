@@ -32,6 +32,7 @@ export function NoteDialog() {
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={(open) => !open && closeDialog()}>
+            xxxxxxxxxx
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle className="text-2xl">{selectedNote.name}</DialogTitle>

@@ -67,7 +67,7 @@ export function NoteDetailDialog() {
 
                 {/* Dialog Content */}
                 <div className="flex-1 overflow-hidden bg-background">
-                    {selectedNote && <NoteDetailDialogContent />}
+                    {/* {selectedNote && <NoteDetailDialogContent />}xxx */}
                 </div>
             </DialogContent>
         </Dialog>

@@ -97,7 +97,7 @@ export function GenericTagAutoComplete({
     return (
         <div className={cn("w-full space-y-2", className)} data-testid={testId}>
             {label && (
-                <Label className="text-sm font-medium">{label}</Label>
+                <Label className="block text-left text-sm font-medium">{label}</Label>
             )}
             
             {/* Selected tags display */}

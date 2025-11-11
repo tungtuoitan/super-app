@@ -10,14 +10,6 @@ export const Grow = ({ className = '', ...props }: React.HTMLAttributes<HTMLDivE
     <div className={`flex-grow p-0 m-0 ${className}`} {...props} />
 );
 
-/**
- * Toolbar container wrapper with consistent styling
- */
-export const ToolbarContainer = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div className={`[&_.MuiPaper-root]:bg-white [&_.MuiPaper-root]:text-black ${className}`} {...props}>
-        {children}
-    </div>
-);
 
 /**
  * Group icon container for toolbar icon groups

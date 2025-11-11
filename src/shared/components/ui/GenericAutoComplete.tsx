@@ -205,7 +205,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                 <Label 
                     htmlFor={id} 
                     className={cn(
-                        "block mb-2",
+                        "block text-left mb-2",
                         size === 'tiny' ? 'text-xs' : 'text-sm',
                         inputProps.error && 'text-destructive'
                     )}

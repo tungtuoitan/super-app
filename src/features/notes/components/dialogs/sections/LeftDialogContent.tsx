@@ -40,7 +40,7 @@ export function LeftDialogContent() {
     return (
         <div className="py-4">
             <h2 className="text-lg font-semibold mb-4">
-                Note Details
+                Note Details2
             </h2>
 
             {/* Note Name */}

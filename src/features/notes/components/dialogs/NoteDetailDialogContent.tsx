@@ -139,21 +139,13 @@ export function NoteDetailDialogContent() {
             return null;
         }
     
-        const isCreateMode = selectedNote.noteId === 0;
-
     return (
         <ScrollArea className="h-full w-full bg-background">
-            <div key={noteKey} className="p-6 space-y-6">
+            <div key={noteKey} className="p-6 space-y-6 h-full">
                 {/* Header with Note Name */}
                 <div className="border-b border-editor-border pb-4">
                     <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <FileText className="w-6 h-6 text-primary" />
-                        </div>
                         <div className="flex-1 min-w-0">
-                            <h2 className="text-2xl font-bold text-foreground mb-2">
-                                {selectedNote?.name || 'Untitled Note'}
-                            </h2>
                             <div className="flex items-center gap-2">
                                 <Badge variant={selectedNote?.isArchived ? "secondary" : "default"} className="text-xs">
                                     {selectedNote?.isArchived ? 'Archived' : 'Active'}
@@ -169,14 +161,14 @@ export function NoteDetailDialogContent() {
                 {/* Two Column Layout - Details and Metadata */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column - Note Details */}
-                    <Card className="border-primary/20 hover:border-primary/40 transition-colors">
-                        <CardHeader className="pb-3">
+                    <div className="border-none">
+                        <CardHeader className="p-0 pb-2">
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <Info className="w-5 h-5 text-primary" />
                                 Note Details
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="p-0 space-y-4">
                             {/* Note Name */}
                             <GenericTextField
                                 label="Note Name"
@@ -214,17 +206,17 @@ export function NoteDetailDialogContent() {
                                 />
                             </div>
                         </CardContent>
-                    </Card>
+                    </div>
 
                     {/* Right Column - Metadata */}
-                    <Card className="border-accent/20 hover:border-accent/40 transition-colors">
-                        <CardHeader className="pb-3">
+                    <div className="border-none">
+                        <CardHeader className="p-0 pb-2">
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <Calendar className="w-5 h-5 text-accent-foreground" />
                                 Metadata
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="p-0 space-y-4">
                             <GenericTextField
                                 label="Created"
                                 value={selectedNote?.createdAt ? new Intl.DateTimeFormat('en-US', {
@@ -260,29 +252,26 @@ export function NoteDetailDialogContent() {
                                 size="small"
                             />
                         </CardContent>
-                    </Card>
+                    </div>
                 </div>
 
                 {/* Full Width - Description */}
-                <Card className="border-primary/20 hover:border-primary/40 transition-colors">
-                    <CardHeader className="pb-3">
+                <div className="border-none">
+                    <CardHeader className="p-0 pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <FileText className="w-5 h-5 text-primary" />
                             Description
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0">
                         <Textarea
                             value={selectedNote?.description || ''}
                             onChange={(e) => handleFieldChange('description', e.target.value)}
                             placeholder="Enter note description..."
                             className="min-h-[200px] resize-none font-mono text-sm"
                         />
-                        <p className="text-xs text-muted-foreground mt-2">
-                            {selectedNote?.description?.length || 0} characters
-                        </p>
                     </CardContent>
-                </Card>
+                </div>
             </div>
         </ScrollArea>
     );

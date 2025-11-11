@@ -21,7 +21,6 @@ export const ToolbarContainer = ({
         <div
             className={cn(
                 "flex-grow",
-                "[&_.MuiPaper-root]:mt-px [&_.MuiPaper-root]:bg-white [&_.MuiPaper-root]:text-black",
                 "[&_.isImportant-icon-false]:text-[#D8D8D7]",
                 "[&_.isImportant-icon-true]:text-[#C70039]",
                 "[&_.selected-true]:bg-[#D8D8D7]",
