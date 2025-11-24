@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { TagsPage } from '../../pages/TagsPage';
-import { VSCodeLayout } from '../Layout/NotesLayout';
+import { VSCodeLayout } from '../notes/NotesLayout';
 import { ShadcnTestPage } from '../../pages/ShadcnTestPage';
 
 /**
