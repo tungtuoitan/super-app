@@ -2,14 +2,14 @@ import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '../VSCodeLayout/ActivityBar'
 import { WorkspaceTree } from '@/features/tags/components/WorkspaceTree'
 import { NoteGridPanel } from '../NoteGridPanel'
-import { type Note } from '@/features/notes'
-import { useEditorTabs } from '@/features/editor'
+import { useEditorTabs } from '@/Components/editor'
 import {VSCodeResizeHandle} from '../VSCodeLayout/VSCodeResizeHandle'
+import {Note} from '@/features/notes/note.types'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
   isVisible: boolean
-  onCollapse?: () => void
+  onCollapse?: () => void  
   onExpand?: () => void
 }
 

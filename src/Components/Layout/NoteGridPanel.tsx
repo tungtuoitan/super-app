@@ -11,9 +11,11 @@ import {
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
+import {useNotes} from '@/features/notes/useNotes';
+import {Note} from '@/features/notes/note.types';
+import {useNoteUI} from '@/features/notes/NoteUIContext';
 
 // Import hooks and services from notes feature
-import { useNotes, useNoteUI, type Note } from '../../features/notes';
 
 /**
  * NoteGridPanel - A flexible layout panel for displaying notes in a data table

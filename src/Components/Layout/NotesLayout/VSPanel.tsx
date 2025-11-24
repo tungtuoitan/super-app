@@ -1,7 +1,7 @@
+import {useNoteUI} from '@/features/notes/NoteUIContext'
 import { X, FileText, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Panel } from 'react-resizable-panels'
-import { useNoteUI } from '@/features/notes'
 
 interface VSPanelProps {
   isVisible: boolean

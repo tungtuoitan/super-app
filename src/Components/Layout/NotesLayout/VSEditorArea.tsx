@@ -1,12 +1,12 @@
 import React from 'react'
 import { X } from 'lucide-react'
-import { useEditorTabs, NoteEditorPanel, ConfirmCloseDialog } from '@/features/editor'
-import { useNoteUI } from '@/features/notes'
+import { useEditorTabs, NoteEditorPanel, ConfirmCloseDialog } from '@/Components/editor'
+import {useNoteUI} from '@/features/notes/NoteUIContext'
 
 /**
  * VSEditorArea - Main editor area for note content
  * 
- * Content:
+ * Content: 
  * - Note detail view when a note is selected
  * - Welcome/empty state when no note is selected
  */
