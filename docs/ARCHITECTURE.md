@@ -1,12 +1,8 @@
 # 🏗️ ARCHITECTURE - System Design & Structure
 
-> **Philosophy**: Feature-first, domain-driven architecture with clear boundaries
-
----
-
-## 📐 System Architecture
-
-### High-Level Overview
+> **Philosophy**: Feature-first, domain-driven architecture with clear boundaries.
+> 
+## High-Level Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -41,859 +37,252 @@
                       Backend API
 ```
 
----
+
+## 📐 System Architecture
+
+### High-Level Overview
+
+Presentation Layer (Components, Pages, Layouts) → State Management Layer (React Query cho server, Context cho global UI, useState cho local) → Business Logic Layer (Services, Hooks, Utils) → Data Access Layer (API Client Axios/Fetch) → Backend API.
 
 ## 📁 Complete Folder Structure
 
-```
 src/
-├── features/                          # Feature modules (domain-driven)
-│   ├── auth/
-│   │   ├── components/
-│   │   │   ├── LoginForm/
-│   │   │   │   ├── LoginForm.tsx
-│   │   │   │   ├── LoginForm.test.tsx
-│   │   │   │   └── index.ts
-│   │   │   └── AuthGuard/
-│   │   ├── hooks/
-│   │   │   ├── useAuth.ts             # React Query hooks
-│   │   │   └── useAuthActions.ts      # Mutation hooks
-│   │   ├── services/
-│   │   │   └── authService.ts         # Business logic + API
-│   │   ├── store/
-│   │   │   └── AuthContext.tsx        # Global auth state
-│   │   ├── types/
-│   │   │   └── auth.types.ts          # Auth domain types
-│   │   └── index.ts                   # Public exports
-│   │
-│   └── notes/
-│       ├── components/
-│       │   ├── NoteGrid/
-│       │   │   ├── NoteGrid.tsx
-│       │   │   ├── NoteGrid.hooks.ts  # Component-specific hooks
-│       │   │   ├── NoteGrid.utils.ts  # Component-specific utils
-│       │   │   ├── NoteGrid.types.ts
-│       │   │   └── index.ts
-│       │   ├── NoteCard/
-│       │   ├── NoteDialog/
-│       │   └── NoteForm/
-│       ├── hooks/
-│       │   ├── useNotes.ts            # Query hook
-│       │   ├── useNote.ts             # Single item query
-│       │   ├── useCreateNote.ts       # Mutation hooks
-│       │   ├── useUpdateNote.ts
-│       │   └── useDeleteNote.ts
-│       ├── services/
-│       │   └── noteService.ts         # Business logic layer
-│       ├── store/
-│       │   └── NoteUIContext.tsx      # Feature UI state
-│       ├── types/
-│       │   ├── note.types.ts          # Domain models
-│       │   └── note.dto.ts            # API DTOs
-│       └── index.ts                   # Feature public API
-│
-├── shared/                            # Shared across features
-│   ├── components/
-│   │   ├── ui/                        # Pure UI components
-│   │   │   ├── Button/
-│   │   │   ├── Input/
-│   │   │   ├── Modal/
-│   │   │   └── Spinner/
-│   │   ├── data-display/              # Data components
-│   │   │   ├── DataGrid/
-│   │   │   ├── Table/
-│   │   │   └── Card/
-│   │   └── feedback/                  # Feedback components
-│   │       ├── Alert/
-│   │       ├── Toast/
-│   │       └── ErrorBoundary/
-│   │
-│   ├── hooks/
-│   │   ├── useDebounce.ts
-│   │   ├── useLocalStorage.ts
-│   │   ├── useMediaQuery.ts
-│   │   └── useDisclosure.ts           # Generic open/close state
-│   │
-│   ├── services/
-│   │   └── storageService.ts          # localStorage wrapper
-│   │
-│   ├── types/
-│   │   ├── common.types.ts            # Shared types
-│   │   └── api.types.ts               # Generic API types
-│   │
-│   └── utils/
-│       ├── format.ts                  # Date, currency formatting
-│       ├── validation.ts              # Validators
-│       └── helpers.ts                 # Generic helpers
-│
-├── lib/                               # Third-party library setup
-│   ├── react-query.ts                 # QueryClient config
-│   ├── api-client.ts                  # Axios/Fetch instance
-│   ├── theme.ts                       # MUI theme
-│   └── router.ts                      # React Router setup
-│
-├── config/                            # Application configuration
-│   ├── env.ts                         # Environment variables
-│   ├── constants.ts                   # App-wide constants
-│   └── routes.ts                      # Route definitions
-│
-├── layouts/                           # Layout components
-│   ├── AppLayout/
-│   ├── AuthLayout/
-│   └── DashboardLayout/
-│
-├── pages/                             # Route pages (thin layer)
-│   ├── HomePage.tsx
-│   ├── NotesPage.tsx
-│   └── LoginPage.tsx
-│
-├── App.tsx                            # Root component
-├── main.tsx                           # Entry point
-└── vite-env.d.ts                      # Vite types
-```
-
----
+- features/ (feature modules: auth, notes, v.v. với components, hooks, services, store, types, index.ts)
+- shared/ (components/ui, data-display, feedback; hooks; services; types; utils)
+- lib/ (react-query.ts, api-client.ts, theme.ts, router.ts)
+- config/ (env.ts, constants.ts, routes.ts)
+- layouts/ (AppLayout, AuthLayout, DashboardLayout)
+- pages/ (HomePage.tsx, NotesPage.tsx, LoginPage.tsx)
+- App.tsx, main.tsx, vite-env.d.ts
 
 ## 🎯 Feature Module Structure
 
-### Anatomy of a Feature
-
-```
-features/notes/
-│
-├── components/              # UI Components
-│   ├── NoteGrid/           # Complex component (folder)
-│   │   ├── NoteGrid.tsx
-│   │   ├── NoteGrid.hooks.ts
-│   │   ├── NoteGrid.utils.ts
-│   │   ├── NoteGrid.types.ts
-│   │   └── index.ts
-│   │
-│   └── NoteCard.tsx        # Simple component (file)
-│
-├── hooks/                  # React Query hooks
-│   ├── useNotes.ts         # GET /notes (list)
-│   ├── useNote.ts          # GET /notes/:id (single)
-│   ├── useCreateNote.ts    # POST /notes
-│   ├── useUpdateNote.ts    # PUT /notes/:id
-│   └── useDeleteNote.ts    # DELETE /notes/:id
-│
-├── services/               # Business logic
-│   └── noteService.ts      # All API calls + transformations
-│
-├── store/                  # Feature state (UI only)
-│   └── NoteUIContext.tsx   # Dialogs, filters, pagination
-│
-├── types/                  # Type definitions
-│   ├── note.types.ts       # Domain model: Note interface
-│   └── note.dto.ts         # API DTOs: CreateNoteDTO, etc.
-│
-└── index.ts                # Public API
-    export * from './components'
-    export * from './hooks'
-    export { noteService } from './services/noteService'
-    export * from './types'
-```
-
----
+features/[name]/
+- components/ (NoteGrid/ với .tsx, .hooks.ts, .utils.ts, .types.ts, index.ts; hoặc file đơn giản như NoteCard.tsx)
+- hooks/ (useNotes.ts, useNote.ts, useCreateNote.ts, v.v.)
+- services/ (noteService.ts)
+- store/ (NoteUIContext.tsx)
+- types/ (note.types.ts, note.dto.ts)
+- index.ts (public exports)
 
 ## 📊 Layer Responsibilities
 
-### 1. Presentation Layer (Components)
+1. **Presentation Layer**: Render UI, xử lý tương tác, hiển thị loading/error, không business logic hay API calls.
 
-**Responsibilities:**
-- Render UI
-- Handle user interactions
-- Display loading/error states
-- NO business logic
-- NO API calls
+2. **State Management Layer**: Quản lý server state (React Query), global UI state (Context), cache invalidation, optimistic updates, không rendering logic.
 
-**Example:**
+3. **Business Logic Layer**: API communication, data transformation, business rules, không React hooks hay UI logic.
+
+4. **Data Access Layer**: HTTP requests, interceptors, auth headers, error transformation, không business logic.
+
+## 🌐 API Client & Service Layer
+
+### API Client Setup (lib/api-client.ts)
+
+**Axios-based Implementation:**
+- Instance config: baseURL từ env, timeout, headers JSON
+- Request interceptors: Thêm token từ storage, log trong DEV mode
+- Response interceptors: Log trong DEV, xử lý lỗi (401: redirect login, 403: forbidden, 500+: server error)
+- Typed methods: get<T>, post<T>, put<T>, patch<T>, delete<T>
+
+**Fetch-based Alternative:**
+- Base config: baseURL, default headers
+- handleResponse: Kiểm tra ok, xử lý status codes (401: logout, parse JSON)
+- Typed methods với proper error handling
+
+### Service Layer Pattern (features/*/services/)
+
+**Service Class Structure:**
 ```typescript
-// features/notes/components/NoteCard.tsx
-interface NoteCardProps {
-    note: Note
-    onClick?: (note: Note) => void
-}
-
-export function NoteCard({ note, onClick }: NoteCardProps) {
-    return (
-        <Card onClick={() => onClick?.(note)}>
-            <Typography>{note.name}</Typography>
-            <Typography variant="body2">{note.description}</Typography>
-        </Card>
-    )
-}
-```
-
----
-
-### 2. State Management Layer
-
-**Responsibilities:**
-- Manage server state (React Query)
-- Manage global UI state (Context)
-- Cache invalidation
-- Optimistic updates
-- NO rendering logic
-
-**Example:**
-```typescript
-// features/notes/hooks/useNotes.ts
-export function useNotes(params?: GetNotesParams) {
-    return useQuery({
-        queryKey: ['notes', params],
-        queryFn: () => noteService.getNotes(params),
-        staleTime: 5 * 60 * 1000,
-    })
-}
-```
-
----
-
-### 3. Business Logic Layer (Services)
-
-**Responsibilities:**
-- API communication
-- Data transformation
-- Business rules
-- NO React hooks
-- NO UI logic
-
-**Example:**
-```typescript
-// features/notes/services/noteService.ts
 class NoteService {
-    async getNotes(params?: GetNotesParams): Promise<Note[]> {
-        const response = await apiClient.get<ApiResponse<NoteDTO[]>>('/notes', { params })
-        return response.data.map(this.transformNote)
-    }
-    
-    private transformNote(dto: NoteDTO): Note {
-        return {
-            ...dto,
-            createdAt: new Date(dto.createdAt),
-        }
-    }
+  private basePath = '/api/notes';
+  
+  // CRUD operations
+  async getNotes(params?: GetNotesParams): Promise<Note[]>
+  async getNoteById(id: string): Promise<Note>
+  async createNote(data: CreateNoteDTO): Promise<Note>
+  async updateNote(id: string, data: UpdateNoteDTO): Promise<Note>
+  async deleteNote(id: string): Promise<void>
+  
+  // Convenience methods
+  async archiveNote(id: string): Promise<Note>
+  async bulkDelete(ids: string[]): Promise<void>
 }
 
-export const noteService = new NoteService()
+export const noteService = new NoteService(); // Singleton
 ```
 
----
+**Data Transformation:**
+- DTOs từ API (dates as strings) → Domain models (Date objects)
+- Transform trong service layer trước khi return
+- Consistent transformation cho tất cả responses
 
-### 4. Data Access Layer (API Client)
+### Common Service Patterns
 
-**Responsibilities:**
-- HTTP requests
-- Request/response interceptors
-- Authentication headers
-- Error transformation
-- NO business logic
-
-**Example:**
+**Authentication Service:**
 ```typescript
-// lib/api-client.ts
-const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    timeout: 30000,
-})
-
-apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-})
+class AuthService {
+  login(credentials): Promise<AuthResponse>      // Lưu token
+  logout(): void                                  // Xóa token
+  getCurrentUser(): Promise<User>
+  verifyToken(token): Promise<boolean>
+  refreshToken(): Promise<string>                // Cập nhật token
+  requestPasswordReset(email): Promise<void>
+  resetPassword(token, password): Promise<void>
+}
 ```
 
----
+**File Upload Service:**
+```typescript
+class UploadService {
+  uploadFile(file, onProgress): Promise<{url: string, id: string}>
+  uploadFiles(files, onProgress): Promise<Array<{url, id}>>
+  deleteFile(fileId): Promise<void>
+}
+```
+- Sử dụng FormData cho multipart/form-data
+- Progress tracking cho UX tốt hơn
+
+### Error Handling Strategy
+
+**Custom Error Classes:**
+```typescript
+class ApiError extends Error {
+  constructor(status: number, message: string, data?: any)
+}
+class NetworkError extends Error {}
+class ValidationError extends Error {
+  constructor(message: string, errors: Record<string, string>)
+}
+```
+
+**Service Error Handling:**
+- Try/catch Axios/Fetch errors
+- Transform thành typed errors (ApiError, NetworkError)
+- Re-throw để React Query/Component xử lý
+- Log errors trong DEV mode
+
+### Advanced Features
+
+**Retry Logic:**
+- Sử dụng axios-retry: 3 attempts, exponential backoff
+- Retry điều kiện: network errors hoặc 5xx status codes
+- Không retry cho 4xx (client errors)
+
+**Request Cancellation:**
+- Axios: CancelToken source, cancel on unmount
+- React Query: Tự động sử dụng AbortController signal
+- Tránh memory leaks và race conditions
+
+**Query Parameters:**
+- Build với URLSearchParams
+- Append key-value pairs
+- Hỗ trợ arrays (multiple values cho cùng key)
+
+**API Security:**
+- CSRF token: Thêm X-CSRF-Token header từ meta tag
+- API key: X-API-Key từ environment
+- Rate limiting headers
+- Request signing nếu cần
+
+### Service Best Practices
+
+**Checklist:**
+- [ ] Class có tên mô tả rõ domain (NoteService, AuthService)
+- [ ] basePath private, không hardcode
+- [ ] Tất cả methods async, return Promise
+- [ ] TypeScript types cho params và returns
+- [ ] Try/catch errors, không silent fail
+- [ ] Transform data từ DTO sang domain model
+- [ ] JSDoc cho public methods (params, returns, throws)
+- [ ] Export singleton instance
+- [ ] Unit tests cho critical paths
+
+**Guidelines:**
+1. **Keep Services Thin**: Không business logic (filter/sort) - để ở component/hook
+2. **Descriptive Names**: getNotes, createNote (không get, create)
+3. **Consistent Error Handling**: Log và re-throw, không swallow errors
+4. **Single Responsibility**: Mỗi service một domain entity
+
+**Remember**: Services là bridge giữa React và API, tập trung vào communication.
 
 ## 🔄 Data Flow Examples
 
-### Example 1: Fetching Data
-
-```
-User clicks "Notes" page
-         ↓
-Component renders
-         ↓
-useNotes() hook called
-         ↓
-React Query checks cache
-         ↓
-If stale, calls noteService.getNotes()
-         ↓
-Service calls apiClient.get('/notes')
-         ↓
-API Client adds auth header, sends request
-         ↓
-Backend returns data
-         ↓
-Service transforms DTO → Domain Model
-         ↓
-React Query caches result
-         ↓
-Component receives data and renders
-```
-
-### Example 2: Creating Data
-
-```
-User fills form and clicks "Save"
-         ↓
-Component calls createNote.mutateAsync()
-         ↓
-Mutation hook calls noteService.createNote()
-         ↓
-Service calls apiClient.post('/notes', data)
-         ↓
-Backend creates note and returns it
-         ↓
-Service transforms response
-         ↓
-onSuccess callback invalidates cache
-         ↓
-React Query refetches notes list
-         ↓
-Component shows updated list
-```
-
----
+- Fetching: Component → hook (useNotes) → React Query → service.getNotes → apiClient.get → backend → transform → cache → render.
+- Creating: Component → mutateAsync → service.createNote → apiClient.post → backend → transform → invalidate cache → refetch → update UI.
 
 ## 🎨 Component Organization
 
-### Simple vs Complex Components
-
-#### Simple Component (Single File)
-```typescript
-// shared/components/ui/Button/Button.tsx
-interface ButtonProps {
-    children: React.ReactNode
-    onClick?: () => void
-    variant?: 'primary' | 'secondary'
-}
-
-export function Button({ children, onClick, variant = 'primary' }: ButtonProps) {
-    return (
-        <MuiButton 
-            onClick={onClick}
-            variant={variant === 'primary' ? 'contained' : 'outlined'}
-        >
-            {children}
-        </MuiButton>
-    )
-}
-```
-
-#### Complex Component (Folder)
-```typescript
-// features/notes/components/NoteGrid/
-NoteGrid/
-  ├── NoteGrid.tsx           # Main component
-  ├── NoteGrid.hooks.ts      # Local hooks
-  ├── NoteGrid.utils.ts      # Helper functions
-  ├── NoteGrid.types.ts      # Type definitions
-  └── index.ts               # Public exports
-
-// NoteGrid.tsx
-import { useNoteGridData } from './NoteGrid.hooks'
-import { formatNoteDate } from './NoteGrid.utils'
-import type { NoteGridProps } from './NoteGrid.types'
-
-export function NoteGrid(props: NoteGridProps) {
-    const { notes, isLoading } = useNoteGridData(props.filters)
-    // ... component logic
-}
-
-// NoteGrid.hooks.ts (component-specific hooks)
-export function useNoteGridData(filters: NoteFilters) {
-    const { data: notes, isLoading } = useNotes(filters)
-    const { deleteNote } = useDeleteNote()
-    
-    return { notes, isLoading, deleteNote }
-}
-
-// NoteGrid.utils.ts (component-specific utilities)
-export function formatNoteDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US').format(date)
-}
-```
-
----
+- Simple: Single file .tsx.
+- Complex: Folder với .tsx, .hooks.ts, .utils.ts, .types.ts, index.ts.
 
 ## 🗂️ File Naming Rules
 
-### Components
-```typescript
-// PascalCase for component files
-NoteCard.tsx
-LoginForm.tsx
-UserProfile.tsx
-
-// Folder for complex components
-NoteGrid/
-  ├── NoteGrid.tsx
-  └── index.ts
-```
-
-### Hooks
-```typescript
-// camelCase with 'use' prefix
-useNotes.ts          // Query hook
-useCreateNote.ts     // Mutation hook
-useNoteFilters.ts    // Custom hook
-```
-
-### Services
-```typescript
-// camelCase with 'Service' suffix
-noteService.ts
-authService.ts
-storageService.ts
-```
-
-### Types
-```typescript
-// camelCase with '.types.ts' suffix for domain models
-note.types.ts        // Note, NoteStatus, etc.
-note.dto.ts          // CreateNoteDTO, UpdateNoteDTO
-auth.types.ts        // User, AuthState, etc.
-```
-
-### Utilities
-```typescript
-// camelCase, descriptive names
-format.ts            // formatDate, formatCurrency
-validation.ts        // validateEmail, validatePassword
-helpers.ts           // General helpers
-```
-
----
+- Components: PascalCase.tsx (NoteCard.tsx), folder cho complex.
+- Hooks: camelCase với use (useNotes.ts).
+- Services: camelCaseService.ts (noteService.ts).
+- Types: camelCase.types.ts (note.types.ts).
+- Utilities: camelCase.ts (format.ts).
 
 ## 📦 Module Boundaries
 
-### Feature Module Exports
-
-```typescript
-// features/notes/index.ts - Feature public API
-// Components
-export { NoteGrid } from './components/NoteGrid'
-export { NoteCard } from './components/NoteCard'
-export { NoteDialog } from './components/NoteDialog'
-
-// Hooks
-export { useNotes } from './hooks/useNotes'
-export { useCreateNote } from './hooks/useCreateNote'
-export { useUpdateNote } from './hooks/useUpdateNote'
-
-// Service (for testing or advanced usage)
-export { noteService } from './services/noteService'
-
-// Types
-export type { Note, CreateNoteDTO, UpdateNoteDTO } from './types/note.types'
-
-// Context
-export { NoteUIProvider, useNoteUI } from './store/NoteUIContext'
-```
-
-### Usage in Other Features
-
-```typescript
-// ✅ GOOD: Import from feature public API
-import { NoteCard, useNotes } from '@/features/notes'
-
-// ❌ BAD: Import from internal files
-import { NoteCard } from '@/features/notes/components/NoteCard'
-import { useNotes } from '@/features/notes/hooks/useNotes'
-```
-
----
+- Export từ index.ts: components, hooks, service, types, context.
+- Import từ feature public API, không internal files.
 
 ## 🔗 Dependencies Between Layers
 
-### Allowed Dependencies
-
-```
-Presentation → State Management ✅
-Presentation → Business Logic ✅
-State Management → Business Logic ✅
-Business Logic → Data Access ✅
-
-Data Access → Business Logic ❌
-Business Logic → Presentation ❌
-State Management → Presentation ❌
-```
-
-### Example of Correct Flow
-
-```typescript
-// ✅ Component uses hooks
-function NoteList() {
-    const { data: notes } = useNotes()
-    return <div>{notes.map(...)}</div>
-}
-
-// ✅ Hook uses service
-function useNotes() {
-    return useQuery({
-        queryKey: ['notes'],
-        queryFn: noteService.getNotes,
-    })
-}
-
-// ✅ Service uses API client
-class NoteService {
-    getNotes() {
-        return apiClient.get('/notes')
-    }
-}
-
-// ❌ Service should NOT use hooks
-class NoteService {
-    getNotes() {
-        const { data } = useQuery(...) // ❌ NO!
-    }
-}
-```
-
----
+- Allowed: Presentation → State/Business, State → Business, Business → Data.
+- Disallowed: Ngược lại.
 
 ## 🎯 Feature Independence
 
-### Guidelines for Feature Modules
-
-1. **Self-Contained**: Each feature has its own components, hooks, services
-2. **Explicit Dependencies**: If Feature A needs Feature B, import from public API
-3. **Shared Code**: Move truly shared code to `shared/`
-
-### Example: Feature Dependencies
-
-```typescript
-// features/notes/components/NoteCard.tsx
-// ✅ Can use shared components
-import { Card } from '@/shared/components/ui/Card'
-import { Button } from '@/shared/components/ui/Button'
-
-// ✅ Can use shared hooks
-import { useDebounce } from '@/shared/hooks/useDebounce'
-
-// ✅ Can use other features (via public API)
-import { UserAvatar } from '@/features/users'
-
-// ❌ Should NOT directly import from other feature internals
-import { UserService } from '@/features/users/services/userService' // ❌
-```
-
----
+- Self-contained, explicit dependencies qua public API.
+- Shared code vào shared/ nếu dùng nhiều features, generic.
 
 ## 🧩 Shared vs Feature Code
 
-### When to Put Code in `shared/`
-
-**Put in `shared/` when:**
-- Used by 3+ features
-- Pure utility (no feature-specific logic)
-- Generic UI component
-- Common type/interface
-
-**Keep in feature when:**
-- Used by single feature
-- Contains feature-specific logic
-- Tightly coupled to feature domain
-
-### Example Decision Tree
-
-```
-Q: Is this component used by multiple features?
-   ├─ No → Keep in feature/
-   └─ Yes → Q: Does it have feature-specific logic?
-              ├─ Yes → Keep in feature/, accept duplication
-              └─ No → Move to shared/
-
-Q: Is this a utility function?
-   ├─ Q: Is it generic (formatDate, validateEmail)?
-   │     └─ Yes → shared/utils/
-   ├─ Q: Is it feature-specific (calculateNoteScore)?
-   │     └─ Yes → feature/utils/ or feature/component/utils/
-   └─ Q: Is it used across features but feature-aware?
-         └─ Yes → Consider making it more generic or accept duplication
-```
-
----
+- Shared: Dùng 3+ features, pure utility, generic UI/type.
+- Feature: Single feature, specific logic, coupled domain.
 
 ## 📐 Scalability Patterns
 
-### Adding New Features
-
-```bash
-# 1. Create feature structure
-mkdir -p src/features/todos/{components,hooks,services,store,types}
-
-# 2. Create types first (design your domain)
-# src/features/todos/types/todo.types.ts
-export interface Todo {
-    id: number
-    title: string
-    completed: boolean
-}
-
-# 3. Create service (API layer)
-# src/features/todos/services/todoService.ts
-
-# 4. Create hooks (React Query)
-# src/features/todos/hooks/useTodos.ts
-
-# 5. Create UI context (if needed for feature UI state)
-# src/features/todos/store/TodoUIContext.tsx
-
-# 6. Create components
-# src/features/todos/components/TodoList.tsx
-
-# 7. Create public API
-# src/features/todos/index.ts
-
-# 8. Wire up in app
-# Add TodoUIProvider if created
-# Add routes if needed
-```
-
-### Growing a Feature
-
-```
-Phase 1: Simple (Single file)
-  features/todos/
-    ├── TodoList.tsx
-    └── useTodos.ts
-
-Phase 2: Medium (Organized folders)
-  features/todos/
-    ├── components/
-    │   └── TodoList.tsx
-    ├── hooks/
-    │   └── useTodos.ts
-    └── services/
-        └── todoService.ts
-
-Phase 3: Complex (Full structure)
-  features/todos/
-    ├── components/
-    │   ├── TodoList/
-    │   ├── TodoCard/
-    │   └── TodoDialog/
-    ├── hooks/
-    │   ├── useTodos.ts
-    │   ├── useCreateTodo.ts
-    │   └── useUpdateTodo.ts
-    ├── services/
-    │   └── todoService.ts
-    ├── store/
-    │   └── TodoUIContext.tsx
-    └── types/
-        └── todo.types.ts
-```
-
----
+- Add feature: Tạo structure, types trước, service, hooks, store nếu cần, components, public API, wire up.
+- Grow feature: Bắt đầu simple (files), medium (folders), complex (full structure).
 
 ## 🔍 Code Organization Examples
 
-### Example 1: Simple Feature (Users)
-
-```
-features/users/
-├── components/
-│   ├── UserCard.tsx        # 50 lines
-│   └── UserAvatar.tsx      # 30 lines
-├── hooks/
-│   └── useUsers.ts         # Query hook
-├── services/
-│   └── userService.ts      # API calls
-├── types/
-│   └── user.types.ts       # User interface
-└── index.ts
-```
-
-### Example 2: Complex Feature (Notes)
-
-```
-features/notes/
-├── components/
-│   ├── NoteGrid/
-│   │   ├── NoteGrid.tsx
-│   │   ├── NoteGrid.hooks.ts
-│   │   ├── NoteGrid.utils.ts
-│   │   ├── NoteGrid.columns.tsx    # Column definitions
-│   │   └── index.ts
-│   ├── NoteDialog/
-│   │   ├── NoteDialog.tsx
-│   │   ├── NoteDialog.hooks.ts
-│   │   └── index.ts
-│   ├── NoteForm/
-│   └── NoteCard.tsx
-├── hooks/
-│   ├── useNotes.ts
-│   ├── useNote.ts
-│   ├── useCreateNote.ts
-│   ├── useUpdateNote.ts
-│   ├── useDeleteNote.ts
-│   └── useNoteFilters.ts
-├── services/
-│   └── noteService.ts
-├── store/
-│   └── NoteUIContext.tsx
-├── types/
-│   ├── note.types.ts
-│   └── note.dto.ts
-└── index.ts
-```
-
----
+- Simple feature (users): components files, hooks, services, types, index.
+- Complex feature (notes): components folders/files, nhiều hooks, services, store, types/dto, index.
 
 ## 🎪 Provider Hierarchy
 
-### Centralized Provider Structure (Required Pattern)
-
-**🎯 RULE**: All Context providers MUST be centralized in `Main.tsx` for cross-feature data sharing.
-
-```typescript
-// Main.tsx - Centralized Provider Setup
-import { BrowserRouter } from 'react-router-dom'
-import { SnackbarProvider } from 'notistack'
-import { AuthProvider } from '@/contexts/AuthContext'
-import { NoteUIProvider } from '@/features/notes'
-import { DialogProvider } from '@/store'
-
-function Main() {
-    return (
-        <BrowserRouter>
-            <SnackbarProvider autoHideDuration={3000}>
-                <AuthProvider>
-                    <NoteUIProvider>
-                        <DialogProvider>
-                            <MainNav />
-                        </DialogProvider>
-                    </NoteUIProvider>
-                </AuthProvider>
-            </SnackbarProvider>
-        </BrowserRouter>
-    )
-}
-```
-
-### Page Implementation (No Provider Wrapping)
-
-```typescript
-// pages/NotesPage.tsx - Direct context usage
-export function NotesPage() {
-    return (
-        <ErrorBoundary>
-            <NotesPageContent />
-        </ErrorBoundary>
-    )
-}
-
-function NotesPageContent() {
-    // Direct access to centralized contexts
-    const { filters, selectedNote } = useNoteUI()
-    const { data: notes } = useNotes()
-    
-    return (
-        <div>
-            <NoteGrid notes={notes} />
-            <NoteDialog />
-        </div>
-    )
-}
-```
-
-**Benefits:**
-- Cross-feature data sharing
-- Single source of truth
-- Easier debugging
-- No provider conflicts
-
----
+- Centralized ở Main.tsx: BrowserRouter, SnackbarProvider, AuthProvider, NoteUIProvider, v.v.
+- Pages: Direct dùng context, không wrap provider.
 
 ## 🚀 Performance Considerations
 
-### Code Splitting by Feature
-
-```typescript
-// Lazy load features
-const NotesPage = lazy(() => import('@/pages/NotesPage'))
-const TodosPage = lazy(() => import('@/pages/TodosPage'))
-
-function Routes() {
-    return (
-        <Suspense fallback={<PageLoader />}>
-            <Switch>
-                <Route path="/notes" component={NotesPage} />
-                <Route path="/todos" component={TodosPage} />
-            </Switch>
-        </Suspense>
-    )
-}
-```
-
-### Feature-Level Code Splitting
-
-```typescript
-// features/notes/index.ts
-// Export components lazily if needed
-export const NoteDialog = lazy(() => 
-    import('./components/NoteDialog').then(m => ({ default: m.NoteDialog }))
-)
-```
-
----
+- Code splitting: Lazy load pages/features, Suspense fallback.
 
 ## 📝 Architecture Checklist
 
-When designing a new feature:
-
-- [ ] Feature name is clear and represents domain concept
-- [ ] Types defined first (domain model)
-- [ ] Service layer handles all API calls
-- [ ] React Query hooks for data fetching
-- [ ] Context only for UI state (if needed)
-- [ ] Components are presentational
-- [ ] Public API exports only necessary items
-- [ ] No circular dependencies
-- [ ] Feature is self-contained
-- [ ] Follows naming conventions
-
----
+- Feature name domain concept.
+- Types first.
+- Service handle API.
+- Hooks cho fetching.
+- Context chỉ UI state.
+- Components presentational.
+- Public API necessary items.
+- No circular.
+- Self-contained.
+- Naming conventions.
 
 ## 🔧 Troubleshooting
 
-### "Where should this code go?"
+Decision tree cho code placement:
+- Component: Multi features → shared/components; Specific → features/[name]/components.
+- Hook: Query → features/hooks; Generic → shared/hooks; Specific → component folder.
+- Business logic → features/services.
+- Type: App-wide → shared/types; Specific → features/types.
+- Utility: Generic → shared/utils; Specific → features/utils or component.
 
-**Use this decision tree:**
-
-```
-Is it a React component?
-├─ Used by multiple features? → shared/components/
-└─ Feature-specific? → features/[name]/components/
-
-Is it a hook?
-├─ React Query (data fetching)? → features/[name]/hooks/
-├─ Generic utility? → shared/hooks/
-└─ Component-specific? → features/[name]/components/[Component]/[Component].hooks.ts
-
-Is it business logic?
-└─ features/[name]/services/
-
-Is it a type?
-├─ Used across app? → shared/types/
-└─ Feature-specific? → features/[name]/types/
-
-Is it a utility?
-├─ Generic? → shared/utils/
-├─ Feature-specific? → features/[name]/utils/ or component folder
-└─ Component-specific? → next to component file
-```
-
----
-
-**Remember**: Architecture should enable fast development, not slow it down. Start simple, refactor when needed.
+**Remember**: Architecture enable fast dev, start simple, refactor when needed.
