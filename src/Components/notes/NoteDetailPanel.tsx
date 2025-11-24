@@ -8,8 +8,8 @@ import { Input } from '@/Components/ui/input'
 import { Textarea } from '@/Components/ui/textarea'
 import { Label } from '@/Components/ui/label'
 import { formatDate } from '@/utils/formatters'
-import {UpdateNoteDTO} from './note.types'
-import {noteService} from './noteService'
+import {UpdateNoteDTO} from '../../types/note.types'
+import {noteService} from '../../services/noteService'
 
 interface NoteDetailPanelProps {
   selectedNoteId?: string

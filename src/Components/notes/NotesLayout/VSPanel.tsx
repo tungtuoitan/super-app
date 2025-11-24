@@ -1,4 +1,4 @@
-import {useNoteUI} from '@/Components/Notes/NoteUIContext'
+import {useNoteUI} from '@/contexts/NoteUIContext'
 import { X, FileText, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Panel } from 'react-resizable-panels'

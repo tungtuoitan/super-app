@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Edit, Palette, FileText, Tag as TagIcon, Type, Loader2 } from 'lucide-react';
-import { useUpdateWorkspaceItem } from './useWorkspace';
+import { useUpdateWorkspaceItem } from '../../hooks/Tags/useWorkspace';
 import { useSnackbar } from 'notistack';
 import type { UpdateWorkspaceItemRequest } from './workspace.types';
 import {

@@ -8,8 +8,8 @@ import { Button } from '@/shared/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/Components/ui/card';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Spinner } from '@/shared/components/ui/Spinner';
-import {useNotes} from './useNotes';
-import {Note} from './note.types';
+import {useNotes} from '../../hooks/useNotes';
+import {Note} from '../../types/note.types';
 
 export function SimpleNotesList() {
     // ✅ NEW: Using React Query hook for server state

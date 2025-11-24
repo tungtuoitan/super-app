@@ -4,8 +4,8 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {CreateNoteDTO, GetNotesParams, UpdateNoteDTO} from './note.types';
-import {noteService} from './noteService';
+import {CreateNoteDTO, GetNotesParams, UpdateNoteDTO} from '../types/note.types';
+import {noteService} from '../services/noteService';
 
 // Query Keys
 export const noteKeys = {

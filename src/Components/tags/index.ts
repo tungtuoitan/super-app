@@ -9,8 +9,8 @@ export { AddTagDialog } from './AddTagDialog';
 export { TagUIProvider, useTagUI } from './TagUIContext';
 
 // Hooks
-export { useTags, useWorkspaceTagTree } from './useTags';
-export { useTagsForAutocomplete } from './useTagsForAutocomplete';
+export { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
+export { useTagsForAutocomplete } from '../../hooks/Tags/useTagsForAutocomplete';
 
 // Service
 export { tagService } from './tagService';

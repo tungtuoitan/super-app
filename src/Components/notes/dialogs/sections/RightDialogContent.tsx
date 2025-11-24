@@ -8,7 +8,7 @@ import React from 'react';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
-import {useNoteUI} from '../../NoteUIContext';
+import {useNoteUI} from '../../../../contexts/NoteUIContext';
 
 /**
  * Right Dialog Content

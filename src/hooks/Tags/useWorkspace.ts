@@ -8,8 +8,8 @@ import { workspaceService } from '../../services/workspaceService';
 import type { 
     AddItemToWorkspaceRequest,
     UpdateWorkspaceItemRequest
-} from './workspace.types';
-import { tagKeys } from '../../hooks/Tags/useTags';
+} from '../../Components/Tags/workspace.types';
+import { tagKeys } from './useTags';
 
 /**
  * Hook to add item (tag or note) to workspace

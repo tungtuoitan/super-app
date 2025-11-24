@@ -19,9 +19,9 @@ import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Checkbox } from '@/Components/ui/checkbox';
-import {Note} from './note.types';
-import {useNotes} from './useNotes';
-import {useNoteUI} from './NoteUIContext';
+import {Note} from '../../types/note.types';
+import {useNotes} from '../../hooks/useNotes';
+import {useNoteUI} from '../../contexts/NoteUIContext';
 
 interface NoteGridProps {
     onNoteClick?: (note: Note) => void;

@@ -4,7 +4,6 @@ import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { TagsPage } from '../../pages/TagsPage';
 import { VSCodeLayout } from '../Notes/NotesLayout';
-import { ShadcnTestPage } from '../../pages/ShadcnTestPage';
 
 /**
  * Main navigation component.
@@ -39,7 +38,6 @@ function MainNav() {
                         <Route path="/" element={<VSCodeLayout />} />
                         <Route path="/tags" Component={TagsPage} />
                         <Route path="/notes" element={<VSCodeLayout />} />
-                        <Route path="/test" element={<ShadcnTestPage />} />
                     </Routes>
                 </div>
             </div>

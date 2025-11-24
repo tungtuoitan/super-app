@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 
-import { useWorkspaceTagTree, useBatchMoveTag } from './useTags';
+import { useWorkspaceTagTree, useBatchMoveTag } from '../../hooks/Tags/useTags';
 import { useTagUI } from './TagUIContext';
 import { useContextMenu } from '@/shared/contexts';
 import type { Tag } from './tag.types';

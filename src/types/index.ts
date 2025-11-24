@@ -47,14 +47,14 @@ export type {
     NoteDTO,
     GetNotesParams,
     NotesResponse,
-} from '@/Components/Notes/note.types';
+} from '@/types/note.types';
 
 // API compatibility aliases
 export type {
     CreateNoteDTO as CreateNoteRequest,
     UpdateNoteDTO as UpdateNoteRequest,
     NoteDTO as NoteResponse,
-} from '@/Components/Notes/note.types';
+} from '@/types/note.types';
 
 // Response wrapper type for create/update operations
 export interface NoteCreateUpdateResponse {

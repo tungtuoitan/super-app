@@ -26,8 +26,8 @@ import {
     SelectValue,
 } from '@/Components/ui/select';
 import { cn } from '@/lib/utils';
-import { useCreateTag } from './useTags';
-import { useWorkspaceTagTree } from './useTags';
+import { useCreateTag } from '../../hooks/Tags/useTags';
+import { useWorkspaceTagTree } from '../../hooks/Tags/useTags';
 import type { CreateTagDTO } from './tag.types';
 import { useSnackbar } from 'notistack';
 

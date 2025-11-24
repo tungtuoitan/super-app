@@ -24,8 +24,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { useTags, useWorkspaceTagTree } from './useTags';
-import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from './useWorkspace';
+import { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
+import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../../hooks/Tags/useWorkspace';
 import type { Tag } from './tag.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';

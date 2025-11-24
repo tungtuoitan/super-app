@@ -8,12 +8,12 @@ import { TagUIProvider } from '@/Components/Tags/TagUIContext';
 import { EditorTabProvider } from '@/Components/Editor';
 import { ContextMenuProvider, useContextMenu } from '@/shared/contexts';
 import { useTagUI } from '@/Components/Tags/TagUIContext';
-import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/Components/Tags/useTags';
+import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/hooks/Tags/useTags';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import { useCallback } from 'react';
 import { Tag } from '@/Components/Tags/tag.types';
-import {NoteUIProvider} from '@/Components/Notes/NoteUIContext';
+import {NoteUIProvider} from '@/contexts/NoteUIContext';
 
 // HARDCODED workspace ID for development
 // TODO: Get from context/route when workspace selection is implemented

@@ -6,7 +6,7 @@
 import { apiClient } from '@/lib/api-client';
 
 import type { Tag } from '@/Components/Tags/tag.types';
-import {CreateNoteDTO, GetNotesParams, Note, NoteDTO, NoteResponse, NotesResponse, UpdateNoteDTO} from './note.types';
+import {CreateNoteDTO, GetNotesParams, Note, NoteDTO, NoteResponse, NotesResponse, UpdateNoteDTO} from '../types/note.types';
 
 class NoteService {
     private readonly basePath = '/api/notes';

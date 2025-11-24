@@ -13,7 +13,7 @@ import { Badge } from '@/Components/ui/badge';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Button } from '@/Components/ui/button';
 import { Loader2 } from 'lucide-react';
-import {Note} from '@/Components/Notes/note.types';
+import {Note} from '@/types/note.types';
 
 // Internal types
 

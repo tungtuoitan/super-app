@@ -17,7 +17,7 @@ import { Input } from '@/Components/ui/input';
 import { Textarea } from '@/Components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { useTagUI } from './TagUIContext';
-import { useCreateTag } from './useTags';
+import { useCreateTag } from '../../hooks/Tags/useTags';
 import { useSnackbar } from 'notistack';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components/ui/GenericAutoComplete';
 import type { CreateTagDTO } from './tag.types';

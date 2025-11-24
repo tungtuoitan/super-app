@@ -16,9 +16,9 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
-import {useNoteUI} from '@/Components/Notes/NoteUIContext';
-import {useCreateNote, useUpdateNote} from '@/Components/Notes/useNotes';
-import {Note} from '@/Components/Notes/note.types';
+import {useNoteUI} from '@/contexts/NoteUIContext';
+import {useCreateNote, useUpdateNote} from '@/hooks/useNotes';
+import {Note} from '@/types/note.types';
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
 
 interface NoteEditorPanelProps {
@@ -47,7 +47,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
             
             if (isCreateMode) {
                 // Create new note - convert Note to CreateNoteDTO
-                const createData: import('@/Components/Notes/note.types').CreateNoteDTO = {
+                const createData: import('@/types/note.types').CreateNoteDTO = {
                     name: selectedNote.name,
                     description: selectedNote.description,
                     tags: selectedNote.tags?.map((tag:any) => tag.tagId),
@@ -61,7 +61,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                 enqueueSnackbar('Note created successfully', { variant: 'success' });
             } else {
                 // Update existing note - convert Note to UpdateNoteDTO
-                const updateData: import('@/Components/Notes/note.types').UpdateNoteDTO = {
+                const updateData: import('@/types/note.types').UpdateNoteDTO = {
                     name: selectedNote.name,
                     description: selectedNote.description,
                     tags: selectedNote.tags?.map((tag:any) => tag.tagId),

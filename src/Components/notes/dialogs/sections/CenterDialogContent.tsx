@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { Label } from '@/Components/ui/label';
 import { Textarea } from '@/Components/ui/textarea';
-import {useNoteUI} from '../../NoteUIContext';
+import {useNoteUI} from '../../../../contexts/NoteUIContext';
 
 /**
  * Center Dialog Content

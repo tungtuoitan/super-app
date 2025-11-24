@@ -15,10 +15,10 @@ import {
 } from '@/Components/ui/tooltip';
 import {useAuthStore} from '@/contexts/AuthContext';
 import {useSnackbar} from 'notistack';
-import {useNoteUI} from '../NoteUIContext';
-import {useCreateNote, useDeleteNote, useUpdateNote} from '../useNotes';
+import {useNoteUI} from '../../../contexts/NoteUIContext';
+import {useCreateNote, useDeleteNote, useUpdateNote} from '../../../hooks/useNotes';
 import {useConfirmationPopover} from '@/shared/hooks';
-import {CreateNoteDTO, UpdateNoteDTO} from '../note.types';
+import {CreateNoteDTO, UpdateNoteDTO} from '../../../types/note.types';
 import {ConfirmationPopover} from '@/shared/components';
 
 /**

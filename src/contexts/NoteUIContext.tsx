@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
-import {Note} from './note.types';
+import {Note} from '../types/note.types';
 
 interface DialogProps {
     open: boolean;

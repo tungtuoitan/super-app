@@ -16,7 +16,7 @@ import {
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import type { Tag } from '@/Components/Tags/tag.types';
-import {useNoteUI} from './NoteUIContext';
+import {useNoteUI} from '../../contexts/NoteUIContext';
 
 /**
  * NoteDialog component for displaying note details

@@ -12,8 +12,8 @@ import { Textarea } from '@/Components/ui/textarea';
 import { Badge } from '@/Components/ui/badge';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { FileText, Calendar, User, Tag as TagIcon, Info } from 'lucide-react';
-import {useNoteUI} from '../NoteUIContext';
-import {Note, NOTE_TYPES, NoteType} from '../note.types';
+import {useNoteUI} from '../../../contexts/NoteUIContext';
+import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
 
 /**
  * Note Detail Dialog Content

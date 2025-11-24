@@ -4,7 +4,7 @@ import { WorkspaceTree } from '@/Components/Tags/WorkspaceTree'
 import { NoteGridPanel } from '../NoteGridPanel'
 import { useEditorTabs } from '@/Components/Editor'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
-import {Note} from '@/Components/Notes/note.types'
+import {Note} from '@/types/note.types'
 
 interface VSSideBarProps {
   activeView: ActivityBarView

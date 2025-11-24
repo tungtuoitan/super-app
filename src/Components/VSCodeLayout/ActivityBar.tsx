@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/Components/ui/tooltip'
-import { SettingsDialog } from '@/Components/Dialogs/SettingsDialog'
+import {SettingsDialog} from './SettingsDialog'
 
 export type ActivityBarView = 'explorer' | 'tags' | 'notes'
 
@@ -56,7 +56,7 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
               )
             })}
           </TooltipProvider>
-        </div>
+        </div> 
 
         {/* Settings at bottom */}
         <div className="pb-1">

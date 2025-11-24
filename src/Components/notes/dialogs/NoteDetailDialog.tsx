@@ -9,7 +9,7 @@ import { Dialog, DialogContent } from '@/Components/ui/dialog';
 import { X, Loader2 } from 'lucide-react';
 import { NoteContentToolbar } from './NoteContentToolbar';
 import { NoteDetailDialogContent } from './NoteDetailDialogContent';
-import {useNoteUI} from '../NoteUIContext';
+import {useNoteUI} from '../../../contexts/NoteUIContext';
 
 
 
