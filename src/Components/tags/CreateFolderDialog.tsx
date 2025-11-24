@@ -26,9 +26,9 @@ import {
     SelectValue,
 } from '@/Components/ui/select';
 import { cn } from '@/lib/utils';
-import { useCreateTag } from '../hooks/useTags';
-import { useWorkspaceTagTree } from '../hooks/useTags';
-import type { CreateTagDTO } from '../types/tag.types';
+import { useCreateTag } from './useTags';
+import { useWorkspaceTagTree } from './useTags';
+import type { CreateTagDTO } from './tag.types';
 import { useSnackbar } from 'notistack';
 
 interface CreateFolderDialogProps {

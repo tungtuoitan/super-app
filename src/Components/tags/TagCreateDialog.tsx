@@ -16,11 +16,11 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Textarea } from '@/Components/ui/textarea';
 import { Loader2 } from 'lucide-react';
-import { useTagUI } from '../store/TagUIContext';
-import { useCreateTag } from '../hooks/useTags';
+import { useTagUI } from './TagUIContext';
+import { useCreateTag } from './useTags';
 import { useSnackbar } from 'notistack';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components/ui/GenericAutoComplete';
-import type { CreateTagDTO } from '../types/tag.types';
+import type { CreateTagDTO } from './tag.types';
 
 // Dummy data for icon options
 const ICON_OPTIONS: IAutoCompleteOptions[] = [

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from '@/shared/components';
-import { useTagsForAutocomplete } from '@/features/tags';
+import { useTagsForAutocomplete } from '@/Components/tags';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Textarea } from '@/Components/ui/textarea';
 import { Badge } from '@/Components/ui/badge';

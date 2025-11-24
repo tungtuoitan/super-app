@@ -4,11 +4,11 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { workspaceService } from '../services/workspaceService';
+import { workspaceService } from './workspaceService';
 import type { 
     AddItemToWorkspaceRequest,
     UpdateWorkspaceItemRequest
-} from '../types/workspace.types';
+} from './workspace.types';
 import { tagKeys } from './useTags';
 
 /**

@@ -5,7 +5,7 @@
  */
 
 import { createContext, useContext, useState, useCallback } from 'react';
-import type { Tag, TagLayoutType } from '../types/tag.types';
+import type { Tag, TagLayoutType } from './tag.types';
 
 interface TagUIContextValue {
     // Selected tag state

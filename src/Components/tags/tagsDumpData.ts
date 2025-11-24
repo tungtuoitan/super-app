@@ -3,7 +3,7 @@
  * Hierarchical structure with multiple levels
  */
 
-import type { Tag } from '../types/tag.types';
+import type { Tag } from './tag.types';
 
 export const tagsDumpData: Tag[] = [
     // Root Level - Programming Languages

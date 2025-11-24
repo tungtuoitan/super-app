@@ -24,12 +24,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { useTags, useWorkspaceTagTree } from '../hooks/useTags';
-import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../hooks/useWorkspace';
-import type { Tag } from '../types/tag.types';
+import { useTags, useWorkspaceTagTree } from './useTags';
+import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from './useWorkspace';
+import type { Tag } from './tag.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import { useTagUI } from '../store/TagUIContext';
+import { useTagUI } from './TagUIContext';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)

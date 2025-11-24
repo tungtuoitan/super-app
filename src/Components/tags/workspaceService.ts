@@ -9,7 +9,7 @@ import type {
     WorkspaceItemResponse,
     UpdateWorkspaceItemRequest,
     UpdateWorkspaceItemResponse
-} from '../types/workspace.types';
+} from './workspace.types';
 
 class WorkspaceService {
     private readonly basePath = '/api/workspace';

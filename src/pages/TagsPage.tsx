@@ -1,15 +1,7 @@
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
-import { WorkspaceTree } from '../features/tags/components/WorkspaceTree';
-import { TagAdd } from '../features/tags/components/toolbars/items/TagAdd';
-import { TagSearch } from '../features/tags/components/toolbars/items/TagSearch';
-import { TagFilter } from '../features/tags/components/toolbars/items/TagFilter';
-import { TagDeleteSelected } from '../features/tags/components/toolbars/items/TagDeleteSelected';
+import { WorkspaceTree, useTagUI, TagCreateDialog, AddTagDialog } from '@/Components/tags';
 import { Grow } from '@/shared/components/styles/commonStyles';
-import { useTagUI } from '../features/tags/store/TagUIContext';
-import { useCallback } from 'react';
-import { Tag } from '../features/tags/types/tag.types';
-import { TagLayoutSelector, TagCreateDialog, AddTagDialog } from '@/features/tags';
 
 /**
  * Tags page with proper error boundary
@@ -42,12 +34,7 @@ function TagsPageContent() {
             {/* Toolbar with fixed height */}
             <div className="shrink-0">
                 <ToolbarContainer>
-                    <TagAdd />
                     <Grow />
-                    <TagSearch />
-                    <TagDeleteSelected />
-                    <TagLayoutSelector />
-                    <TagFilter />
                 </ToolbarContainer>
             </div>
 

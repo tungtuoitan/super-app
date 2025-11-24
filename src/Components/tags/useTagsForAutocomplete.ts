@@ -5,7 +5,7 @@
 import { useMemo } from 'react';
 import { useTags } from './useTags';
 import type { IAutoCompleteOptions } from '@/shared/components/ui/GenericAutoComplete';
-import type { GetTagsParams } from '../types/tag.types';
+import type { GetTagsParams } from './tag.types';
 
 /**
  * Hook that fetches tags from API and transforms them to IAutoCompleteOptions format
