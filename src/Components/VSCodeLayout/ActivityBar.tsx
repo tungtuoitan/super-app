@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/Components/ui/tooltip'
-import { SettingsDialog } from '@/Components/dialogs/SettingsDialog'
+import { SettingsDialog } from '@/Components/Dialogs/SettingsDialog'
 
 export type ActivityBarView = 'explorer' | 'tags' | 'notes'
 

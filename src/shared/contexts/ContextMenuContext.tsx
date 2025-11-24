@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
-import { useTagUI } from '@/Components/tags/TagUIContext';
-import { EditWorkspaceItemDialog } from '@/Components/tags/EditWorkspaceItemDialog';
+import { useTagUI } from '@/Components/Tags/TagUIContext';
+import { EditWorkspaceItemDialog } from '@/Components/Tags/EditWorkspaceItemDialog';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
 

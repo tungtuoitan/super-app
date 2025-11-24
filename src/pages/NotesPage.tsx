@@ -6,14 +6,14 @@
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { GridContainer } from '@/shared/components/ui/GridContainer';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
-import {useEditorTabs} from '@/Components/editor';
-import {NoteCreate} from '@/Components/notes/toolbars/items/NoteCreate';
+import {useEditorTabs} from '@/Components/Editor';
+import {NoteCreate} from '@/Components/Notes/toolbars/items/NoteCreate';
 import {Grow} from '@/shared/components/styles/commonStyles';
-import {NoteSearch} from '@/Components/notes/toolbars/items/NoteSearch';
-import {NoteDeleteSelected} from '@/Components/notes/toolbars/items/NoteDeleteSelected';
-import {NoteFilter} from '@/Components/notes/toolbars/items/NoteFilter';
-import {NoteGrid} from '@/Components/notes/NoteGrid';
-import {NoteDetailDialog} from '@/Components/notes/dialogs/NoteDetailDialog';
+import {NoteSearch} from '@/Components/Notes/toolbars/items/NoteSearch';
+import {NoteDeleteSelected} from '@/Components/Notes/toolbars/items/NoteDeleteSelected';
+import {NoteFilter} from '@/Components/Notes/toolbars/items/NoteFilter';
+import {NoteGrid} from '@/Components/Notes/NoteGrid';
+import {NoteDetailDialog} from '@/Components/Notes/dialogs/NoteDetailDialog';
 
 /**
  * Notes page with proper error boundary

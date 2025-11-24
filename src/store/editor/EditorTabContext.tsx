@@ -6,7 +6,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { EditorTab, NoteTab } from '../../types/editor/tab.types';
-import {Note} from '@/Components/notes/note.types';
+import {Note} from '@/Components/Notes/note.types';
 
 interface EditorTabContextValue {
     // Tab state

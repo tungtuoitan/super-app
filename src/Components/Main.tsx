@@ -4,16 +4,16 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { TagUIProvider } from '@/Components/tags/TagUIContext';
-import { EditorTabProvider } from '@/Components/editor';
+import { TagUIProvider } from '@/Components/Tags/TagUIContext';
+import { EditorTabProvider } from '@/Components/Editor';
 import { ContextMenuProvider, useContextMenu } from '@/shared/contexts';
-import { useTagUI } from '@/Components/tags/TagUIContext';
-import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/Components/tags/useTags';
+import { useTagUI } from '@/Components/Tags/TagUIContext';
+import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/Components/Tags/useTags';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import { useCallback } from 'react';
-import { Tag } from '@/Components/tags/tag.types';
-import {NoteUIProvider} from '@/Components/notes/NoteUIContext';
+import { Tag } from '@/Components/Tags/tag.types';
+import {NoteUIProvider} from '@/Components/Notes/NoteUIContext';
 
 // HARDCODED workspace ID for development
 // TODO: Get from context/route when workspace selection is implemented

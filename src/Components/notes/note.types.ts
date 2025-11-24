@@ -3,7 +3,7 @@
  * Domain models and DTOs for the notes feature
  */
 
-import type { Tag } from '@/Components/tags/tag.types';
+import type { Tag } from '@/Components/Tags/tag.types';
 
 // Note types
 export type NoteType = 'meeting' | 'brainstorm' | 'research' | 'bug' | 'task' | 'idea';
