@@ -10,8 +10,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Comp
 import { useSnackbar } from 'notistack';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
-import {useDeleteNotes} from '../../../../hooks/useNotes';
-import {useNoteUI} from '../../../../contexts/NoteUIContext';
+import {useDeleteNotes} from '../../../hooks/useNotes';
+import {useNoteUI} from '../../../contexts/NoteUIContext';
 
 /**
  * Delete selected notes button

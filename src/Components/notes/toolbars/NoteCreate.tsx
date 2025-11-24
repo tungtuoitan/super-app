@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
-import {useNoteUI} from '../../../../contexts/NoteUIContext';
-import {Note} from '../../../../types/note.types';
+import {useNoteUI} from '../../../contexts/NoteUIContext';
+import {Note} from '../../../types/note.types';
 
 /**
  * Note Create toolbar component

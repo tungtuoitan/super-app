@@ -4,14 +4,13 @@
  */
 
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
-import { GridContainer } from '@/shared/components/ui/GridContainer';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
 import {useEditorTabs} from '@/Components/Editor';
-import {NoteCreate} from '@/Components/Notes/toolbars/items/NoteCreate';
+import {NoteCreate} from '@/components/Notes/toolbars/NoteCreate';
 import {Grow} from '@/shared/components/styles/commonStyles';
-import {NoteSearch} from '@/Components/Notes/toolbars/items/NoteSearch';
-import {NoteDeleteSelected} from '@/Components/Notes/toolbars/items/NoteDeleteSelected';
-import {NoteFilter} from '@/Components/Notes/toolbars/items/NoteFilter';
+import {NoteSearch} from '@/components/Notes/toolbars/NoteSearch';
+import {NoteDeleteSelected} from '@/components/Notes/toolbars/NoteDeleteSelected';
+import {NoteFilter} from '@/components/Notes/toolbars/NoteFilter';
 import {NoteGrid} from '@/Components/Notes/NoteGrid';
 import {NoteDetailDialog} from '@/Components/Notes/dialogs/NoteDetailDialog';
 
