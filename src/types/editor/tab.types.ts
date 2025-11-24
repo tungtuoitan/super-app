@@ -3,7 +3,7 @@
  * Supports multiple tab types: Note, Tag, etc.
  */
 
-import {Note} from "@/features/notes/note.types";
+import {Note} from "@/Components/notes/note.types";
 
 
 export type TabType = 'note' | 'tag' | 'settings';

@@ -11,9 +11,9 @@ import {
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
-import {useNotes} from '@/features/notes/useNotes';
-import {Note} from '@/features/notes/note.types';
-import {useNoteUI} from '@/features/notes/NoteUIContext';
+import {useNotes} from '@/Components/notes/useNotes';
+import {Note} from '@/Components/notes/note.types';
+import {useNoteUI} from '@/Components/notes/NoteUIContext';
 
 // Import hooks and services from notes feature
 

@@ -7,13 +7,13 @@ import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { GridContainer } from '@/shared/components/ui/GridContainer';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
 import {useEditorTabs} from '@/Components/editor';
-import {NoteCreate} from '@/features/notes/toolbars/items/NoteCreate';
+import {NoteCreate} from '@/Components/notes/toolbars/items/NoteCreate';
 import {Grow} from '@/shared/components/styles/commonStyles';
-import {NoteSearch} from '@/features/notes/toolbars/items/NoteSearch';
-import {NoteDeleteSelected} from '@/features/notes/toolbars/items/NoteDeleteSelected';
-import {NoteFilter} from '@/features/notes/toolbars/items/NoteFilter';
-import {NoteGrid} from '@/features/notes/NoteGrid';
-import {NoteDetailDialog} from '@/features/notes/dialogs/NoteDetailDialog';
+import {NoteSearch} from '@/Components/notes/toolbars/items/NoteSearch';
+import {NoteDeleteSelected} from '@/Components/notes/toolbars/items/NoteDeleteSelected';
+import {NoteFilter} from '@/Components/notes/toolbars/items/NoteFilter';
+import {NoteGrid} from '@/Components/notes/NoteGrid';
+import {NoteDetailDialog} from '@/Components/notes/dialogs/NoteDetailDialog';
 
 /**
  * Notes page with proper error boundary
