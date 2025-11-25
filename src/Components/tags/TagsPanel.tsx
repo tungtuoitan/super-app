@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { tagService } from '@/Components/Tags/tagService';
+import { tagService } from '@/services/tagService';
 import { Badge } from '@/Components/ui/badge';
 import { cn } from '@/lib/utils';
 

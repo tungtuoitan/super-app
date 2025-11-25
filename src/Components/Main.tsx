@@ -4,15 +4,15 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { TagUIProvider } from '@/Components/Tags/TagUIContext';
+import { TagUIProvider } from '@/contexts/TagUIContext';
 import { EditorTabProvider } from '@/Components/Editor';
 import { ContextMenuProvider, useContextMenu } from '@/shared/contexts';
-import { useTagUI } from '@/Components/Tags/TagUIContext';
+import { useTagUI } from '@/contexts/TagUIContext';
 import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/hooks/Tags/useTags';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import { useCallback } from 'react';
-import { Tag } from '@/Components/Tags/tag.types';
+import { Tag } from '@/types/tag.types';
 import {NoteUIProvider} from '@/contexts/NoteUIContext';
 
 // HARDCODED workspace ID for development

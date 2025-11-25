@@ -6,14 +6,14 @@ export { TagCreateDialog } from './TagCreateDialog';
 export { AddTagDialog } from './AddTagDialog';
 
 // Context & Hooks
-export { TagUIProvider, useTagUI } from './TagUIContext';
+export { TagUIProvider, useTagUI } from '../../contexts/TagUIContext';
 
 // Hooks
 export { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
 export { useTagsForAutocomplete } from '../../hooks/Tags/useTagsForAutocomplete';
 
 // Service
-export { tagService } from './tagService';
+export { tagService } from '../../services/tagService';
 
 // Types
 export type { 
@@ -22,4 +22,4 @@ export type {
     CreateTagDTO, 
     UpdateTagDTO, 
     GetTagsParams
-} from './tag.types';
+} from '../../types/tag.types';

@@ -8,7 +8,7 @@ import { workspaceService } from '../../services/workspaceService';
 import type { 
     AddItemToWorkspaceRequest,
     UpdateWorkspaceItemRequest
-} from '../../Components/Tags/workspace.types';
+} from '../../types/workspace.types';
 import { tagKeys } from './useTags';
 
 /**

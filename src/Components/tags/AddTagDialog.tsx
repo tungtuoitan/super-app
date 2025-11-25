@@ -26,10 +26,10 @@ import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
 import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../../hooks/Tags/useWorkspace';
-import type { Tag } from './tag.types';
+import type { Tag } from '../../types/tag.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import { useTagUI } from './TagUIContext';
+import { useTagUI } from '../../contexts/TagUIContext';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)

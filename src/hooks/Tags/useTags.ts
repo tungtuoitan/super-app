@@ -4,13 +4,13 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { tagService } from '../../Components/Tags/tagService';
+import { tagService } from '../../services/tagService';
 import type { 
     Tag, 
     CreateTagDTO, 
     UpdateTagDTO, 
     GetTagsParams 
-} from '../../Components/Tags/tag.types';
+} from '../../types/tag.types';
 
 // Query Keys
 export const tagKeys = {

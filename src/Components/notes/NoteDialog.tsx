@@ -15,7 +15,7 @@ import {
 } from '@/Components/ui/dialog';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
-import type { Tag } from '@/Components/Tags/tag.types';
+import type { Tag } from '@/types/tag.types';
 import {useNoteUI} from '../../contexts/NoteUIContext';
 
 /**
