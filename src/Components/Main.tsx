@@ -13,7 +13,7 @@ import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import { useCallback } from 'react';
 import { Tag } from '@/types/tag.types';
-import {NoteUIProvider} from '@/contexts/NoteUIContext';
+import {NoteUIProvider} from '@/store/note/useNoteUIStore';
 
 // HARDCODED workspace ID for development
 // TODO: Get from context/route when workspace selection is implemented

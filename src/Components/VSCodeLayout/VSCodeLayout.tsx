@@ -3,9 +3,9 @@ import { Panel, PanelGroup } from 'react-resizable-panels'
 import { ActivityBar, type ActivityBarView } from './ActivityBar'
 import { VSCodeResizeHandle } from './VSCodeResizeHandle'
 import { VSSideBar } from './VSSideBar'
-import { VSEditorArea } from './NotesLayout/VSEditorArea'
 import { VSPanel } from './VSPanel'
 import { StatusBar } from './StatusBar' 
+import {VSEditorArea} from './VSEditorArea'
 
 interface VSCodeLayoutProps {
   className?: string

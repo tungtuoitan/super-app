@@ -12,8 +12,9 @@ import { Textarea } from '@/Components/ui/textarea';
 import { Badge } from '@/Components/ui/badge';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { FileText, Calendar, User, Tag as TagIcon, Info } from 'lucide-react';
-import {useNoteUI} from '../../../contexts/NoteUIContext';
+import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 /**
  * Note Detail Dialog Content
@@ -23,7 +24,8 @@ import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
  * - Right: Actions/metadata
  */
 export function NoteDetailDialogContent() {
-    const { selectedNote, isDialogOpen, closeDialog, updateSelectedNote } = useNoteUI();
+    const { selectedNote, isDialogOpen } = useNoteUIStore();
+    const { closeDialog, updateSelectedNote } = useNoteUIHelper();
     const [loading, setLoading] = React.useState(false);
     
     // ✅ FIX: Log when selectedNote changes to verify updates
@@ -141,22 +143,25 @@ export function NoteDetailDialogContent() {
     
     return (
         <ScrollArea className="h-full w-full bg-background">
-            <div key={noteKey} className="p-6 space-y-6 h-full">
-                {/* Header with Note Name */}
-                <div className="border-b border-editor-border pb-4">
-                    <div className="flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <Badge variant={selectedNote?.isArchived ? "secondary" : "default"} className="text-xs">
-                                    {selectedNote?.isArchived ? 'Archived' : 'Active'}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                    ID: {selectedNote?.noteId || '0'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+            <div key={noteKey} className="p-6 space-y-6 h-full ">
+                {/* Full Width - Description */}
+                <div className="border-none">
+                    <CardHeader className="p-0 pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-primary" />
+                            Description
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <Textarea
+                            value={selectedNote?.description || ''}
+                            onChange={(e) => handleFieldChange('description', e.target.value)}
+                            placeholder="Enter note description..."
+                            className="min-h-[400px] resize-none font-mono text-sm"
+                        />
+                    </CardContent>
                 </div>
+                
 
                 {/* Two Column Layout - Details and Metadata */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -168,7 +173,7 @@ export function NoteDetailDialogContent() {
                                 Note Details
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0 space-y-4">
+                        <CardContent className="p-0 space-y-2">
                             {/* Note Name */}
                             <GenericTextField
                                 label="Note Name"
@@ -255,23 +260,7 @@ export function NoteDetailDialogContent() {
                     </div>
                 </div>
 
-                {/* Full Width - Description */}
-                <div className="border-none">
-                    <CardHeader className="p-0 pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-primary" />
-                            Description
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <Textarea
-                            value={selectedNote?.description || ''}
-                            onChange={(e) => handleFieldChange('description', e.target.value)}
-                            placeholder="Enter note description..."
-                            className="min-h-[200px] resize-none font-mono text-sm"
-                        />
-                    </CardContent>
-                </div>
+                
             </div>
         </ScrollArea>
     );

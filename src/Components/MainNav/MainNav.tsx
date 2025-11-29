@@ -26,13 +26,14 @@ function MainNav() {
         <div
             className="outline-none"
             tabIndex={0} // Enable keyboard navigation
+            style={{ height: '100%', width: '100vw' }}
         >
             <TopNav />
-            <div className="side-tabs">
+            <div className="side-tabs height-[calc(100%-36px)]">
                 <div 
                     id="bodyWrapper"
                     ref={bodyWrapperRef}
-                    className="w-full h-[calc(100vh-64px)]"
+                    className="w-full h-[calc(100vh-36px)]"
                 >
                     <Routes>
                         <Route path="/" element={<VSCodeLayout />} />

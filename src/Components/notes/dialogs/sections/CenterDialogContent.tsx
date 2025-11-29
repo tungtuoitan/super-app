@@ -7,14 +7,14 @@
 import React, { useState } from 'react';
 import { Label } from '@/Components/ui/label';
 import { Textarea } from '@/Components/ui/textarea';
-import {useNoteUI} from '../../../../contexts/NoteUIContext';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 /**
  * Center Dialog Content
  * Main content area for note editing
  */
 export function CenterDialogContent() {
-    const { selectedNote } = useNoteUI();
+    const { selectedNote } = useNoteUIStore();
     const [content, setContent] = useState(selectedNote?.description || '');
 
     const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {

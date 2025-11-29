@@ -11,7 +11,7 @@ import { useSnackbar } from 'notistack';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import {useDeleteNotes} from '../../../hooks/useNotes';
-import {useNoteUI} from '../../../contexts/NoteUIContext';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 /**
  * Delete selected notes button
@@ -19,7 +19,7 @@ import {useNoteUI} from '../../../contexts/NoteUIContext';
  * Uses confirmation popover before deletion
  */
 export function NoteDeleteSelected() {
-    const { selectedRowIds, setSelectedRowIds } = useNoteUI();
+    const { selectedRowIds, setSelectedRowIds } = useNoteUIStore();
     const deleteNotes = useDeleteNotes();
     const { enqueueSnackbar } = useSnackbar();
 

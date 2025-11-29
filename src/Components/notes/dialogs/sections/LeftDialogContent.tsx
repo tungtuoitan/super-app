@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
-import {useNoteUI} from '../../../../contexts/NoteUIContext';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 const NOTE_TYPES = ['meeting', 'brainstorm', 'research', 'bug'] as const;
 
@@ -16,7 +16,7 @@ const NOTE_TYPES = ['meeting', 'brainstorm', 'research', 'bug'] as const;
  * Form fields for note editing
  */
 export function LeftDialogContent() {
-    const { selectedNote } = useNoteUI();
+    const { selectedNote } = useNoteUIStore();
     const [formData, setFormData] = useState({
         name: selectedNote?.name || '',
         description: selectedNote?.description || '',

@@ -5,14 +5,13 @@
 
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
-import {useEditorTabs} from '@/Components/Editor';
+import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
 import {NoteCreate} from '@/components/Notes/toolbars/NoteCreate';
 import {Grow} from '@/shared/components/styles/commonStyles';
 import {NoteSearch} from '@/components/Notes/toolbars/NoteSearch';
 import {NoteDeleteSelected} from '@/components/Notes/toolbars/NoteDeleteSelected';
 import {NoteFilter} from '@/components/Notes/toolbars/NoteFilter';
 import {NoteGrid} from '@/Components/Notes/NoteGrid';
-import {NoteDetailDialog} from '@/Components/Notes/dialogs/NoteDetailDialog';
 
 /**
  * Notes page with proper error boundary
@@ -37,7 +36,7 @@ export function NotesPage() {
 function NotesPageContent() {
     
     // ✅ Open note in editor tab instead of dialog
-    const { openNoteTab } = useEditorTabs();
+    const { openNoteTab } = useEditorTabHelper();
 
     
     return (
@@ -56,7 +55,7 @@ function NotesPageContent() {
             {/* Note Grid Container that takes remaining height */}
             <div className="flex-1 mt-5 ml-5 h-[calc(100%-64px-20px)] overflow-auto flex flex-col bg-background">
                 <NoteGrid onNoteClick={openNoteTab} />
-                <NoteDetailDialog />
+                {/* <NoteDetailDialog /> */}
             </div>
         </div>
     );

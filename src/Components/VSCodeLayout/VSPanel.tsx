@@ -1,4 +1,4 @@
-import {useNoteUI} from '@/contexts/NoteUIContext'
+import {useNoteUIStore} from '@/store/note/useNoteUIStore'
 import { X, FileText, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Panel } from 'react-resizable-panels'
@@ -89,7 +89,7 @@ export function VSPanel({ isVisible, onClose, onCollapse, onExpand }: VSPanelPro
  * Note Detail Tab - Display selected note details
  */
 function NoteDetailTab() {
-  const { selectedNote } = useNoteUI()
+  const { selectedNote } = useNoteUIStore()
 
   if (!selectedNote) {
     return (
@@ -129,7 +129,7 @@ function NoteDetailTab() {
  * Properties Tab - Display note properties
  */
 function PropertiesTab() {
-  const { selectedNote } = useNoteUI()
+  const { selectedNote } = useNoteUIStore()
 
   if (!selectedNote) {
     return (

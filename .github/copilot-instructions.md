@@ -121,9 +121,9 @@ export function NoteUIProvider({ children }) {
     );
 }
 
-export function useNoteUI() {
+export function useNoteUIStore() {
     const ctx = useContext(NoteUIContext);
-    if (!ctx) throw new Error('useNoteUI requires NoteUIProvider');
+    if (!ctx) throw new Error('useNoteUIStore requires NoteUIProvider');
     return ctx;
 }
 ```

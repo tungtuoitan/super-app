@@ -11,3 +11,9 @@ export type { DialogContextData } from './dialog/DialogStore';
 
 export { ApiStore, ApiProvider, useApiStore } from './api/ApiStore';
 export type { ApiContextData } from './api/ApiStore';
+
+export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from './editor/EditorTabStore';
+export type { EditorTabContextData } from './editor/EditorTabStore';
+
+export { NoteTabStore, NoteTabProvider, useNoteTabStore } from './note/useNoteTabStore';
+export type { NoteTabContextData, TabItem } from './note/useNoteTabStore';

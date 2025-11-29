@@ -16,15 +16,17 @@ import {
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import type { Tag } from '@/types/tag.types';
-import {useNoteUI} from '../../contexts/NoteUIContext';
+import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 /**
  * NoteDialog component for displaying note details
  * Uses the NoteUI context to manage dialog state
  */
 export function NoteDialog() {
-    const { selectedNote, isDialogOpen, closeDialog } = useNoteUI();
-
+    const { selectedNote, isDialogOpen } = useNoteUIStore();
+    const { closeDialog } = useNoteUIHelper();
+    
     if (!selectedNote) {
         return null;
     }

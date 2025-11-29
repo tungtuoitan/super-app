@@ -2,7 +2,7 @@ import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '@/Components/VSCodeLayout/ActivityBar'
 import { WorkspaceTree } from '@/Components/Tags/WorkspaceTree'
 import { NoteGridPanel } from '../Notes/NoteGridPanel'
-import { useEditorTabs } from '@/Components/Editor'
+import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
 
@@ -111,7 +111,7 @@ function TagsView() {
  * Shows compact sidebar view with only name column
  */
 function NotesView() {
-  const { openNoteTab } = useEditorTabs()
+  const { openNoteTab } = useEditorTabHelper()
 
   const handleNoteClick = (note: Note) => {
     console.log('🎯 VSSideBar - Note clicked:', note)

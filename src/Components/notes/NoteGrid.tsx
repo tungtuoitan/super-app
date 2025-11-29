@@ -21,7 +21,7 @@ import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Checkbox } from '@/Components/ui/checkbox';
 import {Note} from '../../types/note.types';
 import {useNotes} from '../../hooks/useNotes';
-import {useNoteUI} from '../../contexts/NoteUIContext';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 interface NoteGridProps {
     onNoteClick?: (note: Note) => void;
@@ -39,7 +39,7 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
     const { data: notes, isLoading, error } = useNotes();
 
     // ✅ Get row selection state from context
-    const { selectedRowIds, setSelectedRowIds } = useNoteUI();
+    const { selectedRowIds, setSelectedRowIds } = useNoteUIStore();
 
     // Table state
     const [sorting, setSorting] = useState<SortingState>([]);

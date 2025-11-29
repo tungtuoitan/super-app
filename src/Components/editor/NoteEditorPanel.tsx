@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { Save, X, RotateCcw } from 'lucide-react';
-import { useEditorTabs } from '@/store/editor/EditorTabContext';
 import { useSnackbar } from 'notistack';
 import type { NoteTab } from '@/types/editor/tab.types';
 import { Button } from '@/Components/ui/button';
@@ -16,18 +15,22 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
-import {useNoteUI} from '@/contexts/NoteUIContext';
 import {useCreateNote, useUpdateNote} from '@/hooks/useNotes';
 import {Note} from '@/types/note.types';
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
+import {Badge} from '../ui/badge';
+import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
+import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 interface NoteEditorPanelProps {
     tab: NoteTab;
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { selectedNote, updateSelectedNote, markAsSaved, resetChanges, hasUnsavedChanges, setSelectedNote } = useNoteUI();
-    const { markTabAsChanged, updateTabNote } = useEditorTabs();
+    const { selectedNote, hasUnsavedChanges } = useNoteUIStore();
+    const { updateSelectedNote, markAsSaved, resetChanges, setSelectedNote } = useNoteUIHelper();
+    const { markTabAsChanged, updateTabNote } = useEditorTabHelper();
     const updateNoteMutation = useUpdateNote();
     const createNoteMutation = useCreateNote();
     const { enqueueSnackbar } = useSnackbar();
@@ -123,7 +126,19 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     return (
         <div className="w-full h-full flex flex-col overflow-hidden bg-[#f6f6f6]">
             {/* Toolbar */}
-            <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
+            <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2 bblue">
+                    <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                    {selectedNote?.isArchived ? 'Archived' : 'Active'}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    ID: {selectedNote?.noteId || '0'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
                 <TooltipProvider>
                     <div className="flex gap-1">

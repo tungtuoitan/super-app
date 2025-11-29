@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
-import {useNoteUI} from '../../../contexts/NoteUIContext';
+import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {Note} from '../../../types/note.types';
 
 /**
@@ -8,7 +8,7 @@ import {Note} from '../../../types/note.types';
  * Matches the exact UI pattern from ITRequestCreate
  */
 export const NoteCreate = () => {
-    const { openDialog } = useNoteUI();
+    const { openDialog } = useNoteUIHelper();
 
     const handleCreateNote = () => {
         // Create a new note object with id = 0 for create mode

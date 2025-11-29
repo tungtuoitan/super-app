@@ -7,60 +7,60 @@ export function StatusBar() {
       <div className="flex items-center gap-4">
         {/* Git branch */}
         <div className="flex items-center gap-1 cursor-pointer px-1 hover:bg-black/20 transition-colors">
-          <GitBranch className="w-3.5 h-3.5" />
-          <span>master-dev</span>
+          {/* <GitBranch className="w-3.5 h-3.5" />
+          <span>master-dev</span> */}
         </div>
 
         {/* Sync status */}
         <div className="flex items-center gap-1 cursor-pointer px-1 hover:bg-black/20 transition-colors">
-          <span>↓0</span>
-          <span>↑0</span>
+          {/* <span>↓0</span>
+          <span>↑0</span> */}
         </div>
 
         {/* Errors and warnings */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
+          {/* <div className="flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5" />
             <span>1</span>
           </div>
           <div className="flex items-center gap-1">
             <AlertTriangle className="w-3.5 h-3.5" />
             <span>1</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-4">
         {/* Line/Column */}
-        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
+        {/* <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           Ln 45, Col 12
-        </div>
+        </div> */}
 
         {/* Spaces */}
-        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
+        {/* <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           Spaces: 2
-        </div>
+        </div> */}
 
         {/* Encoding */}
-        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
+        {/* <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           UTF-8
-        </div>
+        </div> */}
 
         {/* Line ending */}
-        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
+        {/* <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           CRLF
-        </div>
+        </div> */}
 
         {/* Language */}
-        <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
+        {/* <div className="cursor-pointer px-1 hover:bg-black/20 transition-colors">
           TypeScript React
-        </div>
+        </div> */}
 
         {/* Notifications */}
-        <div className="cursor-pointer px-1 flex items-center hover:bg-black/20 transition-colors">
+        {/* <div className="cursor-pointer px-1 flex items-center hover:bg-black/20 transition-colors">
           <Bell className="w-3.5 h-3.5" />
-        </div>
+        </div> */}
       </div>
     </div>
   )

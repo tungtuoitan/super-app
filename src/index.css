@@ -100,3 +100,17 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* Debug border utilities - outside of @layer to ensure they apply */
+.bred {
+  border: 1px solid red !important;
+}
+.bgreen {
+  border: 1px solid green !important;
+}
+.bblue {
+  border: 1px solid blue !important;
+}
+.byellow {
+  border: 1px solid yellow !important;
+}

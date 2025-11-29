@@ -1,7 +1,8 @@
 import React from 'react'
 import { X } from 'lucide-react'
-import { useEditorTabs, NoteEditorPanel, ConfirmCloseDialog } from '@/Components/Editor'
-import {useNoteUI} from '@/contexts/NoteUIContext'
+import { useEditorTabsStore, NoteEditorPanel, ConfirmCloseDialog } from '@/Components/Editor'
+import {useEditorTabHelper} from '@/hooks/useEditorTabHelper'
+import {useNoteUIStore} from '@/store/note/useNoteUIStore'
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -11,8 +12,9 @@ import {useNoteUI} from '@/contexts/NoteUIContext'
  * - Welcome/empty state when no note is selected
  */
 export function VSEditorArea() {
-  const { openTabs, activeTabId, setActiveTab, closeTab, confirmCloseTabId, setConfirmCloseTabId, getTabById } = useEditorTabs()
-  const { selectedNote, setSelectedNote } = useNoteUI()
+  const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
+  const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
+  const { selectedNote, setSelectedNote } = useNoteUIStore()
 
   const handleCloseTab = (event: React.MouseEvent, tabId: string) => {
     event.stopPropagation()
@@ -34,34 +36,36 @@ export function VSEditorArea() {
   const activeTab = activeTabId ? getTabById(activeTabId) : null
 
   // Sync selectedNote when active tab changes
-  React.useEffect(() => {
-    if (activeTab?.type === 'note') {
-      setSelectedNote(activeTab.note)
-    } else {
-      setSelectedNote(null)
-    }
-  }, [activeTab, setSelectedNote])
+//   React.useEffect(() => {
+//     if (activeTab?.type === 'note') {
+//       setSelectedNote(activeTab.note)
+//     } else {
+//       setSelectedNote(null)
+//     }
+//   }, [activeTab, setSelectedNote])
 
   return (
     <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
       {/* Tab bar */}
-      <div className="h-[35px] flex items-center border-b border-editor-border bg-editor-sidebar overflow-hidden">
+      <div className="min-h-[35px] flex items-start border-b border-editor-border bg-editor-sidebar">
         {openTabs.length > 0 ? (
-          <div className="flex-1 flex items-center overflow-x-auto">
+          <div className="flex-1 flex flex-wrap">
             {openTabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleSetActiveTab(tab.id)}
                 className={`
-                  min-h-[35px] h-[35px] px-3 flex items-center gap-2
-                  border-r border-editor-border min-w-max
+                  h-[35px] px-3 flex items-center gap-2
+                  border-r border-b border-editor-border
                   ${activeTabId === tab.id
-                    ? 'bg-editor-bg text-editor-fg'
-                    : 'bg-transparent text-muted-foreground hover:bg-editor-hover'
+                    ? 'bg-editor-bg text-editor-fg border-b-transparent border-t-2 border-t-blue-500'
+                    : 'bg-transparent text-muted-foreground hover:bg-editor-hover border-t border-t-transparent'
                   }
                 `}
               >
-                <span className={`text-[13px] ${activeTabId === tab.id ? 'font-medium' : 'font-normal'}`}>
+                  {/* ${activeTabId === tab.id ? 'font-medium' : 'font-normal'} */}
+                <span className={`text-[13px] whitespace-nowrap 
+                    `}>
                   {tab.title}
                   {tab.hasUnsavedChanges && ' ●'}
                 </span>
@@ -75,7 +79,7 @@ export function VSEditorArea() {
             ))}
           </div>
         ) : (
-          <div className="px-4 w-full">
+          <div className="px-4 w-full h-[35px] flex items-center">
             <p className="text-[13px] text-muted-foreground/70 italic">
               No tabs open
             </p>

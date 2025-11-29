@@ -13,7 +13,7 @@ import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import {useNotes} from '@/hooks/useNotes';
 import {Note} from '@/types/note.types';
-import {useNoteUI} from '@/contexts/NoteUIContext';
+import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
 
 // Import hooks and services from notes feature
 
@@ -35,7 +35,7 @@ export function NoteGridPanel({
     const { data: notes, isLoading, error } = useNotes();
     
     // Get UI state for interactions (fallback)
-    const { openDialog } = useNoteUI();
+    const { openDialog } = useNoteUIHelper();
 
     // State for table
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -70,7 +70,7 @@ export function NoteGridPanel({
                     accessorKey: 'name',
                     header: 'Name',
                     cell: ({ getValue }) => (
-                        <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+                        <span className="text-sm text-primary cursor-pointer text-left">
                             {(getValue() as string) || '—'}
                         </span>
                     ),
@@ -95,7 +95,7 @@ export function NoteGridPanel({
                 header: 'Name',
                 size: 250,
                 cell: ({ getValue }) => (
-                    <span className="text-sm text-primary font-medium cursor-pointer hover:underline">
+                    <span className="text-sm text-primary font-medium cursor-pointer text-left">
                         {(getValue() as string) || '—'}
                     </span>
                 ),
@@ -275,7 +275,7 @@ export function NoteGridPanel({
                                 onClick={() => handleRowClick(row.original)}
                             >
                                 {row.getVisibleCells().map(cell => (
-                                    <td key={cell.id} className="px-4 align-middle">
+                                    <td key={cell.id} className="px-4 align-middle text-left">
                                         {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()

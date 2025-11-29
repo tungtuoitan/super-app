@@ -15,11 +15,12 @@ import {
 } from '@/Components/ui/tooltip';
 import {useAuthStore} from '@/contexts/AuthContext';
 import {useSnackbar} from 'notistack';
-import {useNoteUI} from '../../../contexts/NoteUIContext';
+import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {useCreateNote, useDeleteNote, useUpdateNote} from '../../../hooks/useNotes';
 import {useConfirmationPopover} from '@/shared/hooks';
 import {CreateNoteDTO, UpdateNoteDTO} from '../../../types/note.types';
 import {ConfirmationPopover} from '@/shared/components';
+import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 /**
  * Note Content Toolbar
@@ -27,7 +28,8 @@ import {ConfirmationPopover} from '@/shared/components';
  * Matches RFD toolbar structure and styling
  */
 export function NoteContentToolbar() {
-    const { selectedNote, closeDialog, hasUnsavedChanges, markAsSaved, resetChanges, updateSelectedNote } = useNoteUI();
+    const { selectedNote, hasUnsavedChanges } = useNoteUIStore();
+    const { closeDialog, markAsSaved, resetChanges, updateSelectedNote } = useNoteUIHelper();
     const { isAuthenticated } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     

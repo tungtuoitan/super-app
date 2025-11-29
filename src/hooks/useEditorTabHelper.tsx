@@ -1,42 +1,15 @@
-/**
- * Editor Tab Context
- * Centralized state management for all editor tabs
- * Supports multiple tab types: Note, Tag, etc.
- */
+import {Note} from "@/types/note.types";
+import {useEditorTabsStore} from "../store/editor/EditorTabStore";
+import {NoteTab} from "@/components/Editor";
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { EditorTab, NoteTab } from '../../types/editor/tab.types';
-import {Note} from '@/types/note.types';
 
-interface EditorTabContextValue {
-    // Tab state
-    openTabs: EditorTab[];
-    activeTabId: string | null;
+export const useEditorTabHelper = () => {
+    const { openTabs, setOpenTabs, activeTabId, setActiveTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
 
-    // Tab actions
-    openNoteTab: (note: Note) => void;
-    closeTab: (tabId: string, force?: boolean) => void;
-    setActiveTab: (tabId: string) => void;
-    closeAllTabs: () => void;
-    
-    // Unsaved changes tracking
-    markTabAsChanged: (tabId: string, hasChanges: boolean) => void;
-    getTabById: (tabId: string) => EditorTab | undefined;
-    updateTabNote: (tabId: string, note: Note) => void;
-    
-    // Confirm close dialog
-    confirmCloseTabId: string | null;
-    setConfirmCloseTabId: (tabId: string | null) => void;
-}
-
-const EditorTabContext = createContext<EditorTabContextValue | null>(null);
-
-export function EditorTabProvider({ children }: { children: React.ReactNode }) {
-    const [openTabs, setOpenTabs] = useState<EditorTab[]>([]);
-    const [activeTabId, setActiveTabId] = useState<string | null>(null);
-    const [confirmCloseTabId, setConfirmCloseTabId] = useState<string | null>(null);
-
-    const openNoteTab = useCallback((note: Note) => {
+    const updateActiveTabIdAnd = (newActiveTabId: string | null) => {
+        
+    }
+    const openNoteTab = (note: Note) => {
         console.log('📝 EditorTabContext - openNoteTab called:', note);
         console.log('📝 EditorTabContext - Current openTabs:', openTabs);
         
@@ -64,9 +37,9 @@ export function EditorTabProvider({ children }: { children: React.ReactNode }) {
             setOpenTabs(prev => [...prev, newTab]);
             setActiveTabId(newTab.id);
         }
-    }, [openTabs]);
+    }
 
-    const closeTab = useCallback((tabId: string, force = false) => {
+    const closeTab = (tabId: string, force = false) => {
         const tab = openTabs.find(t => t.id === tabId);
         
         // If tab has unsaved changes and not forcing close, show confirm dialog
@@ -92,16 +65,16 @@ export function EditorTabProvider({ children }: { children: React.ReactNode }) {
 
             return newTabs;
         });
-    }, [openTabs, activeTabId]);
+    }
 
-    const handleSetActiveTab = useCallback((tabId: string) => {
+    const handleSetActiveTab = (tabId: string) => {
         const tab = openTabs.find(t => t.id === tabId);
         if (tab) {
             setActiveTabId(tabId);
         }
-    }, [openTabs]);
+    }
 
-    const closeAllTabs = useCallback(() => {
+    const closeAllTabs = () => {
         // Check if any tab has unsaved changes
         const hasUnsavedChanges = openTabs.some(tab => tab.hasUnsavedChanges);
         
@@ -113,9 +86,9 @@ export function EditorTabProvider({ children }: { children: React.ReactNode }) {
 
         setOpenTabs([]);
         setActiveTabId(null);
-    }, [openTabs]);
+    }
 
-    const markTabAsChanged = useCallback((tabId: string, hasChanges: boolean) => {
+    const markTabAsChanged = (tabId: string, hasChanges: boolean) => {
         setOpenTabs(prev => 
             prev.map(tab => 
                 tab.id === tabId 
@@ -123,13 +96,13 @@ export function EditorTabProvider({ children }: { children: React.ReactNode }) {
                     : tab
             )
         );
-    }, []);
+    }
 
-    const getTabById = useCallback((tabId: string) => {
+    const getTabById = (tabId: string) => {
         return openTabs.find(tab => tab.id === tabId);
-    }, [openTabs]);
+    };
 
-    const updateTabNote = useCallback((tabId: string, note: Note) => {
+    const updateTabNote = (tabId: string, note: Note) => {
         console.log('🔄 EditorTabContext - updateTabNote:', { tabId, note });
         setOpenTabs(prev => 
             prev.map(tab => {
@@ -144,33 +117,16 @@ export function EditorTabProvider({ children }: { children: React.ReactNode }) {
                 return tab;
             })
         );
-    }, []);
-
-    const value = {
-        openTabs,
-        activeTabId,
+    };
+    
+    return {
         openNoteTab,
         closeTab,
-        setActiveTab: handleSetActiveTab,
+        handleSetActiveTab,
         closeAllTabs,
         markTabAsChanged,
         getTabById,
         updateTabNote,
-        confirmCloseTabId,
-        setConfirmCloseTabId,
-    };
 
-    return (
-        <EditorTabContext.Provider value={value}>
-            {children}
-        </EditorTabContext.Provider>
-    );
-}
-
-export function useEditorTabs() {
-    const context = useContext(EditorTabContext);
-    if (!context) {
-        throw new Error('useEditorTabs must be used within EditorTabProvider');
     }
-    return context;
 }

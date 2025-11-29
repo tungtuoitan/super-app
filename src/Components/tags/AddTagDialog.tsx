@@ -466,8 +466,8 @@ export function AddTagDialog({
                         {isSubmitting 
                             ? 'Adding...' 
                             : activeTab === 'existing' 
-                                ? 'Add Tag (Enter)' 
-                                : 'Create & Add (Enter)'
+                                ? 'Add Tag' 
+                                : 'Create & Add'
                         }
                     </Button>
                 </DialogFooter>
