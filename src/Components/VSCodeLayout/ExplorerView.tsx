@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components';
-import { WorkspaceTree } from '../Folders/WorkspaceTree';
+import { WorkspaceTree } from '../Explorer/WorkspaceTree';
 import { useExplorerHelper } from '@/hooks/explorer/useExplorerHelper';
 
 /**

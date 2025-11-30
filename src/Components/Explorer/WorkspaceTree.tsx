@@ -14,14 +14,19 @@ import {
     ChevronsUp,
     Loader2
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
+
+import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import type { Folder } from '../../types/folder.types';
+import type { WorkspaceTreeItemResponse } from '../../types/workspace.types';
 import { AddFolderDialog } from '../tags/AddFolderDialog';
-import {createWorkspaceRootFolder, filterTreeBySearch, getAllFoldersFlattened, getAllVisibleFolderIds, transformFoldersToTreeData, transformTreeItemToFolder, TreeFolder} from '@/hooks/explorer/tree.helper';
-import {WorkspaceWithTreeResponse} from '@/types/workspace.types';
-import {useExplorerStore, useFolderHelper} from '../tags';
-import {WorkspaceTreeEmpty} from '../Explorer/WorkspaceTreeEmpty';
-import {CustomDragPreview} from '../Explorer/CustomDragPreview';
+import { useExplorerStore } from '@/store/index';
+import { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
+import type { WorkspaceWithTreeResponse } from '@/types/workspace.types';
+import {CustomDragPreview} from './CustomDragPreview';
+import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
 import {FolderNode} from './FolderNode';
+import {createWorkspaceRootFolder, filterTreeBySearch, getAllFoldersFlattened, getAllVisibleFolderIds, transformFoldersToTreeData, transformTreeItemToFolder, TreeFolder} from '@/hooks/explorer/tree.helper';
 
 interface WorkspaceTreeProps {
     onFolderClick?: (folder: Folder) => void;

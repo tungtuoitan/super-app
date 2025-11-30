@@ -4,7 +4,7 @@ import { NoteGridPanel } from '../Notes/NoteGridPanel'
 import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
-import {FoldersPanel} from '../Folders'
+import {FoldersPanel} from '../Explorer'
 import { ExplorerView } from './ExplorerView'
 
 interface VSSideBarProps {
