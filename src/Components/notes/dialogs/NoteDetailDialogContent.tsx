@@ -14,7 +14,7 @@ import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-reac
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
-import {useTagsForAutocomplete} from '@/Components/tags';
+import {useFoldersForAutocomplete} from '@/hooks/Folders';
 
 /**
  * Note Detail Dialog Content
@@ -51,8 +51,8 @@ export function NoteDetailDialogContent() {
         }
     }, [selectedNote?.noteId]);
     
-    // Fetch hashtags from API for use in autocomplete
-    const { tagOptions, isLoading: tagsLoading, error: tagsError } = useTagsForAutocomplete();
+    // Fetch hashtags/folders from API for use in autocomplete
+    const { folderOptions, isLoading: tagsLoading, error: tagsError } = useFoldersForAutocomplete();
     
     // Fallback hashtags if API fails
     const fallbackTagOptions: IAutoCompleteOptions[] = [
@@ -63,7 +63,7 @@ export function NoteDetailDialogContent() {
     ];
     
     // Use API hashtags if available, otherwise fallback hashtags
-    const finalTagOptions = tagsError ? fallbackTagOptions : tagOptions;
+    const finalTagOptions = tagsError ? fallbackTagOptions : folderOptions;
     
     // Log error if hashtags failed to load
     React.useEffect(() => {
@@ -115,7 +115,7 @@ export function NoteDetailDialogContent() {
         
         // Convert hashtag IDs to Tag objects by finding them in the options
         const tagObjects = tagIds.map(tagId => {
-            const foundOption = finalTagOptions.find(option => option.id === tagId);
+            const foundOption = finalTagOptions.find((option: IAutoCompleteOptions) => option.id === tagId);
             if (foundOption) {
                 return {
                     tagId: parseInt(foundOption.id as string),

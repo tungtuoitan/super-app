@@ -20,34 +20,34 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 
-import { useWorkspaceTagTree, useBatchMoveTag } from '../../hooks/Tags/useTags';
-import { useTagUIStore } from '@/store/tagUI/TagUIStore';
-import { useTagUIHelper } from '@/hooks/useTagUIHelper';
+import { useWorkspaceTagTree, useBatchMoveTag } from '../../hooks/Folders/useFolders';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import type { Folder as Tag } from '../../types/folder.types';
 import { AddFolderDialog } from '../tags/AddFolderDialog';
+import {useFolderUIHelper} from '@/hooks/useFolderUIHelper';
+import {useFolderUIStore} from '@/store/index';
 
 interface WorkspaceTreeProps {
-    onTagClick?: (tag: Tag) => void;
+    onFolderClick?: (folder: Tag) => void;
     includeShared?: boolean; // DEPRECATED: No longer used, kept for backward compatibility
     workspaceId: number; // REQUIRED: Workspace ID for workspace-specific tree
 }
 
-// Transform Tag to tree data structure for react-arborist
-interface TreeTag {
+// Transform Folder to tree data structure for react-arborist
+interface TreeFolder {
     id: string;
     name: string;
-    children?: TreeTag[];
+    children?: TreeFolder[];
     data: Tag; // Store original folder data
 }
 
 /**
  * Helper function to get all visible folder IDs in tree order
  */
-function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
+function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
     const result: number[] = [];
 
-    function traverse(nodes: TreeTag[]) {
+    function traverse(nodes: TreeFolder[]) {
         for (const node of nodes) {
             result.push(node.data.tagId);
             if (node.children && node.children.length > 0) {
@@ -64,14 +64,14 @@ function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
  * Helper function to check if targetId is a descendant of parentId
  * Used to prevent circular dependencies when moving folders
  */
-function isDescendant(targetId: number, potentialParentId: number, treeData: TreeTag[]): boolean {
+function isDescendant(targetId: number, potentialParentId: number, treeData: TreeFolder[]): boolean {
     // Find the potential parent node
-    const parentNode = getAllTagsFlattened(treeData).find(t => t.data.tagId === potentialParentId);
+    const parentNode = getAllFoldersFlattened(treeData).find(t => t.data.tagId === potentialParentId);
 
     if (!parentNode) return false;
 
     // Recursively check if targetId exists in the subtree of parentNode
-    function checkSubtree(node: TreeTag): boolean {
+    function checkSubtree(node: TreeFolder): boolean {
         if (node.data.tagId === targetId) {
             return true; // Found targetId in descendants
         }
@@ -89,13 +89,13 @@ function isDescendant(targetId: number, potentialParentId: number, treeData: Tre
 /**
  * Helper function to find a folder by ID in the folder array
  */
-function findTagById(tags: Tag[], targetId: number): Tag | undefined {
+function findFolderById(tags: Tag[], targetId: number): Tag | undefined {
     for (const tag of tags) {
         if (tag.tagId === targetId) {
             return tag;
         }
         if (tag.children && tag.children.length > 0) {
-            const found = findTagById(tag.children, targetId);
+            const found = findFolderById(tag.children, targetId);
             if (found) return found;
         }
     }
@@ -105,10 +105,10 @@ function findTagById(tags: Tag[], targetId: number): Tag | undefined {
 /**
  * Helper function to flatten tree data for lookup
  */
-function getAllTagsFlattened(treeData: TreeTag[]): TreeTag[] {
-    const result: TreeTag[] = [];
+function getAllFoldersFlattened(treeData: TreeFolder[]): TreeFolder[] {
+    const result: TreeFolder[] = [];
 
-    function traverse(nodes: TreeTag[]) {
+    function traverse(nodes: TreeFolder[]) {
         for (const node of nodes) {
             result.push(node);
             if (node.children && node.children.length > 0) {
@@ -124,7 +124,7 @@ function getAllTagsFlattened(treeData: TreeTag[]): TreeTag[] {
 /**
  * Node component for react-arborist tree
  */
-function TagNode({ 
+function FolderNode({ 
     node, 
     style, 
     dragHandle, 
@@ -133,27 +133,27 @@ function TagNode({
     onRefresh, 
     onCollapseAll
 }: { 
-    node: NodeApi<TreeTag>; 
+    node: NodeApi<TreeFolder>; 
     style: React.CSSProperties;
     dragHandle?: any; // Let's use any for now to avoid type conflicts
-    treeData: TreeTag[];
+    treeData: TreeFolder[];
     onNewFolder?: () => void;
     onRefresh?: () => void;
     onCollapseAll?: () => void;
 }) {
     const {
-        selectedTagIds,
-        setSelectedTagIds,
-        lastSelectedTagId,
-        setLastSelectedTagId,
-    } = useTagUIStore();
-    const { isTagSelected } = useTagUIHelper();
+        selectedFolderIds,
+        setSelectedFolderIds,
+        lastSelectedFolderId,
+        setLastSelectedFolderId,
+    } = useFolderUIStore();
+    const { isFolderSelected } = useFolderUIHelper();
     const { showContextMenu } = useContextMenuHelper();
 
-    const tag = node.data.data;
+    const folder = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
-    const isSelected = isTagSelected(tag.tagId);
-    const isWorkspaceRoot = tag.tagId < 0; // Workspace root node has negative ID
+    const isSelected = isFolderSelected(folder.tagId);
+    const isWorkspaceRoot = folder.tagId < 0; // Workspace root node has negative ID
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -181,37 +181,37 @@ function TagNode({
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedTagIds(prev => prev.filter(id => id !== tag.tagId));
+                setSelectedFolderIds(prev => prev.filter(id => id !== folder.tagId));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedTagIds(prev => [...prev, tag.tagId]);
+                setSelectedFolderIds(prev => [...prev, folder.tagId]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
-            setLastSelectedTagId(tag.tagId);
-        } else if (e.shiftKey && lastSelectedTagId) {
+            setLastSelectedFolderId(folder.tagId);
+        } else if (e.shiftKey && lastSelectedFolderId) {
             // Shift+Click: Range selection (like VS Code)
-            const allVisibleTags = getAllVisibleTagIds(treeData);
-            const lastIndex = allVisibleTags.indexOf(lastSelectedTagId);
-            const currentIndex = allVisibleTags.indexOf(tag.tagId);
+            const allVisibleFolders = getAllVisibleFolderIds(treeData);
+            const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
+            const currentIndex = allVisibleFolders.indexOf(folder.tagId);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
                 const endIndex = Math.max(lastIndex, currentIndex);
-                const rangeSelection = allVisibleTags.slice(startIndex, endIndex + 1);
-                setSelectedTagIds(rangeSelection);
+                const rangeSelection = allVisibleFolders.slice(startIndex, endIndex + 1);
+                setSelectedFolderIds(rangeSelection);
                 // Sync with react-arborist (select range ending at this node)
                 node.selectMulti();
             } else {
-                setSelectedTagIds([tag.tagId]);
+                setSelectedFolderIds([folder.tagId]);
                 node.select();
             }
-            setLastSelectedTagId(tag.tagId);
+            setLastSelectedFolderId(folder.tagId);
         } else {
             // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
-            setSelectedTagIds([tag.tagId]);
-            setLastSelectedTagId(tag.tagId);
+            setSelectedFolderIds([folder.tagId]);
+            setLastSelectedFolderId(folder.tagId);
             // Sync with react-arborist (single select - clears others)
             node.select();
 
@@ -232,7 +232,7 @@ function TagNode({
         }
         
         // Open folder-specific context menu with folder data
-        showContextMenu(e, 'tag', tag);
+        showContextMenu(e, 'folder', folder);
     };
     
     return (
@@ -287,10 +287,10 @@ function TagNode({
             {/* Folder Icon */}
             <div className="mr-2 flex items-center">
                 {/* Workspace root node */}
-                {tag.tagId < 0 ? (
+                {folder.tagId < 0 ? (
                     <Layers
                         className="w-4 h-4"
-                        style={{ color: tag.color || '#75beff' }}
+                        style={{ color: folder.color || '#75beff' }}
                     />
                 ) : hasChildren ? (
                     node.isOpen ?
@@ -299,7 +299,7 @@ function TagNode({
                 ) : (
                     <TagIcon
                         className="w-4 h-4"
-                        style={{ color: tag.color || '#75beff' }}
+                        style={{ color: folder.color || '#75beff' }}
                     />
                 )}
             </div>
@@ -315,7 +315,7 @@ function TagNode({
                             text-editor-fg
                         `}
                     >
-                        {tag.name}
+                        {folder.name}
                     </span>
                 </div>
             </div>
@@ -405,13 +405,13 @@ function WorkspaceTreeEmpty() {
  * Transform folder hierarchy to react-arborist tree data
  * NOTE: All nodes must have children array (even if empty) to allow drop into them
  */
-function transformTagsToTreeData(tags: Tag[]): TreeTag[] {
+function transformFoldersToTreeData(tags: Tag[]): TreeFolder[] {
     return tags.map(tag => ({
         id: tag.tagId.toString(),
         name: tag.name,
         data: tag,
         // Always provide children array (empty if no children) to enable drop into nodes
-        children: tag.children && tag.children.length > 0 ? transformTagsToTreeData(tag.children) : [],
+        children: tag.children && tag.children.length > 0 ? transformFoldersToTreeData(tag.children) : [],
     }));
 }
 
@@ -443,7 +443,7 @@ function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }:
     id: string | null;
     dragIds: string[];
     isDragging: boolean;
-    treeData: TreeTag[];
+    treeData: TreeFolder[];
 }) {
     if (!isDragging || !offset) return null;
 
@@ -459,9 +459,9 @@ function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }:
         
         // Single item: show folder name
         if (itemCount === 1 && id) {
-            const allTags = getAllTagsFlattened(treeData);
-            const tag = allTags.find(t => t.id === id);
-            return tag?.name || 'Moving...';
+            const allFolders = getAllFoldersFlattened(treeData);
+            const folder = allFolders.find(t => t.id === id);
+            return folder?.name || 'Moving...';
         }
         
         return 'Moving...';
@@ -529,19 +529,19 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
     
     const {
         searchText,
-        selectedTagIds,
-        setSelectedTagIds,
-        lastSelectedTagId,
-        setLastSelectedTagId,
+        selectedFolderIds,
+        setSelectedFolderIds,
+        lastSelectedFolderId,
+        setLastSelectedFolderId,
         isCreateDialogOpen,
-        parentTagForCreate,
-    } = useTagUIStore();
+        parentFolderForCreate,
+    } = useFolderUIStore();
     const {
-        selectAllTags,
+        selectAllFolders,
         clearSelection,
         openCreateDialog,
         closeCreateDialog,
-    } = useTagUIHelper();
+    } = useFolderUIHelper();
     const [isDragging, setIsDragging] = useState(false);
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);
@@ -596,15 +596,15 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 isExpanded: true,
             };
             
-            return transformTagsToTreeData([workspaceRootTag]);
+            return transformFoldersToTreeData([workspaceRootTag]);
         }
         
-        return transformTagsToTreeData(filteredTags);
+        return transformFoldersToTreeData(filteredTags);
     }, [tags, searchText, data]);
 
     // Get all visible folder IDs for keyboard navigation
-    const allVisibleTagIds = useMemo(() => {
-        return getAllVisibleTagIds(treeData);
+    const allVisibleFolderIds = useMemo(() => {
+        return getAllVisibleFolderIds(treeData);
     }, [treeData]);
 
     // Keyboard navigation (VS Code-like)
@@ -614,46 +614,46 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 return; // Only handle when tree is focused
             }
 
-            const currentSelection = selectedTagIds;
+            const currentSelection = selectedFolderIds;
             const lastSelected = currentSelection.length > 0 ? currentSelection[currentSelection.length - 1] : null;
-            const currentIndex = lastSelected ? allVisibleTagIds.indexOf(lastSelected) : -1;
+            const currentIndex = lastSelected ? allVisibleFolderIds.indexOf(lastSelected) : -1;
 
             switch (e.key) {
                 case 'ArrowUp':
                     e.preventDefault();
                     if (currentIndex > 0) {
-                        const newTagId = allVisibleTagIds[currentIndex - 1];
+                        const newFolderId = allVisibleFolderIds[currentIndex - 1];
                         if (e.shiftKey && currentSelection.length > 0) {
                             // Extend selection upward
                             const firstSelected = currentSelection[0];
-                            const firstIndex = allVisibleTagIds.indexOf(firstSelected);
+                            const firstIndex = allVisibleFolderIds.indexOf(firstSelected);
                             const startIndex = Math.min(firstIndex, currentIndex - 1);
                             const endIndex = Math.max(firstIndex, currentIndex - 1);
-                            const rangeSelection = allVisibleTagIds.slice(startIndex, endIndex + 1);
-                            setSelectedTagIds(rangeSelection);
+                            const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
+                            setSelectedFolderIds(rangeSelection);
                         } else {
-                            setSelectedTagIds([newTagId]);
+                            setSelectedFolderIds([newFolderId]);
                         }
-                        setLastSelectedTagId(newTagId);
+                        setLastSelectedFolderId(newFolderId);
                     }
                     break;
 
                 case 'ArrowDown':
                     e.preventDefault();
-                    if (currentIndex < allVisibleTagIds.length - 1) {
-                        const newTagId = allVisibleTagIds[currentIndex + 1];
+                    if (currentIndex < allVisibleFolderIds.length - 1) {
+                        const newFolderId = allVisibleFolderIds[currentIndex + 1];
                         if (e.shiftKey && currentSelection.length > 0) {
                             // Extend selection downward
                             const firstSelected = currentSelection[0];
-                            const firstIndex = allVisibleTagIds.indexOf(firstSelected);
+                            const firstIndex = allVisibleFolderIds.indexOf(firstSelected);
                             const startIndex = Math.min(firstIndex, currentIndex + 1);
                             const endIndex = Math.max(firstIndex, currentIndex + 1);
-                            const rangeSelection = allVisibleTagIds.slice(startIndex, endIndex + 1);
-                            setSelectedTagIds(rangeSelection);
+                            const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
+                            setSelectedFolderIds(rangeSelection);
                         } else {
-                            setSelectedTagIds([newTagId]);
+                            setSelectedFolderIds([newFolderId]);
                         }
-                        setLastSelectedTagId(newTagId);
+                        setLastSelectedFolderId(newFolderId);
                     }
                     break;
 
@@ -661,31 +661,31 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                     if (e.ctrlKey || e.metaKey) {
                         e.preventDefault();
                         // Ctrl+A: Select all
-                        setSelectedTagIds(allVisibleTagIds);
-                        setLastSelectedTagId(allVisibleTagIds[allVisibleTagIds.length - 1]);
+                        setSelectedFolderIds(allVisibleFolderIds);
+                        setLastSelectedFolderId(allVisibleFolderIds[allVisibleFolderIds.length - 1]);
                     }
                     break;
 
                 case 'Escape':
                     // Clear selection
                     clearSelection();
-                    setLastSelectedTagId(null);
+                    setLastSelectedFolderId(null);
                     break;
             }
         };
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [selectedTagIds, allVisibleTagIds, setSelectedTagIds, setLastSelectedTagId, clearSelection]);
+    }, [selectedFolderIds, allVisibleFolderIds, setSelectedFolderIds, setLastSelectedFolderId, clearSelection]);
 
     // Handle selection changes from react-arborist
-    const handleSelectionChange = (nodes: NodeApi<TreeTag>[]) => {
+    const handleSelectionChange = (nodes: NodeApi<TreeFolder>[]) => {
         const selectedIds = nodes.map(node => node.id);
         console.log('🎯 Tree selection changed:', selectedIds);
-        const tagIds = selectedIds.map(id => parseInt(id)).filter(id => id > 0); // Filter out workspace nodes
-        setSelectedTagIds(tagIds);
-        if (tagIds.length > 0) {
-            setLastSelectedTagId(tagIds[tagIds.length - 1]);
+        const folderIds = selectedIds.map(id => parseInt(id)).filter(id => id > 0); // Filter out workspace nodes
+        setSelectedFolderIds(folderIds);
+        if (folderIds.length > 0) {
+            setLastSelectedFolderId(folderIds[folderIds.length - 1]);
         }
     };
 
@@ -703,28 +703,28 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             setIsDragging(true);
 
             // Convert string IDs to numbers
-            let tagIds = args.dragIds.map(id => parseInt(id));
+            let folderIds = args.dragIds.map(id => parseInt(id));
 
             // VS CODE BEHAVIOR: Filter out descendants of selected nodes
             // If moving both parent P and child t1, only move P (t1 will follow automatically)
-            tagIds = tagIds.filter(tagId => {
+            folderIds = folderIds.filter(folderId => {
                 // Check if this folder is a descendant of any other selected folder
-                const isDescendantOfOtherSelected = tagIds.some(otherTagId => {
-                    if (otherTagId === tagId) return false; // Don't compare with itself
-                    return isDescendant(tagId, otherTagId, treeData);
+                const isDescendantOfOtherSelected = folderIds.some(otherFolderId => {
+                    if (otherFolderId === folderId) return false; // Don't compare with itself
+                    return isDescendant(folderId, otherFolderId, treeData);
                 });
                 return !isDescendantOfOtherSelected; // Keep only if NOT a descendant
             });
 
             console.log('📊 Filtered folder IDs (excluding descendants):', {
                 original: args.dragIds,
-                filtered: tagIds,
-                removedCount: args.dragIds.length - tagIds.length
+                filtered: folderIds,
+                removedCount: args.dragIds.length - folderIds.length
             });
 
             // If all selected items are descendants of other selected items, nothing to move
-            if (tagIds.length === 0) {
-                console.log('⚠️ All selected tags are descendants of other selected tags - nothing to move');
+            if (folderIds.length === 0) {
+                console.log('⚠️ All selected folders are descendants of other selected folders - nothing to move');
                 setIsDragging(false);
                 return;
             }
@@ -745,7 +745,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             // VALIDATION: Prevent invalid moves (VS Code behavior)
 
             // 1. Check for workspace root nodes (negative IDs) - cannot move workspace itself
-            const hasWorkspaceRoot = tagIds.some(id => id < 0);
+            const hasWorkspaceRoot = folderIds.some(id => id < 0);
             if (hasWorkspaceRoot) {
                 console.warn('⚠️ Cannot move workspace root node');
                 setIsDragging(false);
@@ -754,7 +754,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
 
             // 2. VS CODE: Don't allow moving into one of the items being moved
             // If target parent is one of the selected items, abort
-            if (newParentId !== undefined && tagIds.includes(newParentId)) {
+            if (newParentId !== undefined && folderIds.includes(newParentId)) {
                 console.warn('⚠️ Cannot move items into one of the selected items');
                 setIsDragging(false);
                 return;
@@ -763,7 +763,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             // 3. VS CODE: Don't allow moving into a child of any selected item
             // If target parent is a descendant of any item being moved, abort
             if (newParentId !== undefined) {
-                const isTargetDescendantOfSelected = tagIds.some(draggedId => {
+                const isTargetDescendantOfSelected = folderIds.some(draggedId => {
                     return isDescendant(newParentId!, draggedId, treeData);
                 });
 
@@ -777,7 +777,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             // 4. VS CODE: Don't allow dropping between items in the same selection
             // Get siblings at target position to check if we're dropping within selection
             const targetParentNode = newParentId !== undefined
-                ? getAllTagsFlattened(treeData).find(t => t.data.tagId === newParentId)
+                ? getAllFoldersFlattened(treeData).find(t => t.data.tagId === newParentId)
                 : null;
 
             // Get siblings (children of target parent, or root level if no parent)
@@ -796,8 +796,8 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
 
                 // Check if both surrounding items are in the selection
                 const bothInSelection =
-                    (itemBeforeId && tagIds.includes(itemBeforeId)) &&
-                    (itemAfterId && tagIds.includes(itemAfterId));
+                    (itemBeforeId && folderIds.includes(itemBeforeId)) &&
+                    (itemAfterId && folderIds.includes(itemAfterId));
 
                 // Check if either surrounding item is in the selection and we're moving to same parent
                 const allOriginalIds = args.dragIds.map(id => parseInt(id)); // Use original IDs before filtering
@@ -806,8 +806,8 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 );
 
                 if (bothInSelection || (isSameParent && (
-                    (itemBeforeId && tagIds.includes(itemBeforeId)) ||
-                    (itemAfterId && tagIds.includes(itemAfterId))
+                    (itemBeforeId && folderIds.includes(itemBeforeId)) ||
+                    (itemAfterId && folderIds.includes(itemAfterId))
                 ))) {
                     console.warn('⚠️ Cannot drop between items in the same selection');
                     setIsDragging(false);
@@ -816,23 +816,23 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             }
 
             // BATCH MOVE: Move all selected items using optimized batch API
-            console.log(`📤 Batch moving ${tagIds.length} folder(s) to parent ${newParentId || 'root'} at index ${args.index}`);
+            console.log(`📤 Batch moving ${folderIds.length} folder(s) to parent ${newParentId || 'root'} at index ${args.index}`);
 
             await batchMoveTagMutation.mutateAsync({
-                tagIds,
+                folderIds,
                 newParentId,
                 startIndex: args.index,
             });
 
-            console.log(`✅ Successfully batch moved ${tagIds.length} folder(s)`);
+            console.log(`✅ Successfully batch moved ${folderIds.length} folder(s)`);
 
             // VS Code behavior: Re-select the moved items after move completes
             // If single item moved, select it; if multiple items moved, select all of them
-            setSelectedTagIds(tagIds);
-            if (tagIds.length > 0) {
-                setLastSelectedTagId(tagIds[tagIds.length - 1]);
+            setSelectedFolderIds(folderIds);
+            if (folderIds.length > 0) {
+                setLastSelectedFolderId(folderIds[folderIds.length - 1]);
             }
-            console.log(`✅ Re-selected moved item(s): ${tagIds.join(', ')}`);
+            console.log(`✅ Re-selected moved item(s): ${folderIds.join(', ')}`);
 
         } catch (error) {
             console.error('❌ Failed to move folder(s):', error);
@@ -850,18 +850,18 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
         // Use currently selected folder as parent (VS Code-like behavior)
         // If a folder is selected, use it as parent
         // Otherwise, default to root level (undefined)
-        const parentId = selectedTagIds.length > 0 
-            ? selectedTagIds[0] // Use first selected tag as parent
+        const parentId = selectedFolderIds.length > 0 
+            ? selectedFolderIds[0] // Use first selected folder as parent
             : undefined; // Root level if nothing selected
             
         // Find the parent folder object if parentId exists
-        const parentTag = parentId 
-            ? findTagById(tags || [], parentId)
+        const parentFolder = parentId 
+            ? findFolderById(tags || [], parentId)
             : undefined;
             
-        openCreateDialog(parentTag);
+        openCreateDialog(parentFolder);
         
-        console.log('📁 Parent folder for new item:', parentTag?.name || 'root');
+        console.log('📁 Parent folder for new item:', parentFolder?.name || 'root');
     };
     
     const handleRefresh = () => {
@@ -918,10 +918,10 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             )}
 
             {/* <SelectionInfo 
-                selectedCount={selectedTagIds.length} 
-                totalCount={allVisibleTagIds.length} 
+                selectedCount={selectedFolderIds.length} 
+                totalCount={allVisibleFolderIds.length} 
             /> */}
-            <Tree<TreeTag>
+            <Tree<TreeFolder>
                 ref={treeRef}
                 data={treeData}
                 openByDefault={true}
@@ -941,7 +941,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                     // Wrap in div to ensure native DOM element for DnD
                     return (
                         <div style={style}>
-                            <TagNode
+                            <FolderNode
                                 node={node}
                                 style={{ height: '100%' }}
                                 dragHandle={dragHandle}
@@ -961,7 +961,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                     open={isCreateDialogOpen}
                     onClose={closeCreateDialog}
                     workspaceId={workspaceId}
-                    parentTagId={parentTagForCreate?.tagId}
+                    parentTagId={parentFolderForCreate?.tagId}
                 />
             )}
         </div>

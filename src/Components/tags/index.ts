@@ -6,17 +6,24 @@ export { WorkspaceTree } from '../Folders/WorkspaceTree';
 export { CreateFolderDialog } from './CreateFolderDialog';
 export { EditWorkspaceItemDialog } from './EditWorkspaceItemDialog';
 
-// Store & Helper (Preferred for new code)
-export { TagUIStore, TagUIStoreProvider, useTagUIStore } from '@/store/tagUI/TagUIStore';
-export type { TagUIStoreData } from '@/store/tagUI/TagUIStore';
-export { useTagUIHelper } from '@/hooks/useTagUIHelper';
+// NEW: Use these for workspace folders
+export { FolderUIStore, FolderUIStoreProvider, useFolderUIStore } from '@/store/folderUI/FolderUIStore';
+export type { FolderUIStoreData } from '@/store/folderUI/FolderUIStore';
+export { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
 
 // Legacy compatibility - use store + helper instead
-// TagUIProvider deprecated - use TagUIStoreProvider from store instead
 
-// Hooks
-export { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
-export { useTagsForAutocomplete } from '../../hooks/Tags/useTagsForAutocomplete';
+// Hooks - Re-export from centralized hooks/Tags
+export { 
+    // Modern folder exports
+    useFolders,
+    useWorkspaceFolderTree,
+    useFoldersForAutocomplete,
+    // Legacy tag exports (deprecated)
+    useTags,
+    useWorkspaceTagTree,
+    useTagsForAutocomplete
+} from '../../hooks/Folders';
 
 // Service
 export { hashtagService } from '../../services/hashtagService';

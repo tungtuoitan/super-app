@@ -24,12 +24,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
-import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../../hooks/Tags/useWorkspace';
+import { useTags, useWorkspaceTagTree } from '../../hooks/Folders/useFolders';
+import { useAddExistingFolderToWorkspace, useCreateAndAddFolderToWorkspace } from '../../hooks/Folders/useWorkspaceTree';
 import type { Folder as Tag } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import { useTagUIStore } from '@/store/tagUI/TagUIStore';
+import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
@@ -84,10 +84,10 @@ export function AddFolderDialog({
     // Hooks
     const { data: allTags, isLoading: tagsLoading } = useTags();
     const { data: workspaceTree, isLoading: workspaceLoading } = useWorkspaceTagTree(workspaceId);
-    const addExistingTag = useAddExistingTagToWorkspace();
-    const createAndAddTag = useCreateAndAddTagToWorkspace();
+    const addExistingTag = useAddExistingFolderToWorkspace();
+    const createAndAddTag = useCreateAndAddFolderToWorkspace();
     const { enqueueSnackbar } = useSnackbar();
-    const { setSelectedTagIds, setLastSelectedTagId } = useTagUIStore();
+    const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderUIStore();
 
     // Find parent folder info for display (VS Code-like)
     const parentTag = React.useMemo(() => {
@@ -165,8 +165,8 @@ export function AddFolderDialog({
             });
 
             // VS Code behavior: Select the newly added tag
-            setSelectedTagIds([result.childId]);
-            setLastSelectedTagId(result.childId);
+            setSelectedFolderIds([result.childId]);
+            setLastSelectedFolderId(result.childId);
 
             enqueueSnackbar(`Folder "${selectedTag.name}" added to workspace!`, { variant: 'success' });
             onClose();
@@ -174,7 +174,7 @@ export function AddFolderDialog({
             console.error('Failed to add existing folder:', error);
             enqueueSnackbar(error?.message || 'Failed to add folder to workspace', { variant: 'error' });
         }
-    }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
+    }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose, setSelectedFolderIds, setLastSelectedFolderId]);
 
     const handleSubmitNew = useCallback(async () => {
         if (!validateNewFolder()) {
@@ -194,8 +194,8 @@ export function AddFolderDialog({
             });
 
             // VS Code behavior: Select the newly created folder
-            setSelectedTagIds([result.childId]);
-            setLastSelectedTagId(result.childId);
+            setSelectedFolderIds([result.childId]);
+            setLastSelectedFolderId(result.childId);
 
             enqueueSnackbar(`New folder "${newFolderName}" created and added!`, { variant: 'success' });
             onClose();
@@ -203,7 +203,7 @@ export function AddFolderDialog({
             console.error('Failed to create and add folder:', error);
             enqueueSnackbar(error?.message || 'Failed to create folder', { variant: 'error' });
         }
-    }, [newFolderName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
+    }, [newFolderName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose, setSelectedFolderIds, setLastSelectedFolderId]);
 
     const handleSubmit = () => {
         if (activeTab === 'existing') {

@@ -1,6 +1,9 @@
 /**
- * Workspace React Query Hooks
- * Hooks for workspace tag tree operations
+ * Workspace Tree React Query Hooks
+ * Hooks for workspace folder tree operations (adding/updating folders in workspace)
+ * 
+ * Note: Backend uses "tag" terminology, frontend uses "folder"
+ * These hooks handle mutations for the workspace folder tree structure
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,10 +12,13 @@ import type {
     AddItemToWorkspaceRequest,
     UpdateWorkspaceItemRequest
 } from '../../types/workspace.types';
-import { tagKeys } from './useTags';
+import { folderKeys, tagKeys } from './useFolders';
 
 /**
- * Hook to add item (tag or note) to workspace
+ * Hook to add item (folder or note) to workspace tree
+ * @example
+ * const addItem = useAddItemToWorkspace();
+ * addItem.mutate({ workspaceId: 1, request: { childType: 'folder', ... } });
  */
 export function useAddItemToWorkspace() {
     const queryClient = useQueryClient();
@@ -41,9 +47,12 @@ export function useAddItemToWorkspace() {
 }
 
 /**
- * Hook to add existing tag to workspace
+ * Hook to add existing folder to workspace tree
+ * @example
+ * const addExisting = useAddExistingFolderToWorkspace();
+ * addExisting.mutate({ workspaceId: 1, tagId: 5, parentTagId: 2 });
  */
-export function useAddExistingTagToWorkspace() {
+export function useAddExistingFolderToWorkspace() {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -77,9 +86,12 @@ export function useAddExistingTagToWorkspace() {
 }
 
 /**
- * Hook to create new tag and add to workspace
+ * Hook to create new folder and add to workspace tree
+ * @example
+ * const createFolder = useCreateAndAddFolderToWorkspace();
+ * createFolder.mutate({ workspaceId: 1, tagName: 'New Folder', parentTagId: 2 });
  */
-export function useCreateAndAddTagToWorkspace() {
+export function useCreateAndAddFolderToWorkspace() {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -121,7 +133,10 @@ export function useCreateAndAddTagToWorkspace() {
 }
 
 /**
- * Hook to update workspace item metadata
+ * Hook to update workspace item metadata (folder properties in workspace context)
+ * @example
+ * const updateItem = useUpdateWorkspaceItem();
+ * updateItem.mutate({ workspaceId: 1, itemId: 3, request: { label: 'New Label' } });
  */
 export function useUpdateWorkspaceItem() {
     const queryClient = useQueryClient();
@@ -145,3 +160,10 @@ export function useUpdateWorkspaceItem() {
         },
     });
 }
+
+// Legacy exports for backward compatibility (deprecated)
+/** @deprecated Use useAddExistingFolderToWorkspace instead */
+export const useAddExistingTagToWorkspace = useAddExistingFolderToWorkspace;
+
+/** @deprecated Use useCreateAndAddFolderToWorkspace instead */
+export const useCreateAndAddTagToWorkspace = useCreateAndAddFolderToWorkspace;

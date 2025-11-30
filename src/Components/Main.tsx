@@ -4,18 +4,12 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { AuthStoreProvider } from '@/store/auth/AuthStore';
-import { TagUIStoreProvider } from '@/store/tagUI/TagUIStore';
+import { FolderUIStoreProvider } from '@/store/folderUI/FolderUIStore';
 import { EditorTabProvider } from '@/Components/Editor';
 import { ContextMenu } from '@/shared/contexts';
 import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenuStore';
-import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import { useTagUIStore } from '@/store/tagUI/TagUIStore';
-import { useTagUIHelper } from '@/hooks/useTagUIHelper';
-import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/hooks/Tags/useTags';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
-import { useCallback } from 'react';
-import { Folder as Tag } from '@/types/folder.types';
 import {NoteUIProvider} from '@/store/note/useNoteUIStore';
 
 
@@ -45,7 +39,7 @@ export function Main() {
             <SnackbarProvider autoHideDuration={3000}>
                 <DndProvider backend={HTML5Backend}>
                     <AuthStoreProvider>
-                        <TagUIStoreProvider>
+                        <FolderUIStoreProvider>
                             <NoteUIProvider>
                                 <EditorTabProvider>
                                     <DialogProvider>
@@ -57,7 +51,7 @@ export function Main() {
                                     </DialogProvider>
                                 </EditorTabProvider>
                             </NoteUIProvider>
-                        </TagUIStoreProvider>
+                        </FolderUIStoreProvider>
                     </AuthStoreProvider>
                 </DndProvider>
             </SnackbarProvider>

@@ -20,8 +20,8 @@ import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPo
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import { useTagUIHelper } from '@/hooks/useTagUIHelper';
-import { useTagUIStore } from '@/store/tagUI/TagUIStore';
+import { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
+import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
 import { EditWorkspaceItemDialog } from '@/Components/tags/EditWorkspaceItemDialog';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
@@ -56,7 +56,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
         handleDeleteItem,
         handleViewInfo,
         closeEditDialog,
-        selectedTagIds,
+        selectedFolderIds,
     } = useContextMenuHelper();
 
     // Confirmation popover for delete actions
@@ -97,7 +97,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
             closeContextMenu();
 
             const nativeEvent = event.syntheticEvent || event;
-            const selectedCount = selectedTagIds.length;
+            const selectedCount = selectedFolderIds.length;
             const isMultipleSelected = selectedCount > 1;
 
             let message: string;
@@ -134,8 +134,9 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
     const renderMenuItems = () => {
         switch (contextType) {
             case 'tag':
+            case 'folder':
                 const isWorkspaceRoot = contextData && contextData.tagId < 0;
-                const selectedCount = selectedTagIds.length;
+                const selectedCount = selectedFolderIds.length;
                 const isMultipleSelected = selectedCount > 1;
 
                 return (

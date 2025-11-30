@@ -26,8 +26,8 @@ import {
     SelectValue,
 } from '@/Components/ui/select';
 import { cn } from '@/lib/utils';
-import { useCreateTag } from '../../hooks/Tags/useTags';
-import { useWorkspaceTagTree } from '../../hooks/Tags/useTags';
+import { useCreateTag } from '../../hooks/Folders/useFolders';
+import { useWorkspaceTagTree } from '../../hooks/Folders/useFolders';
 import type { CreateFolderDTO as CreateTagDTO } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 

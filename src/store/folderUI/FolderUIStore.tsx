@@ -1,32 +1,32 @@
 /**
- * Tag UI Store
- * React Context store for managing tag UI state
+ * Folder UI Store
+ * React Context store for managing folder UI state
  * Pattern: Separate store from business logic (similar to EditorTabStore)
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import type { Folder as Tag, FolderLayoutType as TagLayoutType } from '@/types/folder.types';
+import type { Folder, FolderLayoutType } from '@/types/folder.types';
 
-export interface TagUIStoreData {
-    // Selected tag state
-    selectedTag: Tag | null;
-    setSelectedTag: Dispatch<SetStateAction<Tag | null>>;
+export interface FolderUIStoreData {
+    // Selected folder state
+    selectedFolder: Folder | null;
+    setSelectedFolder: Dispatch<SetStateAction<Folder | null>>;
     isDialogOpen: boolean;
     setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
     
     // Create dialog state
     isCreateDialogOpen: boolean;
     setIsCreateDialogOpen: Dispatch<SetStateAction<boolean>>;
-    parentTagForCreate: Tag | null;
-    setParentTagForCreate: Dispatch<SetStateAction<Tag | null>>;
+    parentFolderForCreate: Folder | null;
+    setParentFolderForCreate: Dispatch<SetStateAction<Folder | null>>;
     
     // Row selection state
     selectedRowIds: number[];
     setSelectedRowIds: Dispatch<SetStateAction<number[]>>;
     
     // Layout preferences
-    currentLayout: TagLayoutType;
-    setCurrentLayout: Dispatch<SetStateAction<TagLayoutType>>;
+    currentLayout: FolderLayoutType;
+    setCurrentLayout: Dispatch<SetStateAction<FolderLayoutType>>;
     
     // Tree state
     expandedNodes: Set<number>;
@@ -39,21 +39,21 @@ export interface TagUIStoreData {
     setShowArchived: Dispatch<SetStateAction<boolean>>;
     
     // Selection state (VS Code-like selection behavior)
-    selectedTagIds: number[];
-    setSelectedTagIds: Dispatch<SetStateAction<number[]>>;
-    lastSelectedTagId: number | null;
-    setLastSelectedTagId: Dispatch<SetStateAction<number | null>>;
+    selectedFolderIds: number[];
+    setSelectedFolderIds: Dispatch<SetStateAction<number[]>>;
+    lastSelectedFolderId: number | null;
+    setLastSelectedFolderId: Dispatch<SetStateAction<number | null>>;
 }
 
-export const tagUIStoreDefaultValue: TagUIStoreData = {
-    selectedTag: null,
-    setSelectedTag: () => {},
+export const folderUIStoreDefaultValue: FolderUIStoreData = {
+    selectedFolder: null,
+    setSelectedFolder: () => {},
     isDialogOpen: false,
     setIsDialogOpen: () => {},
     isCreateDialogOpen: false,
     setIsCreateDialogOpen: () => {},
-    parentTagForCreate: null,
-    setParentTagForCreate: () => {},
+    parentFolderForCreate: null,
+    setParentFolderForCreate: () => {},
     selectedRowIds: [],
     setSelectedRowIds: () => {},
     currentLayout: 'tree',
@@ -64,30 +64,30 @@ export const tagUIStoreDefaultValue: TagUIStoreData = {
     setSearchText: () => {},
     showArchived: false,
     setShowArchived: () => {},
-    selectedTagIds: [],
-    setSelectedTagIds: () => {},
-    lastSelectedTagId: null,
-    setLastSelectedTagId: () => {},
+    selectedFolderIds: [],
+    setSelectedFolderIds: () => {},
+    lastSelectedFolderId: null,
+    setLastSelectedFolderId: () => {},
 };
 
-export const TagUIStore = createContext<TagUIStoreData>(tagUIStoreDefaultValue);
+export const FolderUIStore = createContext<FolderUIStoreData>(folderUIStoreDefaultValue);
 
-export const useTagUIStore = () => useContext(TagUIStore);
+export const useFolderUIStore = () => useContext(FolderUIStore);
 
-export const TagUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const FolderUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Dialog state
-    const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+    const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     
     // Create dialog state
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
-    const [parentTagForCreate, setParentTagForCreate] = useState<Tag | null>(null);
+    const [parentFolderForCreate, setParentFolderForCreate] = useState<Folder | null>(null);
     
     // Row selection state
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
     
     // Layout state
-    const [currentLayout, setCurrentLayout] = useState<TagLayoutType>('tree');
+    const [currentLayout, setCurrentLayout] = useState<FolderLayoutType>('tree');
     
     // Tree expansion state
     const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
@@ -97,20 +97,20 @@ export const TagUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const [showArchived, setShowArchived] = useState<boolean>(false);
     
     // Selection state (VS Code-like)
-    const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-    const [lastSelectedTagId, setLastSelectedTagId] = useState<number | null>(null);
+    const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
+    const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
 
     return (
-        <TagUIStore.Provider
+        <FolderUIStore.Provider
             value={{
-                selectedTag,
-                setSelectedTag,
+                selectedFolder,
+                setSelectedFolder,
                 isDialogOpen,
                 setIsDialogOpen,
                 isCreateDialogOpen,
                 setIsCreateDialogOpen,
-                parentTagForCreate,
-                setParentTagForCreate,
+                parentFolderForCreate,
+                setParentFolderForCreate,
                 selectedRowIds,
                 setSelectedRowIds,
                 currentLayout,
@@ -121,13 +121,13 @@ export const TagUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 setSearchText,
                 showArchived,
                 setShowArchived,
-                selectedTagIds,
-                setSelectedTagIds,
-                lastSelectedTagId,
-                setLastSelectedTagId,
+                selectedFolderIds,
+                setSelectedFolderIds,
+                lastSelectedFolderId,
+                setLastSelectedFolderId,
             }}
         >
             {children}
-        </TagUIStore.Provider>
+        </FolderUIStore.Provider>
     );
 };

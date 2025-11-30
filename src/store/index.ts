@@ -21,5 +21,8 @@ export type { NoteTabContextData, TabItem } from './note/useNoteTabStore';
 export { ContextMenuStore, ContextMenuStoreProvider, useContextMenuStore } from './contextMenu/ContextMenuStore';
 export type { ContextMenuStoreData, ContextMenuPosition, ContextMenuType } from './contextMenu/ContextMenuStore';
 
-export { TagUIStore, TagUIStoreProvider, useTagUIStore } from './tagUI/TagUIStore';
-export type { TagUIStoreData } from './tagUI/TagUIStore';
+export { FolderUIStore, FolderUIStoreProvider, useFolderUIStore } from './folderUI/FolderUIStore';
+export type { FolderUIStoreData } from './folderUI/FolderUIStore';
+
+export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from './hashtagUI/HashtagUIStore';
+export type { HashtagUIStoreData } from './hashtagUI/HashtagUIStore';

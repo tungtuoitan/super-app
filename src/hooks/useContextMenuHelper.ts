@@ -5,10 +5,10 @@
  */
 
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
-import { useTagUIStore } from '@/store/tagUI/TagUIStore';
-import { useTagUIHelper } from '@/hooks/useTagUIHelper';
+import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
+import { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
 import { Folder as Tag } from '@/types/folder.types';
-import {useRemoveWorkspaceItem, useWorkspaceTagTree} from './Tags/useTags';
+import {useRemoveWorkspaceItem, useWorkspaceTagTree} from './Folders/useFolders';
 
 
 
@@ -22,9 +22,9 @@ export const useContextMenuHelper = () => {
         setEditItemData,
     } = useContextMenuStore();
     
-    const { selectedTagIds } = useTagUIStore();
-    const { openCreateDialog } = useTagUIHelper();
-    const { setSelectedTagIds, setLastSelectedTagId } = useTagUIStore();
+    const { selectedFolderIds } = useFolderUIStore();
+    const { openCreateDialog } = useFolderUIHelper();
+    const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderUIStore();
     const removeWorkspaceItemMutation = useRemoveWorkspaceItem();
     const CURRENT_WORKSPACE_ID = 1;
     const { data: workspaceTree } = useWorkspaceTagTree(CURRENT_WORKSPACE_ID);
@@ -129,13 +129,13 @@ export const useContextMenuHelper = () => {
     
                     // VS Code behavior: Select next item after deletion completes
                     if (nextTagIdToSelect !== null) {
-                        setSelectedTagIds([nextTagIdToSelect]);
-                        setLastSelectedTagId(nextTagIdToSelect);
+                        setSelectedFolderIds([nextTagIdToSelect]);
+                        setLastSelectedFolderId(nextTagIdToSelect);
                         console.log(`✅ Selected next item: ${nextTagIdToSelect}`);
                     } else {
                         // Clear selection if no next item
-                        setSelectedTagIds([]);
-                        setLastSelectedTagId(null);
+                        setSelectedFolderIds([]);
+                        setLastSelectedFolderId(null);
                     }
     
                     return;
@@ -249,12 +249,12 @@ export const useContextMenuHelper = () => {
             closeContextMenu();
 
             if (handleDeleteTag) {
-                const selectedCount = selectedTagIds.length;
+                const selectedCount = selectedFolderIds.length;
                 const isMultipleSelected = selectedCount > 1;
 
                 if (isMultipleSelected) {
                     // Delete all selected tags
-                    console.log('🗑️ Deleting multiple tags:', selectedTagIds);
+                    console.log('🗑️ Deleting multiple tags:', selectedFolderIds);
                     // For now, just delete the right-clicked tag
                     // TODO: Implement bulk delete functionality
                     handleDeleteTag(itemData);
@@ -295,6 +295,6 @@ export const useContextMenuHelper = () => {
         handleDeleteItem,
         handleViewInfo,
         closeEditDialog,
-        selectedTagIds,
+        selectedFolderIds,
     };
 };
