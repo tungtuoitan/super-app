@@ -158,3 +158,165 @@ export interface WorkspaceOperationResult {
     status?: number;
     object?: any;
 }
+
+/**
+ * Workspace tree item response - represents a single item in the tree hierarchy
+ * Maps to backend WorkspaceTreeItemResponse
+ */
+export interface WorkspaceTreeItemResponse {
+    /** Type of the item: 'tag', 'note', or 'file' */
+    itemType: string;
+
+    /** Workspace item ID - used for deletion */
+    itemId: number;
+
+    /** Workspace item ID (alias for itemId) */
+    id: number;
+
+    /** Child entity ID (TagId/NoteId/FileId) */
+    childId: number;
+
+    /** User ID who owns/created this item */
+    userId: number;
+
+    /** Display name of the item */
+    name: string;
+
+    /** Parent tag ID (null for root-level items) */
+    parentId?: number | null;
+
+    /** URL-friendly slug */
+    slug?: string;
+
+    /** Hex color code for display */
+    color?: string;
+
+    /** Icon name or class */
+    icon?: string;
+
+    /** Access type: 'owner' or 'shared' */
+    accessType: string;
+
+    /** Whether this workspace owns the item */
+    isOriginal: boolean;
+
+    /** Depth level in tree hierarchy (0 = root) */
+    level: number;
+
+    /** Position/order within same parent */
+    position: number;
+
+    /** Sort order (alias for position) */
+    sortOrder: number;
+
+    /** Depth in tree (alias for level) */
+    depth: number;
+
+    /** Type-specific metadata */
+    metadata?: any;
+
+    /** Child items in the tree */
+    children: WorkspaceTreeItemResponse[];
+
+    /** UI state: Whether expanded */
+    isExpanded: boolean;
+
+    /** UI state: Whether selected */
+    isSelected: boolean;
+
+    /** When created */
+    createdAt: string;
+
+    /** When last updated */
+    updatedAt?: string;
+}
+
+/**
+ * Workspace list item response - for workspace selection dropdown
+ * Maps to backend WorkspaceListResponse
+ */
+export interface WorkspaceListResponse {
+    /** Workspace ID */
+    id: number;
+
+    /** User ID who owns the workspace */
+    userId: number;
+
+    /** Workspace name */
+    name: string;
+
+    /** Workspace description */
+    description?: string;
+
+    /** When created */
+    createdAt: string;
+
+    /** When last updated */
+    updatedAt?: string;
+}
+
+/**
+ * Workspace with complete tree hierarchy response
+ * Maps to backend WorkspaceWithTreeResponse
+ */
+export interface WorkspaceWithTreeResponse {
+    /** Workspace ID */
+    workspaceId: number;
+
+    /** User ID who owns the workspace */
+    userId: number;
+
+    /** Workspace name */
+    name: string;
+
+    /** Workspace description */
+    description?: string;
+
+    /** Hex color code */
+    color?: string;
+
+    /** Icon name or class */
+    icon?: string;
+
+    /** Workspace organization type */
+    type?: string;
+
+    /** Maximum depth allowed */
+    maxDepth?: number;
+
+    /** Whether this is the default workspace */
+    isDefault: boolean;
+
+    /** Whether publicly accessible */
+    isPublic: boolean;
+
+    /** Whether this is a template */
+    isTemplate: boolean;
+
+    /** Whether archived */
+    isArchived: boolean;
+
+    /** Total number of tags */
+    tagCount: number;
+
+    /** Total number of notes */
+    noteCount: number;
+
+    /** Total number of files */
+    fileCount: number;
+
+    /** Number of members */
+    memberCount: number;
+
+    /** Additional settings as JSON */
+    settings?: string;
+
+    /** When created */
+    createdAt: string;
+
+    /** When last updated */
+    updatedAt?: string;
+
+    /** Hierarchical tree structure */
+    items: WorkspaceTreeItemResponse[];
+}

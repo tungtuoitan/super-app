@@ -4,16 +4,88 @@
  */
 
 import { API_CONFIG } from '@/config/api.config';
-import type { 
-    MoveItemsRequest, 
-    DeleteItemsRequest, 
-    WorkspaceOperationResult 
+import type {
+    MoveItemsRequest,
+    DeleteItemsRequest,
+    WorkspaceOperationResult,
+    WorkspaceWithTreeResponse,
+    WorkspaceListResponse
 } from '@/types/workspace.types';
+
+/**
+ * Get all workspaces for the current user
+ * GET /api/workspace
+ *
+ * @param token - Authentication token
+ * @returns Array of user's workspaces or rejects with response
+ */
+export const _getAllUserWorkspaces = async (
+    token: string
+): Promise<WorkspaceListResponse[]> => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "GET",
+        headers: headers,
+    };
+
+    const res = await window.fetch(
+        `${API_CONFIG.baseURL}/api/workspace`,
+        options
+    );
+
+    if (res.ok) {
+        const ret = await res.json();
+        return ret;
+    } else {
+        return Promise.reject(res);
+    }
+};
+
+/**
+ * Get workspace tree with hierarchical structure
+ * GET /api/workspace/{workspaceId}/tree
+ *
+ * @param token - Authentication token
+ * @param workspaceId - The workspace ID
+ * @returns Workspace tree with all items or rejects with response
+ */
+export const _getWorkspaceTree = async (
+    token: string,
+    workspaceId: number
+): Promise<WorkspaceWithTreeResponse> => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "GET",
+        headers: headers,
+    };
+
+    const res = await window.fetch(
+        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/tree`,
+        options
+    );
+
+    if (res.ok) {
+        const ret = await res.json();
+        return ret;
+    } else {
+        return Promise.reject(res);
+    }
+};
 
 /**
  * Get workspace item by ID
  * GET /api/workspace/{workspaceId}/items/{itemId}
- * 
+ *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
  * @param itemId - The workspace item ID to retrieve

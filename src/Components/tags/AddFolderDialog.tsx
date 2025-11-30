@@ -24,14 +24,10 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
-// Removed: TanStack Query hooks no longer available
-// Removed: TanStack Query hooks no longer available
-// TODO: Implement these functions using workspace.service
-// import { addExistingFolderToWorkspace, createAndAddFolderToWorkspace } from '@/services/workspace.service';
 import type { Folder } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
+import {useFolderStore} from '@/store/index';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
@@ -97,7 +93,7 @@ export function AddFolderDialog({
     const addExistingTag: any = null; // Temporarily disabled
     const createAndAddTag: any = null; // Temporarily disabled
     const { enqueueSnackbar } = useSnackbar();
-    const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderUIStore();
+    const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderStore();
 
     // Find parent folder info for display (VS Code-like)
     const parentFolder = React.useMemo(() => {
@@ -219,7 +215,7 @@ export function AddFolderDialog({
         onClose();
     };
 
-    const isSubmitting = addExistingTag.isPending || createAndAddTag.isPending;
+    const isSubmitting = addExistingTag?.isPending || createAndAddTag?.isPending;
 
     // Keyboard Shortcuts
     useKeyboardShortcut({

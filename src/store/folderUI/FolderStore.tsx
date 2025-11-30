@@ -43,6 +43,10 @@ export interface FolderUIStoreData {
     setSelectedFolderIds: Dispatch<SetStateAction<number[]>>;
     lastSelectedFolderId: number | null;
     setLastSelectedFolderId: Dispatch<SetStateAction<number | null>>;
+    
+    // Drag state
+    isDragging: boolean;
+    setIsDragging: Dispatch<SetStateAction<boolean>>;
 }
 
 export const folderUIStoreDefaultValue: FolderUIStoreData = {
@@ -68,11 +72,13 @@ export const folderUIStoreDefaultValue: FolderUIStoreData = {
     setSelectedFolderIds: () => {},
     lastSelectedFolderId: null,
     setLastSelectedFolderId: () => {},
+    isDragging: false,
+    setIsDragging: () => {},
 };
 
-export const FolderUIStore = createContext<FolderUIStoreData>(folderUIStoreDefaultValue);
+export const FolderStore = createContext<FolderUIStoreData>(folderUIStoreDefaultValue);
 
-export const useFolderUIStore = () => useContext(FolderUIStore);
+export const useFolderStore = () => useContext(FolderStore);
 
 export const FolderUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Dialog state
@@ -99,9 +105,12 @@ export const FolderUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> =
     // Selection state (VS Code-like)
     const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
     const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
+    
+    // Drag state
+    const [isDragging, setIsDragging] = useState<boolean>(false);
 
     return (
-        <FolderUIStore.Provider
+        <FolderStore.Provider
             value={{
                 selectedFolder,
                 setSelectedFolder,
@@ -125,9 +134,11 @@ export const FolderUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> =
                 setSelectedFolderIds,
                 lastSelectedFolderId,
                 setLastSelectedFolderId,
+                isDragging,
+                setIsDragging,
             }}
         >
             {children}
-        </FolderUIStore.Provider>
+        </FolderStore.Provider>
     );
 };

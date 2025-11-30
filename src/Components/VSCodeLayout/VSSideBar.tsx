@@ -4,8 +4,8 @@ import { NoteGridPanel } from '../Notes/NoteGridPanel'
 import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
-import {WorkspaceTree} from '../Folders/WorkspaceTree'
 import {FoldersPanel} from '../Folders'
+import { ExplorerView } from './ExplorerView'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -49,12 +49,12 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
           <Panel defaultSize={70} minSize={20}>
             <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
               {/* Header */}
-              <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground">
+              <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                 <span>{getViewTitle(activeView)}</span>
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-auto">
+              <div className="flex-1 overflow-hidden">
                 {activeView === 'explorer' && <ExplorerView />}
                 {activeView === 'folders' && <FoldersView />}
                 {activeView === 'notes' && <NotesView />}
@@ -82,18 +82,6 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
         </PanelGroup>
       )}
     </Panel>
-  )
-}
-
-/**
- * Explorer View - WorkspaceTree for folder navigation
- */
-function ExplorerView() {
-  return (
-    <div className="h-full overflow-hidden flex flex-col">
-      {/* Using workspace folder tree API with workspaceId=1 */}
-      <WorkspaceTree workspaceId={1} includeShared={true} />
-    </div>
   )
 }
 

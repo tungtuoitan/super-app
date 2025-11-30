@@ -20,8 +20,8 @@ import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPo
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
-import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
+import { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
+import { useFolderStore } from '@/store/folderUI/FolderStore';
 import { EditWorkspaceItemDialog } from '@/Components/tags/EditWorkspaceItemDialog';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';

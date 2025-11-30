@@ -4,13 +4,14 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { AuthStoreProvider } from '@/store/auth/AuthStore';
-import { FolderUIStoreProvider } from '@/store/folderUI/FolderUIStore';
 import { EditorTabProvider } from '@/Components/Editor';
+import { ExplorerProvider } from '@/store/explorer/ExplorerStore';
 import { ContextMenu } from '@/shared/contexts';
 import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenuStore';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import {NoteUIProvider} from '@/store/note/useNoteUIStore';
+import {FolderUIStoreProvider} from '@/store/folderUI/FolderStore';
 
 
 /**
@@ -39,19 +40,21 @@ export function Main() {
             <SnackbarProvider autoHideDuration={3000}>
                 <DndProvider backend={HTML5Backend}>
                     <AuthStoreProvider>
-                        <FolderUIStoreProvider>
-                            <NoteUIProvider>
-                                <EditorTabProvider>
-                                    <DialogProvider>
-                                        <ContextMenuStoreProvider>
-                                            <ContextMenu>
-                                                <MainNav />
-                                            </ContextMenu>
-                                        </ContextMenuStoreProvider>
-                                    </DialogProvider>
-                                </EditorTabProvider>
-                            </NoteUIProvider>
-                        </FolderUIStoreProvider>
+                        <ExplorerProvider>
+                            <FolderUIStoreProvider>
+                                <NoteUIProvider>
+                                    <EditorTabProvider>
+                                        <DialogProvider>
+                                            <ContextMenuStoreProvider>
+                                                <ContextMenu>
+                                                    <MainNav />
+                                                </ContextMenu>
+                                            </ContextMenuStoreProvider>
+                                        </DialogProvider>
+                                    </EditorTabProvider>
+                                </NoteUIProvider>
+                            </FolderUIStoreProvider>
+                        </ExplorerProvider>
                     </AuthStoreProvider>
                 </DndProvider>
             </SnackbarProvider>
