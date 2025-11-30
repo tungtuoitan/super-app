@@ -2,7 +2,7 @@
 
 // Components
 export { TagCreateDialog } from './TagCreateDialog';
-export { AddTagDialog } from './AddTagDialog';
+export { AddFolderDialog } from './AddFolderDialog';
 export { WorkspaceTree } from './WorkspaceTree';
 export { TagsPanel } from './TagsPanel';
 export { CreateFolderDialog } from './CreateFolderDialog';
@@ -25,9 +25,9 @@ export { tagService } from '../../services/tagService';
 
 // Types
 export type { 
-    Tag, 
-    TagLayoutType,
-    CreateTagDTO, 
-    UpdateTagDTO, 
-    GetTagsParams
-} from '../../types/tag.types';
+    Folder as Tag, 
+    FolderLayoutType as TagLayoutType,
+    CreateFolderDTO as CreateTagDTO, 
+    UpdateFolderDTO as UpdateTagDTO, 
+    GetFoldersParams as GetTagsParams
+} from '../../types/folder.types';

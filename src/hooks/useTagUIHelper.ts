@@ -6,7 +6,7 @@
 
 import { useCallback } from 'react';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';
-import type { Tag } from '@/types/tag.types';
+import type { Folder as Tag } from '@/types/folder.types';
 
 export const useTagUIHelper = () => {
     const {

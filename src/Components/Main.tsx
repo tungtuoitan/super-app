@@ -15,7 +15,7 @@ import { useRemoveWorkspaceItem, useWorkspaceTagTree } from '@/hooks/Tags/useTag
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import { useCallback } from 'react';
-import { Tag } from '@/types/tag.types';
+import { Folder as Tag } from '@/types/folder.types';
 import {NoteUIProvider} from '@/store/note/useNoteUIStore';
 
 

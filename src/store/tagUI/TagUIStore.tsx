@@ -5,7 +5,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import type { Tag, TagLayoutType } from '@/types/tag.types';
+import type { Folder as Tag, FolderLayoutType as TagLayoutType } from '@/types/folder.types';
 
 export interface TagUIStoreData {
     // Selected tag state

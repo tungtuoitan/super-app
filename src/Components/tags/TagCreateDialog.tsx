@@ -20,7 +20,7 @@ import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 import { useCreateTag } from '../../hooks/Tags/useTags';
 import { useSnackbar } from 'notistack';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components/ui/GenericAutoComplete';
-import type { CreateTagDTO } from '../../types/tag.types';
+import type { CreateFolderDTO as CreateTagDTO } from '../../types/folder.types';
 
 // Dummy data for icon options
 const ICON_OPTIONS: IAutoCompleteOptions[] = [

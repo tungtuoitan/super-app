@@ -6,11 +6,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tagService } from '../../services/tagService';
 import type { 
-    Tag, 
-    CreateTagDTO, 
-    UpdateTagDTO, 
-    GetTagsParams 
-} from '../../types/tag.types';
+    Folder as Tag, 
+    CreateFolderDTO as CreateTagDTO, 
+    UpdateFolderDTO as UpdateTagDTO, 
+    GetFoldersParams as GetTagsParams 
+} from '../../types/folder.types';
 
 // Query Keys
 export const tagKeys = {

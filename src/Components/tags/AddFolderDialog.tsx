@@ -1,5 +1,5 @@
 /**
- * AddTagDialog - Dialog for adding folders to workspace
+ * AddFolderDialog - Dialog for adding folders to workspace
  * Can add existing folders OR create new folders
  * Migrated from MUI to shadcn/ui
  */
@@ -26,7 +26,7 @@ import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
 import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../../hooks/Tags/useWorkspace';
-import type { Tag } from '../../types/tag.types';
+import type { Folder as Tag } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';
@@ -50,7 +50,7 @@ function extractTagIdsFromTree(tags: Tag[]): number[] {
     return tagIds;
 }
 
-interface AddTagDialogProps {
+interface AddFolderDialogProps {
     open: boolean;
     onClose: () => void;
     workspaceId: number;
@@ -59,12 +59,12 @@ interface AddTagDialogProps {
 
 type TabValue = 'existing' | 'new';
 
-export function AddTagDialog({ 
+export function AddFolderDialog({ 
     open, 
     onClose, 
     workspaceId,
     parentTagId 
-}: AddTagDialogProps) {
+}: AddFolderDialogProps) {
     // Tab state
     const [activeTab, setActiveTab] = useState<TabValue>('existing');
     
@@ -73,7 +73,7 @@ export function AddTagDialog({
     const [comboboxOpen, setComboboxOpen] = useState(false);
     
     // New folder fields
-    const [newTagName, setNewTagName] = useState('');
+    const [newFolderName, setNewFolderName] = useState('');
     const [description, setDescription] = useState('');
     const [color, setColor] = useState('#1976D2'); // Default blue
     
@@ -113,7 +113,7 @@ export function AddTagDialog({
         if (open) {
             setActiveTab('existing');
             setSelectedTag(null);
-            setNewTagName('');
+            setNewFolderName('');
             setDescription('');
             setColor('#1976D2');
             setLabel('');
@@ -136,12 +136,12 @@ export function AddTagDialog({
         return Object.keys(newErrors).length === 0;
     };
 
-    const validateNewTag = (): boolean => {
+    const validateNewFolder = (): boolean => {
         const newErrors: { name?: string } = {};
 
-        if (!newTagName.trim()) {
+        if (!newFolderName.trim()) {
             newErrors.name = 'Folder name is required';
-        } else if (newTagName.length > 200) {
+        } else if (newFolderName.length > 200) {
             newErrors.name = 'Folder name must be less than 200 characters';
         }
 
@@ -177,14 +177,14 @@ export function AddTagDialog({
     }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
 
     const handleSubmitNew = useCallback(async () => {
-        if (!validateNewTag()) {
+        if (!validateNewFolder()) {
             return;
         }
 
         try {
             const result = await createAndAddTag.mutateAsync({
                 workspaceId,
-                tagName: newTagName.trim(),
+                tagName: newFolderName.trim(),
                 parentTagId: parentTagId || null,
                 options: {
                     color,
@@ -197,13 +197,13 @@ export function AddTagDialog({
             setSelectedTagIds([result.childId]);
             setLastSelectedTagId(result.childId);
 
-            enqueueSnackbar(`New folder "${newTagName}" created and added!`, { variant: 'success' });
+            enqueueSnackbar(`New folder "${newFolderName}" created and added!`, { variant: 'success' });
             onClose();
         } catch (error: any) {
             console.error('Failed to create and add folder:', error);
             enqueueSnackbar(error?.message || 'Failed to create folder', { variant: 'error' });
         }
-    }, [newTagName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
+    }, [newFolderName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
 
     const handleSubmit = () => {
         if (activeTab === 'existing') {
@@ -224,7 +224,7 @@ export function AddTagDialog({
         key: 'Enter',
         enabled: open && !isSubmitting && (
             (activeTab === 'existing' && !!selectedTag) ||
-            (activeTab === 'new' && !!newTagName.trim())
+            (activeTab === 'new' && !!newFolderName.trim())
         ),
         callback: handleSubmit,
     });
@@ -361,11 +361,11 @@ export function AddTagDialog({
 
                     <TabsContent value="new" className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="new-tag-name">Folder Name *</Label>
+                            <Label htmlFor="new-folder-name">Folder Name *</Label>
                             <Input
-                                id="new-tag-name"
-                                value={newTagName}
-                                onChange={(e) => setNewTagName(e.target.value)}
+                                id="new-folder-name"
+                                value={newFolderName}
+                                onChange={(e) => setNewFolderName(e.target.value)}
                                 placeholder="Enter folder name"
                             />
                             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}

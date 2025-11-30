@@ -4,7 +4,7 @@
  * Note: Backend still uses tagId field, but frontend uses folderId
  */
 
-import type { Tag } from '../../types/tag.types';
+import type { Folder as Tag } from '../../types/folder.types';
 
 // Helper to ensure all items have both tagId and folderId
 const ensureFolderCompat = (items: any[]): Tag[] => {

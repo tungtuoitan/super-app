@@ -24,8 +24,8 @@ import { useWorkspaceTagTree, useBatchMoveTag } from '../../hooks/Tags/useTags';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 import { useTagUIHelper } from '@/hooks/useTagUIHelper';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import type { Tag } from '../../types/tag.types';
-import { AddTagDialog } from './AddTagDialog';
+import type { Folder as Tag } from '../../types/folder.types';
+import { AddFolderDialog } from './AddFolderDialog';
 
 interface WorkspaceTreeProps {
     onTagClick?: (tag: Tag) => void;
@@ -957,7 +957,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
 
             {/* Add Folder Dialog */}
             {workspaceId && (
-                <AddTagDialog
+                <AddFolderDialog
                     open={isCreateDialogOpen}
                     onClose={closeCreateDialog}
                     workspaceId={workspaceId}

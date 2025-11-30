@@ -2,7 +2,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
-import { TagsPage } from '../../pages/TagsPage';
 import { VSCodeLayout } from '../VSCodeLayout';
 import {useContextMenuHelper} from '@/hooks/useContextMenuHelper';
 
@@ -49,7 +48,6 @@ export default function MainNav() {
                     >
                         <Routes>
                             <Route path="/" element={<VSCodeLayout />} />
-                            <Route path="/tags" Component={TagsPage} />
                             <Route path="/notes" element={<VSCodeLayout />} />
                         </Routes>
                     </div>

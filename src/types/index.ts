@@ -9,7 +9,7 @@ export * from './common.types';
 export * from './folder.types';
 
 // Export tag types (backward compatibility - re-exports from folder.types)
-export * from './tag.types';
+
 
 /**
  * API Client Types

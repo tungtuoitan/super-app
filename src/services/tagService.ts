@@ -5,17 +5,17 @@
 
 import { apiClient } from '@/lib/api-client'
 import type {
-    Tag,
-    TagDTO,
-    TagTreeResponseDTO,
-    CreateTagDTO,
-    UpdateTagDTO,
-    GetTagsParams,
-    TagTreeNode,
-    WorkspaceWithTagTree,
+    Folder as Tag,
+    FolderDTO as TagDTO,
+    FolderTreeResponseDTO as TagTreeResponseDTO,
+    CreateFolderDTO as CreateTagDTO,
+    UpdateFolderDTO as UpdateTagDTO,
+    GetFoldersParams as GetTagsParams,
+    FolderTreeNode as TagTreeNode,
+    WorkspaceWithFolderTree as WorkspaceWithTagTree,
     WorkspaceWithTreeDTO,
     WorkspaceTreeItemDTO
-} from '../types/tag.types'
+} from '../types/folder.types'
 import {tagsDumpData} from '@/Components/tags/tagsDumpData';
 
 // Toggle between dump data and real API
