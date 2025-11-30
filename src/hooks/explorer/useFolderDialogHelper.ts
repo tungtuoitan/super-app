@@ -16,6 +16,8 @@ export const useFolderDialogHelper = () => {
     const {
         mode,
         editingFolder,
+        parentFolder,
+        setParentFolder,
         newFolderName,
         description,
         color,
@@ -34,8 +36,6 @@ export const useFolderDialogHelper = () => {
     // Explorer state
     const {
         currentTree,
-        parentFolderForCreate,
-        setParentFolderForCreate,
     } = useExplorerStore();
     
     // Auth
@@ -101,7 +101,7 @@ export const useFolderDialogHelper = () => {
                     name: newFolderName.trim(),
                     description: description.trim() || undefined,
                     color,
-                    parentId: parentFolderForCreate?.folderId || null,
+                    parentId: parentFolder?.folderId || null,
                 };
             
             // Call upsertFolder endpoint
@@ -145,7 +145,7 @@ export const useFolderDialogHelper = () => {
         
         if (dialogMode === 'create') {
             // Create mode: folderOrParent is the parent folder
-            setParentFolderForCreate(folderOrParent || null);
+            setParentFolder(folderOrParent || null);
             resetForm();
         } else {
             // Edit mode: folderOrParent is the folder to edit
@@ -196,7 +196,7 @@ export const useFolderDialogHelper = () => {
         setIsOpen(false);
         setTimeout(() => {
             if (mode === 'create') {
-                setParentFolderForCreate(null);
+                setParentFolder(null);
             }
             resetForm();
         }, 200); // Clear after animation

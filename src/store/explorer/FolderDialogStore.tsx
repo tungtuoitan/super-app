@@ -25,6 +25,8 @@ export interface FolderDialogContextData {
     setMode: Dispatch<SetStateAction<DialogMode>>;
     editingFolder: any | null;
     setEditingFolder: Dispatch<SetStateAction<any | null>>;
+    parentFolder: any | null;
+    setParentFolder: Dispatch<SetStateAction<any | null>>;
     
     // Form fields
     newFolderName: string;
@@ -57,6 +59,8 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     setMode: () => {},
     editingFolder: null,
     setEditingFolder: () => {},
+    parentFolder: null,
+    setParentFolder: () => {},
     
     // Form fields
     newFolderName: '',
@@ -98,6 +102,7 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [mode, setMode] = useState<DialogMode>('create');
     const [editingFolder, setEditingFolder] = useState<any | null>(null);
+    const [parentFolder, setParentFolder] = useState<any | null>(null);
     
     // Form fields
     const [newFolderName, setNewFolderName] = useState<string>('');
@@ -130,6 +135,8 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 setMode,
                 editingFolder,
                 setEditingFolder,
+                parentFolder,
+                setParentFolder,
                 
                 // Form fields
                 newFolderName,

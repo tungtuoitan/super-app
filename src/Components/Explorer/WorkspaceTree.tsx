@@ -5,15 +5,13 @@ import { useDragDropManager } from 'react-dnd';
 import {
     Loader2
 } from 'lucide-react';
-import type { Folder } from '../../types/folder.types';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
-import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
 import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
-import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
 import {CustomDragPreview} from './CustomDragPreview';
 import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
 import {FolderNode} from './FolderNode';
+import {WorkspaceToolBar} from './WorkspaceToolBar';
 import {getAllVisibleFolderIds, transformToTreeData, TreeFolder} from '@/hooks/explorer/tree.helper';
 import {FolderDialog} from './FolderDialog/FolderDialog';
 
@@ -29,8 +27,7 @@ export function WorkspaceTree() {
         handleSelectionChange,
         handleKeyDown,
     } = useTreeSelection();
-    const {
-    } = useDialogAction();
+
     const {
         handleMove,
     } = useTreeOperation();
@@ -69,15 +66,22 @@ export function WorkspaceTree() {
 
 
     if (!treeData || treeData.length === 0) {
-        return <WorkspaceTreeEmpty />;
+        return (
+            <>
+                <WorkspaceToolBar treeData={treeData || []} />
+                <WorkspaceTreeEmpty />
+            </>
+        );
     }
     return (
-        <div
-            ref={treeContainerRef}
-            data-workspace-tree
-            tabIndex={0}
-            className="h-full flex flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto vscode-scrollbar"
-        >
+        <>
+            <WorkspaceToolBar treeData={treeData} />
+            <div
+                ref={treeContainerRef}
+                data-workspace-tree
+                tabIndex={0}
+                className="h-full flex flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto vscode-scrollbar"
+            >
             {/* Loading overlay when dragging */}
             {(isDragging) && (
                 <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
@@ -121,5 +125,6 @@ export function WorkspaceTree() {
             {/* Add Folder Dialog */}
             <FolderDialog />
         </div>
+        </>
     );
 }

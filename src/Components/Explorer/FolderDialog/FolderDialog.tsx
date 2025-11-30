@@ -26,18 +26,17 @@ import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
 
 export function FolderDialog() {
-    // Get state from ExplorerStore (legacy support)
+    // Get state from ExplorerStore
     const {
-        isCreateDialogOpen,
-        parentFolderForCreate,
         currentTree
     } = useExplorerStore();
 
-    // Get form state from FolderDialogStore (new unified approach)
+    // Get form state from FolderDialogStore (unified approach)
     const {
         isOpen,
         mode,
         editingFolder,
+        parentFolder,
         newFolderName,
         setNewFolderName,
         description,
@@ -51,12 +50,12 @@ export function FolderDialog() {
     // Get business logic and dialog actions from helper
     const { submitFolder, closeFolderDialog } = useFolderDialogHelper();
 
-    // Derived values - support both legacy and new approach
-    const dialogOpen = isOpen || isCreateDialogOpen;
-    const parentFolderId = parentFolderForCreate?.folderId;
+    // Derived values
+    const dialogOpen = isOpen;
+    const parentFolderId = parentFolder?.folderId;
 
     // Find parent folder info for display (VS Code-like)
-    const parentFolder = React.useMemo(() => {
+    const parentFolderInfo = React.useMemo(() => {
         if (!parentFolderId || !currentTree?.items || currentTree.items.length === 0) return null;
         
         // Search for parent folder in the tree
@@ -80,9 +79,9 @@ export function FolderDialog() {
         
         // If we have a parent folder, get its children
         if (parentFolderId) {
-            const parent = parentFolder;
+            const parent = parentFolderInfo;
             if (parent && parent.children) {
-                return parent.children.filter(child => 
+                return parent.children.filter((child: WorkspaceTreeItemResponse) => 
                     child.itemType === 'tag' && 
                     // When editing, exclude the current folder being edited
                     (mode === 'create' || child.childId !== editingFolder?.folderId)
@@ -102,7 +101,7 @@ export function FolderDialog() {
     const isDuplicateName = React.useMemo(() => {
         if (!newFolderName.trim()) return false;
         
-        return siblingFolders().some(folder => 
+        return siblingFolders().some((folder: WorkspaceTreeItemResponse) => 
             folder.name.toLowerCase() === newFolderName.trim().toLowerCase()
         );
     }, [newFolderName]);
@@ -135,16 +134,11 @@ export function FolderDialog() {
     };
     console.log('FolderDialog Render:', { dialogOpen, mode, parentFolder });
     
-    // Handle submit (unified for both create and edit)
-    const handleSubmit = async () => {
-        await submitFolder();
-    };
-
     // Keyboard Shortcuts
     useKeyboardShortcut({
         key: 'Enter',
         enabled: dialogOpen && !isSubmitting && !!newFolderName.trim(),
-        callback: handleSubmit,
+        callback: submitFolder,
     });
 
     useKeyboardShortcut({
@@ -241,7 +235,7 @@ export function FolderDialog() {
                         Cancel
                     </Button>
                     <Button  
-                        onClick={handleSubmit}
+                        onClick={submitFolder}
                         disabled={isSubmitting || isDuplicateName || !newFolderName.trim()}
                     >
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

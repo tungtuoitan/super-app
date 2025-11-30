@@ -1,27 +1,18 @@
 
-import React, { useMemo, useState } from 'react';
-import { Tree, NodeApi } from 'react-arborist';
+import React from 'react';
+import { NodeApi } from 'react-arborist';
 import {
     ChevronDown,
     ChevronRight,
     Tag as TagIcon,
     FolderOpen,
     Folder as FolderIcon,
-    Layers,
-    Plus,
-    RefreshCw,
-    ChevronsUp,
-    Loader2
+    Layers
 } from 'lucide-react';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
-import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
-import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
-import { useTreeExpansion } from '@/hooks/explorer/useTreeExpansion.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
-import {useWorkspaceOperation} from '@/hooks/explorer/useWorkspaceOperation.helper';
-import {useFolderDialogHelper} from '@/hooks/explorer';
 
 
 
@@ -45,14 +36,11 @@ export function FolderNode({
     } = useExplorerStore();
     const { showContextMenu } = useContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
-    const { handleMove, handleNewFolder } = useTreeOperation();
-    const { handleCollapseAll } = useTreeExpansion();
-    const { loadTree } = useWorkspaceOperation();
 
     const folder = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isFolderSelected(folder.folderId);
-    const isWorkspaceRoot = folder.folderId < 0; // Workspace root node has negative ID
+    const isWorkspaceRoot = !(folder.folderId > 0); // Workspace root node has negative ID
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -218,48 +206,6 @@ export function FolderNode({
                     </span>
                 </div>
             </div>
-
-            {/* Action Buttons (only for workspace root) */}
-            {isWorkspaceRoot && (
-                <div
-                    className="flex gap-0.5 ml-auto opacity-70 hover:opacity-100 transition-opacity"
-                    onClick={(e) => e.stopPropagation()} // Prevent node selection when clicking buttons
-                >
-                    <button
-                        title="Add Folder"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleNewFolder(treeData);
-                        }}
-                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
-                    >
-                        <Plus className="w-4 h-4" />
-                    </button>
-
-                    <button
-                        title="Refresh"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if(currentTree?.workspaceId)
-                                loadTree(currentTree.workspaceId);
-                        }}
-                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                    </button>
-
-                    <button
-                        title="Collapse All"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleCollapseAll();
-                        }}
-                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
-                    >
-                        <ChevronsUp className="w-4 h-4" />
-                    </button>
-                </div>
-            )}
 
         </div>
     );

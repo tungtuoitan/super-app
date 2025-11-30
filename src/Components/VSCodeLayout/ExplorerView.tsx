@@ -92,13 +92,13 @@ export function ExplorerView() {
 
       {/* Workspace Tree */}
       <div className="flex-1 overflow-hidden relative">
-        {!currentTree?.workspaceId ? (
+        {/* {!currentTree?.workspaceId ? (
           <div className="p-4 text-sm text-muted-foreground">No workspace selected</div>
         ) : !currentTree && !isLoadingTree ? (
           <div className="p-4 text-sm text-muted-foreground">No tree data available</div>
         ) : (
-          <WorkspaceTree />
-        )}
+        )} */}
+        <WorkspaceTree />
         
         {/* Loading Overlay */}
         {(isLoadingWorkspaces || isLoadingTree) && (

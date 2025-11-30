@@ -19,25 +19,13 @@ export interface ExplorerContextData {
     isLoadingTree: boolean;
     setIsLoadingTree: Dispatch<SetStateAction<boolean>>;
     
-    // Folder UI state (workspace folder UI, dialogs, selection)
-    selectedFolder: Folder | null;
-    setSelectedFolder: Dispatch<SetStateAction<Folder | null>>;
-    isDialogOpen: boolean;
-    setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-    isCreateDialogOpen: boolean;
-    setIsCreateDialogOpen: Dispatch<SetStateAction<boolean>>;
-    parentFolderForCreate: Folder | null;
-    setParentFolderForCreate: Dispatch<SetStateAction<Folder | null>>;
+    // Folder UI state (workspace folder UI, selection)
     selectedRowIds: number[];
     setSelectedRowIds: Dispatch<SetStateAction<number[]>>;
-    currentLayout: FolderLayoutType;
-    setCurrentLayout: Dispatch<SetStateAction<FolderLayoutType>>;
     expandedNodes: Set<number>;
     setExpandedNodes: Dispatch<SetStateAction<Set<number>>>;
     searchText: string;
     setSearchText: Dispatch<SetStateAction<string>>;
-    showArchived: boolean;
-    setShowArchived: Dispatch<SetStateAction<boolean>>;
     selectedFolderIds: number[];
     setSelectedFolderIds: Dispatch<SetStateAction<number[]>>;
     lastSelectedFolderId: number | null;
@@ -46,8 +34,6 @@ export interface ExplorerContextData {
     setIsDragging: Dispatch<SetStateAction<boolean>>;
     treeRef: React.RefObject<any> | null;
     setTreeRef: (ref: React.RefObject<any> | null) => void;
-    refetchCallback: (() => void) | null;
-    setRefetchCallback: (callback: (() => void) | null) => void;
 }
 
 export const explorerContextDefaultValue: ExplorerContextData = {
@@ -59,24 +45,12 @@ export const explorerContextDefaultValue: ExplorerContextData = {
     setIsLoadingWorkspaces: () => {},
     isLoadingTree: false,
     setIsLoadingTree: () => {},
-    selectedFolder: null,
-    setSelectedFolder: () => {},
-    isDialogOpen: false,
-    setIsDialogOpen: () => {},
-    isCreateDialogOpen: false,
-    setIsCreateDialogOpen: () => {},
-    parentFolderForCreate: null,
-    setParentFolderForCreate: () => {},
     selectedRowIds: [],
     setSelectedRowIds: () => {},
-    currentLayout: 'tree',
-    setCurrentLayout: () => {},
     expandedNodes: new Set(),
     setExpandedNodes: () => {},
     searchText: '',
     setSearchText: () => {},
-    showArchived: false,
-    setShowArchived: () => {},
     selectedFolderIds: [],
     setSelectedFolderIds: () => {},
     lastSelectedFolderId: null,
@@ -85,8 +59,6 @@ export const explorerContextDefaultValue: ExplorerContextData = {
     setIsDragging: () => {},
     treeRef: null,
     setTreeRef: () => {},
-    refetchCallback: null,
-    setRefetchCallback: () => {},
 };
 
 export const ExplorerStore = createContext<ExplorerContextData>(explorerContextDefaultValue);
@@ -100,20 +72,13 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
     
     // Folder UI state
-    const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
-    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
-    const [parentFolderForCreate, setParentFolderForCreate] = useState<Folder | null>(null);
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-    const [currentLayout, setCurrentLayout] = useState<FolderLayoutType>('tree');
     const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
     const [searchText, setSearchText] = useState<string>('');
-    const [showArchived, setShowArchived] = useState<boolean>(false);
     const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
     const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [treeRef, setTreeRef] = useState<React.RefObject<any> | null>(null);
-    const [refetchCallback, setRefetchCallback] = useState<(() => void) | null>(null);
 
     return (
         <ExplorerStore.Provider
@@ -126,24 +91,12 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 setIsLoadingWorkspaces,
                 isLoadingTree,
                 setIsLoadingTree,
-                selectedFolder,
-                setSelectedFolder,
-                isDialogOpen,
-                setIsDialogOpen,
-                isCreateDialogOpen,
-                setIsCreateDialogOpen,
-                parentFolderForCreate,
-                setParentFolderForCreate,
                 selectedRowIds,
                 setSelectedRowIds,
-                currentLayout,
-                setCurrentLayout,
                 expandedNodes,
                 setExpandedNodes,
                 searchText,
                 setSearchText,
-                showArchived,
-                setShowArchived,
                 selectedFolderIds,
                 setSelectedFolderIds,
                 lastSelectedFolderId,
@@ -152,8 +105,6 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 setIsDragging,
                 treeRef,
                 setTreeRef,
-                refetchCallback,
-                setRefetchCallback,
             }}
         >
             {children}

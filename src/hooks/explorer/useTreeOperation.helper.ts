@@ -14,7 +14,6 @@ export const useTreeOperation = () => {
         setSelectedFolderIds,
         setLastSelectedFolderId,
         setIsDragging,
-        refetchCallback,
     } = useExplorerStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
@@ -152,7 +151,10 @@ export const useTreeOperation = () => {
     const handleNewFolder = (
         treeData: TreeFolder[]
     ) => {
-        console.log('📁 Add Folder clicked');
+        console.log('📁 Add Folder clicked', {
+            treeDataLength: treeData.length,
+            selectedFolderIds,
+        });
         
         const parentId = selectedFolderIds.length > 0 
             ? selectedFolderIds[0]
@@ -163,10 +165,14 @@ export const useTreeOperation = () => {
         const parentFolder = parentId 
             ? findFolderById(folders || [], parentId)
             : undefined;
+        
+        console.log('📁 Opening dialog with:', {
+            parentFolder: parentFolder?.name || 'root',
+            parentId,
+            foldersCount: folders.length,
+        });
             
         openFolderDialog('create', parentFolder);
-        
-        console.log('📁 Parent folder for new item:', parentFolder?.name || 'root');
     };
 
     return {
