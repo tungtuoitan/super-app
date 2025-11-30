@@ -44,10 +44,6 @@ export interface FolderDialogContextData {
     isLoadingTree: boolean;
     setIsLoadingTree: Dispatch<SetStateAction<boolean>>;
     
-    // Workspace tree data
-    workspaceTree: WorkspaceTreeItemResponse[];
-    setWorkspaceTree: Dispatch<SetStateAction<WorkspaceTreeItemResponse[]>>;
-
     // Reset form to initial state
     resetForm: () => void;
 
@@ -80,10 +76,6 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     isLoadingTree: false,
     setIsLoadingTree: () => {},
     
-    // Workspace tree data
-    workspaceTree: [],
-    setWorkspaceTree: () => {},
-
     // Reset form to initial state
     resetForm: () => {},
 
@@ -119,10 +111,6 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
     
-    // Workspace tree data
-    const [workspaceTree, setWorkspaceTree] = useState<WorkspaceTreeItemResponse[]>([]);
-
-
     const resetForm = () => {
         setNewFolderName('');
         setDescription('');
@@ -161,10 +149,6 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 isLoadingTree,
                 setIsLoadingTree,
                 
-                // Workspace tree data
-                workspaceTree,
-                setWorkspaceTree,
-
                 resetForm,
             }}
         >

@@ -6,11 +6,10 @@
 
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
+import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';
-import {useFolderDialogStore} from '../store';
 
 
 
@@ -25,9 +24,8 @@ export const useContextMenuHelper = () => {
     } = useContextMenuStore();
     
     const { selectedFolderIds } = useExplorerStore();
-    const { openCreateDialog, openEditDialog } = useDialogAction();
+    const { openFolderDialog } = useFolderDialogHelper();
     const { setSelectedFolderIds, setLastSelectedFolderId } = useExplorerStore();
-    const { setMode } = useFolderDialogStore();
     const CURRENT_WORKSPACE_ID = 1;
     
     // TODO: Get workspaceTree from proper source (workspace service or context)
@@ -184,10 +182,7 @@ export const useContextMenuHelper = () => {
     const handleCreateFolder = (parentTag?: any) => {
         console.log('📁 Context Menu: Add folder clicked for parent:', parentTag);
         closeContextMenu();
-        if (openCreateDialog) {
-            openCreateDialog(parentTag); 
-            setMode('create');
-        }
+        openFolderDialog('create', parentTag);
     };
 
     /**
@@ -198,9 +193,7 @@ export const useContextMenuHelper = () => {
         closeContextMenu();
         
         if (itemData) {
-            // Use new unified dialog approach
-            openEditDialog(itemData);
-            setMode('edit');
+            openFolderDialog('edit', itemData);
         }
     };
 

@@ -8,6 +8,7 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/compone
 import { WorkspaceTree } from '../Explorer/WorkspaceTree';
 import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+import { Loader2 } from 'lucide-react';
 
 /**
  * Explorer View - WorkspaceTree for folder navigation with workspace selection
@@ -90,17 +91,20 @@ export function ExplorerView() {
       </div>
 
       {/* Workspace Tree */}
-      <div className="flex-1 overflow-hidden">
-        {isLoadingWorkspaces ? (
-          <div className="p-4 text-sm text-muted-foreground">Loading workspaces...</div>
-        ) : !currentTree?.workspaceId ? (
+      <div className="flex-1 overflow-hidden relative">
+        {!currentTree?.workspaceId ? (
           <div className="p-4 text-sm text-muted-foreground">No workspace selected</div>
-        ) : isLoadingTree ? (
-          <div className="p-4 text-sm text-muted-foreground">Loading tree...</div>
-        ) : !currentTree ? (
+        ) : !currentTree && !isLoadingTree ? (
           <div className="p-4 text-sm text-muted-foreground">No tree data available</div>
         ) : (
           <WorkspaceTree />
+        )}
+        
+        {/* Loading Overlay */}
+        {(isLoadingWorkspaces || isLoadingTree) && (
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          </div>
         )}
       </div>
     </div>

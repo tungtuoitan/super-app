@@ -1,6 +1,8 @@
 /**
- * Dialog Action Helper Hook
- * Handles folder dialogs (edit, create)
+ * Dialog Action Helper Hook (DEPRECATED - Use useFolderDialogHelper instead)
+ * 
+ * @deprecated This hook is kept for backward compatibility only.
+ * New code should use openFolderDialog and closeFolderDialog from useFolderDialogHelper.
  * 
  * @pattern Functions only - State should be accessed directly from useExplorerStore()
  * @returns {Object} Dialog action functions only (no state)
@@ -26,12 +28,11 @@ export const useDialogAction = () => {
         setDescription,
         setColor,
         setErrors,
-        setIsSubmitting,
         resetForm,
     } = useFolderDialogStore();
 
     /**
-     * Edit Dialog actions (legacy - for compatibility)
+     * Legacy edit dialog (for compatibility)
      */
     const openDialog = (folder: Folder) => {
         setSelectedFolder(folder);
@@ -40,34 +41,34 @@ export const useDialogAction = () => {
 
     const closeDialog = () => {
         setIsDialogOpen(false);
-        setTimeout(() => setSelectedFolder(null), 200); // After animation
+        setTimeout(() => setSelectedFolder(null), 200);
     };
 
     const updateSelectedFolder = (folder: Folder) => {
         setSelectedFolder(folder);
     };
 
-
     /**
-     * Create Dialog actions
+     * Create Dialog - Wrapper with inline logic
      */
     const openCreateDialog = (parentFolder?: Folder) => {
         setParentFolderForCreate(parentFolder || null);
-        setIsCreateDialogOpen(true); // Legacy support
-        setIsOpen(true); // New unified approach
+        setIsCreateDialogOpen(true);
+        setIsOpen(true);
+        setMode('create');
     };
 
     const closeCreateDialog = () => {
-        setIsCreateDialogOpen(false); // Legacy support
-        setIsOpen(false); // New unified approach
+        setIsCreateDialogOpen(false);
+        setIsOpen(false);
         setTimeout(() => {
             setParentFolderForCreate(null);
             resetForm();
-        }, 200); // Clear after animation
+        }, 200);
     };
     
     /**
-     * Edit Dialog actions (new unified approach)
+     * Edit Dialog - Wrapper with inline logic
      */
     const openEditDialog = (folder: any) => {
         console.log('📝 Opening edit dialog for folder:', {
@@ -80,23 +81,16 @@ export const useDialogAction = () => {
         
         setMode('edit');
         
-        // Handle both folderId and tagId (for backward compatibility)
         const editData = {
             ...folder,
             folderId: folder.folderId || folder.tagId,
         };
         
         setEditingFolder(editData);
-        
-        // Pre-fill form with existing data (with safe fallbacks)
         setNewFolderName(folder.name || '');
         setDescription(folder.description || '');
         setColor(folder.color || '#1976D2');
-        
-        // Clear any previous errors
         setErrors({});
-        
-        // Open dialog
         setIsOpen(true);
         
         console.log('✅ Edit dialog opened with data:', {
@@ -114,16 +108,14 @@ export const useDialogAction = () => {
     };
 
     return {
-        // Legacy edit dialog (for compatibility)
+        // Legacy (for compatibility)
         openDialog,
         closeDialog,
         updateSelectedFolder,
         
-        // Create dialog
+        // Wrappers for backward compatibility
         openCreateDialog,
         closeCreateDialog,
-        
-        // New unified edit dialog
         openEditDialog,
         closeEditDialog,
     };

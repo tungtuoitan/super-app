@@ -5,14 +5,12 @@ import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useAuthStore } from '@/store/auth/AuthStore';
 import { _getWorkspaceTree, _upsertFolder } from '@/services/workspace.service';
 import type { FolderDialogFormErrors } from '@/store/explorer/FolderDialogStore';
-import { useDialogAction } from './useDialogAction.helper';
+import type { Folder } from '@/types/folder.types';
 import {useWorkspaceOperation} from './useWorkspaceOperation.helper';
 
 export const useFolderDialogHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
-    const { closeCreateDialog, closeEditDialog } = useDialogAction();
     const { loadTree } = useWorkspaceOperation();
-    
     
     // Form state from FolderDialogStore
     const {
@@ -24,9 +22,12 @@ export const useFolderDialogHelper = () => {
         setErrors,
         setIsSubmitting,
         setIsLoadingTree,
-        setWorkspaceTree,
-    } = useFolderDialogStore();
-    const {
+        setIsOpen,
+        setMode,
+        setEditingFolder,
+        setNewFolderName,
+        setDescription,
+        setColor,
         resetForm,
     } = useFolderDialogStore();
     
@@ -34,6 +35,7 @@ export const useFolderDialogHelper = () => {
     const {
         currentTree,
         parentFolderForCreate,
+        setParentFolderForCreate,
     } = useExplorerStore();
     
     // Auth
@@ -61,28 +63,12 @@ export const useFolderDialogHelper = () => {
         return Object.keys(newErrors).length === 0;
     }
     
-    /**
-     * Fetch workspace tree
-     * @param {number} workspaceId - Workspace ID to fetch tree for
-     */
-    const fetchWorkspaceTree = async (workspaceId: number) => {
-        setIsLoadingTree(true);
-        try {
-            const response = await _getWorkspaceTree(token, workspaceId);
-            setWorkspaceTree(response.items || []);
-        } catch (error) {
-            console.error('Failed to fetch workspace tree:', error);
-            enqueueSnackbar('Failed to load workspace tree', { variant: 'error' });
-        } finally {
-            setIsLoadingTree(false);
-        }
-    }
     
     /**
-     * Submit new folder creation
-     * @param {Function} onSuccess - Callback to execute on successful creation
+     * Submit folder (unified for create and edit)
+     * Uses mode from FolderDialogStore to determine create vs edit
      */
-    const submitNewFolder = async () => {
+    const submitFolder = async () => {
         // Validate form
         if (!validateNewFolder()) {
             return;
@@ -94,87 +80,52 @@ export const useFolderDialogHelper = () => {
             return;
         }
         
-        setIsSubmitting(true);
-        try {
-            // Create new folder using upsertFolder endpoint
-            await _upsertFolder(token, selectedWorkspaceId, {
-                name: newFolderName.trim(),
-                description: description.trim() || undefined,
-                color,
-                parentId: parentFolderForCreate?.folderId || null,
-            });
-            
-            enqueueSnackbar(`Folder "${newFolderName}" created successfully!`, { 
-                variant: 'success' 
-            });
-            
-            loadTree(selectedWorkspaceId);
-            
-            // Execute success callback (typically closes dialog)
-            closeCreateDialog();
-            
-            resetForm()
-            
-        } catch (error: any) {
-            console.error('Failed to create folder:', error);
-            enqueueSnackbar(
-                error?.message || 'Failed to create folder', 
-                { variant: 'error' }
-            );
-        } finally {
-            setIsSubmitting(false);
-        }
-    }
-    
-    
-    /**
-     * Submit edit folder
-     */
-    const submitEditFolder = async () => {
-        // Validate form
-        if (!validateNewFolder()) {
-            return;
-        }
-        
-        // Check if we have editing folder
-        if (!editingFolder || !editingFolder.folderId) {
+        // Edit mode validation: check if we have editing folder
+        if (mode === 'edit' && (!editingFolder || !editingFolder.folderId)) {
             enqueueSnackbar('No folder selected for editing', { variant: 'error' });
             return;
         }
         
-        // Check workspace ID
-        if (!selectedWorkspaceId) {
-            enqueueSnackbar('No workspace selected', { variant: 'error' });
-            return;
-        }
-        
         setIsSubmitting(true);
         try {
-            // Update folder using upsertFolder endpoint
-            await _upsertFolder(token, selectedWorkspaceId, {
-                folderId: editingFolder.folderId, // Include folderId for update
-                name: newFolderName.trim(),
-                description: description.trim() || undefined,
-                color,
-                parentId: editingFolder.parentId || null,
-            });
+            // Prepare folder data based on mode
+            const folderData = mode === 'edit' 
+                ? {
+                    folderId: editingFolder!.folderId, // Include folderId for update
+                    name: newFolderName.trim(),
+                    description: description.trim() || undefined,
+                    color,
+                    parentId: editingFolder!.parentId || null,
+                }
+                : {
+                    name: newFolderName.trim(),
+                    description: description.trim() || undefined,
+                    color,
+                    parentId: parentFolderForCreate?.folderId || null,
+                };
             
-            enqueueSnackbar(`Folder "${newFolderName}" updated successfully!`, { 
-                variant: 'success' 
-            });
+            // Call upsertFolder endpoint
+            await _upsertFolder(token, selectedWorkspaceId, folderData);
+            
+            // Success message based on mode
+            const successMessage = mode === 'edit' 
+                ? `Folder "${newFolderName}" updated successfully!`
+                : `Folder "${newFolderName}" created successfully!`;
+            
+            enqueueSnackbar(successMessage, { variant: 'success' });
             
             // Reload workspace tree
             loadTree(selectedWorkspaceId);
             
             // Close dialog
-            closeEditDialog();
+            closeFolderDialog();
             
             resetForm();
             
         } catch (error: any) {
-            console.error('Failed to update folder:', error);
+            console.error(`Failed to ${mode} folder:`, error);
             enqueueSnackbar(
-                error?.message || 'Failed to update folder', 
+                error?.message || `Failed to ${mode} folder`, 
                 { variant: 'error' }
             );
         } finally {
@@ -182,14 +133,82 @@ export const useFolderDialogHelper = () => {
         }
     }
     
+    /**
+     * Open folder dialog (unified for create and edit)
+     * @param mode - 'create' or 'edit'
+     * @param folderOrParent - For create: parent folder (optional), For edit: folder to edit (required)
+     */
+    const openFolderDialog = (dialogMode: 'create' | 'edit', folderOrParent?: Folder | null) => {
+        console.log('📂 Opening folder dialog:', { mode: dialogMode, data: folderOrParent });
+        
+        setMode(dialogMode);
+        
+        if (dialogMode === 'create') {
+            // Create mode: folderOrParent is the parent folder
+            setParentFolderForCreate(folderOrParent || null);
+            resetForm();
+        } else {
+            // Edit mode: folderOrParent is the folder to edit
+            if (!folderOrParent) {
+                console.error('❌ Edit mode requires a folder');
+                return;
+            }
+            
+            console.log('📝 Opening edit dialog for folder:', {
+                folderId: folderOrParent.folderId || (folderOrParent as any).tagId,
+                name: folderOrParent.name,
+                description: folderOrParent.description,
+                color: folderOrParent.color,
+                fullData: folderOrParent
+            });
+            
+            // Handle both folderId and tagId (for backward compatibility)
+            const editData = {
+                ...folderOrParent,
+                folderId: folderOrParent.folderId || (folderOrParent as any).tagId,
+            };
+            
+            setEditingFolder(editData);
+            
+            // Pre-fill form with existing data (with safe fallbacks)
+            setNewFolderName(folderOrParent.name || '');
+            setDescription(folderOrParent.description || '');
+            setColor(folderOrParent.color || '#1976D2');
+            
+            console.log('✅ Edit dialog opened with data:', {
+                name: folderOrParent.name || '',
+                description: folderOrParent.description || '',
+                color: folderOrParent.color || '#1976D2'
+            });
+        }
+        
+        // Clear any previous errors
+        setErrors({});
+        
+        // Open dialog
+        setIsOpen(true);
+    };
+    
+    /**
+     * Close folder dialog
+     */
+    const closeFolderDialog = () => {
+        setIsOpen(false);
+        setTimeout(() => {
+            if (mode === 'create') {
+                setParentFolderForCreate(null);
+            }
+            resetForm();
+        }, 200); // Clear after animation
+    };
+
     return {
-        // Validation
+        // Dialog actions
+        openFolderDialog,
+        closeFolderDialog,
+        
+        // Validation & Submit (unified)
         validateNewFolder,
-        
-        // API actions
-        fetchWorkspaceTree,
-        submitNewFolder,
-        submitEditFolder,
-        
+        submitFolder,
     };
 };

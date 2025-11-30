@@ -3,11 +3,10 @@
  * Handles tree operations: drag & drop, refresh, new folder
  */
 
-import {useFolderDialogStore} from '@/store/index';
 import type { TreeFolder } from './tree.helper';
 import { getAllFoldersFlattened, isDescendant, findFolderById } from './tree.helper';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import {useDialogAction} from './useDialogAction.helper';
+import { useFolderDialogHelper } from './useFolderDialogHelper';
 
 export const useTreeOperation = () => {
     const {
@@ -18,8 +17,7 @@ export const useTreeOperation = () => {
         refetchCallback,
     } = useExplorerStore();
 
-    const { setMode } = useFolderDialogStore();
-    const { openCreateDialog } = useDialogAction();
+    const { openFolderDialog } = useFolderDialogHelper();
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG
@@ -166,8 +164,7 @@ export const useTreeOperation = () => {
             ? findFolderById(folders || [], parentId)
             : undefined;
             
-        openCreateDialog(parentFolder);
-        setMode('create');
+        openFolderDialog('create', parentFolder);
         
         console.log('📁 Parent folder for new item:', parentFolder?.name || 'root');
     };

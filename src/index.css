@@ -101,6 +101,59 @@
   }
 }
 
+/* VS Code-style Scrollbar */
+.vscode-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.vscode-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vscode-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(121, 121, 121, 0.4);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.vscode-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 100, 100, 0.7);
+}
+
+.vscode-scrollbar::-webkit-scrollbar-thumb:active {
+  background-color: rgba(85, 85, 85, 0.8);
+}
+
+.vscode-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Dark mode adjustments */
+.dark .vscode-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(121, 121, 121, 0.4);
+}
+
+.dark .vscode-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 100, 100, 0.7);
+}
+
+.dark .vscode-scrollbar::-webkit-scrollbar-thumb:active {
+  background-color: rgba(191, 191, 191, 1);
+}
+
+/* Hide scrollbar for react-arborist tree inner div */
+[role="tree"] > div {
+  overflow: hidden !important;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+[role="tree"] > div::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 /* Debug border utilities - outside of @layer to ensure they apply */
 .bred {
   border: 1px solid red !important;

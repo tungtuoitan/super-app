@@ -21,6 +21,7 @@ import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
 import { useTreeExpansion } from '@/hooks/explorer/useTreeExpansion.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
 import {useWorkspaceOperation} from '@/hooks/explorer/useWorkspaceOperation.helper';
+import {useFolderDialogHelper} from '@/hooks/explorer';
 
 
 
@@ -44,7 +45,6 @@ export function FolderNode({
     } = useExplorerStore();
     const { showContextMenu } = useContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
-    const { openCreateDialog } = useDialogAction();
     const { handleMove, handleNewFolder } = useTreeOperation();
     const { handleCollapseAll } = useTreeExpansion();
     const { loadTree } = useWorkspaceOperation();

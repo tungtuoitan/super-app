@@ -22,7 +22,6 @@ import { cn } from '@/lib/utils';
 import type { WorkspaceTreeItemResponse } from '@/types/workspace.types';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { useExplorerStore } from '@/store/index';
-import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
 import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
 
@@ -31,10 +30,8 @@ export function FolderDialog() {
     const {
         isCreateDialogOpen,
         parentFolderForCreate,
+        currentTree
     } = useExplorerStore();
-
-    // Get actions from dialog helper
-    const { closeCreateDialog, closeEditDialog } = useDialogAction();
 
     // Get form state from FolderDialogStore (new unified approach)
     const {
@@ -49,11 +46,10 @@ export function FolderDialog() {
         setColor,
         errors,
         isSubmitting,
-        workspaceTree,
     } = useFolderDialogStore();
 
-    // Get business logic from helper
-    const { submitNewFolder, submitEditFolder } = useFolderDialogHelper();
+    // Get business logic and dialog actions from helper
+    const { submitFolder, closeFolderDialog } = useFolderDialogHelper();
 
     // Derived values - support both legacy and new approach
     const dialogOpen = isOpen || isCreateDialogOpen;
@@ -61,7 +57,7 @@ export function FolderDialog() {
 
     // Find parent folder info for display (VS Code-like)
     const parentFolder = React.useMemo(() => {
-        if (!parentFolderId || !workspaceTree || workspaceTree.length === 0) return null;
+        if (!parentFolderId || !currentTree?.items || currentTree.items.length === 0) return null;
         
         // Search for parent folder in the tree
         function findFolder(items: WorkspaceTreeItemResponse[], targetId: number): WorkspaceTreeItemResponse | null {
@@ -75,8 +71,41 @@ export function FolderDialog() {
             return null;
         }
         
-        return findFolder(workspaceTree, parentFolderId);
-    }, [parentFolderId, workspaceTree]);
+        return findFolder(currentTree.items, parentFolderId);
+    }, [parentFolderId, currentTree]);
+
+    // Get sibling folders to check for duplicate names
+    const siblingFolders = () => {
+        if (!currentTree?.items || currentTree.items.length === 0) return [];
+        
+        // If we have a parent folder, get its children
+        if (parentFolderId) {
+            const parent = parentFolder;
+            if (parent && parent.children) {
+                return parent.children.filter(child => 
+                    child.itemType === 'tag' && 
+                    // When editing, exclude the current folder being edited
+                    (mode === 'create' || child.childId !== editingFolder?.folderId)
+                );
+            }
+        }
+        
+        // If no parent, get root level folders
+        return currentTree.items.filter(item => 
+            item.itemType === 'tag' &&
+            // When editing, exclude the current folder being edited
+            (mode === 'create' || item.childId !== editingFolder?.folderId)
+        );
+    }
+
+    // Check if name is duplicate
+    const isDuplicateName = React.useMemo(() => {
+        if (!newFolderName.trim()) return false;
+        
+        return siblingFolders().some(folder => 
+            folder.name.toLowerCase() === newFolderName.trim().toLowerCase()
+        );
+    }, [newFolderName]);
 
     // Initialize dialog when it opens
     useEffect(() => {
@@ -102,21 +131,13 @@ export function FolderDialog() {
 
     // Handle dialog close
     const handleClose = () => {
-        if (mode === 'edit') {
-            closeEditDialog();
-        } else {
-            closeCreateDialog();
-        }
+        closeFolderDialog();
     };
     console.log('FolderDialog Render:', { dialogOpen, mode, parentFolder });
     
-    // Handle submit
+    // Handle submit (unified for both create and edit)
     const handleSubmit = async () => {
-        if (mode === 'edit') {
-            await submitEditFolder();
-        } else {
-            await submitNewFolder();
-        }
+        await submitFolder();
     };
 
     // Keyboard Shortcuts
@@ -166,8 +187,12 @@ export function FolderDialog() {
                             onChange={(e) => setNewFolderName(e.target.value)}
                             placeholder="Enter folder name"
                             autoFocus
+                            className={isDuplicateName ? 'border-destructive' : ''}
                         />
                         {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                        {isDuplicateName && !errors.name && (
+                            <p className="text-sm text-destructive">A folder with this name already exists in this location</p>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -217,7 +242,7 @@ export function FolderDialog() {
                     </Button>
                     <Button  
                         onClick={handleSubmit}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isDuplicateName || !newFolderName.trim()}
                     >
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isSubmitting 

@@ -76,7 +76,7 @@ export function WorkspaceTree() {
             ref={treeContainerRef}
             data-workspace-tree
             tabIndex={0}
-            className="h-full flex flex-col p-4 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors"
+            className="h-full flex flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto vscode-scrollbar"
         >
             {/* Loading overlay when dragging */}
             {(isDragging) && (
