@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 
-import { useWorkspaceFolderTree, useBatchMoveFolder } from '../../hooks/Folders/useFolders';
+// Removed: TanStack Query hooks no longer available
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import type { Folder } from '../../types/folder.types';
 import { AddFolderDialog } from '../tags/AddFolderDialog';
@@ -510,9 +510,13 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
         throw new Error('workspaceId is required. The old /tree endpoint is no longer supported.');
     }
     
-    const workspaceTreeQuery = useWorkspaceFolderTree(workspaceId);
+    // TODO: Refactor to use workspace.service directly
+    // const workspaceTreeQuery = useWorkspaceFolderTree(workspaceId);
+    const workspaceTreeQuery: any = { data: null, isLoading: false, error: null }; // Temporarily disabled
     const { data, isLoading, error } = workspaceTreeQuery;
-    const batchMoveFolderMutation = useBatchMoveFolder();
+    
+    // const batchMoveFolderMutation = useBatchMoveFolder();
+    const batchMoveFolderMutation: any = null; // Temporarily disabled
     
     // Extract folders from workspace or use directly
     const folders = useMemo(() => {

@@ -16,7 +16,7 @@ import {
 import { useAuthStore } from '@/store/auth/AuthStore';
 import {useSnackbar} from 'notistack';
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
-import {useCreateNote, useDeleteNote, useUpdateNote} from '../../../hooks/useNotes';
+import { _createNote, _deleteNote, _updateNote } from '../../../services/noteService';
 import {useConfirmationPopover} from '@/shared/hooks';
 import {CreateNoteDTO, UpdateNoteDTO} from '../../../types/note.types';
 import {ConfirmationPopover} from '@/shared/components';
@@ -40,11 +40,14 @@ export function NoteContentToolbar() {
         noteName: selectedNote?.name 
     });
     
-    // React Query hooks
-    const createNote = useCreateNote();
-    const updateNote = useUpdateNote();
-    const deleteNote = useDeleteNote();
-    const inProgressSaving = createNote.isPending || updateNote.isPending || deleteNote.isPending;
+    // TODO: Refactor to use direct service calls with token
+    // const createNote = useCreateNote();
+    // const updateNote = useUpdateNote();
+    // const deleteNote = useDeleteNote();
+    const createNote: any = { isPending: false }; // Temporarily disabled
+    const updateNote: any = { isPending: false }; // Temporarily disabled
+    const deleteNote: any = { isPending: false }; // Temporarily disabled
+    const inProgressSaving = false; // Temporarily disabled
 
     // Confirmation popover hook
     const deleteConfirmation = useConfirmationPopover({

@@ -14,7 +14,6 @@ import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-reac
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
-import {useFoldersForAutocomplete} from '@/hooks/Folders';
 
 /**
  * Note Detail Dialog Content
@@ -51,10 +50,8 @@ export function NoteDetailDialogContent() {
         }
     }, [selectedNote?.noteId]);
     
-    // Fetch hashtags/folders from API for use in autocomplete
-    const { folderOptions, isLoading: tagsLoading, error: tagsError } = useFoldersForAutocomplete();
-    
-    // Fallback hashtags if API fails
+    // Fallback hashtags (no API call needed)
+    const tagsLoading = false; // No longer loading from API
     const fallbackTagOptions: IAutoCompleteOptions[] = [
         { id: 'work', label: 'Work', desc: 'Work', active: true },
         { id: 'personal', label: 'Personal', desc: 'Personal', active: true },
@@ -62,15 +59,8 @@ export function NoteDetailDialogContent() {
         { id: 'urgent', label: 'Urgent', desc: 'Urgent', active: true },
     ];
     
-    // Use API hashtags if available, otherwise fallback hashtags
-    const finalTagOptions = tagsError ? fallbackTagOptions : folderOptions;
-    
-    // Log error if hashtags failed to load
-    React.useEffect(() => {
-        if (tagsError) {
-            console.error('Failed to load hashtags for autocomplete:', tagsError);
-        }
-    }, [tagsError]);
+    // Use fallback hashtags (API removed with TanStack Query)
+    const finalTagOptions = fallbackTagOptions;
     
     // Create options for type autocomplete
     const typeOptions: IAutoCompleteOptions[] = NOTE_TYPES.map((type) => ({
@@ -95,9 +85,7 @@ export function NoteDetailDialogContent() {
     console.log('Debug - HashTag display data:', {
         selectedNoteTags: selectedNote?.tags,
         currentTagsValue,
-        finalTagOptions,
-        tagsLoading,
-        tagsError
+        finalTagOptions
     });        // Handlers for form interactions
         const handleFieldChange = (field: keyof Note, value: any) => {
             updateSelectedNote({ [field]: value });

@@ -20,7 +20,8 @@ import { Button } from '@/Components/ui/button';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Checkbox } from '@/Components/ui/checkbox';
 import {Note} from '../../types/note.types';
-import {useNotes} from '../../hooks/useNotes';
+import {_getNotes} from '../../services/noteService';
+import {storageService} from '../../services/storage.service';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 interface NoteGridProps {
@@ -29,17 +30,38 @@ interface NoteGridProps {
 
 /**
  * NoteGrid component following new architecture
- * - Uses React Query for server state (useNotes)
+ * - Uses noteService directly for server state
  * - Receives onNoteClick prop to avoid unnecessary re-renders
  * - Clean separation of concerns
  * - Performance optimized (no context subscription, memoized)
  */
 export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridProps) {
-    // ✅ React Query for server state only
-    const { data: notes, isLoading, error } = useNotes();
+    // ✅ Server state với service trực tiếp
+    const [notes, setNotes] = React.useState<Note[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [error, setError] = React.useState<Error | null>(null);
 
     // ✅ Get row selection state from context
     const { selectedRowIds, setSelectedRowIds } = useNoteUIStore();
+
+    // Load notes
+    React.useEffect(() => {
+        const loadNotes = async () => {
+            try {
+                setIsLoading(true);
+                const token = storageService.getString('token');
+                if (!token) throw new Error('No auth token');
+                const data = await _getNotes(token, { getAll: true });
+                setNotes(data);
+                setError(null);
+            } catch (err) {
+                setError(err as Error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadNotes();
+    }, []);
 
     // Table state
     const [sorting, setSorting] = useState<SortingState>([]);

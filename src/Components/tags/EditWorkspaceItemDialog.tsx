@@ -5,7 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Edit, Palette, FileText, Tag as TagIcon, Type, Loader2 } from 'lucide-react';
-import { useUpdateWorkspaceItem } from '../../hooks/Folders/useWorkspaceTree';
+// Removed: TanStack Query hooks no longer available
+import { _upsertWorkspaceItem } from '@/services/workspace.service';
 import { useSnackbar } from 'notistack';
 import type { UpdateWorkspaceItemRequest } from '../../types/workspace.types';
 import {
@@ -96,7 +97,9 @@ export function EditWorkspaceItemDialog({
     }>({});
 
     // Hooks
-    const updateItem = useUpdateWorkspaceItem();
+    // TODO: Refactor to use workspace.service directly
+    // const updateItem = useUpdateWorkspaceItem();
+    const updateItem: any = null; // Temporarily disabled
     const { enqueueSnackbar } = useSnackbar();
 
     // Reset form when dialog opens

@@ -12,13 +12,4 @@ export type { FolderUIStoreData } from '@/store/folderUI/FolderUIStore';
 export { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
 
 // Legacy compatibility - use store + helper instead
-
-// Hooks - Re-export from centralized hooks/Folders
-export { 
-    useFolders,
-    useWorkspaceFolderTree,
-    useFoldersForAutocomplete,
-} from '../../hooks/Folders';
-
-// Service
-export { hashtagService } from '../../services/hashtagService';
+// Note: Use workspace.service directly instead of deprecated hooks

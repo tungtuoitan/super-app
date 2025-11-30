@@ -26,7 +26,7 @@ import {
     SelectValue,
 } from '@/Components/ui/select';
 import { cn } from '@/lib/utils';
-import { useCreateFolder, useWorkspaceFolderTree } from '../../hooks/Folders/useFolders';
+// Removed: TanStack Query hooks no longer available
 import type { CreateFolderDTO as CreateTagDTO } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 
@@ -49,8 +49,11 @@ export function CreateFolderDialog({
     const [selectedParentId, setSelectedParentId] = useState<number | null>(parentTagId || null);
     const [errors, setErrors] = useState<{ name?: string }>({});
 
-    const createFolder = useCreateFolder();
-    const { data: workspaceTree } = useWorkspaceFolderTree(workspaceId);
+    // TODO: Refactor to use workspace.service directly
+    // const createFolder = useCreateFolder();
+    // const { data: workspaceTree } = useWorkspaceFolderTree(workspaceId);
+    const createFolder: any = null; // Temporarily disabled
+    const workspaceTree: any = null; // Temporarily disabled
     const { enqueueSnackbar } = useSnackbar();
 
     // Reset form when dialog opens/closes or parentTagId changes

@@ -98,3 +98,63 @@ export interface UpdateWorkspaceItemRequest {
 export interface UpdateWorkspaceItemResponse extends WorkspaceItemResponse {
     message?: string;
 }
+
+/**
+ * Single item to be moved in workspace
+ * Maps to backend MoveItemRequest
+ */
+export interface MoveItemRequest {
+    /** Workspace item ID to move */
+    itemId: number;
+    
+    /** New parent folder ID (null for root level) */
+    newParentTagId?: number | null;
+    newParentFolderId?: number | null; // Frontend alias
+    
+    /** New sort order (optional) */
+    sortOrder?: number;
+}
+
+/**
+ * Request to move multiple workspace items
+ * Maps to backend MoveItemsRequest
+ */
+export interface MoveItemsRequest {
+    /** Array of items to move */
+    items: MoveItemRequest[];
+    
+    /** Whether to cascade move child items (default: true) */
+    cascade?: boolean;
+}
+
+/**
+ * Single item to be deleted from workspace
+ * Maps to backend DeleteItemRequest
+ */
+export interface DeleteItemRequest {
+    /** Workspace item ID to delete */
+    itemId: number;
+}
+
+/**
+ * Request to delete multiple workspace items
+ * Maps to backend DeleteItemsRequest
+ */
+export interface DeleteItemsRequest {
+    /** Array of item IDs to delete */
+    items: DeleteItemRequest[];
+    
+    /** Whether to cascade delete child items (default: true) */
+    cascade?: boolean;
+}
+
+/**
+ * Generic result response from workspace operations
+ * Maps to backend ResultOptions
+ */
+export interface WorkspaceOperationResult {
+    success: boolean;
+    message?: string;
+    status?: number;
+    object?: any;
+}

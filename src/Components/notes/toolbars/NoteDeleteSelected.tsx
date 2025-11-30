@@ -10,7 +10,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Comp
 import { useSnackbar } from 'notistack';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
-import {useDeleteNotes} from '../../../hooks/useNotes';
+import {_deleteNote} from '../../../services/noteService';
+import {storageService} from '../../../services/storage.service';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 /**
@@ -20,8 +21,8 @@ import {useNoteUIStore} from '@/store/note/useNoteUIStore';
  */
 export function NoteDeleteSelected() {
     const { selectedRowIds, setSelectedRowIds } = useNoteUIStore();
-    const deleteNotes = useDeleteNotes();
     const { enqueueSnackbar } = useSnackbar();
+    const [isDeleting, setIsDeleting] = React.useState(false);
 
     // Confirmation popover hook
     const deleteConfirmation = useConfirmationPopover({
@@ -46,7 +47,10 @@ export function NoteDeleteSelected() {
             message: `Do you want to delete ${selectedRowIds.length} selected note${selectedRowIds.length > 1 ? 's' : ''}?`,
             onConfirm: async () => {
                 try {
-                    await deleteNotes.mutateAsync(selectedRowIds);
+                    setIsDeleting(true);
+                    const token = storageService.getString('token');
+                    if (!token) throw new Error('No auth token');
+                    await _deleteNote(token, selectedRowIds.join(','));
 
                     enqueueSnackbar(
                         `${selectedRowIds.length} note${selectedRowIds.length > 1 ? 's' : ''} deleted successfully`,
@@ -64,6 +68,8 @@ export function NoteDeleteSelected() {
                         variant: 'error',
                         autoHideDuration: 5000
                     });
+                } finally {
+                    setIsDeleting(false);
                 }
             }
         });
@@ -83,7 +89,7 @@ export function NoteDeleteSelected() {
                             variant="ghost"
                             size="icon"
                             onClick={handleDeleteClick}
-                            disabled={deleteNotes.isPending}
+                            disabled={isDeleting}
                             className="text-muted-foreground hover:text-destructive"
                         >
                             <Trash2 className="h-4 w-4" />

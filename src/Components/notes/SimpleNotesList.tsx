@@ -8,12 +8,34 @@ import { Button } from '@/shared/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/Components/ui/card';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Spinner } from '@/shared/components/ui/Spinner';
-import {useNotes} from '../../hooks/useNotes';
+import {_getNotes} from '../../services/noteService';
+import {storageService} from '../../services/storage.service';
 import {Note} from '../../types/note.types';
 
 export function SimpleNotesList() {
-    // ✅ NEW: Using React Query hook for server state
-    const { data: notes, isLoading, error, refetch } = useNotes();
+    // ✅ Server state với service trực tiếp
+    const [notes, setNotes] = React.useState<Note[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [error, setError] = React.useState<Error | null>(null);
+
+    const loadNotes = async () => {
+        try {
+            setIsLoading(true);
+            const token = storageService.getString('token');
+            if (!token) throw new Error('No auth token');
+            const data = await _getNotes(token, { getAll: true });
+            setNotes(data);
+            setError(null);
+        } catch (err) {
+            setError(err as Error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        loadNotes();
+    }, []);
 
     if (isLoading) {
         return (
@@ -29,7 +51,7 @@ export function SimpleNotesList() {
             <Alert variant="destructive" className="m-4">
                 <AlertDescription className="flex items-center justify-between">
                     <span>Failed to load notes: {(error as Error).message}</span>
-                    <Button onClick={() => refetch()} variant="ghost" className="ml-4 h-8 px-3">
+                    <Button onClick={loadNotes} variant="ghost" className="ml-4 h-8 px-3">
                         Retry
                     </Button>
                 </AlertDescription>

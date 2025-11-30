@@ -11,11 +11,10 @@ import {
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
-import {useNotes} from '@/hooks/useNotes';
 import {Note} from '@/types/note.types';
 import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
-
-// Import hooks and services from notes feature
+import {_getNotes} from '@/services/noteService';
+import {storageService} from '@/services/storage.service';
 
 /**
  * NoteGridPanel - A flexible layout panel for displaying notes in a data table
@@ -31,11 +30,32 @@ export function NoteGridPanel({
     onNoteClick?: (note: Note) => void;
     sidebarMode?: boolean;
 } = {}) {
-    // Get data from React Query
-    const { data: notes, isLoading, error } = useNotes();
+    // Server state với service trực tiếp
+    const [notes, setNotes] = React.useState<Note[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [error, setError] = React.useState<Error | null>(null);
     
     // Get UI state for interactions (fallback)
     const { openDialog } = useNoteUIHelper();
+
+    // Load notes
+    React.useEffect(() => {
+        const loadNotes = async () => {
+            try {
+                setIsLoading(true);
+                const token = storageService.getString('token');
+                if (!token) throw new Error('No auth token');
+                const data = await _getNotes(token, { getAll: true });
+                setNotes(data);
+                setError(null);
+            } catch (err) {
+                setError(err as Error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadNotes();
+    }, []);
 
     // State for table
     const [sorting, setSorting] = useState<SortingState>([]);

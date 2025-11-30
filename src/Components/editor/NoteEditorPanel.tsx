@@ -15,7 +15,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
-import {useCreateNote, useUpdateNote} from '@/hooks/useNotes';
+import { _createNote, _updateNote } from '@/services/noteService';
 import {Note} from '@/types/note.types';
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
 import {Badge} from '../ui/badge';
@@ -31,8 +31,13 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     const { selectedNote, hasUnsavedChanges } = useNoteUIStore();
     const { updateSelectedNote, markAsSaved, resetChanges, setSelectedNote } = useNoteUIHelper();
     const { markTabAsChanged, updateTabNote } = useEditorTabHelper();
-    const updateNoteMutation = useUpdateNote();
-    const createNoteMutation = useCreateNote();
+    
+    // TODO: Refactor to use _updateNote and _createNote directly with token
+    // const updateNoteMutation = useUpdateNote();
+    // const createNoteMutation = useCreateNote();
+    const updateNoteMutation: any = null; // Temporarily disabled
+    const createNoteMutation: any = null; // Temporarily disabled
+    
     const { enqueueSnackbar } = useSnackbar();
 
     const isCreateMode = selectedNote?.noteId === 0;

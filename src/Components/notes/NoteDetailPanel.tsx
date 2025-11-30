@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/Components/ui/card'
 import { Button } from '@/Components/ui/button'
 import { Badge } from '@/Components/ui/badge'
@@ -8,8 +7,9 @@ import { Input } from '@/Components/ui/input'
 import { Textarea } from '@/Components/ui/textarea'
 import { Label } from '@/Components/ui/label'
 import { formatDate } from '@/utils/formatters'
-import {UpdateNoteDTO} from '../../types/note.types'
-import {noteService} from '../../services/noteService'
+import { UpdateNoteDTO, Note } from '../../types/note.types'
+import { _getNoteById, _updateNote } from '../../services/noteService'
+import { storageService } from '../../services/storage.service'
 
 interface NoteDetailPanelProps {
   selectedNoteId?: string
@@ -19,23 +19,22 @@ export function NoteDetailPanel({ selectedNoteId }: NoteDetailPanelProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
+  const [note, setNote] = useState<Note | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   
-  const queryClient = useQueryClient()
-
-  const { data: note, isLoading } = useQuery({
-    queryKey: ['notes', selectedNoteId],
-    queryFn: () => noteService.getNoteById(Number(selectedNoteId)),
-    enabled: !!selectedNoteId,
-  })
-
-  const updateNoteMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateNoteDTO }) => 
-      noteService.updateNote(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] })
-      setIsEditing(false)
-    },
-  })
+  // Load note when selectedNoteId changes
+  useEffect(() => {
+    if (selectedNoteId) {
+      setIsLoading(true)
+      const token = storageService.getString('token')
+      if (token) {
+        _getNoteById(token, Number(selectedNoteId))
+          .then(setNote)
+          .catch(console.error)
+          .finally(() => setIsLoading(false))
+      }
+    }
+  }, [selectedNoteId])
 
   const handleEdit = () => {
     if (note) {
@@ -47,13 +46,20 @@ export function NoteDetailPanel({ selectedNoteId }: NoteDetailPanelProps) {
 
   const handleSave = async () => {
     if (note) {
-      await updateNoteMutation.mutateAsync({
-        id: note.noteId,
-        data: {
+      try {
+        const token = storageService.getString('token')
+        if (!token) throw new Error('No auth token')
+        
+        const updated = await _updateNote(token, note.noteId, {
+          noteId: note.noteId,
           name: editTitle,
           description: editContent,
-        },
-      })
+        })
+        setNote(updated)
+        setIsEditing(false)
+      } catch (error) {
+        console.error('Failed to update note:', error)
+      }
     }
   }
 
@@ -157,7 +163,6 @@ export function NoteDetailPanel({ selectedNoteId }: NoteDetailPanelProps) {
             <div className="flex gap-2">
               <Button 
                 onClick={handleSave}
-                disabled={updateNoteMutation.isPending}
               >
                 Save
               </Button>

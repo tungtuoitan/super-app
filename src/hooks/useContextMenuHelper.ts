@@ -8,7 +8,8 @@ import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/Contex
 import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
 import { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
 import { Folder } from '@/types/folder.types';
-import {useRemoveWorkspaceItem, useWorkspaceFolderTree} from './Folders/useFolders';
+import { _deleteWorkspaceItems } from '@/services/workspace.service';
+import { storageService } from '@/services/storage.service';
 
 
 
@@ -25,9 +26,10 @@ export const useContextMenuHelper = () => {
     const { selectedFolderIds } = useFolderUIStore();
     const { openCreateDialog } = useFolderUIHelper();
     const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderUIStore();
-    const removeWorkspaceItemMutation = useRemoveWorkspaceItem();
     const CURRENT_WORKSPACE_ID = 1;
-    const { data: workspaceTree } = useWorkspaceFolderTree(CURRENT_WORKSPACE_ID);
+    
+    // TODO: Get workspaceTree from proper source (workspace service or context)
+    const workspaceTree: any = null; // Temporarily disabled
     
         /**
          * Recursively collect all descendant tags (children, grandchildren, etc.)
@@ -113,56 +115,41 @@ export const useContextMenuHelper = () => {
                 return true;
             });
     
-            console.log(`🗑️ Deleting ${foldersToDelete.length} workspace items:`,
-                foldersToDelete.map(f => ({ name: f.name, itemId: f.itemId }))
-            );
-    
-            // Delete all folders in sequence (parent and all descendants)
-            // We delete them one by one to ensure proper cleanup
-            let deletedCount = 0;
-            const totalCount = foldersToDelete.length;
-    
-            const deleteNext = (index: number) => {
-                if (index >= foldersToDelete.length) {
-                    console.log(`✅ Successfully removed ${deletedCount}/${totalCount} folder(s) from workspace`);
-    
-                    // VS Code behavior: Select next item after deletion completes
+            // Delete all folders using workspace service
+            const deleteItems = async () => {
+                try {
+                    const token = storageService.getString('token');
+                    if (!token) throw new Error('No authentication token');
+
+                    console.log(`🗑️ Deleting ${foldersToDelete.length} workspace items:`,
+                        foldersToDelete.map(f => ({ name: f.name, itemId: f.itemId }))
+                    );
+
+                    await _deleteWorkspaceItems(token, CURRENT_WORKSPACE_ID, {
+                        items: foldersToDelete.map(f => ({ itemId: f.itemId! })),
+                        cascade: true
+                    });
+
+                    console.log(`✅ Successfully removed ${foldersToDelete.length} folder(s) from workspace`);
+
+                    // VS Code behavior: Select next item after deletion
                     if (nextFolderIdToSelect !== null) {
                         setSelectedFolderIds([nextFolderIdToSelect]);
                         setLastSelectedFolderId(nextFolderIdToSelect);
                         console.log(`✅ Selected next item: ${nextFolderIdToSelect}`);
                     } else {
-                        // Clear selection if no next item
                         setSelectedFolderIds([]);
                         setLastSelectedFolderId(null);
                     }
-    
-                    return;
+
+                    // Reload page or invalidate cache
+                    window.location.reload();
+                } catch (error) {
+                    console.error(`❌ Failed to delete folders:`, error);
                 }
-    
-                const currentFolder = foldersToDelete[index];
-                console.log(`🗑️ Deleting ${index + 1}/${totalCount}: ${currentFolder.name} (itemId: ${currentFolder.itemId})`);
-    
-                removeWorkspaceItemMutation.mutate({
-                    workspaceId: CURRENT_WORKSPACE_ID,
-                    itemId: currentFolder.itemId!
-                }, {
-                    onSuccess: () => {
-                        deletedCount++;
-                        console.log(`✅ Deleted ${currentFolder.name} (${deletedCount}/${totalCount})`);
-                        // Continue with next folder
-                        deleteNext(index + 1);
-                    },
-                    onError: (error) => {
-                        console.error(`❌ Failed to remove folder ${currentFolder.name}:`, error);
-                        // Continue with next folder even if one fails
-                        deleteNext(index + 1);
-                    },
-                });
             };
-    
-            // Start cascade deletion
-            deleteNext(0);
+
+            deleteItems();
         }
 
     /**
