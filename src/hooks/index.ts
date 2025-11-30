@@ -19,10 +19,3 @@ export * from './useNoteTabHelper';
 export * from './useEditorTabHelper';
 export * from './explorer/useExplorerHelper';
 export * from './useContextMenuHelper';
-// DEPRECATED: useTagUIHelper renamed to useFolderHelper (workspace folders, not hashtags)
-export * from './explorer/useFolderHelper';
-
-// Reference implementations (kept for historical purposes)
-// export * from './useAuth.old';
-// export * from './useDialog.old';
-// export * from './useApi.old';

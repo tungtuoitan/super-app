@@ -11,7 +11,6 @@ import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenuStore';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import {NoteUIProvider} from '@/store/note/useNoteUIStore';
-import {FolderUIStoreProvider} from '@/store/folderUI/FolderStore';
 
 
 /**
@@ -41,19 +40,17 @@ export function Main() {
                 <DndProvider backend={HTML5Backend}>
                     <AuthStoreProvider>
                         <ExplorerProvider>
-                            <FolderUIStoreProvider>
-                                <NoteUIProvider>
-                                    <EditorTabProvider>
-                                        <DialogProvider>
-                                            <ContextMenuStoreProvider>
-                                                <ContextMenu>
-                                                    <MainNav />
-                                                </ContextMenu>
-                                            </ContextMenuStoreProvider>
-                                        </DialogProvider>
-                                    </EditorTabProvider>
-                                </NoteUIProvider>
-                            </FolderUIStoreProvider>
+                            <NoteUIProvider>
+                                <EditorTabProvider>
+                                    <DialogProvider>
+                                        <ContextMenuStoreProvider>
+                                            <ContextMenu>
+                                                <MainNav />
+                                            </ContextMenu>
+                                        </ContextMenuStoreProvider>
+                                    </DialogProvider>
+                                </EditorTabProvider>
+                            </NoteUIProvider>
                         </ExplorerProvider>
                     </AuthStoreProvider>
                 </DndProvider>

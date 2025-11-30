@@ -7,8 +7,8 @@ export { CreateFolderDialog } from './CreateFolderDialog';
 export { EditWorkspaceItemDialog } from './EditWorkspaceItemDialog';
 
 // NEW: Use these for workspace folders
-export { FolderStore, FolderUIStoreProvider, useFolderStore } from '@/store/folderUI/FolderStore';
-export type { FolderUIStoreData } from '@/store/folderUI/FolderStore';
+export { ExplorerStore, ExplorerProvider, useExplorerStore } from '@/store/explorer/ExplorerStore';
+export type { ExplorerContextData } from '@/store/explorer/ExplorerStore';
 export { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
 
 // Legacy compatibility - use store + helper instead

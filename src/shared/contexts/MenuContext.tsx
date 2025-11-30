@@ -21,7 +21,7 @@ import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
-import { useFolderStore } from '@/store/folderUI/FolderStore';
+import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { EditWorkspaceItemDialog } from '@/Components/tags/EditWorkspaceItemDialog';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';

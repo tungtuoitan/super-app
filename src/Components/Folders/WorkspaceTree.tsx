@@ -20,8 +20,8 @@ import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import type { Folder } from '../../types/folder.types';
 import type { WorkspaceTreeItemResponse } from '../../types/workspace.types';
 import { AddFolderDialog } from '../tags/AddFolderDialog';
+import { useExplorerStore } from '@/store/index';
 import { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
-import { useFolderStore } from '@/store/index';
 import type { WorkspaceWithTreeResponse } from '@/types/workspace.types';
 import {CustomDragPreview} from './CustomDragPreview';
 import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
@@ -81,7 +81,7 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
         parentFolderForCreate,
         isDragging,
         setIsDragging,
-    } = useFolderStore();
+    } = useExplorerStore();
     const {
         selectAllFolders,
         clearSelection,

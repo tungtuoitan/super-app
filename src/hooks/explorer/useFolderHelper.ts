@@ -1,7 +1,7 @@
 import type { Folder } from '@/types/folder.types';
 import type { NodeApi } from 'react-arborist';
 import {findFolderById, getAllFoldersFlattened, isDescendant, TreeFolder} from './tree.helper';
-import {useFolderStore} from '../../store';
+import {useExplorerStore} from '../../store';
 
 export const useFolderHelper = () => {
     const {
@@ -14,7 +14,7 @@ export const useFolderHelper = () => {
         setSelectedFolderIds,
         setLastSelectedFolderId,
         setIsDragging,
-    } = useFolderStore();
+    } = useExplorerStore();
 
     /**
      * Dialog actions

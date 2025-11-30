@@ -14,7 +14,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import { useFolderStore } from '@/store/index';
+import { useExplorerStore } from '@/store/index';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
 import {useFolderHelper} from '../tags';
 
@@ -42,7 +42,7 @@ export function FolderNode({
         setSelectedFolderIds,
         lastSelectedFolderId,
         setLastSelectedFolderId,
-    } = useFolderStore();
+    } = useExplorerStore();
     const { isFolderSelected } = useFolderHelper();
     const { showContextMenu } = useContextMenuHelper();
 

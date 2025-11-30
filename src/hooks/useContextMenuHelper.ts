@@ -5,7 +5,7 @@
  */
 
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
-import { useFolderStore } from '@/store/folderUI/FolderStore';
+import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
@@ -23,9 +23,9 @@ export const useContextMenuHelper = () => {
         setEditItemData,
     } = useContextMenuStore();
     
-    const { selectedFolderIds } = useFolderStore();
+    const { selectedFolderIds } = useExplorerStore();
     const { openCreateDialog } = useFolderHelper();
-    const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderStore();
+    const { setSelectedFolderIds, setLastSelectedFolderId } = useExplorerStore();
     const CURRENT_WORKSPACE_ID = 1;
     
     // TODO: Get workspaceTree from proper source (workspace service or context)

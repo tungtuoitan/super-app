@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 import type { Folder } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import {useFolderStore} from '@/store/index';
+import {useExplorerStore} from '@/store/index';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
@@ -93,7 +93,7 @@ export function AddFolderDialog({
     const addExistingTag: any = null; // Temporarily disabled
     const createAndAddTag: any = null; // Temporarily disabled
     const { enqueueSnackbar } = useSnackbar();
-    const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderStore();
+    const { setSelectedFolderIds, setLastSelectedFolderId } = useExplorerStore();
 
     // Find parent folder info for display (VS Code-like)
     const parentFolder = React.useMemo(() => {
