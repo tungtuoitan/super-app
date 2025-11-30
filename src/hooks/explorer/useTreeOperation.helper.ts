@@ -167,21 +167,8 @@ export const useTreeOperation = () => {
         console.log('📁 Parent folder for new item:', parentFolder?.name || 'root');
     };
 
-    /**
-     * Handle refresh action
-     */
-    const handleRefresh = () => {
-        console.log('🔄 Refresh clicked');
-        if (refetchCallback) {
-            refetchCallback();
-        } else {
-            console.warn('⚠️ No refetch callback available');
-        }
-    };
-
     return {
         handleMove,
         handleNewFolder,
-        handleRefresh,
     };
 };

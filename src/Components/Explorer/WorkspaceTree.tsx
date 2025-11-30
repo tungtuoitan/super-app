@@ -3,64 +3,42 @@ import React, { useEffect, useMemo } from 'react';
 import { Tree, NodeApi } from 'react-arborist';
 import { useDragDropManager } from 'react-dnd';
 import {
-    ChevronDown,
-    ChevronRight,
-    Tag as TagIcon,
-    FolderOpen,
-    Folder as FolderIcon,
-    Layers,
-    Plus,
-    RefreshCw,
-    ChevronsUp,
     Loader2
 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/Components/ui/alert';
-
-import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import type { Folder } from '../../types/folder.types';
-import type { WorkspaceTreeItemResponse } from '../../types/workspace.types';
 import { AddFolderDialog } from '../tags/AddFolderDialog';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
 import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
-import type { WorkspaceWithTreeResponse } from '@/types/workspace.types';
+import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
 import {CustomDragPreview} from './CustomDragPreview';
 import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
 import {FolderNode} from './FolderNode';
-import {createWorkspaceRootFolder, filterTreeBySearch, getAllFoldersFlattened, getAllVisibleFolderIds, transformFoldersToTreeData, transformTreeItemToFolder, TreeFolder} from '@/hooks/explorer/tree.helper';
+import {createWorkspaceRootFolder, filterTreeBySearch, getAllVisibleFolderIds, transformFoldersToTreeData, transformTreeItemToFolder, TreeFolder} from '@/hooks/explorer/tree.helper';
 
-interface WorkspaceTreeProps {
-    onFolderClick?: (folder: Folder) => void;
-    includeShared?: boolean; // DEPRECATED: No longer used, kept for backward compatibility
-    workspaceId: number; // REQUIRED: Workspace ID for workspace-specific tree
-    treeData: WorkspaceWithTreeResponse; // REQUIRED: Tree data from parent (ExplorerView)
-    onRefresh?: () => void; // OPTIONAL: Callback when refresh is triggered
-}
+export function WorkspaceTree() {
+    const {
+        searchText,
+        isDragging,
+        setTreeRef,
+    } = useExplorerStore();
 
-export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh }: WorkspaceTreeProps) {
-    // Validate required props
-    if (!workspaceId) {
-        throw new Error('workspaceId is required');
-    }
-    
-    if (!propsTreeData) {
-        throw new Error('treeData is required. WorkspaceTree must receive data from parent (ExplorerView)');
-    }
+    const {
+        handleSelectionChange,
+        handleKeyDown,
+    } = useTreeSelection();
+    const {
+    } = useDialogAction();
+    const {
+        handleMove,
+    } = useTreeOperation();
+    const {
+        getCurrentTree,
+    } = useWorkspaceOperation();
 
-    // Use tree data from props only (no internal fetching)
-    const data = propsTreeData;
-    console.log('📋 WorkspaceTree: Using data from props', { workspaceId, itemCount: data.items?.length });
-
-    // Refetch function - delegates to parent
-    const refetch = () => {
-        if (onRefresh) {
-            console.log('🔄 WorkspaceTree: Calling parent onRefresh');
-            onRefresh();
-        } else {
-            console.warn('⚠️ WorkspaceTree: No onRefresh provided, cannot refresh');
-        }
-    };
+    // Get current workspace tree data
+    const data = getCurrentTree();
 
     // Extract folders from workspace data
     // Data is always WorkspaceWithTreeResponse, need to transform items to Folder[]
@@ -73,32 +51,6 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
             .filter((folder): folder is Folder => folder !== null);
     }, [data]);
     
-    const {
-        searchText,
-        selectedFolderIds,
-        setSelectedFolderIds,
-        lastSelectedFolderId,
-        setLastSelectedFolderId,
-        isCreateDialogOpen,
-        parentFolderForCreate,
-        isDragging,
-        setIsDragging,
-        setTreeRef,
-        setRefetchCallback,
-    } = useExplorerStore();
-    const {
-        clearSelection,
-        handleSelectionChange,
-    } = useTreeSelection();
-    const {
-        openCreateDialog,
-        closeCreateDialog,
-    } = useDialogAction();
-    const {
-        handleMove,
-        handleNewFolder,
-        handleRefresh,
-    } = useTreeOperation();
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);
     const manager = useDragDropManager();
@@ -109,13 +61,6 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
         return () => setTreeRef(null);
     }, [setTreeRef]);
     
-    // Store refetch callback in context
-    useEffect(() => {
-        setRefetchCallback(() => refetch);
-        return () => setRefetchCallback(null);
-    }, [setRefetchCallback, refetch]);
-    
-    // Workspace info is available in data directly when needed
 
     // Transform and filter folders based on search text
     const treeData = useMemo(() => {
@@ -152,90 +97,18 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
 
     // Keyboard navigation (VS Code-like)
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.target !== document.body && !(e.target as Element).closest('[data-workspace-tree]')) {
-                return; // Only handle when tree is focused
-            }
-
-            const currentSelection = selectedFolderIds;
-            const lastSelected = currentSelection.length > 0 ? currentSelection[currentSelection.length - 1] : null;
-            const currentIndex = lastSelected ? allVisibleFolderIds.indexOf(lastSelected) : -1;
-
-            switch (e.key) {
-                case 'ArrowUp':
-                    e.preventDefault();
-                    if (currentIndex > 0) {
-                        const newFolderId = allVisibleFolderIds[currentIndex - 1];
-                        if (e.shiftKey && currentSelection.length > 0) {
-                            // Extend selection upward
-                            const firstSelected = currentSelection[0];
-                            const firstIndex = allVisibleFolderIds.indexOf(firstSelected);
-                            const startIndex = Math.min(firstIndex, currentIndex - 1);
-                            const endIndex = Math.max(firstIndex, currentIndex - 1);
-                            const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
-                            setSelectedFolderIds(rangeSelection);
-                        } else {
-                            setSelectedFolderIds([newFolderId]);
-                        }
-                        setLastSelectedFolderId(newFolderId);
-                    }
-                    break;
-
-                case 'ArrowDown':
-                    e.preventDefault();
-                    if (currentIndex < allVisibleFolderIds.length - 1) {
-                        const newFolderId = allVisibleFolderIds[currentIndex + 1];
-                        if (e.shiftKey && currentSelection.length > 0) {
-                            // Extend selection downward
-                            const firstSelected = currentSelection[0];
-                            const firstIndex = allVisibleFolderIds.indexOf(firstSelected);
-                            const startIndex = Math.min(firstIndex, currentIndex + 1);
-                            const endIndex = Math.max(firstIndex, currentIndex + 1);
-                            const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
-                            setSelectedFolderIds(rangeSelection);
-                        } else {
-                            setSelectedFolderIds([newFolderId]);
-                        }
-                        setLastSelectedFolderId(newFolderId);
-                    }
-                    break;
-
-                case 'a':
-                    if (e.ctrlKey || e.metaKey) {
-                        e.preventDefault();
-                        // Ctrl+A: Select all
-                        setSelectedFolderIds(allVisibleFolderIds);
-                        setLastSelectedFolderId(allVisibleFolderIds[allVisibleFolderIds.length - 1]);
-                    }
-                    break;
-
-                case 'Escape':
-                    // Clear selection
-                    clearSelection();
-                    setLastSelectedFolderId(null);
-                    break;
-            }
+        const handleKeyDownWrapper = (e: KeyboardEvent) => {
+            handleKeyDown(e, allVisibleFolderIds);
         };
 
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [selectedFolderIds, allVisibleFolderIds]);
+        document.addEventListener('keydown', handleKeyDownWrapper);
+        return () => document.removeEventListener('keydown', handleKeyDownWrapper);
+    }, [handleKeyDown, allVisibleFolderIds]);
 
-    // Wrapper functions to call helper with proper dependencies
-    const onSelectionChange = (nodes: NodeApi<TreeFolder>[]) => {
-        handleSelectionChange(nodes);
-    };
 
-    const onMove = async (args: { dragIds: string[]; parentId: string | null; index: number }) => {
-        await handleMove(args, treeData);
-    };
-
-    // Empty state
     if (!treeData || treeData.length === 0) {
         return <WorkspaceTreeEmpty />;
     }
-
-    // Main tree render with react-arborist
     return (
         <div
             ref={treeContainerRef}
@@ -262,8 +135,8 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
                 rowHeight={40}
                 overscanCount={8}
                 dndManager={manager}
-                onMove={onMove}
-                onSelect={onSelectionChange}
+                onMove={async (args) => {await handleMove(args, treeData);}}
+                onSelect={(nodes: NodeApi<TreeFolder>[]) => handleSelectionChange(nodes)}
                 disableMultiSelection={false}
                 disableEdit={true}
                 renderDragPreview={(props) => <CustomDragPreview {...props} treeData={treeData} />}
@@ -284,14 +157,7 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
             </Tree>
 
             {/* Add Folder Dialog */}
-            {workspaceId && (
-                <AddFolderDialog
-                    open={isCreateDialogOpen}
-                    onClose={closeCreateDialog}
-                    workspaceId={workspaceId}
-                    parentTagId={parentFolderForCreate?.tagId}
-                />
-            )}
+            <AddFolderDialog />
         </div>
     );
 }

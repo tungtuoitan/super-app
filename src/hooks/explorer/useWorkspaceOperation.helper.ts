@@ -1,6 +1,14 @@
 /**
  * Workspace Operation Helper Hook
  * Handles loading workspaces and their tree data
+ * 
+ * @pattern Functions only - State should be accessed directly from useExplorerStore()
+ * @returns {Object} Workspace operation functions only (no state)
+ * @example
+ * // Get state from store
+ * const { allWorkspaces, selectedWorkspaceId } = useExplorerStore();
+ * // Get actions from helper
+ * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
  */
 
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
@@ -133,14 +141,7 @@ export const useWorkspaceOperation = () => {
     };
 
     return {
-        // State
-        allWorkspaces,
-        currentTrees,
-        selectedWorkspaceId,
-        isLoadingWorkspaces,
-        isLoadingTree,
-        
-        // Actions
+        // Actions only - get state directly from useExplorerStore()
         loadAllWorkspaces,
         loadTree,
         selectWorkspace,

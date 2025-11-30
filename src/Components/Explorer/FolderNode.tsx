@@ -20,6 +20,7 @@ import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
 import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
 import { useTreeExpansion } from '@/hooks/explorer/useTreeExpansion.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
+import {useWorkspaceOperation} from '../tags';
 
 
 
@@ -43,8 +44,9 @@ export function FolderNode({
     const { showContextMenu } = useContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
     const { openCreateDialog } = useDialogAction();
-    const { handleMove, handleNewFolder, handleRefresh } = useTreeOperation();
+    const { handleMove, handleNewFolder } = useTreeOperation();
     const { handleCollapseAll } = useTreeExpansion();
+    const { reloadCurrentTree } = useWorkspaceOperation();
 
     const folder = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
@@ -237,7 +239,7 @@ export function FolderNode({
                         title="Refresh"
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleRefresh();
+                            reloadCurrentTree();
                         }}
                         className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                     >

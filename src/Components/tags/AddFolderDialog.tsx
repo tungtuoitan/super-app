@@ -27,7 +27,8 @@ import { cn } from '@/lib/utils';
 import type { Folder } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import {useExplorerStore} from '@/store/index';
+import { useExplorerStore } from '@/store/index';
+import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
@@ -48,21 +49,36 @@ function extractTagIdsFromTree(tags: Folder[]): number[] {
     return tagIds;
 }
 
-interface AddFolderDialogProps {
-    open: boolean;
-    onClose: () => void;
-    workspaceId: number;
-    parentTagId?: number | null; // Optional parent folder for nested creation
-}
-
 type TabValue = 'existing' | 'new';
 
-export function AddFolderDialog({ 
-    open, 
-    onClose, 
-    workspaceId,
-    parentTagId 
-}: AddFolderDialogProps) {
+/**
+ * AddFolderDialog Component
+ * Dialog for adding folders to workspace
+ * 
+ * @pattern No props - Gets all data from store directly
+ * - open: from useExplorerStore().isCreateDialogOpen
+ * - onClose: from useDialogAction().closeCreateDialog
+ * - workspaceId: from useExplorerStore().selectedWorkspaceId
+ * - parentTagId: from useExplorerStore().parentFolderForCreate?.tagId
+ */
+export function AddFolderDialog() {
+    // Get state from store
+    const {
+        isCreateDialogOpen: open,
+        parentFolderForCreate,
+        selectedWorkspaceId,
+        setSelectedFolderIds,
+        setLastSelectedFolderId,
+    } = useExplorerStore();
+
+    // Get actions from helper
+    const { closeCreateDialog } = useDialogAction();
+
+    // Derived values
+    const workspaceId = selectedWorkspaceId;
+    const parentTagId = parentFolderForCreate?.tagId;
+    const onClose = closeCreateDialog;
+    
     // Tab state
     const [activeTab, setActiveTab] = useState<TabValue>('existing');
     
@@ -93,7 +109,6 @@ export function AddFolderDialog({
     const addExistingTag: any = null; // Temporarily disabled
     const createAndAddTag: any = null; // Temporarily disabled
     const { enqueueSnackbar } = useSnackbar();
-    const { setSelectedFolderIds, setLastSelectedFolderId } = useExplorerStore();
 
     // Find parent folder info for display (VS Code-like)
     const parentFolder = React.useMemo(() => {

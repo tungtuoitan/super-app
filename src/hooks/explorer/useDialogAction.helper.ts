@@ -1,6 +1,9 @@
 /**
  * Dialog Action Helper Hook
  * Handles folder dialogs (edit, create)
+ * 
+ * @pattern Functions only - State should be accessed directly from useExplorerStore()
+ * @returns {Object} Dialog action functions only (no state)
  */
 
 import type { Folder } from '@/types/folder.types';

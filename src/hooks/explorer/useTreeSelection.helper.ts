@@ -1,6 +1,9 @@
 /**
  * Tree Selection Helper Hook
  * Handles folder selection operations (VS Code-like multi-selection)
+ * 
+ * @pattern Functions only - State should be accessed directly from useExplorerStore()
+ * @returns {Object} Selection action functions only (no state)
  */
 
 import type { NodeApi } from 'react-arborist';
@@ -63,13 +66,81 @@ export const useTreeSelection = () => {
         }
     };
 
+    /**
+     * Handle keyboard navigation (VS Code-like)
+     * Supports: Arrow Up/Down, Shift+Arrow for range selection, Ctrl+A, Escape
+     */
+    const handleKeyDown = (e: KeyboardEvent, allVisibleFolderIds: number[]) => {
+        if (e.target !== document.body && !(e.target as Element).closest('[data-workspace-tree]')) {
+            return; // Only handle when tree is focused
+        }
+
+        const currentSelection = selectedFolderIds;
+        const lastSelected = currentSelection.length > 0 ? currentSelection[currentSelection.length - 1] : null;
+        const currentIndex = lastSelected ? allVisibleFolderIds.indexOf(lastSelected) : -1;
+
+        switch (e.key) {
+            case 'ArrowUp':
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    const newFolderId = allVisibleFolderIds[currentIndex - 1];
+                    if (e.shiftKey && currentSelection.length > 0) {
+                        // Extend selection upward
+                        const firstSelected = currentSelection[0];
+                        const firstIndex = allVisibleFolderIds.indexOf(firstSelected);
+                        const startIndex = Math.min(firstIndex, currentIndex - 1);
+                        const endIndex = Math.max(firstIndex, currentIndex - 1);
+                        const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
+                        setSelectedFolderIds(rangeSelection);
+                    } else {
+                        setSelectedFolderIds([newFolderId]);
+                    }
+                    setLastSelectedFolderId(newFolderId);
+                }
+                break;
+
+            case 'ArrowDown':
+                e.preventDefault();
+                if (currentIndex < allVisibleFolderIds.length - 1) {
+                    const newFolderId = allVisibleFolderIds[currentIndex + 1];
+                    if (e.shiftKey && currentSelection.length > 0) {
+                        // Extend selection downward
+                        const firstSelected = currentSelection[0];
+                        const firstIndex = allVisibleFolderIds.indexOf(firstSelected);
+                        const startIndex = Math.min(firstIndex, currentIndex + 1);
+                        const endIndex = Math.max(firstIndex, currentIndex + 1);
+                        const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
+                        setSelectedFolderIds(rangeSelection);
+                    } else {
+                        setSelectedFolderIds([newFolderId]);
+                    }
+                    setLastSelectedFolderId(newFolderId);
+                }
+                break;
+
+            case 'a':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    // Ctrl+A: Select all
+                    setSelectedFolderIds(allVisibleFolderIds);
+                    setLastSelectedFolderId(allVisibleFolderIds[allVisibleFolderIds.length - 1]);
+                }
+                break;
+
+            case 'Escape':
+                // Clear selection
+                clearSelection();
+                setLastSelectedFolderId(null);
+                break;
+        }
+    };
+
     return {
-        selectedFolderIds,
-        lastSelectedFolderId,
         toggleFolderSelection,
         selectAllFolders,
         clearSelection,
         isFolderSelected,
         handleSelectionChange,
+        handleKeyDown,
     };
 };

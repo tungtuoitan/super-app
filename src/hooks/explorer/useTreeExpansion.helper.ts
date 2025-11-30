@@ -1,6 +1,9 @@
 /**
  * Tree Expansion Helper Hook
  * Handles tree node expand/collapse operations
+ * 
+ * @pattern Functions only - State should be accessed directly from useExplorerStore()
+ * @returns {Object} Expansion action functions only (no state)
  */
 
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
@@ -72,7 +75,6 @@ export const useTreeExpansion = () => {
     };
 
     return {
-        expandedNodes,
         toggleNodeExpansion,
         expandNode,
         collapseNode,

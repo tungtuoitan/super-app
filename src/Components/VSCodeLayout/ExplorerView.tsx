@@ -7,16 +7,22 @@ import { useState, useEffect } from 'react';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components';
 import { WorkspaceTree } from '../Explorer/WorkspaceTree';
 import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
+import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 
 /**
  * Explorer View - WorkspaceTree for folder navigation with workspace selection
  */
 export function ExplorerView() {
+  // Get state directly from store
   const {
     allWorkspaces,
     selectedWorkspaceId,
     isLoadingWorkspaces,
     isLoadingTree,
+  } = useExplorerStore();
+
+  // Get actions from helper
+  const {
     loadAllWorkspaces,
     selectWorkspace,
     getCurrentTree,
@@ -98,12 +104,7 @@ export function ExplorerView() {
         ) : !currentTreeData ? (
           <div className="p-4 text-sm text-muted-foreground">No tree data available</div>
         ) : (
-          <WorkspaceTree 
-            workspaceId={selectedWorkspaceId}
-            treeData={currentTreeData}
-            onRefresh={reloadCurrentTree}
-            includeShared={true}
-          />
+          <WorkspaceTree />
         )}
       </div>
     </div>
