@@ -27,17 +27,20 @@ import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
 
 export function FolderDialog() {
-    // Get state from ExplorerStore
+    // Get state from ExplorerStore (legacy support)
     const {
         isCreateDialogOpen,
         parentFolderForCreate,
     } = useExplorerStore();
 
     // Get actions from dialog helper
-    const { closeCreateDialog } = useDialogAction();
+    const { closeCreateDialog, closeEditDialog } = useDialogAction();
 
-    // Get form state from FolderDialogStore
+    // Get form state from FolderDialogStore (new unified approach)
     const {
+        isOpen,
+        mode,
+        editingFolder,
         newFolderName,
         setNewFolderName,
         description,
@@ -50,9 +53,10 @@ export function FolderDialog() {
     } = useFolderDialogStore();
 
     // Get business logic from helper
-    const { submitNewFolder, initializeDialog } = useFolderDialogHelper();
+    const { submitNewFolder, submitEditFolder, initializeDialog } = useFolderDialogHelper();
 
-    // Derived values
+    // Derived values - support both legacy and new approach
+    const dialogOpen = isOpen || isCreateDialogOpen;
     const parentFolderId = parentFolderForCreate?.folderId;
 
     // Find parent folder info for display (VS Code-like)
@@ -76,23 +80,57 @@ export function FolderDialog() {
 
     // Initialize dialog when it opens
     useEffect(() => {
-        if (isCreateDialogOpen) {
+        if (dialogOpen) {
+            console.log('🔄 FolderDialog opened with mode:', mode);
+            console.log('📋 Form state BEFORE init:', {
+                newFolderName,
+                description,
+                color,
+                editingFolder
+            });
             initializeDialog();
+            
+            // Log again after init to verify data retention
+            setTimeout(() => {
+                console.log('📋 Form state AFTER init:', {
+                    newFolderName,
+                    description,
+                    color
+                });
+            }, 100);
         }
-    }, [isCreateDialogOpen]);
+    }, [dialogOpen, mode]); // Add mode to dependencies to track changes
 
+    // Handle dialog close
+    const handleClose = () => {
+        if (mode === 'edit') {
+            closeEditDialog();
+        } else {
+            closeCreateDialog();
+        }
+    };
+    console.log('FolderDialog Render:', { dialogOpen, mode, parentFolder });
+    
+    // Handle submit
+    const handleSubmit = async () => {
+        if (mode === 'edit') {
+            await submitEditFolder();
+        } else {
+            await submitNewFolder();
+        }
+    };
 
     // Keyboard Shortcuts
     useKeyboardShortcut({
         key: 'Enter',
-        enabled: isCreateDialogOpen && !isSubmitting && !!newFolderName.trim(),
-        callback: submitNewFolder,
+        enabled: dialogOpen && !isSubmitting && !!newFolderName.trim(),
+        callback: handleSubmit,
     });
 
     useKeyboardShortcut({
         key: 'Escape',
-        enabled: isCreateDialogOpen && !isSubmitting,
-        callback: closeCreateDialog,
+        enabled: dialogOpen && !isSubmitting,
+        callback: handleClose,
     });
 
     const colorOptions = [
@@ -107,13 +145,15 @@ export function FolderDialog() {
     ];
 
     return (
-        <Dialog open={isCreateDialogOpen} onOpenChange={(newOpen) => !newOpen && closeCreateDialog()}>
+        <Dialog open={dialogOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
             <DialogContent className="sm:max-w-[550px] rounded-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">
-                        {parentFolder 
-                            ? `Create Folder in "${parentFolder.name}"`
-                            : 'Create New Folder'
+                        {mode === 'edit' 
+                            ? `Edit Folder "${editingFolder?.name || ''}"`
+                            : parentFolder 
+                                ? `Create Folder in "${parentFolder.name}"`
+                                : 'Create New Folder'
                         }
                     </DialogTitle>
                 </DialogHeader>
@@ -126,6 +166,7 @@ export function FolderDialog() {
                             value={newFolderName}
                             onChange={(e) => setNewFolderName(e.target.value)}
                             placeholder="Enter folder name"
+                            autoFocus
                         />
                         {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                     </div>
@@ -170,17 +211,20 @@ export function FolderDialog() {
                 <DialogFooter className="gap-2">
                     <Button 
                         variant="outline"
-                        onClick={closeCreateDialog}
+                        onClick={handleClose}
                         disabled={isSubmitting}
                     >
                         Cancel
                     </Button>
                     <Button  
-                        onClick={() => submitNewFolder()}
+                        onClick={handleSubmit}
                         disabled={isSubmitting}
                     >
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isSubmitting ? 'Creating...' : 'Create Folder'}
+                        {isSubmitting 
+                            ? (mode === 'edit' ? 'Updating...' : 'Creating...') 
+                            : (mode === 'edit' ? 'Update Folder' : 'Create Folder')
+                        }
                     </Button>
                 </DialogFooter>
             </DialogContent>

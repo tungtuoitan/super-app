@@ -36,7 +36,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
     // Business logic
     const {
         closeContextMenu,
-        handleCreateTag,
+        handleCreateFolder,
         handleEditItem,
         handleAddFile,
         handleAddNote,
@@ -55,10 +55,10 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
     });
 
     /**
-     * Wrapper for handleCreateTag to pass contextData
+     * Wrapper for handleCreateFolder to pass contextData
      */
     const onCreateTagClick = () => {
-        handleCreateTag(contextData);
+        handleCreateFolder(contextData);
     };
 
     /**

@@ -8,6 +8,7 @@
 
 import type { Folder } from '@/types/folder.types';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
 
 export const useDialogAction = () => {
     const {
@@ -16,9 +17,21 @@ export const useDialogAction = () => {
         setIsCreateDialogOpen,
         setParentFolderForCreate,
     } = useExplorerStore();
+    
+    const {
+        setIsOpen,
+        setMode,
+        setEditingFolder,
+        setNewFolderName,
+        setDescription,
+        setColor,
+        setErrors,
+        setIsSubmitting,
+        resetForm,
+    } = useFolderDialogStore();
 
     /**
-     * Edit Dialog actions
+     * Edit Dialog actions (legacy - for compatibility)
      */
     const openDialog = (folder: Folder) => {
         setSelectedFolder(folder);
@@ -34,21 +47,74 @@ export const useDialogAction = () => {
         setSelectedFolder(folder);
     };
 
+
     /**
      * Create Dialog actions
      */
     const openCreateDialog = (parentFolder?: Folder) => {
         setParentFolderForCreate(parentFolder || null);
-        setIsCreateDialogOpen(true);
+        setIsCreateDialogOpen(true); // Legacy support
+        setIsOpen(true); // New unified approach
     };
 
     const closeCreateDialog = () => {
-        setIsCreateDialogOpen(false);
-        setTimeout(() => setParentFolderForCreate(null), 200); // Clear after animation
+        setIsCreateDialogOpen(false); // Legacy support
+        setIsOpen(false); // New unified approach
+        setTimeout(() => {
+            setParentFolderForCreate(null);
+            resetForm();
+        }, 200); // Clear after animation
+    };
+    
+    /**
+     * Edit Dialog actions (new unified approach)
+     */
+    const openEditDialog = (folder: any) => {
+        console.log('📝 Opening edit dialog for folder:', {
+            folderId: folder.folderId || folder.tagId,
+            name: folder.name,
+            description: folder.description,
+            color: folder.color,
+            fullData: folder
+        });
+        
+        setMode('edit');
+        
+        // Handle both folderId and tagId (for backward compatibility)
+        const editData = {
+            ...folder,
+            folderId: folder.folderId || folder.tagId,
+        };
+        
+        setEditingFolder(editData);
+        
+        // Pre-fill form with existing data (with safe fallbacks)
+        setNewFolderName(folder.name || '');
+        setDescription(folder.description || '');
+        setColor(folder.color || '#1976D2');
+        
+        // Clear any previous errors
+        setErrors({});
+        
+        // Open dialog
+        setIsOpen(true);
+        
+        console.log('✅ Edit dialog opened with data:', {
+            name: folder.name || '',
+            description: folder.description || '',
+            color: folder.color || '#1976D2'
+        });
+    };
+    
+    const closeEditDialog = () => {
+        setIsOpen(false);
+        setTimeout(() => {
+            resetForm();
+        }, 200);
     };
 
     return {
-        // Edit dialog
+        // Legacy edit dialog (for compatibility)
         openDialog,
         closeDialog,
         updateSelectedFolder,
@@ -56,5 +122,9 @@ export const useDialogAction = () => {
         // Create dialog
         openCreateDialog,
         closeCreateDialog,
+        
+        // New unified edit dialog
+        openEditDialog,
+        closeEditDialog,
     };
 };

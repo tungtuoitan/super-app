@@ -15,7 +15,17 @@ export interface FolderDialogFormErrors {
     color?: string;
 }
 
+export type DialogMode = 'create' | 'edit';
+
 export interface FolderDialogContextData {
+    // Dialog state
+    isOpen: boolean;
+    setIsOpen: Dispatch<SetStateAction<boolean>>;
+    mode: DialogMode;
+    setMode: Dispatch<SetStateAction<DialogMode>>;
+    editingFolder: any | null;
+    setEditingFolder: Dispatch<SetStateAction<any | null>>;
+    
     // Form fields
     newFolderName: string;
     setNewFolderName: Dispatch<SetStateAction<string>>;
@@ -37,12 +47,21 @@ export interface FolderDialogContextData {
     // Workspace tree data
     workspaceTree: WorkspaceTreeItemResponse[];
     setWorkspaceTree: Dispatch<SetStateAction<WorkspaceTreeItemResponse[]>>;
-    
-    // Helper functions
+
+    // Reset form to initial state
     resetForm: () => void;
+
 }
 
 const folderDialogContextDefaultValue: FolderDialogContextData = {
+    // Dialog state
+    isOpen: false,
+    setIsOpen: () => {},
+    mode: 'create',
+    setMode: () => {},
+    editingFolder: null,
+    setEditingFolder: () => {},
+    
     // Form fields
     newFolderName: '',
     setNewFolderName: () => {},
@@ -64,9 +83,10 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     // Workspace tree data
     workspaceTree: [],
     setWorkspaceTree: () => {},
-    
-    // Helper functions
+
+    // Reset form to initial state
     resetForm: () => {},
+
 };
 
 export const FolderDialogStore = createContext<FolderDialogContextData>(
@@ -82,6 +102,11 @@ export const useFolderDialogStore = () => {
 };
 
 export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+    // Dialog state
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [mode, setMode] = useState<DialogMode>('create');
+    const [editingFolder, setEditingFolder] = useState<any | null>(null);
+    
     // Form fields
     const [newFolderName, setNewFolderName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -96,8 +121,8 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
     
     // Workspace tree data
     const [workspaceTree, setWorkspaceTree] = useState<WorkspaceTreeItemResponse[]>([]);
-    
-    // Helper function to reset form
+
+
     const resetForm = () => {
         setNewFolderName('');
         setDescription('');
@@ -106,9 +131,18 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
         setIsSubmitting(false);
     };
     
+
     return (
         <FolderDialogStore.Provider
             value={{
+                // Dialog state
+                isOpen,
+                setIsOpen,
+                mode,
+                setMode,
+                editingFolder,
+                setEditingFolder,
+                
                 // Form fields
                 newFolderName,
                 setNewFolderName,
@@ -130,8 +164,7 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 // Workspace tree data
                 workspaceTree,
                 setWorkspaceTree,
-                
-                // Helper functions
+
                 resetForm,
             }}
         >

@@ -228,7 +228,7 @@ export function FolderNode({
                         title="Add Folder"
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleNewFolder(treeData, openCreateDialog);
+                            handleNewFolder(treeData);
                         }}
                         className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                     >

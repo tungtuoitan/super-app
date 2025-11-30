@@ -5,15 +5,17 @@ import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useAuthStore } from '@/store/auth/AuthStore';
 import { _getWorkspaceTree, _upsertFolder } from '@/services/workspace.service';
 import type { FolderDialogFormErrors } from '@/store/explorer/FolderDialogStore';
-import {useDialogAction} from './useDialogAction.helper';
+import { useDialogAction } from './useDialogAction.helper';
 
 export const useFolderDialogHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
-    const { closeCreateDialog } = useDialogAction();
+    const { closeCreateDialog, closeEditDialog } = useDialogAction();
     
     
     // Form state from FolderDialogStore
     const {
+        mode,
+        editingFolder,
         newFolderName,
         description,
         color,
@@ -21,6 +23,8 @@ export const useFolderDialogHelper = () => {
         setIsSubmitting,
         setIsLoadingTree,
         setWorkspaceTree,
+    } = useFolderDialogStore();
+    const {
         resetForm,
     } = useFolderDialogStore();
     
@@ -34,10 +38,6 @@ export const useFolderDialogHelper = () => {
     const authStore = useAuthStore();
     const token = authStore.auth.userToken;
     
-    /**
-     * Validate new folder form
-     * @returns {boolean} True if valid, false otherwise
-     */
     const validateNewFolder = (): boolean => {
         const newErrors: FolderDialogFormErrors = {};
         
@@ -114,8 +114,7 @@ export const useFolderDialogHelper = () => {
             // Execute success callback (typically closes dialog)
             closeCreateDialog();
             
-            // Reset form
-            resetForm();
+            resetForm()
             
         } catch (error: any) {
             console.error('Failed to create folder:', error);
@@ -130,12 +129,71 @@ export const useFolderDialogHelper = () => {
     
     /**
      * Initialize dialog - fetch tree when dialog opens
+     * Note: In edit mode, form is already pre-filled by openEditDialog, so don't reset
      */
     const initializeDialog = () => {
         if (selectedWorkspaceId) {
             fetchWorkspaceTree(selectedWorkspaceId);
         }
-        resetForm();
+        // Only reset form in create mode (edit mode already has data pre-filled)
+        if (mode === 'create') {
+            resetForm();
+        }
+    }
+    
+    /**
+     * Submit edit folder
+     */
+    const submitEditFolder = async () => {
+        // Validate form
+        if (!validateNewFolder()) {
+            return;
+        }
+        
+        // Check if we have editing folder
+        if (!editingFolder || !editingFolder.folderId) {
+            enqueueSnackbar('No folder selected for editing', { variant: 'error' });
+            return;
+        }
+        
+        // Check workspace ID
+        if (!selectedWorkspaceId) {
+            enqueueSnackbar('No workspace selected', { variant: 'error' });
+            return;
+        }
+        
+        setIsSubmitting(true);
+        try {
+            // Update folder using upsertFolder endpoint
+            await _upsertFolder(token, selectedWorkspaceId, {
+                folderId: editingFolder.folderId, // Include folderId for update
+                name: newFolderName.trim(),
+                description: description.trim() || undefined,
+                color,
+                parentId: editingFolder.parentId || null,
+            });
+            
+            enqueueSnackbar(`Folder "${newFolderName}" updated successfully!`, { 
+                variant: 'success' 
+            });
+            
+            // Reload workspace tree
+            await fetchWorkspaceTree(selectedWorkspaceId);
+            
+            // Close dialog
+            closeEditDialog();
+            
+            resetForm();
+            
+        } catch (error: any) {
+            console.error('Failed to update folder:', error);
+            enqueueSnackbar(
+                error?.message || 'Failed to update folder', 
+                { variant: 'error' }
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     }
     
     return {
@@ -145,6 +203,7 @@ export const useFolderDialogHelper = () => {
         // API actions
         fetchWorkspaceTree,
         submitNewFolder,
+        submitEditFolder,
         
         // Lifecycle
         initializeDialog,
