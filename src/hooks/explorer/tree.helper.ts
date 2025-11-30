@@ -204,3 +204,98 @@ export function createWorkspaceRootFolder(
         isExpanded: true,
     };
 }
+
+/**
+ * Transform workspace data to react-arborist tree data
+ * Handles all transformation logic in a single function:
+ * 1. Extract folders from workspace items
+ * 2. Filter by search text
+ * 3. Wrap in workspace root (if workspace mode)
+ * 4. Convert to TreeFolder format
+ * 
+ * @param data - Workspace data with tree items (or null/undefined)
+ * @param searchText - Search filter text
+ * @returns TreeFolder array ready for react-arborist
+ */
+export function transformToTreeData(
+    data: { workspaceId: number; name: string; description?: string; color?: string; createdAt: string; isArchived: boolean; items: any[] } | null | undefined,
+    searchText: string
+): TreeFolder[] {
+    // ================================================================
+    // STEP 1: Validate input data
+    // ================================================================
+    if (!data || !('items' in data)) {
+        return [];
+    }
+
+    // ================================================================
+    // STEP 2: Transform workspace items to Folder format
+    // Only include 'tag' type items (folders)
+    // Recursively transform all children
+    // ================================================================
+    function transformItem(item: WorkspaceTreeItemResponse): Folder | null {
+        // Only transform tag items (folders)
+        if (item.itemType.toLowerCase() !== "folder") {
+            return null;
+        }
+
+        return {
+            tagId: item.childId,
+            folderId: item.childId,
+            id: item.id,
+            itemId: item.itemId,
+            name: item.name,
+            color: item.color,
+            createdAt: new Date(item.createdAt),
+            isActive: true,
+            depth: item.level,
+            isExpanded: item.isExpanded,
+            children: item.children
+                .map(transformItem)
+                .filter((child): child is Folder => child !== null),
+        };
+    }
+
+    const folders: Folder[] = data.items
+        .map(transformItem)
+        .filter((folder): folder is Folder => folder !== null);
+
+    if (!folders || folders.length === 0) {
+        return [];
+    }
+
+    // ================================================================
+    // STEP 3: Apply search filter to folder tree
+    // Filter recursively - include folders that match OR have matching descendants
+    // ================================================================
+    const filteredFolders = filterTreeBySearch(folders, searchText);
+
+    // ================================================================
+    // STEP 4: Create workspace root node (workspace mode only)
+    // Wrap all folders under a virtual workspace root for display
+    // ================================================================
+    let foldersToTransform: Folder[];
+    
+    if (data && 'workspaceId' in data) {
+        const workspaceRootFolder = createWorkspaceRootFolder(
+            data.workspaceId,
+            data.name,
+            {
+                description: data.description,
+                color: data.color,
+                createdAt: data.createdAt,
+                isArchived: data.isArchived,
+            },
+            filteredFolders
+        );
+        foldersToTransform = [workspaceRootFolder];
+    } else {
+        foldersToTransform = filteredFolders;
+    }
+
+    // ================================================================
+    // STEP 5: Convert to TreeFolder format for react-arborist
+    // Transform Folder hierarchy to TreeFolder with required structure
+    // ================================================================
+    return transformFoldersToTreeData(foldersToTransform);
+}

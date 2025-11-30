@@ -15,7 +15,7 @@ import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.he
 import {CustomDragPreview} from './CustomDragPreview';
 import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
 import {FolderNode} from './FolderNode';
-import {createWorkspaceRootFolder, filterTreeBySearch, getAllVisibleFolderIds, transformFoldersToTreeData, transformTreeItemToFolder, TreeFolder} from '@/hooks/explorer/tree.helper';
+import {getAllVisibleFolderIds, transformToTreeData, TreeFolder} from '@/hooks/explorer/tree.helper';
 
 export function WorkspaceTree() {
     const {
@@ -39,17 +39,6 @@ export function WorkspaceTree() {
 
     // Get current workspace tree data
     const data = getCurrentTree();
-
-    // Extract folders from workspace data
-    // Data is always WorkspaceWithTreeResponse, need to transform items to Folder[]
-    const folders = useMemo(() => {
-        if (!data || !('items' in data)) return [];
-        
-        // Transform WorkspaceTreeItemResponse to Folder format
-        return data.items
-            .map(transformTreeItemToFolder)
-            .filter((folder): folder is Folder => folder !== null);
-    }, [data]);
     
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);
@@ -60,35 +49,12 @@ export function WorkspaceTree() {
         setTreeRef(treeRef);
         return () => setTreeRef(null);
     }, [setTreeRef]);
-    
 
-    // Transform and filter folders based on search text
+    // Transform workspace data to tree format
+    // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
     const treeData = useMemo(() => {
-        if (!folders) return [];
-
-        // Filter tree by search text using helper
-        const filteredFolders = filterTreeBySearch(folders, searchText);
-        
-        // Always wrap folders under a workspace root node (workspace mode only)
-        if (data && 'workspaceId' in data) {
-            const workspaceData = data;
-            const workspaceRootFolder = createWorkspaceRootFolder(
-                workspaceData.workspaceId,
-                workspaceData.name,
-                {
-                    description: workspaceData.description,
-                    color: workspaceData.color,
-                    createdAt: workspaceData.createdAt,
-                    isArchived: workspaceData.isArchived,
-                },
-                filteredFolders
-            );
-            
-            return transformFoldersToTreeData([workspaceRootFolder]);
-        }
-        
-        return transformFoldersToTreeData(filteredFolders);
-    }, [folders, searchText, data]);
+        return transformToTreeData(data, searchText);
+    }, [data, searchText]);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
