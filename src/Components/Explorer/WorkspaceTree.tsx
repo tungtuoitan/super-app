@@ -21,7 +21,9 @@ import type { Folder } from '../../types/folder.types';
 import type { WorkspaceTreeItemResponse } from '../../types/workspace.types';
 import { AddFolderDialog } from '../tags/AddFolderDialog';
 import { useExplorerStore } from '@/store/index';
-import { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
+import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
+import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
+import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
 import type { WorkspaceWithTreeResponse } from '@/types/workspace.types';
 import {CustomDragPreview} from './CustomDragPreview';
 import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
@@ -81,21 +83,37 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
         parentFolderForCreate,
         isDragging,
         setIsDragging,
+        setTreeRef,
+        setRefetchCallback,
     } = useExplorerStore();
     const {
-        selectAllFolders,
         clearSelection,
+        handleSelectionChange,
+    } = useTreeSelection();
+    const {
         openCreateDialog,
         closeCreateDialog,
-        handleSelectionChange,
+    } = useDialogAction();
+    const {
         handleMove,
         handleNewFolder,
         handleRefresh,
-        handleCollapseAll,
-    } = useFolderHelper();
+    } = useTreeOperation();
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);
     const manager = useDragDropManager();
+    
+    // Store treeRef in context for global access
+    useEffect(() => {
+        setTreeRef(treeRef);
+        return () => setTreeRef(null);
+    }, [setTreeRef]);
+    
+    // Store refetch callback in context
+    useEffect(() => {
+        setRefetchCallback(() => refetch);
+        return () => setRefetchCallback(null);
+    }, [setRefetchCallback, refetch]);
     
     // Workspace info is available in data directly when needed
 
@@ -211,18 +229,6 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
     const onMove = async (args: { dragIds: string[]; parentId: string | null; index: number }) => {
         await handleMove(args, treeData);
     };
-    
-    const onNewFolderClick = () => {
-        handleNewFolder(folders);
-    };
-    
-    const onRefreshClick = () => {
-        handleRefresh(refetch);
-    };
-    
-    const onCollapseAllClick = () => {
-        handleCollapseAll(treeRef);
-    };
 
     // Empty state
     if (!treeData || treeData.length === 0) {
@@ -271,9 +277,6 @@ export function WorkspaceTree({ workspaceId, treeData: propsTreeData, onRefresh 
                                 style={{ height: '100%' }}
                                 dragHandle={dragHandle}
                                 treeData={treeData}
-                                onNewFolder={onNewFolderClick}
-                                onRefresh={onRefreshClick}
-                                onCollapseAll={onCollapseAllClick}
                             />
                         </div>
                     );

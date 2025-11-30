@@ -46,6 +46,10 @@ export interface ExplorerContextData {
     setLastSelectedFolderId: Dispatch<SetStateAction<number | null>>;
     isDragging: boolean;
     setIsDragging: Dispatch<SetStateAction<boolean>>;
+    treeRef: React.RefObject<any> | null;
+    setTreeRef: (ref: React.RefObject<any> | null) => void;
+    refetchCallback: (() => void) | null;
+    setRefetchCallback: (callback: (() => void) | null) => void;
 }
 
 export const explorerContextDefaultValue: ExplorerContextData = {
@@ -83,6 +87,10 @@ export const explorerContextDefaultValue: ExplorerContextData = {
     setLastSelectedFolderId: () => {},
     isDragging: false,
     setIsDragging: () => {},
+    treeRef: null,
+    setTreeRef: () => {},
+    refetchCallback: null,
+    setRefetchCallback: () => {},
 };
 
 export const ExplorerStore = createContext<ExplorerContextData>(explorerContextDefaultValue);
@@ -109,6 +117,8 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
     const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [treeRef, setTreeRef] = useState<React.RefObject<any> | null>(null);
+    const [refetchCallback, setRefetchCallback] = useState<(() => void) | null>(null);
 
     return (
         <ExplorerStore.Provider
@@ -147,6 +157,10 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 setLastSelectedFolderId,
                 isDragging,
                 setIsDragging,
+                treeRef,
+                setTreeRef,
+                refetchCallback,
+                setRefetchCallback,
             }}
         >
             {children}

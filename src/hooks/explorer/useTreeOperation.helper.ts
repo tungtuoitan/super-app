@@ -1,119 +1,20 @@
-import type { Folder } from '@/types/folder.types';
-import type { NodeApi } from 'react-arborist';
-import {findFolderById, getAllFoldersFlattened, isDescendant, TreeFolder} from './tree.helper';
-import {useExplorerStore} from '../../store';
+/**
+ * Tree Operation Helper Hook
+ * Handles tree operations: drag & drop, refresh, new folder
+ */
 
-export const useFolderHelper = () => {
+import type { TreeFolder } from './tree.helper';
+import { getAllFoldersFlattened, isDescendant, findFolderById } from './tree.helper';
+import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+
+export const useTreeOperation = () => {
     const {
-        setSelectedFolder,
-        setIsDialogOpen,
-        setIsCreateDialogOpen,
-        setParentFolderForCreate,
-        setExpandedNodes,
         selectedFolderIds,
         setSelectedFolderIds,
         setLastSelectedFolderId,
         setIsDragging,
+        refetchCallback,
     } = useExplorerStore();
-
-    /**
-     * Dialog actions
-     */
-    const openDialog = (folder: Folder) => {
-        setSelectedFolder(folder);
-        setIsDialogOpen(true);
-    }
-
-    const closeDialog = () => {
-        setIsDialogOpen(false);
-        setTimeout(() => setSelectedFolder(null), 200); // After animation
-    }
-
-    const updateSelectedFolder = (folder: Folder) => {
-        setSelectedFolder(folder);
-    }
-    /**
-     * Create dialog actions
-     */
-    const openCreateDialog = (parentFolder?: Folder) => {
-        setParentFolderForCreate(parentFolder || null);
-        setIsCreateDialogOpen(true);
-    }
-
-    const closeCreateDialog = () => {
-        setIsCreateDialogOpen(false);
-        setTimeout(() => setParentFolderForCreate(null), 200); // Clear after animation
-    }
-
-    /**
-     * Tree expansion actions
-     */
-    const toggleNodeExpansion = (folderId: number) => {
-        setExpandedNodes(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(folderId)) {
-                newSet.delete(folderId);
-            } else {
-                newSet.add(folderId);
-            }
-            return newSet;
-        });
-    }
-
-    const expandNode = (folderId: number) => {
-        setExpandedNodes(prev => new Set(prev).add(folderId));
-    }
-    const collapseNode = (folderId: number) => {
-        setExpandedNodes(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(folderId);
-            return newSet;
-        });
-    }
-
-    const expandAll = () => {
-        // This would need to be called with all folder IDs
-        // For now, we'll just expand first few levels
-        setExpandedNodes(new Set([1, 2, 3, 4, 5, 6, 7, 8]));
-    }
-
-    const collapseAll = () => {
-        setExpandedNodes(new Set());
-    }
-    /**
-     * Selection actions (VS Code-like)
-     */
-    const toggleFolderSelection = (folderId: number) => {
-        setSelectedFolderIds(prev => {
-            if (prev.includes(folderId)) {
-                return prev.filter(id => id !== folderId);
-            } else {
-                return [...prev, folderId];
-            }
-        });
-    }
-
-    const selectAllFolders = (folderIds: number[]) => {
-        setSelectedFolderIds(folderIds);
-    }
-    const clearSelection = () => {
-        setSelectedFolderIds([]);
-        setLastSelectedFolderId(null);
-    }
-    const isFolderSelected = (folderId: number) => {
-        return selectedFolderIds.includes(folderId);
-    }
-
-    
-    const handleSelectionChange = (nodes: NodeApi<TreeFolder>[]) => {
-        const selectedIds = nodes.map(node => node.id);
-        console.log('🎯 Tree selection changed:', selectedIds);
-        const folderIds = selectedIds.map(id => parseInt(id)).filter(id => id > 0); // Filter out workspace nodes
-        setSelectedFolderIds(folderIds);
-        if (folderIds.length > 0) {
-            setLastSelectedFolderId(folderIds[folderIds.length - 1]);
-        }
-    }
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG
@@ -239,13 +140,15 @@ export const useFolderHelper = () => {
         } finally {
             setIsDragging(false);
         }
-    }
+    };
 
     /**
      * Handle new folder action
+     * Opens create dialog with selected folder as parent
      */
     const handleNewFolder = (
-        folders: Folder[] | undefined
+        treeData: TreeFolder[],
+        openCreateDialog: (parentFolder?: any) => void
     ) => {
         console.log('📁 Add Folder clicked');
         
@@ -253,6 +156,8 @@ export const useFolderHelper = () => {
             ? selectedFolderIds[0]
             : undefined;
             
+        // Extract folders from treeData
+        const folders = getAllFoldersFlattened(treeData).map(t => t.data);
         const parentFolder = parentId 
             ? findFolderById(folders || [], parentId)
             : undefined;
@@ -260,54 +165,23 @@ export const useFolderHelper = () => {
         openCreateDialog(parentFolder);
         
         console.log('📁 Parent folder for new item:', parentFolder?.name || 'root');
-    }
+    };
 
     /**
      * Handle refresh action
      */
-    const handleRefresh = (refetch: () => void) => {
+    const handleRefresh = () => {
         console.log('🔄 Refresh clicked');
-        refetch();
-    };
-
-    /**
-     * Handle collapse all action
-     */
-    const handleCollapseAll = (treeRef: React.RefObject<any>) => {
-        console.log('📂 Collapse All clicked');
-        if (treeRef.current) {
-            treeRef.current.closeAll();
+        if (refetchCallback) {
+            refetchCallback();
+        } else {
+            console.warn('⚠️ No refetch callback available');
         }
     };
 
     return {
-        // Dialog actions
-        openDialog,
-        closeDialog,
-        updateSelectedFolder,
-        
-        // Create dialog actions
-        openCreateDialog,
-        closeCreateDialog,
-        
-        // Tree expansion actions
-        toggleNodeExpansion,
-        expandNode,
-        collapseNode,
-        expandAll,
-        collapseAll,
-        
-        // Selection actions
-        toggleFolderSelection,
-        selectAllFolders,
-        clearSelection,
-        isFolderSelected,
-        
-        // Tree operations
-        handleSelectionChange,
         handleMove,
         handleNewFolder,
         handleRefresh,
-        handleCollapseAll,
     };
 };

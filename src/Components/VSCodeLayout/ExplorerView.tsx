@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components';
 import { WorkspaceTree } from '../Explorer/WorkspaceTree';
-import { useExplorerHelper } from '@/hooks/explorer/useExplorerHelper';
+import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
 
 /**
  * Explorer View - WorkspaceTree for folder navigation with workspace selection
@@ -21,7 +21,7 @@ export function ExplorerView() {
     selectWorkspace,
     getCurrentTree,
     reloadCurrentTree,
-  } = useExplorerHelper();
+  } = useWorkspaceOperation();
 
   const [selectedOption, setSelectedOption] = useState<IAutoCompleteOptions | null>(null);
 

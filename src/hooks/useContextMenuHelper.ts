@@ -6,7 +6,7 @@
 
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import { useFolderHelper } from '@/hooks/explorer/useFolderHelper';
+import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';
@@ -24,7 +24,7 @@ export const useContextMenuHelper = () => {
     } = useContextMenuStore();
     
     const { selectedFolderIds } = useExplorerStore();
-    const { openCreateDialog } = useFolderHelper();
+    const { openCreateDialog } = useDialogAction();
     const { setSelectedFolderIds, setLastSelectedFolderId } = useExplorerStore();
     const CURRENT_WORKSPACE_ID = 1;
     

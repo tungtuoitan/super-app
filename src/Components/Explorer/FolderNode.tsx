@@ -15,8 +15,11 @@ import {
 } from 'lucide-react';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import { useExplorerStore } from '@/store/index';
+import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
+import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
+import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
+import { useTreeExpansion } from '@/hooks/explorer/useTreeExpansion.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
-import {useFolderHelper} from '../tags';
 
 
 
@@ -24,18 +27,12 @@ export function FolderNode({
     node, 
     style, 
     dragHandle, 
-    treeData, 
-    onNewFolder, 
-    onRefresh, 
-    onCollapseAll
+    treeData,
 }: { 
     node: NodeApi<TreeFolder>; 
     style: React.CSSProperties;
     dragHandle?: any;
     treeData: TreeFolder[];
-    onNewFolder?: () => void;
-    onRefresh?: () => void;
-    onCollapseAll?: () => void;
 }) {
     const {
         selectedFolderIds,
@@ -43,8 +40,11 @@ export function FolderNode({
         lastSelectedFolderId,
         setLastSelectedFolderId,
     } = useExplorerStore();
-    const { isFolderSelected } = useFolderHelper();
     const { showContextMenu } = useContextMenuHelper();
+    const { isFolderSelected } = useTreeSelection();
+    const { openCreateDialog } = useDialogAction();
+    const { handleMove, handleNewFolder, handleRefresh } = useTreeOperation();
+    const { handleCollapseAll } = useTreeExpansion();
 
     const folder = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
@@ -226,7 +226,7 @@ export function FolderNode({
                         title="Add Folder"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onNewFolder?.(); // Unified "Add Folder" action
+                            handleNewFolder(treeData, openCreateDialog);
                         }}
                         className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                     >
@@ -237,7 +237,7 @@ export function FolderNode({
                         title="Refresh"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onRefresh?.();
+                            handleRefresh();
                         }}
                         className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                     >
@@ -248,7 +248,7 @@ export function FolderNode({
                         title="Collapse All"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onCollapseAll?.();
+                            handleCollapseAll();
                         }}
                         className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                     >

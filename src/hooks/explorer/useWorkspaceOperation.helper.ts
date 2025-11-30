@@ -1,13 +1,12 @@
 /**
- * Explorer Helper Hook
- * Business logic for workspace explorer operations
+ * Workspace Operation Helper Hook
  * Handles loading workspaces and their tree data
  */
 
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { _getAllUserWorkspaces, _getWorkspaceTree } from '@/services/workspace.service';
 
-export const useExplorerHelper = () => {
+export const useWorkspaceOperation = () => {
     const {
         allWorkspaces,
         setAllWorkspaces,

@@ -17,5 +17,5 @@ export { useAuthHelper } from './useAuthHelpers';
 export * from './useNoteUIHelper';
 export * from './useNoteTabHelper';
 export * from './useEditorTabHelper';
-export * from './explorer/useExplorerHelper';
+
 export * from './useContextMenuHelper';
