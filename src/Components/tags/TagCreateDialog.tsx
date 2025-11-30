@@ -1,6 +1,6 @@
 /**
- * Mini Tag Creation Dialog
- * A compact dialog for quickly creating new tags from the context menu
+ * Mini Folder Creation Dialog
+ * A compact dialog for quickly creating new folders from the context menu
  * Migrated to ClickUp theme with shadcn/ui components
  */
 
@@ -82,7 +82,7 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
         e.preventDefault();
         
         if (!tagName.trim()) {
-            enqueueSnackbar('Tag name is required', { variant: 'error' });
+            enqueueSnackbar('Folder name is required', { variant: 'error' });
             return;
         }
 
@@ -97,11 +97,11 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
 
             await createTag.mutateAsync(createData);
             
-            enqueueSnackbar('Tag created successfully!', { variant: 'success' });
+            enqueueSnackbar('Folder created successfully!', { variant: 'success' });
             onClose();
         } catch (error) {
-            console.error('Failed to create tag:', error);
-            enqueueSnackbar('Failed to create tag', { variant: 'error' });
+            console.error('Failed to create folder:', error);
+            enqueueSnackbar('Failed to create folder', { variant: 'error' });
         }
     };
 
@@ -115,28 +115,28 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
             <DialogContent className="sm:max-w-md min-h-[450px]">
                 <DialogHeader>
-                    <DialogTitle>Create New Tag</DialogTitle>
+                    <DialogTitle>Create New Folder</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Parent Tag Display */}
+                    {/* Parent Folder Display */}
                     {parentTagForCreate && (
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-muted-foreground">Parent Tag</label>
+                            <label className="text-sm font-medium text-muted-foreground">Parent Folder</label>
                             <Input
                                 value={parentTagForCreate.name}
                                 disabled
                                 className="bg-muted"
                             />
                             <p className="text-xs text-muted-foreground">
-                                This tag will be created as a child of the selected parent
+                                This folder will be created as a child of the selected parent
                             </p>
                         </div>
                     )}
 
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-foreground">
-                            Tag Name <span className="text-destructive">*</span>
+                            Folder Name <span className="text-destructive">*</span>
                         </label>
                         <Input
                             autoFocus
@@ -145,7 +145,7 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
                             onKeyDown={handleKeyDown}
                             required
                             disabled={createTag.isPending}
-                            placeholder="Enter tag name..."
+                            placeholder="Enter folder name..."
                         />
                     </div>
 
@@ -156,7 +156,7 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
                             onChange={(e) => setTagDescription(e.target.value)}
                             onKeyDown={handleKeyDown}
                             disabled={createTag.isPending}
-                            placeholder="Enter tag description..."
+                            placeholder="Enter folder description..."
                             rows={2}
                             className="resize-none"
                         />
@@ -215,7 +215,7 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
                             className="bg-primary hover:bg-primary/90"
                         >
                             {createTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {createTag.isPending ? 'Creating...' : 'Create Tag'}
+                            {createTag.isPending ? 'Creating...' : 'Create Folder'}
                         </Button>
                     </DialogFooter>
                 </form>

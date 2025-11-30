@@ -153,7 +153,7 @@ function PropertiesTab() {
         <PropertyRow label="Type" value={selectedNote.type || 'N/A'} />
         <PropertyRow label="Archived" value={selectedNote.isArchived ? 'Yes' : 'No'} />
         <PropertyRow label="Created By" value={selectedNote.createdBy || 'Unknown'} />
-        <PropertyRow label="Tags" value={selectedNote.tags?.join(', ') || 'No tags'} />
+        <PropertyRow label="HashTags" value={selectedNote.tags?.join(', ') || 'No hashtags'} />
       </div>
     </div>
   )

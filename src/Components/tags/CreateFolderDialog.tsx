@@ -1,5 +1,5 @@
 /**
- * CreateFolderDialog - Dialog for creating new tag/folder in workspace
+ * CreateFolderDialog - Dialog for creating new folder in workspace
  * Migrated from MUI to shadcn/ui
  */
 
@@ -35,7 +35,7 @@ interface CreateFolderDialogProps {
     open: boolean;
     onClose: () => void;
     workspaceId: number;
-    parentTagId?: number; // Optional parent tag for nested creation
+    parentTagId?: number; // Optional parent folder for nested creation
 }
 
 export function CreateFolderDialog({ 

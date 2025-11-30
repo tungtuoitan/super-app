@@ -15,8 +15,8 @@ interface VSCodeLayoutProps {
  * VSCodeLayout - VS Code style layout with resizable panels
  * 
  * Layout structure:
- * - ActivityBar (left, fixed 48px): View selector (Explorer/Tags/Notes)
- * - SideBar (resizable 5-40%): TagTree for Explorer/Tags views, Notes list for Notes view
+ * - ActivityBar (left, fixed 48px): View selector (Explorer/Folders/Notes)
+ * - SideBar (resizable 5-40%): FolderTree for Explorer/Folders views, Notes list for Notes view
  * - EditorArea (resizable): NoteGrid (main notes list)
  *   - Future: Will use react-mosaic for multi-editor drag & drop support
  * - Panel (bottom, resizable 5-60%): NoteDetail and Properties tabs
@@ -39,7 +39,7 @@ interface VSCodeLayoutProps {
  * - Sub-components: ⏳ Still using MUI (will migrate incrementally)
  */
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
-  // View state - Explorer, Tags, Notes
+  // View state - Explorer, Folders, Notes
   const [activeView, setActiveView] = useState<ActivityBarView>('explorer')
   const [isSideBarVisible, setIsSideBarVisible] = useState(true)
   const [isPanelVisible, setIsPanelVisible] = useState(true)
@@ -133,7 +133,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
  * 
  * View switching:
  * - Ctrl+Shift+E: Show Explorer view
- * - Ctrl+Shift+T: Show Tags view (future)
+ * - Ctrl+Shift+T: Show Folders view (future)
  * - Ctrl+Shift+N: Show Notes view (future)
  * 
  * Panel resizing:

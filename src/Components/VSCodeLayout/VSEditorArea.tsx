@@ -95,7 +95,7 @@ export function VSEditorArea() {
             {activeTab.type === 'note' && <NoteEditorPanel tab={activeTab} />}
             {activeTab.type === 'tag' && (
               <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
-                <p className="text-base">Tag editor coming soon...</p>
+                <p className="text-base">Folder editor coming soon...</p>
               </div>
             )}
           </>

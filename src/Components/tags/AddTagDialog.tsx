@@ -1,6 +1,6 @@
 /**
- * AddTagDialog - Dialog for adding tags to workspace
- * Can add existing tags OR create new tags
+ * AddTagDialog - Dialog for adding folders to workspace
+ * Can add existing folders OR create new folders
  * Migrated from MUI to shadcn/ui
  */
 
@@ -54,7 +54,7 @@ interface AddTagDialogProps {
     open: boolean;
     onClose: () => void;
     workspaceId: number;
-    parentTagId?: number | null; // Optional parent tag for nested creation
+    parentTagId?: number | null; // Optional parent folder for nested creation
 }
 
 type TabValue = 'existing' | 'new';
@@ -68,11 +68,11 @@ export function AddTagDialog({
     // Tab state
     const [activeTab, setActiveTab] = useState<TabValue>('existing');
     
-    // Existing tag fields
+    // Existing folder fields
     const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
     const [comboboxOpen, setComboboxOpen] = useState(false);
     
-    // New tag fields
+    // New folder fields
     const [newTagName, setNewTagName] = useState('');
     const [description, setDescription] = useState('');
     const [color, setColor] = useState('#1976D2'); // Default blue
@@ -89,11 +89,11 @@ export function AddTagDialog({
     const { enqueueSnackbar } = useSnackbar();
     const { setSelectedTagIds, setLastSelectedTagId } = useTagUIStore();
 
-    // Find parent tag info for display (VS Code-like)
+    // Find parent folder info for display (VS Code-like)
     const parentTag = React.useMemo(() => {
         if (!parentTagId || !workspaceTree?.tags) return null;
         
-        // Search for parent tag in the tree
+        // Search for parent folder in the tree
         function findTag(tags: Tag[], targetId: number): Tag | null {
             for (const tag of tags) {
                 if (tag.tagId === targetId) return tag;
@@ -129,7 +129,7 @@ export function AddTagDialog({
         const newErrors: { tag?: string } = {};
 
         if (!selectedTag) {
-            newErrors.tag = 'Please select a tag';
+            newErrors.tag = 'Please select a folder';
         }
 
         setErrors(newErrors);
@@ -140,9 +140,9 @@ export function AddTagDialog({
         const newErrors: { name?: string } = {};
 
         if (!newTagName.trim()) {
-            newErrors.name = 'Tag name is required';
+            newErrors.name = 'Folder name is required';
         } else if (newTagName.length > 200) {
-            newErrors.name = 'Tag name must be less than 200 characters';
+            newErrors.name = 'Folder name must be less than 200 characters';
         }
 
         setErrors(newErrors);
@@ -168,11 +168,11 @@ export function AddTagDialog({
             setSelectedTagIds([result.childId]);
             setLastSelectedTagId(result.childId);
 
-            enqueueSnackbar(`Tag "${selectedTag.name}" added to workspace!`, { variant: 'success' });
+            enqueueSnackbar(`Folder "${selectedTag.name}" added to workspace!`, { variant: 'success' });
             onClose();
         } catch (error: any) {
-            console.error('Failed to add existing tag:', error);
-            enqueueSnackbar(error?.message || 'Failed to add tag to workspace', { variant: 'error' });
+            console.error('Failed to add existing folder:', error);
+            enqueueSnackbar(error?.message || 'Failed to add folder to workspace', { variant: 'error' });
         }
     }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
 
@@ -193,15 +193,15 @@ export function AddTagDialog({
                 },
             });
 
-            // VS Code behavior: Select the newly created tag
+            // VS Code behavior: Select the newly created folder
             setSelectedTagIds([result.childId]);
             setLastSelectedTagId(result.childId);
 
-            enqueueSnackbar(`New tag "${newTagName}" created and added!`, { variant: 'success' });
+            enqueueSnackbar(`New folder "${newTagName}" created and added!`, { variant: 'success' });
             onClose();
         } catch (error: any) {
-            console.error('Failed to create and add tag:', error);
-            enqueueSnackbar(error?.message || 'Failed to create tag', { variant: 'error' });
+            console.error('Failed to create and add folder:', error);
+            enqueueSnackbar(error?.message || 'Failed to create folder', { variant: 'error' });
         }
     }, [newTagName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose, setSelectedTagIds, setLastSelectedTagId]);
 
@@ -252,8 +252,8 @@ export function AddTagDialog({
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">
                         {parentTag 
-                            ? `Add Tag to "${parentTag.name}"`
-                            : 'Add Tag to Workspace'
+                            ? `Add Folder to "${parentTag.name}"`
+                            : 'Add Folder to Workspace'
                         }
                     </DialogTitle>
                 </DialogHeader>
@@ -271,9 +271,9 @@ export function AddTagDialog({
                     </TabsList>
 
                     <TabsContent value="existing" className="space-y-6">
-                        {/* Combobox for tag selection */}
+                        {/* Combobox for folder selection */}
                         <div className="space-y-2">
-                            <Label htmlFor="tag-select">Select Tag</Label>
+                            <Label htmlFor="tag-select">Select Folder</Label>
                             <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -298,15 +298,15 @@ export function AddTagDialog({
                                                 )}
                                             </div>
                                         ) : (
-                                            (tagsLoading || workspaceLoading) ? "Loading..." : "Select tag..."
+                                            (tagsLoading || workspaceLoading) ? "Loading..." : "Select folder..."
                                         )}
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                                     <Command>
-                                        <CommandInput placeholder="Search tags..." />
-                                        <CommandEmpty>No tag found.</CommandEmpty>
+                                        <CommandInput placeholder="Search folders..." />
+                                        <CommandEmpty>No folder found.</CommandEmpty>
                                         <CommandList>
                                             <CommandGroup>
                                                 {availableTags.map((tag) => (
@@ -353,7 +353,7 @@ export function AddTagDialog({
                         {!tagsLoading && !workspaceLoading && availableTags.length === 0 && (
                             <Alert>
                                 <AlertDescription>
-                                    All available tags are already in this workspace. You can create a new tag instead.
+                                    All available folders are already in this workspace. You can create a new folder instead.
                                 </AlertDescription>
                             </Alert>
                         )}
@@ -361,15 +361,15 @@ export function AddTagDialog({
 
                     <TabsContent value="new" className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="new-tag-name">Tag Name *</Label>
+                            <Label htmlFor="new-tag-name">Folder Name *</Label>
                             <Input
                                 id="new-tag-name"
                                 value={newTagName}
                                 onChange={(e) => setNewTagName(e.target.value)}
-                                placeholder="Enter tag name"
+                                placeholder="Enter folder name"
                             />
                             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-                            {!errors.name && <p className="text-sm text-muted-foreground">Enter a name for the new tag</p>}
+                            {!errors.name && <p className="text-sm text-muted-foreground">Enter a name for the new folder</p>}
                         </div>
 
                         <div className="space-y-2">
@@ -381,7 +381,7 @@ export function AddTagDialog({
                                 placeholder="Optional description"
                                 rows={3}
                             />
-                            <p className="text-sm text-muted-foreground">Optional description for the tag</p>
+                            <p className="text-sm text-muted-foreground">Optional description for the folder</p>
                         </div>
 
                         <div className="space-y-2">
@@ -423,7 +423,7 @@ export function AddTagDialog({
                             <p className="text-sm text-muted-foreground">Optional custom label for this relationship</p>
                         </div>
 
-                        {/* Parent Tag Info */}
+                        {/* Parent Folder Info */}
                         {parentTag ? (
                             <Alert>
                                 <FolderPlus className="h-4 w-4" />
@@ -466,7 +466,7 @@ export function AddTagDialog({
                         {isSubmitting 
                             ? 'Adding...' 
                             : activeTab === 'existing' 
-                                ? 'Add Tag' 
+                                ? 'Add Folder' 
                                 : 'Create & Add'
                         }
                     </Button>

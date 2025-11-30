@@ -1,6 +1,6 @@
 /**
  * Generic Tab Types for Editor Area
- * Supports multiple tab types: Note, Tag, etc.
+ * Supports multiple tab types: Note, Folder, etc.
  */
 
 import {Note} from "@/types/note.types";
@@ -21,13 +21,13 @@ export interface NoteTab extends BaseTab {
     note: Note;
 }
 
-export interface TagTab extends BaseTab {
+export interface FolderTab extends BaseTab {
     type: 'tag';
     tagId: number;
-    // tag: Tag; // Will be added later
+    // Folder data will be added later
 }
 
-export type EditorTab = NoteTab | TagTab;
+export type EditorTab = NoteTab | FolderTab;
 
 export interface EditorState {
     openTabs: EditorTab[];

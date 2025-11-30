@@ -103,7 +103,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
             let message: string;
 
             if (isMultipleSelected) {
-                message = `Are you sure you want to delete ${selectedCount} selected tags?\n\nThis action cannot be undone.`;
+                message = `Are you sure you want to delete ${selectedCount} selected folders?\n\nThis action cannot be undone.`;
             } else {
                 const countChildren = (tag: any): number => {
                     if (!tag.children || tag.children.length === 0) return 0;
@@ -112,7 +112,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
 
                 const childCount = countChildren(contextData);
                 message = childCount > 0
-                    ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child tag(s).`
+                    ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child folder(s).`
                     : `Are you sure you want to delete "${contextData.name}"?`;
             }
 
@@ -143,7 +143,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                         {/* Add submenu */}
                         <MenuItem onClick={onCreateTagClick}>
                             <AddIcon className="w-4 h-4 mr-2" />
-                            Add Tag
+                            Add Folder
                         </MenuItem>
                         <MenuItem onClick={handleAddFile} disabled>
                             <FileIcon className="w-4 h-4 mr-2" />
@@ -159,14 +159,14 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                         {/* Edit - disabled if multiple items selected */}
                         <MenuItem onClick={onEditItemClick} disabled={isMultipleSelected}>
                             <EditIcon className="w-4 h-4 mr-2" />
-                            Edit {isMultipleSelected ? 'Tags' : 'Tag'}
+                            Edit {isMultipleSelected ? 'Folders' : 'Folder'}
                         </MenuItem>
                         
                         {/* Delete - show count if multiple selected */}
                         {!isWorkspaceRoot && (
                             <MenuItem onClick={onDeleteItemClick}>
                                 <DeleteIcon className="w-4 h-4 mr-2" />
-                                Delete {isMultipleSelected ? `${selectedCount} Tags` : 'Tag'}
+                                Delete {isMultipleSelected ? `${selectedCount} Folders` : 'Folder'}
                             </MenuItem>
                         )}
                     </>

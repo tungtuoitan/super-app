@@ -74,7 +74,7 @@ export const useContextMenuHelper = () => {
 
 
         const handleDeleteTag = (tag: Tag) => {
-            console.log('🗑️ Removing tag from workspace:', tag.tagId, tag.name, 'itemId:', tag.itemId);
+            console.log('🗑️ Removing folder from workspace:', tag.tagId, tag.name, 'itemId:', tag.itemId);
     
             // Validate itemId exists
             if (!tag.itemId) {
@@ -191,10 +191,10 @@ export const useContextMenuHelper = () => {
     }
 
     /**
-     * Handle create tag action
+     * Handle create folder action
      */
     const handleCreateTag = (parentTag?: any) => {
-        console.log('📁 Context Menu: Add tag clicked for parent:', parentTag);
+        console.log('📁 Context Menu: Add folder clicked for parent:', parentTag);
         closeContextMenu();
         if (openCreateDialog) {
             openCreateDialog(parentTag); 

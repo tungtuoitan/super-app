@@ -5,6 +5,7 @@ import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
 import {WorkspaceTree} from '../tags/WorkspaceTree'
+import {FoldersPanel} from '../Folders'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -21,7 +22,7 @@ interface VSSideBarProps {
  * 
  * Views:
  * - Explorer: WorkspaceTree component for workspace navigation
- * - Tags: Tag management interface with WorkspaceTree
+ * - Folders: Folder management and organization
  * - Notes: Notes list interface with search
  * 
  * Collapse behavior:
@@ -55,7 +56,7 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
               {/* Content */}
               <div className="flex-1 overflow-auto">
                 {activeView === 'explorer' && <ExplorerView />}
-                {activeView === 'tags' && <TagsView />}
+                {activeView === 'folders' && <FoldersView />}
                 {activeView === 'notes' && <NotesView />}
               </div>
             </div>
@@ -85,23 +86,24 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
 }
 
 /**
- * Explorer View - WorkspaceTree for tag navigation
+ * Explorer View - WorkspaceTree for folder navigation
  */
 function ExplorerView() {
   return (
     <div className="h-full overflow-hidden flex flex-col">
-      {/* Using workspace tag tree API with workspaceId=1 */}
+      {/* Using workspace folder tree API with workspaceId=1 */}
       <WorkspaceTree workspaceId={1} includeShared={true} />
     </div>
   )
 }
 
 /**
- * Tags View - Tag management interface
+ * Folders View - Folder management interface
  */
-function TagsView() {
+function FoldersView() {
   return (
     <div className="h-full overflow-hidden flex flex-col">
+      <FoldersPanel />
     </div>
   )
 }
@@ -133,8 +135,8 @@ function getViewTitle(view: ActivityBarView): string {
   switch (view) {
     case 'explorer':
       return 'Explorer'
-    case 'tags':
-      return 'Tags'
+    case 'folders':
+      return 'Folders'
     case 'notes':
       return 'Notes'
     default:

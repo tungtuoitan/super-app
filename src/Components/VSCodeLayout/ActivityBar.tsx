@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Folder, Tag, FileText, Settings } from 'lucide-react'
+import { Folder, FileText, Settings } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -8,7 +8,7 @@ import {
 } from '@/Components/ui/tooltip'
 import {SettingsDialog} from './SettingsDialog'
 
-export type ActivityBarView = 'explorer' | 'tags' | 'notes'
+export type ActivityBarView = 'explorer' | 'folders' | 'notes'
 
 interface ActivityBarProps {
   activeView: ActivityBarView
@@ -17,7 +17,7 @@ interface ActivityBarProps {
 
 const activities = [
   { id: 'explorer' as const, icon: Folder, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
-  { id: 'tags' as const, icon: Tag, label: 'Tags', shortcut: 'Ctrl+Shift+T' },
+  { id: 'folders' as const, icon: Folder, label: 'Folders', shortcut: 'Ctrl+Shift+T' },
   { id: 'notes' as const, icon: FileText, label: 'Notes', shortcut: 'Ctrl+Shift+N' },
 ]
 

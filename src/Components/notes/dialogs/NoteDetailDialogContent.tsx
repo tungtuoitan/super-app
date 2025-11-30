@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Textarea } from '@/Components/ui/textarea';
 import { Badge } from '@/Components/ui/badge';
 import { ScrollArea } from '@/Components/ui/scroll-area';
-import { FileText, Calendar, User, Tag as TagIcon, Info } from 'lucide-react';
+import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-react';
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
@@ -51,10 +51,10 @@ export function NoteDetailDialogContent() {
         }
     }, [selectedNote?.noteId]);
     
-    // Fetch tags from API for use in autocomplete
+    // Fetch hashtags from API for use in autocomplete
     const { tagOptions, isLoading: tagsLoading, error: tagsError } = useTagsForAutocomplete();
     
-    // Fallback tags if API fails
+    // Fallback hashtags if API fails
     const fallbackTagOptions: IAutoCompleteOptions[] = [
         { id: 'work', label: 'Work', desc: 'Work', active: true },
         { id: 'personal', label: 'Personal', desc: 'Personal', active: true },
@@ -62,13 +62,13 @@ export function NoteDetailDialogContent() {
         { id: 'urgent', label: 'Urgent', desc: 'Urgent', active: true },
     ];
     
-    // Use API tags if available, otherwise fallback tags
+    // Use API hashtags if available, otherwise fallback hashtags
     const finalTagOptions = tagsError ? fallbackTagOptions : tagOptions;
     
-    // Log error if tags failed to load
+    // Log error if hashtags failed to load
     React.useEffect(() => {
         if (tagsError) {
-            console.error('Failed to load tags for autocomplete:', tagsError);
+            console.error('Failed to load hashtags for autocomplete:', tagsError);
         }
     }, [tagsError]);
     
@@ -85,14 +85,14 @@ export function NoteDetailDialogContent() {
         ? typeOptions.find(option => option.id === selectedNote.type) || null
         : null;
     
-    // Convert tags array to comma-separated string of IDs for TagAutoComplete
-        // Map selected tags to match the format expected by the component (comma-separated string of IDs)
+    // Convert hashtags array to comma-separated string of IDs for TagAutoComplete
+        // Map selected hashtags to match the format expected by the component (comma-separated string of IDs)
     const currentTagsValue = selectedNote?.tags
         ? selectedNote.tags.map((tag:any) => tag.tagId.toString()).filter(Boolean).join(',')
         : '';
     
     // Debug logging
-    console.log('Debug - Tag display data:', {
+    console.log('Debug - HashTag display data:', {
         selectedNoteTags: selectedNote?.tags,
         currentTagsValue,
         finalTagOptions,
@@ -110,10 +110,10 @@ export function NoteDetailDialogContent() {
         };
     
     const handleTagsChange = (tagsString: string) => {
-        // Convert comma-separated string of IDs back to tags array
+        // Convert comma-separated string of IDs back to hashtags array
         const tagIds = tagsString ? tagsString.split(',').map(id => id.trim()).filter(id => id) : [];
         
-        // Convert tag IDs to Tag objects by finding them in the options
+        // Convert hashtag IDs to Tag objects by finding them in the options
         const tagObjects = tagIds.map(tagId => {
             const foundOption = finalTagOptions.find(option => option.id === tagId);
             if (foundOption) {
@@ -130,7 +130,7 @@ export function NoteDetailDialogContent() {
         }).filter(tag => tag !== null);
         
         handleFieldChange('tags', tagObjects);
-        console.log('Tags changed:', { tagsString, tagIds, tagObjects });
+        console.log('HashTags changed:', { tagsString, tagIds, tagObjects });
     };        const handleDuplicate = () => {
             // TODO: Implement duplicate logic
             console.log('Duplicating note');
@@ -206,14 +206,14 @@ export function NoteDetailDialogContent() {
                                 }}
                             />
 
-                            {/* Tags */}
+                            {/* HashTags */}
                             <div className="space-y-2">
                                 <GenericTagAutoComplete
                                     options={finalTagOptions}
                                     value={currentTagsValue}
                                     onChange={handleTagsChange}
-                                    label="Tags"
-                                    placeholder={tagsLoading ? "Loading tags..." : "+ Add Tag"}
+                                    label="HashTags"
+                                    placeholder={tagsLoading ? "Loading hashtags..." : "+ Add HashTag"}
                                     size="small"
                                     data-testid="note-tags"
                                     disabled={tagsLoading}

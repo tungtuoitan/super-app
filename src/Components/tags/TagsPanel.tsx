@@ -21,7 +21,7 @@ export function TagsPanel({ onTagSelect }: TagsPanelProps) {
   if (isLoading) {
     return (
       <div className="p-4">
-        <p className="text-muted-foreground">Loading tags...</p>
+        <p className="text-muted-foreground">Loading folders...</p>
       </div>
     );
   }

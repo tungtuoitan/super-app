@@ -1,6 +1,6 @@
 /**
- * WorkspaceTree Component - Hierarchical tree view of tags using react-arborist
- * Similar to NoteGrid but displays tags in a tree structure with advanced tree functionality
+ * WorkspaceTree Component - Hierarchical tree view of folders using react-arborist
+ * Similar to NoteGrid but displays folders in a tree structure with advanced tree functionality
  */
 
 import React, { useMemo, useState } from 'react';
@@ -38,11 +38,11 @@ interface TreeTag {
     id: string;
     name: string;
     children?: TreeTag[];
-    data: Tag; // Store original tag data
+    data: Tag; // Store original folder data
 }
 
 /**
- * Helper function to get all visible tag IDs in tree order
+ * Helper function to get all visible folder IDs in tree order
  */
 function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
     const result: number[] = [];
@@ -62,7 +62,7 @@ function getAllVisibleTagIds(treeData: TreeTag[]): number[] {
 
 /**
  * Helper function to check if targetId is a descendant of parentId
- * Used to prevent circular dependencies when moving tags
+ * Used to prevent circular dependencies when moving folders
  */
 function isDescendant(targetId: number, potentialParentId: number, treeData: TreeTag[]): boolean {
     // Find the potential parent node
@@ -87,7 +87,7 @@ function isDescendant(targetId: number, potentialParentId: number, treeData: Tre
 }
 
 /**
- * Helper function to find a tag by ID in the tag array
+ * Helper function to find a folder by ID in the folder array
  */
 function findTagById(tags: Tag[], targetId: number): Tag | undefined {
     for (const tag of tags) {
@@ -231,7 +231,7 @@ function TagNode({
             return;
         }
         
-        // Open tag-specific context menu with tag data
+        // Open folder-specific context menu with folder data
         showContextMenu(e, 'tag', tag);
     };
     
@@ -284,7 +284,7 @@ function TagNode({
                 ) : null}
             </button>
 
-            {/* Tag Icon */}
+            {/* Folder Icon */}
             <div className="mr-2 flex items-center">
                 {/* Workspace root node */}
                 {tag.tagId < 0 ? (
@@ -304,8 +304,8 @@ function TagNode({
                 )}
             </div>
 
-            {/* Tag Info */}
-            <div className="flex-1 min-w-0 flex items-center gap-2 h-full">
+            {/* Folder Info */}
+            <div className="flex-1 min-w-0 flex items-center gap-2">
                 <div className="w-full min-w-0 flex items-center gap-2">
                     <span
                         className={`
@@ -327,10 +327,10 @@ function TagNode({
                     onClick={(e) => e.stopPropagation()} // Prevent node selection when clicking buttons
                 >
                     <button
-                        title="Add Tag"
+                        title="Add Folder"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onNewFolder?.(); // Unified "Add Tag" action
+                            onNewFolder?.(); // Unified "Add Folder" action
                         }}
                         className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                     >
@@ -392,17 +392,17 @@ function WorkspaceTreeEmpty() {
         <div className="flex flex-col items-center justify-center p-12 text-center">
             <TagIcon className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                No Tags Found
+                No Folders Found
             </h3>
             <p className="text-sm text-muted-foreground">
-                Create your first tag to organize your content
+                Create your first folder to organize your content
             </p>
         </div>
     );
 }
 
 /**
- * Transform tag hierarchy to react-arborist tree data
+ * Transform folder hierarchy to react-arborist tree data
  * NOTE: All nodes must have children array (even if empty) to allow drop into them
  */
 function transformTagsToTreeData(tags: Tag[]): TreeTag[] {
@@ -424,7 +424,7 @@ function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; t
     return (
         <div className="p-2 px-4 bg-primary/20 text-primary-foreground rounded mb-2 flex items-center justify-between">
             <span className="text-xs">
-                {selectedCount} of {totalCount} tags selected
+                {selectedCount} of {totalCount} folders selected
             </span>
             <span className="text-xs opacity-80">
                 Ctrl+Click to toggle • Shift+Click for range • Ctrl+A to select all
@@ -435,7 +435,7 @@ function SelectionInfo({ selectedCount, totalCount }: { selectedCount: number; t
 
 /**
  * Custom Drag Preview Component (VS Code style)
- * Shows tag name when dragging 1 item, shows count when dragging multiple items
+ * Shows folder name when dragging 1 item, shows count when dragging multiple items
  */
 function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }: {
     offset: { x: number; y: number } | null;
@@ -457,7 +457,7 @@ function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }:
             return `${itemCount}`;
         }
         
-        // Single item: show tag name
+        // Single item: show folder name
         if (itemCount === 1 && id) {
             const allTags = getAllTagsFlattened(treeData);
             const tag = allTags.find(t => t.id === id);
@@ -486,7 +486,7 @@ function CustomDragPreview({ offset, mouse, id, dragIds, isDragging, treeData }:
                     {/* Icon */}
                     <TagIcon className="w-4 h-4 text-primary" />
 
-                    {/* Text: Show tag name for single item, count for multiple */}
+                    {/* Text: Show folder name for single item, count for multiple */}
                     <span
                         className={`
                             text-editor-fg truncate
@@ -561,7 +561,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                         const matchesSearch = 
                             tag.name.toLowerCase().includes(searchText.toLowerCase());
                         
-                        // Include if this tag matches OR any descendant matches
+                        // Include if this folder matches OR any descendant matches
                         const hasMatchingDescendant = tag.children && tag.children.length > 0 ? 
                             filterTree(tag.children).length > 0 : false;
                         
@@ -601,7 +601,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
         return transformTagsToTreeData(filteredTags);
     }, [tags, searchText, data]);
 
-    // Get all visible tag IDs for keyboard navigation
+    // Get all visible folder IDs for keyboard navigation
     const allVisibleTagIds = useMemo(() => {
         return getAllVisibleTagIds(treeData);
     }, [treeData]);
@@ -707,7 +707,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             // VS CODE BEHAVIOR: Filter out descendants of selected nodes
             // If moving both parent P and child t1, only move P (t1 will follow automatically)
             tagIds = tagIds.filter(tagId => {
-                // Check if this tag is a descendant of any other selected tag
+                // Check if this folder is a descendant of any other selected folder
                 const isDescendantOfOtherSelected = tagIds.some(otherTagId => {
                     if (otherTagId === tagId) return false; // Don't compare with itself
                     return isDescendant(tagId, otherTagId, treeData);
@@ -715,7 +715,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 return !isDescendantOfOtherSelected; // Keep only if NOT a descendant
             });
 
-            console.log('📊 Filtered tag IDs (excluding descendants):', {
+            console.log('📊 Filtered folder IDs (excluding descendants):', {
                 original: args.dragIds,
                 filtered: tagIds,
                 removedCount: args.dragIds.length - tagIds.length
@@ -815,7 +815,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             }
 
             // BATCH MOVE: Move all selected items using optimized batch API
-            console.log(`📤 Batch moving ${tagIds.length} tag(s) to parent ${newParentId || 'root'} at index ${args.index}`);
+            console.log(`📤 Batch moving ${tagIds.length} folder(s) to parent ${newParentId || 'root'} at index ${args.index}`);
 
             await batchMoveTagMutation.mutateAsync({
                 tagIds,
@@ -823,7 +823,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 startIndex: args.index,
             });
 
-            console.log(`✅ Successfully batch moved ${tagIds.length} tag(s)`);
+            console.log(`✅ Successfully batch moved ${tagIds.length} folder(s)`);
 
             // VS Code behavior: Re-select the moved items after move completes
             // If single item moved, select it; if multiple items moved, select all of them
@@ -834,7 +834,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             console.log(`✅ Re-selected moved item(s): ${tagIds.join(', ')}`);
 
         } catch (error) {
-            console.error('❌ Failed to move tag(s):', error);
+            console.error('❌ Failed to move folder(s):', error);
             // Error will be handled by React Query's onError
             // Tree will revert to previous state on refetch
         } finally {
@@ -844,23 +844,23 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
     
     // Handle workspace action buttons
     const handleNewFolder = () => {
-        console.log('📁 Add Tag clicked');
+        console.log('📁 Add Folder clicked');
         
-        // Use currently selected tag as parent (VS Code-like behavior)
-        // If a tag is selected, use it as parent
+        // Use currently selected folder as parent (VS Code-like behavior)
+        // If a folder is selected, use it as parent
         // Otherwise, default to root level (undefined)
         const parentId = selectedTagIds.length > 0 
             ? selectedTagIds[0] // Use first selected tag as parent
             : undefined; // Root level if nothing selected
             
-        // Find the parent tag object if parentId exists
+        // Find the parent folder object if parentId exists
         const parentTag = parentId 
             ? findTagById(tags || [], parentId)
             : undefined;
             
         openCreateDialog(parentTag);
         
-        console.log('📁 Parent tag for new item:', parentTag?.name || 'root');
+        console.log('📁 Parent folder for new item:', parentTag?.name || 'root');
     };
     
     const handleRefresh = () => {
@@ -911,7 +911,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
                     <div className="bg-editor-sidebar p-4 px-6 rounded-lg shadow-lg flex items-center gap-3">
                         <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                        <span className="text-sm text-editor-fg">Moving tag...</span>
+                        <span className="text-sm text-editor-fg">Moving folder...</span>
                     </div>
                 </div>
             )}
@@ -954,7 +954,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 }}
             </Tree>
 
-            {/* Add Tag Dialog */}
+            {/* Add Folder Dialog */}
             {workspaceId && (
                 <AddTagDialog
                     open={isCreateDialogOpen}
