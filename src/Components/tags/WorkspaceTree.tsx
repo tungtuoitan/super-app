@@ -24,7 +24,7 @@ import { useWorkspaceTagTree, useBatchMoveTag } from '../../hooks/Tags/useTags';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 import { useTagUIHelper } from '@/hooks/useTagUIHelper';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import type { Tag } from '../../types/folder.types';
+import type { Tag } from '../../types/tag.types';
 import { AddTagDialog } from './AddTagDialog';
 
 interface WorkspaceTreeProps {

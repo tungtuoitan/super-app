@@ -7,7 +7,7 @@
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 import { useTagUIHelper } from '@/hooks/useTagUIHelper';
-import {Tag} from '@/types/folder.types';
+import {Tag} from '@/types/tag.types';
 import {useRemoveWorkspaceItem, useWorkspaceTagTree} from './Tags/useTags';
 
 

@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from '@/shared/components';
-import { useTagsForAutocomplete } from '@/Components/Tags';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Textarea } from '@/Components/ui/textarea';
 import { Badge } from '@/Components/ui/badge';
@@ -15,6 +14,7 @@ import { FileText, Calendar, User, Tag as TagIcon, Info } from 'lucide-react';
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {useTagsForAutocomplete} from '@/Components/tags';
 
 /**
  * Note Detail Dialog Content

@@ -1,10 +1,10 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '@/Components/VSCodeLayout/ActivityBar'
-import { WorkspaceTree } from '@/Components/Tags/WorkspaceTree'
 import { NoteGridPanel } from '../Notes/NoteGridPanel'
 import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
+import {WorkspaceTree} from '../tags/WorkspaceTree'
 
 interface VSSideBarProps {
   activeView: ActivityBarView

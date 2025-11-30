@@ -26,7 +26,7 @@ import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
 import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../../hooks/Tags/useWorkspace';
-import type { Tag } from '../../types/folder.types';
+import type { Tag } from '../../types/tag.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';

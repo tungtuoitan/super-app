@@ -5,7 +5,7 @@
 
 import { apiClient } from '@/lib/api-client';
 
-import type { Tag } from '@/types/folder.types';
+import type { Tag } from '@/types/tag.types';
 import {CreateNoteDTO, GetNotesParams, Note, NoteDTO, NoteResponse, NotesResponse, UpdateNoteDTO} from '../types/note.types';
 
 class NoteService {

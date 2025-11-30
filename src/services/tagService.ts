@@ -15,8 +15,8 @@ import type {
     WorkspaceWithTagTree,
     WorkspaceWithTreeDTO,
     WorkspaceTreeItemDTO
-} from '../types/folder.types'
-import { tagsDumpData } from '../Components/Tags/tagsDumpData'
+} from '../types/tag.types'
+import {tagsDumpData} from '@/Components/tags/tagsDumpData';
 
 // Toggle between dump data and real API
 const USE_DUMP_DATA = false;

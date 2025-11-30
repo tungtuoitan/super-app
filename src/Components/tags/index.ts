@@ -1,9 +1,12 @@
 // Tags Feature Public Exports
 
 // Components
-export { WorkspaceTree } from './WorkspaceTree';
 export { TagCreateDialog } from './TagCreateDialog';
 export { AddTagDialog } from './AddTagDialog';
+export { WorkspaceTree } from './WorkspaceTree';
+export { TagsPanel } from './TagsPanel';
+export { CreateFolderDialog } from './CreateFolderDialog';
+export { EditWorkspaceItemDialog } from './EditWorkspaceItemDialog';
 
 // Store & Helper (Preferred for new code)
 export { TagUIStore, TagUIStoreProvider, useTagUIStore } from '@/store/tagUI/TagUIStore';
@@ -27,4 +30,4 @@ export type {
     CreateTagDTO, 
     UpdateTagDTO, 
     GetTagsParams
-} from '../../types/folder.types';
+} from '../../types/tag.types';

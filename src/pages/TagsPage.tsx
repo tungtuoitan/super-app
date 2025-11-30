@@ -1,6 +1,6 @@
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
 import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
-import { WorkspaceTree, TagCreateDialog, AddTagDialog } from '@/Components/Tags';
+import { WorkspaceTree, TagCreateDialog, AddTagDialog } from '@/Components/tags';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 import { useTagUIHelper } from '@/hooks/useTagUIHelper';
 import { Grow } from '@/shared/components/styles/commonStyles';

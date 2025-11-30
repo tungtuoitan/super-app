@@ -22,7 +22,7 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import { useTagUIHelper } from '@/hooks/useTagUIHelper';
 import { useTagUIStore } from '@/store/tagUI/TagUIStore';
-import { EditWorkspaceItemDialog } from '@/Components/Tags/EditWorkspaceItemDialog';
+import { EditWorkspaceItemDialog } from '@/Components/tags/EditWorkspaceItemDialog';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
 

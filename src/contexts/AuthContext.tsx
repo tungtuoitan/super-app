@@ -12,6 +12,7 @@
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import {useAuthStore, User} from '../store';
+import {useAuthHelper} from '../hooks/useAuthHelpers';
 
 /**
  * Authentication context interface (Legacy)

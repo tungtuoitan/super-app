@@ -10,7 +10,7 @@ import type {
     CreateTagDTO, 
     UpdateTagDTO, 
     GetTagsParams 
-} from '../../types/folder.types';
+} from '../../types/tag.types';
 
 // Query Keys
 export const tagKeys = {
