@@ -53,7 +53,7 @@ export function FolderDialog() {
     } = useFolderDialogStore();
 
     // Get business logic from helper
-    const { submitNewFolder, submitEditFolder, initializeDialog } = useFolderDialogHelper();
+    const { submitNewFolder, submitEditFolder } = useFolderDialogHelper();
 
     // Derived values - support both legacy and new approach
     const dialogOpen = isOpen || isCreateDialogOpen;
@@ -88,7 +88,6 @@ export function FolderDialog() {
                 color,
                 editingFolder
             });
-            initializeDialog();
             
             // Log again after init to verify data retention
             setTimeout(() => {

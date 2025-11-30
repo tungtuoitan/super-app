@@ -44,8 +44,7 @@ export function NoteGridPanel({
             try {
                 setIsLoading(true);
                 const token = storageService.getString('token');
-                if (!token) throw new Error('No auth token');
-                const data = await _getNotes(token, { getAll: true });
+                const data = await _getNotes(token??'', { getAll: true });
                 setNotes(data);
                 setError(null);
             } catch (err) {

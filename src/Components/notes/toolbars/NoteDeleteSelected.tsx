@@ -49,8 +49,7 @@ export function NoteDeleteSelected() {
                 try {
                     setIsDeleting(true);
                     const token = storageService.getString('token');
-                    if (!token) throw new Error('No auth token');
-                    await _deleteNote(token, selectedRowIds.join(','));
+                    await _deleteNote(token??'', selectedRowIds.join(','));
 
                     enqueueSnackbar(
                         `${selectedRowIds.length} note${selectedRowIds.length > 1 ? 's' : ''} deleted successfully`,

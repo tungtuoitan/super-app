@@ -26,13 +26,10 @@ export function NoteDetailPanel({ selectedNoteId }: NoteDetailPanelProps) {
   useEffect(() => {
     if (selectedNoteId) {
       setIsLoading(true)
-      const token = storageService.getString('token')
-      if (token) {
-        _getNoteById(token, Number(selectedNoteId))
+        _getNoteById(Number(selectedNoteId))
           .then(setNote)
           .catch(console.error)
           .finally(() => setIsLoading(false))
-      }
     }
   }, [selectedNoteId])
 
@@ -48,9 +45,8 @@ export function NoteDetailPanel({ selectedNoteId }: NoteDetailPanelProps) {
     if (note) {
       try {
         const token = storageService.getString('token')
-        if (!token) throw new Error('No auth token')
         
-        const updated = await _updateNote(token, note.noteId, {
+        const updated = await _updateNote(token??'', note.noteId, {
           noteId: note.noteId,
           name: editTitle,
           description: editContent,

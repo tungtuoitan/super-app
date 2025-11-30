@@ -6,10 +6,12 @@ import { useAuthStore } from '@/store/auth/AuthStore';
 import { _getWorkspaceTree, _upsertFolder } from '@/services/workspace.service';
 import type { FolderDialogFormErrors } from '@/store/explorer/FolderDialogStore';
 import { useDialogAction } from './useDialogAction.helper';
+import {useWorkspaceOperation} from './useWorkspaceOperation.helper';
 
 export const useFolderDialogHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { closeCreateDialog, closeEditDialog } = useDialogAction();
+    const { loadTree } = useWorkspaceOperation();
     
     
     // Form state from FolderDialogStore
@@ -30,13 +32,16 @@ export const useFolderDialogHelper = () => {
     
     // Explorer state
     const {
-        selectedWorkspaceId,
+        currentTree,
         parentFolderForCreate,
     } = useExplorerStore();
     
     // Auth
     const authStore = useAuthStore();
     const token = authStore.auth.userToken;
+    
+    // Computed value
+    const selectedWorkspaceId = currentTree?.workspaceId;
     
     const validateNewFolder = (): boolean => {
         const newErrors: FolderDialogFormErrors = {};
@@ -61,11 +66,6 @@ export const useFolderDialogHelper = () => {
      * @param {number} workspaceId - Workspace ID to fetch tree for
      */
     const fetchWorkspaceTree = async (workspaceId: number) => {
-        if (!token) {
-            console.error('No auth token available');
-            return;
-        }
-        
         setIsLoadingTree(true);
         try {
             const response = await _getWorkspaceTree(token, workspaceId);
@@ -108,8 +108,7 @@ export const useFolderDialogHelper = () => {
                 variant: 'success' 
             });
             
-            // Reload workspace tree
-            await fetchWorkspaceTree(selectedWorkspaceId);
+            loadTree(selectedWorkspaceId);
             
             // Execute success callback (typically closes dialog)
             closeCreateDialog();
@@ -127,19 +126,6 @@ export const useFolderDialogHelper = () => {
         }
     }
     
-    /**
-     * Initialize dialog - fetch tree when dialog opens
-     * Note: In edit mode, form is already pre-filled by openEditDialog, so don't reset
-     */
-    const initializeDialog = () => {
-        if (selectedWorkspaceId) {
-            fetchWorkspaceTree(selectedWorkspaceId);
-        }
-        // Only reset form in create mode (edit mode already has data pre-filled)
-        if (mode === 'create') {
-            resetForm();
-        }
-    }
     
     /**
      * Submit edit folder
@@ -178,7 +164,7 @@ export const useFolderDialogHelper = () => {
             });
             
             // Reload workspace tree
-            await fetchWorkspaceTree(selectedWorkspaceId);
+            loadTree(selectedWorkspaceId);
             
             // Close dialog
             closeEditDialog();
@@ -205,7 +191,5 @@ export const useFolderDialogHelper = () => {
         submitNewFolder,
         submitEditFolder,
         
-        // Lifecycle
-        initializeDialog,
     };
 };

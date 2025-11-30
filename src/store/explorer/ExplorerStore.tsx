@@ -12,10 +12,8 @@ export interface ExplorerContextData {
     // Workspace state
     allWorkspaces: WorkspaceListResponse[];
     setAllWorkspaces: Dispatch<SetStateAction<WorkspaceListResponse[]>>;
-    currentTrees: Map<number, WorkspaceWithTreeResponse>; // workspaceId -> tree data
-    setCurrentTrees: Dispatch<SetStateAction<Map<number, WorkspaceWithTreeResponse>>>;
-    selectedWorkspaceId: number | null;
-    setSelectedWorkspaceId: Dispatch<SetStateAction<number | null>>;
+    currentTree: WorkspaceWithTreeResponse | null; // Current workspace tree data (contains workspaceId)
+    setCurrentTree: Dispatch<SetStateAction<WorkspaceWithTreeResponse | null>>;
     isLoadingWorkspaces: boolean;
     setIsLoadingWorkspaces: Dispatch<SetStateAction<boolean>>;
     isLoadingTree: boolean;
@@ -55,10 +53,8 @@ export interface ExplorerContextData {
 export const explorerContextDefaultValue: ExplorerContextData = {
     allWorkspaces: [],
     setAllWorkspaces: () => {},
-    currentTrees: new Map(),
-    setCurrentTrees: () => {},
-    selectedWorkspaceId: null,
-    setSelectedWorkspaceId: () => {},
+    currentTree: null,
+    setCurrentTree: () => {},
     isLoadingWorkspaces: false,
     setIsLoadingWorkspaces: () => {},
     isLoadingTree: false,
@@ -99,8 +95,7 @@ export const useExplorerStore = () => useContext(ExplorerStore);
 
 export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [allWorkspaces, setAllWorkspaces] = useState<WorkspaceListResponse[]>([]);
-    const [currentTrees, setCurrentTrees] = useState<Map<number, WorkspaceWithTreeResponse>>(new Map());
-    const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<number | null>(null);
+    const [currentTree, setCurrentTree] = useState<WorkspaceWithTreeResponse | null>(null);
     const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
     
@@ -125,10 +120,8 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
             value={{
                 allWorkspaces,
                 setAllWorkspaces,
-                currentTrees,
-                setCurrentTrees,
-                selectedWorkspaceId,
-                setSelectedWorkspaceId,
+                currentTree,
+                setCurrentTree,
                 isLoadingWorkspaces,
                 setIsLoadingWorkspaces,
                 isLoadingTree,

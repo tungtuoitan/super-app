@@ -4,7 +4,7 @@
  * Migrated from MUI DataGrid to TanStack Table with shadcn/ui
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -45,13 +45,12 @@ export const NoteGrid = React.memo(function NoteGrid({ onNoteClick }: NoteGridPr
     const { selectedRowIds, setSelectedRowIds } = useNoteUIStore();
 
     // Load notes
-    React.useEffect(() => {
+    useEffect(() => {
         const loadNotes = async () => {
             try {
                 setIsLoading(true);
                 const token = storageService.getString('token');
-                if (!token) throw new Error('No auth token');
-                const data = await _getNotes(token, { getAll: true });
+                const data = await _getNotes(token??'', { getAll: true });
                 setNotes(data);
                 setError(null);
             } catch (err) {

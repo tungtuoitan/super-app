@@ -6,7 +6,7 @@
  * @returns {Object} Workspace operation functions only (no state)
  * @example
  * // Get state from store
- * const { allWorkspaces, selectedWorkspaceId } = useExplorerStore();
+ * const { allWorkspaces, currentTree } = useExplorerStore();
  * // Get actions from helper
  * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
  */
@@ -18,10 +18,8 @@ export const useWorkspaceOperation = () => {
     const {
         allWorkspaces,
         setAllWorkspaces,
-        currentTrees,
-        setCurrentTrees,
-        selectedWorkspaceId,
-        setSelectedWorkspaceId,
+        currentTree,
+        setCurrentTree,
         isLoadingWorkspaces,
         setIsLoadingWorkspaces,
         isLoadingTree,
@@ -43,10 +41,9 @@ export const useWorkspaceOperation = () => {
             console.log('📦 Loaded workspaces:', data);
             setAllWorkspaces(data);
 
-            // Set default to first workspace if available and none selected
-            if (data.length > 0 && !selectedWorkspaceId) {
+            // Set default to first workspace if available and no tree loaded
+            if (data.length > 0 && !currentTree) {
                 const defaultWorkspaceId = data[0].id;
-                setSelectedWorkspaceId(defaultWorkspaceId);
                 
                 // Auto-load tree for default workspace
                 await loadTree(defaultWorkspaceId);
@@ -63,16 +60,10 @@ export const useWorkspaceOperation = () => {
 
     /**
      * Load tree data for a specific workspace
-     * Caches the tree in currentTrees map
+     * Sets as current tree
      */
-    const loadTree = async (workspaceId: number, forceReload = false) => {
+    const loadTree = async (workspaceId: number) => {
         try {
-            // Check cache first (unless forcing reload)
-            if (!forceReload && currentTrees.has(workspaceId)) {
-                console.log('📋 Using cached tree for workspace:', workspaceId);
-                return currentTrees.get(workspaceId);
-            }
-
             setIsLoadingTree(true);
             
             // TODO: Get actual token from auth context
@@ -81,12 +72,8 @@ export const useWorkspaceOperation = () => {
             
             console.log('🌳 Loaded tree for workspace:', workspaceId, treeData);
             
-            // Update cache
-            setCurrentTrees(prev => {
-                const newMap = new Map(prev);
-                newMap.set(workspaceId, treeData);
-                return newMap;
-            });
+            // Set as current tree
+            setCurrentTree(treeData);
             
             return treeData;
         } catch (error) {
@@ -102,42 +89,9 @@ export const useWorkspaceOperation = () => {
      */
     const selectWorkspace = async (workspaceId: number) => {
         console.log('🎯 Selecting workspace:', workspaceId);
-        setSelectedWorkspaceId(workspaceId);
         
-        // Load tree if not already cached
-        if (!currentTrees.has(workspaceId)) {
-            await loadTree(workspaceId);
-        }
-    };
-
-    /**
-     * Reload tree for current workspace
-     */
-    const reloadCurrentTree = async () => {
-        if (selectedWorkspaceId) {
-            await loadTree(selectedWorkspaceId, true);
-        }
-    };
-
-    /**
-     * Get tree data for a specific workspace
-     */
-    const getTreeByWorkspaceId = (workspaceId: number) => {
-        return currentTrees.get(workspaceId);
-    };
-
-    /**
-     * Get currently selected tree
-     */
-    const getCurrentTree = () => {
-        return selectedWorkspaceId ? currentTrees.get(selectedWorkspaceId) : null;
-    };
-
-    /**
-     * Clear all cached trees
-     */
-    const clearTreeCache = () => {
-        setCurrentTrees(new Map());
+        // Load tree for selected workspace (will set currentTree which contains workspaceId)
+        await loadTree(workspaceId);
     };
 
     return {
@@ -145,9 +99,5 @@ export const useWorkspaceOperation = () => {
         loadAllWorkspaces,
         loadTree,
         selectWorkspace,
-        reloadCurrentTree,
-        getTreeByWorkspaceId,
-        getCurrentTree,
-        clearTreeCache,
     };
 };

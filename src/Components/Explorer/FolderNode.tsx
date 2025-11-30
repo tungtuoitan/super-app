@@ -40,13 +40,14 @@ export function FolderNode({
         setSelectedFolderIds,
         lastSelectedFolderId,
         setLastSelectedFolderId,
+        currentTree,
     } = useExplorerStore();
     const { showContextMenu } = useContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
     const { openCreateDialog } = useDialogAction();
     const { handleMove, handleNewFolder } = useTreeOperation();
     const { handleCollapseAll } = useTreeExpansion();
-    const { reloadCurrentTree } = useWorkspaceOperation();
+    const { loadTree } = useWorkspaceOperation();
 
     const folder = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
@@ -239,7 +240,8 @@ export function FolderNode({
                         title="Refresh"
                         onClick={(e) => {
                             e.stopPropagation();
-                            reloadCurrentTree();
+                            if(currentTree?.workspaceId)
+                                loadTree(currentTree.workspaceId);
                         }}
                         className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                     >

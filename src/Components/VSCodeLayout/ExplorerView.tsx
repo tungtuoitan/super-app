@@ -16,7 +16,7 @@ export function ExplorerView() {
   // Get state directly from store
   const {
     allWorkspaces,
-    selectedWorkspaceId,
+    currentTree,
     isLoadingWorkspaces,
     isLoadingTree,
   } = useExplorerStore();
@@ -25,8 +25,6 @@ export function ExplorerView() {
   const {
     loadAllWorkspaces,
     selectWorkspace,
-    getCurrentTree,
-    reloadCurrentTree,
   } = useWorkspaceOperation();
 
   const [selectedOption, setSelectedOption] = useState<IAutoCompleteOptions | null>(null);
@@ -36,10 +34,10 @@ export function ExplorerView() {
     loadAllWorkspaces();
   }, []);
 
-  // Sync selected option with selectedWorkspaceId from store
+  // Sync selected option with currentTree.workspaceId from store
   useEffect(() => {
-    if (selectedWorkspaceId && allWorkspaces.length > 0) {
-      const workspace = allWorkspaces.find(ws => ws.id === selectedWorkspaceId);
+    if (currentTree?.workspaceId && allWorkspaces.length > 0) {
+      const workspace = allWorkspaces.find(ws => ws.id === currentTree.workspaceId);
       if (workspace) {
         setSelectedOption({
           id: workspace.id.toString(),
@@ -49,10 +47,8 @@ export function ExplorerView() {
         });
       }
     }
-  }, [selectedWorkspaceId, allWorkspaces]);
+  }, [currentTree?.workspaceId, allWorkspaces]);
 
-  // Get current tree data from cache
-  const currentTreeData = getCurrentTree();
 
   // Convert workspaces to autocomplete options
   const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map(ws => ({
@@ -76,7 +72,7 @@ export function ExplorerView() {
     
 
   return (
-    <div className="h-full overflow-hidden flex flex-col">
+    <div className="h-full overflow-auto flex flex-col">
       {/* Workspace Selector */}
       <div className="px-3 py-2">
         <GenericAutoComplete
@@ -97,11 +93,11 @@ export function ExplorerView() {
       <div className="flex-1 overflow-hidden">
         {isLoadingWorkspaces ? (
           <div className="p-4 text-sm text-muted-foreground">Loading workspaces...</div>
-        ) : !selectedWorkspaceId ? (
+        ) : !currentTree?.workspaceId ? (
           <div className="p-4 text-sm text-muted-foreground">No workspace selected</div>
         ) : isLoadingTree ? (
           <div className="p-4 text-sm text-muted-foreground">Loading tree...</div>
-        ) : !currentTreeData ? (
+        ) : !currentTree ? (
           <div className="p-4 text-sm text-muted-foreground">No tree data available</div>
         ) : (
           <WorkspaceTree />

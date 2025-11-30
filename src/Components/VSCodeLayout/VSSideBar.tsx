@@ -4,7 +4,6 @@ import { NoteGridPanel } from '../Notes/NoteGridPanel'
 import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
-import {FoldersPanel} from '../Explorer'
 import { ExplorerView } from './ExplorerView'
 
 interface VSSideBarProps {
@@ -56,7 +55,6 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
               {/* Content */}
               <div className="flex-1 overflow-hidden">
                 {activeView === 'explorer' && <ExplorerView />}
-                {activeView === 'folders' && <FoldersView />}
                 {activeView === 'notes' && <NotesView />}
               </div>
             </div>
@@ -85,16 +83,6 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
   )
 }
 
-/**
- * Folders View - Folder management interface
- */
-function FoldersView() {
-  return (
-    <div className="h-full overflow-hidden flex flex-col">
-      <FoldersPanel />
-    </div>
-  )
-}
 
 /**
  * Notes View - Notes list interface with grid
@@ -123,8 +111,6 @@ function getViewTitle(view: ActivityBarView): string {
   switch (view) {
     case 'explorer':
       return 'Explorer'
-    case 'folders':
-      return 'Folders'
     case 'notes':
       return 'Notes'
     default:

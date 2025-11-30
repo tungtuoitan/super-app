@@ -22,6 +22,7 @@ export function WorkspaceTree() {
         searchText,
         isDragging,
         setTreeRef,
+        currentTree,
     } = useExplorerStore();
 
     const {
@@ -33,13 +34,8 @@ export function WorkspaceTree() {
     const {
         handleMove,
     } = useTreeOperation();
-    const {
-        getCurrentTree,
-    } = useWorkspaceOperation();
 
-    // Get current workspace tree data
-    const data = getCurrentTree();
-    
+
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);
     const manager = useDragDropManager();
@@ -53,8 +49,8 @@ export function WorkspaceTree() {
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
     const treeData = useMemo(() => {
-        return transformToTreeData(data, searchText);
-    }, [data, searchText]);
+        return transformToTreeData(currentTree, searchText);
+    }, [currentTree, searchText]);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
