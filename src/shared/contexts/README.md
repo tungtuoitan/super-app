@@ -14,7 +14,7 @@ This project uses [@szhsin/react-menu](https://szhsin.github.io/react-menu/) for
 
 ### Basic Setup
 
-The `ContextMenuProvider` is already set up in the application root (`Main.tsx`), so you can use the context menu anywhere in the app.
+The `ContextMenu` is already set up in the application root (`Main.tsx`), so you can use the context menu anywhere in the app.
 
 ### Using the Context Menu Hook
 

@@ -126,7 +126,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     return (
         <div className="w-full h-full flex flex-col overflow-hidden bg-[#f6f6f6]">
             {/* Toolbar */}
-            <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2 bblue">
+            <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
                     <div className="flex items-start gap-3">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">

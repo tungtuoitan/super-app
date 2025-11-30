@@ -15,7 +15,7 @@ import type {
     WorkspaceWithTagTree,
     WorkspaceWithTreeDTO,
     WorkspaceTreeItemDTO
-} from '../types/tag.types'
+} from '../types/folder.types'
 import { tagsDumpData } from '../Components/Tags/tagsDumpData'
 
 // Toggle between dump data and real API

@@ -1,7 +1,7 @@
 import { MouseEvent, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { useAuthStore } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/auth/AuthStore';
 
 /**
  * Top navigation component.
@@ -22,7 +22,7 @@ export function TopNav() {
 
     return (
         <div className="top-navigation flex-grow bg-black h-[36px] z-[10000000000] sticky top-0">
-            <nav className="bg-[#09090B] sticky top-0 h-[36px] border-b border-gray-200">
+            <nav className="bg-[#1B1D23] sticky top-0 h-[36px]">
             </nav>
         </div>
     );

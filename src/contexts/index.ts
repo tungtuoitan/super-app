@@ -2,7 +2,6 @@
  * Contexts Index
  */
 
-export * from './AuthContext';
 export * from './NavigationContext';
-export * from './TagUIContext';
+// TagUIContext moved to store - import from '@/store/tagUI/TagUIStore'
 export * from './ThemeContext';

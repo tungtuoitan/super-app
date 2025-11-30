@@ -3,8 +3,8 @@
  * Central export point for all application stores
  */
 
-export { AuthStore, AuthProvider, useAuthStoreContext } from './auth/AuthStore';
-export type { AuthContextData } from './auth/AuthStore';
+export { AuthStore, AuthStoreProvider, useAuthStore } from './auth/AuthStore';
+export type { AuthStoreData, User } from './auth/AuthStore';
 
 export { DialogStore, DialogProvider, useDialogStore } from './dialog/DialogStore';
 export type { DialogContextData } from './dialog/DialogStore';
@@ -17,3 +17,9 @@ export type { EditorTabContextData } from './editor/EditorTabStore';
 
 export { NoteTabStore, NoteTabProvider, useNoteTabStore } from './note/useNoteTabStore';
 export type { NoteTabContextData, TabItem } from './note/useNoteTabStore';
+
+export { ContextMenuStore, ContextMenuStoreProvider, useContextMenuStore } from './contextMenu/ContextMenuStore';
+export type { ContextMenuStoreData, ContextMenuPosition, ContextMenuType } from './contextMenu/ContextMenuStore';
+
+export { TagUIStore, TagUIStoreProvider, useTagUIStore } from './tagUI/TagUIStore';
+export type { TagUIStoreData } from './tagUI/TagUIStore';

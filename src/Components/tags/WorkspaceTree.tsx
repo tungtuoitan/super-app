@@ -21,9 +21,10 @@ import {
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 
 import { useWorkspaceTagTree, useBatchMoveTag } from '../../hooks/Tags/useTags';
-import { useTagUI } from '../../contexts/TagUIContext';
-import { useContextMenu } from '@/shared/contexts';
-import type { Tag } from '../../types/tag.types';
+import { useTagUIStore } from '@/store/tagUI/TagUIStore';
+import { useTagUIHelper } from '@/hooks/useTagUIHelper';
+import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
+import type { Tag } from '../../types/folder.types';
 import { AddTagDialog } from './AddTagDialog';
 
 interface WorkspaceTreeProps {
@@ -145,9 +146,9 @@ function TagNode({
         setSelectedTagIds,
         lastSelectedTagId,
         setLastSelectedTagId,
-        isTagSelected
-    } = useTagUI();
-    const { showContextMenu } = useContextMenu();
+    } = useTagUIStore();
+    const { isTagSelected } = useTagUIHelper();
+    const { showContextMenu } = useContextMenuHelper();
 
     const tag = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
@@ -530,14 +531,17 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
         searchText,
         selectedTagIds,
         setSelectedTagIds,
+        lastSelectedTagId,
         setLastSelectedTagId,
-        clearSelection,
-        // Use context state for create dialog
         isCreateDialogOpen,
+        parentTagForCreate,
+    } = useTagUIStore();
+    const {
+        selectAllTags,
+        clearSelection,
         openCreateDialog,
         closeCreateDialog,
-        parentTagForCreate,
-    } = useTagUI();
+    } = useTagUIHelper();
     const [isDragging, setIsDragging] = useState(false);
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const treeRef = React.useRef<any>(null);

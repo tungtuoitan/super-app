@@ -111,10 +111,25 @@ export const useNoteUIStore = () => useContext(NoteUIContext);
 
 export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Dialog state
-    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+    const [selectedNote, setSelectedNoteState] = useState<Note | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const originalNoteRef = useRef<Note | null>(null);
+
+    // Wrapped setSelectedNote with logging
+    const setSelectedNote = React.useCallback((note: Note | null | ((prev: Note | null) => Note | null)) => {
+        console.log('📌 NoteUIStore - setSelectedNote called:', note);
+        if (typeof note === 'function') {
+            setSelectedNoteState(prev => {
+                const result = note(prev);
+                console.log('📌 NoteUIStore - setSelectedNote (function):', { prev, result });
+                return result;
+            });
+        } else {
+            console.log('📌 NoteUIStore - setSelectedNote (direct):', note);
+            setSelectedNoteState(note);
+        }
+    }, []);
 
     // Search UI state
     const [searchText, setSearchText] = useState('');

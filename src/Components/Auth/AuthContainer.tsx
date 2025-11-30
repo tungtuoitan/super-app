@@ -1,9 +1,9 @@
-import { useAuthStore } from '../../contexts/AuthContext';
-import { useAuthHelpers } from '../../hooks';
+import { useAuthHelper } from '@/hooks/useAuthHelpers';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import {useAuthStore} from '@/store/index';
 
 /**
  * Authentication container component.
@@ -21,7 +21,7 @@ import { AlertCircle } from 'lucide-react';
  */
 export function AuthContainer() {
     const { auth, setAuth, loading, error } = useAuthStore();
-    const { login } = useAuthHelpers();
+    const { login } = useAuthHelper();
 
     /**
      * Handle input changes for authentication form fields.

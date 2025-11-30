@@ -13,7 +13,7 @@ import {
     TooltipProvider, 
     TooltipTrigger 
 } from '@/Components/ui/tooltip';
-import {useAuthStore} from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/auth/AuthStore';
 import {useSnackbar} from 'notistack';
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {useCreateNote, useDeleteNote, useUpdateNote} from '../../../hooks/useNotes';

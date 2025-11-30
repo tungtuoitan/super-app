@@ -1,1 +1,1 @@
-export { ContextMenuProvider, useContextMenu } from './ContextMenuContext'; 
+export { ContextMenu } from './MenuContext'; 

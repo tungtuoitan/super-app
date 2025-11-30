@@ -15,7 +15,7 @@ import {
 } from '@/Components/ui/dialog';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
-import type { Tag } from '@/types/tag.types';
+import type { Tag } from '@/types/folder.types';
 import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 

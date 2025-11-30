@@ -1,32 +1,25 @@
 /**
- * useAuthHelpers Hook
- * Helper functions for authentication operations including login, logout,
- * and token exchange. Uses AuthStore for state management.
+ * Auth Helper Hook
+ * Business logic for authentication operations
+ * Pattern: Separate business logic from store (similar to useTagUIHelper)
  */
 
+import { useCallback } from 'react';
 import { authApi } from '@/services/api';
-import { useAuthStoreContext } from '@/store/auth/AuthStore';
+import { useAuthStore } from '@/store/auth/AuthStore';
 import { storageService, STORAGE_KEYS } from '@/services/storage.service';
 import type { LoginRequest, ExchangeTokenResponse } from '@/types/index';
 
-interface UseAuthHelpersReturn {
-    login: (username: string, password: string) => Promise<void>;
-    logout: () => void;
-    exchangeToken: (code: string) => Promise<ExchangeTokenResponse>;
-}
-
 /**
- * Custom helper hook for authentication operations
- * NO PARAMETERS - Helper hooks should not accept any parameters
- * NO useEffect - Components handle data fetching timing
- * NO side effects - Components handle business logic timing
+ * Auth helper hook for authentication operations
+ * NO PARAMETERS - Access state via useAuthStore
+ * NO useEffect - Components handle timing
  * ONLY function definitions - Return callable functions
- * USE store setters - Update centralized state
  * 
  * @returns Object containing auth helper functions
  */
-export function useAuthHelpers(): UseAuthHelpersReturn {
-    // Get state setters from AuthStore (no state returned)
+export function useAuthHelper() {
+    // Get state setters from AuthStore
     const { 
         setAuth, 
         setIsAuthenticated,
@@ -35,15 +28,12 @@ export function useAuthHelpers(): UseAuthHelpersReturn {
         setTokenExchangeLoading,
         setTokenExchangeError,
         setError 
-    } = useAuthStoreContext();
+    } = useAuthStore();
 
     /**
      * Login with username and password
-     * @param username User's username
-     * @param password User's password
-     * @throws Will throw error if login fails
      */
-    const login = async (username: string, password: string): Promise<void> => {
+    const login = useCallback(async (username: string, password: string): Promise<void> => {
         setLoginLoading(true);
         setLoginError(null);
         setError(null);
@@ -71,13 +61,12 @@ export function useAuthHelpers(): UseAuthHelpersReturn {
         } finally {
             setLoginLoading(false);
         }
-    };
+    }, [setAuth, setIsAuthenticated, setLoginLoading, setLoginError, setError]);
 
     /**
      * Logout user and clean up auth state
-     * Clears store state and removes stored tokens
      */
-    const logout = (): void => {
+    const logout = useCallback((): void => {
         // Clear auth store state
         setAuth({
             userName: '',
@@ -93,15 +82,12 @@ export function useAuthHelpers(): UseAuthHelpersReturn {
         
         // Remove token from storage
         storageService.remove(STORAGE_KEYS.USER_TOKEN);
-    };
+    }, [setAuth, setIsAuthenticated, setError, setLoginError, setTokenExchangeError]);
 
     /**
      * Exchange authorization code for token
-     * @param code Authorization code from OAuth provider
-     * @returns Promise resolving to token exchange response
-     * @throws Will throw error if token exchange fails
      */
-    const exchangeToken = async (code: string): Promise<ExchangeTokenResponse> => {
+    const exchangeToken = useCallback(async (code: string): Promise<ExchangeTokenResponse> => {
         setTokenExchangeLoading(true);
         setTokenExchangeError(null);
         setError(null);
@@ -131,9 +117,7 @@ export function useAuthHelpers(): UseAuthHelpersReturn {
         } finally {
             setTokenExchangeLoading(false);
         }
-    };
-
-    // NO useEffect - Components handle data fetching timing
+    }, [setAuth, setIsAuthenticated, setTokenExchangeLoading, setTokenExchangeError, setError]);
 
     return {
         login,

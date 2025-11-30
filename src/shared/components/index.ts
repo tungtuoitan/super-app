@@ -5,4 +5,3 @@
 
 export * from './ui';
 export * from './feedback';
-export { ContextMenuExample } from './ContextMenuExample';

@@ -26,10 +26,10 @@ import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
 import { useAddExistingTagToWorkspace, useCreateAndAddTagToWorkspace } from '../../hooks/Tags/useWorkspace';
-import type { Tag } from '../../types/tag.types';
+import type { Tag } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import { useTagUI } from '../../contexts/TagUIContext';
+import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
@@ -87,7 +87,7 @@ export function AddTagDialog({
     const addExistingTag = useAddExistingTagToWorkspace();
     const createAndAddTag = useCreateAndAddTagToWorkspace();
     const { enqueueSnackbar } = useSnackbar();
-    const { setSelectedTagIds, setLastSelectedTagId } = useTagUI();
+    const { setSelectedTagIds, setLastSelectedTagId } = useTagUIStore();
 
     // Find parent tag info for display (VS Code-like)
     const parentTag = React.useMemo(() => {

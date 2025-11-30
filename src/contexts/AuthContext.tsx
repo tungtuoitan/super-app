@@ -1,76 +1,83 @@
 /**
- * Authentication Context
- * Minimal authentication context that provides basic auth state.
- * Business logic is handled by AuthStore and useAuthHelpers.
+ * Authentication Context - Compatibility Layer
+ * 
+ * DEPRECATED: This file is kept for backward compatibility.
+ * New code should use:
+ * - useAuthStore() for state access
+ * - useAuthHelper() for business logic
+ * 
+ * Pattern: Store + Helper (similar to TagUI and ContextMenu)
  */
 
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import type { PropsWithChildren } from 'react';
-import { AuthProvider as AuthStoreProvider, useAuthStoreContext } from '@/store/auth/AuthStore';
+import {useAuthStore, User} from '../store';
 
 /**
- * Authentication context interface defining basic auth state access
+ * Authentication context interface (Legacy)
  */
 export interface AuthContextValue {
-    auth: {
-        userName: string;
-        password: string;
-        userToken: string;
-    };
+    // State
+    auth: User;
     isAuthenticated: boolean;
-    setAuth: React.Dispatch<React.SetStateAction<{
-        userName: string;
-        password: string;
-        userToken: string;
-    }>>;
     loading: boolean;
     error: string | null;
+    loginLoading: boolean;
+    loginError: string | null;
+    
+    // Actions
+    setAuth: React.Dispatch<React.SetStateAction<User>>;
+    login: (username: string, password: string) => Promise<void>;
     logout: () => void;
+    exchangeToken: (code: string) => Promise<any>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
 /**
- * Custom hook to access authentication context
- * @throws {Error} When used outside of AuthProvider
- * @returns {AuthContextValue} Authentication context value with state
- */
-export const useAuthStore = () => {
-    const storeContext = useAuthStoreContext();
-    
-    if (!storeContext) {
-        throw new Error('useAuthStore must be used within AuthProvider');
-    }
-    
-    return {
-        auth: storeContext.auth,
-        isAuthenticated: storeContext.isAuthenticated,
-        setAuth: storeContext.setAuth,
-        loading: storeContext.loading,
-        error: storeContext.error,
-        logout: () => {
-            // Clear auth state
-            storeContext.setAuth({
-                userName: '',
-                password: '',
-                userToken: '',
-            });
-            storeContext.setIsAuthenticated(false);
-            
-            // Clear any stored token
-            localStorage.removeItem('userToken');
-        },
-    };
-};
-
-/**
- * Authentication provider component that wraps the AuthStore provider
- * Provides minimal auth context for compatibility with existing code
+ * Legacy provider - no longer needed but kept for backward compatibility
+ * The actual provider is AuthStoreProvider in Main.tsx
  */
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
-    return (
-        <AuthStoreProvider>
-            {children}
-        </AuthStoreProvider>
-    );
+    return <>{children}</>;
 };
+
+/**
+ * Backward compatible hook that combines store and helper
+ * Prefer using useAuthStore() and useAuthHelper() directly in new code
+ */
+export function useAuth(): AuthContextValue {
+    // Get state from store
+    const {
+        auth,
+        setAuth,
+        isAuthenticated,
+        loading,
+        error,
+        loginLoading,
+        loginError,
+    } = useAuthStore();
+    
+    // Get actions from helper
+    const {
+        login,
+        logout,
+        exchangeToken,
+    } = useAuthHelper();
+    
+    return {
+        // State
+        auth,
+        isAuthenticated,
+        loading,
+        error,
+        loginLoading,
+        loginError,
+        
+        // Actions
+        setAuth,
+        login,
+        logout,
+        exchangeToken,
+    };
+}
+
+

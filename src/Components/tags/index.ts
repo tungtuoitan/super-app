@@ -5,8 +5,13 @@ export { WorkspaceTree } from './WorkspaceTree';
 export { TagCreateDialog } from './TagCreateDialog';
 export { AddTagDialog } from './AddTagDialog';
 
-// Context & Hooks
-export { TagUIProvider, useTagUI } from '../../contexts/TagUIContext';
+// Store & Helper (Preferred for new code)
+export { TagUIStore, TagUIStoreProvider, useTagUIStore } from '@/store/tagUI/TagUIStore';
+export type { TagUIStoreData } from '@/store/tagUI/TagUIStore';
+export { useTagUIHelper } from '@/hooks/useTagUIHelper';
+
+// Legacy compatibility - use store + helper instead
+// TagUIProvider deprecated - use TagUIStoreProvider from store instead
 
 // Hooks
 export { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
@@ -22,4 +27,4 @@ export type {
     CreateTagDTO, 
     UpdateTagDTO, 
     GetTagsParams
-} from '../../types/tag.types';
+} from '../../types/folder.types';

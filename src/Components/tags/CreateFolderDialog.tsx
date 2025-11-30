@@ -28,7 +28,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useCreateTag } from '../../hooks/Tags/useTags';
 import { useWorkspaceTagTree } from '../../hooks/Tags/useTags';
-import type { CreateTagDTO } from '../../types/tag.types';
+import type { CreateTagDTO } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 
 interface CreateFolderDialogProps {

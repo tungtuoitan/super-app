@@ -28,6 +28,15 @@ export function NoteDetailDialogContent() {
     const { closeDialog, updateSelectedNote } = useNoteUIHelper();
     const [loading, setLoading] = React.useState(false);
     
+    // ✅ DEBUG: Log store state on every render
+    console.log('🎨 NoteDetailDialogContent render:', { 
+        selectedNote, 
+        isDialogOpen,
+        hasNote: !!selectedNote,
+        noteId: selectedNote?.noteId,
+        noteName: selectedNote?.name 
+    });
+    
     // ✅ FIX: Log when selectedNote changes to verify updates
     React.useEffect(() => {
         console.log('🔄 NoteDetailDialogContent - selectedNote changed:', selectedNote);

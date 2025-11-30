@@ -11,11 +11,14 @@
 
 // Auth helpers (still needed for authentication flow)
 export * from './useAuthHelpers';
+export { useAuthHelper } from './useAuthHelpers';
 
 // UI helpers
 export * from './useNoteUIHelper';
 export * from './useNoteTabHelper';
 export * from './useEditorTabHelper';
+export * from './useContextMenuHelper';
+export * from './useTagUIHelper';
 
 // Reference implementations (kept for historical purposes)
 // export * from './useAuth.old';

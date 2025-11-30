@@ -16,11 +16,11 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Textarea } from '@/Components/ui/textarea';
 import { Loader2 } from 'lucide-react';
-import { useTagUI } from '../../contexts/TagUIContext';
+import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 import { useCreateTag } from '../../hooks/Tags/useTags';
 import { useSnackbar } from 'notistack';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components/ui/GenericAutoComplete';
-import type { CreateTagDTO } from '../../types/tag.types';
+import type { CreateTagDTO } from '../../types/folder.types';
 
 // Dummy data for icon options
 const ICON_OPTIONS: IAutoCompleteOptions[] = [
@@ -65,7 +65,7 @@ export function TagCreateDialog({ open, onClose }: TagCreateDialogProps) {
     const [selectedIcon, setSelectedIcon] = useState<IAutoCompleteOptions | null>(ICON_OPTIONS[0]); // Default to folder
     const [selectedColor, setSelectedColor] = useState<IAutoCompleteOptions | null>(COLOR_OPTIONS[0]); // Default to blue
     const { enqueueSnackbar } = useSnackbar();
-    const { parentTagForCreate } = useTagUI();
+    const { parentTagForCreate } = useTagUIStore();
     const createTag = useCreateTag();
 
     // Reset form when dialog opens/closes

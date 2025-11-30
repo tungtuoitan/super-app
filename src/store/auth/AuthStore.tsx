@@ -1,3 +1,9 @@
+/**
+ * Auth Store
+ * React Context store for managing authentication state
+ * Pattern: Separate store from business logic (similar to TagUIStore, EditorTabStore)
+ */
+
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 
 /**
@@ -10,7 +16,7 @@ export interface User {
     userToken: string;
 }
 
-export interface AuthContextData {
+export interface AuthStoreData {
     // Core auth data
     auth: User;
     setAuth: Dispatch<SetStateAction<User>>;
@@ -42,7 +48,7 @@ const DEFAULT_AUTH_STATE: User = {
     userToken: '',
 };
 
-const authContextDefaultValue: AuthContextData = {
+const authStoreDefaultValue: AuthStoreData = {
     // Core auth data
     auth: DEFAULT_AUTH_STATE,
     setAuth: () => { },
@@ -68,11 +74,11 @@ const authContextDefaultValue: AuthContextData = {
     setTokenExchangeError: () => { },
 };
 
-export const AuthStore = createContext<AuthContextData>(authContextDefaultValue);
+export const AuthStore = createContext<AuthStoreData>(authStoreDefaultValue);
 
-export const useAuthStoreContext = () => useContext(AuthStore);
+export const useAuthStore = () => useContext(AuthStore);
 
-export const AuthProvider: React.FC<React.PropsWithChildren<React.PropsWithChildren<unknown>>> = ({ children }) => {
+export const AuthStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Core auth data
     const [auth, setAuth] = useState<User>(DEFAULT_AUTH_STATE);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);

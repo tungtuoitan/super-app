@@ -1,13 +1,55 @@
 import {Note} from "@/types/note.types";
 import {useEditorTabsStore} from "../store/editor/EditorTabStore";
+import {useNoteUIStore} from "../store/note/useNoteUIStore";
 import {NoteTab} from "@/components/Editor";
 
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
+    const { setSelectedNote, originalNoteRef, setHasUnsavedChanges } = useNoteUIStore();
 
-    const updateActiveTabIdAnd = (newActiveTabId: string | null) => {
+    /**
+     * Update active tab ID and sync selectedNote
+     * Mirrors the useEffect pattern: sync selectedNote when active tab changes
+     */
+    const updateActiveTabIdAndSelectedNote = (newActiveTabId: string | null, tabs?: typeof openTabs) => {
+        const tabsToSearch = tabs || openTabs;
         
+        console.log('🔄 updateActiveTabIdAndSelectedNote:', { 
+            newActiveTabId, 
+            tabsCount: tabsToSearch.length,
+            tabs: tabsToSearch 
+        });
+        
+        setActiveTabId(newActiveTabId);
+        
+        if (newActiveTabId) {
+            const activeTab = tabsToSearch.find(tab => tab.id === newActiveTabId);
+            console.log('🔍 Found active tab:', activeTab);
+            
+            if (activeTab?.type === 'note') {
+                console.log('✅ Setting selectedNote:', activeTab.note);
+                
+                // Initialize originalNoteRef for change tracking
+                if (!originalNoteRef.current || originalNoteRef.current.noteId !== activeTab.note.noteId) {
+                    console.log('📌 Initializing originalNoteRef in EditorTabHelper:', activeTab.note);
+                    originalNoteRef.current = { ...activeTab.note };
+                    setHasUnsavedChanges(false); // Reset changes for newly opened note
+                }
+                
+                setSelectedNote(activeTab.note);
+            } else {
+                console.log('❌ No note tab found, clearing selectedNote');
+                originalNoteRef.current = null;
+                setHasUnsavedChanges(false);
+                setSelectedNote(null);
+            }
+        } else {
+            console.log('🚫 No active tab ID, clearing selectedNote');
+            originalNoteRef.current = null;
+            setHasUnsavedChanges(false);
+            setSelectedNote(null);
+        }
     }
     const openNoteTab = (note: Note) => {
         console.log('📝 EditorTabContext - openNoteTab called:', note);
@@ -21,7 +63,7 @@ export const useEditorTabHelper = () => {
         if (existingTab) {
             // Tab already exists, just activate it
             console.log('📝 EditorTabContext - Tab exists, activating:', existingTab.id);
-            setActiveTabId(existingTab.id);
+            updateActiveTabIdAndSelectedNote(existingTab.id);
         } else {
             // Create new tab
             const newTab: NoteTab = {
@@ -34,8 +76,13 @@ export const useEditorTabHelper = () => {
             };
 
             console.log('📝 EditorTabContext - Creating new tab:', newTab);
-            setOpenTabs(prev => [...prev, newTab]);
-            setActiveTabId(newTab.id);
+            
+            // Update tabs first, then set active with the new tabs array
+            const newTabs = [...openTabs, newTab];
+            setOpenTabs(newTabs);
+            
+            // Pass the new tabs array to ensure we can find the tab
+            updateActiveTabIdAndSelectedNote(newTab.id, newTabs);
         }
     }
 
@@ -48,29 +95,26 @@ export const useEditorTabHelper = () => {
             return;
         }
 
-        // Close the tab
-        setOpenTabs(prev => {
-            const newTabs = prev.filter(t => t.id !== tabId);
+        // Filter out the closed tab
+        const newTabs = openTabs.filter(t => t.id !== tabId);
+        setOpenTabs(newTabs);
 
-            // If closing active tab, switch to another tab
-            if (activeTabId === tabId) {
-                if (newTabs.length > 0) {
-                    // Switch to the last tab
-                    setActiveTabId(newTabs[newTabs.length - 1].id);
-                } else {
-                    // No tabs left
-                    setActiveTabId(null);
-                }
+        // If closing active tab, switch to another tab
+        if (activeTabId === tabId) {
+            if (newTabs.length > 0) {
+                // Switch to the last tab
+                updateActiveTabIdAndSelectedNote(newTabs[newTabs.length - 1].id, newTabs);
+            } else {
+                // No tabs left
+                updateActiveTabIdAndSelectedNote(null, newTabs);
             }
-
-            return newTabs;
-        });
+        }
     }
 
     const handleSetActiveTab = (tabId: string) => {
         const tab = openTabs.find(t => t.id === tabId);
         if (tab) {
-            setActiveTabId(tabId);
+            updateActiveTabIdAndSelectedNote(tabId);
         }
     }
 
@@ -85,7 +129,7 @@ export const useEditorTabHelper = () => {
         }
 
         setOpenTabs([]);
-        setActiveTabId(null);
+        updateActiveTabIdAndSelectedNote(null);
     }
 
     const markTabAsChanged = (tabId: string, hasChanges: boolean) => {
