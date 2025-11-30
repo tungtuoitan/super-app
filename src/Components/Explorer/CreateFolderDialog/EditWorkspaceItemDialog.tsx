@@ -8,7 +8,7 @@ import { Edit, Palette, FileText, Tag as TagIcon, Type, Loader2 } from 'lucide-r
 // Removed: TanStack Query hooks no longer available
 import { _upsertWorkspaceItem } from '@/services/workspace.service';
 import { useSnackbar } from 'notistack';
-import type { UpdateWorkspaceItemRequest } from '../../types/workspace.types';
+import type { UpdateWorkspaceItemRequest } from '../../../types/workspace.types';
 import {
     Dialog,
     DialogContent,

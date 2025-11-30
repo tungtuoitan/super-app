@@ -6,7 +6,7 @@ import {
     Loader2
 } from 'lucide-react';
 import type { Folder } from '../../types/folder.types';
-import { AddFolderDialog } from '../tags/AddFolderDialog';
+import { AddFolderDialog } from './CreateFolderDialog/AddFolderDialog';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';

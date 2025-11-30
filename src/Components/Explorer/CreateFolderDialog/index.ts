@@ -2,7 +2,7 @@
 
 // Components
 export { AddFolderDialog } from './AddFolderDialog';
-export { WorkspaceTree } from '../Explorer/WorkspaceTree';
+export { WorkspaceTree } from '../WorkspaceTree';
 export { CreateFolderDialog } from './CreateFolderDialog';
 export { EditWorkspaceItemDialog } from './EditWorkspaceItemDialog';
 

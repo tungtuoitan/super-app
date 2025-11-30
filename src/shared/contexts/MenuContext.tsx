@@ -20,11 +20,9 @@ import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPo
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import { EditWorkspaceItemDialog } from '@/Components/tags/EditWorkspaceItemDialog';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
+import {EditWorkspaceItemDialog} from '@/Components/Explorer/CreateFolderDialog';
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;

@@ -27,7 +27,7 @@ import {
 } from '@/Components/ui/select';
 import { cn } from '@/lib/utils';
 // Removed: TanStack Query hooks no longer available
-import type { CreateFolderDTO as CreateTagDTO } from '../../types/folder.types';
+import type { CreateFolderDTO as CreateTagDTO } from '../../../types/folder.types';
 import { useSnackbar } from 'notistack';
 
 interface CreateFolderDialogProps {
