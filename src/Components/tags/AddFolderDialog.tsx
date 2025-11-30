@@ -38,7 +38,7 @@ function extractTagIdsFromTree(tags: Folder[]): number[] {
     
     function traverse(nodes: Folder[]) {
         for (const node of nodes) {
-            tagIds.push(node.tagId);
+            tagIds.push(node.folderId);
             if (node.children && node.children.length > 0) {
                 traverse(node.children);
             }
@@ -51,16 +51,6 @@ function extractTagIdsFromTree(tags: Folder[]): number[] {
 
 type TabValue = 'existing' | 'new';
 
-/**
- * AddFolderDialog Component
- * Dialog for adding folders to workspace
- * 
- * @pattern No props - Gets all data from store directly
- * - open: from useExplorerStore().isCreateDialogOpen
- * - onClose: from useDialogAction().closeCreateDialog
- * - workspaceId: from useExplorerStore().selectedWorkspaceId
- * - parentTagId: from useExplorerStore().parentFolderForCreate?.tagId
- */
 export function AddFolderDialog() {
     // Get state from store
     const {
@@ -76,7 +66,7 @@ export function AddFolderDialog() {
 
     // Derived values
     const workspaceId = selectedWorkspaceId;
-    const parentTagId = parentFolderForCreate?.tagId;
+    const parentFolderId = parentFolderForCreate?.folderId;
     const onClose = closeCreateDialog;
     
     // Tab state
@@ -112,12 +102,12 @@ export function AddFolderDialog() {
 
     // Find parent folder info for display (VS Code-like)
     const parentFolder = React.useMemo(() => {
-        if (!parentTagId || !workspaceTree?.tags) return null;
+        if (!parentFolderId || !workspaceTree?.tags) return null;
         
         // Search for parent folder in the tree
         function findFolder(tags: Folder[], targetId: number): Folder | null {
             for (const tag of tags) {
-                if (tag.tagId === targetId) return tag;
+                if (tag.folderId === targetId) return tag;
                 if (tag.children && tag.children.length > 0) {
                     const found = findFolder(tag.children, targetId);
                     if (found) return found;
@@ -126,8 +116,8 @@ export function AddFolderDialog() {
             return null;
         }
         
-        return findFolder(workspaceTree.tags, parentTagId);
-    }, [parentTagId, workspaceTree]);
+        return findFolder(workspaceTree.tags, parentFolderId);
+    }, [parentFolderId, workspaceTree]);
 
     // Reset form when dialog opens/closes
     useEffect(() => {
@@ -178,8 +168,8 @@ export function AddFolderDialog() {
         try {
             await addExistingTag.mutateAsync({
                 workspaceId,
-                tagId: selectedTag.tagId,
-                parentTagId: parentTagId || null,
+                tagId: selectedTag.folderId,
+                parentFolderId: parentFolderId || null,
                 options: {
                     label: label.trim() || undefined,
                 },
@@ -191,7 +181,7 @@ export function AddFolderDialog() {
             console.error('Failed to add existing folder:', error);
             enqueueSnackbar(error?.message || 'Failed to add folder to workspace', { variant: 'error' });
         }
-    }, [selectedTag, workspaceId, parentTagId, label, addExistingTag, enqueueSnackbar, onClose]);
+    }, [selectedTag, workspaceId, parentFolderId, label, addExistingTag, enqueueSnackbar, onClose]);
 
     const handleSubmitNew = useCallback(async () => {
         if (!validateNewFolder()) {
@@ -202,7 +192,7 @@ export function AddFolderDialog() {
             await createAndAddTag.mutateAsync({
                 workspaceId,
                 tagName: newFolderName.trim(),
-                parentTagId: parentTagId || null,
+                parentFolderId: parentFolderId || null,
                 options: {
                     color,
                     label: label.trim() || undefined,
@@ -216,7 +206,7 @@ export function AddFolderDialog() {
             console.error('Failed to create and add folder:', error);
             enqueueSnackbar(error?.message || 'Failed to create folder', { variant: 'error' });
         }
-    }, [newFolderName, workspaceId, parentTagId, color, label, description, createAndAddTag, enqueueSnackbar, onClose]);
+    }, [newFolderName, workspaceId, parentFolderId, color, label, description, createAndAddTag, enqueueSnackbar, onClose]);
 
     const handleSubmit = () => {
         if (activeTab === 'existing') {
@@ -334,7 +324,7 @@ export function AddFolderDialog() {
                                                         <Check
                                                             className={cn(
                                                                 "mr-2 h-4 w-4",
-                                                                selectedTag?.tagId === tag.tagId ? "opacity-100" : "opacity-0"
+                                                                selectedTag?.folderId === tag.folderId ? "opacity-100" : "opacity-0"
                                                             )}
                                                         />
                                                         <div className="flex items-center gap-2">

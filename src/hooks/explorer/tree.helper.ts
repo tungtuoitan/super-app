@@ -24,14 +24,14 @@ export function isDescendant(
 ): boolean {
     // Find the potential parent node
     const parentNode = getAllFoldersFlattened(treeData).find(
-        (t) => t.data.tagId === potentialParentId
+        (t) => t.data.folderId === potentialParentId
     );
 
     if (!parentNode) return false;
 
     // Recursively check if targetId exists in the subtree of parentNode
     function checkSubtree(node: TreeFolder): boolean {
-        if (node.data.tagId === targetId) {
+        if (node.data.folderId === targetId) {
             return true; // Found targetId in descendants
         }
 
@@ -50,7 +50,7 @@ export function findFolderById(
     targetId: number
 ): Folder | undefined {
     for (const folder of folders) {
-        if (folder.tagId === targetId) {
+        if (folder.folderId === targetId) {
             return folder;
         }
         if (folder.children && folder.children.length > 0) {
@@ -73,7 +73,7 @@ export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
 
     function traverse(nodes: TreeFolder[]) {
         for (const node of nodes) {
-            result.push(node.data.tagId);
+            result.push(node.data.folderId);
             if (node.children && node.children.length > 0) {
                 traverse(node.children);
             }
@@ -101,7 +101,6 @@ export function transformTreeItemToFolder(
     }
 
     const folder: Folder = {
-        tagId: item.childId,
         folderId: item.childId,
         id: item.id,
         itemId: item.itemId,
@@ -127,10 +126,10 @@ export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
     return folders
         .filter(
             (folder) =>
-                folder && folder.tagId !== undefined && folder.tagId !== null
+                folder && folder.folderId !== undefined && folder.folderId !== null
         )
         .map((folder) => ({
-            id: folder.tagId.toString(),
+            id: folder.folderId.toString(),
             name: folder.name || "Untitled",
             data: folder,
             // Always provide children array (empty if no children) to enable drop into nodes
@@ -190,7 +189,6 @@ export function createWorkspaceRootFolder(
     children: Folder[]
 ): Folder {
     return {
-        tagId: -workspaceId, // Negative ID to distinguish from real folders
         folderId: -workspaceId,
         name: workspaceName,
         description: workspaceData.description,
@@ -240,7 +238,6 @@ export function transformToTreeData(
         }
 
         return {
-            tagId: item.childId,
             folderId: item.childId,
             id: item.id,
             itemId: item.itemId,

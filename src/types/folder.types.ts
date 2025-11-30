@@ -6,7 +6,6 @@
 // API Response DTO (from backend TagResponse - backend still uses "tag" terminology)
 // Backend returns: TagId, Name, Description, Color, CreatedAt, IsActive, Depth
 export interface FolderDTO {
-    tagId: number; // Backend field name (kept for API compatibility)
     name: string;
     description?: string;
     color?: string;
@@ -17,7 +16,6 @@ export interface FolderDTO {
 
 // API Response DTO for Folder Tree (from backend TagTreeResponse)
 export interface FolderTreeResponseDTO {
-    tagId: number; // Backend field name
     userId: number;
     name: string;
     parentId?: number;
@@ -51,9 +49,6 @@ export interface Folder {
     isExpanded?: boolean; // For tree UI state
     isArchived?: boolean; // Computed from isActive (!isActive)
     noteCount?: number; // Number of notes in this folder
-
-    // DEPRECATED: Backend compatibility fields (map to backend's tagId field)
-    tagId: number; // Maps to backend tagId (required for API calls)
 }
 
 // Create request (matches backend CreateTagRequest - backend uses "tag")

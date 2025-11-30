@@ -50,8 +50,8 @@ export function FolderNode({
 
     const folder = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0;
-    const isSelected = isFolderSelected(folder.tagId);
-    const isWorkspaceRoot = folder.tagId < 0; // Workspace root node has negative ID
+    const isSelected = isFolderSelected(folder.folderId);
+    const isWorkspaceRoot = folder.folderId < 0; // Workspace root node has negative ID
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -79,20 +79,20 @@ export function FolderNode({
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedFolderIds(prev => prev.filter(id => id !== folder.tagId));
+                setSelectedFolderIds(prev => prev.filter(id => id !== folder.folderId));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedFolderIds(prev => [...prev, folder.tagId]);
+                setSelectedFolderIds(prev => [...prev, folder.folderId]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
-            setLastSelectedFolderId(folder.tagId);
+            setLastSelectedFolderId(folder.folderId);
         } else if (e.shiftKey && lastSelectedFolderId) {
             // Shift+Click: Range selection (like VS Code)
             const allVisibleFolders = getAllVisibleFolderIds(treeData);
             const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
-            const currentIndex = allVisibleFolders.indexOf(folder.tagId);
+            const currentIndex = allVisibleFolders.indexOf(folder.folderId);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
@@ -102,14 +102,14 @@ export function FolderNode({
                 // Sync with react-arborist (select range ending at this node)
                 node.selectMulti();
             } else {
-                setSelectedFolderIds([folder.tagId]);
+                setSelectedFolderIds([folder.folderId]);
                 node.select();
             }
-            setLastSelectedFolderId(folder.tagId);
+            setLastSelectedFolderId(folder.folderId);
         } else {
             // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
-            setSelectedFolderIds([folder.tagId]);
-            setLastSelectedFolderId(folder.tagId);
+            setSelectedFolderIds([folder.folderId]);
+            setLastSelectedFolderId(folder.folderId);
             // Sync with react-arborist (single select - clears others)
             node.select();
 
@@ -185,7 +185,7 @@ export function FolderNode({
             {/* Folder Icon */}
             <div className="mr-2 flex items-center">
                 {/* Workspace root node */}
-                {folder.tagId < 0 ? (
+                {folder.folderId < 0 ? (
                     <Layers
                         className="w-4 h-4"
                         style={{ color: folder.color || '#75beff' }}

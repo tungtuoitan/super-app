@@ -86,7 +86,7 @@ export function NoteDialog() {
                                     {Array.isArray(selectedNote.tags)
                                         ? selectedNote.tags.map((tag: Folder, index: number) => (
                                               <Badge
-                                                  key={tag.id || tag.tagId || index}
+                                                  key={tag.id || tag.folderId || index}
                                                   variant="outline"
                                                   className="border-primary/40 text-primary"
                                               >
