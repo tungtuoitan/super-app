@@ -7,8 +7,8 @@
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
 import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
 import { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
-import { Folder as Tag } from '@/types/folder.types';
-import {useRemoveWorkspaceItem, useWorkspaceTagTree} from './Folders/useFolders';
+import { Folder } from '@/types/folder.types';
+import {useRemoveWorkspaceItem, useWorkspaceFolderTree} from './Folders/useFolders';
 
 
 
@@ -27,17 +27,17 @@ export const useContextMenuHelper = () => {
     const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderUIStore();
     const removeWorkspaceItemMutation = useRemoveWorkspaceItem();
     const CURRENT_WORKSPACE_ID = 1;
-    const { data: workspaceTree } = useWorkspaceTagTree(CURRENT_WORKSPACE_ID);
+    const { data: workspaceTree } = useWorkspaceFolderTree(CURRENT_WORKSPACE_ID);
     
         /**
          * Recursively collect all descendant tags (children, grandchildren, etc.)
          * Returns array of all tags in the subtree including the root tag
          */
-        const collectAllDescendants = (tag: Tag): Tag[] => {
-            const descendants: Tag[] = [tag];
+        const collectAllDescendants = (folder: Folder): Folder[] => {
+            const descendants: Folder[] = [folder];
     
-            if (tag.children && tag.children.length > 0) {
-                for (const child of tag.children) {
+            if (folder.children && folder.children.length > 0) {
+                for (const child of folder.children) {
                     descendants.push(...collectAllDescendants(child));
                 }
             }
@@ -48,19 +48,19 @@ export const useContextMenuHelper = () => {
         /**
          * Get all visible tag IDs in tree order (for VS Code-like navigation)
          */
-        const getAllVisibleTagIds = (tags: Tag[]): number[] => {
+        const getAllVisibleTagIds = (folders: Folder[]): number[] => {
             const result: number[] = [];
     
-            function traverse(nodes: Tag[]) {
+            function traverse(nodes: Folder[]) {
                 for (const node of nodes) {
-                    result.push(node.tagId);
+                    result.push(node.folderId);
                     if (node.children && node.children.length > 0) {
                         traverse(node.children);
                     }
                 }
             }
     
-            traverse(tags);
+            traverse(folders);
             return result;
         }
     
@@ -72,66 +72,65 @@ export const useContextMenuHelper = () => {
 
 
 
-
-        const handleDeleteTag = (tag: Tag) => {
-            console.log('🗑️ Removing folder from workspace:', tag.tagId, tag.name, 'itemId:', tag.itemId);
+        const handleDeleteFolder = (folder: Folder) => {
+            console.log('🗑️ Removing folder from workspace:', folder.folderId, folder.name, 'itemId:', folder.itemId);
     
             // Validate itemId exists
-            if (!tag.itemId) {
-                console.error('❌ Cannot remove tag: missing itemId');
-                alert('Cannot remove tag: missing workspace item information');
+            if (!folder.itemId) {
+                console.error('❌ Cannot remove folder: missing itemId');
+                alert('Cannot remove folder: missing workspace item information');
                 return;
             }
     
             // VS Code behavior: Find next item to select after deletion
-            let nextTagIdToSelect: number | null = null;
+            let nextFolderIdToSelect: number | null = null;
             if (workspaceTree?.tags) {
-                const allVisibleTagIds = getAllVisibleTagIds(workspaceTree.tags);
-                const currentIndex = allVisibleTagIds.indexOf(tag.tagId);
+                const allVisibleFolderIds = getAllVisibleTagIds(workspaceTree.tags);
+                const currentIndex = allVisibleFolderIds.indexOf(folder.folderId);
     
                 if (currentIndex !== -1) {
                     // Try to select the next item (below)
-                    if (currentIndex < allVisibleTagIds.length - 1) {
-                        nextTagIdToSelect = allVisibleTagIds[currentIndex + 1];
+                    if (currentIndex < allVisibleFolderIds.length - 1) {
+                        nextFolderIdToSelect = allVisibleFolderIds[currentIndex + 1];
                     }
                     // If it's the last item, select the previous one (above)
                     else if (currentIndex > 0) {
-                        nextTagIdToSelect = allVisibleTagIds[currentIndex - 1];
+                        nextFolderIdToSelect = allVisibleFolderIds[currentIndex - 1];
                     }
                 }
             }
     
             // Collect all descendants (children, grandchildren, etc.) for cascade deletion
-            const allTags = collectAllDescendants(tag);
-            console.log(`🗑️ Cascade delete: removing ${allTags.length} tag(s) (including ${allTags.length - 1} descendants)`);
+            const allFolders = collectAllDescendants(folder);
+            console.log(`🗑️ Cascade delete: removing ${allFolders.length} folder(s) (including ${allFolders.length - 1} descendants)`);
     
-            // Filter out tags without itemId and warn about them
-            const tagsToDelete = allTags.filter(t => {
-                if (!t.itemId) {
-                    console.warn(`⚠️ Skipping tag without itemId: ${t.name} (tagId: ${t.tagId})`);
+            // Filter out folders without itemId and warn about them
+            const foldersToDelete = allFolders.filter(f => {
+                if (!f.itemId) {
+                    console.warn(`⚠️ Skipping folder without itemId: ${f.name} (folderId: ${f.folderId})`);
                     return false;
                 }
                 return true;
             });
     
-            console.log(`🗑️ Deleting ${tagsToDelete.length} workspace items:`,
-                tagsToDelete.map(t => ({ name: t.name, itemId: t.itemId }))
+            console.log(`🗑️ Deleting ${foldersToDelete.length} workspace items:`,
+                foldersToDelete.map(f => ({ name: f.name, itemId: f.itemId }))
             );
     
-            // Delete all tags in sequence (parent and all descendants)
+            // Delete all folders in sequence (parent and all descendants)
             // We delete them one by one to ensure proper cleanup
             let deletedCount = 0;
-            const totalCount = tagsToDelete.length;
+            const totalCount = foldersToDelete.length;
     
             const deleteNext = (index: number) => {
-                if (index >= tagsToDelete.length) {
-                    console.log(`✅ Successfully removed ${deletedCount}/${totalCount} tag(s) from workspace`);
+                if (index >= foldersToDelete.length) {
+                    console.log(`✅ Successfully removed ${deletedCount}/${totalCount} folder(s) from workspace`);
     
                     // VS Code behavior: Select next item after deletion completes
-                    if (nextTagIdToSelect !== null) {
-                        setSelectedFolderIds([nextTagIdToSelect]);
-                        setLastSelectedFolderId(nextTagIdToSelect);
-                        console.log(`✅ Selected next item: ${nextTagIdToSelect}`);
+                    if (nextFolderIdToSelect !== null) {
+                        setSelectedFolderIds([nextFolderIdToSelect]);
+                        setLastSelectedFolderId(nextFolderIdToSelect);
+                        console.log(`✅ Selected next item: ${nextFolderIdToSelect}`);
                     } else {
                         // Clear selection if no next item
                         setSelectedFolderIds([]);
@@ -141,22 +140,22 @@ export const useContextMenuHelper = () => {
                     return;
                 }
     
-                const currentTag = tagsToDelete[index];
-                console.log(`🗑️ Deleting ${index + 1}/${totalCount}: ${currentTag.name} (itemId: ${currentTag.itemId})`);
+                const currentFolder = foldersToDelete[index];
+                console.log(`🗑️ Deleting ${index + 1}/${totalCount}: ${currentFolder.name} (itemId: ${currentFolder.itemId})`);
     
                 removeWorkspaceItemMutation.mutate({
                     workspaceId: CURRENT_WORKSPACE_ID,
-                    itemId: currentTag.itemId!
+                    itemId: currentFolder.itemId!
                 }, {
                     onSuccess: () => {
                         deletedCount++;
-                        console.log(`✅ Deleted ${currentTag.name} (${deletedCount}/${totalCount})`);
-                        // Continue with next tag
+                        console.log(`✅ Deleted ${currentFolder.name} (${deletedCount}/${totalCount})`);
+                        // Continue with next folder
                         deleteNext(index + 1);
                     },
                     onError: (error) => {
-                        console.error(`❌ Failed to remove tag ${currentTag.name}:`, error);
-                        // Continue with next tag even if one fails
+                        console.error(`❌ Failed to remove folder ${currentFolder.name}:`, error);
+                        // Continue with next folder even if one fails
                         deleteNext(index + 1);
                     },
                 });
@@ -248,19 +247,19 @@ export const useContextMenuHelper = () => {
 
             closeContextMenu();
 
-            if (handleDeleteTag) {
+            if (handleDeleteFolder) {
                 const selectedCount = selectedFolderIds.length;
                 const isMultipleSelected = selectedCount > 1;
 
                 if (isMultipleSelected) {
-                    // Delete all selected tags
-                    console.log('🗑️ Deleting multiple tags:', selectedFolderIds);
-                    // For now, just delete the right-clicked tag
+                    // Delete all selected folders
+                    console.log('🗑️ Deleting multiple folders:', selectedFolderIds);
+                    // For now, just delete the right-clicked folder
                     // TODO: Implement bulk delete functionality
-                    handleDeleteTag(itemData);
+                    handleDeleteFolder(itemData);
                 } else {
-                    // Delete single tag
-                    handleDeleteTag(itemData);
+                    // Delete single folder
+                    handleDeleteFolder(itemData);
                 }
             }
         } else {

@@ -4,7 +4,6 @@
  */
 
 import type { Folder } from '@/types/folder.types';
-import type { Folder as Tag } from '@/types/folder.types'; // Backward compatibility alias
 
 // Note types
 export type NoteType = 'meeting' | 'brainstorm' | 'research' | 'bug' | 'task' | 'idea';

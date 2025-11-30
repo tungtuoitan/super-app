@@ -1,11 +1,11 @@
 /**
  * Hashtag Service - API communication and business logic for hashtags
- * Note: This uses Tag types which are re-exported from folder.types
+ * Note: This uses Folder types which are re-exported from folder.types
  */
 
 import { apiClient } from '@/lib/api-client'
 import type {
-    Folder as Tag,
+    Folder,
     FolderDTO as TagDTO,
     FolderTreeResponseDTO as TagTreeResponseDTO,
     CreateFolderDTO as CreateTagDTO,
@@ -28,7 +28,7 @@ class HashtagService {
     /**
      * Get all tags with optional filtering
      */
-    async getTags(params?: GetTagsParams): Promise<Tag[]> {
+    async getTags(params?: GetTagsParams): Promise<Folder[]> {
         // Use dump data if enabled
         if (USE_DUMP_DATA) {
             console.log('📦 Using dump data for hashtags');
@@ -36,7 +36,7 @@ class HashtagService {
             await new Promise(resolve => setTimeout(resolve, 300)); 
 
             // Flatten tree to get all tags
-            const flattenTags = (tags: Tag[]): Tag[] => {
+            const flattenTags = (tags: Folder[]): Folder[] => {
                 return tags.flatMap(tag => [tag, ...flattenTags(tag.children || [])]);
             };
 
@@ -100,7 +100,7 @@ class HashtagService {
      * Transform API DTO to domain model
      * Backend only returns: tagId, name, description, color, createdAt, isActive, depth
      */
-    private transformTag(dto: TagDTO): Tag {
+    private transformTag(dto: TagDTO): Folder {
         return {
             tagId: dto.tagId,
             folderId: dto.tagId, // Map tagId to folderId for folder terminology
@@ -124,9 +124,9 @@ class HashtagService {
      */
 
     /**
-     * Transform TagTreeResponseDTO to Tag with children structure
+     * Transform TagTreeResponseDTO to Folder with children structure
      */
-    private transformTagTreeResponse(dto: TagTreeResponseDTO): Tag {
+    private transformTagTreeResponse(dto: TagTreeResponseDTO): Folder {
         return {
             tagId: dto.tagId,
             folderId: dto.tagId, // Map tagId to folderId for folder terminology
@@ -147,7 +147,7 @@ class HashtagService {
     /**
      * Get single tag by ID
      */
-    async getTagById(id: number): Promise<Tag> {
+    async getTagById(id: number): Promise<Folder> {
         try {
             const response = await apiClient.get<TagDTO>(`${this.basePath}/${id}`)
             return this.transformTag(response)
@@ -160,7 +160,7 @@ class HashtagService {
     /**
      * Create new tag
      */
-    async createTag(data: CreateTagDTO): Promise<Tag> {
+    async createTag(data: CreateTagDTO): Promise<Folder> {
         try {
             // Ensure userId is provided - using hardcoded value for development
             // TODO: Replace with actual user ID from auth context when auth is implemented
@@ -180,7 +180,7 @@ class HashtagService {
     /**
      * Update existing tag
      */
-    async updateTag(id: number, data: UpdateTagDTO): Promise<Tag> {
+    async updateTag(id: number, data: UpdateTagDTO): Promise<Folder> {
         try {
             const response = await apiClient.put<TagDTO>(`${this.basePath}/${id}`, data)
             return this.transformTag(response)
@@ -220,11 +220,11 @@ class HashtagService {
     /**
      * Archive/unarchive tag
      */
-    async archiveTag(id: number): Promise<Tag> {
+    async archiveTag(id: number): Promise<Folder> {
         return this.updateTag(id, { isArchived: true });
     }
 
-    async unarchiveTag(id: number): Promise<Tag> {
+    async unarchiveTag(id: number): Promise<Folder> {
         return this.updateTag(id, { isArchived: false });
     }
 
@@ -232,7 +232,7 @@ class HashtagService {
      * Move tag to a new parent or position
      * This updates the tag's parentId and potentially reorders siblings
      */
-    async moveTag(tagId: number, newParentId?: number, newIndex?: number): Promise<Tag> {
+    async moveTag(tagId: number, newParentId?: number, newIndex?: number): Promise<Folder> {
         try {
             console.log('🔄 Moving hashtag:', { tagId, newParentId, newIndex });
 
@@ -283,17 +283,17 @@ class HashtagService {
     /**
      * Build hierarchical tree structure from flat array using depth property
      */
-    private buildTagTree(tags: Tag[]): Tag[] {
+    private buildTagTree(tags: Folder[]): Folder[] {
         if (!tags || tags.length === 0) return [];
 
         // Sort tags by depth to ensure parents come before children
         const sortedTags = [...tags].sort((a, b) => (a.depth || 0) - (b.depth || 0));
         
-        const result: Tag[] = [];
-        const tagStack: Tag[] = [];
+        const result: Folder[] = [];
+        const tagStack: Folder[] = [];
 
         sortedTags.forEach(tag => {
-            const tagWithChildren: Tag = { 
+            const tagWithChildren: Folder = { 
                 ...tag, 
                 children: [],
                 isExpanded: false 
@@ -331,7 +331,7 @@ class HashtagService {
      * Build hierarchical tree from flat tags using parentId and childId relationship
      * Relationship: item.parentId === parent.childId
      */
-    private buildTreeFromParentChild(flatTags: Tag[], originalItems: any[]): Tag[] {
+    private buildTreeFromParentChild(flatTags: Folder[], originalItems: any[]): Folder[] {
         if (!flatTags || flatTags.length === 0) return [];
 
         console.log('🌲 [buildTreeFromParentChild] Building tree from:', {
@@ -340,8 +340,8 @@ class HashtagService {
         });
 
         // Create a map of childId -> tag for quick lookup
-        const tagByChildId = new Map<number, Tag>();
-        const tagByItemId = new Map<number, Tag>();
+        const tagByChildId = new Map<number, Folder>();
+        const tagByItemId = new Map<number, Folder>();
         
         flatTags.forEach(tag => {
             tagByChildId.set(tag.tagId, tag);
@@ -358,7 +358,7 @@ class HashtagService {
             itemByChildId.set(item.childId, item);
         });
 
-        const rootTags: Tag[] = [];
+        const rootTags: Folder[] = [];
 
         // Build parent-child relationships
         flatTags.forEach(tag => {
@@ -406,7 +406,7 @@ class HashtagService {
     /**
      * Get tags at a specific depth level
      */
-    async getTagsByDepth(depth: number): Promise<Tag[]> {
+    async getTagsByDepth(depth: number): Promise<Folder[]> {
         const allTags = await this.getTags();
         return allTags.filter(tag => (tag.depth || 0) === depth);
     }
@@ -414,7 +414,7 @@ class HashtagService {
     /**
      * Get root level tags only (depth 0)
      */
-    async getRootTags(): Promise<Tag[]> {
+    async getRootTags(): Promise<Folder[]> {
         return this.getTagsByDepth(0);
     }
 
@@ -487,10 +487,10 @@ class HashtagService {
     }
 
     /**
-     * Transform WorkspaceTreeItemDTO to Tag (flat, without children)
+     * Transform WorkspaceTreeItemDTO to Folder (flat, without children)
      * Children will be built separately using buildTreeFromParentChild
      */
-    private transformWorkspaceTreeItemToTag(item: any): Tag {
+    private transformWorkspaceTreeItemToTag(item: any): Folder {
         // WorkspaceTreeItemDTO structure from backend:
         // - id / itemId: workspace_items.item_id (PK for deletion)
         // - childId: actual tag_id/note_id (FK to tags/notes table)

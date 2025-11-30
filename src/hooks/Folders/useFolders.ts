@@ -1,8 +1,8 @@
 /**
  * Folder React Query Hooks
- * Data fetching hooks for workspace folders (backend calls them "tags")
+ * Data fetching hooks for workspace folders
  * 
- * Note: Backend uses "tag" terminology, frontend uses "folder"
+ * Note: Backend uses "tag" terminology, but frontend consistently uses "folder"
  * This file provides hooks for querying folder data from the API
  */
 
@@ -29,10 +29,6 @@ export const folderKeys = {
     roots: () => [...folderKeys.all, 'roots'] as const,
 };
 
-// Legacy query keys (deprecated, use folderKeys)
-/** @deprecated Use folderKeys instead */
-export const tagKeys = folderKeys;
-
 /**
  * Hook to fetch all folders with optional filtering
  * @example
@@ -45,14 +41,6 @@ export function useFolders(params?: GetFoldersParams) {
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 }
-
-/** @deprecated Use useFolders instead */
-export const useTags = useFolders;
-
-/**
- * REMOVED: useTagTree hook
- * Old /tree endpoint is deprecated. Use useWorkspaceFolderTree(workspaceId) instead.
- */
 
 /**
  * Hook to fetch workspace folder tree with hierarchy
@@ -68,9 +56,6 @@ export function useWorkspaceFolderTree(workspaceId: number) {
     });
 }
 
-/** @deprecated Use useWorkspaceFolderTree instead */
-export const useWorkspaceTagTree = useWorkspaceFolderTree;
-
 /**
  * Hook to fetch single folder by ID
  * @example
@@ -84,9 +69,6 @@ export function useFolder(id: number, enabled = true) {
         staleTime: 5 * 60 * 1000,
     });
 }
-
-/** @deprecated Use useFolder instead */
-export const useTag = useFolder;
 
 /**
  * Hook to fetch folders at a specific depth level
@@ -102,9 +84,6 @@ export function useFoldersByDepth(depth: number, enabled = true) {
     });
 }
 
-/** @deprecated Use useFoldersByDepth instead */
-export const useTagsByDepth = useFoldersByDepth;
-
 /**
  * Hook to fetch root level folders only
  * @example
@@ -117,9 +96,6 @@ export function useRootFolders() {
         staleTime: 5 * 60 * 1000,
     });
 }
-
-/** @deprecated Use useRootFolders instead */
-export const useRootTags = useRootFolders;
 
 /**
  * Hook to create new folder
@@ -148,9 +124,6 @@ export function useCreateFolder() {
     });
 }
 
-/** @deprecated Use useCreateFolder instead */
-export const useCreateTag = useCreateFolder;
-
 /**
  * Hook to update existing folder
  * @example
@@ -172,9 +145,6 @@ export function useUpdateFolder() {
     });
 }
 
-/** @deprecated Use useUpdateFolder instead */
-export const useUpdateTag = useUpdateFolder;
-
 /**
  * Hook to delete folder
  * @example
@@ -192,9 +162,6 @@ export function useDeleteFolder() {
         },
     });
 }
-
-/** @deprecated Use useDeleteFolder instead */
-export const useDeleteTag = useDeleteFolder;
 
 /**
  * Hook to archive folder
@@ -215,9 +182,6 @@ export function useArchiveFolder() {
     });
 }
 
-/** @deprecated Use useArchiveFolder instead */
-export const useArchiveTag = useArchiveFolder;
-
 /**
  * Hook to unarchive folder
  * @example
@@ -236,9 +200,6 @@ export function useUnarchiveFolder() {
         },
     });
 }
-
-/** @deprecated Use useUnarchiveFolder instead */
-export const useUnarchiveTag = useUnarchiveFolder;
 
 /**
  * Hook to move folder to new parent or position
@@ -263,9 +224,6 @@ export function useMoveFolder() {
     });
 }
 
-/** @deprecated Use useMoveFolder instead */
-export const useMoveTag = useMoveFolder;
-
 /**
  * Hook to batch move multiple folders to new parent or position
  * Much more efficient than moving folders one by one
@@ -289,9 +247,6 @@ export function useBatchMoveFolder() {
         },
     });
 }
-
-/** @deprecated Use useBatchMoveFolder instead */
-export const useBatchMoveTag = useBatchMoveFolder;
 
 /**
  * Hook to remove item from workspace (removes workspace_items relationship only)

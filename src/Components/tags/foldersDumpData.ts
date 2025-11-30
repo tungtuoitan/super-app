@@ -4,10 +4,10 @@
  * Note: Backend still uses tagId field, but frontend uses folderId
  */
 
-import type { Folder as Tag } from '../../types/folder.types';
+import type { Folder } from '../../types/folder.types';
 
 // Helper to ensure all items have both tagId and folderId
-const ensureFolderCompat = (items: any[]): Tag[] => {
+const ensureFolderCompat = (items: any[]): Folder[] => {
     return items.map(item => ({
         ...item,
         folderId: item.tagId,
@@ -472,4 +472,4 @@ const rawData: any[] = [
 ];
 
 // Export with folderId compatibility
-export const foldersDumpData: Tag[] = ensureFolderCompat(rawData);
+export const foldersDumpData: Folder[] = ensureFolderCompat(rawData);

@@ -26,8 +26,7 @@ import {
     SelectValue,
 } from '@/Components/ui/select';
 import { cn } from '@/lib/utils';
-import { useCreateTag } from '../../hooks/Folders/useFolders';
-import { useWorkspaceTagTree } from '../../hooks/Folders/useFolders';
+import { useCreateFolder, useWorkspaceFolderTree } from '../../hooks/Folders/useFolders';
 import type { CreateFolderDTO as CreateTagDTO } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 
@@ -50,8 +49,8 @@ export function CreateFolderDialog({
     const [selectedParentId, setSelectedParentId] = useState<number | null>(parentTagId || null);
     const [errors, setErrors] = useState<{ name?: string }>({});
 
-    const createTag = useCreateTag();
-    const { data: workspaceTree } = useWorkspaceTagTree(workspaceId);
+    const createFolder = useCreateFolder();
+    const { data: workspaceTree } = useWorkspaceFolderTree(workspaceId);
     const { enqueueSnackbar } = useSnackbar();
 
     // Reset form when dialog opens/closes or parentTagId changes
@@ -108,7 +107,7 @@ export function CreateFolderDialog({
                 parentId: selectedParentId || undefined,
             };
 
-            await createTag.mutateAsync(createData);
+            await createFolder.mutateAsync(createData);
             
             enqueueSnackbar(`Folder "${folderName}" created successfully!`, { variant: 'success' });
             onClose();
@@ -220,7 +219,7 @@ export function CreateFolderDialog({
                     </div>
 
                     {/* Error Alert */}
-                    {createTag.isError && (
+                    {createFolder.isError && (
                         <Alert variant="destructive">
                             <AlertDescription>
                                 Failed to create folder. Please try again.
@@ -233,16 +232,16 @@ export function CreateFolderDialog({
                     <Button 
                         variant="outline"
                         onClick={handleCancel}
-                        disabled={createTag.isPending}
+                        disabled={createFolder.isPending}
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={createTag.isPending || !folderName.trim()}
+                        disabled={createFolder.isPending || !folderName.trim()}
                     >
-                        {createTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {createTag.isPending ? 'Creating...' : 'Create Folder'}
+                        {createFolder.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {createFolder.isPending ? 'Creating...' : 'Create Folder'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

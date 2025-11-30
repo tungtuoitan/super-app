@@ -5,29 +5,29 @@
 
 import { apiClient } from '@/lib/api-client';
 
-import type { Folder as Tag } from '@/types/folder.types';
+import type { Folder } from '@/types/folder.types';
 import {CreateNoteDTO, GetNotesParams, Note, NoteDTO, NoteResponse, NotesResponse, UpdateNoteDTO} from '../types/note.types';
 
 class NoteService {
     private readonly basePath = '/api/notes';
 
     /**
-     * Transform Tag DTO from backend to frontend model
+     * Transform Folder DTO from backend to frontend model
      * Backend only returns: tagId, name, description, color, createdAt, isActive, depth
      */
-    private transformTag(tagDto: any): Tag {
+    private transformFolder(folderDto: any): Folder {
         return {
-            tagId: tagDto.tagId,
-            folderId: tagDto.tagId, // Same as tagId for compatibility
-            name: tagDto.name,
-            description: tagDto.description,
-            color: tagDto.color,
-            createdAt: tagDto.createdAt ? new Date(tagDto.createdAt) : new Date(),
-            isActive: tagDto.isActive !== undefined ? tagDto.isActive : true,
-            depth: tagDto.depth,
+            tagId: folderDto.tagId,
+            folderId: folderDto.tagId, // Same as tagId for compatibility
+            name: folderDto.name,
+            description: folderDto.description,
+            color: folderDto.color,
+            createdAt: folderDto.createdAt ? new Date(folderDto.createdAt) : new Date(),
+            isActive: folderDto.isActive !== undefined ? folderDto.isActive : true,
+            depth: folderDto.depth,
             // Computed/frontend-only properties
-            id: tagDto.tagId, // Alias for backward compatibility
-            isArchived: tagDto.isActive !== undefined ? !tagDto.isActive : false,
+            id: folderDto.tagId, // Alias for backward compatibility
+            isArchived: folderDto.isActive !== undefined ? !folderDto.isActive : false,
             children: [],
             isExpanded: false,
         };
@@ -37,12 +37,12 @@ class NoteService {
      * Transform NoteDTO to domain model
      */
     private transformNote(dto: NoteDTO): Note {
-        const transformedTags = dto.tags?.map(tag => this.transformTag(tag)) || [];
+        const transformedFolders = dto.tags?.map(folder => this.transformFolder(folder)) || [];
         return {
             ...dto,
             // Transform tags array with proper type conversion
-            tags: transformedTags, // Backward compatibility
-            hashtags: transformedTags, // Primary field for note metadata
+            tags: transformedFolders, // Backward compatibility
+            hashtags: transformedFolders, // Primary field for note metadata
             createdAt: new Date(dto.createdAt),
             updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
         };

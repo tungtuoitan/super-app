@@ -24,9 +24,9 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { useTags, useWorkspaceTagTree } from '../../hooks/Folders/useFolders';
+import { useFolders, useWorkspaceFolderTree } from '../../hooks/Folders/useFolders';
 import { useAddExistingFolderToWorkspace, useCreateAndAddFolderToWorkspace } from '../../hooks/Folders/useWorkspaceTree';
-import type { Folder as Tag } from '../../types/folder.types';
+import type { Folder } from '../../types/folder.types';
 import { useSnackbar } from 'notistack';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
@@ -34,10 +34,10 @@ import { useFolderUIStore } from '@/store/folderUI/FolderUIStore';
 /**
  * Helper function to extract all tag IDs from workspace tree (including nested children)
  */
-function extractTagIdsFromTree(tags: Tag[]): number[] {
+function extractTagIdsFromTree(tags: Folder[]): number[] {
     const tagIds: number[] = [];
     
-    function traverse(nodes: Tag[]) {
+    function traverse(nodes: Folder[]) {
         for (const node of nodes) {
             tagIds.push(node.tagId);
             if (node.children && node.children.length > 0) {
@@ -69,7 +69,7 @@ export function AddFolderDialog({
     const [activeTab, setActiveTab] = useState<TabValue>('existing');
     
     // Existing folder fields
-    const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+    const [selectedTag, setSelectedTag] = useState<Folder | null>(null);
     const [comboboxOpen, setComboboxOpen] = useState(false);
     
     // New folder fields
@@ -82,30 +82,30 @@ export function AddFolderDialog({
     const [errors, setErrors] = useState<{ tag?: string; name?: string }>({});
 
     // Hooks
-    const { data: allTags, isLoading: tagsLoading } = useTags();
-    const { data: workspaceTree, isLoading: workspaceLoading } = useWorkspaceTagTree(workspaceId);
+    const { data: allTags, isLoading: tagsLoading } = useFolders();
+    const { data: workspaceTree, isLoading: workspaceLoading } = useWorkspaceFolderTree(workspaceId);
     const addExistingTag = useAddExistingFolderToWorkspace();
     const createAndAddTag = useCreateAndAddFolderToWorkspace();
     const { enqueueSnackbar } = useSnackbar();
     const { setSelectedFolderIds, setLastSelectedFolderId } = useFolderUIStore();
 
     // Find parent folder info for display (VS Code-like)
-    const parentTag = React.useMemo(() => {
+    const parentFolder = React.useMemo(() => {
         if (!parentTagId || !workspaceTree?.tags) return null;
         
         // Search for parent folder in the tree
-        function findTag(tags: Tag[], targetId: number): Tag | null {
+        function findFolder(tags: Folder[], targetId: number): Folder | null {
             for (const tag of tags) {
                 if (tag.tagId === targetId) return tag;
                 if (tag.children && tag.children.length > 0) {
-                    const found = findTag(tag.children, targetId);
+                    const found = findFolder(tag.children, targetId);
                     if (found) return found;
                 }
             }
             return null;
         }
         
-        return findTag(workspaceTree.tags, parentTagId);
+        return findFolder(workspaceTree.tags, parentTagId);
     }, [parentTagId, workspaceTree]);
 
     // Reset form when dialog opens/closes
@@ -251,8 +251,8 @@ export function AddFolderDialog({
             <DialogContent className="sm:max-w-[550px] rounded-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">
-                        {parentTag 
-                            ? `Add Folder to "${parentTag.name}"`
+                        {parentFolder 
+                            ? `Add Folder to "${parentFolder.name}"`
                             : 'Add Folder to Workspace'
                         }
                     </DialogTitle>
@@ -424,17 +424,17 @@ export function AddFolderDialog({
                         </div>
 
                         {/* Parent Folder Info */}
-                        {parentTag ? (
+                        {parentFolder ? (
                             <Alert>
                                 <FolderPlus className="h-4 w-4" />
                                 <AlertDescription>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm">Will be added under:</span>
                                         <Badge 
-                                            style={{ backgroundColor: parentTag.color || '#1976D2' }}
+                                            style={{ backgroundColor: parentFolder.color || '#1976D2' }}
                                             className="text-white font-medium"
                                         >
-                                            {parentTag.name}
+                                            {parentFolder.name}
                                         </Badge>
                                     </div>
                                 </AlertDescription>

@@ -11,7 +11,7 @@ import {
     ChevronRight,
     Tag as TagIcon,
     FolderOpen,
-    Folder,
+    Folder as FolderIcon,
     Layers,
     Plus,
     RefreshCw,
@@ -20,15 +20,15 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 
-import { useWorkspaceTagTree, useBatchMoveTag } from '../../hooks/Folders/useFolders';
+import { useWorkspaceFolderTree, useBatchMoveFolder } from '../../hooks/Folders/useFolders';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
-import type { Folder as Tag } from '../../types/folder.types';
+import type { Folder } from '../../types/folder.types';
 import { AddFolderDialog } from '../tags/AddFolderDialog';
 import {useFolderUIHelper} from '@/hooks/useFolderUIHelper';
 import {useFolderUIStore} from '@/store/index';
 
 interface WorkspaceTreeProps {
-    onFolderClick?: (folder: Tag) => void;
+    onFolderClick?: (folder: Folder) => void;
     includeShared?: boolean; // DEPRECATED: No longer used, kept for backward compatibility
     workspaceId: number; // REQUIRED: Workspace ID for workspace-specific tree
 }
@@ -38,7 +38,7 @@ interface TreeFolder {
     id: string;
     name: string;
     children?: TreeFolder[];
-    data: Tag; // Store original folder data
+    data: Folder; // Store original folder data
 }
 
 /**
@@ -89,13 +89,13 @@ function isDescendant(targetId: number, potentialParentId: number, treeData: Tre
 /**
  * Helper function to find a folder by ID in the folder array
  */
-function findFolderById(tags: Tag[], targetId: number): Tag | undefined {
-    for (const tag of tags) {
-        if (tag.tagId === targetId) {
-            return tag;
+function findFolderById(folders: Folder[], targetId: number): Folder | undefined {
+    for (const folder of folders) {
+        if (folder.tagId === targetId) {
+            return folder;
         }
-        if (tag.children && tag.children.length > 0) {
-            const found = findFolderById(tag.children, targetId);
+        if (folder.children && folder.children.length > 0) {
+            const found = findFolderById(folder.children, targetId);
             if (found) return found;
         }
     }
@@ -295,7 +295,7 @@ function FolderNode({
                 ) : hasChildren ? (
                     node.isOpen ?
                         <FolderOpen className="w-4 h-4 text-yellow-500" /> :
-                        <Folder className="w-4 h-4 text-yellow-500" />
+                        <FolderIcon className="w-4 h-4 text-yellow-500" />
                 ) : (
                     <TagIcon
                         className="w-4 h-4"
@@ -405,13 +405,13 @@ function WorkspaceTreeEmpty() {
  * Transform folder hierarchy to react-arborist tree data
  * NOTE: All nodes must have children array (even if empty) to allow drop into them
  */
-function transformFoldersToTreeData(tags: Tag[]): TreeFolder[] {
-    return tags.map(tag => ({
-        id: tag.tagId.toString(),
-        name: tag.name,
-        data: tag,
+function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
+    return folders.map(folder => ({
+        id: folder.tagId.toString(),
+        name: folder.name,
+        data: folder,
         // Always provide children array (empty if no children) to enable drop into nodes
-        children: tag.children && tag.children.length > 0 ? transformFoldersToTreeData(tag.children) : [],
+        children: folder.children && folder.children.length > 0 ? transformFoldersToTreeData(folder.children) : [],
     }));
 }
 
@@ -510,12 +510,12 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
         throw new Error('workspaceId is required. The old /tree endpoint is no longer supported.');
     }
     
-    const workspaceTreeQuery = useWorkspaceTagTree(workspaceId);
+    const workspaceTreeQuery = useWorkspaceFolderTree(workspaceId);
     const { data, isLoading, error } = workspaceTreeQuery;
-    const batchMoveTagMutation = useBatchMoveTag();
+    const batchMoveFolderMutation = useBatchMoveFolder();
     
-    // Extract tags from workspace or use directly
-    const tags = useMemo(() => {
+    // Extract folders from workspace or use directly
+    const folders = useMemo(() => {
         if (!data) return undefined;
         
         // If workspace data, extract tags
@@ -523,8 +523,8 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             return data.tags;
         }
         
-        // Otherwise it's already Tag[]
-        return data as Tag[];
+        // Otherwise it's already Folder[]
+        return data as Folder[];
     }, [data]);
     
     const {
@@ -549,40 +549,40 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
     
     // Workspace info is available in data directly when needed
 
-    // Transform and filter tags based on search text
+    // Transform and filter folders based on search text
     const treeData = useMemo(() => {
-        if (!tags) return [];
+        if (!folders) return [];
 
-        const filterTree = (nodes: Tag[]): Tag[] => {
+        const filterTree = (nodes: Folder[]): Folder[] => {
             return nodes
-                .filter(tag => {
+                .filter(folder => {
                     // Search filter
                     if (searchText) {
                         const matchesSearch = 
-                            tag.name.toLowerCase().includes(searchText.toLowerCase());
+                            folder.name.toLowerCase().includes(searchText.toLowerCase());
                         
                         // Include if this folder matches OR any descendant matches
-                        const hasMatchingDescendant = tag.children && tag.children.length > 0 ? 
-                            filterTree(tag.children).length > 0 : false;
+                        const hasMatchingDescendant = folder.children && folder.children.length > 0 ? 
+                            filterTree(folder.children).length > 0 : false;
                         
                         return matchesSearch || hasMatchingDescendant;
                     }
                     
                     return true;
                 })
-                .map(tag => ({
-                    ...tag,
-                    children: tag.children && tag.children.length > 0 ? filterTree(tag.children) : [],
+                .map(folder => ({
+                    ...folder,
+                    children: folder.children && folder.children.length > 0 ? filterTree(folder.children) : [],
                 }));
         };
 
-        const filteredTags = filterTree(tags);
+        const filteredFolders = filterTree(folders);
         
-        // Always wrap tags under a workspace root node (workspace mode only)
+        // Always wrap folders under a workspace root node (workspace mode only)
         if (data && 'workspaceId' in data) {
             const workspaceData = data;
-            const workspaceRootTag: Tag = {
-                tagId: -workspaceData.workspaceId, // Negative ID to distinguish from real tags
+            const workspaceRootFolder: Folder = {
+                tagId: -workspaceData.workspaceId, // Negative ID to distinguish from real folders
                 folderId: -workspaceData.workspaceId, // Same as tagId for compatibility
                 name: workspaceData.name,
                 description: workspaceData.description,
@@ -592,15 +592,15 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
                 depth: 0,
                 id: -workspaceData.workspaceId,
                 isArchived: workspaceData.isArchived,
-                children: filteredTags,
+                children: filteredFolders,
                 isExpanded: true,
             };
             
-            return transformFoldersToTreeData([workspaceRootTag]);
+            return transformFoldersToTreeData([workspaceRootFolder]);
         }
         
-        return transformFoldersToTreeData(filteredTags);
-    }, [tags, searchText, data]);
+        return transformFoldersToTreeData(filteredFolders);
+    }, [folders, searchText, data]);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
@@ -818,7 +818,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             // BATCH MOVE: Move all selected items using optimized batch API
             console.log(`📤 Batch moving ${folderIds.length} folder(s) to parent ${newParentId || 'root'} at index ${args.index}`);
 
-            await batchMoveTagMutation.mutateAsync({
+            await batchMoveFolderMutation.mutateAsync({
                 folderIds,
                 newParentId,
                 startIndex: args.index,
@@ -856,7 +856,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             
         // Find the parent folder object if parentId exists
         const parentFolder = parentId 
-            ? findFolderById(tags || [], parentId)
+            ? findFolderById(folders || [], parentId)
             : undefined;
             
         openCreateDialog(parentFolder);
@@ -888,7 +888,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
         return (
             <Alert variant="destructive" className="m-4">
                 <AlertDescription>
-                    Failed to load tags: {error instanceof Error ? error.message : 'Unknown error occurred'}
+                    Failed to load folders: {error instanceof Error ? error.message : 'Unknown error occurred'}
                 </AlertDescription>
             </Alert>
         );
@@ -908,7 +908,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             className="h-full flex flex-col p-4 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors"
         >
             {/* Loading overlay when dragging */}
-            {(isDragging || batchMoveTagMutation.isPending) && (
+            {(isDragging || batchMoveFolderMutation.isPending) && (
                 <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
                     <div className="bg-editor-sidebar p-4 px-6 rounded-lg shadow-lg flex items-center gap-3">
                         <Loader2 className="w-5 h-5 text-primary animate-spin" />

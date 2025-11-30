@@ -27,28 +27,11 @@ export {
     useBatchMoveFolder,
     useRemoveWorkspaceItem,
     folderKeys,
-    
-    // Legacy tag exports (deprecated)
-    useTags,
-    useTag,
-    useWorkspaceTagTree,
-    useTagsByDepth,
-    useRootTags,
-    useCreateTag,
-    useUpdateTag,
-    useDeleteTag,
-    useArchiveTag,
-    useUnarchiveTag,
-    useMoveTag,
-    useBatchMoveTag,
-    tagKeys
 } from './useFolders';
 
 // Folder autocomplete
 export { 
     useFoldersForAutocomplete,
-    // Legacy
-    useTagsForAutocomplete 
 } from './useFoldersForAutocomplete';
 
 // Workspace tree mutations (adding/updating folders in workspace)

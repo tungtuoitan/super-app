@@ -15,7 +15,7 @@ import {
 } from '@/Components/ui/dialog';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
-import type { Folder as Tag } from '@/types/folder.types';
+import type { Folder } from '@/types/folder.types';
 import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
@@ -84,7 +84,7 @@ export function NoteDialog() {
                                 <span className="font-semibold text-foreground">Tags:</span>
                                 <div className="flex gap-1.5 flex-wrap">
                                     {Array.isArray(selectedNote.tags)
-                                        ? selectedNote.tags.map((tag: Tag, index: number) => (
+                                        ? selectedNote.tags.map((tag: Folder, index: number) => (
                                               <Badge
                                                   key={tag.id || tag.tagId || index}
                                                   variant="outline"

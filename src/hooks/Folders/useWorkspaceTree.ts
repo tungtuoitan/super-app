@@ -12,7 +12,7 @@ import type {
     AddItemToWorkspaceRequest,
     UpdateWorkspaceItemRequest
 } from '../../types/workspace.types';
-import { folderKeys, tagKeys } from './useFolders';
+import { folderKeys } from './useFolders';
 
 /**
  * Hook to add item (folder or note) to workspace tree
@@ -33,14 +33,14 @@ export function useAddItemToWorkspace() {
         }) => workspaceService.addItemToWorkspace(workspaceId, request),
         
         onSuccess: (_, variables) => {
-            // Invalidate workspace tag tree to refetch
+            // Invalidate workspace folder tree to refetch
             queryClient.invalidateQueries({ 
-                queryKey: tagKeys.workspaceTree(variables.workspaceId) 
+                queryKey: folderKeys.workspaceTree(variables.workspaceId) 
             });
             
-            // Also invalidate general tag list
+            // Also invalidate general folder list
             queryClient.invalidateQueries({ 
-                queryKey: tagKeys.all 
+                queryKey: folderKeys.all 
             });
         },
     });
@@ -79,7 +79,7 @@ export function useAddExistingFolderToWorkspace() {
         
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ 
-                queryKey: tagKeys.workspaceTree(variables.workspaceId) 
+                queryKey: folderKeys.workspaceTree(variables.workspaceId) 
             });
         },
     });
@@ -120,13 +120,13 @@ export function useCreateAndAddFolderToWorkspace() {
         onSuccess: (_, variables) => {
             // Invalidate workspace tree - primary update
             queryClient.invalidateQueries({ 
-                queryKey: tagKeys.workspaceTree(variables.workspaceId) 
+                queryKey: folderKeys.workspaceTree(variables.workspaceId) 
             });
             
-            // Invalidate tag lists only (not all tag queries)
-            // This updates the tag dropdown without causing double fetch of workspace tree
+            // Invalidate folder lists only (not all folder queries)
+            // This updates the folder dropdown without causing double fetch of workspace tree
             queryClient.invalidateQueries({ 
-                queryKey: tagKeys.lists() 
+                queryKey: folderKeys.lists() 
             });
         },
     });
@@ -155,7 +155,7 @@ export function useUpdateWorkspaceItem() {
         onSuccess: (_, variables) => {
             // Invalidate workspace tree to refetch
             queryClient.invalidateQueries({ 
-                queryKey: tagKeys.workspaceTree(variables.workspaceId) 
+                queryKey: folderKeys.workspaceTree(variables.workspaceId) 
             });
         },
     });

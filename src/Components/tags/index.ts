@@ -13,16 +13,11 @@ export { useFolderUIHelper } from '@/hooks/useFolderUIHelper';
 
 // Legacy compatibility - use store + helper instead
 
-// Hooks - Re-export from centralized hooks/Tags
+// Hooks - Re-export from centralized hooks/Folders
 export { 
-    // Modern folder exports
     useFolders,
     useWorkspaceFolderTree,
     useFoldersForAutocomplete,
-    // Legacy tag exports (deprecated)
-    useTags,
-    useWorkspaceTagTree,
-    useTagsForAutocomplete
 } from '../../hooks/Folders';
 
 // Service
