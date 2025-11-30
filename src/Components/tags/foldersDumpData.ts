@@ -472,4 +472,4 @@ const rawData: any[] = [
 ];
 
 // Export with folderId compatibility
-export const tagsDumpData: Tag[] = ensureFolderCompat(rawData);
+export const foldersDumpData: Tag[] = ensureFolderCompat(rawData);

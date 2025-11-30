@@ -1,5 +1,5 @@
 /**
- * Tag Service - API communication and business logic for tags
+ * Hashtag Service - API communication and business logic for hashtags
  * Note: This uses Tag types which are re-exported from folder.types
  */
 
@@ -16,13 +16,13 @@ import type {
     WorkspaceWithTreeDTO,
     WorkspaceTreeItemDTO
 } from '../types/folder.types'
-import {tagsDumpData} from '@/Components/tags/tagsDumpData';
+import {foldersDumpData} from '@/components/tags/foldersDumpData';
 
 // Toggle between dump data and real API
 const USE_DUMP_DATA = false;
 
 
-class TagService {
+class HashtagService {
     private readonly basePath = '/api/tags'
 
     /**
@@ -31,19 +31,19 @@ class TagService {
     async getTags(params?: GetTagsParams): Promise<Tag[]> {
         // Use dump data if enabled
         if (USE_DUMP_DATA) {
-            console.log('📦 Using dump data for tags');
+            console.log('📦 Using dump data for hashtags');
             // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 300)); 
 
             // Flatten tree to get all tags
             const flattenTags = (tags: Tag[]): Tag[] => {
                 return tags.flatMap(tag => [tag, ...flattenTags(tag.children || [])]);
             };
 
-            let allTags = flattenTags(tagsDumpData);
+            let allTags = flattenTags(foldersDumpData);
 
-            console.log('📦 Flattened tags count:', allTags.length);
-            console.log('📦 First 3 tags:', allTags.slice(0, 3).map(t => ({ 
+            console.log('📦 Flattened hashtags count:', allTags.length);
+            console.log('📦 First 3 hashtags:', allTags.slice(0, 3).map(t => ({ 
                 tagId: t.tagId, 
                 id: t.id, 
                 name: t.name 
@@ -91,7 +91,7 @@ class TagService {
             // Transform the response to ensure proper types
             return response.map(this.transformTag)
         } catch (error) {
-            console.error('Failed to fetch tags:', error)
+            console.error('Failed to fetch hashtags:', error)
             throw error
         }
     }
@@ -152,7 +152,7 @@ class TagService {
             const response = await apiClient.get<TagDTO>(`${this.basePath}/${id}`)
             return this.transformTag(response)
         } catch (error) {
-            console.error(`Failed to fetch tag ${id}:`, error)
+            console.error(`Failed to fetch hashtag ${id}:`, error)
             throw error
         }
     }
@@ -172,7 +172,7 @@ class TagService {
             const response = await apiClient.post<TagDTO>(this.basePath, createPayload)
             return this.transformTag(response)
         } catch (error) {
-            console.error('Failed to create tag:', error)
+            console.error('Failed to create hashtag:', error)
             throw error
         }
     }
@@ -185,7 +185,7 @@ class TagService {
             const response = await apiClient.put<TagDTO>(`${this.basePath}/${id}`, data)
             return this.transformTag(response)
         } catch (error) {
-            console.error('Failed to update tag:', error)
+            console.error('Failed to update hashtag:', error)
             throw error
         }
     }
@@ -197,7 +197,7 @@ class TagService {
         try {
             await apiClient.delete(`${this.basePath}/${id}`)
         } catch (error) {
-            console.error('Failed to delete tag:', error)
+            console.error('Failed to delete hashtag:', error)
             throw error
         }
     }
@@ -208,9 +208,9 @@ class TagService {
      */
     async removeWorkspaceItem(workspaceId: number, itemId: number): Promise<void> {
         try {
-            console.log(`🗑️ [tagService] Removing workspace item ${itemId} from workspace ${workspaceId}`);
+            console.log(`🗑️ [hashtagService] Removing workspace item ${itemId} from workspace ${workspaceId}`);
             await apiClient.delete(`/api/workspace/${workspaceId}/items/${itemId}`);
-            console.log(`✅ [tagService] Successfully removed workspace item ${itemId}`);
+            console.log(`✅ [hashtagService] Successfully removed workspace item ${itemId}`);
         } catch (error) {
             console.error('Failed to remove workspace item:', error);
             throw error;
@@ -234,7 +234,7 @@ class TagService {
      */
     async moveTag(tagId: number, newParentId?: number, newIndex?: number): Promise<Tag> {
         try {
-            console.log('🔄 Moving tag:', { tagId, newParentId, newIndex });
+            console.log('🔄 Moving hashtag:', { tagId, newParentId, newIndex });
 
             // Call the move endpoint (assuming backend has this)
             // If backend doesn't have a specific move endpoint, we'll just update parentId
@@ -248,7 +248,7 @@ class TagService {
 
             return this.transformTag(response);
         } catch (error) {
-            console.error('Failed to move tag:', error);
+            console.error('Failed to move hashtag:', error);
 
             // Fallback: just update parentId if move endpoint doesn't exist
             console.log('Fallback: updating parentId only');
@@ -262,7 +262,7 @@ class TagService {
      */
     async batchMoveTag(tagIds: number[], newParentId?: number, startIndex: number = 0): Promise<void> {
         try {
-            console.log('🔄 Batch moving tags:', { tagIds, newParentId, startIndex });
+            console.log('🔄 Batch moving hashtags:', { tagIds, newParentId, startIndex });
 
             await apiClient.post(
                 `${this.basePath}/batch-move`,
@@ -275,7 +275,7 @@ class TagService {
 
             console.log('✅ Batch move successful');
         } catch (error) {
-            console.error('Failed to batch move tags:', error);
+            console.error('Failed to batch move hashtags:', error);
             throw error;
         }
     }
@@ -365,12 +365,12 @@ class TagService {
             const originalItem = itemByChildId.get(tag.tagId);
             
             if (!originalItem) {
-                console.warn(`⚠️ No original item found for tag ${tag.tagId}`);
+                console.warn(`⚠️ No original item found for hashtag ${tag.tagId}`);
                 rootTags.push(tag);
                 return;
             }
 
-            console.log(`🔍 Processing tag "${tag.name}":`, {
+            console.log(`🔍 Processing hashtag "${tag.name}":`, {
                 tagId: tag.tagId,
                 childId: originalItem.childId,
                 parentId: originalItem.parentId
@@ -389,7 +389,7 @@ class TagService {
                     parentTag.children = parentTag.children || [];
                     parentTag.children.push(tag);
                 } else {
-                    console.warn(`⚠️ Parent not found for tag "${tag.name}" (parentId: ${originalItem.parentId}), treating as root`);
+                    console.warn(`⚠️ Parent not found for hashtag "${tag.name}" (parentId: ${originalItem.parentId}), treating as root`);
                     rootTags.push(tag);
                 }
             }
@@ -425,37 +425,37 @@ class TagService {
      */
     async getWorkspaceTagTree(workspaceId: number): Promise<WorkspaceWithTagTree> {
         try {
-            console.log(`📦 [tagService] Fetching workspace tree for workspaceId: ${workspaceId}`);
-            console.log(`📦 [tagService] API URL: ${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/workspace/${workspaceId}/tree`);
+            console.log(`📦 [hashtagService] Fetching workspace tree for workspaceId: ${workspaceId}`);
+            console.log(`📦 [hashtagService] API URL: ${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/workspace/${workspaceId}/tree`);
             
             const response = await apiClient.get<WorkspaceWithTreeDTO>(
                 `/api/workspace/${workspaceId}/tree`
             );
             
-            console.log('✅ [tagService] Workspace tree response:', response);
-            console.log('✅ [tagService] Response items count:', response.items?.length || 0);
+            console.log('✅ [hashtagService] Workspace tree response:', response);
+            console.log('✅ [hashtagService] Response items count:', response.items?.length || 0);
             
             // Filter only tags from polymorphic items (case-insensitive)
             const tagItems = response.items.filter(item =>
                 item.itemType?.toLowerCase() === 'tag'
             );
 
-            console.log('✅ [tagService] Filtered tag items:', tagItems.length);
-            console.log('✅ [tagService] First tag item:', tagItems[0]);
+            console.log('✅ [hashtagService] Filtered tag items:', tagItems.length);
+            console.log('✅ [hashtagService] First tag item:', tagItems[0]);
 
             // Transform workspace tree items to tags (flat array first)
             const flatTags = tagItems.map((item: WorkspaceTreeItemDTO) =>
                 this.transformWorkspaceTreeItemToTag(item)
             );
 
-            console.log('✅ [tagService] Flat tags:', flatTags.length);
-            console.log('✅ [tagService] First flat tag:', flatTags[0]);
+            console.log('✅ [hashtagService] Flat tags:', flatTags.length);
+            console.log('✅ [hashtagService] First flat tag:', flatTags[0]);
 
             // Build hierarchical tree structure based on parentId and childId
             const tags = this.buildTreeFromParentChild(flatTags, tagItems);
 
-            console.log('✅ [tagService] Hierarchical tags:', tags.length);
-            console.log('✅ [tagService] First hierarchical tag:', tags[0]);
+            console.log('✅ [hashtagService] Hierarchical tags:', tags.length);
+            console.log('✅ [hashtagService] First hierarchical tag:', tags[0]);
             
             // Transform the response
             return {
@@ -522,4 +522,4 @@ class TagService {
     }
 }
 
-export const tagService = new TagService();
+export const hashtagService = new HashtagService();

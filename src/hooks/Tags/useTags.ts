@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { tagService } from '../../services/tagService';
+import { hashtagService } from '../../services/hashtagService';
 import type { 
     Folder as Tag, 
     CreateFolderDTO as CreateTagDTO, 
@@ -32,7 +32,7 @@ export const tagKeys = {
 export function useTags(params?: GetTagsParams) {
     return useQuery({
         queryKey: tagKeys.list(params),
-        queryFn: () => tagService.getTags(params),
+        queryFn: () => hashtagService.getTags(params),
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 }
@@ -48,7 +48,7 @@ export function useTags(params?: GetTagsParams) {
 export function useWorkspaceTagTree(workspaceId: number) {
     return useQuery({
         queryKey: tagKeys.workspaceTree(workspaceId),
-        queryFn: () => tagService.getWorkspaceTagTree(workspaceId),
+        queryFn: () => hashtagService.getWorkspaceTagTree(workspaceId),
         staleTime: 5 * 60 * 1000,
         enabled: workspaceId > 0, // Only fetch if ID is valid
     });
@@ -60,7 +60,7 @@ export function useWorkspaceTagTree(workspaceId: number) {
 export function useTag(id: number, enabled = true) {
     return useQuery({
         queryKey: tagKeys.detail(id),
-        queryFn: () => tagService.getTagById(id),
+        queryFn: () => hashtagService.getTagById(id),
         enabled,
         staleTime: 5 * 60 * 1000,
     });
@@ -72,7 +72,7 @@ export function useTag(id: number, enabled = true) {
 export function useTagsByDepth(depth: number, enabled = true) {
     return useQuery({
         queryKey: tagKeys.depth(depth),
-        queryFn: () => tagService.getTagsByDepth(depth),
+        queryFn: () => hashtagService.getTagsByDepth(depth),
         enabled,
         staleTime: 5 * 60 * 1000,
     });
@@ -84,7 +84,7 @@ export function useTagsByDepth(depth: number, enabled = true) {
 export function useRootTags() {
     return useQuery({
         queryKey: tagKeys.roots(),
-        queryFn: () => tagService.getRootTags(),
+        queryFn: () => hashtagService.getRootTags(),
         staleTime: 5 * 60 * 1000,
     });
 }
@@ -96,7 +96,7 @@ export function useCreateTag() {
     const queryClient = useQueryClient();
     
     return useMutation({
-        mutationFn: (data: CreateTagDTO) => tagService.createTag(data),
+        mutationFn: (data: CreateTagDTO) => hashtagService.createTag(data),
         onSuccess: (newTag) => {
             // Invalidate all tag queries to refetch fresh data
             queryClient.invalidateQueries({ queryKey: tagKeys.all });
@@ -121,7 +121,7 @@ export function useUpdateTag() {
     
     return useMutation({
         mutationFn: ({ id, data }: { id: number; data: UpdateTagDTO }) =>
-            tagService.updateTag(id, data),
+            hashtagService.updateTag(id, data),
         onSuccess: (_, { id }) => {
             // Invalidate specific tag and related queries
             queryClient.invalidateQueries({ queryKey: tagKeys.detail(id) });
@@ -138,7 +138,7 @@ export function useDeleteTag() {
     const queryClient = useQueryClient();
     
     return useMutation({
-        mutationFn: (id: number) => tagService.deleteTag(id),
+        mutationFn: (id: number) => hashtagService.deleteTag(id),
         onSuccess: () => {
             // Invalidate all tag queries
             queryClient.invalidateQueries({ queryKey: tagKeys.all });
@@ -153,7 +153,7 @@ export function useArchiveTag() {
     const queryClient = useQueryClient();
     
     return useMutation({
-        mutationFn: (id: number) => tagService.archiveTag(id),
+        mutationFn: (id: number) => hashtagService.archiveTag(id),
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: tagKeys.detail(id) });
             queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
@@ -169,7 +169,7 @@ export function useUnarchiveTag() {
     const queryClient = useQueryClient();
     
     return useMutation({
-        mutationFn: (id: number) => tagService.unarchiveTag(id),
+        mutationFn: (id: number) => hashtagService.unarchiveTag(id),
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: tagKeys.detail(id) });
             queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
@@ -189,7 +189,7 @@ export function useMoveTag() {
             tagId: number;
             newParentId?: number;
             newIndex?: number;
-        }) => tagService.moveTag(tagId, newParentId, newIndex),
+        }) => hashtagService.moveTag(tagId, newParentId, newIndex),
         onSuccess: () => {
             // Invalidate all tag tree queries since hierarchy has changed
             queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
@@ -210,7 +210,7 @@ export function useBatchMoveTag() {
             tagIds: number[];
             newParentId?: number;
             startIndex?: number;
-        }) => tagService.batchMoveTag(tagIds, newParentId, startIndex),
+        }) => hashtagService.batchMoveTag(tagIds, newParentId, startIndex),
         onSuccess: () => {
             // Invalidate all tag tree queries since hierarchy has changed
             queryClient.invalidateQueries({ queryKey: tagKeys.tree() });
@@ -230,7 +230,7 @@ export function useRemoveWorkspaceItem() {
         mutationFn: ({ workspaceId, itemId }: {
             workspaceId: number;
             itemId: number;
-        }) => tagService.removeWorkspaceItem(workspaceId, itemId),
+        }) => hashtagService.removeWorkspaceItem(workspaceId, itemId),
         onSuccess: () => {
             // Invalidate workspace tree queries
             queryClient.invalidateQueries({ queryKey: tagKeys.all });

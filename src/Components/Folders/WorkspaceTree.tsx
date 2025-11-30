@@ -25,7 +25,7 @@ import { useTagUIStore } from '@/store/tagUI/TagUIStore';
 import { useTagUIHelper } from '@/hooks/useTagUIHelper';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import type { Folder as Tag } from '../../types/folder.types';
-import { AddFolderDialog } from './AddFolderDialog';
+import { AddFolderDialog } from '../tags/AddFolderDialog';
 
 interface WorkspaceTreeProps {
     onTagClick?: (tag: Tag) => void;

@@ -1,10 +1,8 @@
 // Tags Feature Public Exports
 
 // Components
-export { TagCreateDialog } from './TagCreateDialog';
 export { AddFolderDialog } from './AddFolderDialog';
-export { WorkspaceTree } from './WorkspaceTree';
-export { TagsPanel } from './TagsPanel';
+export { WorkspaceTree } from '../Folders/WorkspaceTree';
 export { CreateFolderDialog } from './CreateFolderDialog';
 export { EditWorkspaceItemDialog } from './EditWorkspaceItemDialog';
 
@@ -21,13 +19,4 @@ export { useTags, useWorkspaceTagTree } from '../../hooks/Tags/useTags';
 export { useTagsForAutocomplete } from '../../hooks/Tags/useTagsForAutocomplete';
 
 // Service
-export { tagService } from '../../services/tagService';
-
-// Types
-export type { 
-    Folder as Tag, 
-    FolderLayoutType as TagLayoutType,
-    CreateFolderDTO as CreateTagDTO, 
-    UpdateFolderDTO as UpdateTagDTO, 
-    GetFoldersParams as GetTagsParams
-} from '../../types/folder.types';
+export { hashtagService } from '../../services/hashtagService';

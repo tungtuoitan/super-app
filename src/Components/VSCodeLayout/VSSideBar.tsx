@@ -4,7 +4,7 @@ import { NoteGridPanel } from '../Notes/NoteGridPanel'
 import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
-import {WorkspaceTree} from '../tags/WorkspaceTree'
+import {WorkspaceTree} from '../Folders/WorkspaceTree'
 import {FoldersPanel} from '../Folders'
 
 interface VSSideBarProps {

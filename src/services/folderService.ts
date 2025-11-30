@@ -1,6 +1,6 @@
 /**
  * Folder Service - API communication for folders (workspace navigation)
- * This is a wrapper/adapter for tagService.ts to provide folder-friendly terminology
+ * This is a wrapper/adapter for hashtagService.ts to provide folder-friendly terminology
  * Backend API still uses "tag" terminology
  */
 
@@ -17,8 +17,8 @@ import type {
     WorkspaceTreeItemDTO
 } from '../types/folder.types';
 
-// Re-use tagService implementation but export with folder terminology
-import { tagService as backendService } from './tagService';
+// Re-use hashtagService implementation but export with folder terminology
+import { hashtagService as backendService } from './hashtagService';
 
 /**
  * Folder Service Class
