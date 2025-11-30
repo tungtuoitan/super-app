@@ -13,6 +13,19 @@ import type {
 } from '@/types/workspace.types';
 
 /**
+ * Request to create or update a folder in workspace
+ * Maps to backend UpsertFolderRequest
+ */
+export interface UpsertFolderRequest {
+    folderId?: number | null; // If provided, updates existing folder
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    parentId?: number | null; // Parent folder ID (null for root)
+}
+
+/**
  * Get all workspaces for the current user
  * GET /api/workspace
  *
@@ -235,6 +248,94 @@ export const _deleteWorkspaceItems = async (
 
     const options = {
         method: "DELETE",
+        headers: headers,
+        body: JSON.stringify(data),
+    };
+
+    const res = await window.fetch(
+        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/items`,
+        options
+    );
+
+    if (res.ok) {
+        const ret = await res.json();
+        return ret;
+    } else {
+        return Promise.reject(res);
+    }
+};
+
+/**
+ * Create or update a folder in workspace
+ * POST /api/workspace/{workspaceId}/folders
+ * 
+ * @param token - Authentication token
+ * @param workspaceId - The workspace ID
+ * @param data - Folder data (name, description, color, etc.)
+ * @returns Operation result or rejects with response
+ */
+export const _upsertFolder = async (
+    token: string,
+    workspaceId: number,
+    data: UpsertFolderRequest
+): Promise<WorkspaceOperationResult> => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(data),
+    };
+
+    const res = await window.fetch(
+        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/folders`,
+        options
+    );
+
+    if (res.ok) {
+        const ret = await res.json();
+        return ret;
+    } else {
+        return Promise.reject(res);
+    }
+};
+
+/**
+ * Add an item (folder/note/file) to workspace
+ * POST /api/workspace/{workspaceId}/items
+ * 
+ * @param token - Authentication token
+ * @param workspaceId - The workspace ID
+ * @param data - Item data (childType, childId, etc.)
+ * @returns Operation result or rejects with response
+ */
+export const _addItemToWorkspace = async (
+    token: string,
+    workspaceId: number,
+    data: {
+        parentTagId?: number | null;
+        childType: 'tag' | 'note' | 'folder';
+        childId?: number;
+        folderName?: string;
+        label?: string;
+        notes?: string;
+        color?: string;
+        icon?: string;
+        sortOrder?: number;
+    }
+): Promise<WorkspaceOperationResult> => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "POST",
         headers: headers,
         body: JSON.stringify(data),
     };

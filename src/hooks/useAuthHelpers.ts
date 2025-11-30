@@ -4,7 +4,6 @@
  * Pattern: Separate business logic from store (similar to useTagUIHelper)
  */
 
-import { useCallback } from 'react';
 import { authApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth/AuthStore';
 import { storageService, STORAGE_KEYS } from '@/services/storage.service';
@@ -33,7 +32,7 @@ export function useAuthHelper() {
     /**
      * Login with username and password
      */
-    const login = useCallback(async (username: string, password: string): Promise<void> => {
+    const login = async (username: string, password: string): Promise<void> => {
         setLoginLoading(true);
         setLoginError(null);
         setError(null);
@@ -61,12 +60,12 @@ export function useAuthHelper() {
         } finally {
             setLoginLoading(false);
         }
-    }, [setAuth, setIsAuthenticated, setLoginLoading, setLoginError, setError]);
+    };
 
     /**
      * Logout user and clean up auth state
      */
-    const logout = useCallback((): void => {
+    const logout = (): void => {
         // Clear auth store state
         setAuth({
             userName: '',
@@ -82,12 +81,12 @@ export function useAuthHelper() {
         
         // Remove token from storage
         storageService.remove(STORAGE_KEYS.USER_TOKEN);
-    }, [setAuth, setIsAuthenticated, setError, setLoginError, setTokenExchangeError]);
+    };
 
     /**
      * Exchange authorization code for token
      */
-    const exchangeToken = useCallback(async (code: string): Promise<ExchangeTokenResponse> => {
+    const exchangeToken = async (code: string): Promise<ExchangeTokenResponse> => {
         setTokenExchangeLoading(true);
         setTokenExchangeError(null);
         setError(null);
@@ -117,7 +116,7 @@ export function useAuthHelper() {
         } finally {
             setTokenExchangeLoading(false);
         }
-    }, [setAuth, setIsAuthenticated, setTokenExchangeLoading, setTokenExchangeError, setError]);
+    };
 
     return {
         login,

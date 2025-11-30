@@ -1,5 +1,5 @@
 // shared/hooks/useKeyboardShortcut.ts
-import { useEffect, useCallback } from 'react'
+import { useEffect } from 'react'
 
 /**
  * Keyboard shortcut configuration
@@ -49,10 +49,9 @@ export function useKeyboardShortcut({
     enabled = true,
     callback,
 }: KeyboardShortcutConfig) {
-    const handleKeyDown = useCallback(
-        (e: KeyboardEvent) => {
-            // Check if shortcut is enabled
-            if (!enabled) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+        // Check if shortcut is enabled
+        if (!enabled) return
 
             // Check modifiers
             const ctrlOrCmd = ctrl ? (e.ctrlKey || e.metaKey) : true
@@ -69,9 +68,7 @@ export function useKeyboardShortcut({
                 e.stopPropagation()
                 callback()
             }
-        },
-        [key, ctrl, shift, alt, enabled, callback]
-    )
+        }
 
     useEffect(() => {
         if (!enabled) return
@@ -93,7 +90,7 @@ export function useInputShortcuts({
     onEscape?: () => void
     enabled?: boolean
 }) {
-    const handleKeyDown = useCallback(
+    const handleKeyDown =     
         (e: React.KeyboardEvent) => {
             if (!enabled) return
 
@@ -106,9 +103,7 @@ export function useInputShortcuts({
                 e.preventDefault()
                 onEscape()
             }
-        },
-        [enabled, onEnter, onEscape]
-    )
+        }
 
     return { onKeyDown: handleKeyDown }
 }

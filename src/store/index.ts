@@ -26,3 +26,6 @@ export type { HashtagUIStoreData } from './hashtagUI/HashtagUIStore';
 
 export { ExplorerStore, ExplorerProvider, useExplorerStore } from './explorer/ExplorerStore';
 export type { ExplorerContextData } from './explorer/ExplorerStore';
+
+export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from './explorer/FolderDialogStore';
+export type { FolderDialogContextData, FolderDialogFormErrors } from './explorer/FolderDialogStore';

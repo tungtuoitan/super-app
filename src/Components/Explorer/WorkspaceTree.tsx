@@ -6,7 +6,6 @@ import {
     Loader2
 } from 'lucide-react';
 import type { Folder } from '../../types/folder.types';
-import { AddFolderDialog } from './CreateFolderDialog/AddFolderDialog';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { useDialogAction } from '@/hooks/explorer/useDialogAction.helper';
@@ -16,6 +15,7 @@ import {CustomDragPreview} from './CustomDragPreview';
 import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
 import {FolderNode} from './FolderNode';
 import {getAllVisibleFolderIds, transformToTreeData, TreeFolder} from '@/hooks/explorer/tree.helper';
+import {FolderDialog} from './FolderDialog/FolderDialog';
 
 export function WorkspaceTree() {
     const {
@@ -123,7 +123,7 @@ export function WorkspaceTree() {
             </Tree>
 
             {/* Add Folder Dialog */}
-            <AddFolderDialog />
+            <FolderDialog />
         </div>
     );
 }

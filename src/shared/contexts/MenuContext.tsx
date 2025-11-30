@@ -1,11 +1,3 @@
-/**
- * Global Context Menu System
- * Provides right-click context menu functionality across the entire application
- * Using @szhsin/react-menu for better performance and accessibility
- * 
- * Pattern: UI-only provider, logic in store + helper
- */
-
 import React from 'react';
 import { ControlledMenu, MenuItem, MenuDivider } from '@szhsin/react-menu';
 import { 
@@ -22,7 +14,6 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
 import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
-import {EditWorkspaceItemDialog} from '@/Components/Explorer/CreateFolderDialog';
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -40,8 +31,6 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
         anchorPoint,
         contextType,
         contextData,
-        isEditDialogOpen,
-        editItemData,
     } = useContextMenuStore();
     
     // Business logic
@@ -53,7 +42,6 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
         handleAddNote,
         handleDeleteItem,
         handleViewInfo,
-        closeEditDialog,
         selectedFolderIds,
     } = useContextMenuHelper();
 
@@ -220,25 +208,8 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                 {renderMenuItems()}
             </ControlledMenu>
 
-            {/* Confirmation Popover for delete actions */}
+            {/* Confirmation Popover for delete actions */} 
             <ConfirmationPopover {...deleteConfirmation.getPopoverProps()} />
-
-            {/* Edit Workspace Item Dialog */}
-            {editItemData && (
-                <EditWorkspaceItemDialog
-                    open={isEditDialogOpen}
-                    onClose={closeEditDialog}
-                    workspaceId={editItemData.workspaceId || 1} // CURRENT_WORKSPACE_ID = 1
-                    itemId={editItemData.itemId || editItemData.tagId}
-                    currentName={editItemData.name || ''}
-                    currentLabel={editItemData.label || ''}
-                    currentNotes={editItemData.notes || ''}
-                    currentColor={editItemData.color || ''}
-                    currentIcon={editItemData.icon || ''}
-                    currentSortOrder={editItemData.sortOrder || 0}
-                    itemName={editItemData.name || 'Item'}
-                />
-            )}
         </>
     );
 }

@@ -6,6 +6,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AuthStoreProvider } from '@/store/auth/AuthStore';
 import { EditorTabProvider } from '@/Components/Editor';
 import { ExplorerProvider } from '@/store/explorer/ExplorerStore';
+import { FolderDialogProvider } from '@/store/explorer/FolderDialogStore';
 import { ContextMenu } from '@/shared/contexts';
 import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenuStore';
 import MainNav from './MainNav/MainNav';
@@ -40,17 +41,19 @@ export function Main() {
                 <DndProvider backend={HTML5Backend}>
                     <AuthStoreProvider>
                         <ExplorerProvider>
-                            <NoteUIProvider>
-                                <EditorTabProvider>
-                                    <DialogProvider>
-                                        <ContextMenuStoreProvider>
-                                            <ContextMenu>
-                                                <MainNav />
-                                            </ContextMenu>
-                                        </ContextMenuStoreProvider>
-                                    </DialogProvider>
-                                </EditorTabProvider>
-                            </NoteUIProvider>
+                            <FolderDialogProvider>
+                                <NoteUIProvider>
+                                    <EditorTabProvider>
+                                        <DialogProvider>
+                                            <ContextMenuStoreProvider>
+                                                <ContextMenu>
+                                                    <MainNav />
+                                                </ContextMenu>
+                                            </ContextMenuStoreProvider>
+                                        </DialogProvider>
+                                    </EditorTabProvider>
+                                </NoteUIProvider>
+                            </FolderDialogProvider>
                         </ExplorerProvider>
                     </AuthStoreProvider>
                 </DndProvider>
