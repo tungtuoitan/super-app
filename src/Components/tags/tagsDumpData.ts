@@ -1,11 +1,21 @@
 /**
- * Tags Dump Data for Development/Testing
+ * Folders Dump Data for Development/Testing
  * Hierarchical structure with multiple levels
+ * Note: Backend still uses tagId field, but frontend uses folderId
  */
 
 import type { Tag } from '../../types/tag.types';
 
-export const tagsDumpData: Tag[] = [
+// Helper to ensure all items have both tagId and folderId
+const ensureFolderCompat = (items: any[]): Tag[] => {
+    return items.map(item => ({
+        ...item,
+        folderId: item.tagId,
+        children: item.children ? ensureFolderCompat(item.children) : []
+    }));
+};
+
+const rawData: any[] = [
     // Root Level - Programming Languages
     {
         tagId: 1,
@@ -460,3 +470,6 @@ export const tagsDumpData: Tag[] = [
         ],
     },
 ];
+
+// Export with folderId compatibility
+export const tagsDumpData: Tag[] = ensureFolderCompat(rawData);

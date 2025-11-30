@@ -16,7 +16,8 @@ export const NoteCreate = () => {
             noteId: 0,
             name: '',
             description: '',
-            tags: [],
+            tags: [], // Backward compatibility
+            hashtags: [], // Primary field
             type: undefined,
             createdBy: '',
             createdAt: new Date(),

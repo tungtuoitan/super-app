@@ -22,7 +22,8 @@ const transformNoteResponse = (noteResponse: NoteResponse): Note => ({
     noteId: noteResponse.noteId,
     name: noteResponse.name,
     description: noteResponse.description,
-    tags: noteResponse.tags,
+    tags: noteResponse.tags, // Backward compatibility
+    hashtags: noteResponse.tags, // Primary field (backend still uses 'tags')
     type: noteResponse.type,
     createdBy: noteResponse.createdBy,
     createdAt: new Date(noteResponse.createdAt),

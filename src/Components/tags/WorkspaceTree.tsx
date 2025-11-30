@@ -583,6 +583,7 @@ export function WorkspaceTree({ workspaceId }: WorkspaceTreeProps) {
             const workspaceData = data;
             const workspaceRootTag: Tag = {
                 tagId: -workspaceData.workspaceId, // Negative ID to distinguish from real tags
+                folderId: -workspaceData.workspaceId, // Same as tagId for compatibility
                 name: workspaceData.name,
                 description: workspaceData.description,
                 color: workspaceData.color,

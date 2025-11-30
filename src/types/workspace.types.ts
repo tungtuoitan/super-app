@@ -1,24 +1,27 @@
 /**
- * Workspace Types - Types for workspace tag tree operations
+ * Workspace Types - Types for workspace folder tree operations
  * Aligns with backend AddItemToWorkspaceRequest and WorkspaceItemResponse
+ * Note: Backend still uses "tag" terminology in API
  */
 
 /**
- * Request to add an item (tag or note) to a workspace
+ * Request to add an item (folder or note) to a workspace
  * Maps to backend AddItemToWorkspaceRequest
  */
 export interface AddItemToWorkspaceRequest {
-    /** Parent tag ID where the item will be placed (null for root items) */
-    parentTagId?: number | null;
+    /** Parent folder ID where the item will be placed (null for root items) */
+    parentTagId?: number | null; // Backend field name (kept for API compatibility)
+    parentFolderId?: number | null; // Frontend alias
     
-    /** Type of child entity (e.g., 'tag', 'note') */
-    childType: 'tag' | 'note';
+    /** Type of child entity - 'folder' for workspace folders, 'note' for notes */
+    childType: 'tag' | 'note' | 'folder'; // Backend accepts 'tag', frontend uses 'folder'
     
-    /** ID of the child entity (optional if creating new tag) */
+    /** ID of the child entity (optional if creating new folder) */
     childId?: number;
     
-    /** Tag name (required when childType='tag' and childId is not provided - will auto-create tag) */
-    tagName?: string;
+    /** Folder name (required when childType='folder' and childId is not provided - will auto-create folder) */
+    tagName?: string; // Backend field name (kept for API compatibility)
+    folderName?: string; // Frontend alias
     
     /** Optional relationship type (e.g., 'contains', 'references') */
     relationshipType?: string;

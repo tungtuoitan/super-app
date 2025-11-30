@@ -3,7 +3,8 @@
  * Domain models and DTOs for the notes feature
  */
 
-import type { Tag } from '@/types/tag.types';
+import type { Folder } from '@/types/folder.types';
+import type { Tag } from '@/types/tag.types'; // Backward compatibility alias
 
 // Note types
 export type NoteType = 'meeting' | 'brainstorm' | 'research' | 'bug' | 'task' | 'idea';
@@ -24,7 +25,8 @@ export interface Note {
     noteId: number;
     name: string;
     description?: string;
-    tags: Tag[]; // Array of Tag objects
+    hashtags: Folder[]; // Array of Folder objects (note's hashtags)
+    tags?: Folder[]; // DEPRECATED: Use hashtags instead. Kept for backward compatibility
     type?: string; // Changed from NoteType to string to match backend
     createdAt: Date;
     updatedAt?: Date;
@@ -38,7 +40,7 @@ export interface NoteDTO {
     noteId: number;
     name: string;
     description?: string;
-    tags: Tag[]; // Array of Tag objects from backend
+    tags: Folder[]; // Backend still uses "tags" field name (array of Folder/Tag objects)
     type?: string; // String type to match backend response
     createdAt: string; // ISO string
     updatedAt?: string; // ISO string
@@ -51,7 +53,8 @@ export interface NoteDTO {
 export interface CreateNoteDTO {
     name: string;
     description?: string;
-    tags?: number[]; // Tag IDs - backend expects 'tags' in JSON (maps to TagIds property)
+    tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
+    hashtagIds?: number[]; // Frontend alias for tags
     type?: string;
 }
 
@@ -59,7 +62,8 @@ export interface CreateNoteDTO {
 export interface UpdateNoteDTO {
     name?: string;
     description?: string;
-    tags?: number[]; // Tag IDs - backend expects 'tags' in JSON (maps to TagIds property)
+    tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
+    hashtagIds?: number[]; // Frontend alias for tags
     type?: string;
     isArchived?: boolean;
 }

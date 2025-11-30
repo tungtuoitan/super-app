@@ -18,6 +18,7 @@ class NoteService {
     private transformTag(tagDto: any): Tag {
         return {
             tagId: tagDto.tagId,
+            folderId: tagDto.tagId, // Same as tagId for compatibility
             name: tagDto.name,
             description: tagDto.description,
             color: tagDto.color,
@@ -36,10 +37,12 @@ class NoteService {
      * Transform NoteDTO to domain model
      */
     private transformNote(dto: NoteDTO): Note {
+        const transformedTags = dto.tags?.map(tag => this.transformTag(tag)) || [];
         return {
             ...dto,
             // Transform tags array with proper type conversion
-            tags: dto.tags?.map(tag => this.transformTag(tag)) || [],
+            tags: transformedTags, // Backward compatibility
+            hashtags: transformedTags, // Primary field for note metadata
             createdAt: new Date(dto.createdAt),
             updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
         };

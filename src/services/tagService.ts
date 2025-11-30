@@ -1,5 +1,6 @@
 /**
  * Tag Service - API communication and business logic for tags
+ * Note: This uses Tag types which are re-exported from folder.types
  */
 
 import { apiClient } from '@/lib/api-client'
@@ -11,7 +12,6 @@ import type {
     UpdateTagDTO,
     GetTagsParams,
     TagTreeNode,
-    WorkspaceWithTagTreeDTO,
     WorkspaceWithTagTree,
     WorkspaceWithTreeDTO,
     WorkspaceTreeItemDTO
@@ -103,6 +103,7 @@ class TagService {
     private transformTag(dto: TagDTO): Tag {
         return {
             tagId: dto.tagId,
+            folderId: dto.tagId, // Map tagId to folderId for folder terminology
             name: dto.name,
             description: dto.description,
             color: dto.color,
@@ -128,6 +129,7 @@ class TagService {
     private transformTagTreeResponse(dto: TagTreeResponseDTO): Tag {
         return {
             tagId: dto.tagId,
+            folderId: dto.tagId, // Map tagId to folderId for folder terminology
             name: dto.name,
             description: undefined, // Not available in tree response
             color: dto.color,
@@ -470,11 +472,13 @@ class TagService {
                 isTemplate: response.isTemplate,
                 isArchived: response.isArchived,
                 tagCount: response.tagCount,
+                folderCount: response.tagCount, // Alias for folder terminology
                 memberCount: response.memberCount,
                 settings: response.settings,
                 createdAt: new Date(response.createdAt),
                 updatedAt: response.updatedAt ? new Date(response.updatedAt) : undefined,
-                tags: tags
+                tags: tags,
+                folders: tags // Alias for folder terminology
             };
         } catch (error) {
             console.error('Failed to fetch workspace tree:', error);
@@ -502,6 +506,7 @@ class TagService {
 
         return {
             tagId: actualTagId,
+            folderId: actualTagId, // Map tagId to folderId for folder terminology
             id: actualTagId,
             itemId: workspaceItemId, // Store workspace_items.item_id for deletion
             name: item.name,
