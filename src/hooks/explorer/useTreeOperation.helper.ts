@@ -9,7 +9,6 @@ import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useFolderDialogHelper } from './useFolderDialogHelper';
 import { useWorkspaceOperation } from './useWorkspaceOperation.helper';
 import { _upsertFolder } from '@/services/workspace.service';
-import { useAuth } from '@/contexts/AuthContext';
 
 export const useTreeOperation = () => {
     const {
@@ -21,7 +20,6 @@ export const useTreeOperation = () => {
         setCurrentTree,
     } = useExplorerStore();
     
-    const { auth } = useAuth();
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceOperation();
 
@@ -145,7 +143,6 @@ export const useTreeOperation = () => {
             }
 
             const workspaceId = currentTree.workspaceId;
-            const token = auth.userToken;
 
             console.log('🔄 Calling API to update folders:', {
                 workspaceId,
@@ -162,7 +159,7 @@ export const useTreeOperation = () => {
                 }
 
                 try {
-                    const result = await _upsertFolder(token, workspaceId, {
+                    const result = await _upsertFolder('', workspaceId, {
                         id: folderId,
                         name: folder.data.name,
                         parentId: newParentId ?? null,
