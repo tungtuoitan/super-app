@@ -238,6 +238,138 @@ export const useContextMenuHelper = () => {
     }
 
     /**
+     * Handle bulk delete for multiple selected folders
+     */
+    const handleBulkDeleteFolders = (selectedIds: number[]) => {
+        console.log('🗑️ Bulk deleting folders:', selectedIds);
+
+        if (!currentTree?.items) {
+            console.error('❌ Cannot delete: no tree data');
+            return;
+        }
+
+        // Find all selected folders in the tree
+        const findFolderById = (items: any[], folderId: number): Folder | null => {
+            for (const item of items) {
+                const nodeId = item.childId || item.id;
+                if (nodeId === folderId) {
+                    return item.child || item;
+                }
+                if (item.children?.length > 0) {
+                    const found = findFolderById(item.children, folderId);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+
+        const selectedFolders: Folder[] = [];
+        for (const folderId of selectedIds) {
+            const folder = findFolderById(currentTree.items, folderId);
+            if (folder) {
+                // Check if this is a workspace root node (negative ID)
+                if (folder.id < 0) {
+                    console.warn('⚠️ Skipping workspace root node:', folder.id);
+                    continue;
+                }
+                selectedFolders.push(folder);
+            }
+        }
+
+        if (selectedFolders.length === 0) {
+            console.warn('⚠️ No valid folders to delete');
+            return;
+        }
+
+        // VS Code behavior: Find next item to select after deletion
+        let nextFolderIdToSelect: number | null = null;
+        const allVisibleFolderIds = getAllVisibleTagIds(currentTree.items);
+        
+        // Find the highest index among selected folders
+        const selectedIndices = selectedIds
+            .map(id => allVisibleFolderIds.indexOf(id))
+            .filter(idx => idx !== -1)
+            .sort((a, b) => b - a); // Sort descending
+        
+        if (selectedIndices.length > 0) {
+            const lastSelectedIndex = selectedIndices[0];
+            
+            // Try to select the next item after the last selected item
+            if (lastSelectedIndex < allVisibleFolderIds.length - 1) {
+                nextFolderIdToSelect = allVisibleFolderIds[lastSelectedIndex + 1];
+            }
+            // If it's the last item, select the previous one before the first selected
+            else if (selectedIndices[selectedIndices.length - 1] > 0) {
+                nextFolderIdToSelect = allVisibleFolderIds[selectedIndices[selectedIndices.length - 1] - 1];
+            }
+        }
+
+        // Collect all folders and their descendants
+        const allFoldersToDelete: Folder[] = [];
+        const itemIdSet = new Set<number>(); // Avoid duplicates
+
+        for (const folder of selectedFolders) {
+            const descendants = collectAllDescendants(folder);
+            for (const desc of descendants) {
+                if (desc.itemId && !itemIdSet.has(desc.itemId)) {
+                    allFoldersToDelete.push(desc);
+                    itemIdSet.add(desc.itemId);
+                }
+            }
+        }
+
+        console.log(`🗑️ Cascade bulk delete: removing ${allFoldersToDelete.length} folder(s) (${selectedFolders.length} selected + ${allFoldersToDelete.length - selectedFolders.length} descendants)`);
+
+        // Delete all folders using workspace service
+        const deleteItems = async () => {
+            try {
+                const token = storageService.getString('token');
+
+                console.log(`🗑️ Deleting ${allFoldersToDelete.length} workspace items:`,
+                    allFoldersToDelete.map(f => ({ name: f.name, id: f.itemId, type: 2 }))
+                );
+
+                console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items', {
+                    items: allFoldersToDelete.map(f => ({ id: f.itemId!, type: 2 as const })),
+                    cascade: true
+                });
+
+                const result = await _deleteWorkspaceItems(token ?? '', CURRENT_WORKSPACE_ID, {
+                    items: allFoldersToDelete.map(f => ({ id: f.itemId!, type: 2 as const })),
+                    cascade: true
+                });
+
+                console.log('✅ API response:', result);
+
+                if (result.success) {
+                    console.log(`✅ Successfully removed ${allFoldersToDelete.length} folder(s) from workspace`);
+
+                    // VS Code behavior: Select next item after deletion
+                    if (nextFolderIdToSelect !== null) {
+                        setSelectedFolderIds([nextFolderIdToSelect]);
+                        setLastSelectedFolderId(nextFolderIdToSelect);
+                        console.log(`✅ Selected next item: ${nextFolderIdToSelect}`);
+                    } else {
+                        setSelectedFolderIds([]);
+                        setLastSelectedFolderId(null);
+                    }
+
+                    // Reload page to refresh tree
+                    window.location.reload();
+                } else {
+                    console.error('❌ Delete failed:', result.message);
+                    alert(`Failed to delete folders: ${result.message}`);
+                }
+            } catch (error) {
+                console.error(`❌ Failed to delete folders:`, error);
+                alert(`Error deleting folders: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+        };
+
+        deleteItems();
+    };
+
+    /**
      * Handle delete item action
      */
     const handleDeleteItem = (itemData: any, contextType: ContextMenuType) => {
@@ -257,11 +389,9 @@ export const useContextMenuHelper = () => {
             const isMultipleSelected = selectedCount > 1;
 
             if (isMultipleSelected) {
-                // Delete all selected folders
-                console.log('🗑️ Deleting multiple folders:', selectedFolderIds);
-                // TODO: Implement bulk delete functionality for multiple folders
-                // For now, delete the right-clicked folder
-                handleDeleteFolder(itemData);
+                // Bulk delete all selected folders
+                console.log('🗑️ Bulk deleting multiple folders:', selectedFolderIds);
+                handleBulkDeleteFolders(selectedFolderIds);
             } else {
                 // Delete single folder
                 handleDeleteFolder(itemData);
