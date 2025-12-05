@@ -8,8 +8,9 @@
         "url": "http://localhost:3000",
         "webRoot": "${workspaceFolder}",
         "sourceMaps": true,
-        "trace": true
-      },
+        "trace": true,
+        "preLaunchTask": "npm: start"
+      }
     ]
   }
   

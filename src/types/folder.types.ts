@@ -41,6 +41,7 @@ export interface Folder {
     createdAt: Date;
     isActive: boolean;
     depth?: number; // Depth in hierarchy from backend (0 = root, 1 = child, etc.)
+    parentId?: number | null; // Parent folder ID (null for root level)
 
     // Frontend-only properties for tree UI and backward compatibility
     itemId?: number; // WorkspaceItems.item_id (when loaded from workspace tree)

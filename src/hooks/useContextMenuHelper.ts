@@ -204,7 +204,7 @@ export const useContextMenuHelper = () => {
     const handleCreateFolder = (parentTag?: any) => {
         console.log('📁 Context Menu: Add folder clicked for parent:', parentTag);
         closeContextMenu();
-        openFolderDialog('create', parentTag);
+        openFolderDialog('create', null, parentTag);
     };
 
     /**
@@ -215,7 +215,7 @@ export const useContextMenuHelper = () => {
         closeContextMenu();
         
         if (itemData) {
-            openFolderDialog('edit', itemData);
+            openFolderDialog('edit', itemData, null);
         }
     };
 

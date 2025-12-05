@@ -117,9 +117,11 @@ export function FolderNode({
         if (isWorkspaceRoot) {
             return;
         }
+
+        const _currentFolder = currentTree?.items.find(f => f.id === folder.id);
         
         // Open folder-specific context menu with folder data
-        showContextMenu(e, 'folder', folder);
+        showContextMenu(e, 'folder', {...folder, parentId: _currentFolder?.parentId ?? null });
     };
     
     return (

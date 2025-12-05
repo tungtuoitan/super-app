@@ -95,7 +95,7 @@ export const useFolderDialogHelper = () => {
                     name: newFolderName.trim(),
                     description: description.trim() || undefined,
                     color,
-                    parentId: editingFolder!.parentId || null,
+                    parentId: editingFolder!.parentId ?? null, // Preserve existing parentId (use ?? to handle 0)
                 }
                 : {
                     name: newFolderName.trim(),
@@ -103,6 +103,8 @@ export const useFolderDialogHelper = () => {
                     color,
                     parentId: parentFolder?.id || null,
                 };
+            
+            console.log('📤 Submitting folder data:', folderData);
             
             // Call upsertFolder endpoint
             await _upsertFolder(token, selectedWorkspaceId, folderData);
@@ -135,50 +137,57 @@ export const useFolderDialogHelper = () => {
     
     /**
      * Open folder dialog (unified for create and edit)
-     * @param mode - 'create' or 'edit'
-     * @param folderOrParent - For create: parent folder (optional), For edit: folder to edit (required)
+     * @param dialogMode - 'create' or 'edit'
+     * @param folder - For edit mode: folder to edit (required). For create mode: unused
+     * @param parentFolder - For create mode: parent folder (optional). For edit mode: unused
      */
-    const openFolderDialog = (dialogMode: 'create' | 'edit', folderOrParent?: Folder | null) => {
-        console.log('📂 Opening folder dialog:', { mode: dialogMode, data: folderOrParent });
+    const openFolderDialog = (
+        dialogMode: 'create' | 'edit',
+        folder?: Folder | null,
+        parentFolder?: Folder | null
+    ) => {
+        console.log('📂 Opening folder dialog:', { mode: dialogMode, folder, parentFolder });
         
         setMode(dialogMode);
         
         if (dialogMode === 'create') {
-            // Create mode: folderOrParent is the parent folder
-            setParentFolder(folderOrParent || null);
+            // Create mode: use parentFolder parameter
+            setParentFolder(parentFolder || null);
             resetForm();
         } else {
-            // Edit mode: folderOrParent is the folder to edit
-            if (!folderOrParent) {
+            // Edit mode: use folder parameter
+            if (!folder) {
                 console.error('❌ Edit mode requires a folder');
                 return;
             }
             
             console.log('📝 Opening edit dialog for folder:', {
-                id: folderOrParent.id || (folderOrParent as any).tagId,
-                name: folderOrParent.name,
-                description: folderOrParent.description,
-                color: folderOrParent.color,
-                fullData: folderOrParent
+                id: folder.id || (folder as any).tagId,
+                name: folder.name,
+                description: folder.description,
+                color: folder.color,
+                parentId: folder.parentId,
+                fullData: folder
             });
             
             // Handle both folderId and tagId (for backward compatibility)
             const editData = {
-                ...folderOrParent,
-                id: folderOrParent.id || (folderOrParent as any).tagId,
+                ...folder,
+                id: folder.id || (folder as any).tagId,
             };
             
             setEditingFolder(editData);
             
             // Pre-fill form with existing data (with safe fallbacks)
-            setNewFolderName(folderOrParent.name || '');
-            setDescription(folderOrParent.description || '');
-            setColor(folderOrParent.color || '#1976D2');
+            setNewFolderName(folder.name || '');
+            setDescription(folder.description || '');
+            setColor(folder.color || '#1976D2');
             
             console.log('✅ Edit dialog opened with data:', {
-                name: folderOrParent.name || '',
-                description: folderOrParent.description || '',
-                color: folderOrParent.color || '#1976D2'
+                name: folder.name || '',
+                description: folder.description || '',
+                color: folder.color || '#1976D2',
+                parentId: folder.parentId
             });
         }
         

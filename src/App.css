@@ -56,6 +56,15 @@ code {
     user-select: none;
 }
 
+/* Remove outline/border from tree items */
+[role="treeitem"] {
+    outline: none !important;
+}
+
+[role="treeitem"]:focus {
+    outline: none !important;
+}
+
 
 /* 2------TLContainer------ */
 /* make timelinebar scrolls horizontally */
