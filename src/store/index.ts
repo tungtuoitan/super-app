@@ -9,9 +9,6 @@ export type { AuthStoreData, User } from './auth/AuthStore';
 export { DialogStore, DialogProvider, useDialogStore } from './dialog/DialogStore';
 export type { DialogContextData } from './dialog/DialogStore';
 
-export { ApiStore, ApiProvider, useApiStore } from './api/ApiStore';
-export type { ApiContextData } from './api/ApiStore';
-
 export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from './editor/EditorTabStore';
 export type { EditorTabContextData } from './editor/EditorTabStore';
 
