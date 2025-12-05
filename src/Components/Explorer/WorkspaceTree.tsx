@@ -9,9 +9,8 @@ import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
 import {CustomDragPreview} from './CustomDragPreview';
-import {WorkspaceTreeEmpty} from './WorkspaceTreeEmpty';
 import {FolderNode} from './FolderNode';
-import {WorkspaceToolBar} from './WorkspaceToolBar';
+import {RootFolderNode} from './RootFolderNode';
 import {getAllVisibleFolderIds, transformToTreeData, TreeFolder} from '@/hooks/explorer/tree.helper';
 import {FolderDialog} from './FolderDialog/FolderDialog';
 
@@ -65,17 +64,8 @@ export function WorkspaceTree() {
     }, [handleKeyDown, allVisibleFolderIds]);
 
 
-    if (!treeData || treeData.length === 0) {
-        return (
-            <>
-                <WorkspaceToolBar treeData={treeData || []} />
-                <WorkspaceTreeEmpty />
-            </>
-        );
-    }
     return (
         <>
-            <WorkspaceToolBar treeData={treeData} />
             <div
                 ref={treeContainerRef}
                 data-workspace-tree
@@ -108,22 +98,32 @@ export function WorkspaceTree() {
                 renderDragPreview={(props) => <CustomDragPreview {...props} treeData={treeData} />}
             >
                 {({ node, style, dragHandle }) => {
+                    // Check if this is the workspace root node
+                    const isWorkspaceRoot = node.data.data.id < 0;
+                    
                     // Wrap in div to ensure native DOM element for DnD
                     return (
                         <div style={style}>
-                            <FolderNode
-                                node={node}
-                                style={{ height: '100%' }}
-                                dragHandle={dragHandle}
-                                treeData={treeData}
-                            />
+                            {isWorkspaceRoot ? (
+                                <RootFolderNode
+                                    node={node}
+                                    style={{ height: '100%' }}
+                                    treeData={treeData}
+                                />
+                            ) : (
+                                <FolderNode
+                                    node={node}
+                                    style={{ height: '100%' }}
+                                    dragHandle={dragHandle}
+                                    treeData={treeData}
+                                />
+                            )}
                         </div>
                     );
                 }}
             </Tree>
 
-            {/* Add Folder Dialog */}
-            <FolderDialog />
+
         </div>
         </>
     );

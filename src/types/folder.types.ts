@@ -34,7 +34,7 @@ export interface FolderTreeResponseDTO {
 
 // Domain model (what we use in app)
 export interface Folder {
-    folderId: number; // Frontend primary key (maps to backend tagId)
+    id: number; // Primary key (maps to backend tagId)
     name: string;
     description?: string;
     color?: string;
@@ -43,7 +43,6 @@ export interface Folder {
     depth?: number; // Depth in hierarchy from backend (0 = root, 1 = child, etc.)
 
     // Frontend-only properties for tree UI and backward compatibility
-    id?: number; // Alias for folderId
     itemId?: number; // WorkspaceItems.item_id (when loaded from workspace tree)
     children?: Folder[]; // Child folders for tree structure
     isExpanded?: boolean; // For tree UI state
@@ -75,7 +74,7 @@ export interface UpdateFolderDTO {
 
 // Move folder request
 export interface MoveFolderDTO {
-    folderId: number;
+    id: number;
     newParentId?: number; // null or undefined for root level
     newIndex?: number; // Position in the new parent's children array
 }

@@ -95,7 +95,7 @@ export const useTreeOperation = () => {
             }
 
             const targetParentNode = newParentId !== undefined
-                ? getAllFoldersFlattened(treeData).find(t => t.data.folderId === newParentId)
+                ? getAllFoldersFlattened(treeData).find(t => t.data.id === newParentId)
                 : null;
 
             const targetSiblings = targetParentNode

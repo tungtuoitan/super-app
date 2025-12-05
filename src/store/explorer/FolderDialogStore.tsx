@@ -1,13 +1,6 @@
-/**
- * FolderDialog Store Context
- * Manages form state for FolderDialog component
- * 
- * @pattern Context for UI state (form fields, validation, loading)
- * @see FolderDialog component in src/Components/Explorer/FolderDialog
- */
 
 import { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
-import type { WorkspaceTreeItemResponse } from '@/types/workspace.types';
+import type { WorkspaceItemResponse } from '@/types/workspace.types';
 
 export interface FolderDialogFormErrors {
     name?: string;

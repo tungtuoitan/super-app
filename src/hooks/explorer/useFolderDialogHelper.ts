@@ -81,7 +81,7 @@ export const useFolderDialogHelper = () => {
         }
         
         // Edit mode validation: check if we have editing folder
-        if (mode === 'edit' && (!editingFolder || !editingFolder.folderId)) {
+        if (mode === 'edit' && (!editingFolder || !editingFolder.id)) {
             enqueueSnackbar('No folder selected for editing', { variant: 'error' });
             return;
         }
@@ -91,7 +91,7 @@ export const useFolderDialogHelper = () => {
             // Prepare folder data based on mode
             const folderData = mode === 'edit' 
                 ? {
-                    folderId: editingFolder!.folderId, // Include folderId for update
+                    id: editingFolder!.id, // Include folderId for update
                     name: newFolderName.trim(),
                     description: description.trim() || undefined,
                     color,
@@ -101,7 +101,7 @@ export const useFolderDialogHelper = () => {
                     name: newFolderName.trim(),
                     description: description.trim() || undefined,
                     color,
-                    parentId: parentFolder?.folderId || null,
+                    parentId: parentFolder?.id || null,
                 };
             
             // Call upsertFolder endpoint
@@ -155,7 +155,7 @@ export const useFolderDialogHelper = () => {
             }
             
             console.log('📝 Opening edit dialog for folder:', {
-                folderId: folderOrParent.folderId || (folderOrParent as any).tagId,
+                id: folderOrParent.id || (folderOrParent as any).tagId,
                 name: folderOrParent.name,
                 description: folderOrParent.description,
                 color: folderOrParent.color,
@@ -165,7 +165,7 @@ export const useFolderDialogHelper = () => {
             // Handle both folderId and tagId (for backward compatibility)
             const editData = {
                 ...folderOrParent,
-                folderId: folderOrParent.folderId || (folderOrParent as any).tagId,
+                id: folderOrParent.id || (folderOrParent as any).tagId,
             };
             
             setEditingFolder(editData);

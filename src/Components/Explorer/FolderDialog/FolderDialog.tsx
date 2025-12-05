@@ -19,7 +19,7 @@ import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type { WorkspaceTreeItemResponse } from '@/types/workspace.types';
+import type { WorkspaceItemResponse } from '@/types/workspace.types';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { useExplorerStore } from '@/store/index';
 import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
@@ -51,15 +51,14 @@ export function FolderDialog() {
     const { submitFolder, closeFolderDialog } = useFolderDialogHelper();
 
     // Derived values
-    const dialogOpen = isOpen;
-    const parentFolderId = parentFolder?.folderId;
+    const parentFolderId = parentFolder?.id;
 
     // Find parent folder info for display (VS Code-like)
     const parentFolderInfo = React.useMemo(() => {
         if (!parentFolderId || !currentTree?.items || currentTree.items.length === 0) return null;
         
         // Search for parent folder in the tree
-        function findFolder(items: WorkspaceTreeItemResponse[], targetId: number): WorkspaceTreeItemResponse | null {
+        function findFolder(items: WorkspaceItemResponse[], targetId: number): WorkspaceItemResponse | null {
             for (const item of items) {
                 if (item.itemType === 'tag' && item.childId === targetId) return item;
                 if (item.children && item.children.length > 0) {
@@ -81,10 +80,10 @@ export function FolderDialog() {
         if (parentFolderId) {
             const parent = parentFolderInfo;
             if (parent && parent.children) {
-                return parent.children.filter((child: WorkspaceTreeItemResponse) => 
+                return parent.children.filter((child: WorkspaceItemResponse) => 
                     child.itemType === 'tag' && 
                     // When editing, exclude the current folder being edited
-                    (mode === 'create' || child.childId !== editingFolder?.folderId)
+                    (mode === 'create' || child.childId !== editingFolder?.id)
                 );
             }
         }
@@ -93,7 +92,7 @@ export function FolderDialog() {
         return currentTree.items.filter(item => 
             item.itemType === 'tag' &&
             // When editing, exclude the current folder being edited
-            (mode === 'create' || item.childId !== editingFolder?.folderId)
+            (mode === 'create' || item.childId !== editingFolder?.id)
         );
     }
 
@@ -101,14 +100,14 @@ export function FolderDialog() {
     const isDuplicateName = React.useMemo(() => {
         if (!newFolderName.trim()) return false;
         
-        return siblingFolders().some((folder: WorkspaceTreeItemResponse) => 
+        return siblingFolders().some((folder: WorkspaceItemResponse) => 
             folder.name.toLowerCase() === newFolderName.trim().toLowerCase()
         );
     }, [newFolderName]);
 
     // Initialize dialog when it opens
     useEffect(() => {
-        if (dialogOpen) {
+        if (isOpen) {
             console.log('🔄 FolderDialog opened with mode:', mode);
             console.log('📋 Form state BEFORE init:', {
                 newFolderName,
@@ -126,24 +125,24 @@ export function FolderDialog() {
                 });
             }, 100);
         }
-    }, [dialogOpen, mode]); // Add mode to dependencies to track changes
+    }, [isOpen, mode]); // Add mode to dependencies to track changes
 
     // Handle dialog close
     const handleClose = () => {
         closeFolderDialog();
     };
-    console.log('FolderDialog Render:', { dialogOpen, mode, parentFolder });
+    console.log('FolderDialog Render:', { isOpen, mode, parentFolder });
     
     // Keyboard Shortcuts
     useKeyboardShortcut({
         key: 'Enter',
-        enabled: dialogOpen && !isSubmitting && !!newFolderName.trim(),
+        enabled: isOpen && !isSubmitting && !!newFolderName.trim(),
         callback: submitFolder,
     });
 
     useKeyboardShortcut({
         key: 'Escape',
-        enabled: dialogOpen && !isSubmitting,
+        enabled: isOpen && !isSubmitting,
         callback: handleClose,
     });
 
@@ -159,7 +158,7 @@ export function FolderDialog() {
     ];
 
     return (
-        <Dialog open={dialogOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
+        <Dialog open={isOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
             <DialogContent className="sm:max-w-[550px] rounded-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">

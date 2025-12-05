@@ -17,12 +17,12 @@ import type {
  * Maps to backend UpsertFolderRequest
  */
 export interface UpsertFolderRequest {
-    folderId?: number | null; // If provided, updates existing folder
+    id?: number | null; // If provided, updates existing folder
     name: string;
     description?: string;
     color?: string;
     icon?: string;
-    parentId?: number | null; // Parent folder ID (null for root)
+    parentId?: number | null; // Parent folder ID (null for root) - consistent with CreateFolderDTO/UpdateFolderDTO
 }
 
 /**

@@ -9,6 +9,7 @@ import { WorkspaceTree } from '../Explorer/WorkspaceTree';
 import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { Loader2 } from 'lucide-react';
+import {FolderDialog} from '../Explorer/FolderDialog';
 
 /**
  * Explorer View - WorkspaceTree for folder navigation with workspace selection
@@ -47,7 +48,7 @@ export function ExplorerView() {
           active: true
         });
       }
-    }
+    } 
   }, [currentTree?.workspaceId, allWorkspaces]);
 
 
@@ -92,13 +93,8 @@ export function ExplorerView() {
 
       {/* Workspace Tree */}
       <div className="flex-1 overflow-hidden relative">
-        {/* {!currentTree?.workspaceId ? (
-          <div className="p-4 text-sm text-muted-foreground">No workspace selected</div>
-        ) : !currentTree && !isLoadingTree ? (
-          <div className="p-4 text-sm text-muted-foreground">No tree data available</div>
-        ) : (
-        )} */}
         <WorkspaceTree />
+        <FolderDialog />
         
         {/* Loading Overlay */}
         {(isLoadingWorkspaces || isLoadingTree) && (

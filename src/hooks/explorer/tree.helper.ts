@@ -1,4 +1,4 @@
-import {WorkspaceTreeItemResponse} from "@/types/workspace.types";
+import {WorkspaceItemResponse} from "@/types/workspace.types";
 import { Folder } from "../../types";
 
 export function getAllFoldersFlattened(treeData: TreeFolder[]): TreeFolder[] {
@@ -24,14 +24,14 @@ export function isDescendant(
 ): boolean {
     // Find the potential parent node
     const parentNode = getAllFoldersFlattened(treeData).find(
-        (t) => t.data.folderId === potentialParentId
+        (t) => t.data.id === potentialParentId
     );
 
     if (!parentNode) return false;
 
     // Recursively check if targetId exists in the subtree of parentNode
     function checkSubtree(node: TreeFolder): boolean {
-        if (node.data.folderId === targetId) {
+        if (node.data.id === targetId) {
             return true; // Found targetId in descendants
         }
 
@@ -50,7 +50,7 @@ export function findFolderById(
     targetId: number
 ): Folder | undefined {
     for (const folder of folders) {
-        if (folder.folderId === targetId) {
+        if (folder.id === targetId) {
             return folder;
         }
         if (folder.children && folder.children.length > 0) {
@@ -73,7 +73,7 @@ export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
 
     function traverse(nodes: TreeFolder[]) {
         for (const node of nodes) {
-            result.push(node.data.folderId);
+            result.push(node.data.id);
             if (node.children && node.children.length > 0) {
                 traverse(node.children);
             }
@@ -89,11 +89,11 @@ export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
  */
 
 /**
- * Transform WorkspaceTreeItemResponse to Folder
+ * Transform WorkspaceItemResponse to Folder
  * Only transforms items with itemType='tag' (folders)
  */
 export function transformTreeItemToFolder(
-    item: WorkspaceTreeItemResponse
+    item: WorkspaceItemResponse
 ): Folder | null {
     // Only transform tag items (folders)
     if (item.itemType.toLowerCase() !== "tag") {
@@ -101,8 +101,7 @@ export function transformTreeItemToFolder(
     }
 
     const folder: Folder = {
-        folderId: item.childId,
-        id: item.id,
+        id: item.childId,
         itemId: item.itemId,
         name: item.name,
         color: item.color,
@@ -126,10 +125,10 @@ export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
     return folders
         .filter(
             (folder) =>
-                folder && folder.folderId !== undefined && folder.folderId !== null
+                folder && folder.id !== undefined && folder.id !== null
         )
         .map((folder) => ({
-            id: folder.folderId.toString(),
+            id: folder.itemId?.toString() || folder.id.toString(),
             name: folder.name || "Untitled",
             data: folder,
             // Always provide children array (empty if no children) to enable drop into nodes
@@ -137,7 +136,7 @@ export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
                 folder.children && folder.children.length > 0
                     ? transformFoldersToTreeData(folder.children)
                     : [],
-        }));
+        }));  
 }
 
 /**
@@ -189,19 +188,40 @@ export function createWorkspaceRootFolder(
     children: Folder[]
 ): Folder {
     return {
-        folderId: -workspaceId,
+        id: -workspaceId,
         name: workspaceName,
         description: workspaceData.description,
         color: workspaceData.color,
         createdAt: new Date(workspaceData.createdAt),
         isActive: !workspaceData.isArchived,
         depth: 0,
-        id: -workspaceId,
         isArchived: workspaceData.isArchived,
         children: children,
         isExpanded: true,
     };
 }
+
+
+    function transformItem(item: WorkspaceItemResponse): Folder | null {
+        // Only transform tag items (folders)
+        if (item.itemType.toLowerCase() !== "folder") {
+            return null;
+        }
+
+        return {
+            id: item.id, // Use item.id (backend provides this)
+            itemId: item.itemId,
+            name: item.name,
+            color: item.color,
+            createdAt: new Date(item.createdAt),
+            isActive: true,
+            depth: item.level,
+            isExpanded: item.isExpanded,
+            children: item.children
+                .map(transformItem)
+                .filter((child): child is Folder => child !== null),
+        };
+    }
 
 /**
  * Transform workspace data to react-arborist tree data
@@ -231,45 +251,25 @@ export function transformToTreeData(
     // Only include 'tag' type items (folders)
     // Recursively transform all children
     // ================================================================
-    function transformItem(item: WorkspaceTreeItemResponse): Folder | null {
-        // Only transform tag items (folders)
-        if (item.itemType.toLowerCase() !== "folder") {
-            return null;
-        }
-
-        return {
-            folderId: item.childId,
-            id: item.id,
-            itemId: item.itemId,
-            name: item.name,
-            color: item.color,
-            createdAt: new Date(item.createdAt),
-            isActive: true,
-            depth: item.level,
-            isExpanded: item.isExpanded,
-            children: item.children
-                .map(transformItem)
-                .filter((child): child is Folder => child !== null),
-        };
-    }
-
+    console.log('🔍 transformToTreeData - Input data.items:', data.items);
+    
     const folders: Folder[] = data.items
         .map(transformItem)
         .filter((folder): folder is Folder => folder !== null);
-
-    if (!folders || folders.length === 0) {
-        return [];
-    }
+    
+    console.log('📁 transformToTreeData - Transformed folders:', folders);
 
     // ================================================================
     // STEP 3: Apply search filter to folder tree
     // Filter recursively - include folders that match OR have matching descendants
     // ================================================================
-    const filteredFolders = filterTreeBySearch(folders, searchText);
+    const filteredFolders = folders.length > 0 ? filterTreeBySearch(folders, searchText) : [];
+    console.log('🔎 transformToTreeData - Filtered folders:', filteredFolders);
 
     // ================================================================
     // STEP 4: Create workspace root node (workspace mode only)
     // Wrap all folders under a virtual workspace root for display
+    // Always create workspace root, even if there are no child folders
     // ================================================================
     let foldersToTransform: Folder[];
     
@@ -294,5 +294,7 @@ export function transformToTreeData(
     // STEP 5: Convert to TreeFolder format for react-arborist
     // Transform Folder hierarchy to TreeFolder with required structure
     // ================================================================
-    return transformFoldersToTreeData(foldersToTransform);
+    const result = transformFoldersToTreeData(foldersToTransform);
+    console.log('🌲 transformToTreeData - Final result:', result);
+    return result;
 }

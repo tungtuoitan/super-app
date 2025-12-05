@@ -43,10 +43,10 @@ export interface AddItemToWorkspaceRequest {
 }
 
 /**
- * Response from workspace item operations
- * Maps to backend WorkspaceItemResponse
+ * Response from workspace item operations (add/update/delete)
+ * Maps to backend WorkspaceItemOperationResponse
  */
-export interface WorkspaceItemResponse {
+export interface WorkspaceItemOperationResponse {
     itemId: number;
     workspaceId: number;
     parentTagId: number | null;
@@ -63,7 +63,7 @@ export interface WorkspaceItemResponse {
     addedBy: number;
     createdAt: string; // ISO string
     updatedAt?: string; // ISO string
-    
+
     // Navigation properties
     parentTagName?: string;
     childName?: string;
@@ -160,10 +160,10 @@ export interface WorkspaceOperationResult {
 }
 
 /**
- * Workspace tree item response - represents a single item in the tree hierarchy
- * Maps to backend WorkspaceTreeItemResponse
+ * Workspace item response - represents a single item in the tree hierarchy
+ * Maps to backend WorkspaceItemResponse
  */
-export interface WorkspaceTreeItemResponse {
+export interface WorkspaceItemResponse {
     /** Type of the item: 'tag', 'note', or 'file' */
     itemType: string;
 
@@ -216,7 +216,7 @@ export interface WorkspaceTreeItemResponse {
     metadata?: any;
 
     /** Child items in the tree */
-    children: WorkspaceTreeItemResponse[];
+    children: WorkspaceItemResponse[];
 
     /** UI state: Whether expanded */
     isExpanded: boolean;
@@ -318,5 +318,5 @@ export interface WorkspaceWithTreeResponse {
     updatedAt?: string;
 
     /** Hierarchical tree structure */
-    items: WorkspaceTreeItemResponse[];
+    items: WorkspaceItemResponse[];
 }

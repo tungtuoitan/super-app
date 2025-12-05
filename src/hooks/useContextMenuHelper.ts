@@ -53,16 +53,14 @@ export const useContextMenuHelper = () => {
         const getAllVisibleTagIds = (folders: Folder[]): number[] => {
             const result: number[] = [];
     
-            function traverse(nodes: Folder[]) {
-                for (const node of nodes) {
-                    result.push(node.folderId);
-                    if (node.children && node.children.length > 0) {
-                        traverse(node.children);
-                    }
+        function traverse(nodes: Folder[]) {
+            for (const node of nodes) {
+                result.push(node.id);
+                if (node.children && node.children.length > 0) {
+                    traverse(node.children);
                 }
             }
-    
-            traverse(folders);
+        }            traverse(folders);
             return result;
         }
     
@@ -75,7 +73,7 @@ export const useContextMenuHelper = () => {
 
 
         const handleDeleteFolder = (folder: Folder) => {
-            console.log('🗑️ Removing folder from workspace:', folder.folderId, folder.name, 'itemId:', folder.itemId);
+            console.log('🗑️ Removing folder from workspace:', folder.id, folder.name, 'itemId:', folder.itemId);
     
             // Validate itemId exists
             if (!folder.itemId) {
@@ -88,7 +86,7 @@ export const useContextMenuHelper = () => {
             let nextFolderIdToSelect: number | null = null;
             if (workspaceTree?.tags) {
                 const allVisibleFolderIds = getAllVisibleTagIds(workspaceTree.tags);
-                const currentIndex = allVisibleFolderIds.indexOf(folder.folderId);
+                const currentIndex = allVisibleFolderIds.indexOf(folder.id);
     
                 if (currentIndex !== -1) {
                     // Try to select the next item (below)
@@ -109,7 +107,7 @@ export const useContextMenuHelper = () => {
             // Filter out folders without itemId and warn about them
             const foldersToDelete = allFolders.filter(f => {
                 if (!f.itemId) {
-                    console.warn(`⚠️ Skipping folder without itemId: ${f.name} (folderId: ${f.folderId})`);
+                    console.warn(`⚠️ Skipping folder without itemId: ${f.name} (folderId: ${f.id})`);
                     return false;
                 }
                 return true;
