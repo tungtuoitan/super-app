@@ -202,8 +202,50 @@ export function createWorkspaceRootFolder(
 }
 
 
+    /**
+     * Build hierarchical structure from flat list using parentId
+     * ✅ This function is now ACTIVELY USED - API returns flat data
+     * Backend returns flat array with parentId, we build hierarchy here
+     * Benefits: smaller payload, better caching, easier updates
+     */
+    function buildHierarchy(items: WorkspaceItemResponse[]): WorkspaceItemResponse[] {
+        // Filter only folder items (folders can have children, notes/files are leaf nodes)
+        const folderItems = items.filter(item => item.itemType.toLowerCase() === "folder");
+
+        // Create a map for O(1) lookup
+        const itemMap = new Map<number, WorkspaceItemResponse>();
+        folderItems.forEach(item => {
+            itemMap.set(item.id, { ...item, children: [] });
+        });
+
+        // Build parent-child relationships
+        const roots: WorkspaceItemResponse[] = [];
+
+        folderItems.forEach(item => {
+            const currentItem = itemMap.get(item.id);
+            if (!currentItem) return;
+
+            if (item.parentId === null || item.parentId === undefined) {
+                // Root level item (no parent)
+                roots.push(currentItem);
+            } else {
+                // Child item - add to parent's children array
+                const parent = itemMap.get(item.parentId);
+                if (parent) {
+                    parent.children.push(currentItem);
+                } else {
+                    // Orphan (parent not found) - treat as root
+                    console.warn(`Item ${item.id} has parentId ${item.parentId} but parent not found`);
+                    roots.push(currentItem);
+                }
+            }
+        });
+
+        return roots;
+    }
+
     function transformItem(item: WorkspaceItemResponse): Folder | null {
-        // Only transform tag items (folders)
+        // Only transform folder items (should already be filtered)
         if (item.itemType.toLowerCase() !== "folder") {
             return null;
         }
@@ -247,27 +289,35 @@ export function transformToTreeData(
     }
 
     // ================================================================
-    // STEP 2: Transform workspace items to Folder format
-    // Only include 'tag' type items (folders)
-    // Recursively transform all children
+    // STEP 2: Build hierarchical structure from flat list
+    // ✅ API NOW returns FLAT array with parentId relationships (refactored for better performance)
+    // We build the tree structure here in frontend for flexibility & caching benefits
     // ================================================================
-    console.log('🔍 transformToTreeData - Input data.items:', data.items);
+    console.log('🔍 transformToTreeData - Input data.items (FLAT):', data.items);
+
+    const hierarchicalItems = buildHierarchy(data.items);
+    console.log('🏗️ transformToTreeData - Built hierarchy:', hierarchicalItems);
     
-    const folders: Folder[] = data.items
+    // ================================================================
+    // STEP 3: Transform workspace items to Folder format
+    // Now that we have the hierarchy, transform to Folder objects
+    // ================================================================
+    const folders: Folder[] = hierarchicalItems
         .map(transformItem)
         .filter((folder): folder is Folder => folder !== null);
     
     console.log('📁 transformToTreeData - Transformed folders:', folders);
 
+    
     // ================================================================
-    // STEP 3: Apply search filter to folder tree
+    // STEP 4: Apply search filter to folder tree
     // Filter recursively - include folders that match OR have matching descendants
     // ================================================================
     const filteredFolders = folders.length > 0 ? filterTreeBySearch(folders, searchText) : [];
     console.log('🔎 transformToTreeData - Filtered folders:', filteredFolders);
 
     // ================================================================
-    // STEP 4: Create workspace root node (workspace mode only)
+    // STEP 5: Create workspace root node (workspace mode only)
     // Wrap all folders under a virtual workspace root for display
     // Always create workspace root, even if there are no child folders
     // ================================================================
@@ -291,7 +341,7 @@ export function transformToTreeData(
     }
 
     // ================================================================
-    // STEP 5: Convert to TreeFolder format for react-arborist
+    // STEP 6: Convert to TreeFolder format for react-arborist
     // Transform Folder hierarchy to TreeFolder with required structure
     // ================================================================
     const result = transformFoldersToTreeData(foldersToTransform);
