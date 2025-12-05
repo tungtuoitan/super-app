@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Folder, FileText, Settings } from 'lucide-react'
+import { Folder, FileText, Settings, Boxes } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -8,7 +8,7 @@ import {
 } from '@/Components/ui/tooltip'
 import {SettingsDialog} from './SettingsDialog'
 
-export type ActivityBarView = 'explorer' | 'folders' | 'notes'
+export type ActivityBarView = 'explorer' | 'workspace' | 'note'
 
 interface ActivityBarProps {
   activeView: ActivityBarView
@@ -16,9 +16,9 @@ interface ActivityBarProps {
 }
 
 const activities = [
-  { id: 'explorer' as const, icon: Folder, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
-  { id: 'folders' as const, icon: Folder, label: 'Folders', shortcut: 'Ctrl+Shift+T' },
-  { id: 'notes' as const, icon: FileText, label: 'Notes', shortcut: 'Ctrl+Shift+N' },
+  { id: 'explorer' as const, icon: Folder, label: 'Explorer' },
+  { id: 'workspace' as const, icon: Boxes, label: 'Workspace' },
+  { id: 'note' as const, icon: FileText, label: 'Note' },
 ]
 
 export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
@@ -50,7 +50,7 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="right">
-                    <p>{activity.label} ({activity.shortcut})</p>
+                    <p>{activity.label}</p>
                   </TooltipContent>
                 </Tooltip>
               )
@@ -71,7 +71,7 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right">
-                <p>Settings (Ctrl+,)</p>
+                <p>Settings</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

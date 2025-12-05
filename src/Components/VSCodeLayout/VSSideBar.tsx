@@ -55,7 +55,8 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
               {/* Content */}
               <div className="flex-1 overflow-hidden">
                 {activeView === 'explorer' && <ExplorerView />}
-                {activeView === 'notes' && <NotesView />}
+                {/* {activeView === 'workspace' && <NotesView />} */}
+                {activeView === 'note' && <NotesView />}
               </div>
             </div>
           </Panel>
@@ -89,17 +90,10 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
  * Shows compact sidebar view with only name column
  */
 function NotesView() {
-  const { openNoteTab } = useEditorTabHelper()
-
-  const handleNoteClick = (note: Note) => {
-    console.log('🎯 VSSideBar - Note clicked:', note)
-    openNoteTab(note)
-  }
-
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* NoteGrid in sidebar mode - only shows name column */}
-      <NoteGridPanel onNoteClick={handleNoteClick} sidebarMode={true} />
+      <NoteGridPanel sidebarMode={true} />
     </div>
   )
 }
@@ -111,8 +105,8 @@ function getViewTitle(view: ActivityBarView): string {
   switch (view) {
     case 'explorer':
       return 'Explorer'
-    case 'notes':
-      return 'Notes'
+    case 'note':
+      return 'Note'
     default:
       return 'View'
   }

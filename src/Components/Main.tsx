@@ -12,6 +12,7 @@ import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenuStore';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import {NoteUIProvider} from '@/store/note/useNoteUIStore';
+import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanelStore';
 
 
 /**
@@ -43,15 +44,17 @@ export function Main() {
                         <ExplorerProvider>
                             <FolderDialogProvider>
                                 <NoteUIProvider>
-                                    <EditorTabProvider>
-                                        <DialogProvider>
-                                            <ContextMenuStoreProvider>
-                                                <ContextMenu>
-                                                    <MainNav />
-                                                </ContextMenu>
-                                            </ContextMenuStoreProvider>
-                                        </DialogProvider>
-                                    </EditorTabProvider>
+                                    <NoteGridPanelProvider>
+                                        <EditorTabProvider>
+                                            <DialogProvider>
+                                                <ContextMenuStoreProvider>
+                                                    <ContextMenu>
+                                                        <MainNav />
+                                                    </ContextMenu>
+                                                </ContextMenuStoreProvider>
+                                            </DialogProvider>
+                                        </EditorTabProvider>
+                                    </NoteGridPanelProvider>
                                 </NoteUIProvider>
                             </FolderDialogProvider>
                         </ExplorerProvider>

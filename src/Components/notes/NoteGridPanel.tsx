@@ -15,6 +15,9 @@ import {Note} from '@/types/note.types';
 import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
 import {_getNotes} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
+import {useNoteTabHelper} from '@/hooks/useNoteTabHelper';
+import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
+import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanelStore';
 
 /**
  * NoteGridPanel - A flexible layout panel for displaying notes in a data table
@@ -24,19 +27,25 @@ import {storageService} from '@/services/storage.service';
  * @param sidebarMode - If true, shows only name column for compact sidebar view
  */
 export function NoteGridPanel({
-    onNoteClick,
     sidebarMode = false
 }: {
-    onNoteClick?: (note: Note) => void;
     sidebarMode?: boolean;
 } = {}) {
-    // Server state với service trực tiếp
-    const [notes, setNotes] = React.useState<Note[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [error, setError] = React.useState<Error | null>(null);
+    // State từ centralized store
+    const {
+        notes,
+        setNotes,
+        isLoading,
+        setIsLoading,
+        error,
+        setError,
+        sorting,
+        setSorting,
+        pagination,
+        setPagination
+    } = useNoteGridPanelStore();
     
-    // Get UI state for interactions (fallback)
-    const { openDialog } = useNoteUIHelper();
+    const { openNoteTab } = useEditorTabHelper();
 
     // Load notes
     React.useEffect(() => {
@@ -55,10 +64,6 @@ export function NoteGridPanel({
         };
         loadNotes();
     }, []);
-
-    // State for table
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
 
     // Helper function to format date/time
     const formatDateTime = (date: Date): string => {
@@ -202,16 +207,6 @@ export function NoteGridPanel({
         getRowId: (row) => String(row.noteId),
     });
 
-    // Handle row click
-    const handleRowClick = (note: Note) => {
-        // Use custom handler if provided, otherwise open dialog
-        if (onNoteClick) {
-            onNoteClick(note);
-        } else {
-            openDialog(note);
-        }
-    };
-
     // Loading state
     if (isLoading) {
         return (
@@ -291,7 +286,7 @@ export function NoteGridPanel({
                                 className={`border-b border-editor-border cursor-pointer hover:bg-editor-hover ${
                                     sidebarMode ? 'h-9' : 'h-[42px]'
                                 }`}
-                                onClick={() => handleRowClick(row.original)}
+                                onClick={() => openNoteTab(row.original)}
                             >
                                 {row.getVisibleCells().map(cell => (
                                     <td key={cell.id} className="px-4 align-middle text-left">
