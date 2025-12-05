@@ -1,6 +1,6 @@
 /**
  * Workspace Types - Types for workspace folder tree operations
- * Aligns with backend AddItemToWorkspaceRequest and WorkspaceItemResponse
+ * Aligns with backend AddItemToWorkspaceRequest and WorkspaceItem
  * Note: Backend still uses "tag" terminology in API
  */
 
@@ -95,7 +95,7 @@ export interface UpdateWorkspaceItemRequest {
  * Response from update workspace item operation
  * Maps to backend UpdateWorkspaceItemResponse
  */
-export interface UpdateWorkspaceItemResponse extends WorkspaceItemResponse {
+export interface UpdateWorkspaceItemResponse extends WorkspaceItem {
     message?: string;
 }
 
@@ -161,9 +161,9 @@ export interface WorkspaceOperationResult {
 
 /**
  * Workspace item response - represents a single item in the tree hierarchy
- * Maps to backend WorkspaceItemResponse
+ * Maps to backend WorkspaceItem
  */
-export interface WorkspaceItemResponse {
+export interface WorkspaceItem {
     /** Type of the item: 'tag', 'note', or 'file' */
     itemType: string;
 
@@ -216,7 +216,7 @@ export interface WorkspaceItemResponse {
     metadata?: any;
 
     /** Child items in the tree */
-    children: WorkspaceItemResponse[];
+    children: WorkspaceItem[];
 
     /** UI state: Whether expanded */
     isExpanded: boolean;
@@ -318,5 +318,5 @@ export interface WorkspaceWithTreeResponse {
     updatedAt?: string;
 
     /** Hierarchical tree structure */
-    items: WorkspaceItemResponse[];
+    items: WorkspaceItem[];
 }

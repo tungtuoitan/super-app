@@ -1,6 +1,6 @@
 
 import { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
-import type { WorkspaceItemResponse } from '@/types/workspace.types';
+import type { WorkspaceItem } from '@/types/workspace.types';
 
 export interface FolderDialogFormErrors {
     name?: string;

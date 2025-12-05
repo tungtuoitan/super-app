@@ -19,7 +19,7 @@ import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Textarea } from '@/Components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type { WorkspaceItemResponse } from '@/types/workspace.types';
+import type { WorkspaceItem } from '@/types/workspace.types';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { useExplorerStore } from '@/store/index';
 import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
@@ -58,7 +58,7 @@ export function FolderDialog() {
         if (!parentFolderId || !currentTree?.items || currentTree.items.length === 0) return null;
         
         // Search for parent folder in the tree
-        function findFolder(items: WorkspaceItemResponse[], targetId: number): WorkspaceItemResponse | null {
+        function findFolder(items: WorkspaceItem[], targetId: number): WorkspaceItem | null {
             for (const item of items) {
                 if (item.itemType === 'tag' && item.childId === targetId) return item;
                 if (item.children && item.children.length > 0) {
@@ -80,7 +80,7 @@ export function FolderDialog() {
         if (parentFolderId) {
             const parent = parentFolderInfo;
             if (parent && parent.children) {
-                return parent.children.filter((child: WorkspaceItemResponse) => 
+                return parent.children.filter((child: WorkspaceItem) => 
                     child.itemType === 'tag' && 
                     // When editing, exclude the current folder being edited
                     (mode === 'create' || child.childId !== editingFolder?.id)
@@ -100,7 +100,7 @@ export function FolderDialog() {
     const isDuplicateName = React.useMemo(() => {
         if (!newFolderName.trim()) return false;
         
-        return siblingFolders().some((folder: WorkspaceItemResponse) => 
+        return siblingFolders().some((folder: WorkspaceItem) => 
             folder.name.toLowerCase() === newFolderName.trim().toLowerCase()
         );
     }, [newFolderName]);

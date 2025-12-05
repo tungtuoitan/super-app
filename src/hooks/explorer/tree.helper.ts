@@ -1,4 +1,4 @@
-import {WorkspaceItemResponse} from "@/types/workspace.types";
+import {WorkspaceItem} from "@/types/workspace.types";
 import { Folder } from "../../types";
 
 export function getAllFoldersFlattened(treeData: TreeFolder[]): TreeFolder[] {
@@ -89,11 +89,11 @@ export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
  */
 
 /**
- * Transform WorkspaceItemResponse to Folder
+ * Transform WorkspaceItem to Folder
  * Only transforms items with itemType='tag' (folders)
  */
 export function transformTreeItemToFolder(
-    item: WorkspaceItemResponse
+    item: WorkspaceItem
 ): Folder | null {
     // Only transform tag items (folders)
     if (item.itemType.toLowerCase() !== "tag") {
@@ -208,18 +208,18 @@ export function createWorkspaceRootFolder(
      * Backend returns flat array with parentId, we build hierarchy here
      * Benefits: smaller payload, better caching, easier updates
      */
-    function buildHierarchy(items: WorkspaceItemResponse[]): WorkspaceItemResponse[] {
+    function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
         // Filter only folder items (folders can have children, notes/files are leaf nodes)
         const folderItems = items.filter(item => item.itemType.toLowerCase() === "folder");
 
         // Create a map for O(1) lookup
-        const itemMap = new Map<number, WorkspaceItemResponse>();
+        const itemMap = new Map<number, WorkspaceItem>();
         folderItems.forEach(item => {
             itemMap.set(item.id, { ...item, children: [] });
         });
 
         // Build parent-child relationships
-        const roots: WorkspaceItemResponse[] = [];
+        const roots: WorkspaceItem[] = [];
 
         folderItems.forEach(item => {
             const currentItem = itemMap.get(item.id);
@@ -244,7 +244,7 @@ export function createWorkspaceRootFolder(
         return roots;
     }
 
-    function transformItem(item: WorkspaceItemResponse): Folder | null {
+    function transformItem(item: WorkspaceItem): Folder | null {
         // Only transform folder items (should already be filtered)
         if (item.itemType.toLowerCase() !== "folder") {
             return null;
