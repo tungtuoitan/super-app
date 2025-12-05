@@ -20,7 +20,7 @@ import { Button } from '@/Components/ui/button';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Checkbox } from '@/Components/ui/checkbox';
 import {Note} from '../../types/note.types';
-import {_getNotes} from '../../services/noteService';
+import {_getNotes} from '../../services/note.service';
 import {storageService} from '../../services/storage.service';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 

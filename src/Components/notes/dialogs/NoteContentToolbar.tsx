@@ -16,7 +16,7 @@ import {
 import { useAuthStore } from '@/store/auth/AuthStore';
 import {useSnackbar} from 'notistack';
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
-import { _createNote, _deleteNote, _updateNote } from '../../../services/noteService';
+import { _createNote, _deleteNote, _updateNote } from '../../../services/note.service';
 import {useConfirmationPopover} from '@/shared/hooks';
 import {CreateNoteDTO, UpdateNoteDTO} from '../../../types/note.types';
 import {ConfirmationPopover} from '@/shared/components';

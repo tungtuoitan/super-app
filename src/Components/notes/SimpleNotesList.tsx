@@ -8,7 +8,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/Components/ui/card';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { Spinner } from '@/shared/components/ui/Spinner';
-import {_getNotes} from '../../services/noteService';
+import {_getNotes} from '../../services/note.service';
 import {storageService} from '../../services/storage.service';
 import {Note} from '../../types/note.types';
 

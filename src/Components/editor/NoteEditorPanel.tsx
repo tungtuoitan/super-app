@@ -15,7 +15,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
-import { _createNote, _updateNote } from '@/services/noteService';
+import { _createNote, _updateNote } from '@/services/note.service';
 import {Note} from '@/types/note.types';
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
 import {Badge} from '../ui/badge';

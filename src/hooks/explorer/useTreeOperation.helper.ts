@@ -7,6 +7,9 @@ import type { TreeFolder } from './tree.helper';
 import { getAllFoldersFlattened, isDescendant, findFolderById } from './tree.helper';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useFolderDialogHelper } from './useFolderDialogHelper';
+import { useWorkspaceOperation } from './useWorkspaceOperation.helper';
+import { _upsertFolder } from '@/services/workspace.service';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useTreeOperation = () => {
     const {
@@ -14,9 +17,13 @@ export const useTreeOperation = () => {
         setSelectedFolderIds,
         setLastSelectedFolderId,
         setIsDragging,
+        currentTree,
+        setCurrentTree,
     } = useExplorerStore();
-
+    
+    const { auth } = useAuth();
     const { openFolderDialog } = useFolderDialogHelper();
+    const { loadTree } = useWorkspaceOperation();
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG
@@ -128,7 +135,56 @@ export const useTreeOperation = () => {
                 }
             }
 
+            // ================================================================
+            // API CALL: Update folders with new parent
+            // ================================================================
+            if (!currentTree?.workspaceId) {
+                console.error('❌ No workspace ID found');
+                setIsDragging(false);
+                return;
+            }
+
+            const workspaceId = currentTree.workspaceId;
+            const token = auth.userToken;
+
+            console.log('🔄 Calling API to update folders:', {
+                workspaceId,
+                folderIds,
+                newParentId: newParentId ?? null,
+            });
+
+            // Update each folder with new parentId
+            const updatePromises = folderIds.map(async (folderId) => {
+                const folder = getAllFoldersFlattened(treeData).find(t => t.data.id === folderId);
+                if (!folder) {
+                    console.warn(`⚠️ Folder ${folderId} not found in tree`);
+                    return;
+                }
+
+                try {
+                    const result = await _upsertFolder(token, workspaceId, {
+                        id: folderId,
+                        name: folder.data.name,
+                        parentId: newParentId ?? null,
+                        color: folder.data.color,
+                    });
+
+                    console.log(`✅ Folder ${folderId} updated:`, result);
+                    return result;
+                } catch (error) {
+                    console.error(`❌ Failed to update folder ${folderId}:`, error);
+                    throw error;
+                }
+            });
+
+            // Wait for all updates to complete
+            await Promise.all(updatePromises);
+
             console.log(`✅ Successfully batch moved ${folderIds.length} folder(s)`);
+
+            // Refresh tree to get updated data from backend
+            console.log('🔄 Refreshing tree...');
+            await loadTree(workspaceId);
 
             // VS Code behavior: Re-select the moved items after move completes
             setSelectedFolderIds(folderIds);
@@ -139,6 +195,8 @@ export const useTreeOperation = () => {
 
         } catch (error) {
             console.error('❌ Failed to move folder(s):', error);
+            // TODO: Show error toast to user
+            // TODO: Revert optimistic UI update
         } finally {
             setIsDragging(false);
         }

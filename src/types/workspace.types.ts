@@ -132,8 +132,11 @@ export interface MoveItemsRequest {
  * Maps to backend DeleteItemRequest
  */
 export interface DeleteItemRequest {
-    /** Workspace item ID to delete */
-    itemId: number;
+    /** Item ID to delete */
+    id: number;
+
+    /** Item type: 2 = folder, 3 = note, 4 = file */
+    type: 2 | 3 | 4;
 }
 
 /**

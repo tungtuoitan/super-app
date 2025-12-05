@@ -23,13 +23,16 @@ export const useContextMenuHelper = () => {
         setEditItemData,
     } = useContextMenuStore();
     
-    const { selectedFolderIds } = useExplorerStore();
+    const { 
+        selectedFolderIds, 
+        setSelectedFolderIds, 
+        setLastSelectedFolderId,
+        currentTree 
+    } = useExplorerStore();
     const { openFolderDialog } = useFolderDialogHelper();
-    const { setSelectedFolderIds, setLastSelectedFolderId } = useExplorerStore();
-    const CURRENT_WORKSPACE_ID = 1;
     
-    // TODO: Get workspaceTree from proper source (workspace service or context)
-    const workspaceTree: any = null; // Temporarily disabled
+    // Get current workspace ID from tree (fallback to 1 if not available)
+    const CURRENT_WORKSPACE_ID = currentTree?.workspaceId ?? 1;
     
         /**
          * Recursively collect all descendant tags (children, grandchildren, etc.)
@@ -47,24 +50,28 @@ export const useContextMenuHelper = () => {
             return descendants;
         }
     
-        /**
-         * Get all visible tag IDs in tree order (for VS Code-like navigation)
-         */
-        const getAllVisibleTagIds = (folders: Folder[]): number[] => {
-            const result: number[] = [];
-    
-        function traverse(nodes: Folder[]) {
+    /**
+     * Get all visible tag IDs in tree order (for VS Code-like navigation)
+     */
+    const getAllVisibleTagIds = (items: any[]): number[] => {
+        const result: number[] = [];
+
+        function traverse(nodes: any[]) {
             for (const node of nodes) {
-                result.push(node.id);
+                // Use childId for WorkspaceItem or id for Folder
+                const nodeId = node.childId || node.id;
+                if (nodeId) {
+                    result.push(nodeId);
+                }
                 if (node.children && node.children.length > 0) {
                     traverse(node.children);
                 }
             }
-        }            traverse(folders);
-            return result;
         }
-    
-
+        
+        traverse(items);
+        return result;
+    }
 
 
 
@@ -84,8 +91,8 @@ export const useContextMenuHelper = () => {
     
             // VS Code behavior: Find next item to select after deletion
             let nextFolderIdToSelect: number | null = null;
-            if (workspaceTree?.tags) {
-                const allVisibleFolderIds = getAllVisibleTagIds(workspaceTree.tags);
+            if (currentTree?.items) {
+                const allVisibleFolderIds = getAllVisibleTagIds(currentTree.items);
                 const currentIndex = allVisibleFolderIds.indexOf(folder.id);
     
                 if (currentIndex !== -1) {
@@ -117,33 +124,50 @@ export const useContextMenuHelper = () => {
             const deleteItems = async () => {
                 try {
                     const token = storageService.getString('token');
-                    if (!token) throw new Error('No authentication token');
+                    // if (!token) {
+                    //     console.error('❌ No authentication token found');
+                    //     alert('Authentication required. Please login again.');
+                    //     return;
+                    // }
 
                     console.log(`🗑️ Deleting ${foldersToDelete.length} workspace items:`,
-                        foldersToDelete.map(f => ({ name: f.name, itemId: f.itemId }))
+                        foldersToDelete.map(f => ({ name: f.name, id: f.itemId, type: 2 }))
                     );
 
-                    await _deleteWorkspaceItems(token, CURRENT_WORKSPACE_ID, {
-                        items: foldersToDelete.map(f => ({ itemId: f.itemId! })),
+                    console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items', {
+                        items: foldersToDelete.map(f => ({ id: f.itemId!, type: 2 as const })),
                         cascade: true
                     });
 
-                    console.log(`✅ Successfully removed ${foldersToDelete.length} folder(s) from workspace`);
+                    const result = await _deleteWorkspaceItems(token??'', CURRENT_WORKSPACE_ID, {
+                        items: foldersToDelete.map(f => ({ id: f.itemId!, type: 2 as const })),
+                        cascade: true
+                    });
 
-                    // VS Code behavior: Select next item after deletion
-                    if (nextFolderIdToSelect !== null) {
-                        setSelectedFolderIds([nextFolderIdToSelect]);
-                        setLastSelectedFolderId(nextFolderIdToSelect);
-                        console.log(`✅ Selected next item: ${nextFolderIdToSelect}`);
+                    console.log('✅ API response:', result);
+
+                    if (result.success) {
+                        console.log(`✅ Successfully removed ${foldersToDelete.length} folder(s) from workspace`);
+
+                        // VS Code behavior: Select next item after deletion
+                        if (nextFolderIdToSelect !== null) {
+                            setSelectedFolderIds([nextFolderIdToSelect]);
+                            setLastSelectedFolderId(nextFolderIdToSelect);
+                            console.log(`✅ Selected next item: ${nextFolderIdToSelect}`);
+                        } else {
+                            setSelectedFolderIds([]);
+                            setLastSelectedFolderId(null);
+                        }
+
+                        // Reload page to refresh tree
+                        window.location.reload();
                     } else {
-                        setSelectedFolderIds([]);
-                        setLastSelectedFolderId(null);
+                        console.error('❌ Delete failed:', result.message);
+                        alert(`Failed to delete folder: ${result.message}`);
                     }
-
-                    // Reload page or invalidate cache
-                    window.location.reload();
                 } catch (error) {
                     console.error(`❌ Failed to delete folders:`, error);
+                    alert(`Error deleting folder: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 }
             };
 
@@ -219,9 +243,9 @@ export const useContextMenuHelper = () => {
     const handleDeleteItem = (itemData: any, contextType: ContextMenuType) => {
         console.log('🗑️ Context Menu: Delete item clicked for:', itemData);
 
-        if (contextType === 'tag' && itemData) {
+        if ((contextType === 'tag' || contextType === 'folder') && itemData) {
             // Check if this is a workspace root node (negative ID)
-            if (itemData.tagId < 0) {
+            if (itemData.tagId < 0 || itemData.id < 0) {
                 console.warn('⚠️ Cannot delete workspace root node');
                 closeContextMenu();
                 return;
@@ -229,20 +253,18 @@ export const useContextMenuHelper = () => {
 
             closeContextMenu();
 
-            if (handleDeleteFolder) {
-                const selectedCount = selectedFolderIds.length;
-                const isMultipleSelected = selectedCount > 1;
+            const selectedCount = selectedFolderIds.length;
+            const isMultipleSelected = selectedCount > 1;
 
-                if (isMultipleSelected) {
-                    // Delete all selected folders
-                    console.log('🗑️ Deleting multiple folders:', selectedFolderIds);
-                    // For now, just delete the right-clicked folder
-                    // TODO: Implement bulk delete functionality
-                    handleDeleteFolder(itemData);
-                } else {
-                    // Delete single folder
-                    handleDeleteFolder(itemData);
-                }
+            if (isMultipleSelected) {
+                // Delete all selected folders
+                console.log('🗑️ Deleting multiple folders:', selectedFolderIds);
+                // TODO: Implement bulk delete functionality for multiple folders
+                // For now, delete the right-clicked folder
+                handleDeleteFolder(itemData);
+            } else {
+                // Delete single folder
+                handleDeleteFolder(itemData);
             }
         } else {
             closeContextMenu();

@@ -72,7 +72,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
      * Wrapper for handleDeleteItem with confirmation
      */
     const onDeleteItemClick = (event: any) => {
-        if (contextType === 'tag' && contextData) {
+        if (contextType === 'folder' && contextData) {
             // Check if this is a workspace root node (negative ID)
             if (contextData.tagId < 0) {
                 console.warn('⚠️ Cannot delete workspace root node');
@@ -82,7 +82,10 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
 
             closeContextMenu();
 
+            // Extract anchor element from menu event
             const nativeEvent = event.syntheticEvent || event;
+            const anchorElement = nativeEvent?.target as HTMLElement;
+            
             const selectedCount = selectedFolderIds.length;
             const isMultipleSelected = selectedCount > 1;
 
@@ -103,7 +106,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
             }
 
             deleteConfirmation.show({
-                event: nativeEvent,
+                anchorEl: anchorElement,
                 message,
                 onConfirm: () => {
                     handleDeleteItem(contextData, contextType);

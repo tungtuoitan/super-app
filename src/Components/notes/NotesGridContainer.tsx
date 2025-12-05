@@ -1,4 +1,4 @@
-import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
+import { ToolbarContainer } from '@/shared/components/ToolbarContainer';
 import { LegacyRef, CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 

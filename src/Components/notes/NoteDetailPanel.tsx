@@ -8,7 +8,7 @@ import { Textarea } from '@/Components/ui/textarea'
 import { Label } from '@/Components/ui/label'
 import { formatDate } from '@/utils/formatters'
 import { UpdateNoteDTO, Note } from '../../types/note.types'
-import { _getNoteById, _updateNote } from '../../services/noteService'
+import { _getNoteById, _updateNote } from '../../services/note.service'
 import { storageService } from '../../services/storage.service'
 
 interface NoteDetailPanelProps {

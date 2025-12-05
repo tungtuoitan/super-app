@@ -79,13 +79,29 @@ export function useConfirmationPopover(options: UseConfirmationPopoverOptions = 
     });
 
     const show = (params: {
-        event: React.MouseEvent<HTMLElement>;
+        event?: React.MouseEvent<HTMLElement> | MouseEvent | any;
+        anchorEl?: HTMLElement | null;
         message: string;
         onConfirm: () => void;
     }) => {
+        // Support both React events and native events
+        let anchor: HTMLElement | null = null;
+        
+        if (params.anchorEl) {
+            // Direct anchorEl provided
+            anchor = params.anchorEl;
+        } else if (params.event) {
+            // Try to extract anchor from event
+            if ('currentTarget' in params.event && params.event.currentTarget instanceof HTMLElement) {
+                anchor = params.event.currentTarget;
+            } else if ('target' in params.event && params.event.target instanceof HTMLElement) {
+                anchor = params.event.target;
+            }
+        }
+        
         setState({
             isOpen: true,
-            anchorEl: params.event.currentTarget,
+            anchorEl: anchor,
             message: params.message,
             onConfirm: params.onConfirm,
         });

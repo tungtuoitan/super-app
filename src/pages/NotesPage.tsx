@@ -4,10 +4,10 @@
  */
 
 import { ErrorBoundary } from '@/shared/components/feedback/ErrorBoundary';
-import { ToolbarContainer } from '@/shared/components/containers/ToolbarContainer';
+import { ToolbarContainer } from '@/shared/components/ToolbarContainer';
 import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
 import {NoteCreate} from '@/components/Notes/toolbars/NoteCreate';
-import {Grow} from '@/shared/components/styles/commonStyles';
+import {Grow} from '@/shared/styles/commonStyles';
 import {NoteSearch} from '@/components/Notes/toolbars/NoteSearch';
 import {NoteDeleteSelected} from '@/components/Notes/toolbars/NoteDeleteSelected';
 import {NoteFilter} from '@/components/Notes/toolbars/NoteFilter';

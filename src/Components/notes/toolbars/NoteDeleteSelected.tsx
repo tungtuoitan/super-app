@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Comp
 import { useSnackbar } from 'notistack';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
-import {_deleteNote} from '../../../services/noteService';
+import {_deleteNote} from '../../../services/note.service';
 import {storageService} from '../../../services/storage.service';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 

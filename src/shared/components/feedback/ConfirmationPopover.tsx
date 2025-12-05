@@ -10,6 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/Components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export interface ConfirmationPopoverProps {
     /** Whether the popover is open */
@@ -93,31 +94,22 @@ export function ConfirmationPopover({
     onCancel,
     onClose,
 }: ConfirmationPopoverProps) {
+    const { theme } = useTheme();
     const popoverRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = React.useState({ top: 0, left: 0 });
 
-    // Calculate position based on anchor element
+    // Calculate position - center screen
     useEffect(() => {
-        if (open && anchorEl && popoverRef.current) {
-            const anchorRect = anchorEl.getBoundingClientRect();
+        if (open && popoverRef.current) {
             const popoverRect = popoverRef.current.getBoundingClientRect();
             
-            let top = anchorRect.bottom + window.scrollY + 8; // 8px gap
-            let left = anchorRect.left + window.scrollX;
-
-            // Check if popover goes off right edge
-            if (left + popoverRect.width > window.innerWidth) {
-                left = window.innerWidth - popoverRect.width - 16;
-            }
-
-            // Check if popover goes off bottom edge
-            if (top + popoverRect.height > window.innerHeight + window.scrollY) {
-                top = anchorRect.top + window.scrollY - popoverRect.height - 8;
-            }
+            // Center horizontally and vertically
+            const top = (window.innerHeight - popoverRect.height) / 2 + window.scrollY;
+            const left = (window.innerWidth - popoverRect.width) / 2 + window.scrollX;
 
             setPosition({ top, left });
         }
-    }, [open, anchorEl]);
+    }, [open]);
 
     // Handle click outside
     useEffect(() => {
@@ -166,8 +158,11 @@ export function ConfirmationPopover({
             <div
                 ref={popoverRef}
                 className={cn(
-                    "fixed bg-white rounded-lg shadow-lg border border-gray-200",
-                    "px-4 py-3"
+                    "fixed rounded-lg shadow-lg border",
+                    "px-4 py-3",
+                    theme === 'dark' 
+                        ? 'bg-gray-800 border-gray-700 text-white' 
+                        : 'bg-white border-gray-200 text-gray-900'
                 )}
                 style={{
                     top: position.top,
@@ -176,8 +171,11 @@ export function ConfirmationPopover({
                     zIndex,
                 }}
             >
-                <p className="text-sm mb-3">{message}</p>
-                <hr className="border-gray-200 mb-3" />
+                <p className="text-sm mb-3 whitespace-pre-line">{message}</p>
+                <hr className={cn(
+                    "mb-3",
+                    theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+                )} />
                 <div className="flex justify-end gap-2">
                     <Button
                         size="sm"

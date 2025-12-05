@@ -13,7 +13,7 @@ import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import {Note} from '@/types/note.types';
 import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
-import {_getNotes} from '@/services/noteService';
+import {_getNotes} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
 
 /**
