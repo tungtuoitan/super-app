@@ -4,6 +4,7 @@
  */
 
 import { API_CONFIG } from '@/config/api.config';
+import type { ResultOptions, NoteDTO } from '@/types/note.types';
 
 /**
  * Get all notes with optional filtering
@@ -64,8 +65,14 @@ export const _getNotes = async (
     const res = await window.fetch(url, options);
 
     if (res.ok) {
-        const ret = await res.json();
-        return ret;
+        const result = await res.json() as ResultOptions<NoteDTO>;
+        
+        // Unwrap ResultOptions and return data array
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to fetch notes');
+        }
+        
+        return result.data || [];
     } else {
         return Promise.reject(res);
     }
@@ -97,8 +104,13 @@ export const _getNoteById = async (noteId: number) => {
     );
 
     if (res.ok) {
-        const ret = await res.json();
-        return ret;
+        const result = await res.json() as ResultOptions<NoteDTO>;
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to fetch note');
+        }
+        
+        return result.object; // Single object from 'object' field
     } else {
         return Promise.reject(res);
     }
@@ -142,8 +154,13 @@ export const _upsertNote = async (
     );
 
     if (res.ok) {
-        const ret = await res.json();
-        return ret;
+        const result = await res.json() as ResultOptions<NoteDTO>;
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to upsert note');
+        }
+        
+        return result.object; // Single object from 'object' field
     } else {
         return Promise.reject(res);
     }
@@ -184,8 +201,13 @@ export const _createNote = async (
     );
 
     if (res.ok) {
-        const ret = await res.json();
-        return ret;
+        const result = await res.json() as ResultOptions<NoteDTO>;
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to create note');
+        }
+        
+        return result.object; // Single object from 'object' field
     } else {
         return Promise.reject(res);
     }
@@ -230,8 +252,13 @@ export const _updateNote = async (
     );
 
     if (res.ok) {
-        const ret = await res.json();
-        return ret;
+        const result = await res.json() as ResultOptions<NoteDTO>;
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to update note');
+        }
+        
+        return result.object; // Single object from 'object' field
     } else {
         return Promise.reject(res);
     }
@@ -266,7 +293,13 @@ export const _deleteNote = async (
     );
 
     if (res.ok) {
-        return;
+        const result = await res.json() as ResultOptions;
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to delete note');
+        }
+        
+        return; // No data returned for delete
     } else {
         return Promise.reject(res);
     }
@@ -301,7 +334,13 @@ export const _undoDeleteNote = async (
     );
 
     if (res.ok) {
-        return;
+        const result = await res.json() as ResultOptions;
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to restore note');
+        }
+        
+        return; // No data returned for undo
     } else {
         return Promise.reject(res);
     }

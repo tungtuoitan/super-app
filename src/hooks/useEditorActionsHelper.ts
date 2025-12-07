@@ -49,6 +49,10 @@ export const useEditorActionsHelper = () => {
             const savedNote = await _upsertNote(token, upsertData);
             console.log('✅ Note saved successfully:', savedNote);
 
+            if (!savedNote) {
+                throw new Error('Failed to save note: No data returned from server');
+            }
+
             enqueueSnackbar(
                 isCreateMode ? 'Note created successfully' : 'Note saved successfully',
                 { variant: 'success' }

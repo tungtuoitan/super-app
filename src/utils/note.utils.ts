@@ -3,37 +3,38 @@
  * Helper functions for note data transformation and manipulation
  */
 
-import { Note } from '@/types/note.types';
+import { Note, NoteDTO } from '@/types/note.types';
 
 /**
- * Transform note data to ensure dates are Date objects
- * Handles both API responses (string dates) and already-transformed notes
+ * Transform NoteDTO from API to Note domain model
+ * Converts string dates to Date objects and maps tags to hashtags
  * 
- * @param note - Note data from API or store
- * @returns Note with Date objects for createdAt/updatedAt
+ * @param dto - Note DTO from API
+ * @returns Note domain model
  */
-export const transformNoteData = (note: Note): Note => {
+export const transformNoteData = (dto: NoteDTO): Note => {
     return {
-        ...note,
-        createdAt: note.createdAt instanceof Date 
-            ? note.createdAt 
-            : new Date(note.createdAt),
-        updatedAt: note.updatedAt 
-            ? (note.updatedAt instanceof Date 
-                ? note.updatedAt 
-                : new Date(note.updatedAt))
-            : undefined,
+        id: dto.id,
+        name: dto.name,
+        description: dto.description,
+        hashtags: dto.tags || [], // Map 'tags' from backend to 'hashtags' in domain model
+        tags: dto.tags, // Keep for backward compatibility
+        type: dto.type,
+        createdAt: new Date(dto.createdAt),
+        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
+        isArchived: dto.isArchived,
+        createdBy: dto.createdBy,
     };
 };
 
 /**
- * Transform array of notes
+ * Transform array of NoteDTOs from API to Note domain models
  * 
- * @param notes - Array of notes from API
- * @returns Array of notes with transformed dates
+ * @param dtos - Array of NoteDTOs from API
+ * @returns Array of Note domain models with transformed dates
  */
-export const transformNotesData = (notes: Note[]): Note[] => {
-    return notes.map(transformNoteData);
+export const transformNotesData = (dtos: NoteDTO[]): Note[] => {
+    return dtos.map(transformNoteData);
 };
 
 /**
