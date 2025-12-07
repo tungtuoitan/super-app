@@ -118,8 +118,8 @@ export function transformTreeItemToFolder(
     }
 
     const folder: Folder = {
-        id: item.id,          // ✅ Folder ID (from FolderItem.id)
-        itemId: item.itemId,  // Workspace relationship ID (for delete operations)
+        id: item.id,                      // ✅ Folder ID (from FolderItem.id)
+        relationshipId: item.relationshipId,  // Workspace relationship ID (for delete operations)
         name: item.name,
         color: item.color,
         createdAt: new Date(item.createdAt),
@@ -145,7 +145,7 @@ export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
                 folder && folder.id !== undefined && folder.id !== null
         )
         .map((folder) => ({
-            id: folder.itemId?.toString() || folder.id.toString(),
+            id: folder.relationshipId?.toString() || folder.id.toString(),
             name: folder.name || "Untitled",
             data: folder,
             // Always provide children array (empty if no children) to enable drop into nodes
@@ -294,8 +294,8 @@ export function createWorkspaceRootFolder(
         }
 
         return {
-            id: item.id,              // ✅ Folder ID (from FolderItem.id)
-            itemId: item.itemId,      // Workspace relationship ID (for delete operations)
+            id: item.id,                      // ✅ Folder ID (from FolderItem.id)
+            relationshipId: item.relationshipId,  // Workspace relationship ID (for delete operations)
             name: item.name,
             color: item.color,
             createdAt: new Date(item.createdAt),
@@ -334,15 +334,15 @@ export function transformToTreeData(
 
     // ================================================================
     // STEP 2: Transform backend response to frontend types
-    // Backend: {itemId, itemType: 'tag'/'note'/'file', childId}
-    // Frontend: {id, type: 'folder'/'note'/'file'}
+    // Backend: {id, type: 'folder'/'note'/'file', relationshipId}
+    // Frontend: {id, type: 'folder'/'note'/'file', relationshipId}
     // ================================================================
     console.log('🔍 transformToTreeData - Raw backend items:', JSON.stringify(data.items, null, 2));
     console.log('🔍 transformToTreeData - Backend items breakdown:', data.items.map((item: any) => ({
         name: item.name,
-        itemType: item.itemType,
-        itemId: item.itemId,
-        childId: item.childId,
+        type: item.type,
+        id: item.id,
+        relationshipId: item.relationshipId,
         parentId: item.parentId
     })));
 
@@ -351,7 +351,7 @@ export function transformToTreeData(
         name: item.name,
         type: item.type,
         id: item.id,
-        itemId: item.itemId,
+        relationshipId: item.relationshipId,
         parentId: item.parentId
     })));
 

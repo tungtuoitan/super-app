@@ -44,7 +44,7 @@ export interface Folder {
     parentId?: number | null; // Parent folder ID (null for root level)
 
     // Frontend-only properties for tree UI and backward compatibility
-    itemId?: number; // WorkspaceItems.item_id (when loaded from workspace tree)
+    relationshipId?: number; // workspace_items.id (workspace relationship ID for delete operations)
     children?: Folder[]; // Child folders for tree structure
     isExpanded?: boolean; // For tree UI state
     isArchived?: boolean; // Computed from isActive (!isActive)
@@ -103,10 +103,8 @@ export interface FolderTreeNode extends Folder {
 // Workspace Tree Item Response (from backend WorkspaceTreeItemResponse)
 // Polymorphic - can be Folder, Note, or File
 export interface WorkspaceTreeItemDTO {
-    id: number; // workspace_items.item_id (for deletion)
-    itemId: number; // workspace_items.item_id (alias for id)
+    id: number; // workspace_items.item_id === id of table folder/note/file
     childId: number; // Actual tag_id/note_id/file_id
-    itemType: 'Tag' | 'Note' | 'File'; // Backend value (kept for API compatibility)
     name: string;
     parentId?: number; // parent_tag_id (null for root items)
     label?: string;

@@ -47,7 +47,7 @@ export interface AddItemToWorkspaceRequest {
  * Maps to backend WorkspaceItemOperationResponse
  */
 export interface WorkspaceItemOperationResponse {
-    itemId: number;
+    relationshipId: number;  // workspace_items.id
     workspaceId: number;
     parentTagId: number | null;
     childType: string;
@@ -104,8 +104,8 @@ export type UpdateWorkspaceItemResponse = WorkspaceItem & {
  * Maps to backend MoveItemRequest
  */
 export interface MoveItemRequest {
-    /** Workspace item ID to move */
-    itemId: number;
+    /** Workspace relationship ID to move */
+    relationshipId: number;
     
     /** New parent folder ID (null for root level) */
     newParentTagId?: number | null;
@@ -270,9 +270,6 @@ export interface FileMetadata {
 interface BaseWorkspaceItem {
     /** Workspace relationship ID (workspace_items.id) - used for workspace-specific operations */
     relationshipId?: number;
-
-    /** Entity ID (kept for backward compatibility) - same as 'id' field */
-    itemId?: number;
 
     /** User ID owner */
     userId: number;

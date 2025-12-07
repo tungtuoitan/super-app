@@ -26,16 +26,16 @@ export function ActivityBar({ isSideBarVisible, onToggleSideBar }: ActivityBarPr
   const { activeView, navigateToView } = useNavigationStore()
 
   const handleActivityClick = (view: ActivityBarView) => {
+    // Do nothing if clicking the already active view
     if (activeView === view) {
-      // Toggle sidebar if clicking the same active view
+      return
+    }
+    
+    // Navigate to different view
+    navigateToView(view)
+    // Ensure sidebar is visible when switching views
+    if (!isSideBarVisible) {
       onToggleSideBar()
-    } else {
-      // Navigate to different view
-      navigateToView(view)
-      // Ensure sidebar is visible when switching views
-      if (!isSideBarVisible) {
-        onToggleSideBar()
-      }
     }
   }
 
