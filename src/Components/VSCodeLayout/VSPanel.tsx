@@ -103,7 +103,7 @@ function NoteDetailTab() {
 
   return (
     <div>
-      <h3 className="text-base font-semibold mb-2 text-editor-fg">
+      {/* <h3 className="text-base font-semibold mb-2 text-editor-fg">
         {selectedNote.name}
       </h3>
 
@@ -120,7 +120,7 @@ function NoteDetailTab() {
             Updated: {new Date(selectedNote.updatedAt).toLocaleString()}
           </span>
         )}
-      </div>
+      </div> */}
     </div>
   )
 }

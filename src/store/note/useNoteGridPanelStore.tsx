@@ -14,14 +14,14 @@ export interface PaginationState {
 
 export interface NoteGridPanelContextData {
     notes: Note[];
-    isLoading: boolean;
-    error: Error | null;
-    sorting: SortingState;
-    pagination: PaginationState;
     setNotes: Dispatch<SetStateAction<Note[]>>;
+    isLoading: boolean;
     setIsLoading: Dispatch<SetStateAction<boolean>>;
+    error: Error | null;
     setError: Dispatch<SetStateAction<Error | null>>;
+    sorting: SortingState;
     setSorting: Dispatch<SetStateAction<SortingState>>;
+    pagination: PaginationState;
     setPagination: Dispatch<SetStateAction<PaginationState>>;
     rowSelection: RowSelectionState;
     setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;

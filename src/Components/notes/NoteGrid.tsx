@@ -236,61 +236,24 @@ export function NoteGrid() {
         enableRowSelection: true,
     });
 
-    // Loading state
-    if (isLoading) {
-        return (
-            <div className="w-full h-full bg-background">
-                <div className="rounded-md border">
-                    <table className="w-full">
-                        <tbody>
-                            <tr>
-                                <td colSpan={columns.length} className="h-24 text-center">
-                                    <div className="flex items-center justify-center">
-                                        <Loader2 className="h-6 w-6 animate-spin" />
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        );
-    }
-
-    // Error state
-    if (error) {
-        return (
-            <Alert variant="destructive">
-                <AlertDescription>Failed to load notes: {error.message}</AlertDescription>
-            </Alert>
-        );
-    }
-
-    // Empty state
-    if (!notes || notes.length === 0) {
-        return (
-            <div className="w-full h-full bg-background">
-                <div className="rounded-md border">
-                    <table className="w-full">
-                        <tbody>
-                            <tr>
-                                <td colSpan={columns.length} className="h-24 text-center">
-                                    <div className="text-muted-foreground">
-                                        <h2 className="text-lg mb-2">No notes found</h2>
-                                        <p className="text-sm">Create your first note to get started</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        );
-    }
-
-
     return (
-        <div className="w-full h-full bg-background flex flex-col">
+        <div className="w-full h-full bg-background flex flex-col relative">
+            {/* Loading Overlay */}
+            {isLoading && (
+                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                </div>
+            )}
+
+            {/* Error Overlay */}
+            {error && (
+                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
+                    <Alert variant="destructive" className="max-w-md">
+                        <AlertDescription>Failed to load notes</AlertDescription>
+                    </Alert>
+                </div>
+            )}
+
             {/* Table */}
             <div className="flex-1 overflow-auto rounded-md border">
                 <table className="w-full">
