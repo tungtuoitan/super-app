@@ -4,9 +4,10 @@
  */
 
 import {Note} from "@/types/note.types";
+import {Ws} from "@/store/ws/useWsListStore";
 
 
-export type TabType = 'note' | 'tag' | 'settings';
+export type TabType = 'note' | 'tag' | 'settings' | 'workspace';
 
 /**
  * Tab-specific view state for preserving UI state across tab switches
@@ -44,7 +45,13 @@ export interface FolderTab extends BaseTab {
     // Folder data will be added later
 }
 
-export type EditorTab = NoteTab | FolderTab;
+export interface WorkspaceTab extends BaseTab {
+    type: 'workspace';
+    workspaceId: number;
+    workspace: Ws;
+}
+
+export type EditorTab = NoteTab | FolderTab | WorkspaceTab;
 
 export interface EditorState {
     openTabs: EditorTab[];

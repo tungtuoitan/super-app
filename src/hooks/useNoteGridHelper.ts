@@ -127,12 +127,14 @@ export const useNoteGridHelper = () => {
     
             // If row provided (clicked on a row)
             if (row) {
-                // If row is not selected, select only this row
+                // If row is not selected, add it to current selection
                 if (!row.getIsSelected()) {
-                    setRowSelection({ [row.id]: true });
-                    selectedIds = [parseInt(row.id)];
+                    // Add this row to existing selection
+                    setRowSelection({ ...rowSelection, [row.id]: true });
+                    // Include this row in selectedIds along with existing selection
+                    selectedIds = [...Object.keys(rowSelection).map(id => parseInt(id)), parseInt(row.id)];
                 } else {
-                    // Use current selection
+                    // Row already selected, use current selection
                     selectedIds = Object.keys(rowSelection).map(id => parseInt(id));
                 }
     

@@ -311,6 +311,91 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                     </>
                 );
             
+            case 'workspace-grid':
+                // Calculate selected count: if row clicked but not selected, count is 1
+                // Otherwise use the selectedIds from contextData
+                const wsGridSelectedCount = contextData?.selectedIds?.length || 0;
+                const wsGridIsMultiple = wsGridSelectedCount > 1;
+                const wsGridHasSelection = wsGridSelectedCount > 0;
+                
+                return (
+                    <>
+                        <MenuItem onClick={() => {
+                            if (contextData?.onAddWorkspace) {
+                                closeContextMenu();
+                                contextData.onAddWorkspace();
+                            }
+                        }}>
+                            <AddIcon className="w-4 h-4 mr-2" />
+                            Add Workspace
+                        </MenuItem>
+                        
+                        <MenuDivider />
+                        
+                        {/* Soft Delete */}
+                        <MenuItem 
+                            onClick={(event) => {
+                                if (contextData?.onDelete) {
+                                    closeContextMenu();
+
+                                    // Extract anchor element from menu event
+                                    const nativeEvent = event.syntheticEvent || event;
+                                    const anchorElement = nativeEvent?.target as HTMLElement;
+
+                                    const message = wsGridIsMultiple
+                                        ? `Are you sure you want to delete ${wsGridSelectedCount} selected workspaces?\n\n⚠️ This will also delete ALL folders, notes, and files in these workspaces.\n\nThis action cannot be undone.`
+                                        : `Are you sure you want to delete this workspace?\n\n⚠️ This will also delete ALL folders, notes, and files in this workspace.\n\nThis action cannot be undone.`;
+
+                                    deleteConfirmation.show({
+                                        anchorEl: anchorElement,
+                                        message,
+                                        onConfirm: () => {
+                                            contextData.onDelete(false);
+                                        }
+                                    });
+                                }
+                            }}
+                            disabled={!wsGridHasSelection}
+                        >
+                            <DeleteIcon className="w-4 h-4 mr-2" />
+                            Delete
+                        </MenuItem>
+                        
+                        {/* Hard Delete */}
+                        <MenuItem 
+                            onClick={(event) => {
+                                if (contextData?.onDelete) {
+                                    closeContextMenu();
+
+                                    // Extract anchor element from menu event
+                                    const nativeEvent = event.syntheticEvent || event;
+                                    const anchorElement = nativeEvent?.target as HTMLElement;
+
+                                    const message = wsGridIsMultiple
+                                        ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${wsGridSelectedCount} selected workspaces and ALL their contents (folders, notes, files).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`
+                                        : `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete this workspace and ALL its contents (folders, notes, files).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+
+                                    deleteConfirmation.show({
+                                        anchorEl: anchorElement,
+                                        message,
+                                        onConfirm: () => {
+                                            // Hard delete flag
+                                            if (contextData?.onDelete) {
+                                                contextData.onDelete(true);
+                                            }
+                                        }
+                                    });
+                                }
+                            }}
+                            className="text-red-600 hover:bg-red-50"
+                            disabled={!wsGridHasSelection}
+                        >
+                            <HardDeleteIcon className="w-4 h-4 mr-2" />
+                            Hard Delete
+                        </MenuItem>
+                    </>
+                );
+            
             default:
                 return (
                     <>

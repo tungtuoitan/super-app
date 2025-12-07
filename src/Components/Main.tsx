@@ -14,6 +14,8 @@ import {DialogProvider} from '@/store/index';
 import {NoteUIProvider} from '@/store/note/useNoteUIStore';
 import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanelStore';
 import { NavProvider } from '@/contexts/NavigationContext';
+import { WsListProvider } from '@/store/ws/useWsListStore';
+import { WsUIProvider } from '@/store/ws/useWsUIStore';
 
 
 /**
@@ -45,19 +47,23 @@ export function Main() {
                         <AuthStoreProvider>
                             <ExplorerProvider>
                                 <FolderDialogProvider>
-                                    <NoteUIProvider>
-                                        <NoteGridPanelProvider>
-                                            <EditorTabProvider>
-                                                <DialogProvider>
-                                                    <ContextMenuStoreProvider>
-                                                        <ContextMenu>
-                                                            <MainNav />
-                                                        </ContextMenu>
-                                                    </ContextMenuStoreProvider>
-                                                </DialogProvider>
-                                            </EditorTabProvider>
-                                        </NoteGridPanelProvider>
-                                    </NoteUIProvider>
+                                    <WsListProvider>
+                                        <WsUIProvider>
+                                            <NoteUIProvider>
+                                                <NoteGridPanelProvider>
+                                                    <EditorTabProvider>
+                                                        <DialogProvider>
+                                                            <ContextMenuStoreProvider>
+                                                                <ContextMenu>
+                                                                    <MainNav />
+                                                                </ContextMenu>
+                                                            </ContextMenuStoreProvider>
+                                                        </DialogProvider>
+                                                    </EditorTabProvider>
+                                                </NoteGridPanelProvider>
+                                            </NoteUIProvider>
+                                        </WsUIProvider>
+                                    </WsListProvider>
                                 </FolderDialogProvider>
                             </ExplorerProvider>
                         </AuthStoreProvider>

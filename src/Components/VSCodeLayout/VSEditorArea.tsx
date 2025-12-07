@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { useEditorTabsStore, NoteEditorPanel, ConfirmCloseDialog } from '@/Components/Editor'
 import {useEditorTabHelper} from '@/hooks/useEditorTabHelper'
 import {useNoteUIStore} from '@/store/note/useNoteUIStore'
+import { WsEditorPanel } from '@/Components/Workspace'
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -90,6 +91,7 @@ export function VSEditorArea() {
           // Render appropriate editor based on tab type
           <>
             {activeTab.type === 'note' && <NoteEditorPanel tab={activeTab} />}
+            {activeTab.type === 'workspace' && <WsEditorPanel tab={activeTab} />}
             {activeTab.type === 'tag' && (
               <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
                 <p className="text-base">Folder editor coming soon...</p>

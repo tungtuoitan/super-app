@@ -97,10 +97,10 @@ export const useEditorTabHelper = () => {
         const tab = openTabs.find(t => t.id === tabId);
         
         // If tab has unsaved changes and not forcing close, show confirm dialog
-        if (tab?.hasUnsavedChanges && !force) {
-            setConfirmCloseTabId(tabId);
-            return;
-        }
+        // if (tab?.hasUnsavedChanges && !force) {
+        //     setConfirmCloseTabId(tabId);
+        //     return;
+        // }
 
         // Filter out the closed tab
         const newTabs = openTabs.filter(t => t.id !== tabId);
