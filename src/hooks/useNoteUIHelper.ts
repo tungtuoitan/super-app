@@ -91,7 +91,7 @@ export const useNoteUIHelper = () => {
         } else {
             // For existing notes, compare with original
             if (originalNoteRef.current) {
-                const fieldsToCheck: (keyof Note)[] = ['name', 'description', 'type', 'tags', 'isArchived'];
+                const fieldsToCheck: (keyof Note)[] = ['name', 'description', 'type', 'tags'];
 
                 const hasChanges = fieldsToCheck.some((key) => {
                     const originalValue = originalNoteRef.current![key];

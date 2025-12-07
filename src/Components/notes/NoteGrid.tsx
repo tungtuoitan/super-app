@@ -53,6 +53,12 @@ export function NoteGrid() {
 
     useEffect(() => {
         loadNotes();
+        
+        // Set default filter to Active Only
+        const deletedAtColumn = table.getColumn('deletedAt');
+        if (deletedAtColumn && !columnFilters.length) {
+            deletedAtColumn.setFilterValue('null');
+        }
     }, []);
 
     // Helper to get badge variant by type
@@ -103,7 +109,7 @@ export function NoteGrid() {
             {
                 accessorKey: 'id',
                 header: () => (
-                    <div className="text-center">ID</div>
+                    <div className="text-center text-sm">ID</div>
                 ),
                 size: 30,
                 cell: ({ getValue }) => (
@@ -115,7 +121,7 @@ export function NoteGrid() {
             {
                 accessorKey: 'name',
                 header: () => (
-                    <div className="text-left">Note Name</div>
+                    <div className="text-left text-sm">Note Name</div>
                 ),
                 size: 300,
                 cell: ({ getValue, row }) => (
@@ -204,16 +210,33 @@ export function NoteGrid() {
             //     ),
             // },
             {
-                accessorKey: 'isArchived',
-                header: 'Status',
-                size: 100,
-                enableHiding: true,
+                accessorKey: 'deletedAt',
+                header: () => (
+                    <div className="text-center text-sm">Status</div>
+                ),
+                size: 60,
+                enableSorting: true,
+                filterFn: (row, columnId, filterValue) => {
+                    const deletedAt = row.original.deletedAt;
+                    if (filterValue === 'null') {
+                        return deletedAt === null || deletedAt === undefined;
+                    }
+                    if (filterValue === 'notNull') {
+                        return deletedAt !== null && deletedAt !== undefined;
+                    }
+                    return true; // 'all' - show everything
+                },
                 cell: ({ getValue }) => {
-                    const isArchived = getValue() as boolean;
+                    const deletedAt = getValue() as Date | null | undefined;
+                    
+                    if (!deletedAt) {
+                        return null;
+                    }
+                    
                     return (
-                        <Badge variant={isArchived ? 'outline' : 'default'}>
-                            {isArchived ? 'Archived' : 'Active'}
-                        </Badge>
+                        <div className="flex items-center justify-center" title="Deleted">
+                            <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                        </div>
                     );
                 }
             }
@@ -238,7 +261,6 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
             pagination,
             rowSelection,
             columnFilters,
-            columnVisibility: { isArchived: false },
         },
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
@@ -317,7 +339,7 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
                                 key={row.id}
                                 data-row
                                 className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${
-                                    row.original.isArchived ? 'opacity-60' : ''
+                                    row.original.deletedAt ? 'opacity-60' : ''
                                 }`}
                                 onClick={() => openNoteTab(row.original)}
                                 onContextMenu={(e) => handleContextMenu(e, row)}

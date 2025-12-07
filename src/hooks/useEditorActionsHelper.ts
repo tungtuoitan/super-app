@@ -42,7 +42,6 @@ export const useEditorActionsHelper = () => {
                 description: selectedNote.description,
                 tags: selectedNote.tags?.map((tag: any) => tag.tagId),
                 type: selectedNote.type,
-                isArchived: selectedNote.isArchived,
             };
 
             console.log(`📝 ${isCreateMode ? 'Creating' : 'Updating'} note with data:`, upsertData);

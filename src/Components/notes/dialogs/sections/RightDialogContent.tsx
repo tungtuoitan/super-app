@@ -27,8 +27,8 @@ export function RightDialogContent() {
                     <CardTitle className="text-base">Status</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Badge variant={selectedNote?.isArchived ? 'secondary' : 'default'}>
-                        {selectedNote?.isArchived ? 'Archived' : 'Active'}
+                    <Badge variant={selectedNote?.deletedAt ? 'destructive' : 'default'}>
+                        {selectedNote?.deletedAt ? 'Deleted' : 'Active'}
                     </Badge>
                 </CardContent>
             </Card>
@@ -50,17 +50,10 @@ export function RightDialogContent() {
                             </Button>
                             <Button 
                                 variant="outline" 
-                                className="w-full text-warning"
-                                onClick={() => console.log('Archive note')}
-                            >
-                                {selectedNote?.isArchived ? 'Unarchive' : 'Archive'}
-                            </Button>
-                            <Button 
-                                variant="outline" 
                                 className="w-full text-destructive hover:text-destructive"
                                 onClick={() => console.log('Delete note')}
                             >
-                                Delete
+                                {selectedNote?.deletedAt ? 'Restore' : 'Delete'}
                             </Button>
                         </>
                     )}

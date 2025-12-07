@@ -21,7 +21,7 @@ export function NoteGridFilterPopup({
     columnFilters,
     onClearFilters 
 }: NoteGridFilterPopupProps) {
-    const currentFilter = table.getColumn('isArchived')?.getFilterValue();
+    const currentFilter = table.getColumn('deletedAt')?.getFilterValue();
     const hasFilters = columnFilters.length > 0;
 
     const filterOptions = [
@@ -30,30 +30,42 @@ export function NoteGridFilterPopup({
             label: 'All Notes',
             icon: Filter,
             color: 'text-muted-foreground',
+            description: 'Show all notes',
         },
         {
             value: 'active',
             label: 'Active Only',
             icon: CheckCircle2,
             color: 'text-green-500',
+            description: 'Not deleted',
         },
         {
-            value: 'archived',
-            label: 'Archived Only',
+            value: 'deleted',
+            label: 'Deleted Only',
             icon: Archive,
-            color: 'text-orange-500',
+            color: 'text-red-500',
+            description: 'Deleted notes',
         },
     ];
 
     const handleFilterChange = (value: string) => {
-        table.getColumn('isArchived')?.setFilterValue(
-            value === 'all' ? undefined : value === 'active' ? false : true
-        );
+        const deletedAtColumn = table.getColumn('deletedAt');
+        
+        if (value === 'active') {
+            // Active = not deleted (deletedAt is null)
+            deletedAtColumn?.setFilterValue('null');
+        } else if (value === 'deleted') {
+            // Deleted = has deletedAt value
+            deletedAtColumn?.setFilterValue('notNull');
+        } else {
+            // 'all' = no filter (show everything)
+            deletedAtColumn?.setFilterValue(undefined);
+        }
     };
 
     const getCurrentFilterValue = () => {
         if (currentFilter === undefined) return 'all';
-        return currentFilter === false ? 'active' : 'archived';
+        return currentFilter === 'null' ? 'active' : 'deleted';
     };
 
     return (

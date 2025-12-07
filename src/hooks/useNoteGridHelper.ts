@@ -57,7 +57,6 @@ export const useNoteGridHelper = () => {
             type: 'idea',
             createdAt: new Date(),
             updatedAt: new Date(),
-            isArchived: false,
             createdBy: 'You',
         };
 

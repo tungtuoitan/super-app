@@ -157,20 +157,7 @@ export function NoteDetailDialogContent() {
                             size="small"
                         />
 
-                        {/* Status */}
-                        <GenericAutoComplete
-                            value={selectedNote?.isArchived ? { id: 'archived', label: 'Archived', desc: 'Archived', active: true } : { id: 'active', label: 'Active', desc: 'Active', active: true }}
-                            onChange={(event, newValue) => handleFieldChange('isArchived', newValue?.id === 'archived')}
-                            allOptions={[
-                                { id: 'active', label: 'Active', desc: 'Active', active: true },
-                                { id: 'archived', label: 'Archived', desc: 'Archived', active: true },
-                            ]}
-                            inputProps={{
-                                name: 'status',
-                                label: 'Status',
-                                required: false,
-                            }}
-                        />
+                        {/* Status field removed - using deletedAt instead */}
 
                         {/* HashTags */}
                         <div className="space-y-2">

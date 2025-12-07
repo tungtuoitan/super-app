@@ -22,7 +22,6 @@ export const NoteCreate = () => {
             createdBy: '',
             createdAt: new Date(),
             updatedAt: new Date(),
-            isArchived: false,
         };
         
         openDialog(newNote);

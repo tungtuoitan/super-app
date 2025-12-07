@@ -33,7 +33,7 @@ export const NOTE_TYPES: readonly NoteType[] = [
 ] as const;
 
 // Domain Model (what we use in the app)
-// Backend returns: Id, Name, Description, Tags, Type, CreatedAt, UpdatedAt, IsArchived
+// Backend returns: Id, Name, Description, Tags, Type, CreatedAt, UpdatedAt, DeletedAt
 export interface Note {
     id: number;
     name: string;
@@ -43,7 +43,7 @@ export interface Note {
     type?: string; // Changed from NoteType to string to match backend
     createdAt: Date;
     updatedAt?: Date;
-    isArchived: boolean;
+    deletedAt?: Date; // Track if note is deleted (soft delete)
     createdBy?: string; // Optional - may be removed from backend response for security
 }
 
@@ -57,7 +57,7 @@ export interface NoteDTO {
     type?: string; // String type to match backend response
     createdAt: string; // ISO string
     updatedAt?: string; // ISO string
-    isArchived: boolean;
+    deletedAt?: string; // ISO string (nullable DateTime from backend)
     createdBy?: string; // Optional - may be removed from backend response for security
 }
 

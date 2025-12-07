@@ -28,7 +28,7 @@ const transformNoteResponse = (noteResponse: NoteResponse): Note => ({
     createdBy: noteResponse.createdBy,
     createdAt: new Date(noteResponse.createdAt),
     updatedAt: noteResponse.updatedAt ? new Date(noteResponse.updatedAt) : undefined,
-    isArchived: noteResponse.isArchived,
+    deletedAt: noteResponse.deletedAt ? new Date(noteResponse.deletedAt) : undefined,
 });
 
 export const notesApi = {
