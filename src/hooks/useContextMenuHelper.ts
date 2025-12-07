@@ -9,6 +9,7 @@ import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
+import { _deleteNote } from '@/services/note.service';
 import { storageService } from '@/services/storage.service';
 
 
@@ -370,6 +371,36 @@ export const useContextMenuHelper = () => {
     };
 
     /**
+     * Handle delete note action
+     */
+    const handleDeleteNote = async (noteData: any) => {
+        console.log('🗑️ Deleting note:', noteData);
+
+        if (!noteData?.noteId) {
+            console.error('❌ Cannot delete note: missing noteId');
+            alert('Cannot delete note: missing note information');
+            return;
+        }
+
+        try {
+            const token = storageService.getString('token');
+
+            console.log(`🗑️ Deleting note ID: ${noteData.noteId}`, noteData.name);
+            console.log('📤 Calling API: DELETE /api/Notes/${noteData.noteId}');
+
+            await _deleteNote(token ?? '', noteData.noteId.toString());
+
+            console.log('✅ Successfully deleted note');
+
+            // Reload page to refresh data
+            window.location.reload();
+        } catch (error) {
+            console.error('❌ Failed to delete note:', error);
+            alert(`Error deleting note: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    };
+
+    /**
      * Handle delete item action
      */
     const handleDeleteItem = (itemData: any, contextType: ContextMenuType) => {
@@ -396,6 +427,10 @@ export const useContextMenuHelper = () => {
                 // Delete single folder
                 handleDeleteFolder(itemData);
             }
+        } else if (contextType === 'note' && itemData) {
+            // Handle note deletion
+            closeContextMenu();
+            handleDeleteNote(itemData);
         } else {
             closeContextMenu();
         }

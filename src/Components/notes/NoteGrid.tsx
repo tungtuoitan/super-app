@@ -255,7 +255,17 @@ export function NoteGrid() {
             )}
 
             {/* Table */}
-            <div className="flex-1 overflow-auto rounded-md border">
+            <div 
+                className="flex-1 overflow-auto rounded-md border"
+                onContextMenu={(e) => {
+                    // Only show context menu if clicking on empty area (not on a row)
+                    const target = e.target as HTMLElement;
+                    const isClickedOnRow = target.closest('tr[data-row]');
+                    if (!isClickedOnRow) {
+                        handleContextMenu(e);
+                    }
+                }}
+            >
                 <table className="w-full">
                     <thead className="bg-muted/50 sticky top-0 z-10">
                         {table.getHeaderGroups().map(headerGroup => (
@@ -281,6 +291,7 @@ export function NoteGrid() {
                         {table.getRowModel().rows.map(row => (
                             <tr
                                 key={row.id}
+                                data-row
                                 className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${
                                     row.original.isArchived ? 'opacity-60' : ''
                                 }`}

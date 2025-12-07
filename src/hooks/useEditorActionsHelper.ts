@@ -28,13 +28,14 @@ export const useEditorActionsHelper = () => {
             return null;
         }
 
-        const isCreateMode = selectedNote.noteId === 0;
+        // Check if it's a new note (noteId === 0 or negative)
+        const isCreateMode = selectedNote.noteId <= 0;
         const token = storageService.getString('token') || '';
 
         try {
             // Upsert data - works for both create and update
             const upsertData: UpsertNoteDTO = {
-                noteId: selectedNote.noteId, // 0 = create, >0 = update
+                noteId: isCreateMode ? 0 : selectedNote.noteId, // Always use 0 for create
                 name: selectedNote.name,
                 description: selectedNote.description,
                 tags: selectedNote.tags?.map((tag: any) => tag.tagId),

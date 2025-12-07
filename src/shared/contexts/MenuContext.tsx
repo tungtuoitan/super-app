@@ -85,7 +85,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
             // Extract anchor element from menu event
             const nativeEvent = event.syntheticEvent || event;
             const anchorElement = nativeEvent?.target as HTMLElement;
-            
+
             const selectedCount = selectedFolderIds.length;
             const isMultipleSelected = selectedCount > 1;
 
@@ -104,6 +104,23 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                     ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child folder(s).`
                     : `Are you sure you want to delete "${contextData.name}"?`;
             }
+
+            deleteConfirmation.show({
+                anchorEl: anchorElement,
+                message,
+                onConfirm: () => {
+                    handleDeleteItem(contextData, contextType);
+                }
+            });
+        } else if (contextType === 'note' && contextData) {
+            // Handle note deletion with confirmation
+            closeContextMenu();
+
+            // Extract anchor element from menu event
+            const nativeEvent = event.syntheticEvent || event;
+            const anchorElement = nativeEvent?.target as HTMLElement;
+
+            const message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
 
             deleteConfirmation.show({
                 anchorEl: anchorElement,
@@ -187,10 +204,37 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                 
                 return (
                     <>
+                        <MenuItem onClick={() => {
+                            if (contextData?.onAddNote) {
+                                closeContextMenu();
+                                contextData.onAddNote();
+                            }
+                        }}>
+                            <AddIcon className="w-4 h-4 mr-2" />
+                            Add Note
+                        </MenuItem>
+                        
+                        <MenuDivider />
+                        
                         <MenuItem onClick={(event) => {
                             if (contextData?.onDelete) {
                                 closeContextMenu();
-                                contextData.onDelete();
+
+                                // Extract anchor element from menu event
+                                const nativeEvent = event.syntheticEvent || event;
+                                const anchorElement = nativeEvent?.target as HTMLElement;
+
+                                const message = noteGridIsMultiple
+                                    ? `Are you sure you want to delete ${noteGridSelectedCount} selected notes?\n\nThis action cannot be undone.`
+                                    : `Are you sure you want to delete this note?\n\nThis action cannot be undone.`;
+
+                                deleteConfirmation.show({
+                                    anchorEl: anchorElement,
+                                    message,
+                                    onConfirm: () => {
+                                        contextData.onDelete();
+                                    }
+                                });
                             }
                         }}>
                             <DeleteIcon className="w-4 h-4 mr-2" />
