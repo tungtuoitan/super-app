@@ -1,11 +1,13 @@
 /**
  * Navigation Context
  * Global navigation state management for sidebar navigation, body wrapper, 
- * and selected menu items across the application
+ * routing, and selected menu items across the application
  */
 
-import { createContext, useContext, useState, useRef } from 'react';
+import { createContext, useContext, useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { PropsWithChildren } from 'react';
+import { ROUTE_TO_VIEW, VIEW_TO_ROUTE, type ActivityBarView } from '@/config/routes';
 
 /**
  * Navigation context interface defining the shape of navigation state and actions
@@ -18,6 +20,8 @@ export interface NavigationContextValue {
     toggleNavigation: () => void;
     selectedItemId: string | null;
     setSelectedItemId: (id: string) => void;
+    activeView: ActivityBarView;
+    navigateToView: (view: ActivityBarView) => void;
 }
 
 export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
@@ -28,6 +32,8 @@ export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
     toggleNavigation: () => {},
     selectedItemId: null,
     setSelectedItemId: () => {},
+    activeView: 'explorer',
+    navigateToView: () => {},
 };
 
 const NavigationContext = createContext<NavigationContextValue>(
@@ -49,16 +55,36 @@ export const useNavigationStore = () => {
 
 /**
  * Navigation provider component that manages navigation state for the entire application
- * Provides sidebar expansion state, navigation references, and selected menu item tracking
+ * Provides sidebar expansion state, navigation references, routing integration,
+ * and selected menu item tracking
  */
 export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const sideNavigationRef = useRef<HTMLDivElement | null>(null);
     const bodyWrapperRef = useRef<HTMLDivElement>(null);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+    const [activeView, setActiveView] = useState<ActivityBarView>('explorer');
+    
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Sync activeView with current route
+    useEffect(() => {
+        const view = ROUTE_TO_VIEW[location.pathname];
+        if (view && view !== activeView) {
+            setActiveView(view);
+        }
+    }, [location.pathname]);
 
     const toggleNavigation = () => {
         setExpanded((prev) => !prev);
+    };
+
+    const navigateToView = (view: ActivityBarView) => {
+        const route = VIEW_TO_ROUTE[view];
+        if (route && location.pathname !== route) {
+            navigate(route);
+        }
     };
 
     return (
@@ -71,6 +97,8 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
                 toggleNavigation,
                 selectedItemId,
                 setSelectedItemId,
+                activeView,
+                navigateToView,
             }}
         >
             {children}

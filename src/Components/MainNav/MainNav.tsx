@@ -1,9 +1,10 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { VSCodeLayout } from '../VSCodeLayout';
 import {useContextMenuHelper} from '@/hooks/useContextMenuHelper';
+import { APP_ROUTES } from '@/config/routes';
 
 /**
  * Main navigation component.
@@ -14,8 +15,11 @@ import {useContextMenuHelper} from '@/hooks/useContextMenuHelper';
  * - Main content area with routing
  * - VSCode-style layout with integrated sidebar
  * 
- * The sidebar (Explorer, Tags, Notes) is now integrated into the VSCodeLayout
- * component, removing the need for a separate side menu.
+ * Routes:
+ * - /explorer: Explorer view (folder tree)
+ * - /workspace: Workspace view
+ * - /notes: Notes list view
+ * - /: Redirects to /explorer
  * 
  * @returns The main navigation layout component
  */
@@ -47,8 +51,10 @@ export default function MainNav() {
                         className="w-full h-[calc(100vh-36px)]"
                     >
                         <Routes>
-                            <Route path="/" element={<VSCodeLayout />} />
-                            <Route path="/notes" element={<VSCodeLayout />} />
+                            <Route path={APP_ROUTES.HOME} element={<Navigate to={APP_ROUTES.EXPLORER} replace />} />
+                            <Route path={APP_ROUTES.EXPLORER} element={<VSCodeLayout />} />
+                            <Route path={APP_ROUTES.WORKSPACE} element={<VSCodeLayout />} />
+                            <Route path={APP_ROUTES.NOTES} element={<VSCodeLayout />} />
                         </Routes>
                     </div>
                 </div>

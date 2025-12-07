@@ -13,6 +13,7 @@ import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import {NoteUIProvider} from '@/store/note/useNoteUIStore';
 import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanelStore';
+import { NavProvider } from '@/contexts/NavigationContext';
 
 
 /**
@@ -38,29 +39,31 @@ import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanelStore';
 export function Main() {
     return (
         <BrowserRouter>
-            <SnackbarProvider autoHideDuration={3000}>
-                <DndProvider backend={HTML5Backend}>
-                    <AuthStoreProvider>
-                        <ExplorerProvider>
-                            <FolderDialogProvider>
-                                <NoteUIProvider>
-                                    <NoteGridPanelProvider>
-                                        <EditorTabProvider>
-                                            <DialogProvider>
-                                                <ContextMenuStoreProvider>
-                                                    <ContextMenu>
-                                                        <MainNav />
-                                                    </ContextMenu>
-                                                </ContextMenuStoreProvider>
-                                            </DialogProvider>
-                                        </EditorTabProvider>
-                                    </NoteGridPanelProvider>
-                                </NoteUIProvider>
-                            </FolderDialogProvider>
-                        </ExplorerProvider>
-                    </AuthStoreProvider>
-                </DndProvider>
-            </SnackbarProvider>
+            <NavProvider>
+                <SnackbarProvider autoHideDuration={3000}>
+                    <DndProvider backend={HTML5Backend}>
+                        <AuthStoreProvider>
+                            <ExplorerProvider>
+                                <FolderDialogProvider>
+                                    <NoteUIProvider>
+                                        <NoteGridPanelProvider>
+                                            <EditorTabProvider>
+                                                <DialogProvider>
+                                                    <ContextMenuStoreProvider>
+                                                        <ContextMenu>
+                                                            <MainNav />
+                                                        </ContextMenu>
+                                                    </ContextMenuStoreProvider>
+                                                </DialogProvider>
+                                            </EditorTabProvider>
+                                        </NoteGridPanelProvider>
+                                    </NoteUIProvider>
+                                </FolderDialogProvider>
+                            </ExplorerProvider>
+                        </AuthStoreProvider>
+                    </DndProvider>
+                </SnackbarProvider>
+            </NavProvider>
         </BrowserRouter>
     );
 }

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Panel, PanelGroup } from 'react-resizable-panels'
-import { ActivityBar, type ActivityBarView } from './ActivityBar'
+import { ActivityBar } from './ActivityBar'
 import { VSCodeResizeHandle } from './VSCodeResizeHandle'
 import { VSSideBar } from './VSSideBar'
 import { VSPanel } from './VSPanel'
 import { StatusBar } from './StatusBar' 
 import {VSEditorArea} from './VSEditorArea'
+import { useNavigationStore } from '@/contexts/NavigationContext'
 
 interface VSCodeLayoutProps {
   className?: string
@@ -15,12 +16,17 @@ interface VSCodeLayoutProps {
  * VSCodeLayout - VS Code style layout with resizable panels
  * 
  * Layout structure:
- * - ActivityBar (left, fixed 48px): View selector (Explorer/Folders/Notes)
- * - SideBar (resizable 5-40%): FolderTree for Explorer/Folders views, Notes list for Notes view
+ * - ActivityBar (left, fixed 48px): View selector (Explorer/Workspace/Notes)
+ * - SideBar (resizable 5-40%): FolderTree for Explorer/Workspace views, Notes list for Notes view
  * - EditorArea (resizable): NoteGrid (main notes list)
  *   - Future: Will use react-mosaic for multi-editor drag & drop support
  * - Panel (bottom, resizable 5-60%): NoteDetail and Properties tabs
  * - StatusBar (bottom, fixed): Application status information
+ * 
+ * Navigation:
+ * - Routes: /explorer, /workspace, /notes
+ * - URL-first: Browser back/forward work automatically
+ * - ActiveView synced with URL via NavigationContext
  * 
  * Resize features:
  * - Horizontal: SideBar width (Ctrl+B to toggle)
@@ -30,30 +36,14 @@ interface VSCodeLayoutProps {
  * - Re-expandable: Drag resize handle to restore collapsed panels (like VSCode)
  * - Minimum size: 5% before collapse triggers
  * 
- * Future enhancements:
- * - EditorArea will use react-mosaic for drag & drop multi-note editing
- * - Support split view, tab management, and editor groups
- * 
  * ✨ MIGRATION STATUS: MUI → shadcn/ui + Tailwind
  * - Main layout: ✅ Migrated to Tailwind
  * - Sub-components: ⏳ Still using MUI (will migrate incrementally)
  */
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
-  // View state - Explorer, Folders, Notes
-  const [activeView, setActiveView] = useState<ActivityBarView>('explorer')
+  const { activeView } = useNavigationStore()
   const [isSideBarVisible, setIsSideBarVisible] = useState(true)
   const [isPanelVisible, setIsPanelVisible] = useState(true)
-
-  // Handle activity bar view changes
-  const handleViewChange = (view: ActivityBarView) => {
-    if (activeView === view) {
-      // Toggle sidebar if clicking the same view
-      setIsSideBarVisible(!isSideBarVisible)
-    } else {
-      setActiveView(view)
-      setIsSideBarVisible(true)
-    }
-  }
 
   return (
     <div
@@ -67,8 +57,8 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
       <div className="flex-1 flex overflow-hidden">
         {/* Activity Bar - Fixed width, no resize */}
         <ActivityBar 
-          activeView={activeView} 
-          onViewChange={handleViewChange}
+          isSideBarVisible={isSideBarVisible}
+          onToggleSideBar={() => setIsSideBarVisible(!isSideBarVisible)}
         />
 
         {/* Horizontal PanelGroup: SideBar | Editor+Panel */}
@@ -133,23 +123,11 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
  * 
  * View switching:
  * - Ctrl+Shift+E: Show Explorer view
- * - Ctrl+Shift+T: Show Folders view (future)
- * - Ctrl+Shift+N: Show Notes view (future)
+ * - Ctrl+Shift+T: Show Workspace view
+ * - Ctrl+Shift+N: Show Notes view
  * 
  * Panel resizing:
  * - Drag resize handles to adjust panel sizes
  * - Double-click resize handle to reset to default size
  * - Panel sizes auto-save and persist across sessions
- * 
- * @param setIsSideBarVisible - Function to toggle sidebar visibility
- * @param setIsPanelVisible - Function to toggle panel visibility
- * @param setActiveView - Function to switch between views
  */
-export function useNotesKeyboardShortcuts(
-  setIsSideBarVisible: (visible: boolean) => void,
-  setIsPanelVisible: (visible: boolean) => void,
-  setActiveView: (view: ActivityBarView) => void
-) {
-  // TODO: Implement keyboard shortcuts
-  // Will be implemented in future phase
-}

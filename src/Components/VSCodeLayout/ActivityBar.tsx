@@ -7,22 +7,37 @@ import {
   TooltipTrigger,
 } from '@/Components/ui/tooltip'
 import {SettingsDialog} from './SettingsDialog'
-
-export type ActivityBarView = 'explorer' | 'workspace' | 'note'
+import { useNavigationStore } from '@/contexts/NavigationContext'
+import type { ActivityBarView } from '@/config/routes'
 
 interface ActivityBarProps {
-  activeView: ActivityBarView
-  onViewChange: (view: ActivityBarView) => void
+  isSideBarVisible: boolean
+  onToggleSideBar: () => void
 }
 
 const activities = [
   { id: 'explorer' as const, icon: Folder, label: 'Explorer' },
   { id: 'workspace' as const, icon: Boxes, label: 'Workspace' },
-  { id: 'note' as const, icon: FileText, label: 'Note' },
+  { id: 'note' as const, icon: FileText, label: 'Notes' },
 ]
 
-export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
+export function ActivityBar({ isSideBarVisible, onToggleSideBar }: ActivityBarProps) {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const { activeView, navigateToView } = useNavigationStore()
+
+  const handleActivityClick = (view: ActivityBarView) => {
+    if (activeView === view) {
+      // Toggle sidebar if clicking the same active view
+      onToggleSideBar()
+    } else {
+      // Navigate to different view
+      navigateToView(view)
+      // Ensure sidebar is visible when switching views
+      if (!isSideBarVisible) {
+        onToggleSideBar()
+      }
+    }
+  }
 
   return (
     <>
@@ -38,8 +53,7 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
                 <Tooltip key={activity.id}>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={isActive ? undefined : () => onViewChange(activity.id)}
-                      disabled={isActive}
+                      onClick={() => handleActivityClick(activity.id)}
                       className={`w-12 h-12 rounded-none transition-colors border-transparent cursor-pointer ${
                         isActive
                           ? 'text-editor-white border-editor-active'

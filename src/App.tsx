@@ -1,4 +1,3 @@
-import { NavProvider } from './contexts/NavigationContext';
 import { Main } from './Components/Main';
 
 import './App.css';
@@ -14,9 +13,7 @@ import './App.css';
 export function App() {
     return (
         <div className="App overflow-hidden h-screen w-full m-0 p-0">
-            <NavProvider>
-                <Main />
-            </NavProvider>
+            <Main />
         </div>
     );
 }
