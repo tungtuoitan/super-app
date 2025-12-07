@@ -13,6 +13,7 @@ import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
+import {FolderItem, isFolder} from '@/types/workspace.types';
 
 
 
@@ -37,10 +38,10 @@ export function FolderNode({
     const { showContextMenu } = useContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
 
-    const folder = node.data.data;
+    const folderItem = node.data.data as FolderItem;
     const hasChildren = node.data.children && node.data.children.length > 0;
-    const isSelected = isFolderSelected(folder.id);
-    const isWorkspaceRoot = !(folder.id > 0); // Workspace root node has negative ID
+    const isSelected = isFolderSelected(folderItem.id);
+    const isWorkspaceRoot = folderItem.id < 0; // Workspace root node has negative ID
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -68,20 +69,20 @@ export function FolderNode({
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedFolderIds(prev => prev.filter(id => id !== folder.id));
+                setSelectedFolderIds(prev => prev.filter(id => id !== folderItem.id));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedFolderIds(prev => [...prev, folder.id]);
+                setSelectedFolderIds(prev => [...prev, folderItem.id]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
-            setLastSelectedFolderId(folder.id);
+            setLastSelectedFolderId(folderItem.id);
         } else if (e.shiftKey && lastSelectedFolderId) {
             // Shift+Click: Range selection (like VS Code)
             const allVisibleFolders = getAllVisibleFolderIds(treeData);
             const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
-            const currentIndex = allVisibleFolders.indexOf(folder.id);
+            const currentIndex = allVisibleFolders.indexOf(folderItem.id);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
@@ -91,14 +92,14 @@ export function FolderNode({
                 // Sync with react-arborist (select range ending at this node)
                 node.selectMulti();
             } else {
-                setSelectedFolderIds([folder.id]);
+                setSelectedFolderIds([folderItem.id]);
                 node.select();
             }
-            setLastSelectedFolderId(folder.id);
+            setLastSelectedFolderId(folderItem.id);
         } else {
             // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
-            setSelectedFolderIds([folder.id]);
-            setLastSelectedFolderId(folder.id);
+            setSelectedFolderIds([folderItem.id]);
+            setLastSelectedFolderId(folderItem.id);
             // Sync with react-arborist (single select - clears others)
             node.select();
 
@@ -112,16 +113,16 @@ export function FolderNode({
     const handleRightClick = (e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent bubbling to parent
         e.preventDefault(); // Prevent default context menu
-        
+
         // Don't show context menu for workspace root
         if (isWorkspaceRoot) {
             return;
         }
 
-        const _currentFolder = currentTree?.items.find(f => f.id === folder.id);
-        
+        const _currentFolder = currentTree?.items.find(f => f.id === folderItem.id);
+
         // Open folder-specific context menu with folder data
-        showContextMenu(e, 'folder', {...folder, parentId: _currentFolder?.parentId ?? null });
+        showContextMenu(e, 'folder', {...folderItem, parentId: _currentFolder?.parentId ?? null });
     };
     
     return (
@@ -176,10 +177,10 @@ export function FolderNode({
             {/* Folder Icon */}
             <div className="mr-2 flex items-center">
                 {/* Workspace root node */}
-                {folder.id < 0 ? (
+                {folderItem.id < 0 ? (
                     <Layers
                         className="w-4 h-4"
-                        style={{ color: folder.color || '#75beff' }}
+                        style={{ color: folderItem.color || '#75beff' }}
                     />
                 ) : hasChildren ? (
                     node.isOpen ?
@@ -188,7 +189,7 @@ export function FolderNode({
                 ) : (
                     <TagIcon
                         className="w-4 h-4"
-                        style={{ color: folder.color || '#75beff' }}
+                        style={{ color: folderItem.color || '#75beff' }}
                     />
                 )}
             </div>
@@ -204,7 +205,7 @@ export function FolderNode({
                             text-editor-fg
                         `}
                     >
-                        {folder.name}
+                        {folderItem.name +'-'+ folderItem.id}
                     </span>
                 </div>
             </div>

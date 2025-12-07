@@ -44,7 +44,6 @@ export interface Folder {
     parentId?: number | null; // Parent folder ID (null for root level)
 
     // Frontend-only properties for tree UI and backward compatibility
-    relationshipId?: number; // workspace_items.id (workspace relationship ID for delete operations)
     children?: Folder[]; // Child folders for tree structure
     isExpanded?: boolean; // For tree UI state
     isArchived?: boolean; // Computed from isActive (!isActive)

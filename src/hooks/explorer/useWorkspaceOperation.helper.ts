@@ -72,6 +72,7 @@ export const useWorkspaceOperation = () => {
             
             console.log('🌳 Loaded tree for workspace:', workspaceId, treeData);
             
+            treeData.items = treeData.items.filter(item => item.deletedAt === null);
             // Set as current tree
             setCurrentTree(treeData);
             

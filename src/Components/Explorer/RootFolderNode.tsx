@@ -13,6 +13,7 @@ import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
 import { useTreeExpansion } from '@/hooks/explorer/useTreeExpansion.helper';
 import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
 import { TreeFolder } from '@/hooks/explorer/tree.helper';
+import { FolderItem } from '@/types/workspace.types';
 
 interface RootFolderNodeProps {
     node: NodeApi<TreeFolder>;
@@ -30,7 +31,7 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
     const { handleCollapseAll } = useTreeExpansion();
     const { loadTree } = useWorkspaceOperation();
 
-    const folder = node.data.data;
+    const folderItem = node.data.data as FolderItem;
     const hasChildren = node.data.children && node.data.children.length > 0;
 
     return (
@@ -63,14 +64,14 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
             <div className="mr-2 flex items-center">
                 <Layers
                     className="w-4 h-4"
-                    style={{ color: folder.color || '#75beff' }}
+                    style={{ color: folderItem.color || '#75beff' }}
                 />
             </div>
 
             {/* Workspace Name */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
                 <span className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate">
-                    {folder.name}
+                    {folderItem.name}
                 </span>
             </div>
 

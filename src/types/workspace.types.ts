@@ -47,7 +47,6 @@ export interface AddItemToWorkspaceRequest {
  * Maps to backend WorkspaceItemOperationResponse
  */
 export interface WorkspaceItemOperationResponse {
-    relationshipId: number;  // workspace_items.id
     workspaceId: number;
     parentTagId: number | null;
     childType: string;
@@ -100,19 +99,15 @@ export type UpdateWorkspaceItemResponse = WorkspaceItem & {
 };
 
 /**
- * Single item to be moved in workspace
- * Maps to backend MoveItemRequest
+ * Single item identifier to be moved in workspace
+ * Maps to backend ItemIdentifier
  */
-export interface MoveItemRequest {
-    /** Workspace relationship ID to move */
-    relationshipId: number;
+export interface MoveItemIdentifier {
+    /** Item type: 2 = folder, 3 = note, 4 = file */
+    type: 2 | 3 | 4;
     
-    /** New parent folder ID (null for root level) */
-    newParentTagId?: number | null;
-    newParentFolderId?: number | null; // Frontend alias
-    
-    /** New sort order (optional) */
-    sortOrder?: number;
+    /** Item ID (folder/note/file entity ID) */
+    id: number;
 }
 
 /**
@@ -121,10 +116,13 @@ export interface MoveItemRequest {
  */
 export interface MoveItemsRequest {
     /** Array of items to move */
-    items: MoveItemRequest[];
+    items: MoveItemIdentifier[];
     
-    /** Whether to cascade move child items (default: true) */
-    cascade?: boolean;
+    /** Target parent folder ID (null = move to root level) */
+    targetParentId?: number | null;
+    
+    /** Target workspace ID (null = same workspace) */
+    targetWorkspaceId?: number | null;
 }
 
 /**
@@ -271,8 +269,6 @@ export interface FileMetadata {
  * Base workspace item - all items share these properties
  */
 interface BaseWorkspaceItem {
-    /** Workspace relationship ID (workspace_items.id) - used for workspace-specific operations */
-    relationshipId?: number;
 
     /** User ID owner */
     userId: number;
@@ -307,6 +303,8 @@ interface BaseWorkspaceItem {
     /** Timestamps */
     createdAt: string;
     updatedAt?: string;
+
+    deletedAt?: string;
 }
 
 // ============================================

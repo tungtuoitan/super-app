@@ -1,8 +1,6 @@
 /**
  * Workspace Mapper - Transform backend response to frontend types
  *
- * Backend uses: id, type ('folder'/'note'/'file'), relationshipId
- * Frontend uses: id, type ('folder'/'note'/'file'), relationshipId
  *
  * This mapper bridges the gap between backend and frontend type systems
  */
@@ -22,7 +20,6 @@ import {
  * This matches the structure from backend API
  */
 export interface BackendWorkspaceItem {
-    relationshipId?: number;             // Workspace relationship ID (workspace_items.id)
     type: 'tag' | 'note' | 'file' | 'folder';  // Backend uses 'folder' or 'note' or 'file'
     id: number;                          // Entity ID (folder/note/file ID)
     childId?: number;                    // Legacy field (some APIs still use this)
@@ -51,7 +48,6 @@ export interface BackendWorkspaceItem {
  */
 function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
     return {
-        relationshipId: item.relationshipId, // Workspace relationship ID (workspace_items.id)
         id: item.id || item.childId!,        // ✅ folder ID (prefer 'id', fallback 'childId')
         type: 'folder',                      // ✅ type = 'folder'
         userId: item.userId,
@@ -80,7 +76,6 @@ function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
  */
 function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
     return {
-        relationshipId: item.relationshipId, // Workspace relationship ID (workspace_items.id)
         id: item.id || item.childId!,        // ✅ note ID (prefer 'id', fallback 'childId')
         type: 'note',                        // ✅ type = 'note'
         userId: item.userId,
@@ -109,7 +104,6 @@ function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
  */
 function transformToFileItem(item: BackendWorkspaceItem): FileItem {
     return {
-        relationshipId: item.relationshipId, // Workspace relationship ID (workspace_items.id)
         id: item.id || item.childId!,        // ✅ file ID (prefer 'id', fallback 'childId')
         type: 'file',                        // ✅ type = 'file'
         userId: item.userId,
@@ -139,14 +133,6 @@ function transformToFileItem(item: BackendWorkspaceItem): FileItem {
 export function transformBackendItem(item: BackendWorkspaceItem): WorkspaceItem {
     const itemType = item.type?.toLowerCase();
 
-    // Debug log
-    console.log('🔄 transformBackendItem:', {
-        name: item.name,
-        type: item.type,
-        itemTypeLower: itemType,
-        id: item.id,
-        relationshipId: item.relationshipId
-    });
 
     switch (itemType) {
         case 'tag':

@@ -7,10 +7,12 @@
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
+import { useEditorTabHelper } from '@/hooks/useEditorTabHelper';
 import { Folder } from '@/types/folder.types';
-import { _deleteWorkspaceItems } from '@/services/workspace.service';
-import { _deleteNote } from '@/services/note.service';
+import { _deleteWorkspaceItems, _addItemToWorkspace } from '@/services/workspace.service';
+import { _deleteNote, _upsertNote } from '@/services/note.service';
 import { storageService } from '@/services/storage.service';
+import { Note } from '@/types/note.types';
 
 
 
@@ -24,13 +26,15 @@ export const useContextMenuHelper = () => {
         setEditItemData,
     } = useContextMenuStore();
     
-    const { 
-        selectedFolderIds, 
-        setSelectedFolderIds, 
+    const {
+        selectedFolderIds,
+        setSelectedFolderIds,
         setLastSelectedFolderId,
-        currentTree 
+        currentTree,
+        setCurrentTree
     } = useExplorerStore();
     const { openFolderDialog } = useFolderDialogHelper();
+    const { openNoteTab } = useEditorTabHelper();
     
     // Get current workspace ID from tree (fallback to 1 if not available)
     const CURRENT_WORKSPACE_ID = currentTree?.workspaceId ?? 1;
@@ -81,7 +85,6 @@ export const useContextMenuHelper = () => {
 
 
         const handleDeleteFolder = (folder: Folder, isHardDelete: boolean = false) => {
-            console.log('🗑️ Removing folder from workspace:', folder.id, folder.name, 'relationshipId:', folder.relationshipId, 'isHardDelete:', isHardDelete);
 
             // Validate folder ID exists
             if (!folder.id) {
@@ -131,17 +134,31 @@ export const useContextMenuHelper = () => {
                     //     return;
                     // }
 
-                    console.log(`🗑️ Deleting ${foldersToDelete.length} workspace items:`,
-                        foldersToDelete.map(f => ({ name: f.name, entityId: f.id, relationshipId: f.relationshipId, type: 2 }))
-                    );
+
+                    // Map items with proper type codes (2=folder, 3=note, 4=file)
+                    const deleteItems = foldersToDelete.map(f => {
+                        // Check if item has 'type' property (WorkspaceItem from tree)
+                        const itemType = (f as any).type;
+                        let typeCode: 2 | 3 | 4 = 2; // Default to folder
+                        
+                        if (itemType === 'folder' || itemType === 'tag') {
+                            typeCode = 2;
+                        } else if (itemType === 'note') {
+                            typeCode = 3;
+                        } else if (itemType === 'file') {
+                            typeCode = 4;
+                        }
+                        
+                        return { id: f.id!, type: typeCode };
+                    });
 
                     console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items', {
-                        items: foldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
+                        items: deleteItems,
                         cascade: true
                     });
 
                     const result = await _deleteWorkspaceItems(token??'', CURRENT_WORKSPACE_ID, {
-                        items: foldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
+                        items: deleteItems,
                         cascade: true,
                         isHardDelete: isHardDelete
                     });
@@ -232,12 +249,78 @@ export const useContextMenuHelper = () => {
 
     /**
      * Handle add note action
+     * Creates a temporary note with negative ID and opens it in editor
+     * Note will be saved to DB only when user clicks Save in editor
      */
-    const handleAddNote = () => {
-        console.log('📝 Context Menu: Add note clicked');
+    const handleAddNote = (parentFolder?: any) => {
+        console.log('📝 Context Menu: Add note clicked for parent:', parentFolder);
         closeContextMenu();
-        // TODO: Implement add note functionality
-    }
+
+        // Generate temporary negative ID (same pattern as NoteGrid)
+        const tempId = -Math.floor(Math.random() * 10000);
+
+        // Create temporary note
+        const newNote: Note = {
+            id: tempId,
+            name: 'Untitled Note',
+            description: '',
+            hashtags: parentFolder?.id ? [parentFolder.id] : [],
+            tags: [],
+            type: 'idea',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: 'You',
+        };
+
+        console.log('✅ Created temporary note:', newNote);
+
+        // ✅ Add note to workspace tree immediately (with unsaved state)
+        if (currentTree) {
+            const newNoteItem = {
+                id: tempId,
+                type: 'note' as const,
+                userId: currentTree.userId,
+                name: 'Untitled Note',
+                accessType: 'owner' as const,
+                isOriginal: true,
+                level: parentFolder ? parentFolder.level + 1 : 1,
+                depth: parentFolder ? parentFolder.depth + 1 : 1,
+                position: 0,
+                sortOrder: 0,
+                isExpanded: false,
+                isSelected: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                parentId: parentFolder?.id || null,
+                // Full metadata with unsaved flag
+                metadata: {
+                    description: '',
+                    contentPreview: '',
+                    contentType: 'markdown' as const,
+                    isArchived: false,
+                    isPinned: false,
+                    isFavorite: false,
+                    versionCount: 0,
+                    memberCount: 1,
+                    isPublic: false,
+                    // Custom field to mark as unsaved
+                    isUnsaved: true,
+                } as any, // Cast to bypass strict type checking for custom field
+            };
+
+            setCurrentTree({
+                ...currentTree,
+                items: [...currentTree.items, newNoteItem],
+            });
+
+            console.log('✅ Added temporary note to workspace tree');
+        }
+
+        // Open note tab for editing
+        openNoteTab(newNote);
+
+        console.log('✅ Opened note tab for editing');
+    };
 
     /**
      * Handle bulk delete for multiple selected folders
@@ -328,17 +411,26 @@ export const useContextMenuHelper = () => {
             try {
                 const token = storageService.getString('token');
 
-                console.log(`🗑️ Deleting ${allFoldersToDelete.length} workspace items:`,
-                    allFoldersToDelete.map(f => ({ name: f.name, entityId: f.id, relationshipId: f.relationshipId, type: 2 }))
-                );
-
-                console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items', {
-                    items: allFoldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
-                    cascade: true
+            
+                // Map items with proper type codes (2=folder, 3=note, 4=file)
+                const deleteItems = allFoldersToDelete.map(f => {
+                    // Check if item has 'type' property (WorkspaceItem from tree)
+                    const itemType = (f as any).type;
+                    let typeCode: 2 | 3 | 4 = 2; // Default to folder
+                    
+                    if (itemType === 'folder' || itemType === 'tag') {
+                        typeCode = 2;
+                    } else if (itemType === 'note') {
+                        typeCode = 3;
+                    } else if (itemType === 'file') {
+                        typeCode = 4;
+                    }
+                    
+                    return { id: f.id!, type: typeCode };
                 });
 
                 const result = await _deleteWorkspaceItems(token ?? '', CURRENT_WORKSPACE_ID, {
-                    items: allFoldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
+                    items: deleteItems,
                     cascade: true,
                     isHardDelete: isHardDelete
                 });
@@ -404,6 +496,51 @@ export const useContextMenuHelper = () => {
     };
 
     /**
+     * Handle delete file action
+     */
+    const handleDeleteFile = async (fileData: any, isHardDelete: boolean = false) => {
+        console.log('🗑️ Deleting file:', fileData, 'isHardDelete:', isHardDelete);
+
+        if (!fileData?.id) {
+            console.error('❌ Cannot delete file: missing id');
+            alert('Cannot delete file: missing file information');
+            return;
+        }
+
+        try {
+            const token = storageService.getString('token');
+
+            console.log(`🗑️ Deleting file ID: ${fileData.id}`, fileData.name);
+            console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items');
+
+            const result = await _deleteWorkspaceItems(token ?? '', CURRENT_WORKSPACE_ID, {
+                items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
+                cascade: true,
+                isHardDelete: isHardDelete
+            });
+
+            console.log('✅ API response:', result);
+
+            if (result.success) {
+                console.log('✅ Successfully deleted file');
+
+                // Clear selection
+                setSelectedFolderIds([]);
+                setLastSelectedFolderId(null);
+
+                // Reload page to refresh data
+                window.location.reload();
+            } else {
+                console.error('❌ Delete failed:', result.message);
+                alert(`Failed to delete file: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('❌ Failed to delete file:', error);
+            alert(`Error deleting file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    };
+
+    /**
      * Handle delete item action
      */
     const handleDeleteItem = (itemData: any, contextType: ContextMenuType, isHardDelete: boolean = false) => {
@@ -434,6 +571,10 @@ export const useContextMenuHelper = () => {
             // Handle note deletion
             closeContextMenu();
             handleDeleteNote(itemData, isHardDelete);
+        } else if (contextType === 'file' && itemData) {
+            // Handle file deletion
+            closeContextMenu();
+            handleDeleteFile(itemData, isHardDelete);
         } else {
             closeContextMenu();
         }

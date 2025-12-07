@@ -154,6 +154,28 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                     handleDeleteItem(contextData, contextType, isHardDelete);
                 }
             });
+        } else if (contextType === 'file' && contextData) {
+            // Handle file deletion with confirmation
+            closeContextMenu();
+
+            // Extract anchor element from menu event
+            const nativeEvent = event.syntheticEvent || event;
+            const anchorElement = nativeEvent?.target as HTMLElement;
+
+            let message: string;
+            if (isHardDelete) {
+                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}".\n\n❌ This action CANNOT be undone.\n❌ The file will be LOST FOREVER.`;
+            } else {
+                message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
+            }
+
+            deleteConfirmation.show({
+                anchorEl: anchorElement,
+                message,
+                onConfirm: () => {
+                    handleDeleteItem(contextData, contextType, isHardDelete);
+                }
+            });
         } else {
             handleDeleteItem(contextData, contextType, isHardDelete);
         }
@@ -181,7 +203,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                             <FileIcon className="w-4 h-4 mr-2" />
                             Add File
                         </MenuItem>
-                        <MenuItem onClick={handleAddNote} disabled>
+                        <MenuItem onClick={() => handleAddNote(contextData)}>
                             <NoteIcon className="w-4 h-4 mr-2" />
                             Add Note
                         </MenuItem>
@@ -229,7 +251,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                             <DeleteIcon className="w-4 h-4 mr-2" />
                             Delete
                         </MenuItem>
-                        <MenuItem 
+                        <MenuItem
                             onClick={(e) => onDeleteItemClick(e, true)}
                             className="text-red-600 hover:bg-red-50"
                         >
@@ -238,7 +260,33 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                         </MenuItem>
                     </>
                 );
-            
+
+            case 'file':
+                return (
+                    <>
+                        <MenuItem onClick={handleViewInfo}>
+                            <InfoIcon className="w-4 h-4 mr-2" />
+                            View Details
+                        </MenuItem>
+                        <MenuItem onClick={handleViewInfo} disabled>
+                            <FileIcon className="w-4 h-4 mr-2" />
+                            Download
+                        </MenuItem>
+                        <MenuDivider />
+                        <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                            <DeleteIcon className="w-4 h-4 mr-2" />
+                            Delete
+                        </MenuItem>
+                        <MenuItem
+                            onClick={(e) => onDeleteItemClick(e, true)}
+                            className="text-red-600 hover:bg-red-50"
+                        >
+                            <HardDeleteIcon className="w-4 h-4 mr-2" />
+                            Hard Delete
+                        </MenuItem>
+                    </>
+                );
+
             case 'note-grid':
                 const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
                 const noteGridIsMultiple = noteGridSelectedCount > 1;
@@ -426,7 +474,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                 {renderMenuItems()}
             </ControlledMenu>
 
-            {/* Confirmation Popover for delete actions */} 
+            {/* Confirmation Popover for delete actions */}
             <ConfirmationPopover {...deleteConfirmation.getPopoverProps()} />
         </>
     );

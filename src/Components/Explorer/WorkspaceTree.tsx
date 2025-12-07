@@ -11,8 +11,11 @@ import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
 import {CustomDragPreview} from './CustomDragPreview';
 import {FolderNode} from './FolderNode';
 import {RootFolderNode} from './RootFolderNode';
+import {NoteNode} from './NoteNode';
+import {FileNode} from './FileNode';
 import {getAllVisibleFolderIds, transformToTreeData, TreeFolder} from '@/hooks/explorer/tree.helper';
 import {FolderDialog} from './FolderDialog/FolderDialog';
+import {isFolder, isNote, isFile} from '@/types/workspace.types';
 
 export function WorkspaceTree() {
     const {
@@ -99,10 +102,10 @@ export function WorkspaceTree() {
                 renderDragPreview={(props) => <CustomDragPreview {...props} treeData={treeData} />}
             >
                 {({ node, style, dragHandle }) => {
-                    // Check if this is the workspace root node
-                    const isWorkspaceRoot = node.data.data.id < 0;
-                    
-                    // Wrap in div to ensure native DOM element for DnD
+                    const item = node.data.data;
+                    const isWorkspaceRoot = item.id < 0;
+
+                    // Render different node types based on item type
                     return (
                         <div style={style}>
                             {isWorkspaceRoot ? (
@@ -111,14 +114,26 @@ export function WorkspaceTree() {
                                     style={{ height: '100%' }}
                                     treeData={treeData}
                                 />
-                            ) : (
+                            ) : isFolder(item) ? (
                                 <FolderNode
                                     node={node}
                                     style={{ height: '100%' }}
                                     dragHandle={dragHandle}
                                     treeData={treeData}
                                 />
-                            )}
+                            ) : isNote(item) ? (
+                                <NoteNode
+                                    node={node}
+                                    style={{ height: '100%' }}
+                                    dragHandle={dragHandle}
+                                />
+                            ) : isFile(item) ? (
+                                <FileNode
+                                    node={node}
+                                    style={{ height: '100%' }}
+                                    dragHandle={dragHandle}
+                                />
+                            ) : null}
                         </div>
                     );
                 }}

@@ -11,7 +11,7 @@ export interface ContextMenuPosition {
     y: number;
 }
 
-export type ContextMenuType = 'default' | 'tag' | 'note' | 'folder' | 'note-grid' | 'workspace-grid';
+export type ContextMenuType = 'default' | 'tag' | 'note' | 'file' | 'folder' | 'note-grid' | 'workspace-grid';
 
 export interface ContextMenuStoreData {
     // Menu state
@@ -29,6 +29,12 @@ export interface ContextMenuStoreData {
     setIsEditDialogOpen: Dispatch<SetStateAction<boolean>>;
     editItemData: any | null;
     setEditItemData: Dispatch<SetStateAction<any | null>>;
+
+    // Note dialog state
+    isNoteDialogOpen: boolean;
+    setIsNoteDialogOpen: Dispatch<SetStateAction<boolean>>;
+    noteDialogParentFolder: any | null;
+    setNoteDialogParentFolder: Dispatch<SetStateAction<any | null>>;
 }
 
 export const contextMenuStoreDefaultValue: ContextMenuStoreData = {
@@ -44,6 +50,10 @@ export const contextMenuStoreDefaultValue: ContextMenuStoreData = {
     setIsEditDialogOpen: () => {},
     editItemData: null,
     setEditItemData: () => {},
+    isNoteDialogOpen: false,
+    setIsNoteDialogOpen: () => {},
+    noteDialogParentFolder: null,
+    setNoteDialogParentFolder: () => {},
 };
 
 export const ContextMenuStore = createContext<ContextMenuStoreData>(contextMenuStoreDefaultValue);
@@ -57,6 +67,8 @@ export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>
     const [contextData, setContextData] = useState<any | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
     const [editItemData, setEditItemData] = useState<any | null>(null);
+    const [isNoteDialogOpen, setIsNoteDialogOpen] = useState<boolean>(false);
+    const [noteDialogParentFolder, setNoteDialogParentFolder] = useState<any | null>(null);
 
     return (
         <ContextMenuStore.Provider
@@ -73,6 +85,10 @@ export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>
                 setIsEditDialogOpen,
                 editItemData,
                 setEditItemData,
+                isNoteDialogOpen,
+                setIsNoteDialogOpen,
+                noteDialogParentFolder,
+                setNoteDialogParentFolder,
             }}
         >
             {children}

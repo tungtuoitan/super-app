@@ -77,11 +77,12 @@ export function findFolderById(
     return undefined;
 }
 
+// ✅ Updated to support all item types (folder/note/file)
 export interface TreeFolder {
     id: string;
     name: string;
     children?: TreeFolder[];
-    data: Folder; // Store original folder data
+    data: WorkspaceItem; // Can be FolderItem | NoteItem | FileItem
 }
 
 export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
@@ -119,7 +120,6 @@ export function transformTreeItemToFolder(
 
     const folder: Folder = {
         id: item.id,                      // ✅ Folder ID (from FolderItem.id)
-        relationshipId: item.relationshipId,  // Workspace relationship ID (for delete operations)
         name: item.name,
         color: item.color,
         createdAt: new Date(item.createdAt),
@@ -135,6 +135,29 @@ export function transformTreeItemToFolder(
 }
 
 /**
+ * Transform WorkspaceItem hierarchy to react-arborist tree data
+ * ✅ Supports all item types: folders (can have children), notes & files (leaf nodes)
+ * NOTE: Only folders can have children - notes/files are always leaf nodes
+ */
+export function transformItemsToTreeData(items: WorkspaceItem[]): TreeFolder[] {
+    return items
+        .filter(
+            (item) =>
+                item && item.id !== undefined && item.id !== null
+        )
+        .map((item) => ({
+            id: item.id.toString(),
+            name: item.name || "Untitled",
+            data: item,
+            // Only folders can have children - notes/files are always leaf nodes
+            children: isFolder(item) && item.children && item.children.length > 0
+                ? transformItemsToTreeData(item.children)
+                : [],
+        }));
+}
+
+/**
+ * @deprecated Use transformItemsToTreeData instead
  * Transform folder hierarchy to react-arborist tree data
  * NOTE: All nodes must have children array (even if empty) to allow drop into them
  */
@@ -145,15 +168,15 @@ export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
                 folder && folder.id !== undefined && folder.id !== null
         )
         .map((folder) => ({
-            id: folder.relationshipId?.toString() || folder.id.toString(),
+            id: folder.id.toString(),
             name: folder.name || "Untitled",
-            data: folder,
+            data: folder as any, // Cast for backward compatibility
             // Always provide children array (empty if no children) to enable drop into nodes
             children:
                 folder.children && folder.children.length > 0
                     ? transformFoldersToTreeData(folder.children)
                     : [],
-        }));  
+        }));
 }
 
 /**
@@ -295,7 +318,6 @@ export function createWorkspaceRootFolder(
 
         return {
             id: item.id,                      // ✅ Folder ID (from FolderItem.id)
-            relationshipId: item.relationshipId,  // Workspace relationship ID (for delete operations)
             name: item.name,
             color: item.color,
             createdAt: new Date(item.createdAt),
@@ -322,7 +344,7 @@ export function createWorkspaceRootFolder(
  * @returns TreeFolder array ready for react-arborist
  */
 export function transformToTreeData(
-    data: { workspaceId: number; name: string; description?: string; color?: string; createdAt: string; isArchived: boolean; items: any[] } | null | undefined,
+    data: { workspaceId: number; name: string; description?: string; color?: string; createdAt: string; isArchived: boolean; items: any[], userId: number, updatedAt?: string, icon?: string } | null | undefined,
     searchText: string
 ): TreeFolder[] {
     // ================================================================
@@ -334,26 +356,11 @@ export function transformToTreeData(
 
     // ================================================================
     // STEP 2: Transform backend response to frontend types
-    // Backend: {id, type: 'folder'/'note'/'file', relationshipId}
-    // Frontend: {id, type: 'folder'/'note'/'file', relationshipId}
+    // Backend: {id, type: 'folder'/'note'/'file'}
+    // Frontend: {id, type: 'folder'/'note'/'file'}
     // ================================================================
-    console.log('🔍 transformToTreeData - Raw backend items:', JSON.stringify(data.items, null, 2));
-    console.log('🔍 transformToTreeData - Backend items breakdown:', data.items.map((item: any) => ({
-        name: item.name,
-        type: item.type,
-        id: item.id,
-        relationshipId: item.relationshipId,
-        parentId: item.parentId
-    })));
 
     const frontendItems = transformBackendItems(data.items as BackendWorkspaceItem[]);
-    console.log('✅ transformToTreeData - Transformed to frontend types:', frontendItems.map(item => ({
-        name: item.name,
-        type: item.type,
-        id: item.id,
-        relationshipId: item.relationshipId,
-        parentId: item.parentId
-    })));
 
     // ================================================================
     // STEP 3: Build hierarchical structure from flat list
@@ -364,53 +371,49 @@ export function transformToTreeData(
     console.log('🏗️ transformToTreeData - Built hierarchy:', hierarchicalItems);
     
     // ================================================================
-    // STEP 4: Transform workspace items to Folder format (backward compatibility)
-    // Only extracts folders - notes and files are filtered out
-    // TODO: In future, support rendering notes & files in tree
+    // STEP 4: Apply search filter (if needed)
+    // TODO: Implement search filter for all item types (not just folders)
     // ================================================================
-    const folders: Folder[] = hierarchicalItems
-        .map(transformItem)
-        .filter((folder): folder is Folder => folder !== null);
-
-    console.log('📁 transformToTreeData - Transformed folders:', folders);
-
+    const filteredItems = hierarchicalItems; // For now, no filtering
+    console.log('🔎 transformToTreeData - Filtered items:', filteredItems);
 
     // ================================================================
-    // STEP 5: Apply search filter to folder tree
-    // Filter recursively - include folders that match OR have matching descendants
+    // STEP 5: Create workspace root node (workspace mode only)
+    // Wrap all items under a virtual workspace root for display
     // ================================================================
-    const filteredFolders = folders.length > 0 ? filterTreeBySearch(folders, searchText) : [];
-    console.log('🔎 transformToTreeData - Filtered folders:', filteredFolders);
-
-    // ================================================================
-    // STEP 6: Create workspace root node (workspace mode only)
-    // Wrap all folders under a virtual workspace root for display
-    // Always create workspace root, even if there are no child folders
-    // ================================================================
-    let foldersToTransform: Folder[];
+    let itemsToTransform: WorkspaceItem[];
 
     if (data && 'workspaceId' in data) {
-        const workspaceRootFolder = createWorkspaceRootFolder(
-            data.workspaceId,
-            data.name,
-            {
-                description: data.description,
-                color: data.color,
-                createdAt: data.createdAt,
-                isArchived: data.isArchived,
-            },
-            filteredFolders
-        );
-        foldersToTransform = [workspaceRootFolder];
+        // Create workspace root as a FolderItem
+        const workspaceRoot: FolderItem = {
+            id: -data.workspaceId,
+            type: 'folder',
+            userId: data.userId,
+            name: data.name,
+            color: data.color,
+            icon: data.icon,
+            accessType: 'owner',
+            isOriginal: true,
+            level: 0,
+            depth: 0,
+            position: 0,
+            sortOrder: 0,
+            isExpanded: true,
+            isSelected: false,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+            children: filteredItems,
+        };
+        itemsToTransform = [workspaceRoot];
     } else {
-        foldersToTransform = filteredFolders;
+        itemsToTransform = filteredItems;
     }
 
     // ================================================================
-    // STEP 7: Convert to TreeFolder format for react-arborist
-    // Transform Folder hierarchy to TreeFolder with required structure
+    // STEP 6: Convert to TreeFolder format for react-arborist
+    // ✅ Transform WorkspaceItem hierarchy (folders, notes, files) to TreeFolder
     // ================================================================
-    const result = transformFoldersToTreeData(foldersToTransform);
+    const result = transformItemsToTreeData(itemsToTransform);
     console.log('🌲 transformToTreeData - Final result:', result);
     return result;
 }
