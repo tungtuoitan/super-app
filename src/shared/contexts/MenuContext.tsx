@@ -181,6 +181,24 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                     </>
                 );
             
+            case 'note-grid':
+                const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
+                const noteGridIsMultiple = noteGridSelectedCount > 1;
+                
+                return (
+                    <>
+                        <MenuItem onClick={(event) => {
+                            if (contextData?.onDelete) {
+                                closeContextMenu();
+                                contextData.onDelete();
+                            }
+                        }}>
+                            <DeleteIcon className="w-4 h-4 mr-2" />
+                            Delete {noteGridIsMultiple ? `${noteGridSelectedCount} Notes` : 'Note'}
+                        </MenuItem>
+                    </>
+                );
+            
             default:
                 return (
                     <>

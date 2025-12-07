@@ -11,7 +11,7 @@ export interface ContextMenuPosition {
     y: number;
 }
 
-export type ContextMenuType = 'default' | 'tag' | 'note' | 'folder';
+export type ContextMenuType = 'default' | 'tag' | 'note' | 'folder' | 'note-grid';
 
 export interface ContextMenuStoreData {
     // Menu state

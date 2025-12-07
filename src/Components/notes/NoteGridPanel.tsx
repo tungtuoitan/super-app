@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -6,7 +6,6 @@ import {
     getSortedRowModel,
     ColumnDef,
     flexRender,
-    SortingState,
     RowSelectionState
 } from '@tanstack/react-table';
 import { Loader2, Trash2 } from 'lucide-react';
@@ -14,14 +13,10 @@ import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { Checkbox } from '@/Components/ui/checkbox';
 import {Note} from '@/types/note.types';
-import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
 import {_getNotes, _deleteNote} from '@/services/note.service';
-import {storageService} from '@/services/storage.service';
-import {useNoteTabHelper} from '@/hooks/useNoteTabHelper';
 import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanelStore';
-import {transformNotesData} from '@/utils/note.utils';
-import {useSnackbar} from 'notistack';
+import {useNoteGridHelper} from '@/hooks/useNoteGridHelper';
 
 /**
  * NoteGridPanel - A flexible layout panel for displaying notes in a data table
@@ -46,84 +41,21 @@ export function NoteGridPanel({
         sorting,
         setSorting,
         pagination,
-        setPagination
+        setPagination,
+        rowSelection,
+        setRowSelection
+
     } = useNoteGridPanelStore();
 
     const { openNoteTab } = useEditorTabHelper();
-    const { enqueueSnackbar } = useSnackbar();
+    const { loadNotes, handleDeleteSelected, handleContextMenu,formatDateTime } = useNoteGridHelper();
 
-    // Row selection state
-    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-    // Load notes
-    const loadNotes = async () => {
-        try {
-            setIsLoading(true);
-            const token = storageService.getString('token');
-            const data = await _getNotes(token??'', { getAll: true });
-            // Transform dates from API strings to Date objects
-            const transformedData = transformNotesData(data);
-            setNotes(transformedData);
-            setError(null);
-        } catch (err) {
-            setError(err as Error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    React.useEffect(() => {
+    useEffect(() => {
         loadNotes();
     }, []);
 
-    // Delete selected notes
-    const handleDeleteSelected = async () => {
-        const selectedIds = Object.keys(rowSelection).map(id => parseInt(id));
-        if (selectedIds.length === 0) return;
-
-        const confirmed = window.confirm(
-            `Are you sure you want to delete ${selectedIds.length} note(s)?`
-        );
-        if (!confirmed) return;
-
-        try {
-            const token = storageService.getString('token') || '';
-            // Send comma-separated IDs to backend
-            await _deleteNote(token, selectedIds.join(','));
-
-            enqueueSnackbar(`Successfully deleted ${selectedIds.length} note(s)`, {
-                variant: 'success'
-            });
-
-            // Clear selection and reload notes
-            setRowSelection({});
-            await loadNotes();
-        } catch (error) {
-            console.error('Failed to delete notes:', error);
-            enqueueSnackbar('Failed to delete notes', { variant: 'error' });
-        }
-    };
-
-    // Helper function to format date/time
-    const formatDateTime = (date: Date): string => {
-        return new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        }).format(date);
-    };
-
-    // Memoized sorted notes
-    const sortedNotes = useMemo(() => {
-        if (!notes) return [];
-        return [...notes].sort((a, b) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-    }, [notes]);
-
+    
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Note>[]>(() => {
         // Sidebar mode: only show name column
@@ -255,7 +187,8 @@ export function NoteGridPanel({
 
     // Create table instance
     const table = useReactTable({
-        data: sortedNotes,
+        data: notes.sort((a, b) => 
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -296,7 +229,7 @@ export function NoteGridPanel({
     }
 
     // Empty state
-    if (!sortedNotes || sortedNotes.length === 0) {
+    if (!notes || notes.length === 0) {
         return (
             <div className="h-full flex items-center justify-center bg-editor-bg">
                 <div className="text-center">
@@ -322,7 +255,7 @@ export function NoteGridPanel({
                             </span>
                         ) : (
                             <>
-                                {sortedNotes.length} note{sortedNotes.length !== 1 ? 's' : ''}
+                                {notes.length} note{notes.length !== 1 ? 's' : ''}
                             </>
                         )}
                     </span>
@@ -359,7 +292,7 @@ export function NoteGridPanel({
                                             : flexRender(
                                                 header.column.columnDef.header,
                                                 header.getContext()
-                                            )}
+                                            )}Q
                                     </th>
                                 ))}
                             </tr>
@@ -373,6 +306,7 @@ export function NoteGridPanel({
                                     sidebarMode ? 'h-9' : 'h-[42px]'
                                 }`}
                                 onClick={() => openNoteTab(row.original)}
+                                onContextMenu={(e) => handleContextMenu(e, row)}
                             >
                                 {row.getVisibleCells().map(cell => (
                                     <td key={cell.id} className="px-4 align-middle text-left">
@@ -393,8 +327,8 @@ export function NoteGridPanel({
                 <div className="flex items-center justify-between px-4 py-3 border-t border-editor-border bg-editor-sidebar">
                     <div className="text-sm text-editor-fg">
                         Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
-                        {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, sortedNotes.length)} of{' '}
-                        {sortedNotes.length} results
+                        {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, notes.length)} of{' '}
+                        {notes.length} results
                     </div>
                     <div className="flex items-center space-x-2">
                         <Button

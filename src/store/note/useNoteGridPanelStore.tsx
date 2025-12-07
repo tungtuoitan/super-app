@@ -5,7 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
 import { Note } from '../../types/note.types';
-import { SortingState } from '@tanstack/react-table';
+import { RowSelectionState, SortingState } from '@tanstack/react-table';
 
 export interface PaginationState {
     pageIndex: number;
@@ -23,6 +23,8 @@ export interface NoteGridPanelContextData {
     setError: Dispatch<SetStateAction<Error | null>>;
     setSorting: Dispatch<SetStateAction<SortingState>>;
     setPagination: Dispatch<SetStateAction<PaginationState>>;
+    rowSelection: RowSelectionState;
+    setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
 }
 
 export const noteGridPanelContextDefaultValue: NoteGridPanelContextData = {
@@ -36,6 +38,8 @@ export const noteGridPanelContextDefaultValue: NoteGridPanelContextData = {
     setError: () => {},
     setSorting: () => {},
     setPagination: () => {},
+    rowSelection: {},
+    setRowSelection: () => {},
 };
 
 export const NoteGridPanelStore = createContext<NoteGridPanelContextData>(noteGridPanelContextDefaultValue);
@@ -48,6 +52,7 @@ export const NoteGridPanelProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [error, setError] = useState<Error | null>(null);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
     return (
         <NoteGridPanelStore.Provider
@@ -62,6 +67,8 @@ export const NoteGridPanelProvider: React.FC<React.PropsWithChildren<unknown>> =
                 setSorting,
                 pagination,
                 setPagination,
+                rowSelection,
+                setRowSelection,
             }}
         >
             {children}
