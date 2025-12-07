@@ -4,6 +4,7 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    getFilteredRowModel,
     ColumnDef,
     flexRender,
     RowSelectionState
@@ -18,6 +19,7 @@ import {_getNotes, _deleteNote} from '@/services/note.service';
 import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanelStore';
 import {useNoteGridHelper} from '@/hooks/useNoteGridHelper';
+import {NoteGridFilterPopup} from './NoteGridFilterPopup';
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -40,8 +42,9 @@ export function NoteGrid() {
         pagination,
         setPagination,
         rowSelection,
-        setRowSelection
-
+        setRowSelection,
+        columnFilters,
+        setColumnFilters
     } = useNoteGridPanelStore();
 
     const { openNoteTab } = useEditorTabHelper();
@@ -200,19 +203,20 @@ export function NoteGrid() {
             //         </span>
             //     ),
             // },
-            // {
-            //     accessorKey: 'isArchived',
-            //     header: 'Status',
-            //     size: 100,
-            //     cell: ({ getValue }) => {
-            //         const isArchived = getValue() as boolean;
-            //         return (
-            //             <Badge variant={isArchived ? 'outline' : 'default'}>
-            //                 {isArchived ? 'Archived' : 'Active'}
-            //             </Badge>
-            //         );
-            //     }
-            // }
+            {
+                accessorKey: 'isArchived',
+                header: 'Status',
+                size: 100,
+                enableHiding: true,
+                cell: ({ getValue }) => {
+                    const isArchived = getValue() as boolean;
+                    return (
+                        <Badge variant={isArchived ? 'outline' : 'default'}>
+                            {isArchived ? 'Archived' : 'Active'}
+                        </Badge>
+                    );
+                }
+            }
         ];
     }, []);
 console.log('NoteGrid rendered with notes::::::::::', notes);
@@ -224,13 +228,17 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
         onSortingChange: setSorting,
         onPaginationChange: setPagination,
         onRowSelectionChange: setRowSelection,
+        onColumnFiltersChange: setColumnFilters,
         state: {
             sorting,
             pagination,
             rowSelection,
+            columnFilters,
+            columnVisibility: { isArchived: false },
         },
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
@@ -268,6 +276,22 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
             >
                 <table className="w-full">
                     <thead className="bg-muted/50 sticky top-0 z-10">
+                        {/* Header with Filter Icon */}
+                        <tr className="border-b">
+                            <th colSpan={table.getAllColumns().filter(col => col.getIsVisible()).length} className="h-10 px-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                        Notes ({table.getFilteredRowModel().rows.length})
+                                    </span>
+                                    <NoteGridFilterPopup 
+                                        table={table}
+                                        columnFilters={columnFilters}
+                                        onClearFilters={() => setColumnFilters([])}
+                                    />
+                                </div>
+                            </th>
+                        </tr>
+                        {/* Column Headers */}
                         {table.getHeaderGroups().map(headerGroup => (
                             <tr key={headerGroup.id} className="border-b">
                                 {headerGroup.headers.map(header => (

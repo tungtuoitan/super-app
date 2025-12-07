@@ -5,7 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
 import { Note } from '../../types/note.types';
-import { RowSelectionState, SortingState } from '@tanstack/react-table';
+import { RowSelectionState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
 
 export interface PaginationState {
     pageIndex: number;
@@ -25,6 +25,8 @@ export interface NoteGridPanelContextData {
     setPagination: Dispatch<SetStateAction<PaginationState>>;
     rowSelection: RowSelectionState;
     setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
+    columnFilters: ColumnFiltersState;
+    setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
 }
 
 export const noteGridPanelContextDefaultValue: NoteGridPanelContextData = {
@@ -33,13 +35,15 @@ export const noteGridPanelContextDefaultValue: NoteGridPanelContextData = {
     error: null,
     sorting: [],
     pagination: { pageIndex: 0, pageSize: 50 },
+    rowSelection: {},
+    columnFilters: [],
     setNotes: () => {},
     setIsLoading: () => {},
     setError: () => {},
     setSorting: () => {},
     setPagination: () => {},
-    rowSelection: {},
     setRowSelection: () => {},
+    setColumnFilters: () => {},
 };
 
 export const NoteGridPanelStore = createContext<NoteGridPanelContextData>(noteGridPanelContextDefaultValue);
@@ -53,6 +57,7 @@ export const NoteGridPanelProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     return (
         <NoteGridPanelStore.Provider
@@ -69,6 +74,8 @@ export const NoteGridPanelProvider: React.FC<React.PropsWithChildren<unknown>> =
                 setPagination,
                 rowSelection,
                 setRowSelection,
+                columnFilters,
+                setColumnFilters,
             }}
         >
             {children}
