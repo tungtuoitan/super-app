@@ -11,9 +11,9 @@ Hệ thống layout linh hoạt giống VS Code, hỗ trợ chia/sắp xếp/res
 - Location: src/Components/Layout/FlexibleLayout.tsx
 - Quản lý layout mosaic với drag & drop, preset layouts (Single, Two/Three Columns), persistence qua localStorage, dynamic panel management.
 
-### 2. NoteGridPanel
+### 2. NoteGrid
 
-- Location: src/Components/Layout/NoteGridPanel.tsx
+- Location: src/Components/Layout/NoteGrid.tsx
 - Hiển thị notes trong DataGrid, dùng useNotes, click mở detail, handle loading/error/empty states.
 
 ### 3. TagsPanelReal

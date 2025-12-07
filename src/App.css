@@ -101,3 +101,6 @@ display: none ;
     background-color: lightblue;
 }
 
+.td {
+    width: 20px !important;
+}

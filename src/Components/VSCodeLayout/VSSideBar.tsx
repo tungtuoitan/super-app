@@ -1,6 +1,6 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '@/Components/VSCodeLayout/ActivityBar'
-import { NoteGridPanel } from '../Notes/NoteGridPanel'
+import { NoteGrid } from '../Notes/NoteGrid'
 import { useEditorTabHelper } from '@/hooks/useEditorTabHelper'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import {Note} from '@/types/note.types'
@@ -92,8 +92,7 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
 function NotesView() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* NoteGrid with all columns */}
-      <NoteGridPanel sidebarMode={false} />
+      <NoteGrid />
     </div>
   )
 }
