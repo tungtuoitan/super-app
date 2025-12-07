@@ -111,9 +111,9 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                                         variant="ghost"
                                         size="icon"
                                         onClick={handleSave}
-                                        disabled={!hasUnsavedChanges || isSaving}
+                                        disabled={!hasUnsavedChanges || isSaving || tab.isDeleted}
                                         className={`h-8 w-8 ${
-                                            hasUnsavedChanges 
+                                            hasUnsavedChanges && !tab.isDeleted
                                                 ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
                                                 : 'text-white/40'
                                         } disabled:text-white/20`}
@@ -123,7 +123,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                                 </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Save (Ctrl+S)</p>
+                                <p>{tab.isDeleted ? 'Cannot save deleted note' : 'Save (Ctrl+S)'}</p>
                             </TooltipContent>
                         </Tooltip>
 
@@ -134,7 +134,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                                         variant="ghost"
                                         size="icon"
                                         onClick={handleCancel}
-                                        disabled={!hasUnsavedChanges}
+                                        disabled={!hasUnsavedChanges || tab.isDeleted}
                                         className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                     >
                                         <RotateCcw className="h-[18px] w-[18px]" />
@@ -142,7 +142,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                                 </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Discard Changes</p>
+                                <p>{tab.isDeleted ? 'Cannot edit deleted note' : 'Discard Changes'}</p>
                             </TooltipContent>
                         </Tooltip>
                     </div>

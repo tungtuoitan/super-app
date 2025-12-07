@@ -8,6 +8,7 @@ import {useContextMenuStore} from '../store';
 import {useSnackbar} from 'notistack';
 import {useEditorTabHelper} from './useEditorTabHelper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanelStore';
+import {useEditorTabsStore} from '@/store/editor/EditorTabStore';
 
 export const useNoteGridHelper = () => {
     const {
@@ -20,24 +21,23 @@ export const useNoteGridHelper = () => {
         originalNoteRef,
     } = useNoteUIStore();
 
-
-
-        const {
-            notes,
-            setNotes,
-            isLoading,
-            setIsLoading,
-            error,
-            setError,
-            sorting,
-            setSorting,
-            pagination,
-            setPagination,
-            rowSelection,
-            setRowSelection,
-        } = useNoteGridPanelStore();
+    const {
+        notes,
+        setNotes,
+        isLoading,
+        setIsLoading,
+        error,
+        setError,
+        sorting,
+        setSorting,
+        pagination,
+        setPagination,
+        rowSelection,
+        setRowSelection,
+    } = useNoteGridPanelStore();
     
     const { openNoteTab } = useEditorTabHelper();
+    const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setIsOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
 
@@ -101,6 +101,15 @@ export const useNoteGridHelper = () => {
             enqueueSnackbar(`Successfully deleted ${selectedIds.length} note(s)`, {
                 variant: 'success'
             });
+
+            // Mark opened tabs as deleted instead of closing them
+            const updatedTabs = openTabs.map(tab => {
+                if (tab.type === 'note' && selectedIds.includes(tab.noteId)) {
+                    return { ...tab, isDeleted: true };
+                }
+                return tab;
+            });
+            setOpenTabs(updatedTabs);
 
             // Clear selection and reload notes
             setRowSelection({});

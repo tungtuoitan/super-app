@@ -83,10 +83,10 @@ export const useContextMenuHelper = () => {
         const handleDeleteFolder = (folder: Folder) => {
             console.log('🗑️ Removing folder from workspace:', folder.id, folder.name, 'relationshipId:', folder.relationshipId);
 
-            // Validate relationshipId exists
-            if (!folder.relationshipId) {
-                console.error('❌ Cannot remove folder: missing relationshipId');
-                alert('Cannot remove folder: missing workspace item information');
+            // Validate folder ID exists
+            if (!folder.id) {
+                console.error('❌ Cannot remove folder: missing folder ID');
+                alert('Cannot remove folder: missing folder information');
                 return;
             }
     
@@ -112,10 +112,10 @@ export const useContextMenuHelper = () => {
             const allFolders = collectAllDescendants(folder);
             console.log(`🗑️ Cascade delete: removing ${allFolders.length} folder(s) (including ${allFolders.length - 1} descendants)`);
     
-            // Filter out folders without relationshipId and warn about them
+            // Filter out folders without ID and warn about them
             const foldersToDelete = allFolders.filter(f => {
-                if (!f.relationshipId) {
-                    console.warn(`⚠️ Skipping folder without relationshipId: ${f.name} (folderId: ${f.id})`);
+                if (!f.id) {
+                    console.warn(`⚠️ Skipping folder without ID: ${f.name}`);
                     return false;
                 }
                 return true;
@@ -132,16 +132,16 @@ export const useContextMenuHelper = () => {
                     // }
 
                     console.log(`🗑️ Deleting ${foldersToDelete.length} workspace items:`,
-                        foldersToDelete.map(f => ({ name: f.name, id: f.relationshipId, type: 2 }))
+                        foldersToDelete.map(f => ({ name: f.name, entityId: f.id, relationshipId: f.relationshipId, type: 2 }))
                     );
 
                     console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items', {
-                        items: foldersToDelete.map(f => ({ id: f.relationshipId!, type: 2 as const })),
+                        items: foldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
                         cascade: true
                     });
 
                     const result = await _deleteWorkspaceItems(token??'', CURRENT_WORKSPACE_ID, {
-                        items: foldersToDelete.map(f => ({ id: f.relationshipId!, type: 2 as const })),
+                        items: foldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
                         cascade: true
                     });
 
@@ -308,14 +308,14 @@ export const useContextMenuHelper = () => {
 
         // Collect all folders and their descendants
         const allFoldersToDelete: Folder[] = [];
-        const relationshipIdSet = new Set<number>(); // Avoid duplicates
+        const folderIdSet = new Set<number>(); // Avoid duplicates
 
         for (const folder of selectedFolders) {
             const descendants = collectAllDescendants(folder);
             for (const desc of descendants) {
-                if (desc.relationshipId && !relationshipIdSet.has(desc.relationshipId)) {
+                if (desc.id && !folderIdSet.has(desc.id)) {
                     allFoldersToDelete.push(desc);
-                    relationshipIdSet.add(desc.relationshipId);
+                    folderIdSet.add(desc.id);
                 }
             }
         }
@@ -328,16 +328,16 @@ export const useContextMenuHelper = () => {
                 const token = storageService.getString('token');
 
                 console.log(`🗑️ Deleting ${allFoldersToDelete.length} workspace items:`,
-                    allFoldersToDelete.map(f => ({ name: f.name, id: f.relationshipId, type: 2 }))
+                    allFoldersToDelete.map(f => ({ name: f.name, entityId: f.id, relationshipId: f.relationshipId, type: 2 }))
                 );
 
                 console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items', {
-                    items: allFoldersToDelete.map(f => ({ id: f.relationshipId!, type: 2 as const })),
+                    items: allFoldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
                     cascade: true
                 });
 
                 const result = await _deleteWorkspaceItems(token ?? '', CURRENT_WORKSPACE_ID, {
-                    items: allFoldersToDelete.map(f => ({ id: f.relationshipId!, type: 2 as const })),
+                    items: allFoldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
                     cascade: true
                 });
 

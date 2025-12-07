@@ -42,33 +42,38 @@ export function VSEditorArea() {
       <div className="min-h-[35px] flex items-start border-b border-editor-border bg-editor-sidebar">
         {openTabs.length > 0 ? (
           <div className="flex-1 flex flex-wrap">
-            {openTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleSetActiveTab(tab.id)}
-                className={`
-                  h-[35px] px-3 flex items-center gap-2
-                  border-r border-b border-editor-border
-                  ${activeTabId === tab.id
-                    ? 'bg-editor-bg text-editor-fg border-b-transparent border-t-2 border-t-blue-500'
-                    : 'bg-transparent text-muted-foreground hover:bg-editor-hover border-t border-t-transparent'
-                  }
-                `}
-              >
-                  {/* ${activeTabId === tab.id ? 'font-medium' : 'font-normal'} */}
-                <span className={`text-[13px] whitespace-nowrap 
-                    `}>
-                  {tab.title}
-                  {tab.hasUnsavedChanges && ' ●'}
-                </span>
+            {openTabs.map((tab) => {
+              const isDeleted = tab.type === 'note' && tab.isDeleted;
+              return (
                 <button
-                  onClick={(e) => handleCloseTab(e, tab.id)}
-                  className="p-0.5 hover:bg-editor-hover rounded"
+                  key={tab.id}
+                  onClick={() => handleSetActiveTab(tab.id)}
+                  className={`
+                    h-[35px] px-3 flex items-center gap-2
+                    border-r border-b border-editor-border
+                    ${activeTabId === tab.id
+                      ? 'bg-editor-bg text-editor-fg border-b-transparent border-t-2 border-t-blue-500'
+                      : 'bg-transparent text-muted-foreground hover:bg-editor-hover border-t border-t-transparent'
+                    }
+                  `}
                 >
-                  <X className="w-4 h-4" />
+                  {/* ${activeTabId === tab.id ? 'font-medium' : 'font-normal'} */}
+                  <span className={`text-[13px] whitespace-nowrap ${
+                    isDeleted ? 'text-red-500 line-through' : ''
+                  }`}>
+                    {tab.title}
+                    {tab.hasUnsavedChanges && ' ●'}
+                    {isDeleted && ' [Deleted]'}
+                  </span>
+                  <button
+                    onClick={(e) => handleCloseTab(e, tab.id)}
+                    className="p-0.5 hover:bg-editor-hover rounded"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </button>
-              </button>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="px-4 w-full h-[35px] flex items-center">

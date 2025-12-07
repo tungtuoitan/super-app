@@ -29,6 +29,7 @@ export interface BaseTab {
     title: string;
     hasUnsavedChanges?: boolean;
     viewState?: TabViewState;
+    isDeleted?: boolean;  // Flag to indicate note has been deleted
 }
 
 export interface NoteTab extends BaseTab {
