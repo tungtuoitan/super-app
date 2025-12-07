@@ -32,7 +32,7 @@ export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
     toggleNavigation: () => {},
     selectedItemId: null,
     setSelectedItemId: () => {},
-    activeView: 'explorer',
+    activeView: 'workspace',
     navigateToView: () => {},
 };
 
@@ -63,7 +63,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const bodyWrapperRef = useRef<HTMLDivElement>(null);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-    const [activeView, setActiveView] = useState<ActivityBarView>('explorer');
+    const [activeView, setActiveView] = useState<ActivityBarView>('workspace');
     
     const location = useLocation();
     const navigate = useNavigate();

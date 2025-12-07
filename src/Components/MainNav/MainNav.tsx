@@ -51,8 +51,8 @@ export default function MainNav() {
                         className="w-full h-[calc(100vh-36px)]"
                     >
                         <Routes>
-                            <Route path={APP_ROUTES.HOME} element={<Navigate to={APP_ROUTES.EXPLORER} replace />} />
-                            <Route path={APP_ROUTES.EXPLORER} element={<VSCodeLayout />} />
+                            <Route path={APP_ROUTES.HOME} element={<Navigate to={APP_ROUTES.WORKSPACE} replace />} />
+                            <Route path={APP_ROUTES.WORKSPACE_LIST} element={<VSCodeLayout />} />
                             <Route path={APP_ROUTES.WORKSPACE} element={<VSCodeLayout />} />
                             <Route path={APP_ROUTES.NOTES} element={<VSCodeLayout />} />
                         </Routes>

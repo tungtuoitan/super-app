@@ -21,6 +21,7 @@
 3. **Colocation > Abstraction**: Code liên quan ở gần nhau
 4. **Standard > Custom**: Dùng thư viện chuẩn, không wrap không cần thiết
 5. **Design System Consistency**: Dùng theme tokens, không hardcode
+6. "Explorer" component chính là "Workspace" component
 
 ---
 

@@ -16,8 +16,8 @@ interface ActivityBarProps {
 }
 
 const activities = [
-  { id: 'explorer' as const, icon: Folder, label: 'Explorer' },
-  { id: 'workspace' as const, icon: Boxes, label: 'Workspace' },
+  { id: 'workspaceList' as const, icon: Boxes, label: 'WorkspaceList' },
+  { id: 'workspace' as const, icon: Folder, label: 'Workspace' },
   { id: 'note' as const, icon: FileText, label: 'Notes' },
 ]
 

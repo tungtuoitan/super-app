@@ -2,8 +2,8 @@ import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '@/config/routes'
 import { NoteGrid } from '../Notes/NoteGrid'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
-import { ExplorerView } from './ExplorerView'
 import { WorkspaceView } from './WorkspaceView'
+import { WorkspaceListView } from './WorkspaceListView'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -53,7 +53,7 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
 
               {/* Content */}
               <div className="flex-1 overflow-hidden">
-                {activeView === 'explorer' && <ExplorerView />}
+                {activeView === 'workspaceList' && <WorkspaceListView />}
                 {activeView === 'workspace' && <WorkspaceView />}
                 {activeView === 'note' && <NotesView />}
               </div>
@@ -101,10 +101,10 @@ function NotesView() {
  */
 function getViewTitle(view: ActivityBarView): string {
   switch (view) {
-    case 'explorer':
-      return 'Explorer'
     case 'workspace':
       return 'Workspace'
+    case 'workspaceList':
+      return 'WorkspaceList'
     case 'note':
       return 'Notes'
     default:
