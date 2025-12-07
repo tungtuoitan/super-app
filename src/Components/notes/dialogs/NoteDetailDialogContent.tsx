@@ -14,6 +14,7 @@ import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-reac
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
 import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {formatNoteDate} from '@/utils/note.utils';
 
 /**
  * Note Detail Dialog Content
@@ -25,27 +26,10 @@ import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 export function NoteDetailDialogContent() {
     const { selectedNote, isDialogOpen } = useNoteUIStore();
     const { closeDialog, updateSelectedNote } = useNoteUIHelper();
-    const [loading, setLoading] = React.useState(false);
     
-    // ✅ DEBUG: Log store state on every render
-    console.log('🎨 NoteDetailDialogContent render:', { 
-        selectedNote, 
-        isDialogOpen,
-        hasNote: !!selectedNote,
-        noteId: selectedNote?.noteId,
-        noteName: selectedNote?.name 
-    });
-    
-    // ✅ FIX: Log when selectedNote changes to verify updates
-    React.useEffect(() => {
-        console.log('🔄 NoteDetailDialogContent - selectedNote changed:', selectedNote);
-    }, [selectedNote]);
-    
-    // ✅ FIX: Force re-render when note ID changes (after save)
     const [noteKey, setNoteKey] = React.useState(0);
     React.useEffect(() => {
         if (selectedNote) {
-            console.log('🔑 Updating noteKey for note:', selectedNote.noteId);
             setNoteKey(prev => prev + 1);
         }
     }, [selectedNote?.noteId]);
@@ -221,28 +205,14 @@ export function NoteDetailDialogContent() {
                         <CardContent className="p-0 space-y-4">
                             <GenericTextField
                                 label="Created"
-                                value={selectedNote?.createdAt ? new Intl.DateTimeFormat('en-US', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                }).format(selectedNote.createdAt) : '-'}
+                                value={formatNoteDate(selectedNote?.createdAt)}
                                 disabled
                                 size="small"
                             />
 
                             <GenericTextField
                                 label="Updated"
-                                value={selectedNote?.updatedAt ? new Intl.DateTimeFormat('en-US', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                }).format(selectedNote.updatedAt) : '-'}
+                                value={formatNoteDate(selectedNote?.updatedAt)}
                                 disabled
                                 size="small"
                             />

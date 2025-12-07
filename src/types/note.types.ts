@@ -67,6 +67,16 @@ export interface UpdateNoteDTO {
     isArchived?: boolean;
 }
 
+// Matches backend UpsertNoteRequest - unified create/update
+export interface UpsertNoteDTO {
+    noteId: number; // 0 = create new, > 0 = update existing
+    name: string;
+    description?: string;
+    tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
+    type?: string;
+    isArchived?: boolean;
+}
+
 // Query parameters
 export interface GetNotesParams {
     page?: number;

@@ -74,7 +74,7 @@ export const _getNotes = async (
 /**
  * Get single note by ID
  * GET /api/notes/{noteId}
- * 
+ *
  * @param token - Authentication token
  * @param noteId - The note ID to retrieve
  * @returns Note details or rejects with response
@@ -105,7 +105,52 @@ export const _getNoteById = async (noteId: number) => {
 };
 
 /**
- * Create new note
+ * Upsert note (create or update) - RECOMMENDED
+ * POST /api/notes
+ * Backend determines create vs update based on noteId (0 = create, >0 = update)
+ *
+ * @param token - Authentication token
+ * @param data - Note upsert data
+ * @returns Created or updated note or rejects with response
+ */
+export const _upsertNote = async (
+    token: string,
+    data: {
+        noteId: number; // 0 = create new, > 0 = update existing
+        name: string;
+        description?: string;
+        tags?: number[]; // Backend expects 'tags' in JSON (JsonPropertyName mapping to TagIds)
+        type?: string;
+        isArchived?: boolean;
+    }
+) => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(data),
+    };
+
+    const res = await window.fetch(
+        `${API_CONFIG.baseURL}/api/notes`,
+        options
+    );
+
+    if (res.ok) {
+        const ret = await res.json();
+        return ret;
+    } else {
+        return Promise.reject(res);
+    }
+};
+
+/**
+ * Create new note (legacy - consider using _upsertNote instead)
  * POST /api/notes
  * 
  * @param token - Authentication token

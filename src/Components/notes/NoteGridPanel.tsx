@@ -6,18 +6,22 @@ import {
     getSortedRowModel,
     ColumnDef,
     flexRender,
-    SortingState
+    SortingState,
+    RowSelectionState
 } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
+import { Checkbox } from '@/Components/ui/checkbox';
 import {Note} from '@/types/note.types';
 import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
-import {_getNotes} from '@/services/note.service';
+import {_getNotes, _deleteNote} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
 import {useNoteTabHelper} from '@/hooks/useNoteTabHelper';
 import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanelStore';
+import {transformNotesData} from '@/utils/note.utils';
+import {useSnackbar} from 'notistack';
 
 /**
  * NoteGridPanel - A flexible layout panel for displaying notes in a data table
@@ -44,26 +48,61 @@ export function NoteGridPanel({
         pagination,
         setPagination
     } = useNoteGridPanelStore();
-    
+
     const { openNoteTab } = useEditorTabHelper();
+    const { enqueueSnackbar } = useSnackbar();
+
+    // Row selection state
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
     // Load notes
+    const loadNotes = async () => {
+        try {
+            setIsLoading(true);
+            const token = storageService.getString('token');
+            const data = await _getNotes(token??'', { getAll: true });
+            // Transform dates from API strings to Date objects
+            const transformedData = transformNotesData(data);
+            setNotes(transformedData);
+            setError(null);
+        } catch (err) {
+            setError(err as Error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     React.useEffect(() => {
-        const loadNotes = async () => {
-            try {
-                setIsLoading(true);
-                const token = storageService.getString('token');
-                const data = await _getNotes(token??'', { getAll: true });
-                setNotes(data);
-                setError(null);
-            } catch (err) {
-                setError(err as Error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         loadNotes();
     }, []);
+
+    // Delete selected notes
+    const handleDeleteSelected = async () => {
+        const selectedIds = Object.keys(rowSelection).map(id => parseInt(id));
+        if (selectedIds.length === 0) return;
+
+        const confirmed = window.confirm(
+            `Are you sure you want to delete ${selectedIds.length} note(s)?`
+        );
+        if (!confirmed) return;
+
+        try {
+            const token = storageService.getString('token') || '';
+            // Send comma-separated IDs to backend
+            await _deleteNote(token, selectedIds.join(','));
+
+            enqueueSnackbar(`Successfully deleted ${selectedIds.length} note(s)`, {
+                variant: 'success'
+            });
+
+            // Clear selection and reload notes
+            setRowSelection({});
+            await loadNotes();
+        } catch (error) {
+            console.error('Failed to delete notes:', error);
+            enqueueSnackbar('Failed to delete notes', { variant: 'error' });
+        }
+    };
 
     // Helper function to format date/time
     const formatDateTime = (date: Date): string => {
@@ -104,6 +143,29 @@ export function NoteGridPanel({
 
         // Full mode: show all columns
         return [
+            {
+                id: 'select',
+                header: ({ table }) => (
+                    <Checkbox
+                        checked={table.getIsAllPageRowsSelected()}
+                        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                        aria-label="Select all"
+                        className="translate-y-[2px]"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(value) => row.toggleSelected(!!value)}
+                        aria-label="Select row"
+                        className="translate-y-[2px]"
+                        onClick={(e) => e.stopPropagation()} // Prevent row click
+                    />
+                ),
+                size: 40,
+                enableSorting: false,
+                enableHiding: false,
+            },
             {
                 accessorKey: 'noteId',
                 header: 'ID',
@@ -200,11 +262,14 @@ export function NoteGridPanel({
         getSortedRowModel: getSortedRowModel(),
         onSortingChange: setSorting,
         onPaginationChange: setPagination,
+        onRowSelectionChange: setRowSelection,
         state: {
             sorting,
             pagination,
+            rowSelection,
         },
         getRowId: (row) => String(row.noteId),
+        enableRowSelection: true,
     });
 
     // Loading state
@@ -243,14 +308,35 @@ export function NoteGridPanel({
     }
 
     // Main content - VSCode-style dark table
+    const selectedCount = Object.keys(rowSelection).length;
+
     return (
         <div className="h-full w-full flex flex-col bg-editor-bg">
-            {/* Header with count - hide in sidebar mode */}
+            {/* Header with count and actions - hide in sidebar mode */}
             {!sidebarMode && (
-                <div className="p-3 border-b border-editor-border bg-editor-sidebar">
+                <div className="p-3 border-b border-editor-border bg-editor-sidebar flex items-center justify-between">
                     <span className="text-sm text-editor-fg">
-                        {sortedNotes.length} note{sortedNotes.length !== 1 ? 's' : ''}
+                        {selectedCount > 0 ? (
+                            <span className="font-semibold text-primary">
+                                {selectedCount} selected
+                            </span>
+                        ) : (
+                            <>
+                                {sortedNotes.length} note{sortedNotes.length !== 1 ? 's' : ''}
+                            </>
+                        )}
                     </span>
+                    {selectedCount > 0 && (
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleDeleteSelected}
+                            className="flex items-center gap-2"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            Delete {selectedCount} note{selectedCount !== 1 ? 's' : ''}
+                        </Button>
+                    )}
                 </div>
             )}
             

@@ -7,8 +7,8 @@ import { Input } from '@/Components/ui/input'
 import { Textarea } from '@/Components/ui/textarea'
 import { Label } from '@/Components/ui/label'
 import { formatDate } from '@/utils/formatters'
-import { UpdateNoteDTO, Note } from '../../types/note.types'
-import { _getNoteById, _updateNote } from '../../services/note.service'
+import { UpsertNoteDTO, Note } from '../../types/note.types'
+import { _getNoteById, _upsertNote } from '../../services/note.service'
 import { storageService } from '../../services/storage.service'
 
 interface NoteDetailPanelProps {
@@ -45,12 +45,16 @@ export function NoteDetailPanel({ selectedNoteId }: NoteDetailPanelProps) {
     if (note) {
       try {
         const token = storageService.getString('token')
-        
-        const updated = await _updateNote(token??'', note.noteId, {
+
+        // Use upsert pattern - noteId > 0 means update
+        const upsertData: UpsertNoteDTO = {
           noteId: note.noteId,
           name: editTitle,
           description: editContent,
-        })
+          isArchived: note.isArchived,
+        }
+
+        const updated = await _upsertNote(token ?? '', upsertData)
         setNote(updated)
         setIsEditing(false)
       } catch (error) {

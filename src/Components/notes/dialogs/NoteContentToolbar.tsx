@@ -16,9 +16,10 @@ import {
 import { useAuthStore } from '@/store/auth/AuthStore';
 import {useSnackbar} from 'notistack';
 import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
-import { _createNote, _deleteNote, _updateNote } from '../../../services/note.service';
+// NOTE: This component uses legacy create/update pattern. Consider refactoring to use _upsertNote
+import { _createNote, _deleteNote, _updateNote, _upsertNote } from '../../../services/note.service';
 import {useConfirmationPopover} from '@/shared/hooks';
-import {CreateNoteDTO, UpdateNoteDTO} from '../../../types/note.types';
+import {CreateNoteDTO, UpdateNoteDTO, UpsertNoteDTO} from '../../../types/note.types';
 import {ConfirmationPopover} from '@/shared/components';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 

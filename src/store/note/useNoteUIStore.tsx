@@ -117,7 +117,7 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     const originalNoteRef = useRef<Note | null>(null);
 
     // Wrapped setSelectedNote with logging
-    const setSelectedNote = React.useCallback((note: Note | null | ((prev: Note | null) => Note | null)) => {
+    const setSelectedNote = (note: Note | null | ((prev: Note | null) => Note | null)) => {
         console.log('📌 NoteUIStore - setSelectedNote called:', note);
         if (typeof note === 'function') {
             setSelectedNoteState(prev => {
@@ -129,7 +129,7 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
             console.log('📌 NoteUIStore - setSelectedNote (direct):', note);
             setSelectedNoteState(note);
         }
-    }, []);
+    }
 
     // Search UI state
     const [searchText, setSearchText] = useState('');

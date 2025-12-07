@@ -30,7 +30,7 @@
 
 ## ⚡ Performance Anti-Patterns
 
-11. **Premature Optimization**: Chỉ memo/useCallback khi cần.
+11. **Premature Optimization**: Chỉ memo/useCallback KHI CÓ VẤN ĐỀ PERFORMANCE.
 
 12. **Not Virtualizing Long Lists**: Dùng react-window cho list dài.
 

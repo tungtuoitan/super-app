@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { Save, X, RotateCcw } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import type { NoteTab } from '@/types/editor/tab.types';
 import { Button } from '@/Components/ui/button';
 import {
@@ -15,12 +14,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
-import { _createNote, _updateNote } from '@/services/note.service';
-import {Note} from '@/types/note.types';
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
-import {Badge} from '../ui/badge';
-import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
-import {useNoteUIHelper} from '@/hooks/useNoteUIHelper';
+import {useEditorActionsHelper} from '@/hooks/useEditorActionsHelper';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 
 interface NoteEditorPanelProps {
@@ -28,90 +23,31 @@ interface NoteEditorPanelProps {
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { selectedNote, hasUnsavedChanges } = useNoteUIStore();
-    const { updateSelectedNote, markAsSaved, resetChanges, setSelectedNote } = useNoteUIHelper();
-    const { markTabAsChanged, updateTabNote } = useEditorTabHelper();
-    
-    // TODO: Refactor to use _updateNote and _createNote directly with token
-    // const updateNoteMutation = useUpdateNote();
-    // const createNoteMutation = useCreateNote();
-    const updateNoteMutation: any = null; // Temporarily disabled
-    const createNoteMutation: any = null; // Temporarily disabled
-    
-    const { enqueueSnackbar } = useSnackbar();
+    const { selectedNote } = useNoteUIStore();
+    const { saveNote, cancelChanges, syncTabChangeState, hasUnsavedChanges } = useEditorActionsHelper();
 
     const isCreateMode = selectedNote?.noteId === 0;
+    const [isSaving, setIsSaving] = React.useState(false);
 
     // Sync hasUnsavedChanges with tab state
     React.useEffect(() => {
-        markTabAsChanged(tab.id, hasUnsavedChanges);
-    }, [hasUnsavedChanges, tab.id, markTabAsChanged]);
+        syncTabChangeState(tab.id);
+    }, [hasUnsavedChanges, tab.id, syncTabChangeState]);
 
     const handleSave = async () => {
         if (!selectedNote) return;
 
+        setIsSaving(true);
         try {
-            let savedNote: Note;
-            
-            if (isCreateMode) {
-                // Create new note - convert Note to CreateNoteDTO
-                const createData: import('@/types/note.types').CreateNoteDTO = {
-                    name: selectedNote.name,
-                    description: selectedNote.description,
-                    tags: selectedNote.tags?.map((tag:any) => tag.tagId),
-                    type: selectedNote.type,
-                };
-                
-                console.log('📝 Creating note with data:', createData);
-                savedNote = await createNoteMutation.mutateAsync(createData);
-                console.log('✅ Note created successfully:', savedNote);
-                
-                enqueueSnackbar('Note created successfully', { variant: 'success' });
-            } else {
-                // Update existing note - convert Note to UpdateNoteDTO
-                const updateData: import('@/types/note.types').UpdateNoteDTO = {
-                    name: selectedNote.name,
-                    description: selectedNote.description,
-                    tags: selectedNote.tags?.map((tag:any) => tag.tagId),
-                    type: selectedNote.type,
-                    isArchived: selectedNote.isArchived,
-                };
-                
-                console.log('📝 Updating note with data:', updateData);
-                savedNote = await updateNoteMutation.mutateAsync({
-                    id: selectedNote.noteId,
-                    data: updateData,
-                });
-                console.log('✅ Note updated successfully:', savedNote);
-                
-                enqueueSnackbar('Note saved successfully', { variant: 'success' });
-            }
-            
-            // ✅ FIX: Update context with the saved note from server
-            console.log('🔄 Setting selectedNote to saved note:', savedNote);
-            setSelectedNote(savedNote);
-            
-            // ✅ FIX: Update tab with the saved note
-            if (updateTabNote) {
-                console.log('📑 Updating tab with saved note');
-                updateTabNote(tab.id, savedNote);
-            }
-            
-            // Mark as saved after all updates
-            markAsSaved();
-            
-        } catch (error) {
-            console.error('❌ Failed to save note:', error);
-            enqueueSnackbar('Failed to save note', { variant: 'error' });
+            await saveNote(tab.id);
+        } finally {
+            setIsSaving(false);
         }
     };
 
     const handleCancel = () => {
-        resetChanges();
-        enqueueSnackbar('Changes discarded', { variant: 'info' });
+        cancelChanges();
     };
-
-    const isSaving = updateNoteMutation.isPending || createNoteMutation.isPending;
 
     // Keyboard shortcut: Ctrl+S to save
     React.useEffect(() => {
