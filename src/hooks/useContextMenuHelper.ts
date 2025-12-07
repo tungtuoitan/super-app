@@ -377,8 +377,8 @@ export const useContextMenuHelper = () => {
     const handleDeleteNote = async (noteData: any) => {
         console.log('🗑️ Deleting note:', noteData);
 
-        if (!noteData?.noteId) {
-            console.error('❌ Cannot delete note: missing noteId');
+        if (!noteData?.id) {
+            console.error('❌ Cannot delete note: missing id');
             alert('Cannot delete note: missing note information');
             return;
         }
@@ -386,10 +386,10 @@ export const useContextMenuHelper = () => {
         try {
             const token = storageService.getString('token');
 
-            console.log(`🗑️ Deleting note ID: ${noteData.noteId}`, noteData.name);
-            console.log('📤 Calling API: DELETE /api/Notes/${noteData.noteId}');
+            console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
+            console.log('📤 Calling API: DELETE /api/Notes/${noteData.id}');
 
-            await _deleteNote(token ?? '', noteData.noteId.toString());
+            await _deleteNote(token ?? '', noteData.id.toString());
 
             console.log('✅ Successfully deleted note');
 

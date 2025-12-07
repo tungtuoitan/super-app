@@ -148,7 +148,7 @@ function PropertiesTab() {
       </p>
 
       <div className="flex flex-col gap-1">
-        <PropertyRow label="ID" value={selectedNote.noteId.toString()} />
+        <PropertyRow label="ID" value={selectedNote.id.toString()} />
         <PropertyRow label="Name" value={selectedNote.name} />
         <PropertyRow label="Type" value={selectedNote.type || 'N/A'} />
         <PropertyRow label="Archived" value={selectedNote.isArchived ? 'Yes' : 'No'} />

@@ -96,7 +96,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                                     {selectedNote?.isArchived ? 'Archived' : 'Active'}
                                 </span>
                                 <span className="text-xs text-muted-foreground">
-                                    ID: {selectedNote?.noteId || '0'}
+                                    ID: {selectedNote?.id || '0'}
                                 </span>
                             </div>
                         </div>

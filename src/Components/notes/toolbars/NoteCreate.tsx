@@ -13,7 +13,7 @@ export const NoteCreate = () => {
     const handleCreateNote = () => {
         // Create a new note object with id = 0 for create mode
         const newNote: Note = {
-            noteId: 0,
+            id: 0,
             name: '',
             description: '',
             tags: [], // Backward compatibility

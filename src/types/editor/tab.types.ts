@@ -33,7 +33,7 @@ export interface BaseTab {
 
 export interface NoteTab extends BaseTab {
     type: 'note';
-    noteId: number;
+    noteId: number;  // Note ID for tab identification
     note: Note;
 }
 

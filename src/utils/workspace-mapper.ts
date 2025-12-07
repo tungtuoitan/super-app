@@ -22,9 +22,11 @@ import {
  * This matches the structure from backend API
  */
 export interface BackendWorkspaceItem {
-    itemType: 'tag' | 'note' | 'file';  // Backend uses 'tag' for folders
-    itemId: number;                      // Workspace item ID
-    childId: number;                     // Actual entity ID (TagId/NoteId/FileId)
+    relationshipId?: number;             // Workspace relationship ID (workspace_items.id)
+    type: 'tag' | 'note' | 'file' | 'folder';  // Backend uses 'folder' or 'note' or 'file'
+    itemId: number;                      // Entity ID (folder/note/file ID)
+    id: number;                          // Entity ID (alias of itemId)
+    childId?: number;                    // Legacy field (some APIs still use this)
     userId: number;
     name: string;
     parentId?: number | null;
@@ -50,9 +52,10 @@ export interface BackendWorkspaceItem {
  */
 function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
     return {
-        id: item.childId,                    // ✅ folder ID
+        relationshipId: item.relationshipId, // Workspace relationship ID (workspace_items.id)
+        id: item.id || item.childId!,        // ✅ folder ID (prefer 'id', fallback 'childId')
         type: 'folder',                      // ✅ type = 'folder'
-        itemId: item.itemId,                 // Workspace relationship ID
+        itemId: item.itemId,                 // Entity ID (kept for backward compatibility)
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -79,9 +82,10 @@ function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
  */
 function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
     return {
-        id: item.childId,                    // ✅ note ID
+        relationshipId: item.relationshipId, // Workspace relationship ID (workspace_items.id)
+        id: item.id || item.childId!,        // ✅ note ID (prefer 'id', fallback 'childId')
         type: 'note',                        // ✅ type = 'note'
-        itemId: item.itemId,                 // Workspace relationship ID
+        itemId: item.itemId,                 // Entity ID (kept for backward compatibility)
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -108,9 +112,10 @@ function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
  */
 function transformToFileItem(item: BackendWorkspaceItem): FileItem {
     return {
-        id: item.childId,                    // ✅ file ID
+        relationshipId: item.relationshipId, // Workspace relationship ID (workspace_items.id)
+        id: item.id || item.childId!,        // ✅ file ID (prefer 'id', fallback 'childId')
         type: 'file',                        // ✅ type = 'file'
-        itemId: item.itemId,                 // Workspace relationship ID
+        itemId: item.itemId,                 // Entity ID (kept for backward compatibility)
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -136,7 +141,17 @@ function transformToFileItem(item: BackendWorkspaceItem): FileItem {
  * Main transformer - transforms backend item to appropriate frontend type
  */
 export function transformBackendItem(item: BackendWorkspaceItem): WorkspaceItem {
-    const itemType = item.itemType.toLowerCase();
+    const itemType = item.type?.toLowerCase();
+
+    // Debug log
+    console.log('🔄 transformBackendItem:', {
+        name: item.name,
+        type: item.type,
+        itemTypeLower: itemType,
+        id: item.id,
+        relationshipId: item.relationshipId,
+        itemId: item.itemId
+    });
 
     switch (itemType) {
         case 'tag':
@@ -150,7 +165,7 @@ export function transformBackendItem(item: BackendWorkspaceItem): WorkspaceItem 
             return transformToFileItem(item);
 
         default:
-            console.warn(`Unknown itemType: ${item.itemType}, treating as folder`);
+            console.warn(`Unknown type: ${item.type}, treating as folder`);
             return transformToFolderItem(item);
     }
 }
@@ -168,8 +183,9 @@ export function transformBackendItems(items: BackendWorkspaceItem[]): WorkspaceI
  */
 export function transformToBackendItem(item: WorkspaceItem): Partial<BackendWorkspaceItem> {
     return {
-        itemType: item.type === 'folder' ? 'tag' : item.type,
-        childId: item.id,
+        type: item.type === 'folder' ? 'tag' : item.type,
+        id: item.id,
+        childId: item.id,  // Legacy field for backward compatibility
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,

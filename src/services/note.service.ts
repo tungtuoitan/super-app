@@ -116,7 +116,7 @@ export const _getNoteById = async (noteId: number) => {
 export const _upsertNote = async (
     token: string,
     data: {
-        noteId: number; // 0 = create new, > 0 = update existing
+        id: number; // 0 = create new, > 0 = update existing
         name: string;
         description?: string;
         tags?: number[]; // Backend expects 'tags' in JSON (JsonPropertyName mapping to TagIds)

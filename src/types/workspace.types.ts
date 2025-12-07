@@ -268,8 +268,10 @@ export interface FileMetadata {
  * Base workspace item - all items share these properties
  */
 interface BaseWorkspaceItem {
-    /** Workspace item ID - used for workspace operations (add/delete from workspace)
-     * This is the relationship ID in workspace_items table */
+    /** Workspace relationship ID (workspace_items.id) - used for workspace-specific operations */
+    relationshipId?: number;
+
+    /** Entity ID (kept for backward compatibility) - same as 'id' field */
     itemId?: number;
 
     /** User ID owner */

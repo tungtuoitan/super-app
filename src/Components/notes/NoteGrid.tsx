@@ -98,7 +98,7 @@ export function NoteGrid() {
                 enableHiding: false,
             },
             {
-                accessorKey: 'noteId',
+                accessorKey: 'id',
                 header: () => (
                     <div className="text-center">ID</div>
                 ),
@@ -215,7 +215,7 @@ export function NoteGrid() {
             // }
         ];
     }, []);
-
+console.log('NoteGrid rendered with notes::::::::::', notes);
     // Create table instance
     const table = useReactTable({
         data: notes.sort((a, b) => 
@@ -232,7 +232,7 @@ export function NoteGrid() {
             pagination,
             rowSelection,
         },
-        getRowId: (row) => String(row.noteId),
+        getRowId: (row) => String(row.id),
         enableRowSelection: true,
     });
 

@@ -35,10 +35,10 @@ export function NoteContentToolbar() {
     const { enqueueSnackbar } = useSnackbar();
     
     // Debug log
-    console.log('🎨 NoteContentToolbar render:', { 
-        hasUnsavedChanges, 
-        noteId: selectedNote?.noteId,
-        noteName: selectedNote?.name 
+    console.log('🎨 NoteContentToolbar render:', {
+        hasUnsavedChanges,
+        noteId: selectedNote?.id,
+        noteName: selectedNote?.name
     });
     
     // TODO: Refactor to use direct service calls with token
@@ -61,7 +61,7 @@ export function NoteContentToolbar() {
     const handleSave = async () => {
         if (!selectedNote) return;
         
-        const isNewNote = selectedNote.noteId === 0;
+        const isNewNote = selectedNote.id === 0 || selectedNote.id < 0;
         
         try { 
             console.log('Saving note:', { selectedNote, isNewNote });
@@ -95,10 +95,10 @@ export function NoteContentToolbar() {
                     isArchived: selectedNote.isArchived,
                 };
                 
-                console.log('Updating note with data:', { id: selectedNote.noteId, data: updateData });
-                const updatedNote = await updateNote.mutateAsync({ 
-                    id: selectedNote.noteId, 
-                    data: updateData 
+                console.log('Updating note with data:', { id: selectedNote.id, data: updateData });
+                const updatedNote = await updateNote.mutateAsync({
+                    id: selectedNote.id,
+                    data: updateData
                 });
                 
                 enqueueSnackbar('Note saved successfully', { 
@@ -138,7 +138,7 @@ export function NoteContentToolbar() {
     };
 
     const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
-        if (!selectedNote || selectedNote.noteId <= 0) {
+        if (!selectedNote || selectedNote.id <= 0) {
             return;
         }
         
@@ -152,7 +152,7 @@ export function NoteContentToolbar() {
             message: 'Do you want to delete this note?',
             onConfirm: async () => {
                 try {
-                    await deleteNote.mutateAsync(selectedNote.noteId);
+                    await deleteNote.mutateAsync(selectedNote.id);
                     
                     enqueueSnackbar('Note deleted successfully', { 
                         variant: 'success', 
@@ -172,10 +172,10 @@ export function NoteContentToolbar() {
     };
 
     const copyNoteLink = () => {
-        if (!selectedNote || selectedNote.noteId <= 0) return;
-        
+        if (!selectedNote || selectedNote.id <= 0) return;
+
         const baseUrl = window.location.href;
-        const noteLink = `${baseUrl}/note/${selectedNote.noteId}`;
+        const noteLink = `${baseUrl}/note/${selectedNote.id}`;
         
         navigator.clipboard.writeText(noteLink).then(() => {
             // TODO: Add notification for copy success
@@ -188,7 +188,7 @@ export function NoteContentToolbar() {
         });
     };
 
-    const isNewNote = selectedNote?.noteId === 0;
+    const isNewNote = selectedNote?.id === 0 || (selectedNote?.id && selectedNote.id < 0);
 
     // Render save/cancel/delete buttons matching RFD structure
     const renderSaveCancel = () => {
@@ -239,7 +239,7 @@ export function NoteContentToolbar() {
                     }
                     {/* Show Delete for existing notes with proper conditions */}
                     {(() => {
-                        const shouldShowDelete = !hasUnsavedChanges && !isNewNote && selectedNote && selectedNote.noteId > 0;
+                        const shouldShowDelete = !hasUnsavedChanges && !isNewNote && selectedNote && selectedNote.id > 0;
                         
                         return shouldShowDelete && (
                             <TooltipProvider>
@@ -275,8 +275,8 @@ export function NoteContentToolbar() {
                 <div className="flex items-center justify-between bg-white text-muted-foreground px-6 pr-5 h-[61px] min-h-[61px]">
                     <div className="flex flex-wrap flex-col mt-1.5">
                         <h2 className="text-xl font-normal text-black flex items-center tracking-wide">
-                            {`NOTE ID: ${selectedNote?.noteId || '0'}`}
-                            {selectedNote && selectedNote.noteId > 0 && (
+                            {`NOTE ID: ${selectedNote?.id || '0'}`}
+                            {selectedNote && selectedNote.id > 0 && (
                                 <div className="flex">
                                     <Button
                                         variant="ghost"

@@ -32,7 +32,7 @@ export function NoteDetailDialogContent() {
         if (selectedNote) {
             setNoteKey(prev => prev + 1);
         }
-    }, [selectedNote?.noteId]);
+    }, [selectedNote?.id]);
     
     // Fallback hashtags (no API call needed)
     const tagsLoading = false; // No longer loading from API

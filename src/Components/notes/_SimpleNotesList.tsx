@@ -78,7 +78,7 @@ export function SimpleNotesList() {
             </h1>
             <div className="flex flex-col gap-4">
                 {notes.map((note: Note) => (
-                    <Card key={note.noteId}>
+                    <Card key={note.id}>
                         <CardHeader>
                             <CardTitle>{note.name}</CardTitle>
                             {note.description && (

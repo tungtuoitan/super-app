@@ -19,9 +19,9 @@ export const NOTE_TYPES: readonly NoteType[] = [
 ] as const;
 
 // Domain Model (what we use in the app)
-// Backend returns: NoteId, Name, Description, Tags, Type, CreatedAt, UpdatedAt, IsArchived
+// Backend returns: Id, Name, Description, Tags, Type, CreatedAt, UpdatedAt, IsArchived
 export interface Note {
-    noteId: number;
+    id: number;
     name: string;
     description?: string;
     hashtags: Folder[]; // Array of Folder objects (note's hashtags)
@@ -36,7 +36,7 @@ export interface Note {
 // API DTOs (what backend sends/receives)
 // Matches backend NoteResponse DTO exactly
 export interface NoteDTO {
-    noteId: number;
+    id: number;  // Backend returns 'id' (from NoteResponse.Id)
     name: string;
     description?: string;
     tags: Folder[]; // Backend still uses "tags" field name (array of Folder/Tag objects)
@@ -69,7 +69,7 @@ export interface UpdateNoteDTO {
 
 // Matches backend UpsertNoteRequest - unified create/update
 export interface UpsertNoteDTO {
-    noteId: number; // 0 = create new, > 0 = update existing
+    id: number; // 0 = create new, > 0 = update existing
     name: string;
     description?: string;
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)

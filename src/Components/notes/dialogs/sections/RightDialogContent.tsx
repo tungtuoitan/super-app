@@ -17,7 +17,7 @@ import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 export function RightDialogContent() {
     const { selectedNote } = useNoteUIStore();
 
-    const isNewNote = selectedNote?.noteId === 0;
+    const isNewNote = selectedNote?.id === 0 || (selectedNote?.id && selectedNote.id < 0);
 
     return (
         <div className="p-4 h-full overflow-y-auto space-y-4">

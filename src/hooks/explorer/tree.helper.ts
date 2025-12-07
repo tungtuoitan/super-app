@@ -226,6 +226,13 @@ export function createWorkspaceRootFolder(
      * Benefits: smaller payload, better caching, easier updates
      */
     function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
+        console.log('🏗️ buildHierarchy - Input items:', items.map(i => ({
+            name: i.name,
+            id: i.id,
+            type: i.type,
+            parentId: i.parentId
+        })));
+
         // Create a map for O(1) lookup - include ALL item types
         const itemMap = new Map<number, WorkspaceItem>();
 
@@ -238,6 +245,8 @@ export function createWorkspaceRootFolder(
             itemMap.set(item.id, itemWithChildren);
         });
 
+        console.log('🗺️ buildHierarchy - Item map keys:', Array.from(itemMap.keys()));
+
         // Build parent-child relationships
         const roots: WorkspaceItem[] = [];
 
@@ -247,6 +256,7 @@ export function createWorkspaceRootFolder(
 
             if (item.parentId === null || item.parentId === undefined) {
                 // Root level item (no parent)
+                console.log(`✅ Root item: ${item.name} (id: ${item.id})`);
                 roots.push(currentItem);
             } else {
                 // Child item - add to parent's children array
@@ -254,18 +264,21 @@ export function createWorkspaceRootFolder(
                 if (parent) {
                     // Only add to parent if parent is a folder
                     if (isFolder(parent)) {
+                        console.log(`✅ Adding ${item.name} (id: ${item.id}) to parent ${parent.name} (id: ${parent.id})`);
                         parent.children.push(currentItem);
                     } else {
-                        console.warn(`Item ${item.id} has parent ${item.parentId} which is not a folder`);
+                        console.warn(`⚠️ Item ${item.id} has parent ${item.parentId} which is not a folder`);
                         roots.push(currentItem);
                     }
                 } else {
                     // Orphan (parent not found) - treat as root
-                    console.warn(`Item ${item.id} has parentId ${item.parentId} but parent not found`);
+                    console.warn(`⚠️ Orphan: ${item.name} (id: ${item.id}) has parentId ${item.parentId} but parent not found in map`);
                     roots.push(currentItem);
                 }
             }
         });
+
+        console.log('📦 buildHierarchy - Roots:', roots.map(r => ({ name: r.name, id: r.id, childrenCount: isFolder(r) ? r.children.length : 0 })));
 
         return roots;
     }
@@ -324,10 +337,23 @@ export function transformToTreeData(
     // Backend: {itemId, itemType: 'tag'/'note'/'file', childId}
     // Frontend: {id, type: 'folder'/'note'/'file'}
     // ================================================================
-    console.log('🔍 transformToTreeData - Raw backend items:', data.items);
+    console.log('🔍 transformToTreeData - Raw backend items:', JSON.stringify(data.items, null, 2));
+    console.log('🔍 transformToTreeData - Backend items breakdown:', data.items.map((item: any) => ({
+        name: item.name,
+        itemType: item.itemType,
+        itemId: item.itemId,
+        childId: item.childId,
+        parentId: item.parentId
+    })));
 
     const frontendItems = transformBackendItems(data.items as BackendWorkspaceItem[]);
-    console.log('✅ transformToTreeData - Transformed to frontend types:', frontendItems);
+    console.log('✅ transformToTreeData - Transformed to frontend types:', frontendItems.map(item => ({
+        name: item.name,
+        type: item.type,
+        id: item.id,
+        itemId: item.itemId,
+        parentId: item.parentId
+    })));
 
     // ================================================================
     // STEP 3: Build hierarchical structure from flat list

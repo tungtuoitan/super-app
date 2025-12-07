@@ -47,6 +47,7 @@ export function WorkspaceTree() {
     const treeData = useMemo(() => {
         return transformToTreeData(currentTree, searchText);
     }, [currentTree, searchText]);
+    console.log('WorkspaceTree rendered with treeData::::::::::', treeData);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {

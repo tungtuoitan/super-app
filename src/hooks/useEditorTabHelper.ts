@@ -38,7 +38,7 @@ export const useEditorTabHelper = () => {
                 console.log('✅ Setting selectedNote:', activeTab.note);
                 
                 // Initialize originalNoteRef for change tracking
-                if (!originalNoteRef.current || originalNoteRef.current.noteId !== activeTab.note.noteId) {
+                if (!originalNoteRef.current || originalNoteRef.current.id !== activeTab.note.id) {
                     console.log('📌 Initializing originalNoteRef in EditorTabHelper:', activeTab.note);
                     originalNoteRef.current = { ...activeTab.note };
                     setHasUnsavedChanges(false); // Reset changes for newly opened note
@@ -64,7 +64,7 @@ export const useEditorTabHelper = () => {
         
         // Check if tab already exists for this note
         const existingTab = openTabs.find(
-            tab => tab.type === 'note' && tab.noteId === note.noteId
+            tab => tab.type === 'note' && tab.noteId === note.id
         ) as NoteTab | undefined;
 
         if (existingTab) {
@@ -74,9 +74,9 @@ export const useEditorTabHelper = () => {
         } else {
             // Create new tab
             const newTab: NoteTab = {
-                id: `note-${note.noteId}-${Date.now()}`,
+                id: `note-${note.id}-${Date.now()}`,
                 type: 'note',
-                noteId: note.noteId,
+                noteId: note.id,
                 title: note.name || 'Untitled Note',
                 note: note,
                 hasUnsavedChanges: false,
@@ -155,12 +155,12 @@ export const useEditorTabHelper = () => {
 
     const updateTabNote = (tabId: string, note: Note) => {
         console.log('🔄 EditorTabContext - updateTabNote:', { tabId, note });
-        setOpenTabs(prev => 
+        setOpenTabs(prev =>
             prev.map(tab => {
                 if (tab.id === tabId && tab.type === 'note') {
                     return {
                         ...tab,
-                        noteId: note.noteId,
+                        noteId: note.id,
                         title: note.name || 'Untitled Note',
                         note: note,
                     } as NoteTab;

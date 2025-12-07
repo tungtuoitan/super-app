@@ -16,7 +16,7 @@ export const useNoteUIHelper = () => {
         console.log('🚪 openDialog called:', note);
 
         // Initialize originalNoteRef when a note is selected
-        if (!originalNoteRef.current || originalNoteRef.current.noteId !== note.noteId) {
+        if (!originalNoteRef.current || originalNoteRef.current.id !== note.id) {
             console.log('📌 Initializing originalNoteRef:', note);
             originalNoteRef.current = { ...note };
         }
@@ -24,7 +24,7 @@ export const useNoteUIHelper = () => {
         setSelectedNote(note);
 
         // For new notes, set hasUnsavedChanges based on existing content
-        const isNewNote = note.noteId === 0;
+        const isNewNote = note.id === 0 || note.id < 0;
         if (isNewNote) {
             const hasContent =
                 note.name?.trim() ||
@@ -59,9 +59,9 @@ export const useNoteUIHelper = () => {
         console.log('✨ Updated state:', updated);
         console.log('📌 Original ref:', originalNoteRef.current);
 
-        // Check if this was originally a new note (originalRef has noteId === 0)
-        const wasNewNote = originalNoteRef.current?.noteId === 0;
-        const isNowSaved = updated.noteId > 0;
+        // Check if this was originally a new note (originalRef has id === 0 or < 0)
+        const wasNewNote = originalNoteRef.current?.id === 0 || (originalNoteRef.current?.id && originalNoteRef.current.id < 0);
+        const isNowSaved = updated.id > 0;
 
         // If this was a new note and now has an ID, update the original reference
         if (wasNewNote && isNowSaved) {
@@ -71,8 +71,8 @@ export const useNoteUIHelper = () => {
             return;
         }
 
-        // For new notes that are still unsaved (noteId === 0)
-        if (updated.noteId === 0) {
+        // For new notes that are still unsaved (id === 0 or < 0)
+        if (updated.id === 0 || updated.id < 0) {
             const hasContent =
                 updated.name?.trim() ||
                 updated.description?.trim() ||

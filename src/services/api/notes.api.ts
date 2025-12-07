@@ -19,7 +19,7 @@ import type {
  * Converts NoteResponse with ISO date strings to Note with Date objects
  */
 const transformNoteResponse = (noteResponse: NoteResponse): Note => ({
-    noteId: noteResponse.noteId,
+    id: noteResponse.id,  // Backend returns 'id' (mapped from NoteResponse.Id)
     name: noteResponse.name,
     description: noteResponse.description,
     tags: noteResponse.tags, // Backward compatibility

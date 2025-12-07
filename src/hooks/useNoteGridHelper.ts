@@ -46,10 +46,10 @@ export const useNoteGridHelper = () => {
         console.log('➕ Creating new note...');
 
         // Generate temporary negative ID
-        const tempId = -Math.floor(Math.random() * 10);
+        const tempId = -Math.floor(Math.random() * 10000);  // Larger range to avoid collisions
         // Create temporary note
         const newNote: Note = {
-            noteId: tempId,
+            id: tempId,
             name: 'Untitled Note',
             description: '',
             hashtags: [],
@@ -88,8 +88,9 @@ export const useNoteGridHelper = () => {
     };    
     
     // Delete selected notes (called from context menu after confirmation)
-    const handleDeleteSelected = async () => {
-        const selectedIds = Object.keys(rowSelection).map(id => parseInt(id));
+    const handleDeleteSelected = async (ids?: number[]) => {
+        // Use provided ids or fall back to current selection
+        const selectedIds = ids ?? Object.keys(rowSelection).map(id => parseInt(id));
         if (selectedIds.length === 0) return;
 
         try {
@@ -128,10 +129,10 @@ export const useNoteGridHelper = () => {
                 }
     
                 selectedNotes = [...notes]
-                    .sort((a, b) => 
+                    .sort((a, b) =>
                         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .filter(note => 
-                        selectedIds.includes(note.noteId)
+                    .filter(note =>
+                        selectedIds.includes(note.id)
                     );
             } else {
                 // Clicked on empty area
@@ -143,7 +144,7 @@ export const useNoteGridHelper = () => {
         setContextData({
             selectedNotes,
             selectedIds,
-            onDelete: handleDeleteSelected,
+            onDelete: () => handleDeleteSelected(selectedIds),  // Pass selectedIds directly
             onAddNote: createNewNote,
         });
         setIsOpen(true);
