@@ -6,7 +6,8 @@ import {
     Trash2 as DeleteIcon, 
     Info as InfoIcon,
     File as FileIcon,
-    FileText as NoteIcon
+    FileText as NoteIcon,
+    AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
@@ -70,8 +71,9 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
 
     /**
      * Wrapper for handleDeleteItem with confirmation
+     * @param isHardDelete - If true, permanently delete (hard delete)
      */
-    const onDeleteItemClick = (event: any) => {
+    const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
         if (contextType === 'folder' && contextData) {
             // Check if this is a workspace root node (negative ID)
             if (contextData.tagId < 0) {
@@ -91,25 +93,43 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
 
             let message: string;
 
-            if (isMultipleSelected) {
-                message = `Are you sure you want to delete ${selectedCount} selected folders?\n\nThis action cannot be undone.`;
-            } else {
-                const countChildren = (tag: any): number => {
-                    if (!tag.children || tag.children.length === 0) return 0;
-                    return tag.children.length + tag.children.reduce((sum: number, child: any) => sum + countChildren(child), 0);
-                };
+            if (isHardDelete) {
+                // Hard delete warning messages
+                if (isMultipleSelected) {
+                    message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${selectedCount} selected folders and ALL their contents (notes, files, subfolders).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+                } else {
+                    const countChildren = (tag: any): number => {
+                        if (!tag.children || tag.children.length === 0) return 0;
+                        return tag.children.length + tag.children.reduce((sum: number, child: any) => sum + countChildren(child), 0);
+                    };
 
-                const childCount = countChildren(contextData);
-                message = childCount > 0
-                    ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child folder(s).`
-                    : `Are you sure you want to delete "${contextData.name}"?`;
+                    const childCount = countChildren(contextData);
+                    message = childCount > 0
+                        ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ${childCount} child folder(s) with ALL their contents.\n\n❌ This action CANNOT be undone.\n❌ All notes, files, and subfolders will be LOST FOREVER.`
+                        : `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ALL its contents.\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+                }
+            } else {
+                // Soft delete messages (current behavior)
+                if (isMultipleSelected) {
+                    message = `Are you sure you want to delete ${selectedCount} selected folders?\n\nThis action cannot be undone.`;
+                } else {
+                    const countChildren = (tag: any): number => {
+                        if (!tag.children || tag.children.length === 0) return 0;
+                        return tag.children.length + tag.children.reduce((sum: number, child: any) => sum + countChildren(child), 0);
+                    };
+
+                    const childCount = countChildren(contextData);
+                    message = childCount > 0
+                        ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child folder(s).`
+                        : `Are you sure you want to delete "${contextData.name}"?`;
+                }
             }
 
             deleteConfirmation.show({
                 anchorEl: anchorElement,
                 message,
                 onConfirm: () => {
-                    handleDeleteItem(contextData, contextType);
+                    handleDeleteItem(contextData, contextType, isHardDelete);
                 }
             });
         } else if (contextType === 'note' && contextData) {
@@ -120,17 +140,22 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
             const nativeEvent = event.syntheticEvent || event;
             const anchorElement = nativeEvent?.target as HTMLElement;
 
-            const message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
+            let message: string;
+            if (isHardDelete) {
+                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}".\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`;
+            } else {
+                message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
+            }
 
             deleteConfirmation.show({
                 anchorEl: anchorElement,
                 message,
                 onConfirm: () => {
-                    handleDeleteItem(contextData, contextType);
+                    handleDeleteItem(contextData, contextType, isHardDelete);
                 }
             });
         } else {
-            handleDeleteItem(contextData, contextType);
+            handleDeleteItem(contextData, contextType, isHardDelete);
         }
     };
 
@@ -166,15 +191,24 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                         {/* Edit - disabled if multiple items selected */}
                         <MenuItem onClick={onEditItemClick} disabled={isMultipleSelected}>
                             <EditIcon className="w-4 h-4 mr-2" />
-                            Edit {isMultipleSelected ? 'Folders' : 'Folder'}
+                            Edit
                         </MenuItem>
                         
-                        {/* Delete - show count if multiple selected */}
+                        {/* Delete */}
                         {!isWorkspaceRoot && (
-                            <MenuItem onClick={onDeleteItemClick}>
-                                <DeleteIcon className="w-4 h-4 mr-2" />
-                                Delete {isMultipleSelected ? `${selectedCount} Folders` : 'Folder'}
-                            </MenuItem>
+                            <>
+                                <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                                    <DeleteIcon className="w-4 h-4 mr-2" />
+                                    Delete
+                                </MenuItem>
+                                <MenuItem 
+                                    onClick={(e) => onDeleteItemClick(e, true)}
+                                    className="text-red-600 hover:bg-red-50"
+                                >
+                                    <HardDeleteIcon className="w-4 h-4 mr-2" />
+                                    Hard Delete
+                                </MenuItem>
+                            </>
                         )}
                     </>
                 );
@@ -184,16 +218,23 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                     <>
                         <MenuItem onClick={onEditItemClick}>
                             <EditIcon className="w-4 h-4 mr-2" />
-                            Edit Note
+                            Edit
                         </MenuItem>
                         <MenuItem onClick={handleViewInfo}>
                             <InfoIcon className="w-4 h-4 mr-2" />
                             View Details
                         </MenuItem>
                         <MenuDivider />
-                        <MenuItem onClick={onDeleteItemClick}>
+                        <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
                             <DeleteIcon className="w-4 h-4 mr-2" />
-                            Delete Note
+                            Delete
+                        </MenuItem>
+                        <MenuItem 
+                            onClick={(e) => onDeleteItemClick(e, true)}
+                            className="text-red-600 hover:bg-red-50"
+                        >
+                            <HardDeleteIcon className="w-4 h-4 mr-2" />
+                            Hard Delete
                         </MenuItem>
                     </>
                 );
@@ -211,7 +252,7 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                             }
                         }}>
                             <AddIcon className="w-4 h-4 mr-2" />
-                            Add Note
+                            Add
                         </MenuItem>
                         
                         <MenuDivider />
@@ -232,13 +273,40 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
                                     anchorEl: anchorElement,
                                     message,
                                     onConfirm: () => {
-                                        contextData.onDelete();
+                                        contextData.onDelete(false);
                                     }
                                 });
                             }
                         }}>
                             <DeleteIcon className="w-4 h-4 mr-2" />
-                            Delete {noteGridIsMultiple ? `${noteGridSelectedCount} Notes` : 'Note'}
+                            Delete
+                        </MenuItem>
+                        <MenuItem 
+                            onClick={(event) => {
+                                if (contextData?.onDelete) {
+                                    closeContextMenu();
+
+                                    // Extract anchor element from menu event
+                                    const nativeEvent = event.syntheticEvent || event;
+                                    const anchorElement = nativeEvent?.target as HTMLElement;
+
+                                    const message = noteGridIsMultiple
+                                        ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${noteGridSelectedCount} selected notes.\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`
+                                        : `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete this note.\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`;
+
+                                    deleteConfirmation.show({
+                                        anchorEl: anchorElement,
+                                        message,
+                                        onConfirm: () => {
+                                            contextData.onDelete(true);
+                                        }
+                                    });
+                                }
+                            }}
+                            className="text-red-600 hover:bg-red-50"
+                        >
+                            <HardDeleteIcon className="w-4 h-4 mr-2" />
+                            Hard Delete
                         </MenuItem>
                     </>
                 );

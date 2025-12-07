@@ -149,6 +149,9 @@ export interface DeleteItemsRequest {
     
     /** Whether to cascade delete child items (default: true) */
     cascade?: boolean;
+    
+    /** Hard delete flag: true = permanently delete, false = soft delete (default) */
+    isHardDelete?: boolean;
 }
 
 /**

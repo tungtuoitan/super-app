@@ -240,3 +240,22 @@
 .szh-menu__divider {
   background-color: hsl(var(--border)) !important;
 }
+
+/* Hard Delete Menu Item - Destructive Red Style */
+.szh-menu__item.text-red-600 {
+  color: rgb(220, 38, 38) !important;
+}
+
+.szh-menu__item.text-red-600:hover {
+  background-color: rgb(254, 242, 242) !important;
+  color: rgb(220, 38, 38) !important;
+}
+
+.dark .szh-menu__item.text-red-600 {
+  color: rgb(248, 113, 113) !important;
+}
+
+.dark .szh-menu__item.text-red-600:hover {
+  background-color: rgb(127, 29, 29) !important;
+  color: rgb(248, 113, 113) !important;
+}

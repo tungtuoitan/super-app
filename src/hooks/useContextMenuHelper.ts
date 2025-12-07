@@ -80,8 +80,8 @@ export const useContextMenuHelper = () => {
 
 
 
-        const handleDeleteFolder = (folder: Folder) => {
-            console.log('🗑️ Removing folder from workspace:', folder.id, folder.name, 'relationshipId:', folder.relationshipId);
+        const handleDeleteFolder = (folder: Folder, isHardDelete: boolean = false) => {
+            console.log('🗑️ Removing folder from workspace:', folder.id, folder.name, 'relationshipId:', folder.relationshipId, 'isHardDelete:', isHardDelete);
 
             // Validate folder ID exists
             if (!folder.id) {
@@ -142,7 +142,8 @@ export const useContextMenuHelper = () => {
 
                     const result = await _deleteWorkspaceItems(token??'', CURRENT_WORKSPACE_ID, {
                         items: foldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
-                        cascade: true
+                        cascade: true,
+                        isHardDelete: isHardDelete
                     });
 
                     console.log('✅ API response:', result);
@@ -241,8 +242,8 @@ export const useContextMenuHelper = () => {
     /**
      * Handle bulk delete for multiple selected folders
      */
-    const handleBulkDeleteFolders = (selectedIds: number[]) => {
-        console.log('🗑️ Bulk deleting folders:', selectedIds);
+    const handleBulkDeleteFolders = (selectedIds: number[], isHardDelete: boolean = false) => {
+        console.log('🗑️ Bulk deleting folders:', selectedIds, 'isHardDelete:', isHardDelete);
 
         if (!currentTree?.items) {
             console.error('❌ Cannot delete: no tree data');
@@ -338,7 +339,8 @@ export const useContextMenuHelper = () => {
 
                 const result = await _deleteWorkspaceItems(token ?? '', CURRENT_WORKSPACE_ID, {
                     items: allFoldersToDelete.map(f => ({ id: f.id!, type: 2 as const })),
-                    cascade: true
+                    cascade: true,
+                    isHardDelete: isHardDelete
                 });
 
                 console.log('✅ API response:', result);
@@ -374,8 +376,8 @@ export const useContextMenuHelper = () => {
     /**
      * Handle delete note action
      */
-    const handleDeleteNote = async (noteData: any) => {
-        console.log('🗑️ Deleting note:', noteData);
+    const handleDeleteNote = async (noteData: any, isHardDelete: boolean = false) => {
+        console.log('🗑️ Deleting note:', noteData, 'isHardDelete:', isHardDelete);
 
         if (!noteData?.id) {
             console.error('❌ Cannot delete note: missing id');
@@ -404,8 +406,8 @@ export const useContextMenuHelper = () => {
     /**
      * Handle delete item action
      */
-    const handleDeleteItem = (itemData: any, contextType: ContextMenuType) => {
-        console.log('🗑️ Context Menu: Delete item clicked for:', itemData);
+    const handleDeleteItem = (itemData: any, contextType: ContextMenuType, isHardDelete: boolean = false) => {
+        console.log('🗑️ Context Menu: Delete item clicked for:', itemData, 'isHardDelete:', isHardDelete);
 
         if ((contextType === 'tag' || contextType === 'folder') && itemData) {
             // Check if this is a workspace root node (negative ID)
@@ -423,15 +425,15 @@ export const useContextMenuHelper = () => {
             if (isMultipleSelected) {
                 // Bulk delete all selected folders
                 console.log('🗑️ Bulk deleting multiple folders:', selectedFolderIds);
-                handleBulkDeleteFolders(selectedFolderIds);
+                handleBulkDeleteFolders(selectedFolderIds, isHardDelete);
             } else {
                 // Delete single folder
-                handleDeleteFolder(itemData);
+                handleDeleteFolder(itemData, isHardDelete);
             }
         } else if (contextType === 'note' && itemData) {
             // Handle note deletion
             closeContextMenu();
-            handleDeleteNote(itemData);
+            handleDeleteNote(itemData, isHardDelete);
         } else {
             closeContextMenu();
         }
