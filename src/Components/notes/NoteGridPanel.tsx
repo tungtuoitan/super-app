@@ -12,6 +12,7 @@ import { Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { Checkbox } from '@/Components/ui/checkbox';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
 import {Note} from '@/types/note.types';
 import {_getNotes, _deleteNote} from '@/services/note.service';
 import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
@@ -55,9 +56,25 @@ export function NoteGridPanel({
         loadNotes();
     }, []);
 
+    // Helper to get badge variant by type
+    const getTypeVariant = (type?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+        const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+            'meeting': 'default',
+            'brainstorm': 'secondary',
+            'research': 'outline',
+            'bug': 'destructive',
+            'task': 'default',
+            'idea': 'secondary',
+            'default': 'outline'
+        };
+        return variants[type?.toLowerCase() || 'default'] || variants.default;
+    };
+
     
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Note>[]>(() => {
+        console.log('🔍 NoteGridPanel - sidebarMode:', sidebarMode, 'columns count:', sidebarMode ? 1 : 10);
+        
         // Sidebar mode: only show name column
         if (sidebarMode) {
             return [
@@ -110,12 +127,37 @@ export function NoteGridPanel({
             },
             {
                 accessorKey: 'name',
-                header: 'Name',
-                size: 250,
-                cell: ({ getValue }) => (
-                    <span className="text-sm text-primary font-medium cursor-pointer text-left">
+                header: 'Note Name',
+                size: 300,
+                cell: ({ getValue, row }) => (
+                    <div className="text-sm text-primary font-medium cursor-pointer hover:text-primary/80 underline">
                         {(getValue() as string) || '—'}
-                    </span>
+                    </div>
+                ),
+            },
+            {
+                accessorKey: 'type',
+                header: 'Type',
+                size: 120,
+                cell: ({ getValue }) => {
+                    const type = getValue() as string;
+                    return type ? (
+                        <Badge variant={getTypeVariant(type)} className="capitalize">
+                            {type}
+                        </Badge>
+                    ) : (
+                        <span className="text-sm text-muted-foreground">N/A</span>
+                    );
+                },
+            },
+            {
+                accessorKey: 'description',
+                header: 'Description',
+                size: 400,
+                cell: ({ getValue }) => (
+                    <div className="text-sm text-muted-foreground line-clamp-2 overflow-hidden text-ellipsis">
+                        {(getValue() as string) || '—'}
+                    </div>
                 ),
             },
             {
@@ -125,7 +167,7 @@ export function NoteGridPanel({
                 cell: ({ getValue, row }) => {
                     const tags = getValue();
                     if (!tags || (Array.isArray(tags) && tags.length === 0)) {
-                        return <span className="text-sm text-[#858585]">—</span>;
+                        return <span className="text-sm text-muted-foreground">—</span>;
                     }
 
                     const tagArray = Array.isArray(tags) ? tags : (tags as string).split(',');
@@ -138,13 +180,13 @@ export function NoteGridPanel({
                                 <Badge
                                     key={`${row.original.noteId}-${index}`}
                                     variant="secondary"
-                                    className="text-[0.7rem] h-5 bg-[#4FC3F7]/10 text-[#4FC3F7] border-[#4FC3F7]/30"
+                                    className="text-[0.7rem] h-5"
                                 >
                                     #{typeof tag === 'string' ? tag.trim() : tag.name || tag}
                                 </Badge>
                             ))}
                             {remainingCount > 0 && (
-                                <Badge variant="outline" className="text-[0.7rem] h-5 text-[#858585]">
+                                <Badge variant="outline" className="text-[0.7rem] h-5">
                                     +{remainingCount}
                                 </Badge>
                             )}
@@ -153,21 +195,21 @@ export function NoteGridPanel({
                 }
             },
             {
-                accessorKey: 'description',
-                header: 'Description',
-                size: 300,
+                accessorKey: 'createdBy',
+                header: 'Created By',
+                size: 140,
                 cell: ({ getValue }) => (
-                    <span className="text-sm text-[#cccccc] overflow-hidden text-ellipsis whitespace-nowrap block">
+                    <span className="text-sm text-muted-foreground">
                         {(getValue() as string) || '—'}
                     </span>
                 ),
             },
             {
                 accessorKey: 'createdAt',
-                header: 'Created',
-                size: 180,
+                header: 'Created Date',
+                size: 140,
                 cell: ({ getValue }) => (
-                    <span className="text-xs text-[#858585]">
+                    <span className="text-sm text-muted-foreground">
                         {getValue() ? formatDateTime(new Date(getValue() as string)) : '—'}
                     </span>
                 ),
@@ -176,14 +218,17 @@ export function NoteGridPanel({
                 accessorKey: 'isArchived',
                 header: 'Status',
                 size: 100,
-                cell: ({ getValue }) => (
-                    <span className={`text-xs font-medium ${(getValue() as boolean) ? 'text-muted-foreground' : 'text-primary'}`}>
-                        {(getValue() as boolean) ? 'Archived' : 'Active'}
-                    </span>
-                )
+                cell: ({ getValue }) => {
+                    const isArchived = getValue() as boolean;
+                    return (
+                        <Badge variant={isArchived ? 'outline' : 'default'}>
+                            {isArchived ? 'Archived' : 'Active'}
+                        </Badge>
+                    );
+                }
             }
         ];
-    }, [sidebarMode]);
+    }, [sidebarMode, formatDateTime, getTypeVariant]);
 
     // Create table instance
     const table = useReactTable({
@@ -208,10 +253,19 @@ export function NoteGridPanel({
     // Loading state
     if (isLoading) {
         return (
-            <div className="h-full flex items-center justify-center bg-editor-bg">
-                <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                    <span className="text-sm text-editor-fg">Loading notes...</span>
+            <div className="w-full h-full bg-background">
+                <div className="rounded-md border">
+                    <table className="w-full">
+                        <tbody>
+                            <tr>
+                                <td colSpan={columns.length} className="h-24 text-center">
+                                    <div className="flex items-center justify-center">
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         );
@@ -220,71 +274,69 @@ export function NoteGridPanel({
     // Error state
     if (error) {
         return (
-            <div className="h-full p-4 bg-editor-bg">
-                <div className="p-4 mb-4 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-sm">
-                    Failed to load notes: {error.message}
-                </div>
-            </div>
+            <Alert variant="destructive">
+                <AlertDescription>Failed to load notes: {error.message}</AlertDescription>
+            </Alert>
         );
     }
 
     // Empty state
     if (!notes || notes.length === 0) {
         return (
-            <div className="h-full flex items-center justify-center bg-editor-bg">
-                <div className="text-center">
-                    <h2 className="text-lg text-muted-foreground mb-2">No notes found</h2>
-                    <p className="text-sm text-muted-foreground">Create your first note to get started</p>
+            <div className="w-full h-full bg-background">
+                <div className="rounded-md border">
+                    <table className="w-full">
+                        <tbody>
+                            <tr>
+                                <td colSpan={columns.length} className="h-24 text-center">
+                                    <div className="text-muted-foreground">
+                                        <h2 className="text-lg mb-2">No notes found</h2>
+                                        <p className="text-sm">Create your first note to get started</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         );
     }
 
-    // Main content - VSCode-style dark table
+    // Main content - Modern table with rounded border
     const selectedCount = Object.keys(rowSelection).length;
 
     return (
-        <div className="h-full w-full flex flex-col bg-editor-bg">
+        <div className="w-full h-full bg-background">
             {/* Header with count and actions - hide in sidebar mode */}
-            {!sidebarMode && (
-                <div className="p-3 border-b border-editor-border bg-editor-sidebar flex items-center justify-between">
-                    <span className="text-sm text-editor-fg">
-                        {selectedCount > 0 ? (
-                            <span className="font-semibold text-primary">
-                                {selectedCount} selected
-                            </span>
-                        ) : (
-                            <>
-                                {notes.length} note{notes.length !== 1 ? 's' : ''}
-                            </>
-                        )}
-                    </span>
-                    {selectedCount > 0 && (
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleDeleteSelected}
-                            className="flex items-center gap-2"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                            Delete {selectedCount} note{selectedCount !== 1 ? 's' : ''}
-                        </Button>
-                    )}
+            {!sidebarMode && selectedCount > 0 && (
+                <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">
+                        <span className="font-semibold text-primary">
+                            {selectedCount} selected
+                        </span>
+                    </div>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleDeleteSelected}
+                        className="flex items-center gap-2"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        Delete {selectedCount} note{selectedCount !== 1 ? 's' : ''}
+                    </Button>
                 </div>
             )}
             
             {/* Table */}
-            <div className="flex-1 w-full overflow-auto">
-                <table className="w-full border-collapse">
-                    <thead className="bg-editor-sidebar sticky top-0 z-10">
+            <div className="rounded-md border">
+                <table className="w-full">
+                    <thead className="bg-muted/50">
                         {table.getHeaderGroups().map(headerGroup => (
-                            <tr key={headerGroup.id} className="border-b border-editor-border">
+                            <tr key={headerGroup.id} className="border-b">
                                 {headerGroup.headers.map(header => (
                                     <th
                                         key={header.id}
-                                        className={`px-4 text-left align-middle font-semibold text-muted-foreground uppercase ${
-                                            sidebarMode ? 'text-[0.7rem] h-8' : 'text-[0.8rem] h-10'
-                                        }`}
+                                        className="h-[52px] px-4 text-left align-middle font-semibold text-muted-foreground"
                                         style={{ width: header.getSize() }}
                                     >
                                         {header.isPlaceholder
@@ -292,7 +344,7 @@ export function NoteGridPanel({
                                             : flexRender(
                                                 header.column.columnDef.header,
                                                 header.getContext()
-                                            )}Q
+                                            )}
                                     </th>
                                 ))}
                             </tr>
@@ -302,14 +354,14 @@ export function NoteGridPanel({
                         {table.getRowModel().rows.map(row => (
                             <tr
                                 key={row.id}
-                                className={`border-b border-editor-border cursor-pointer hover:bg-editor-hover ${
-                                    sidebarMode ? 'h-9' : 'h-[42px]'
+                                className={`border-b h-[50px] cursor-pointer hover:bg-muted/50 transition-colors ${
+                                    row.original.isArchived ? 'opacity-60' : ''
                                 }`}
                                 onClick={() => openNoteTab(row.original)}
                                 onContextMenu={(e) => handleContextMenu(e, row)}
                             >
                                 {row.getVisibleCells().map(cell => (
-                                    <td key={cell.id} className="px-4 align-middle text-left">
+                                    <td key={cell.id} className="px-4 align-middle">
                                         {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
@@ -324,8 +376,8 @@ export function NoteGridPanel({
 
             {/* Pagination - hide in sidebar mode */}
             {!sidebarMode && (
-                <div className="flex items-center justify-between px-4 py-3 border-t border-editor-border bg-editor-sidebar">
-                    <div className="text-sm text-editor-fg">
+                <div className="flex items-center justify-between px-2 py-4">
+                    <div className="text-sm text-muted-foreground">
                         Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
                         {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, notes.length)} of{' '}
                         {notes.length} results

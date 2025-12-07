@@ -121,15 +121,12 @@ export const useNoteGridHelper = () => {
             setIsOpen(true);
         };
     
-        // Helper function to format date/time
+        // Helper function to format date/time (short format for grid)
         const formatDateTime = (date: Date): string => {
             return new Intl.DateTimeFormat('en-US', {
                 year: 'numeric',
                 month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
+                day: 'numeric'
             }).format(date);
         };
 

@@ -87,13 +87,13 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
 
 /**
  * Notes View - Notes list interface with grid
- * Shows compact sidebar view with only name column
+ * Shows full note grid with all columns
  */
 function NotesView() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* NoteGrid in sidebar mode - only shows name column */}
-      <NoteGridPanel sidebarMode={true} />
+      {/* NoteGrid with all columns */}
+      <NoteGridPanel sidebarMode={false} />
     </div>
   )
 }
