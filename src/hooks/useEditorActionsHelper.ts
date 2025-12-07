@@ -9,6 +9,7 @@ import { _upsertNote } from '@/services/note.service';
 import { storageService } from '@/services/storage.service';
 import { useNoteUIHelper } from './useNoteUIHelper';
 import { useEditorTabHelper } from './useEditorTabHelper';
+import { useNoteGridHelper } from './useNoteGridHelper';
 import { useNoteUIStore } from '@/store/note/useNoteUIStore';
 import { transformNoteData } from '@/utils/note.utils';
 
@@ -16,6 +17,7 @@ export const useEditorActionsHelper = () => {
     const { selectedNote, hasUnsavedChanges } = useNoteUIStore();
     const { setSelectedNote, markAsSaved, resetChanges } = useNoteUIHelper();
     const { updateTabNote, markTabAsChanged } = useEditorTabHelper();
+    const { loadNotes } = useNoteGridHelper();
     const { enqueueSnackbar } = useSnackbar();
 
     /**
@@ -67,6 +69,10 @@ export const useEditorActionsHelper = () => {
 
             // Mark as saved after all updates
             markAsSaved();
+
+            // Reload note grid to reflect changes
+            console.log('🔄 Reloading note grid...');
+            await loadNotes();
 
             return transformedNote;
         } catch (error) {

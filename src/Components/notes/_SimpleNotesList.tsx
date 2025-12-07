@@ -3,7 +3,7 @@
  * Demonstrates the new React Query architecture
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Button } from '@/shared/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/Components/ui/card';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
@@ -32,7 +32,7 @@ export function SimpleNotesList() {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         loadNotes();
     }, []);
 

@@ -95,9 +95,9 @@ export interface UpdateWorkspaceItemRequest {
  * Response from update workspace item operation
  * Maps to backend UpdateWorkspaceItemResponse
  */
-export interface UpdateWorkspaceItemResponse extends WorkspaceItem {
+export type UpdateWorkspaceItemResponse = WorkspaceItem & {
     message?: string;
-}
+};
 
 /**
  * Single item to be moved in workspace
@@ -162,76 +162,255 @@ export interface WorkspaceOperationResult {
     object?: any;
 }
 
-/**
- * Workspace item response - represents a single item in the tree hierarchy
- * Maps to backend WorkspaceItem
- */
-export interface WorkspaceItem {
-    /** Type of the item: 'tag', 'note', or 'file' */
-    itemType: string;
+// ============================================
+// METADATA TYPES
+// ============================================
 
-    /** Workspace item ID - used for deletion */
-    itemId: number;
+/** Folder-specific metadata */
+export interface FolderMetadata {
+    /** Hierarchical path (e.g., "/1/5/12/") */
+    path?: string;
 
-    /** Workspace item ID (alias for itemId) */
-    id: number;
+    /** Usage count across workspace */
+    usageCount: number;
 
-    /** Child entity ID (TagId/NoteId/FileId) */
-    childId: number;
+    /** Total direct children */
+    childrenCount: number;
+    tagChildrenCount: number;
+    noteChildrenCount: number;
+    fileChildrenCount: number;
 
-    /** User ID who owns/created this item */
-    userId: number;
+    /** Optional description */
+    description?: string;
 
-    /** Display name of the item */
-    name: string;
+    /** Public sharing */
+    isPublic: boolean;
+    publicSlug?: string;
 
-    /** Parent tag ID (null for root-level items) */
-    parentId?: number | null;
-
-    /** URL-friendly slug */
-    slug?: string;
-
-    /** Hex color code for display */
+    /** Visual */
     color?: string;
-
-    /** Icon name or class */
     icon?: string;
 
-    /** Access type: 'owner' or 'shared' */
-    accessType: string;
+    /** Timestamps */
+    createdAt?: string;
+}
 
-    /** Whether this workspace owns the item */
+/** Note-specific metadata */
+export interface NoteMetadata {
+    /** Description/summary */
+    description?: string;
+
+    /** Content preview (first 200 chars) */
+    contentPreview?: string;
+
+    /** Content type */
+    contentType?: 'markdown' | 'plain' | 'rich-text';
+
+    /** States */
+    isArchived: boolean;
+    isPinned: boolean;
+    isFavorite: boolean;
+
+    /** Counts */
+    versionCount: number;
+    memberCount: number;
+
+    /** Public sharing */
+    isPublic: boolean;
+    publicSlug?: string;
+
+    /** Timestamps */
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+/** File-specific metadata */
+export interface FileMetadata {
+    /** File info */
+    originalFilename: string;
+    extension: string;
+    mimeType: string;
+
+    /** Size */
+    fileSize: number;
+    fileSizeFormatted: string;
+
+    /** Storage */
+    filePath: string;
+    storagePath: string;
+    blobUrl?: string;
+    blobContainerName?: string;
+
+    /** Optional description */
+    description?: string;
+
+    /** States */
+    isPublic: boolean;
+    isArchived: boolean;
+
+    /** Download stats */
+    downloadCount: number;
+    lastDownloadedAt?: string;
+
+    /** Preview */
+    thumbnailUrl?: string;
+
+    /** Timestamps */
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+// ============================================
+// BASE ITEM (Shared properties)
+// ============================================
+
+/**
+ * Base workspace item - all items share these properties
+ */
+interface BaseWorkspaceItem {
+    /** Workspace item ID - used for workspace operations (add/delete from workspace)
+     * This is the relationship ID in workspace_items table */
+    itemId?: number;
+
+    /** User ID owner */
+    userId: number;
+
+    /** Display name */
+    name: string;
+
+    /** Parent folder ID (null = workspace root) */
+    parentId?: number | null;
+
+    /** URL slug */
+    slug?: string;
+
+    /** Visual */
+    color?: string;
+    icon?: string;
+
+    /** Access info */
+    accessType: 'owner' | 'shared';
     isOriginal: boolean;
 
-    /** Depth level in tree hierarchy (0 = root) */
+    /** Hierarchy info */
     level: number;
-
-    /** Position/order within same parent */
+    depth: number;
     position: number;
-
-    /** Sort order (alias for position) */
     sortOrder: number;
 
-    /** Depth in tree (alias for level) */
-    depth: number;
-
-    /** Type-specific metadata */
-    metadata?: any;
-
-    /** Child items in the tree */
-    children: WorkspaceItem[];
-
-    /** UI state: Whether expanded */
+    /** UI states */
     isExpanded: boolean;
-
-    /** UI state: Whether selected */
     isSelected: boolean;
 
-    /** When created */
+    /** Timestamps */
     createdAt: string;
-
-    /** When last updated */
     updatedAt?: string;
+}
+
+// ============================================
+// SPECIFIC ITEM TYPES
+// ============================================
+
+/**
+ * Folder item - can have children
+ * ✅ id = folder ID (TagId in database)
+ * ✅ type = 'folder'
+ */
+export interface FolderItem extends BaseWorkspaceItem {
+    /** ID of folder */
+    id: number;
+
+    /** Type of item */
+    type: 'folder';
+
+    /** Folder-specific metadata */
+    metadata?: FolderMetadata;
+
+    /** Child items (folders, notes, files) */
+    children: WorkspaceItem[];
+}
+
+/**
+ * Note item - always leaf node
+ * ✅ id = note ID (NoteId in database)
+ * ✅ type = 'note'
+ */
+export interface NoteItem extends BaseWorkspaceItem {
+    /** ID of note */
+    id: number;
+
+    /** Type of item */
+    type: 'note';
+
+    /** Note-specific metadata */
+    metadata?: NoteMetadata;
+
+    /** Notes cannot have children */
+    children?: never[];
+}
+
+/**
+ * File item - always leaf node
+ * ✅ id = file ID (FileId in database)
+ * ✅ type = 'file'
+ */
+export interface FileItem extends BaseWorkspaceItem {
+    /** ID of file */
+    id: number;
+
+    /** Type of item */
+    type: 'file';
+
+    /** File-specific metadata */
+    metadata?: FileMetadata;
+
+    /** Files cannot have children */
+    children?: never[];
+}
+
+/**
+ * Discriminated union of all workspace item types
+ * Use this for type-safe item handling
+ */
+export type WorkspaceItem = FolderItem | NoteItem | FileItem;
+
+// ============================================
+// TYPE GUARDS
+// ============================================
+
+/**
+ * Type guard to check if item is a folder
+ */
+export function isFolder(item: WorkspaceItem): item is FolderItem {
+    return item.type === 'folder';
+}
+
+/**
+ * Type guard to check if item is a note
+ */
+export function isNote(item: WorkspaceItem): item is NoteItem {
+    return item.type === 'note';
+}
+
+/**
+ * Type guard to check if item is a file
+ */
+export function isFile(item: WorkspaceItem): item is FileItem {
+    return item.type === 'file';
+}
+
+/**
+ * Type guard to check if item is a leaf node (note or file)
+ */
+export function isLeafNode(item: WorkspaceItem): item is NoteItem | FileItem {
+    return item.type === 'note' || item.type === 'file';
+}
+
+/**
+ * Type guard to check if item can have children (folder)
+ */
+export function canHaveChildren(item: WorkspaceItem): item is FolderItem {
+    return item.type === 'folder';
 }
 
 /**

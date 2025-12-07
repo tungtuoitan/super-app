@@ -4,7 +4,7 @@
  * Clean, organized design with shadcn/ui components
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from '@/shared/components';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Textarea } from '@/Components/ui/textarea';
@@ -28,7 +28,7 @@ export function NoteDetailDialogContent() {
     const { closeDialog, updateSelectedNote } = useNoteUIHelper();
     
     const [noteKey, setNoteKey] = React.useState(0);
-    React.useEffect(() => {
+    useEffect(() => {
         if (selectedNote) {
             setNoteKey(prev => prev + 1);
         }
@@ -65,12 +65,7 @@ export function NoteDetailDialogContent() {
         ? selectedNote.tags.map((tag:any) => tag.tagId.toString()).filter(Boolean).join(',')
         : '';
     
-    // Debug logging
-    console.log('Debug - HashTag display data:', {
-        selectedNoteTags: selectedNote?.tags,
-        currentTagsValue,
-        finalTagOptions
-    });        // Handlers for form interactions
+     // Handlers for form interactions
         const handleFieldChange = (field: keyof Note, value: any) => {
             updateSelectedNote({ [field]: value });
             console.log(`Field ${field} changed to:`, value);
@@ -123,112 +118,110 @@ export function NoteDetailDialogContent() {
         }
     
     return (
-        <ScrollArea className="h-full w-full bg-background">
-            <div key={noteKey} className="p-6 space-y-6 h-full ">
-                {/* Full Width - Description */}
+        <div key={noteKey} className="p-6 space-y-6 h-full ">
+            {/* Full Width - Description */}
+            <div className="border-none">
+                <CardHeader className="p-0 pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-primary" />
+                        Description
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Textarea
+                        value={selectedNote?.description || ''}
+                        onChange={(e) => handleFieldChange('description', e.target.value)}
+                        placeholder="Enter note description..."
+                        className="min-h-[400px] resize-none font-mono text-sm"
+                    />
+                </CardContent>
+            </div>
+            
+
+            {/* Two Column Layout - Details and Metadata */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column - Note Details */}
                 <div className="border-none">
                     <CardHeader className="p-0 pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-primary" />
-                            Description
+                            <Info className="w-5 h-5 text-primary" />
+                            Note Details
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0">
-                        <Textarea
-                            value={selectedNote?.description || ''}
-                            onChange={(e) => handleFieldChange('description', e.target.value)}
-                            placeholder="Enter note description..."
-                            className="min-h-[400px] resize-none font-mono text-sm"
+                    <CardContent className="p-0 space-y-2">
+                        {/* Note Name */}
+                        <GenericTextField
+                            label="Note Name"
+                            value={selectedNote?.name || ''}
+                            onChange={(e) => handleFieldChange('name', e.target.value)}
+                            size="small"
+                        />
+
+                        {/* Status */}
+                        <GenericAutoComplete
+                            value={selectedNote?.isArchived ? { id: 'archived', label: 'Archived', desc: 'Archived', active: true } : { id: 'active', label: 'Active', desc: 'Active', active: true }}
+                            onChange={(event, newValue) => handleFieldChange('isArchived', newValue?.id === 'archived')}
+                            allOptions={[
+                                { id: 'active', label: 'Active', desc: 'Active', active: true },
+                                { id: 'archived', label: 'Archived', desc: 'Archived', active: true },
+                            ]}
+                            inputProps={{
+                                name: 'status',
+                                label: 'Status',
+                                required: false,
+                            }}
+                        />
+
+                        {/* HashTags */}
+                        <div className="space-y-2">
+                            <GenericTagAutoComplete
+                                options={finalTagOptions}
+                                value={currentTagsValue}
+                                onChange={handleTagsChange}
+                                label="HashTags"
+                                placeholder={tagsLoading ? "Loading hashtags..." : "+ Add HashTag"}
+                                size="small"
+                                data-testid="note-tags"
+                                disabled={tagsLoading}
+                            />
+                        </div>
+                    </CardContent>
+                </div>
+
+                {/* Right Column - Metadata */}
+                <div className="border-none">
+                    <CardHeader className="p-0 pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-accent-foreground" />
+                            Metadata
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0 space-y-4">
+                        <GenericTextField
+                            label="Created"
+                            value={formatNoteDate(selectedNote?.createdAt)}
+                            disabled
+                            size="small"
+                        />
+
+                        <GenericTextField
+                            label="Updated"
+                            value={formatNoteDate(selectedNote?.updatedAt)}
+                            disabled
+                            size="small"
+                        />
+
+                        <GenericTextField
+                            label="Created by"
+                            value={selectedNote?.createdBy || '-'}
+                            disabled
+                            size="small"
                         />
                     </CardContent>
                 </div>
-                
-
-                {/* Two Column Layout - Details and Metadata */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Left Column - Note Details */}
-                    <div className="border-none">
-                        <CardHeader className="p-0 pb-2">
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Info className="w-5 h-5 text-primary" />
-                                Note Details
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0 space-y-2">
-                            {/* Note Name */}
-                            <GenericTextField
-                                label="Note Name"
-                                value={selectedNote?.name || ''}
-                                onChange={(e) => handleFieldChange('name', e.target.value)}
-                                size="small"
-                            />
-
-                            {/* Status */}
-                            <GenericAutoComplete
-                                value={selectedNote?.isArchived ? { id: 'archived', label: 'Archived', desc: 'Archived', active: true } : { id: 'active', label: 'Active', desc: 'Active', active: true }}
-                                onChange={(event, newValue) => handleFieldChange('isArchived', newValue?.id === 'archived')}
-                                allOptions={[
-                                    { id: 'active', label: 'Active', desc: 'Active', active: true },
-                                    { id: 'archived', label: 'Archived', desc: 'Archived', active: true },
-                                ]}
-                                inputProps={{
-                                    name: 'status',
-                                    label: 'Status',
-                                    required: false,
-                                }}
-                            />
-
-                            {/* HashTags */}
-                            <div className="space-y-2">
-                                <GenericTagAutoComplete
-                                    options={finalTagOptions}
-                                    value={currentTagsValue}
-                                    onChange={handleTagsChange}
-                                    label="HashTags"
-                                    placeholder={tagsLoading ? "Loading hashtags..." : "+ Add HashTag"}
-                                    size="small"
-                                    data-testid="note-tags"
-                                    disabled={tagsLoading}
-                                />
-                            </div>
-                        </CardContent>
-                    </div>
-
-                    {/* Right Column - Metadata */}
-                    <div className="border-none">
-                        <CardHeader className="p-0 pb-2">
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-accent-foreground" />
-                                Metadata
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0 space-y-4">
-                            <GenericTextField
-                                label="Created"
-                                value={formatNoteDate(selectedNote?.createdAt)}
-                                disabled
-                                size="small"
-                            />
-
-                            <GenericTextField
-                                label="Updated"
-                                value={formatNoteDate(selectedNote?.updatedAt)}
-                                disabled
-                                size="small"
-                            />
-
-                            <GenericTextField
-                                label="Created by"
-                                value={selectedNote?.createdBy || '-'}
-                                disabled
-                                size="small"
-                            />
-                        </CardContent>
-                    </div>
-                </div>
-
-                
             </div>
-        </ScrollArea>
+
+            
+        </div>
     );
 }

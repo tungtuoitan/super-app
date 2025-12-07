@@ -4,7 +4,7 @@
  * Includes toolbar for save/cancel actions
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Save, X, RotateCcw } from 'lucide-react';
 import type { NoteTab } from '@/types/editor/tab.types';
 import { Button } from '@/Components/ui/button';
@@ -17,6 +17,7 @@ import {
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
 import {useEditorActionsHelper} from '@/hooks/useEditorActionsHelper';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {useEditorTabsStore} from '@/store/index';
 
 interface NoteEditorPanelProps {
     tab: NoteTab;
@@ -25,14 +26,34 @@ interface NoteEditorPanelProps {
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     const { selectedNote } = useNoteUIStore();
     const { saveNote, cancelChanges, syncTabChangeState, hasUnsavedChanges } = useEditorActionsHelper();
+    const { setOpenTabs,openTabs } = useEditorTabsStore();
+    
+    const contentRef = React.useRef<HTMLDivElement>(null);
 
-    const isCreateMode = selectedNote?.noteId === 0;
     const [isSaving, setIsSaving] = React.useState(false);
 
     // Sync hasUnsavedChanges with tab state
-    React.useEffect(() => {
+    useEffect(() => {
         syncTabChangeState(tab.id);
-    }, [hasUnsavedChanges, tab.id, syncTabChangeState]);
+    }, [hasUnsavedChanges, tab.id]);
+
+    // Restore scroll position when tab becomes active
+    useEffect(() => {
+        const viewState = openTabs.find(t => t.id === tab.id)?.viewState
+        if (contentRef.current && viewState?.scrollTop !== undefined) {
+            contentRef.current.scrollTop = viewState.scrollTop;
+        }
+    }, [tab.id]);
+
+    // Save scroll position when scrolling
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const scrollTop = e.currentTarget.scrollTop;
+        setOpenTabs(prev => prev.map(t => 
+            t.id === tab.id 
+                ? { ...t, viewState: { ...t.viewState, scrollTop } }
+                : t
+        ));
+    }
 
     const handleSave = async () => {
         if (!selectedNote) return;
@@ -50,7 +71,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     };
 
     // Keyboard shortcut: Ctrl+S to save
-    React.useEffect(() => {
+    useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
@@ -129,7 +150,11 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto">
+            <div 
+                ref={contentRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-auto bg-background"
+            >
                 <NoteDetailDialogContent />
             </div>
         </div>

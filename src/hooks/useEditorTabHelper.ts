@@ -5,7 +5,14 @@ import {NoteTab} from "@/components/Editor";
 
 
 export const useEditorTabHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
+    const { 
+        openTabs, 
+        setOpenTabs, 
+        activeTabId, 
+        setActiveTabId, 
+        confirmCloseTabId, 
+        setConfirmCloseTabId,
+    } = useEditorTabsStore();
     const { setSelectedNote, originalNoteRef, setHasUnsavedChanges } = useNoteUIStore();
 
     /**
@@ -171,6 +178,5 @@ export const useEditorTabHelper = () => {
         markTabAsChanged,
         getTabById,
         updateTabNote,
-
     }
 }

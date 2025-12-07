@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { X } from 'lucide-react'
 import { useEditorTabsStore, NoteEditorPanel, ConfirmCloseDialog } from '@/Components/Editor'
 import {useEditorTabHelper} from '@/hooks/useEditorTabHelper'
@@ -35,14 +35,6 @@ export function VSEditorArea() {
   // Get active tab
   const activeTab = activeTabId ? getTabById(activeTabId) : null
 
-  // Sync selectedNote when active tab changes
-//   React.useEffect(() => {
-//     if (activeTab?.type === 'note') {
-//       setSelectedNote(activeTab.note)
-//     } else {
-//       setSelectedNote(null)
-//     }
-//   }, [activeTab, setSelectedNote])
 
   return (
     <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">

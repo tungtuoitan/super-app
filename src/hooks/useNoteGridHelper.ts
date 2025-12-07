@@ -46,8 +46,7 @@ export const useNoteGridHelper = () => {
         console.log('➕ Creating new note...');
 
         // Generate temporary negative ID
-        const tempId = -Date.now();
-
+        const tempId = -Math.floor(Math.random() * 10);
         // Create temporary note
         const newNote: Note = {
             noteId: tempId,

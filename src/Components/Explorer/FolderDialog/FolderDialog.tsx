@@ -18,6 +18,7 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Textarea } from '@/Components/ui/textarea';
+import { isFolder } from '@/types/workspace.types';
 import { cn } from '@/lib/utils';
 import type { WorkspaceItem } from '@/types/workspace.types';
 import { useKeyboardShortcut } from '@/shared/hooks';
@@ -56,11 +57,12 @@ export function FolderDialog() {
     // Find parent folder info for display (VS Code-like)
     const parentFolderInfo = React.useMemo(() => {
         if (!parentFolderId || !currentTree?.items || currentTree.items.length === 0) return null;
-        
+
         // Search for parent folder in the tree
         function findFolder(items: WorkspaceItem[], targetId: number): WorkspaceItem | null {
             for (const item of items) {
-                if (item.itemType === 'tag' && item.childId === targetId) return item;
+                // ✅ Use type guard and id field
+                if (isFolder(item) && item.id === targetId) return item;
                 if (item.children && item.children.length > 0) {
                     const found = findFolder(item.children, targetId);
                     if (found) return found;
@@ -68,31 +70,33 @@ export function FolderDialog() {
             }
             return null;
         }
-        
+
         return findFolder(currentTree.items, parentFolderId);
     }, [parentFolderId, currentTree]);
 
     // Get sibling folders to check for duplicate names
     const siblingFolders = () => {
         if (!currentTree?.items || currentTree.items.length === 0) return [];
-        
+
         // If we have a parent folder, get its children
         if (parentFolderId) {
             const parent = parentFolderInfo;
             if (parent && parent.children) {
-                return parent.children.filter((child: WorkspaceItem) => 
-                    child.itemType === 'tag' && 
+                return parent.children.filter((child: WorkspaceItem) =>
+                    // ✅ Use type guard and id field
+                    isFolder(child) &&
                     // When editing, exclude the current folder being edited
-                    (mode === 'create' || child.childId !== editingFolder?.id)
+                    (mode === 'create' || child.id !== editingFolder?.id)
                 );
             }
         }
-        
+
         // If no parent, get root level folders
-        return currentTree.items.filter(item => 
-            item.itemType === 'tag' &&
+        return currentTree.items.filter(item =>
+            // ✅ Use type guard and id field
+            isFolder(item) &&
             // When editing, exclude the current folder being edited
-            (mode === 'create' || item.childId !== editingFolder?.id)
+            (mode === 'create' || item.id !== editingFolder?.id)
         );
     }
 

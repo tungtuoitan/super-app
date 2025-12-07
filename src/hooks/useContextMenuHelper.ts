@@ -59,8 +59,8 @@ export const useContextMenuHelper = () => {
 
         function traverse(nodes: any[]) {
             for (const node of nodes) {
-                // Use childId for WorkspaceItem or id for Folder
-                const nodeId = node.childId || node.id;
+                // ✅ All items have id field in new type system
+                const nodeId = node.id;
                 if (nodeId) {
                     result.push(nodeId);
                 }
@@ -69,7 +69,7 @@ export const useContextMenuHelper = () => {
                 }
             }
         }
-        
+
         traverse(items);
         return result;
     }
@@ -252,9 +252,10 @@ export const useContextMenuHelper = () => {
         // Find all selected folders in the tree
         const findFolderById = (items: any[], folderId: number): Folder | null => {
             for (const item of items) {
-                const nodeId = item.childId || item.id;
+                // ✅ All items have id field in new type system
+                const nodeId = item.id;
                 if (nodeId === folderId) {
-                    return item.child || item;
+                    return item;
                 }
                 if (item.children?.length > 0) {
                     const found = findFolderById(item.children, folderId);

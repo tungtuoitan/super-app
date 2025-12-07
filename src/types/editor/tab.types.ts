@@ -8,11 +8,27 @@ import {Note} from "@/types/note.types";
 
 export type TabType = 'note' | 'tag' | 'settings';
 
+/**
+ * Tab-specific view state for preserving UI state across tab switches
+ * Extensible for future needs (cursor position, expanded sections, etc.)
+ */
+export interface TabViewState {
+    /** Scroll position in the editor content */
+    scrollTop?: number;
+    
+    // Future extensions:
+    // cursorPosition?: { line: number; column: number };
+    // expandedSections?: string[];
+    // selectedText?: { start: number; end: number };
+    // zoom?: number;
+}
+
 export interface BaseTab {
     id: string;
     type: TabType;
     title: string;
     hasUnsavedChanges?: boolean;
+    viewState?: TabViewState;
 }
 
 export interface NoteTab extends BaseTab {

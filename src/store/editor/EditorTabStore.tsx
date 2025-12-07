@@ -4,8 +4,8 @@
  * Supports multiple tab types: Note, Tag, etc.
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import type { EditorTab } from '../../types/editor/tab.types';
+import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback } from 'react';
+import type { EditorTab, TabViewState } from '../../types/editor/tab.types';
 
 export interface EditorTabContextData {
     openTabs: EditorTab[];
