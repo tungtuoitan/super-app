@@ -271,3 +271,38 @@ export const _deleteNote = async (
         return Promise.reject(res);
     }
 };
+
+/**
+ * Undo delete (restore) single or multiple notes
+ * POST /api/notes/undo/{noteId} or /api/notes/undo/{id1,id2,id3}
+ * 
+ * @param token - Authentication token
+ * @param noteId - Single note ID or comma-separated IDs
+ * @returns void or rejects with response
+ */
+export const _undoDeleteNote = async (
+    token: string,
+    noteId: number | string
+) => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "POST",
+        headers: headers,
+    };
+
+    const res = await window.fetch(
+        `${API_CONFIG.baseURL}/api/notes/undo/${noteId}`,
+        options
+    );
+
+    if (res.ok) {
+        return;
+    } else {
+        return Promise.reject(res);
+    }
+};

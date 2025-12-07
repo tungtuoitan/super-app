@@ -5,7 +5,7 @@
  */
 
 import React, {useEffect} from 'react';
-import { Save, X, RotateCcw } from 'lucide-react';
+import { Save, X, RotateCcw, Undo2 } from 'lucide-react';
 import type { NoteTab } from '@/types/editor/tab.types';
 import { Button } from '@/Components/ui/button';
 import {
@@ -18,6 +18,10 @@ import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDial
 import {useEditorActionsHelper} from '@/hooks/useEditorActionsHelper';
 import {useNoteUIStore} from '@/store/note/useNoteUIStore';
 import {useEditorTabsStore} from '@/store/index';
+import {_undoDeleteNote} from '@/services/note.service';
+import {storageService} from '@/services/storage.service';
+import {useSnackbar} from 'notistack';
+import {useNoteGridHelper} from '@/hooks/useNoteGridHelper';
 
 interface NoteEditorPanelProps {
     tab: NoteTab;
@@ -26,11 +30,14 @@ interface NoteEditorPanelProps {
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     const { selectedNote } = useNoteUIStore();
     const { saveNote, cancelChanges, syncTabChangeState, hasUnsavedChanges } = useEditorActionsHelper();
-    const { setOpenTabs,openTabs } = useEditorTabsStore();
+    const { setOpenTabs, openTabs } = useEditorTabsStore();
+    const { enqueueSnackbar } = useSnackbar();
+    const { loadNotes } = useNoteGridHelper();
     
     const contentRef = React.useRef<HTMLDivElement>(null);
 
     const [isSaving, setIsSaving] = React.useState(false);
+    const [isUndoing, setIsUndoing] = React.useState(false);
 
     // Sync hasUnsavedChanges with tab state
     useEffect(() => {
@@ -70,6 +77,33 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
         cancelChanges();
     };
 
+    const handleUndo = async () => {
+        if (!selectedNote || !tab.isDeleted) return;
+
+        setIsUndoing(true);
+        try {
+            const token = storageService.getString('token') || '';
+            await _undoDeleteNote(token, selectedNote.id);
+
+            // Update tab to remove isDeleted flag
+            setOpenTabs(prev => prev.map(t => 
+                t.id === tab.id && t.type === 'note'
+                    ? { ...t, isDeleted: false }
+                    : t
+            ));
+
+            // Reload note grid to show restored note
+            await loadNotes();
+
+            enqueueSnackbar('Note restored successfully', { variant: 'success' });
+        } catch (error) {
+            console.error('Failed to restore note:', error);
+            enqueueSnackbar('Failed to restore note', { variant: 'error' });
+        } finally {
+            setIsUndoing(false);
+        }
+    };
+
     // Keyboard shortcut: Ctrl+S to save
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -104,28 +138,51 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
 
                 <TooltipProvider>
                     <div className="flex gap-1">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={handleSave}
-                                        disabled={!hasUnsavedChanges || isSaving || tab.isDeleted}
-                                        className={`h-8 w-8 ${
-                                            hasUnsavedChanges && !tab.isDeleted
-                                                ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
-                                                : 'text-white/40'
-                                        } disabled:text-white/20`}
-                                    >
-                                        <Save className="h-[18px] w-[18px]" />
-                                    </Button>
-                                </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{tab.isDeleted ? 'Cannot save deleted note' : 'Save (Ctrl+S)'}</p>
-                            </TooltipContent>
-                        </Tooltip>
+                        {tab.isDeleted ? (
+                            // Show Undo button for deleted notes
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={handleUndo}
+                                            disabled={isUndoing}
+                                            className="h-8 w-8 text-green-500 hover:bg-green-500/10 disabled:text-white/20"
+                                        >
+                                            <Undo2 className="h-[18px] w-[18px]" />
+                                        </Button>
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Restore Note</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        ) : (
+                            // Show Save button for normal notes
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={handleSave}
+                                            disabled={!hasUnsavedChanges || isSaving}
+                                            className={`h-8 w-8 ${
+                                                hasUnsavedChanges
+                                                    ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
+                                                    : 'text-white/40'
+                                            } disabled:text-white/20`}
+                                        >
+                                            <Save className="h-[18px] w-[18px]" />
+                                        </Button>
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Save (Ctrl+S)</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
 
                         <Tooltip>
                             <TooltipTrigger asChild>
