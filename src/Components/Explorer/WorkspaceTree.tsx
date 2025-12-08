@@ -103,7 +103,7 @@ export function WorkspaceTree() {
             >
                 {({ node, style, dragHandle }) => {
                     const item = node.data.data;
-                    const isWorkspaceRoot = item.id < 0;
+                    const isWorkspaceRoot = item.id == -12345;
 
                     // Render different node types based on item type
                     return (

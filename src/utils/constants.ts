@@ -29,3 +29,7 @@ export const GRID = {
   COLUMN_BUFFER: 150,
   ROW_BUFFER: 250,
 } as const;
+
+export const WORKSPACE = {
+  ROOT_ID: -12345, // Virtual ID for workspace root node
+} as const;

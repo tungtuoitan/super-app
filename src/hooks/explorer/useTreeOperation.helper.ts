@@ -11,6 +11,8 @@ import { useWorkspaceOperation } from './useWorkspaceOperation.helper';
 import { _moveWorkspaceItems } from '@/services/workspace.service';
 import type { MoveItemsRequest } from '@/types/workspace.types';
 import { Folder } from '@/types/index';
+import { useSnackbar } from 'notistack';
+import { WORKSPACE } from '@/utils/constants';
 
 export const useTreeOperation = () => {
     const {
@@ -24,6 +26,7 @@ export const useTreeOperation = () => {
     
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceOperation();
+    const { enqueueSnackbar } = useSnackbar();
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
@@ -32,17 +35,12 @@ export const useTreeOperation = () => {
         args: { dragIds: string[]; parentId: string | null; index: number },
         treeData: TreeFolder[]
     ) => {
-        console.log('🔄 Tree Node Move Event (Multi-Drag):', {
-            draggedItemIds: args.dragIds,
-            dragCount: args.dragIds.length,
-            newParentId: args.parentId || 'root',
-            newIndex: args.index,
-        });
-
         try {
             setIsDragging(true);
 
-            // ✅ Extract entity IDs from tree nodes for validation
+            // =================================================================
+            // STEP 1: EXTRACT ENTITY IDS FROM DRAGGED ITEMS
+            // =================================================================
             const allItems = getAllFoldersFlattened(treeData);
             let itemIds = args.dragIds
                 .map(dragId => {
@@ -60,19 +58,15 @@ export const useTreeOperation = () => {
                 return !isDescendantOfOtherSelected;
             });
 
-            console.log('📊 Filtered item IDs (excluding descendants):', {
-                original: args.dragIds,
-                filtered: itemIds,
-                removedCount: args.dragIds.length - itemIds.length
-            });
-
             if (itemIds.length === 0) {
                 console.log('⚠️ All selected items are descendants of other selected items - nothing to move');
                 setIsDragging(false);
                 return;
             }
 
-            // ✅ Extract entity ID from parent tree node
+            // =================================================================
+            // STEP 2: EXTRACT TARGET PARENT ID
+            // =================================================================
             // IMPORTANT: args.parentId can be:
             // 1. A folder ID (when dropping INTO a folder)
             // 2. A note/file ID (when dropping BETWEEN siblings - use their parent instead)
@@ -96,11 +90,6 @@ export const useTreeOperation = () => {
                             } else {
                                 // Dropping BETWEEN siblings (note/file) - use their parent instead
                                 newParentId = itemData.parentId ?? undefined;
-                                console.log(`📍 Drop target is ${itemData.type} (not folder), using its parent:`, {
-                                    targetItem: itemData.name,
-                                    targetId: parentEntityId,
-                                    actualParentId: newParentId ?? 'root'
-                                });
                             }
                         } else {
                             // Fallback: assume folder
@@ -110,10 +99,17 @@ export const useTreeOperation = () => {
                 }
             }
 
-            // VALIDATION: Prevent invalid moves
-            const hasWorkspaceRoot = itemIds.some(id => id < 0);
+            // =================================================================
+            // STEP 3: VALIDATION - PREVENT INVALID MOVES
+            // =================================================================
+            const hasWorkspaceRoot = itemIds.some(id => id === WORKSPACE.ROOT_ID);
             if (hasWorkspaceRoot) {
                 console.warn('⚠️ Cannot move workspace root node');
+                setIsDragging(false);
+                return;
+            }
+            if (itemIds.some(id => id < 0)) {
+                console.warn('⚠️ Cannot move items with invalid IDs');
                 setIsDragging(false);
                 return;
             }
@@ -136,11 +132,14 @@ export const useTreeOperation = () => {
                 }
             }
 
+            // =================================================================
+            // STEP 4: VALIDATE DROP POSITION
+            // =================================================================
             const targetParentNode = newParentId !== undefined
                 ? getAllFoldersFlattened(treeData).find(t => t.data.id === newParentId)
                 : null;
 
-            // ✅ Filter out workspace root (negative entity IDs)
+            // Filter out workspace root (negative entity IDs)
             const targetSiblings = targetParentNode
                 ? (targetParentNode.children || [])
                 : treeData.filter(t => t.data.id > 0);
@@ -149,7 +148,6 @@ export const useTreeOperation = () => {
                 const itemBefore = args.index > 0 ? targetSiblings[args.index - 1] : null;
                 const itemAfter = args.index < targetSiblings.length ? targetSiblings[args.index] : null;
 
-                // ✅ Use entity IDs from tree node data
                 const itemBeforeId = itemBefore?.data.id ?? null;
                 const itemAfterId = itemAfter?.data.id ?? null;
 
@@ -157,7 +155,6 @@ export const useTreeOperation = () => {
                     (itemBeforeId && itemIds.includes(itemBeforeId)) &&
                     (itemAfterId && itemIds.includes(itemAfterId));
 
-                // ✅ Check if any dragged items are siblings with the target
                 const isSameParent = targetSiblings.some(sibling => {
                     const siblingEntityId = sibling.data.id;
                     return itemIds.includes(siblingEntityId);
@@ -173,9 +170,12 @@ export const useTreeOperation = () => {
                 }
             }
 
-            // ================================================================
-            // API CALL: Move workspace items (folders/notes/files) to new parent
-            // ================================================================
+            // =================================================================
+            // STEP 5: BUILD MOVE REQUEST & CALL API
+            // =================================================================
+            // =================================================================
+            // STEP 5: BUILD MOVE REQUEST & CALL API
+            // =================================================================
             if (!currentTree?.workspaceId) {
                 console.error('❌ No workspace ID found');
                 setIsDragging(false);
@@ -184,14 +184,8 @@ export const useTreeOperation = () => {
 
             const workspaceId = currentTree.workspaceId;
 
-            console.log('🔄 Calling API to move items:', {
-                workspaceId,
-                itemIds: itemIds,
-                newParentId: newParentId ?? null,
-            });
-
             // Build move request matching backend API format
-            // ✅ Only include items that passed validation (filtered itemIds)
+            // Only include items that passed validation (filtered itemIds)
             const moveRequest: MoveItemsRequest = {
                 items: itemIds.map(entityId => {
                     const item = allItems.find(t => t.data.id === entityId);
@@ -222,21 +216,33 @@ export const useTreeOperation = () => {
                         id: entityId, // Use entity ID (folder/note/file ID)
                     };
                 }),
-                targetParentId: newParentId ?? null, // Root level request property
+                targetParentId: newParentId ?? null,
             };
-
-            console.log('📦 Move request:', moveRequest);
 
             try {
                 const result = await _moveWorkspaceItems('', workspaceId, moveRequest);
                 console.log(`✅ Successfully moved ${moveRequest.items.length} item(s):`, result);
+                
+                // Show success toast
+                enqueueSnackbar(
+                    `Successfully moved ${moveRequest.items.length} item(s)`,
+                    { variant: 'success' }
+                );
             } catch (error) {
                 console.error(`❌ Failed to move items:`, error);
+                
+                // Show error toast with user-friendly message
+                enqueueSnackbar(
+                    'Failed to move items. Please try again.',
+                    { variant: 'error' }
+                );
+                
                 throw error;
             }
 
-            // Refresh tree to get updated data from backend
-            console.log('🔄 Refreshing tree...');
+            // =================================================================
+            // STEP 6: REFRESH TREE & RESTORE SELECTION
+            // =================================================================
             await loadTree(workspaceId);
 
             // VS Code behavior: Re-select the moved items after move completes
@@ -244,12 +250,14 @@ export const useTreeOperation = () => {
             if (itemIds.length > 0) {
                 setLastSelectedFolderId(itemIds[itemIds.length - 1]);
             }
-            console.log(`✅ Re-selected moved item(s): ${itemIds.join(', ')}`);
-
         } catch (error) {
             console.error('❌ Failed to move item(s):', error);
-            // TODO: Show error toast to user
-            // TODO: Revert optimistic UI update
+            
+            // Show error toast to user
+            enqueueSnackbar(
+                'An error occurred while moving items',
+                { variant: 'error' }
+            );
         } finally {
             setIsDragging(false);
         }

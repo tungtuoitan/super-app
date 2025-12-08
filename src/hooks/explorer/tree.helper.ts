@@ -386,7 +386,7 @@ export function transformToTreeData(
     if (data && 'workspaceId' in data) {
         // Create workspace root as a FolderItem
         const workspaceRoot: FolderItem = {
-            id: -data.workspaceId,
+            id: -12345,  // Virtual ID for workspace root, -12345 is used to avoid conflicts
             type: 'folder',
             userId: data.userId,
             name: data.name,

@@ -186,7 +186,6 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
      */
     const renderMenuItems = () => {
         switch (contextType) {
-            case 'tag':
             case 'folder':
                 const isWorkspaceRoot = contextData && contextData.tagId < 0;
                 const selectedCount = selectedFolderIds.length;
