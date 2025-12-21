@@ -25,4 +25,4 @@ export { ExplorerStore, ExplorerProvider, useExplorerStore } from './explorer/Ex
 export type { ExplorerContextData } from './explorer/ExplorerStore';
 
 export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from './explorer/FolderDialogStore';
-export type { FolderDialogContextData, FolderDialogFormErrors } from './explorer/FolderDialogStore';
+export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from './explorer/FolderDialogStore';

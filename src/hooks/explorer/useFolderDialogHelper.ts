@@ -1,6 +1,7 @@
 
 import { useSnackbar } from 'notistack';
 import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
+import type { ItemType } from '@/store/explorer/FolderDialogStore';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useAuthStore } from '@/store/auth/AuthStore';
 import { _getWorkspaceTree, _upsertFolder } from '@/services/workspace.service';
@@ -15,6 +16,8 @@ export const useFolderDialogHelper = () => {
     // Form state from FolderDialogStore
     const {
         mode,
+        itemType,
+        setItemType,
         editingFolder,
         parentFolder,
         setParentFolder,
@@ -138,17 +141,20 @@ export const useFolderDialogHelper = () => {
     /**
      * Open folder dialog (unified for create and edit)
      * @param dialogMode - 'create' or 'edit'
+     * @param type - Item type: 'folder', 'note', or 'file'
      * @param folder - For edit mode: folder to edit (required). For create mode: unused
      * @param parentFolder - For create mode: parent folder (optional). For edit mode: unused
      */
     const openFolderDialog = (
         dialogMode: 'create' | 'edit',
+        type: ItemType = 'folder',
         folder?: Folder | null,
         parentFolder?: Folder | null
     ) => {
-        console.log('📂 Opening folder dialog:', { mode: dialogMode, folder, parentFolder });
+        console.log('📂 Opening item dialog:', { mode: dialogMode, type, folder, parentFolder });
         
         setMode(dialogMode);
+        setItemType(type);
         
         if (dialogMode === 'create') {
             // Create mode: use parentFolder parameter

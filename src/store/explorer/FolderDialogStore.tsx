@@ -9,6 +9,7 @@ export interface FolderDialogFormErrors {
 }
 
 export type DialogMode = 'create' | 'edit';
+export type ItemType = 'folder' | 'note' | 'file';
 
 export interface FolderDialogContextData {
     // Dialog state
@@ -16,6 +17,8 @@ export interface FolderDialogContextData {
     setIsOpen: Dispatch<SetStateAction<boolean>>;
     mode: DialogMode;
     setMode: Dispatch<SetStateAction<DialogMode>>;
+    itemType: ItemType;
+    setItemType: Dispatch<SetStateAction<ItemType>>;
     editingFolder: any | null;
     setEditingFolder: Dispatch<SetStateAction<any | null>>;
     parentFolder: any | null;
@@ -50,6 +53,8 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     setIsOpen: () => {},
     mode: 'create',
     setMode: () => {},
+    itemType: 'folder',
+    setItemType: () => {},
     editingFolder: null,
     setEditingFolder: () => {},
     parentFolder: null,
@@ -94,6 +99,7 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
     // Dialog state
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [mode, setMode] = useState<DialogMode>('create');
+    const [itemType, setItemType] = useState<ItemType>('folder');
     const [editingFolder, setEditingFolder] = useState<any | null>(null);
     const [parentFolder, setParentFolder] = useState<any | null>(null);
     
@@ -126,6 +132,8 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 setIsOpen,
                 mode,
                 setMode,
+                itemType,
+                setItemType,
                 editingFolder,
                 setEditingFolder,
                 parentFolder,

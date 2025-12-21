@@ -7,12 +7,14 @@
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
 import { useExplorerStore } from '@/store/explorer/ExplorerStore';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
+import type { ItemType } from '@/store/explorer/FolderDialogStore';
 import { useEditorTabHelper } from '@/hooks/useEditorTabHelper';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems, _addItemToWorkspace } from '@/services/workspace.service';
 import { _deleteNote, _upsertNote } from '@/services/note.service';
 import { storageService } from '@/services/storage.service';
 import { Note } from '@/types/note.types';
+import {useConfirmationPopover} from '@/shared/hooks';
 
 
 
@@ -24,8 +26,12 @@ export const useContextMenuHelper = () => {
         setContextData,
         setIsEditDialogOpen,
         setEditItemData,
+        contextType,
+        contextData,
+        isOpen,
+        anchorPoint,
     } = useContextMenuStore();
-    
+
     const {
         selectedFolderIds,
         setSelectedFolderIds,
@@ -218,12 +224,14 @@ export const useContextMenuHelper = () => {
     }
 
     /**
-     * Handle create folder action
+     * Handle create item action (folder/note/file)
+     * @param itemType - Type of item to create: 'folder', 'note', or 'file'
+     * @param parentTag - Parent folder for the new item
      */
-    const handleCreateFolder = (parentTag?: any) => {
-        console.log('📁 Context Menu: Add folder clicked for parent:', parentTag);
+    const handleCreateItem = (itemType: ItemType, parentTag?: any) => {
+        console.log(`📁 Context Menu: Add ${itemType} clicked for parent:`, parentTag);
         closeContextMenu();
-        openFolderDialog('create', null, parentTag);
+        openFolderDialog('create', itemType, null, parentTag);
     };
 
     /**
@@ -234,7 +242,9 @@ export const useContextMenuHelper = () => {
         closeContextMenu();
         
         if (itemData) {
-            openFolderDialog('edit', itemData, null);
+            // Determine item type from data
+            const itemType: ItemType = itemData.type || 'folder';
+            openFolderDialog('edit', itemType, itemData, null);
         }
     };
 
@@ -597,16 +607,142 @@ export const useContextMenuHelper = () => {
         setTimeout(() => setEditItemData(null), 200);
     }
 
+        // Confirmation popover for delete actions
+    const deleteConfirmation = useConfirmationPopover({
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        confirmColor: 'destructive',
+        buttonVariant: 'default',
+        zIndex: 20000 // Higher than menu z-index
+    });
+
+    /**
+     * Wrapper for handleDeleteItem with confirmation
+     * @param isHardDelete - If true, permanently delete (hard delete)
+     */
+    const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
+        if (contextType === 'folder' && contextData) {
+            // Check if this is a workspace root node (negative ID)
+            if (contextData.tagId < 0) {
+                console.warn('⚠️ Cannot delete workspace root node');
+                closeContextMenu();
+                return;
+            }
+
+            closeContextMenu();
+
+            // Extract anchor element from menu event
+            const nativeEvent = event.syntheticEvent || event;
+            const anchorElement = nativeEvent?.target as HTMLElement;
+
+            const selectedCount = selectedFolderIds.length;
+            const isMultipleSelected = selectedCount > 1;
+
+            let message: string;
+
+            if (isHardDelete) {
+                // Hard delete warning messages
+                if (isMultipleSelected) {
+                    message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${selectedCount} selected folders and ALL their contents (notes, files, subfolders).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+                } else {
+                    const countChildren = (tag: any): number => {
+                        if (!tag.children || tag.children.length === 0) return 0;
+                        return tag.children.length + tag.children.reduce((sum: number, child: any) => sum + countChildren(child), 0);
+                    };
+
+                    const childCount = countChildren(contextData);
+                    message = childCount > 0
+                        ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ${childCount} child folder(s) with ALL their contents.\n\n❌ This action CANNOT be undone.\n❌ All notes, files, and subfolders will be LOST FOREVER.`
+                        : `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ALL its contents.\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+                }
+            } else {
+                // Soft delete messages (current behavior)
+                if (isMultipleSelected) {
+                    message = `Are you sure you want to delete ${selectedCount} selected folders?\n\nThis action cannot be undone.`;
+                } else {
+                    const countChildren = (tag: any): number => {
+                        if (!tag.children || tag.children.length === 0) return 0;
+                        return tag.children.length + tag.children.reduce((sum: number, child: any) => sum + countChildren(child), 0);
+                    };
+
+                    const childCount = countChildren(contextData);
+                    message = childCount > 0
+                        ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child folder(s).`
+                        : `Are you sure you want to delete "${contextData.name}"?`;
+                }
+            }
+
+            deleteConfirmation.show({
+                anchorEl: anchorElement,
+                message,
+                onConfirm: () => {
+                    handleDeleteItem(contextData, contextType, isHardDelete);
+                }
+            });
+        } else if (contextType === 'note' && contextData) {
+            // Handle note deletion with confirmation
+            closeContextMenu();
+
+            // Extract anchor element from menu event
+            const nativeEvent = event.syntheticEvent || event;
+            const anchorElement = nativeEvent?.target as HTMLElement;
+
+            let message: string;
+            if (isHardDelete) {
+                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}".\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`;
+            } else {
+                message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
+            }
+
+            deleteConfirmation.show({
+                anchorEl: anchorElement,
+                message,
+                onConfirm: () => {
+                    handleDeleteItem(contextData, contextType, isHardDelete);
+                }
+            });
+        } else if (contextType === 'file' && contextData) {
+            // Handle file deletion with confirmation
+            closeContextMenu();
+
+            // Extract anchor element from menu event
+            const nativeEvent = event.syntheticEvent || event;
+            const anchorElement = nativeEvent?.target as HTMLElement;
+
+            let message: string;
+            if (isHardDelete) {
+                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}".\n\n❌ This action CANNOT be undone.\n❌ The file will be LOST FOREVER.`;
+            } else {
+                message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
+            }
+
+            deleteConfirmation.show({
+                anchorEl: anchorElement,
+                message,
+                onConfirm: () => {
+                    handleDeleteItem(contextData, contextType, isHardDelete);
+                }
+            });
+        } else {
+            handleDeleteItem(contextData, contextType, isHardDelete);
+        }
+    };
+
     return {
         showContextMenu,
         closeContextMenu,
-        handleCreateFolder,
-        handleEditItem,
+
+        handleCreateItem,
+
         handleAddFile,
         handleAddNote,
+
+        handleEditItem,
         handleDeleteItem,
         handleViewInfo,
+        
         closeEditDialog,
-        selectedFolderIds,
+        onDeleteItemClick,
+        deleteConfirmation,
     };
 };

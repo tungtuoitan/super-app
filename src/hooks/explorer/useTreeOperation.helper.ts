@@ -291,7 +291,7 @@ export const useTreeOperation = () => {
             foldersCount: folders.length,
         });
             
-        openFolderDialog('create', null, parentFolder);
+        openFolderDialog('create', 'folder', null, parentFolder);
     };
 
     return {

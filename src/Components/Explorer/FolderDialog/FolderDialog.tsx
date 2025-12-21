@@ -36,6 +36,7 @@ export function FolderDialog() {
     const {
         isOpen,
         mode,
+        itemType,
         editingFolder,
         parentFolder,
         newFolderName,
@@ -161,34 +162,44 @@ export function FolderDialog() {
         { value: '#616161', label: 'Gray' },
     ];
 
+    // Dynamic labels based on itemType
+    const getItemLabel = () => {
+        switch (itemType) {
+            case 'folder': return 'Folder';
+            case 'note': return 'Note';
+            case 'file': return 'File';
+            default: return 'Item';
+        }
+    };
+
+    const itemLabel = getItemLabel();
+
     return (
         <Dialog open={isOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
             <DialogContent className="sm:max-w-[550px] rounded-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">
                         {mode === 'edit' 
-                            ? `Edit Folder "${editingFolder?.name || ''}"`
-                            : parentFolder 
-                                ? `Create Folder in "${parentFolder.name}"`
-                                : 'Create New Folder'
+                            ? `Edit ${itemLabel}`
+                            : `Create ${itemLabel}`
                         }
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6">
                     <div className="space-y-2">
-                        <Label htmlFor="new-folder-name">Folder Name *</Label>
+                        <Label htmlFor="new-folder-name">{itemLabel} Name *</Label>
                         <Input
                             id="new-folder-name"
                             value={newFolderName}
                             onChange={(e) => setNewFolderName(e.target.value)}
-                            placeholder="Enter folder name"
+                            placeholder={`Enter ${itemLabel.toLowerCase()} name`}
                             autoFocus
                             className={isDuplicateName ? 'border-destructive' : ''}
                         />
                         {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                         {isDuplicateName && !errors.name && (
-                            <p className="text-sm text-destructive">A folder with this name already exists in this location</p>
+                            <p className="text-sm text-destructive">A {itemLabel.toLowerCase()} with this name already exists in this location</p>
                         )}
                     </div>
 
@@ -203,30 +214,33 @@ export function FolderDialog() {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="color">Color</Label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {colorOptions.map((option) => (
-                                <button
-                                    key={option.value}
-                                    type="button"
-                                    onClick={() => setColor(option.value)}
-                                    className={cn(
-                                        "flex items-center justify-center gap-2 p-3 rounded-md border-2 transition-all",
-                                        color === option.value 
-                                            ? "border-primary ring-2 ring-primary ring-offset-2" 
-                                            : "border-border hover:border-primary/50"
-                                    )}
-                                >
-                                    <div
-                                        className="w-5 h-5 rounded border"
-                                        style={{ backgroundColor: option.value }}
-                                    />
-                                    <span className="text-xs">{option.label}</span>
-                                </button>
-                            ))}
+                    {/* Only show color picker for folders */}
+                    {itemType === 'folder' && (
+                        <div className="space-y-2">
+                            <Label htmlFor="color">Color</Label>
+                            <div className="grid grid-cols-4 gap-2">
+                                {colorOptions.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => setColor(option.value)}
+                                        className={cn(
+                                            "flex items-center justify-center gap-2 p-3 rounded-md border-2 transition-all",
+                                            color === option.value 
+                                                ? "border-primary ring-2 ring-primary ring-offset-2" 
+                                                : "border-border hover:border-primary/50"
+                                        )}
+                                    >
+                                        <div
+                                            className="w-5 h-5 rounded border"
+                                            style={{ backgroundColor: option.value }}
+                                        />
+                                        <span className="text-xs">{option.label}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 <DialogFooter className="gap-2">
@@ -244,7 +258,7 @@ export function FolderDialog() {
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isSubmitting 
                             ? (mode === 'edit' ? 'Updating...' : 'Creating...') 
-                            : (mode === 'edit' ? 'Update Folder' : 'Create Folder')
+                            : (mode === 'edit' ? `Update ${itemLabel}` : `Create ${itemLabel}`)
                         }
                     </Button>
                 </DialogFooter>

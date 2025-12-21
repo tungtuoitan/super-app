@@ -2,9 +2,9 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "type": "msedge",
+        "type": "chrome",
         "request": "launch",
-        "name": "Launch Edge (Debug)",
+        "name": "Launch Chrome (Debug)",
         "url": "http://localhost:3000",
         "webRoot": "${workspaceFolder}",
         "sourceMaps": true,
@@ -14,7 +14,7 @@
         "runtimeArgs": ["--disable-web-security"]
       },
       {
-        "type": "msedge",
+        "type": "chrome",
         "request": "attach",
         "name": "Attach to Edge",
         "port": 9222,

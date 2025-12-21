@@ -1,0 +1,78 @@
+/**
+ * Note Grid Menu Helper Hook
+ * Business logic for note grid context menu operations
+ */
+
+import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
+import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+
+export const useNoteGridMenuHelper = () => {
+    const {
+        contextData,
+        setIsOpen,
+    } = useContextMenuStore();
+
+    const closeContextMenu = () => setIsOpen(false);
+
+    // Extract data from contextData
+    const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
+    const noteGridIsMultiple = noteGridSelectedCount > 1;
+
+    /**
+     * Handle add note
+     */
+    const handleAddNote = () => {
+        if (contextData?.onAddNote) {
+            closeContextMenu();
+            contextData.onAddNote();
+        }
+    };
+
+    /**
+     * Confirmation popover for delete actions
+     */
+    const deleteConfirmation = useConfirmationPopover({
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        confirmColor: 'destructive',
+        buttonVariant: 'default',
+        zIndex: 20000,
+    });
+
+    /**
+     * Handle delete with confirmation
+     */
+    const handleDelete = (event: any, isHardDelete: boolean = false) => {
+        if (!contextData?.onDelete) return;
+
+        closeContextMenu();
+
+        // Extract anchor element from menu event
+        const nativeEvent = event.syntheticEvent || event;
+        const anchorElement = nativeEvent?.target as HTMLElement;
+
+        const message = noteGridIsMultiple
+            ? isHardDelete
+                ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${noteGridSelectedCount} selected notes.\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`
+                : `Are you sure you want to delete ${noteGridSelectedCount} selected notes?\n\nThis action cannot be undone.`
+            : isHardDelete
+            ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete this note.\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`
+            : `Are you sure you want to delete this note?\n\nThis action cannot be undone.`;
+
+        deleteConfirmation.show({
+            anchorEl: anchorElement,
+            message,
+            onConfirm: () => {
+                contextData.onDelete(isHardDelete);
+            },
+        });
+    };
+
+    return {
+        noteGridSelectedCount,
+        noteGridIsMultiple,
+        handleAddNote,
+        handleDelete,
+        deleteConfirmation,
+    };
+};

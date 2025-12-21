@@ -1,0 +1,85 @@
+import React from 'react';
+import { MenuItem, MenuDivider } from '@szhsin/react-menu';
+import { 
+    Plus as AddIcon, 
+    Edit as EditIcon, 
+    Trash2 as DeleteIcon, 
+    File as FileIcon,
+    FileText as NoteIcon,
+    AlertTriangle as HardDeleteIcon
+} from 'lucide-react';
+import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorkspaceFolderMenuHelper';
+
+/**
+ * WorkspaceFolderNodeMenu
+ * Context menu for folder nodes in workspace explorer tree
+ * 
+ * Menu Items:
+ * - Add Folder/File/Note (submenu)
+ * - Edit (rename folder)
+ * - Delete / Hard Delete
+ */
+export function WorkspaceFolderNodeMenu() {
+    const {
+        contextData,
+        selectedFolderIds,
+        isWorkspaceRoot,
+        isMultipleSelected,
+        handleCreateItem,
+        handleEditItem,
+        onDeleteItemClick,
+    } = useWorkspaceFolderMenuHelper();
+
+    const addMenuItems = [
+        { type: 'folder' as const, icon: AddIcon, label: 'Add Folder', disabled: false },
+        { type: 'file' as const, icon: FileIcon, label: 'Add File', disabled: true },
+        { type: 'note' as const, icon: NoteIcon, label: 'Add Note', disabled: false },
+    ];
+
+    return (
+        <>
+            {/* Add submenu - Create new items */}
+            {addMenuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                    <MenuItem 
+                        key={item.type}
+                        onClick={() => handleCreateItem(item.type, contextData)} 
+                        disabled={item.disabled}
+                    >
+                        <Icon className="w-4 h-4 mr-2" />
+                        {item.label}
+                    </MenuItem>
+                );
+            })}
+            
+            <MenuDivider />
+            
+            {/* Edit - disabled if multiple items selected */}
+            <MenuItem 
+                onClick={() => handleEditItem(contextData)} 
+                disabled={isMultipleSelected}
+            >
+                <EditIcon className="w-4 h-4 mr-2" />
+                Edit
+            </MenuItem>
+            
+            {/* Delete - hidden for workspace root */}
+            {!isWorkspaceRoot && (
+                <>
+                    <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                        <DeleteIcon className="w-4 h-4 mr-2" />
+                        Delete
+                    </MenuItem>
+                    <MenuItem 
+                        onClick={(e) => onDeleteItemClick(e, true)}
+                        className="text-red-600 hover:bg-red-50"
+                    >
+                        <HardDeleteIcon className="w-4 h-4 mr-2" />
+                        Hard Delete
+                    </MenuItem>
+                </>
+            )}
+        </>
+    );
+}
