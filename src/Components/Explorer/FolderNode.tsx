@@ -9,7 +9,7 @@ import {
     Folder as FolderIcon,
     Layers
 } from 'lucide-react';
-import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
+import { useContextMenuHelper } from '@/hooks/useContextMenu.helper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';

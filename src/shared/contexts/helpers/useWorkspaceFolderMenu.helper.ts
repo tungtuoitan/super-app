@@ -4,11 +4,11 @@
  * Extracted from useContextMenuHelper for folder-specific logic
  */
 
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
+import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
+import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
-import type { ItemType } from '@/store/explorer/FolderDialogStore';
+import type { ItemType } from '@/store/explorer/FolderDialog.store';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';

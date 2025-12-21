@@ -1,14 +1,14 @@
 import {_deleteNote, _getNotes} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
-import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import { Note } from '@/types/note.types';
 import {transformNotesData} from '../utils';
 import {useEffect} from 'react';
 import {useContextMenuStore} from '../store';
 import {useSnackbar} from 'notistack';
-import {useEditorTabHelper} from './useEditorTabHelper';
-import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanelStore';
-import {useEditorTabsStore} from '@/store/editor/EditorTabStore';
+import {useEditorTabHelper} from './useEditorTab.helper';
+import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
+import {useEditorTabsStore} from '@/store/editor/EditorTab.store';
 
 export const useNoteGridHelper = () => {
     const {

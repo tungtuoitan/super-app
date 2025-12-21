@@ -13,7 +13,7 @@ import {
     PopoverTrigger,
 } from '@/Components/ui/popover';
 import { Table } from '@tanstack/react-table';
-import { Ws } from '@/store/ws/useWsListStore';
+import { Ws } from '@/store/ws/useWsList.store';
 
 interface WsGridFilterPopupProps {
     table: Table<Ws>;

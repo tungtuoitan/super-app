@@ -12,7 +12,7 @@ import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPo
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import {_deleteNote} from '../../../services/note.service';
 import {storageService} from '../../../services/storage.service';
-import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 
 /**
  * Delete selected notes button

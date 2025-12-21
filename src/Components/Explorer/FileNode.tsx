@@ -8,7 +8,7 @@ import {
     FileArchive,
     FileCode,
 } from 'lucide-react';
-import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
+import { useContextMenuHelper } from '@/hooks/useContextMenu.helper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { TreeFolder } from '@/hooks/explorer/tree.helper';

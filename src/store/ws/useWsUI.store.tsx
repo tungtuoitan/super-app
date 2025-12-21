@@ -4,7 +4,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from 'react';
-import { Ws } from './useWsListStore';
+import { Ws } from './useWsList.store';
 
 export interface WsUIContextData {
     selectedWorkspace: Ws | null;

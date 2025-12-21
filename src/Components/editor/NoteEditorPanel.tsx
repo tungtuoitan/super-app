@@ -15,13 +15,13 @@ import {
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
-import {useEditorActionsHelper} from '@/hooks/useEditorActionsHelper';
-import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {useEditorActionsHelper} from '@/hooks/useEditorActions.helper';
+import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import {useEditorTabsStore} from '@/store/index';
 import {_undoDeleteNote} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
 import {useSnackbar} from 'notistack';
-import {useNoteGridHelper} from '@/hooks/useNoteGridHelper';
+import {useNoteGridHelper} from '@/hooks/useNoteGrid.helper';
 
 interface NoteEditorPanelProps {
     tab: NoteTab;

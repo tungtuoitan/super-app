@@ -11,9 +11,9 @@ import { Textarea } from '@/Components/ui/textarea';
 import { Badge } from '@/Components/ui/badge';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-react';
-import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
+import {useNoteUIHelper} from '../../../hooks/useNoteUI.helper';
 import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
-import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import {formatNoteDate} from '@/utils/note.utils';
 
 /**

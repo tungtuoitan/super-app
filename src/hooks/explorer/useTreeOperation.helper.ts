@@ -5,8 +5,8 @@
 
 import type { TreeFolder } from './tree.helper';
 import { getAllFoldersFlattened, isDescendant, findFolderById } from './tree.helper';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import { useFolderDialogHelper } from './useFolderDialogHelper';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
+import { useFolderDialogHelper } from './useFolderDialog.helper';
 import { useWorkspaceOperation } from './useWorkspaceOperation.helper';
 import { _moveWorkspaceItems } from '@/services/workspace.service';
 import type { MoveItemsRequest } from '@/types/workspace.types';

@@ -4,7 +4,7 @@
  */
 
 import {Note} from "@/types/note.types";
-import {Ws} from "@/store/ws/useWsListStore";
+import {Ws} from "@/store/ws/useWsList.store";
 
 
 export type TabType = 'note' | 'tag' | 'settings' | 'workspace';

@@ -23,8 +23,8 @@ import { cn } from '@/lib/utils';
 import type { WorkspaceItem } from '@/types/workspace.types';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { useExplorerStore } from '@/store/index';
-import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
-import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
+import { useFolderDialogStore } from '@/store/explorer/FolderDialog.store';
+import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 
 export function FolderDialog() {
     // Get state from ExplorerStore

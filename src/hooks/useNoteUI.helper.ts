@@ -1,4 +1,4 @@
-import {useNoteUIStore} from '@/store/note/useNoteUIStore';
+import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import { Note } from '@/types/note.types';
 
 export const useNoteUIHelper = () => {

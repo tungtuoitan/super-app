@@ -1,6 +1,6 @@
 import {Note} from "@/types/note.types";
-import {useEditorTabsStore} from "../store/editor/EditorTabStore";
-import {useNoteUIStore} from "../store/note/useNoteUIStore";
+import {useEditorTabsStore} from "../store/editor/EditorTab.store";
+import {useNoteUIStore} from "../store/note/useNoteUI.store";
 import {NoteTab} from "@/components/Editor";
 
 

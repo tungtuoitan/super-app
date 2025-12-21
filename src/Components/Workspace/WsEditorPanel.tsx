@@ -14,14 +14,14 @@ import {
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
 import { WsDetailDialogContent } from './WsDetailDialogContent';
-import { useWsUIStore } from '@/store/ws/useWsUIStore';
-import { useWsUIHelper } from '@/hooks/useWsUIHelper';
+import { useWsUIStore } from '@/store/ws/useWsUI.store';
+import { useWsUIHelper } from '@/hooks/useWsUI.helper';
 import { useEditorTabsStore } from '@/store/index';
 import { _upsertWs, _undoDeleteWs } from '@/services/ws.service';
 import { storageService } from '@/services/storage.service';
 import { useSnackbar } from 'notistack';
-import { useWsListHelper } from '@/hooks/useWsListHelper';
-import { Ws } from '@/store/ws/useWsListStore';
+import { useWsListHelper } from '@/hooks/useWsList.helper';
+import { Ws } from '@/store/ws/useWsList.store';
 
 interface WsEditorPanelProps {
     tab: WorkspaceTab;

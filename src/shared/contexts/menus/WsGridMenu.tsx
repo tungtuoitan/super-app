@@ -5,8 +5,8 @@ import {
     Trash2 as DeleteIcon, 
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
-import { useWsGridMenuHelper } from '@/shared/contexts/helpers/useWsGridMenuHelper';
-import {useContextMenuHelper} from '@/hooks/useContextMenuHelper';
+import { useWsGridMenuHelper } from '@/shared/contexts/helpers/useWsGridMenu.helper';
+import {useContextMenuHelper} from '@/hooks/useContextMenu.helper';
 import {useContextMenuStore} from '@/store/index';
 
 /**
@@ -23,7 +23,7 @@ export function WsGridMenu() {
         handleDelete,
     } = useWsGridMenuHelper();
 
-            const {
+    const {
         contextData,
         setIsContextMenuOpen,
     } = useContextMenuStore();

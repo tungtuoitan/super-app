@@ -7,7 +7,7 @@ import {
     File as FileIcon,
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
-import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorkspaceChildMenuHelper';
+import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorkspaceChildMenu.helper';
 
 /**
  * WorkspaceChildNodeMenu

@@ -4,9 +4,9 @@
  * Shared helper for both note and file nodes in explorer tree
  */
 
-import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenuStore';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialogHelper';
+import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenu.store';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
+import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 import { _deleteNote } from '@/services/note.service';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';

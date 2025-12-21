@@ -8,7 +8,7 @@ import {
     FileText as NoteIcon,
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
-import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorkspaceFolderMenuHelper';
+import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorkspaceFolderMenu.helper';
 
 /**
  * WorkspaceFolderNodeMenu

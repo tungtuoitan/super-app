@@ -3,26 +3,26 @@
  * Central export point for all application stores
  */
 
-export { AuthStore, AuthStoreProvider, useAuthStore } from './auth/AuthStore';
-export type { AuthStoreData, User } from './auth/AuthStore';
+export { AuthStore, AuthStoreProvider, useAuthStore } from './auth/Auth.store';
+export type { AuthStoreData, User } from './auth/Auth.store';
 
-export { DialogStore, DialogProvider, useDialogStore } from './dialog/DialogStore';
-export type { DialogContextData } from './dialog/DialogStore';
+export { DialogStore, DialogProvider, useDialogStore } from './dialog/Dialog.store';
+export type { DialogContextData } from './dialog/Dialog.store';
 
-export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from './editor/EditorTabStore';
-export type { EditorTabContextData } from './editor/EditorTabStore';
+export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from './editor/EditorTab.store';
+export type { EditorTabContextData } from './editor/EditorTab.store';
 
-export { NoteTabStore, NoteTabProvider, useNoteTabStore } from './note/useNoteTabStore';
-export type { NoteTabContextData, TabItem } from './note/useNoteTabStore';
+export { NoteTabStore, NoteTabProvider, useNoteTabStore } from './note/useNoteTab.store';
+export type { NoteTabContextData, TabItem } from './note/useNoteTab.store';
 
-export { ContextMenuStore, ContextMenuStoreProvider, useContextMenuStore } from './contextMenu/ContextMenuStore';
-export type { ContextMenuStoreData, ContextMenuPosition, ContextMenuType } from './contextMenu/ContextMenuStore';
+export { ContextMenuStore, ContextMenuStoreProvider, useContextMenuStore } from './contextMenu/ContextMenu.store';
+export type { ContextMenuStoreData, ContextMenuPosition, ContextMenuType } from './contextMenu/ContextMenu.store';
 
-export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from './hashtagUI/HashtagUIStore';
-export type { HashtagUIStoreData } from './hashtagUI/HashtagUIStore';
+export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from './hashtagUI/HashtagUI.store';
+export type { HashtagUIStoreData } from './hashtagUI/HashtagUI.store';
 
-export { ExplorerStore, ExplorerProvider, useExplorerStore } from './explorer/ExplorerStore';
-export type { ExplorerContextData } from './explorer/ExplorerStore';
+export { ExplorerStore, ExplorerProvider, useExplorerStore } from './explorer/Explorer.store';
+export type { ExplorerContextData } from './explorer/Explorer.store';
 
-export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from './explorer/FolderDialogStore';
-export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from './explorer/FolderDialogStore';
+export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from './explorer/FolderDialog.store';
+export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from './explorer/FolderDialog.store';

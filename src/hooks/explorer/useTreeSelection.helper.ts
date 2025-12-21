@@ -8,7 +8,7 @@
 
 import type { NodeApi } from 'react-arborist';
 import type { TreeFolder } from './tree.helper';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
 
 export const useTreeSelection = () => {
     const {

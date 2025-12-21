@@ -1,7 +1,7 @@
 import { MouseEvent, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { useAuthStore } from '@/store/auth/AuthStore';
+import { useAuthStore } from '@/store/auth/Auth.store';
 
 /**
  * Top navigation component.

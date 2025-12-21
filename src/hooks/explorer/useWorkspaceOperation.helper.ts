@@ -11,7 +11,7 @@
  * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
  */
 
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { _getAllUserWorkspaces, _getWorkspaceTree } from '@/services/workspace.service';
 
 export const useWorkspaceOperation = () => {

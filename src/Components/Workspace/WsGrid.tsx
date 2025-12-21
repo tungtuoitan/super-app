@@ -17,9 +17,9 @@ import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { useWsListStore, Ws } from '@/store/ws/useWsListStore';
-import { useWsListHelper } from '@/hooks/useWsListHelper';
-import { useWsTabHelper } from '@/hooks/useWsTabHelper';
+import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
+import { useWsListHelper } from '@/hooks/useWsList.helper';
+import { useWsTabHelper } from '@/hooks/useWsTab.helper';
 import { WsGridFilterPopup } from './WsGridFilterPopup';
 
 /**

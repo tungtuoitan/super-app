@@ -5,7 +5,7 @@
  */
 
 import { authApi } from '@/services/api';
-import { useAuthStore } from '@/store/auth/AuthStore';
+import { useAuthStore } from '@/store/auth/Auth.store';
 import { storageService, STORAGE_KEYS } from '@/services/storage.service';
 import type { LoginRequest, ExchangeTokenResponse } from '@/types/index';
 

@@ -1,5 +1,5 @@
 import { Note } from '@/types/note.types';
-import { useNoteTabStore } from '../store/note/useNoteTabStore';
+import { useNoteTabStore } from '../store/note/useNoteTab.store';
 
 export const useNoteTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId, confirmCloseTabId, setConfirmCloseTabId } = useNoteTabStore();

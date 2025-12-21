@@ -1,4 +1,4 @@
-import { useAuthHelper } from '@/hooks/useAuthHelpers';
+import { useAuthHelper } from '@/hooks/useAuth.helpers';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Alert, AlertDescription } from '@/Components/ui/alert';

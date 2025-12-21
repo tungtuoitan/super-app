@@ -16,9 +16,9 @@ import { Checkbox } from '@/Components/ui/checkbox';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import {Note} from '@/types/note.types';
 import {_getNotes, _deleteNote} from '@/services/note.service';
-import {useEditorTabHelper} from '@/hooks/useEditorTabHelper';
-import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanelStore';
-import {useNoteGridHelper} from '@/hooks/useNoteGridHelper';
+import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
+import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
+import {useNoteGridHelper} from '@/hooks/useNoteGrid.helper';
 import {NoteGridFilterPopup} from './NoteGridFilterPopup';
 
 /**

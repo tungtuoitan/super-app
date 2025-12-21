@@ -3,7 +3,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { VSCodeLayout } from '../VSCodeLayout';
-import {useContextMenuHelper} from '@/hooks/useContextMenuHelper';
+import {useContextMenuHelper} from '@/hooks/useContextMenu.helper';
 import { APP_ROUTES } from '@/config/routes';
 
 /**

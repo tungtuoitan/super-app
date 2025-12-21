@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { GenericAutoComplete, type IAutoCompleteOptions } from '@/shared/components';
 import { WorkspaceTree } from '../Explorer/WorkspaceTree';
 import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { Loader2 } from 'lucide-react';
 import {FolderDialog} from '../Explorer/FolderDialog';
 

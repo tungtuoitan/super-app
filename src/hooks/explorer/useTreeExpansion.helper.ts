@@ -6,7 +6,7 @@
  * @returns {Object} Expansion action functions only (no state)
  */
 
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
 
 export const useTreeExpansion = () => {
     const {

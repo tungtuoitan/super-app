@@ -5,10 +5,10 @@
 
 import { _deleteWs, _getWsList, _undoDeleteWs, WsDTO } from '@/services/ws.service';
 import { storageService } from '@/services/storage.service';
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
+import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useSnackbar } from 'notistack';
-import { useWsListStore, Ws } from '@/store/ws/useWsListStore';
-import { useWsTabHelper } from './useWsTabHelper';
+import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
+import { useWsTabHelper } from './useWsTab.helper';
 import { useEditorTabsStore } from '@/Components/Editor';
 
 /**

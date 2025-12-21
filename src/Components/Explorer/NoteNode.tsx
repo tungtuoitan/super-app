@@ -4,10 +4,10 @@ import { NodeApi } from 'react-arborist';
 import {
     FileText,
 } from 'lucide-react';
-import { useContextMenuHelper } from '@/hooks/useContextMenuHelper';
+import { useContextMenuHelper } from '@/hooks/useContextMenu.helper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
-import { useEditorTabHelper } from '@/hooks/useEditorTabHelper';
+import { useEditorTabHelper } from '@/hooks/useEditorTab.helper';
 import { TreeFolder } from '@/hooks/explorer/tree.helper';
 import { NoteItem } from '@/types/workspace.types';
 import { Note } from '@/types/note.types';

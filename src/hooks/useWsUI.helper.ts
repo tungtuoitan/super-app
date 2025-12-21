@@ -3,8 +3,8 @@
  * Business logic for workspace UI interactions
  */
 
-import { useWsUIStore } from '@/store/ws/useWsUIStore';
-import { Ws } from '@/store/ws/useWsListStore';
+import { useWsUIStore } from '@/store/ws/useWsUI.store';
+import { Ws } from '@/store/ws/useWsList.store';
 
 export const useWsUIHelper = () => {
     const {

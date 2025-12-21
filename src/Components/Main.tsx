@@ -3,19 +3,19 @@ import { SnackbarProvider } from 'notistack';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import { AuthStoreProvider } from '@/store/auth/AuthStore';
+import { AuthStoreProvider } from '@/store/auth/Auth.store';
 import { EditorTabProvider } from '@/Components/Editor';
-import { ExplorerProvider } from '@/store/explorer/ExplorerStore';
-import { FolderDialogProvider } from '@/store/explorer/FolderDialogStore';
+import { ExplorerProvider } from '@/store/explorer/Explorer.store';
+import { FolderDialogProvider } from '@/store/explorer/FolderDialog.store';
 import { ContextMenu } from '@/shared/contexts';
-import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenuStore';
+import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenu.store';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
-import {NoteUIProvider} from '@/store/note/useNoteUIStore';
-import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanelStore';
+import {NoteUIProvider} from '@/store/note/useNoteUI.store';
+import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanel.store';
 import { NavProvider } from '@/contexts/NavigationContext';
-import { WsListProvider } from '@/store/ws/useWsListStore';
-import { WsUIProvider } from '@/store/ws/useWsUIStore';
+import { WsListProvider } from '@/store/ws/useWsList.store';
+import { WsUIProvider } from '@/store/ws/useWsUI.store';
 
 
 /**

@@ -1,11 +1,11 @@
 
 import { useSnackbar } from 'notistack';
-import { useFolderDialogStore } from '@/store/explorer/FolderDialogStore';
-import type { ItemType } from '@/store/explorer/FolderDialogStore';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
-import { useAuthStore } from '@/store/auth/AuthStore';
+import { useFolderDialogStore } from '@/store/explorer/FolderDialog.store';
+import type { ItemType } from '@/store/explorer/FolderDialog.store';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
+import { useAuthStore } from '@/store/auth/Auth.store';
 import { _getWorkspaceTree, _upsertFolder } from '@/services/workspace.service';
-import type { FolderDialogFormErrors } from '@/store/explorer/FolderDialogStore';
+import type { FolderDialogFormErrors } from '@/store/explorer/FolderDialog.store';
 import type { Folder } from '@/types/folder.types';
 import {useWorkspaceOperation} from './useWorkspaceOperation.helper';
 

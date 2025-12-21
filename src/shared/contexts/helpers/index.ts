@@ -3,7 +3,7 @@
  * Export all menu helper hooks
  */
 
-export { useWorkspaceFolderMenuHelper } from './useWorkspaceFolderMenuHelper';
-export { useWorkspaceChildMenuHelper } from './useWorkspaceChildMenuHelper';
-export { useNoteGridMenuHelper } from './useNoteGridMenuHelper';
-export { useWsGridMenuHelper } from './useWsGridMenuHelper';
+export { useWorkspaceFolderMenuHelper } from './useWorkspaceFolderMenu.helper';
+export { useWorkspaceChildMenuHelper } from './useWorkspaceChildMenu.helper';
+export { useNoteGridMenuHelper } from './useNoteGridMenu.helper';
+export { useWsGridMenuHelper } from './useWsGridMenu.helper';

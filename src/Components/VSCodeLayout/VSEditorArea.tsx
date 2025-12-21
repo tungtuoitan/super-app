@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react'
 import { X } from 'lucide-react'
 import { useEditorTabsStore, NoteEditorPanel, ConfirmCloseDialog } from '@/Components/Editor'
-import {useEditorTabHelper} from '@/hooks/useEditorTabHelper'
-import {useNoteUIStore} from '@/store/note/useNoteUIStore'
+import {useEditorTabHelper} from '@/hooks/useEditorTab.helper'
+import {useNoteUIStore} from '@/store/note/useNoteUI.store'
 import { WsEditorPanel } from '@/Components/Workspace'
 
 /**

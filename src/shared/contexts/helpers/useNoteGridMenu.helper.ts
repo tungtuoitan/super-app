@@ -3,7 +3,7 @@
  * Business logic for note grid context menu operations
  */
 
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenuStore';
+import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 
 export const useNoteGridMenuHelper = () => {

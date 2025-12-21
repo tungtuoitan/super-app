@@ -8,12 +8,12 @@ import { Note, UpsertNoteDTO } from '@/types/note.types';
 import { _upsertNote } from '@/services/note.service';
 import { _addItemToWorkspace } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';
-import { useNoteUIHelper } from './useNoteUIHelper';
-import { useEditorTabHelper } from './useEditorTabHelper';
-import { useNoteGridHelper } from './useNoteGridHelper';
+import { useNoteUIHelper } from './useNoteUI.helper';
+import { useEditorTabHelper } from './useEditorTab.helper';
+import { useNoteGridHelper } from './useNoteGrid.helper';
 import { useWorkspaceOperation } from './explorer/useWorkspaceOperation.helper';
-import { useNoteUIStore } from '@/store/note/useNoteUIStore';
-import { useExplorerStore } from '@/store/explorer/ExplorerStore';
+import { useNoteUIStore } from '@/store/note/useNoteUI.store';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { transformNoteData } from '@/utils/note.utils';
 
 export const useEditorActionsHelper = () => {

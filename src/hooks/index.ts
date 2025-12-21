@@ -10,13 +10,13 @@
  */
 
 // Auth helpers (still needed for authentication flow)
-export * from './useAuthHelpers';
-export { useAuthHelper } from './useAuthHelpers';
+export * from './useAuth.helpers';
+export { useAuthHelper } from './useAuth.helpers';
 
 // UI helpers
-export * from './useNoteUIHelper';
-export * from './useNoteTabHelper';
-export * from './useEditorTabHelper';
-export * from './useEditorActionsHelper';
+export * from './useNoteUI.helper';
+export * from './useNoteTab.helper';
+export * from './useEditorTab.helper';
+export * from './useEditorActions.helper';
 
-export * from './useContextMenuHelper';
+export * from './useContextMenu.helper';

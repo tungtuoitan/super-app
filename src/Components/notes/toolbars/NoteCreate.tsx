@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
-import {useNoteUIHelper} from '../../../hooks/useNoteUIHelper';
+import {useNoteUIHelper} from '../../../hooks/useNoteUI.helper';
 import {Note} from '../../../types/note.types';
 
 /**

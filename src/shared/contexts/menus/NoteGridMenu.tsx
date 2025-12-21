@@ -5,7 +5,7 @@ import {
     Trash2 as DeleteIcon, 
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
-import { useNoteGridMenuHelper } from '@/shared/contexts/helpers/useNoteGridMenuHelper';
+import { useNoteGridMenuHelper } from '@/shared/contexts/helpers/useNoteGridMenu.helper';
 
 /**
  * NoteGridMenu

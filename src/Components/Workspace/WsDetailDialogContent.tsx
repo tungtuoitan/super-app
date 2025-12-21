@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Textarea } from '@/Components/ui/textarea';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { Briefcase, FileText, Calendar, User } from 'lucide-react';
-import { useWsUIStore } from '@/store/ws/useWsUIStore';
-import { useWsUIHelper } from '@/hooks/useWsUIHelper';
-import { Ws } from '@/store/ws/useWsListStore';
+import { useWsUIStore } from '@/store/ws/useWsUI.store';
+import { useWsUIHelper } from '@/hooks/useWsUI.helper';
+import { Ws } from '@/store/ws/useWsList.store';
 
 /**
  * Workspace Detail Dialog Content
