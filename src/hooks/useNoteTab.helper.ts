@@ -20,7 +20,7 @@ export const useNoteTabHelper = () => {
             const newTab = {
                 id: `note-tab-${note.id}-${Date.now()}`,
                 noteId: note.id,
-                title: note.name || 'Untitled Note',
+                title: note.name || 'Unsaved Note',
                 note: note,
                 hasUnsavedChanges: false,
             };
@@ -102,7 +102,7 @@ export const useNoteTabHelper = () => {
                     return {
                         ...tab,
                         noteId: note.id,
-                        title: note.name || 'Untitled Note',
+                        title: note.name || 'Unsaved Note',
                         note: note,
                     };
                 }

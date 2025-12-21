@@ -10,6 +10,7 @@ import { useSnackbar } from 'notistack';
 import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
 import { useWsTabHelper } from './useWsTab.helper';
 import { useEditorTabsStore } from '@/Components/Editor';
+import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
 
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
@@ -69,13 +70,15 @@ export const useWsListHelper = () => {
     const createNewWorkspace = () => {
         console.log('➕ Creating new workspace...');
 
-        // Generate temporary negative ID
-        const tempId = -Math.floor(Math.random() * 10000);
+        // Generate sequential temporary negative ID from open tabs
+        const existingIds = collectIdsFromTabs(openTabs);
+        const tempId = generateTempId(existingIds);
+        const name = generateUnsavedName(tempId);
         
         // Create temporary workspace
         const newWorkspace: Ws = {
             id: tempId,
-            name: 'Untitled Workspace',
+            name: name,
             description: '',
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -89,8 +92,6 @@ export const useWsListHelper = () => {
         // Open workspace in editor tab
         console.log('🏢 Opening new workspace in tab:', newWorkspace);
         openWorkspaceTab(newWorkspace);
-        
-        enqueueSnackbar('New workspace created', { variant: 'success' });
     };
 
     /**

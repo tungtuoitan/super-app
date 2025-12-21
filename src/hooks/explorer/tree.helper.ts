@@ -147,7 +147,7 @@ export function transformItemsToTreeData(items: WorkspaceItem[]): TreeFolder[] {
         )
         .map((item) => ({
             id: item.id.toString(),
-            name: item.name || "Untitled",
+            name: item.name || "Unsaved",
             data: item,
             // Only folders can have children - notes/files are always leaf nodes
             children: isFolder(item) && item.children && item.children.length > 0
@@ -169,7 +169,7 @@ export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
         )
         .map((folder) => ({
             id: folder.id.toString(),
-            name: folder.name || "Untitled",
+            name: folder.name || "Unsaved",
             data: folder as any, // Cast for backward compatibility
             // Always provide children array (empty if no children) to enable drop into nodes
             children:

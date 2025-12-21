@@ -15,6 +15,8 @@ import { _deleteNote, _upsertNote } from '@/services/note.service';
 import { storageService } from '@/services/storage.service';
 import { Note } from '@/types/note.types';
 import {useConfirmationPopover} from '@/shared/hooks';
+import {useEditorTabsStore} from '../store';
+import {collectIdsFromTabs, generateTempId, generateUnsavedName} from '../utils';
 
 
 
@@ -39,6 +41,8 @@ export const useContextMenuHelper = () => {
     } = useExplorerStore();
     const { openFolderDialog } = useFolderDialogHelper();
     const { openNoteTab } = useEditorTabHelper();
+    const { openTabs } = useEditorTabsStore();
+
     
     // Get current workspace ID from tree (fallback to 1 if not available)
     const CURRENT_WORKSPACE_ID = currentTree?.workspaceId ?? 1;
@@ -257,13 +261,15 @@ export const useContextMenuHelper = () => {
         console.log('📝 Context Menu: Add note clicked for parent:', parentFolder);
         setIsContextMenuOpen(false);
 
-        // Generate temporary negative ID (same pattern as NoteGrid)
-        const tempId = -Math.floor(Math.random() * 10000);
+        // Generate sequential temporary negative ID from open tabs
+        const existingIds = collectIdsFromTabs(openTabs);
+        const tempId = generateTempId(existingIds);
+        const name = generateUnsavedName(tempId);
 
         // Create temporary note
         const newNote: Note = {
             id: tempId,
-            name: 'Untitled Note',
+            name: name,
             description: '',
             hashtags: parentFolder?.id ? [parentFolder.id] : [],
             tags: [],
@@ -281,7 +287,7 @@ export const useContextMenuHelper = () => {
                 id: tempId,
                 type: 'note' as const,
                 userId: currentTree.userId,
-                name: 'Untitled Note',
+                name: name,
                 accessType: 'owner' as const,
                 isOriginal: true,
                 level: parentFolder ? parentFolder.level + 1 : 1,

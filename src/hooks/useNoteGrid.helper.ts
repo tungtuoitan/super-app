@@ -2,7 +2,7 @@ import {_deleteNote, _getNotes} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
 import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import { Note } from '@/types/note.types';
-import {transformNotesData} from '../utils';
+import {collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotesData} from '../utils';
 import {useEffect} from 'react';
 import {useContextMenuStore} from '../store';
 import {useSnackbar} from 'notistack';
@@ -45,12 +45,15 @@ export const useNoteGridHelper = () => {
     const createNewNote = () => {
         console.log('➕ Creating new note...');
 
-        // Generate temporary negative ID
-        const tempId = -Math.floor(Math.random() * 10000);  // Larger range to avoid collisions
+        // Generate sequential temporary negative ID from open tabs
+        const existingIds = collectIdsFromTabs(openTabs);
+        const tempId = generateTempId(existingIds);
+        const name = generateUnsavedName(tempId);
+        
         // Create temporary note
         const newNote: Note = {
             id: tempId,
-            name: 'Untitled Note',
+            name: name,
             description: '',
             hashtags: [],
             tags: [],

@@ -77,7 +77,7 @@ export const useEditorTabHelper = () => {
                 id: `note-${note.id}-${Date.now()}`,
                 type: 'note',
                 noteId: note.id,
-                title: note.name || 'Untitled Note',
+                title: note.name || 'Unsaved Note',
                 note: note,
                 hasUnsavedChanges: false,
             };
@@ -161,7 +161,7 @@ export const useEditorTabHelper = () => {
                     return {
                         ...tab,
                         noteId: note.id,
-                        title: note.name || 'Untitled Note',
+                        title: note.name || 'Unsaved Note',
                         note: note,
                     } as NoteTab;
                 }

@@ -33,7 +33,7 @@ export const useWsTabHelper = () => {
                 id: `workspace-tab-${workspace.id}-${Date.now()}`,
                 type: 'workspace',
                 workspaceId: workspace.id,
-                title: workspace.name || 'Untitled Workspace',
+                title: workspace.name || 'Unsaved Workspace',
                 workspace: workspace,
                 hasUnsavedChanges: false,
             };
