@@ -5,7 +5,7 @@
 
 import { Ws } from '@/store/ws/useWsList.store';
 import { useEditorTabsStore } from '@/Components/Editor';
-import { WorkspaceTab } from '@/types/editor/tab.types';
+import { EditorTab } from '@/types/editor/tab.types';
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -20,7 +20,7 @@ export const useWsTabHelper = () => {
 
         // Check if tab already exists for this workspace
         const existingTab = openTabs.find(
-            tab => tab.type === 'workspace' && (tab as WorkspaceTab).workspaceId === workspace.id
+            tab => tab.type === 'workspace' && (tab.data as Ws).id === workspace.id
         );
 
         if (existingTab) {
@@ -29,12 +29,11 @@ export const useWsTabHelper = () => {
             setActiveTabId(existingTab.id);
         } else {
             // Create new workspace tab
-            const newTab: WorkspaceTab = {
+            const newTab: EditorTab = {
                 id: `workspace-tab-${workspace.id}-${Date.now()}`,
                 type: 'workspace',
-                workspaceId: workspace.id,
+                data: workspace,
                 title: workspace.name || 'Unsaved Workspace',
-                workspace: workspace,
                 hasUnsavedChanges: false,
             };
 
@@ -76,13 +75,13 @@ export const useWsTabHelper = () => {
         console.log('🏢 WsTabHelper - updateWorkspaceInTabs:', workspaceId, updatedWorkspace);
         
         setOpenTabs(prev => prev.map(tab => {
-            if (tab.type === 'workspace' && (tab as WorkspaceTab).workspaceId === workspaceId) {
-                const wsTab = tab as WorkspaceTab;
+            if (tab.type === 'workspace' && (tab.data as Ws).id === workspaceId) {
+                const wsData = tab.data as Ws;
                 return {
-                    ...wsTab,
-                    workspace: { ...wsTab.workspace, ...updatedWorkspace },
-                    title: updatedWorkspace.name || wsTab.title,
-                } as WorkspaceTab;
+                    ...tab,
+                    data: { ...wsData, ...updatedWorkspace },
+                    title: updatedWorkspace.name || tab.title,
+                };
             }
             return tab;
         }));

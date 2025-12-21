@@ -9,7 +9,9 @@ export const useNoteTabHelper = () => {
         console.log('📝 NoteTabHelper - Current openTabs:', openTabs);
 
         // Check if tab already exists for this note
-        const existingTab = openTabs.find(tab => tab.noteId === note.id);
+        const existingTab = openTabs.find(tab => 
+            tab.type === 'note' && (tab.data as Note).id === note.id
+        );
 
         if (existingTab) {
             // Tab already exists, just activate it
@@ -19,9 +21,9 @@ export const useNoteTabHelper = () => {
             // Create new tab
             const newTab = {
                 id: `note-tab-${note.id}-${Date.now()}`,
-                noteId: note.id,
+                type: 'note' as const,
+                data: note,
                 title: note.name || 'Unsaved Note',
-                note: note,
                 hasUnsavedChanges: false,
             };
 

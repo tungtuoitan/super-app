@@ -6,7 +6,7 @@
 
 import React, {useEffect} from 'react';
 import { Save, X, RotateCcw, Undo2 } from 'lucide-react';
-import type { NoteTab } from '@/types/editor/tab.types';
+import type { EditorTab } from '@/types/editor/tab.types';
 import { Button } from '@/Components/ui/button';
 import {
     Tooltip,
@@ -24,7 +24,7 @@ import {useSnackbar} from 'notistack';
 import {useNoteGridHelper} from '@/hooks/useNoteGrid.helper';
 
 interface NoteEditorPanelProps {
-    tab: NoteTab;
+    tab: EditorTab;
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {

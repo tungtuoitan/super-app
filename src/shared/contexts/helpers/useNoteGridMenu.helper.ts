@@ -17,6 +17,9 @@ export const useNoteGridMenuHelper = () => {
     // Extract data from contextData
     const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
     const noteGridIsMultiple = noteGridSelectedCount > 1;
+    
+    // Check if all selected notes are temporary (negative IDs)
+    const allSelectedAreTempNotes = contextData?.selectedIds?.every((id: number) => id < 0) ?? false;
 
     /**
      * Handle add note
@@ -35,6 +38,13 @@ export const useNoteGridMenuHelper = () => {
         if (!contextData?.onDelete) return;
 
         setIsContextMenuOpen(false);
+
+        // If all selected notes are temporary (negative IDs), delete immediately without confirmation
+        if (allSelectedAreTempNotes) {
+            console.log('🗑️ Deleting temporary notes immediately (no confirmation):', contextData.selectedIds);
+            contextData.onDelete(isHardDelete);
+            return;
+        }
 
         // Extract anchor element from menu event
         const nativeEvent = event.syntheticEvent || event;
@@ -65,6 +75,7 @@ export const useNoteGridMenuHelper = () => {
     return {
         noteGridSelectedCount,
         noteGridIsMultiple,
+        allSelectedAreTempNotes,
         handleAddNote,
         handleDelete,
     };

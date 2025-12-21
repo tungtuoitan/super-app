@@ -20,6 +20,7 @@ export function NoteGridMenu() {
     const {
         noteGridSelectedCount,
         noteGridIsMultiple,
+        allSelectedAreTempNotes,
         handleAddNote,
         handleDelete,
     } = useNoteGridMenuHelper();
@@ -40,14 +41,16 @@ export function NoteGridMenu() {
                 Delete
             </MenuItem>
             
-            {/* Hard Delete */}
-            <MenuItem 
-                onClick={(e) => handleDelete(e, true)}
-                className="text-red-600 hover:bg-red-50"
-            >
-                <HardDeleteIcon className="w-4 h-4 mr-2" />
-                Hard Delete
-            </MenuItem>
+            {/* Hard Delete - Only show if not all selected notes are temporary */}
+            {!allSelectedAreTempNotes && (
+                <MenuItem 
+                    onClick={(e) => handleDelete(e, true)}
+                    className="text-red-600 hover:bg-red-50"
+                >
+                    <HardDeleteIcon className="w-4 h-4 mr-2" />
+                    Hard Delete
+                </MenuItem>
+            )}
         </>
     );
 }

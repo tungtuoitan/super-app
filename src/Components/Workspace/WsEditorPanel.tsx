@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { Save, RotateCcw, Undo2 } from 'lucide-react';
-import type { WorkspaceTab } from '@/types/editor/tab.types';
+import type { EditorTab } from '@/types/editor/tab.types';
 import { Button } from '@/Components/ui/button';
 import {
     Tooltip,
@@ -24,7 +24,7 @@ import { useWsListHelper } from '@/hooks/useWsList.helper';
 import { Ws } from '@/store/ws/useWsList.store';
 
 interface WsEditorPanelProps {
-    tab: WorkspaceTab;
+    tab: EditorTab;
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
@@ -41,8 +41,9 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
 
     // Set selected workspace when tab is active
     useEffect(() => {
-        if (tab.workspace) {
-            setSelectedWorkspace(tab.workspace);
+        if (tab.type === 'workspace') {
+            const wsData = tab.data as Ws;
+            setSelectedWorkspace(wsData);
         }
     }, [tab.id]);
 

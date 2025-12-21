@@ -7,22 +7,25 @@
  */
 
 import type { EditorTab } from '@/types/editor/tab.types';
+import type { Note } from '@/types/note.types';
+import type { Ws } from '@/store/ws/useWsList.store';
 
 /**
  * Collect all IDs from open tabs
- * Extracts noteId, workspaceId, tagId from all tab types
+ * Extracts id from data field of all tab types
  */
 export const collectIdsFromTabs = (openTabs: EditorTab[]): number[] => {
     const ids: number[] = [];
     
     openTabs.forEach(tab => {
-        if (tab.type === 'note' && 'noteId' in tab) {
-            ids.push(tab.noteId);
-        } else if (tab.type === 'workspace' && 'workspaceId' in tab) {
-            ids.push(tab.workspaceId);
-        } else if (tab.type === 'tag' && 'tagId' in tab) {
-            ids.push(tab.tagId);
+        if (tab.type === 'note') {
+            const noteData = tab.data as Note;
+            ids.push(noteData.id);
+        } else if (tab.type === 'workspace') {
+            const wsData = tab.data as Ws;
+            ids.push(wsData.id);
         }
+        // Add other types as needed
     });
     
     return ids;

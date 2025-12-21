@@ -1,7 +1,8 @@
 import {Note} from "@/types/note.types";
 import {useEditorTabsStore} from "../store/editor/EditorTab.store";
 import {useNoteUIStore} from "../store/note/useNoteUI.store";
-import {NoteTab} from "@/components/Editor";
+import {useNoteGridPanelStore} from "../store/note/useNoteGridPanel.store";
+import {EditorTab} from "@/types/editor/tab.types";
 
 
 export const useEditorTabHelper = () => {
@@ -14,6 +15,7 @@ export const useEditorTabHelper = () => {
         setConfirmCloseTabId,
     } = useEditorTabsStore();
     const { setSelectedNote, originalNoteRef, setHasUnsavedChanges } = useNoteUIStore();
+    const { setNotes } = useNoteGridPanelStore();
 
     /**
      * Update active tab ID and sync selectedNote
@@ -35,16 +37,17 @@ export const useEditorTabHelper = () => {
             console.log('🔍 Found active tab:', activeTab);
             
             if (activeTab?.type === 'note') {
-                console.log('✅ Setting selectedNote:', activeTab.note);
+                const noteData = activeTab.data as Note;
+                console.log('✅ Setting selectedNote:', noteData);
                 
                 // Initialize originalNoteRef for change tracking
-                if (!originalNoteRef.current || originalNoteRef.current.id !== activeTab.note.id) {
-                    console.log('📌 Initializing originalNoteRef in EditorTabHelper:', activeTab.note);
-                    originalNoteRef.current = { ...activeTab.note };
+                if (!originalNoteRef.current || originalNoteRef.current.id !== noteData.id) {
+                    console.log('📌 Initializing originalNoteRef in EditorTabHelper:', noteData);
+                    originalNoteRef.current = { ...noteData };
                     setHasUnsavedChanges(false); // Reset changes for newly opened note
                 }
                 
-                setSelectedNote(activeTab.note);
+                setSelectedNote(noteData);
             } else {
                 console.log('❌ No note tab found, clearing selectedNote');
                 originalNoteRef.current = null;
@@ -64,8 +67,8 @@ export const useEditorTabHelper = () => {
         
         // Check if tab already exists for this note
         const existingTab = openTabs.find(
-            tab => tab.type === 'note' && tab.noteId === note.id
-        ) as NoteTab | undefined;
+            tab => tab.type === 'note' && (tab.data as Note).id === note.id
+        );
 
         if (existingTab) {
             // Tab already exists, just activate it
@@ -73,12 +76,11 @@ export const useEditorTabHelper = () => {
             updateActiveTabIdAndSelectedNote(existingTab.id);
         } else {
             // Create new tab
-            const newTab: NoteTab = {
+            const newTab: EditorTab = {
                 id: `note-${note.id}-${Date.now()}`,
                 type: 'note',
-                noteId: note.id,
+                data: note,
                 title: note.name || 'Unsaved Note',
-                note: note,
                 hasUnsavedChanges: false,
             };
 
@@ -101,6 +103,15 @@ export const useEditorTabHelper = () => {
         //     setConfirmCloseTabId(tabId);
         //     return;
         // }
+
+        // If closing a note tab with negative ID (temporary note), remove it from grid
+        if (tab?.type === 'note') {
+            const noteData = tab.data as Note;
+            if (noteData.id < 0) {
+                console.log('🗑️ Removing temporary note from grid:', noteData.id);
+                setNotes(prevNotes => prevNotes.filter(note => note.id !== noteData.id));
+            }
+        }
 
         // Filter out the closed tab
         const newTabs = openTabs.filter(t => t.id !== tabId);
@@ -160,10 +171,9 @@ export const useEditorTabHelper = () => {
                 if (tab.id === tabId && tab.type === 'note') {
                     return {
                         ...tab,
-                        noteId: note.id,
+                        data: note,
                         title: note.name || 'Unsaved Note',
-                        note: note,
-                    } as NoteTab;
+                    };
                 }
                 return tab;
             })

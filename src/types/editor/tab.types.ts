@@ -26,6 +26,7 @@ export interface TabViewState {
 
 export interface BaseTab {
     id: string;
+    data: Note | Ws;
     type: TabType;
     title: string;
     hasUnsavedChanges?: boolean;
@@ -33,25 +34,7 @@ export interface BaseTab {
     isDeleted?: boolean;  // Flag to indicate note has been deleted
 }
 
-export interface NoteTab extends BaseTab {
-    type: 'note';
-    noteId: number;  // Note ID for tab identification
-    note: Note;
-}
-
-export interface FolderTab extends BaseTab {
-    type: 'tag';
-    tagId: number;
-    // Folder data will be added later
-}
-
-export interface WorkspaceTab extends BaseTab {
-    type: 'workspace';
-    workspaceId: number;
-    workspace: Ws;
-}
-
-export type EditorTab = NoteTab | FolderTab | WorkspaceTab;
+export type EditorTab = BaseTab;
 
 export interface EditorState {
     openTabs: EditorTab[];

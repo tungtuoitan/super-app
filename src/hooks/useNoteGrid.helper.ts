@@ -95,27 +95,46 @@ export const useNoteGridHelper = () => {
         const selectedIds = ids ?? Object.keys(rowSelection).map(id => parseInt(id));
         if (selectedIds.length === 0) return;
 
+        // Separate temporary notes (negative IDs) from persisted notes (positive IDs)
+        const tempNoteIds = selectedIds.filter(id => id < 0);
+        const persistedNoteIds = selectedIds.filter(id => id > 0);
+
         try {
-            const token = storageService.getString('token') || '';
-            // Send comma-separated IDs to backend
-            await _deleteNote(token, selectedIds.join(','));
+            // Handle temporary notes - just remove from grid locally
+            if (tempNoteIds.length > 0) {
+                console.log('🗑️ Removing temporary notes from grid:', tempNoteIds);
+                setNotes(prevNotes => prevNotes.filter(note => !tempNoteIds.includes(note.id)));
+                
+                enqueueSnackbar(`Removed ${tempNoteIds.length} unsaved note(s)`, {
+                    variant: 'success'
+                });
+            }
 
-            enqueueSnackbar(`Successfully deleted ${selectedIds.length} note(s)`, {
-                variant: 'success'
-            });
+            // Handle persisted notes - call API
+            if (persistedNoteIds.length > 0) {
+                const token = storageService.getString('token') || '';
+                // Send comma-separated IDs to backend
+                await _deleteNote(token, persistedNoteIds.join(','));
 
-            // Mark opened tabs as deleted instead of closing them
-            const updatedTabs = openTabs.map(tab => {
-                if (tab.type === 'note' && selectedIds.includes(tab.noteId)) {
-                    return { ...tab, isDeleted: true };
-                }
-                return tab;
-            });
-            setOpenTabs(updatedTabs);
+                enqueueSnackbar(`Successfully deleted ${persistedNoteIds.length} note(s)`, {
+                    variant: 'success'
+                });
 
-            // Clear selection and reload notes
+                // Mark opened tabs as deleted instead of closing them
+                const updatedTabs = openTabs.map(tab => {
+                    if (tab.type === 'note' && persistedNoteIds.includes(tab.data.id)) {
+                        return { ...tab, isDeleted: true };
+                    }
+                    return tab;
+                });
+                setOpenTabs(updatedTabs);
+
+                // Reload notes from API
+                await loadNotes();
+            }
+
+            // Clear selection
             setRowSelection({});
-            await loadNotes();
         } catch (error) {
             console.error('Failed to delete notes:', error);
             enqueueSnackbar('Failed to delete notes', { variant: 'error' });

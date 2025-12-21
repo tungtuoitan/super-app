@@ -5,20 +5,14 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from 'react';
 import { Note } from '../../types/note.types';
+import {BaseTab} from '@/types/editor/tab.types';
 
-export interface TabItem {
-    id: string;
-    noteId: number;
-    title: string;
-    note: Note;
-    hasUnsavedChanges?: boolean;
-}
 
 export interface NoteTabContextData {
-    openTabs: TabItem[];
+    openTabs: BaseTab[];
     activeTabId: string | null;
     confirmCloseTabId: string | null;
-    setOpenTabs: Dispatch<SetStateAction<TabItem[]>>;
+    setOpenTabs: Dispatch<SetStateAction<BaseTab[]>>;
     setActiveTabId: Dispatch<SetStateAction<string | null>>;
     setConfirmCloseTabId: Dispatch<SetStateAction<string | null>>;
 }
@@ -37,7 +31,7 @@ export const NoteTabStore = createContext<NoteTabContextData>(noteTabContextDefa
 export const useNoteTabStore = () => useContext(NoteTabStore);
 
 export const NoteTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [openTabs, setOpenTabs] = useState<TabItem[]>([]);
+    const [openTabs, setOpenTabs] = useState<BaseTab[]>([]);
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
     const [confirmCloseTabId, setConfirmCloseTabId] = useState<string | null>(null);
 
