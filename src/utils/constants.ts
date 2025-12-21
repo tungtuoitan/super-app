@@ -56,7 +56,6 @@ export const constants = {
     workspace: 'Workspace',
     file: 'File',
     folder: 'Folder',
-    tag: 'Tag',
     notes: 'Notes',
   } as const,
 

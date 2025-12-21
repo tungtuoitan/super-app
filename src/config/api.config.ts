@@ -17,18 +17,11 @@
 const getBaseUrl = (): string => {
     // Always use environment variable
     // For production, set REACT_APP_API_URL in .env.local (gitignored)
-    if (process.env.REACT_APP_API_URL) {
-        return process.env.REACT_APP_API_URL;
+    if (process.env.ENVIRONMENT === 'production' && process.env.PRO_API_URL) {
+        return process.env.PRO_API_URL;
+    } else {
+        return process.env.LOCAL_API_URL || 'http://localhost:5000';
     }
-
-    // Safe development fallback
-    if (window.location.hostname === 'localhost') {
-        return 'http://localhost:5000';
-    }
-
-    // Default to HTTP for development (change to HTTPS in production)
-    console.warn('REACT_APP_API_URL not set. Using default HTTP endpoint.');
-    return 'http://localhost:5000';
 };
 
 /**
@@ -57,27 +50,6 @@ export const API_ENDPOINTS = {
         create: '/api/Notes',
         update: '/api/Notes',
         delete: '/api/Notes',
-    },
-    tags: {
-        getAll: '/api/Tags',
-        create: '/api/Tags',
-        update: '/api/Tags',
-        delete: '/api/Tags',
-    },
-    events: {
-        getAll: '/Ev/GetEvs',
-        createOrUpdate: '/Ev/IuEv',
-    },
-    srs: {
-        getAll: '/SRs/GetSRs',
-    },
-    prs: {
-        getAll: '/Pr/GetPrs',
-        createOrUpdate: '/Pr/IuPr',
-    },
-    folders: {
-        getAll: '/Fo/GetFos',
-        createOrUpdate: '/Fo/IuFos',
     },
     userProfile: {
         get: '/UserProfile/GetUserProfileJson',
