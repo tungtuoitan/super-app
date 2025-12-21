@@ -41,10 +41,6 @@ export interface FolderDialogContextData {
     setIsSubmitting: Dispatch<SetStateAction<boolean>>;
     isLoadingTree: boolean;
     setIsLoadingTree: Dispatch<SetStateAction<boolean>>;
-    
-    // Reset form to initial state
-    resetForm: () => void;
-
 }
 
 const folderDialogContextDefaultValue: FolderDialogContextData = {
@@ -77,11 +73,8 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     setIsSubmitting: () => {},
     isLoadingTree: false,
     setIsLoadingTree: () => {},
-    
-    // Reset form to initial state
-    resetForm: () => {},
-
 };
+
 
 export const FolderDialogStore = createContext<FolderDialogContextData>(
     folderDialogContextDefaultValue
@@ -114,14 +107,6 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
     // Loading states
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
-    
-    const resetForm = () => {
-        setNewFolderName('');
-        setDescription('');
-        setColor('#1976D2');
-        setErrors({});
-        setIsSubmitting(false);
-    };
     
 
     return (
@@ -156,8 +141,6 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 setIsSubmitting,
                 isLoadingTree,
                 setIsLoadingTree,
-                
-                resetForm,
             }}
         >
             {children}

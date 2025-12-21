@@ -33,7 +33,6 @@ export const useFolderDialogHelper = () => {
         setNewFolderName,
         setDescription,
         setColor,
-        resetForm,
     } = useFolderDialogStore();
     
     // Explorer state
@@ -47,6 +46,17 @@ export const useFolderDialogHelper = () => {
     
     // Computed value
     const selectedWorkspaceId = currentTree?.workspaceId;
+    
+    /**
+     * Reset form to initial state
+     */
+    const resetForm = () => {
+        setNewFolderName('');
+        setDescription('');
+        setColor('#1976D2');
+        setErrors({});
+        setIsSubmitting(false);
+    };
     
     const validateNewFolder = (): boolean => {
         const newErrors: FolderDialogFormErrors = {};
