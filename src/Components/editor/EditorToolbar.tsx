@@ -23,27 +23,26 @@ export function EditorToolbar() {
 
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
     const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
-    const { selectedNote, setSelectedNote } = useNoteUIStore()
 
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null
 
     // Get toolbar actions for active tab
-    const toolbarActions = useEditorToolbarHelper(activeTab || null)
+    const { handleSave, handleCancel, handleUndo, anyHasChanges, isSaving, isUndoing, statusText, itemId } = useEditorToolbarHelper()
 
     useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault()
-        if (activeTab && toolbarActions.anyHasChanges && !toolbarActions.isSaving) {
-            toolbarActions.handleSave()
+        if (activeTab && anyHasChanges && !isSaving) {
+            handleSave()
         }
         }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [activeTab, toolbarActions])
+    }, [activeTab, anyHasChanges, isSaving, handleSave])
 
     return (
         <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
@@ -52,10 +51,10 @@ export function EditorToolbar() {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">
-                            {toolbarActions.statusText}
+                            {statusText}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                            ID: {toolbarActions.itemId || '0'}
+                            ID: {itemId || '0'}
                         </span>
                     </div>
                 </div>
@@ -72,8 +71,8 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={toolbarActions.handleUndo}
-                                        disabled={toolbarActions.isUndoing}
+                                        onClick={handleUndo}
+                                        disabled={isUndoing}
                                         className="h-8 w-8 text-green-500 hover:bg-green-500/10 disabled:text-white/20"
                                     >
                                         <Undo2 className="h-[18px] w-[18px]" />
@@ -92,10 +91,10 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={toolbarActions.handleSave}
-                                        disabled={!toolbarActions.anyHasChanges || toolbarActions.isSaving}
+                                        onClick={handleSave}
+                                        disabled={!anyHasChanges || isSaving}
                                         className={`h-8 w-8 ${
-                                            toolbarActions.anyHasChanges
+                                            anyHasChanges
                                                 ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
                                                 : 'text-white/40'
                                         } disabled:text-white/20`}
@@ -117,8 +116,8 @@ export function EditorToolbar() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={toolbarActions.handleCancel}
-                                    disabled={!toolbarActions.anyHasChanges || activeTab?.isDeleted}
+                                    onClick={handleCancel}
+                                    disabled={!anyHasChanges || activeTab?.isDeleted}
                                     className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                 >
                                     <RotateCcw className="h-[18px] w-[18px]" />

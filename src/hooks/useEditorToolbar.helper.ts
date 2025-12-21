@@ -9,6 +9,7 @@ import { useSnackbar } from 'notistack';
 import type { BaseTab } from '@/types/editor/tab.types';
 import type { Note } from '@/types/note.types';
 import { useEditorActionsHelper } from './useEditorActions.helper';
+import { useEditorTabHelper } from './useEditorTab.helper';
 import { useNoteUIStore } from '@/store/note/useNoteUI.store';
 import { useWsUIStore } from '@/store/ws/useWsUI.store';
 import { useEditorTabsStore } from '@/store/index';
@@ -36,8 +37,13 @@ interface EditorToolbarActions {
     itemId: number | null;
 }
 
-export const useEditorToolbarHelper = (tab: BaseTab | null): EditorToolbarActions => {
+export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { enqueueSnackbar } = useSnackbar();
+    const { activeTabId } = useEditorTabsStore();
+    const { getTabById } = useEditorTabHelper();
+    
+    // Get active tab
+    const tab = activeTabId ? getTabById(activeTabId) : null;
     const { setOpenTabs } = useEditorTabsStore();
     
     // Note-specific
