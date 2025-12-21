@@ -41,44 +41,6 @@ export interface ConfirmationPopoverProps {
     onClose?: () => void;
 }
 
-/**
- * ConfirmationPopover - A reusable confirmation popover component
- * 
- * @example
- * ```tsx
- * const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
- * const [showConfirm, setShowConfirm] = useState(false);
- * 
- * const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
- *     setAnchorEl(event.currentTarget);
- *     setShowConfirm(true);
- * };
- * 
- * const handleConfirmDelete = () => {
- *     deleteItem();
- *     setShowConfirm(false);
- *     setAnchorEl(null);
- * };
- * 
- * const handleCancel = () => {
- *     setShowConfirm(false);
- *     setAnchorEl(null);
- * };
- * 
- * return (
- *     <>
- *         <Button onClick={handleDeleteClick}>Delete</Button>
- *         <ConfirmationPopover
- *             open={showConfirm}
- *             anchorEl={anchorEl}
- *             message="Are you sure you want to delete this item?"
- *             onConfirm={handleConfirmDelete}
- *             onCancel={handleCancel}
- *         />
- *     </>
- * );
- * ```
- */
 export function ConfirmationPopover({
     open,
     anchorEl,

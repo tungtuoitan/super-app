@@ -4,13 +4,15 @@
  */
 
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
-import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
 
 export const useNoteGridMenuHelper = () => {
     const {
         contextData,
         setIsContextMenuOpen,
     } = useContextMenuStore();
+    
+    const { showConfirmation } = useConfirmationPopoverHelper();
 
     // Extract data from contextData
     const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
@@ -25,17 +27,6 @@ export const useNoteGridMenuHelper = () => {
             contextData.onAddNote();
         }
     };
-
-    /**
-     * Confirmation popover for delete actions
-     */
-    const deleteConfirmation = useConfirmationPopover({
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-        confirmColor: 'destructive',
-        buttonVariant: 'default',
-        zIndex: 20000,
-    });
 
     /**
      * Handle delete with confirmation
@@ -57,9 +48,14 @@ export const useNoteGridMenuHelper = () => {
             ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete this note.\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`
             : `Are you sure you want to delete this note?\n\nThis action cannot be undone.`;
 
-        deleteConfirmation.show({
+        showConfirmation({
             anchorEl: anchorElement,
             message,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            confirmColor: 'destructive',
+            buttonVariant: 'default',
+            zIndex: 20000,
             onConfirm: () => {
                 contextData.onDelete(isHardDelete);
             },
@@ -71,6 +67,5 @@ export const useNoteGridMenuHelper = () => {
         noteGridIsMultiple,
         handleAddNote,
         handleDelete,
-        deleteConfirmation,
     };
 };

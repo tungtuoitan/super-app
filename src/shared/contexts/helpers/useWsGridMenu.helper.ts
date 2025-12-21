@@ -4,30 +4,19 @@
  */
 
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
-import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
 
 export const useWsGridMenuHelper = () => {
     const {
         contextData,
         setIsContextMenuOpen,
     } = useContextMenuStore();
+    
+    const { showConfirmation } = useConfirmationPopoverHelper();
 
     // Extract data from contextData
     const wsGridSelectedCount = contextData?.selectedIds?.length || 0;
     const wsGridIsMultiple = wsGridSelectedCount > 1;
-    const wsGridHasSelection = wsGridSelectedCount > 0;
-
-
-    /**
-     * Confirmation popover for delete actions
-     */
-    const deleteConfirmation = useConfirmationPopover({
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-        confirmColor: 'destructive',
-        buttonVariant: 'default',
-        zIndex: 20000,
-    });
 
     /**
      * Handle delete with confirmation
@@ -55,9 +44,14 @@ export const useWsGridMenuHelper = () => {
                 : `Are you sure you want to delete this workspace?\n\n⚠️ This will also delete ALL folders, notes, and files in this workspace.\n\nThis action cannot be undone.`;
         }
 
-        deleteConfirmation.show({
+        showConfirmation({
             anchorEl: anchorElement,
             message,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            confirmColor: 'destructive',
+            buttonVariant: 'default',
+            zIndex: 20000,
             onConfirm: () => {
                 contextData.onDelete(isHardDelete);
             },
@@ -65,10 +59,6 @@ export const useWsGridMenuHelper = () => {
     };
 
     return {
-        wsGridSelectedCount,
-        wsGridIsMultiple,
-        wsGridHasSelection,
         handleDelete,
-        deleteConfirmation,
     };
 };

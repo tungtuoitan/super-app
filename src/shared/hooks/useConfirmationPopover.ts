@@ -34,42 +34,7 @@ export interface ConfirmationPopoverState {
     onConfirm: (() => void) | null;
 }
 
-/**
- * Hook for managing confirmation popover state
- * 
- * @param options - Configuration options for the popover
- * @returns Object with state and control functions
- * 
- * @example
- * ```tsx
- * import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
- * 
- * function MyComponent() {
- *     const confirmation = useConfirmationPopover({
- *         confirmText: 'Delete',
- *         confirmColor: 'error',
- *         buttonVariant: 'contained'
- *     });
- * 
- *     const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
- *         confirmation.show({
- *             event,
- *             message: 'Are you sure you want to delete this note?',
- *             onConfirm: () => {
- *                 deleteNote();
- *             }
- *         });
- *     };
- * 
- *     return (
- *         <>
- *             <Button onClick={handleDeleteClick}>Delete</Button>
- *             <ConfirmationPopover {...confirmation.getPopoverProps()} />
- *         </>
- *     );
- * }
- * ```
- */
+
 export function useConfirmationPopover(options: UseConfirmationPopoverOptions = {}) {
     const [state, setState] = useState<ConfirmationPopoverState>({
         isOpen: false,
@@ -99,12 +64,20 @@ export function useConfirmationPopover(options: UseConfirmationPopoverOptions = 
             }
         }
         
+        console.log('[useConfirmationPopover] show() called with:', {
+            anchor,
+            message: params.message,
+            hasOnConfirm: !!params.onConfirm
+        });
+        
         setState({
             isOpen: true,
             anchorEl: anchor,
             message: params.message,
             onConfirm: params.onConfirm,
         });
+        
+        console.log('[useConfirmationPopover] setState called with isOpen=true');
     };
 
     const hide = () => {
@@ -138,6 +111,13 @@ export function useConfirmationPopover(options: UseConfirmationPopoverOptions = 
     };
 
     const getPopoverProps = () => {
+        console.log('[useConfirmationPopover] getPopoverProps() called, state:', {
+            isOpen: state.isOpen,
+            hasAnchor: !!state.anchorEl,
+            hasMessage: !!state.message,
+            hasOnConfirm: !!state.onConfirm
+        });
+        
         return {
             open: state.isOpen,
             anchorEl: state.anchorEl,

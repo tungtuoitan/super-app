@@ -1,12 +1,7 @@
 import React from 'react';
 import { ControlledMenu, MenuItem, MenuDivider } from '@szhsin/react-menu';
 import { Info as InfoIcon } from 'lucide-react';
-import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
-import { useWorkspaceFolderMenuHelper } from './helpers/useWorkspaceFolderMenu.helper';
-import { useWorkspaceChildMenuHelper } from './helpers/useWorkspaceChildMenu.helper';
-import { useNoteGridMenuHelper } from './helpers/useNoteGridMenu.helper';
-import { useWsGridMenuHelper } from './helpers/useWsGridMenu.helper';
 import { WorkspaceFolderNodeMenu } from './menus/WorkspaceFolderNodeMenu';
 import { WorkspaceChildNodeMenu } from './menus/WorkspaceChildNodeMenu';
 import { NoteGridMenu } from './menus/NoteGridMenu';
@@ -32,11 +27,6 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
         setIsContextMenuOpen,
     } = useContextMenuStore();
 
-    // Get all helper confirmation popovers
-    const folderHelper = useWorkspaceFolderMenuHelper();
-    const childHelper = useWorkspaceChildMenuHelper();
-    const noteGridHelper = useNoteGridMenuHelper();
-    const wsGridHelper = useWsGridMenuHelper();
 
     /**
      * Render menu items based on context type
@@ -85,12 +75,6 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
             >
                 {renderMenuItems()}
             </ControlledMenu>
-
-            {/* Confirmation Popovers for all menu types */}
-            <ConfirmationPopover {...folderHelper.deleteConfirmation.getPopoverProps()} />
-            <ConfirmationPopover {...childHelper.deleteConfirmation.getPopoverProps()} />
-            <ConfirmationPopover {...noteGridHelper.deleteConfirmation.getPopoverProps()} />
-            <ConfirmationPopover {...wsGridHelper.deleteConfirmation.getPopoverProps()} />
         </>
     );
 }

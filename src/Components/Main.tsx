@@ -9,6 +9,8 @@ import { ExplorerProvider } from '@/store/explorer/Explorer.store';
 import { FolderDialogProvider } from '@/store/explorer/FolderDialog.store';
 import { ContextMenu } from '@/shared/contexts';
 import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenu.store';
+import { ConfirmationPopoverProvider } from '@/store/confirmationPopover/ConfirmationPopover.store';
+import { ConfirmationPopoverContainer } from '@/Components/ConfirmationPopover';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider} from '@/store/index';
 import {NoteUIProvider} from '@/store/note/useNoteUI.store';
@@ -54,9 +56,12 @@ export function Main() {
                                                     <EditorTabProvider>
                                                         <DialogProvider>
                                                             <ContextMenuStoreProvider>
-                                                                <ContextMenu>
-                                                                    <MainNav />
-                                                                </ContextMenu>
+                                                                <ConfirmationPopoverProvider>
+                                                                    <ContextMenu>
+                                                                        <MainNav />
+                                                                    </ContextMenu>
+                                                                    <ConfirmationPopoverContainer />
+                                                                </ConfirmationPopoverProvider>
                                                             </ContextMenuStoreProvider>
                                                         </DialogProvider>
                                                     </EditorTabProvider>
