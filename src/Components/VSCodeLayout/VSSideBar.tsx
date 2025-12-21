@@ -4,6 +4,8 @@ import { NoteGrid } from '../Notes/NoteGrid'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import { WorkspaceView } from './WorkspaceView'
 import { WorkspaceListView } from './WorkspaceListView'
+import { GridControlBar } from '@/Components/shared/GridControlBar'
+import { GridControlProvider } from '@/store/grid/useGridControl.store'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -41,24 +43,26 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
     >
       {/* Only render inner panels when visible to avoid mounting when hidden */}
       {isVisible && (
-        // Use a vertical PanelGroup to split the sidebar into two stacked panels
-        <PanelGroup direction="vertical" className="h-full">
-          {/* Top panel: original sidebar content */}
-          <Panel defaultSize={70} minSize={20}>
-            <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
-              {/* Header */}
-              <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
-                <span>{getViewTitle(activeView)}</span>
-              </div>
+        <GridControlProvider>
+          {/* Use a vertical PanelGroup to split the sidebar into two stacked panels */}
+          <PanelGroup direction="vertical" className="h-full">
+            {/* Top panel: original sidebar content */}
+            <Panel defaultSize={70} minSize={20}>
+              <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
+                {/* Header */}
+                <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
+                  <span>{getViewTitle(activeView)}</span>
+                  <GridControlBar />
+                </div>
 
-              {/* Content */}
-              <div className="flex-1 overflow-hidden">
-                {activeView === 'workspaceList' && <WorkspaceListView />}
-                {activeView === 'workspace' && <WorkspaceView />}
-                {activeView === 'note' && <NotesView />}
+                {/* Content */}
+                <div className="flex-1 overflow-hidden">
+                  {activeView === 'workspaceList' && <WorkspaceListView />}
+                  {activeView === 'workspace' && <WorkspaceView />}
+                  {activeView === 'note' && <NotesView />}
+                </div>
               </div>
-            </div>
-          </Panel>
+            </Panel>
 
           <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
 
@@ -78,11 +82,11 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
             </div>
           </Panel>
         </PanelGroup>
+        </GridControlProvider>
       )}
     </Panel>
   )
 }
-
 
 /**
  * Notes View - Notes list interface with grid

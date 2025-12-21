@@ -1,6 +1,8 @@
 /**
- * WsGridFilterPopup - Filter popup for workspace grid
- * Allows filtering workspaces by status (Active/Deleted/All)
+ * GenericFilterPopup - Reusable filter popup for grid components
+ * Allows filtering entities by deletedAt status (Active/Deleted/All)
+ *
+ * @template T - The entity type (Ws, Note, Task, etc.)
  */
 
 import React from 'react';
@@ -13,29 +15,32 @@ import {
     PopoverTrigger,
 } from '@/Components/ui/popover';
 import { Table } from '@tanstack/react-table';
-import { Ws } from '@/store/ws/useWsList.store';
 
-interface WsGridFilterPopupProps {
-    table: Table<Ws>;
+interface GenericFilterPopupProps<T> {
+    table: Table<T>;
     columnFilters: any[];
     onClearFilters: () => void;
+    entityName: string;        // e.g., "Workspaces", "Notes", "Tasks"
+    columnId?: string;          // default: "deletedAt"
 }
 
-export function WsGridFilterPopup({ 
-    table, 
+export function GenericFilterPopup<T>({
+    table,
     columnFilters,
-    onClearFilters 
-}: WsGridFilterPopupProps) {
-    const currentFilter = table.getColumn('deletedAt')?.getFilterValue();
+    onClearFilters,
+    entityName,
+    columnId = 'deletedAt'
+}: GenericFilterPopupProps<T>) {
+    const currentFilter = table.getColumn(columnId)?.getFilterValue();
     const hasFilters = columnFilters.length > 0;
 
     const filterOptions = [
         {
             value: 'all',
-            label: 'All Workspaces',
+            label: `All ${entityName}`,
             icon: Filter,
             color: 'text-muted-foreground',
-            description: 'Show all workspaces',
+            description: `Show all ${entityName.toLowerCase()}`,
         },
         {
             value: 'active',
@@ -49,22 +54,22 @@ export function WsGridFilterPopup({
             label: 'Deleted Only',
             icon: Archive,
             color: 'text-red-500',
-            description: 'Deleted workspaces',
+            description: `Deleted ${entityName.toLowerCase()}`,
         },
     ];
 
     const handleFilterChange = (value: string) => {
-        const deletedAtColumn = table.getColumn('deletedAt');
-        
+        const column = table.getColumn(columnId);
+
         if (value === 'active') {
             // Active = not deleted (deletedAt is null)
-            deletedAtColumn?.setFilterValue('null');
+            column?.setFilterValue('null');
         } else if (value === 'deleted') {
             // Deleted = has deletedAt value
-            deletedAtColumn?.setFilterValue('notNull');
+            column?.setFilterValue('notNull');
         } else {
             // 'all' = no filter (show everything)
-            deletedAtColumn?.setFilterValue(undefined);
+            column?.setFilterValue(undefined);
         }
     };
 
@@ -83,7 +88,7 @@ export function WsGridFilterPopup({
                 >
                     <Filter className="h-4 w-4" />
                     {hasFilters && (
-                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
+                        <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
                     )}
                 </Button>
             </PopoverTrigger>
@@ -93,7 +98,7 @@ export function WsGridFilterPopup({
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Filter className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-medium text-sm">Filter Workspaces</h4>
+                            <h4 className="font-medium text-sm">Filter {entityName}</h4>
                         </div>
                         {hasFilters && (
                             <Button
@@ -115,7 +120,7 @@ export function WsGridFilterPopup({
                         {filterOptions.map((option) => {
                             const Icon = option.icon;
                             const isSelected = getCurrentFilterValue() === option.value;
-                            
+
                             return (
                                 <button
                                     key={option.value}
@@ -123,8 +128,8 @@ export function WsGridFilterPopup({
                                     className={`
                                         w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm
                                         transition-colors
-                                        ${isSelected 
-                                            ? 'bg-primary/10 text-primary font-medium' 
+                                        ${isSelected
+                                            ? 'bg-primary/10 text-primary font-medium'
                                             : 'hover:bg-muted text-foreground'
                                         }
                                     `}

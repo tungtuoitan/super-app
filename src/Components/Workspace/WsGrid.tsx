@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
 import { useWsListHelper } from '@/hooks/useWsList.helper';
 import { useWsTabHelper } from '@/hooks/useWsTab.helper';
-import { WsGridFilterPopup } from './WsGridFilterPopup';
+import { useGridControlHelper } from '@/hooks/useGridControl.helper';
 
 /**
  * WsGrid - Workspace list grid with table display
@@ -43,17 +43,7 @@ export function WsGrid() {
 
     const { loadWorkspaces, openContextMenu, formatDateTime } = useWsListHelper();
     const { openWorkspaceTab } = useWsTabHelper();
-
-    // Load workspaces on mount
-    useEffect(() => {
-        loadWorkspaces();
-        
-        // Set default filter to Active Only
-        const deletedAtColumn = table.getColumn('deletedAt');
-        if (deletedAtColumn && !columnFilters.length) {
-            deletedAtColumn.setFilterValue('null');
-        }
-    }, []);
+    const { registerGrid, unregisterGrid, searchQuery } = useGridControlHelper();
 
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Ws>[]>(() => {
@@ -79,18 +69,18 @@ export function WsGrid() {
                         />
                     </div>
                 ),
-                size: 30,
+                size: 20,
                 enableSorting: false,
                 enableHiding: false,
             },
             {
                 accessorKey: 'id',
                 header: () => (
-                    <div className="text-center text-sm">ID</div>
+                    <div className="text-left text-sm">ID</div>
                 ),
-                size: 50,
+                size: 20,
                 cell: ({ getValue }) => (
-                    <div className="text-center text-sm">
+                    <div className="text-left text-sm">
                         {getValue() as number}
                     </div>
                 ),
@@ -100,7 +90,7 @@ export function WsGrid() {
                 header: () => (
                     <div className="text-left text-sm">Workspace Name</div>
                 ),
-                size: 250,
+                size: 200,
                 cell: ({ getValue }) => (
                     <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80 px-2">
                         {(getValue() as string) || '—'}
@@ -122,7 +112,7 @@ export function WsGrid() {
             {
                 accessorKey: 'deletedAt',
                 header: () => (
-                    <div className="text-center text-sm">Status</div>
+                    <div className="text-left text-sm">Status</div>
                 ),
                 size: 60,
                 enableSorting: true,
@@ -144,7 +134,7 @@ export function WsGrid() {
                     }
                     
                     return (
-                        <div className="flex items-center justify-center" title="Deleted">
+                        <div className="flex items-center justify-start pl-2" title="Deleted">
                             <div className="w-2 h-2 rounded-full bg-destructive"></div>
                         </div>
                     );
@@ -153,9 +143,22 @@ export function WsGrid() {
         ];
     }, []);
 
+    // Filter data by search query
+    const filteredData = useMemo(() => {
+        if (!searchQuery) {
+            return workspaces;
+        }
+        const query = searchQuery.toLowerCase();
+        return workspaces.filter((ws) =>
+            ws.name?.toLowerCase().includes(query) ||
+            ws.description?.toLowerCase().includes(query) ||
+            String(ws.id).includes(query)
+        );
+    }, [workspaces, searchQuery]);
+
     // Create table instance
     const table = useReactTable({
-        data: workspaces.sort((a, b) => 
+        data: filteredData.sort((a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         ),
         columns,
@@ -176,6 +179,30 @@ export function WsGrid() {
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
     });
+
+    // Register grid with GridControl and load data
+    useEffect(() => {
+        loadWorkspaces();
+
+        // Set default filter to Active Only
+        const deletedAtColumn = table.getColumn('deletedAt');
+        if (deletedAtColumn && !columnFilters.length) {
+            deletedAtColumn.setFilterValue('null');
+        }
+
+        // Register this grid with GridControl
+        registerGrid(table, columnFilters, setColumnFilters, 'Workspaces');
+
+        // Cleanup on unmount
+        return () => {
+            unregisterGrid();
+        };
+    }, []);
+
+    // Update GridControl when columnFilters change
+    useEffect(() => {
+        registerGrid(table, columnFilters, setColumnFilters, 'Workspaces');
+    }, [columnFilters, table]);
 
     return (
         <div className="w-full h-full bg-background flex flex-col relative">
@@ -208,21 +235,6 @@ export function WsGrid() {
             >
                 <table className="w-full">
                     <thead className="bg-muted/50 sticky top-0 z-10">
-                        {/* Header with Count */}
-                        <tr className="border-b">
-                            <th colSpan={table.getAllColumns().filter(col => col.getIsVisible()).length} className="h-10 px-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-muted-foreground">
-                                        Workspaces ({table.getFilteredRowModel().rows.length})
-                                    </span>
-                                    <WsGridFilterPopup 
-                                        table={table}
-                                        columnFilters={columnFilters}
-                                        onClearFilters={() => setColumnFilters([])}
-                                    />
-                                </div>
-                            </th>
-                        </tr>
                         {/* Column Headers */}
                         {table.getHeaderGroups().map(headerGroup => (
                             <tr key={headerGroup.id} className="border-b">

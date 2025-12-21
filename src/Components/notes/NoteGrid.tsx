@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -19,7 +19,7 @@ import {_getNotes, _deleteNote} from '@/services/note.service';
 import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
 import {useNoteGridHelper} from '@/hooks/useNoteGrid.helper';
-import {NoteGridFilterPopup} from './NoteGridFilterPopup';
+import { useGridControlHelper } from '@/hooks/useGridControl.helper';
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -49,17 +49,7 @@ export function NoteGrid() {
 
     const { openNoteTab } = useEditorTabHelper();
     const { loadNotes, handleDeleteSelected, openContextMenu,formatDateTime } = useNoteGridHelper();
-
-
-    useEffect(() => {
-        loadNotes();
-        
-        // Set default filter to Active Only
-        const deletedAtColumn = table.getColumn('deletedAt');
-        if (deletedAtColumn && !columnFilters.length) {
-            deletedAtColumn.setFilterValue('null');
-        }
-    }, []);
+    const { registerGrid, unregisterGrid, searchQuery } = useGridControlHelper();
 
     // Helper to get badge variant by type
     const getTypeVariant = (type?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -102,18 +92,18 @@ export function NoteGrid() {
                         />
                     </div>
                 ),
-                size: 30,
+                size: 20,
                 enableSorting: false,
                 enableHiding: false,
             },
             {
                 accessorKey: 'id',
                 header: () => (
-                    <div className="text-center text-sm">ID</div>
+                    <div className="text-left text-sm">ID</div>
                 ),
-                size: 30,
+                size: 20,
                 cell: ({ getValue }) => (
-                    <div className="text-center text-sm">
+                    <div className="text-left text-sm">
                         {getValue() as number}
                     </div>
                 ),
@@ -123,7 +113,7 @@ export function NoteGrid() {
                 header: () => (
                     <div className="text-left text-sm">Note Name</div>
                 ),
-                size: 300,
+                size: 200,
                 cell: ({ getValue, row }) => (
                     <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80">
                         {(getValue() as string) || '—'}
@@ -212,7 +202,7 @@ export function NoteGrid() {
             {
                 accessorKey: 'deletedAt',
                 header: () => (
-                    <div className="text-center text-sm">Status</div>
+                    <div className="text-left text-sm">Status</div>
                 ),
                 size: 60,
                 enableSorting: true,
@@ -234,7 +224,7 @@ export function NoteGrid() {
                     }
                     
                     return (
-                        <div className="flex items-center justify-center" title="Deleted">
+                        <div className="flex items-center justify-start pl-2" title="Deleted">
                             <div className="w-2 h-2 rounded-full bg-destructive"></div>
                         </div>
                     );
@@ -242,10 +232,25 @@ export function NoteGrid() {
             }
         ];
     }, []);
+
+    // Filter data by search query
+    const filteredData = useMemo(() => {
+        if (!searchQuery) {
+            return notes;
+        }
+        const query = searchQuery.toLowerCase();
+        return notes.filter((note) =>
+            note.name?.toLowerCase().includes(query) ||
+            note.description?.toLowerCase().includes(query) ||
+            note.type?.toLowerCase().includes(query) ||
+            String(note.id).includes(query)
+        );
+    }, [notes, searchQuery]);
+
 console.log('NoteGrid rendered with notes::::::::::', notes);
     // Create table instance
     const table = useReactTable({
-        data: notes.sort((a, b) => 
+        data: filteredData.sort((a, b) =>
                     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         columns,
         getCoreRowModel: getCoreRowModel(),
@@ -265,6 +270,30 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
     });
+
+    // Register grid with GridControl and load data
+    useEffect(() => {
+        loadNotes();
+
+        // Set default filter to Active Only
+        const deletedAtColumn = table.getColumn('deletedAt');
+        if (deletedAtColumn && !columnFilters.length) {
+            deletedAtColumn.setFilterValue('null');
+        }
+
+        // Register this grid with GridControl
+        registerGrid(table, columnFilters, setColumnFilters, 'Notes');
+
+        // Cleanup on unmount
+        return () => {
+            unregisterGrid();
+        };
+    }, []);
+
+    // Update GridControl when columnFilters change
+    useEffect(() => {
+        registerGrid(table, columnFilters, setColumnFilters, 'Notes');
+    }, [columnFilters, table]);
 
     return (
         <div className="w-full h-full bg-background flex flex-col relative">
@@ -298,21 +327,6 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
             >
                 <table className="w-full">
                     <thead className="bg-muted/50 sticky top-0 z-10">
-                        {/* Header with Filter Icon */}
-                        <tr className="border-b">
-                            <th colSpan={table.getAllColumns().filter(col => col.getIsVisible()).length} className="h-10 px-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-muted-foreground">
-                                        Notes ({table.getFilteredRowModel().rows.length})
-                                    </span>
-                                    <NoteGridFilterPopup 
-                                        table={table}
-                                        columnFilters={columnFilters}
-                                        onClearFilters={() => setColumnFilters([])}
-                                    />
-                                </div>
-                            </th>
-                        </tr>
                         {/* Column Headers */}
                         {table.getHeaderGroups().map(headerGroup => (
                             <tr key={headerGroup.id} className="border-b">
