@@ -13,8 +13,8 @@ export type ItemType = 'folder' | 'note' | 'file';
 
 export interface FolderDialogContextData {
     // Dialog state
-    isOpen: boolean;
-    setIsOpen: Dispatch<SetStateAction<boolean>>;
+    isFolderDialogOpen: boolean;
+    setIsFolderDialogOpen: Dispatch<SetStateAction<boolean>>;
     mode: DialogMode;
     setMode: Dispatch<SetStateAction<DialogMode>>;
     itemType: ItemType;
@@ -49,8 +49,8 @@ export interface FolderDialogContextData {
 
 const folderDialogContextDefaultValue: FolderDialogContextData = {
     // Dialog state
-    isOpen: false,
-    setIsOpen: () => {},
+    isFolderDialogOpen: false,
+    setIsFolderDialogOpen: () => {},
     mode: 'create',
     setMode: () => {},
     itemType: 'folder',
@@ -97,7 +97,7 @@ export const useFolderDialogStore = () => {
 
 export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Dialog state
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isFolderDialogOpen, setIsFolderDialogOpen] = useState<boolean>(false);
     const [mode, setMode] = useState<DialogMode>('create');
     const [itemType, setItemType] = useState<ItemType>('folder');
     const [editingFolder, setEditingFolder] = useState<any | null>(null);
@@ -128,8 +128,8 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
         <FolderDialogStore.Provider
             value={{
                 // Dialog state
-                isOpen,
-                setIsOpen,
+                isFolderDialogOpen,
+                setIsFolderDialogOpen,
                 mode,
                 setMode,
                 itemType,

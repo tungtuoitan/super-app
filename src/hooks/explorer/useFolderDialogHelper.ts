@@ -27,7 +27,7 @@ export const useFolderDialogHelper = () => {
         setErrors,
         setIsSubmitting,
         setIsLoadingTree,
-        setIsOpen,
+        setIsFolderDialogOpen,
         setMode,
         setEditingFolder,
         setNewFolderName,
@@ -201,14 +201,14 @@ export const useFolderDialogHelper = () => {
         setErrors({});
         
         // Open dialog
-        setIsOpen(true);
+        setIsFolderDialogOpen(true);
     };
     
     /**
      * Close folder dialog
      */
     const closeFolderDialog = () => {
-        setIsOpen(false);
+        setIsFolderDialogOpen(false);
         setTimeout(() => {
             if (mode === 'create') {
                 setParentFolder(null);

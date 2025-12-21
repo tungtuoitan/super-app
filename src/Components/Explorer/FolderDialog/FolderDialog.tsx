@@ -34,7 +34,7 @@ export function FolderDialog() {
 
     // Get form state from FolderDialogStore (unified approach)
     const {
-        isOpen,
+        isFolderDialogOpen,
         mode,
         itemType,
         editingFolder,
@@ -112,7 +112,7 @@ export function FolderDialog() {
 
     // Initialize dialog when it opens
     useEffect(() => {
-        if (isOpen) {
+        if (isFolderDialogOpen) {
             console.log('🔄 FolderDialog opened with mode:', mode);
             console.log('📋 Form state BEFORE init:', {
                 newFolderName,
@@ -130,24 +130,24 @@ export function FolderDialog() {
                 });
             }, 100);
         }
-    }, [isOpen, mode]); // Add mode to dependencies to track changes
+    }, [isFolderDialogOpen, mode]); // Add mode to dependencies to track changes
 
     // Handle dialog close
     const handleClose = () => {
         closeFolderDialog();
     };
-    console.log('FolderDialog Render:', { isOpen, mode, parentFolder });
+    console.log('FolderDialog Render:', { isFolderDialogOpen, mode, parentFolder });
     
     // Keyboard Shortcuts
     useKeyboardShortcut({
         key: 'Enter',
-        enabled: isOpen && !isSubmitting && !!newFolderName.trim(),
+        enabled: isFolderDialogOpen && !isSubmitting && !!newFolderName.trim(),
         callback: submitFolder,
     });
 
     useKeyboardShortcut({
         key: 'Escape',
-        enabled: isOpen && !isSubmitting,
+        enabled: isFolderDialogOpen && !isSubmitting,
         callback: handleClose,
     });
 
@@ -175,7 +175,7 @@ export function FolderDialog() {
     const itemLabel = getItemLabel();
 
     return (
-        <Dialog open={isOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
+        <Dialog open={isFolderDialogOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
             <DialogContent className="sm:max-w-[550px] rounded-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">
