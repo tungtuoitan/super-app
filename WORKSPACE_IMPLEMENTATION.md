@@ -47,7 +47,7 @@
   - `createNewWorkspace()` - Create new workspace entry
   - `handleDeleteSelected(isHardDelete)` - Soft/hard delete selected workspaces
   - `handleUndoDelete(ids)` - Restore deleted workspaces
-  - `handleContextMenu(event, row)` - Open context menu
+  - `openContextMenu(event, row)` - Open context menu
   - `formatDateTime(date)` - Date formatting utility
 
 #### 5. **Business Logic** - `useWsUIHelper.ts`
@@ -195,7 +195,7 @@ interface WsDTO {
 7. **Refresh**: `invalidateQueries` → `loadWorkspaces()` → Grid updates
 
 #### Context Menu Flow:
-1. Right-click on grid row → `handleContextMenu(event, row)`
+1. Right-click on grid row → `openContextMenu(event, row)`
 2. `ContextMenuStore` opens menu at cursor position
 3. Select option (Add/Delete/Hard Delete)
 4. Confirmation dialog (for destructive actions)

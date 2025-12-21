@@ -48,7 +48,7 @@ export function NoteGrid() {
     } = useNoteGridPanelStore();
 
     const { openNoteTab } = useEditorTabHelper();
-    const { loadNotes, handleDeleteSelected, handleContextMenu,formatDateTime } = useNoteGridHelper();
+    const { loadNotes, handleDeleteSelected, openContextMenu,formatDateTime } = useNoteGridHelper();
 
 
     useEffect(() => {
@@ -292,7 +292,7 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest('tr[data-row]');
                     if (!isClickedOnRow) {
-                        handleContextMenu(e);
+                        openContextMenu(e);
                     }
                 }}
             >
@@ -342,7 +342,7 @@ console.log('NoteGrid rendered with notes::::::::::', notes);
                                     row.original.deletedAt ? 'opacity-60' : ''
                                 }`}
                                 onClick={() => openNoteTab(row.original)}
-                                onContextMenu={(e) => handleContextMenu(e, row)}
+                                onContextMenu={(e) => openContextMenu(e, row)}
                             >
                                 {row.getVisibleCells().map(cell => (
                                     <td key={cell.id} className="text-left">

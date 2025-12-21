@@ -26,14 +26,12 @@ interface ContextMenuProviderProps {
 export function ContextMenu({ children }: ContextMenuProviderProps) {
     // Store state
     const {
-        isOpen,
+        isContextMenuOpen,
         anchorPoint,
         contextType,
-        setIsOpen,
+        setIsContextMenuOpen,
     } = useContextMenuStore();
 
-    const closeContextMenu = () => setIsOpen(false);
-    
     // Get all helper confirmation popovers
     const folderHelper = useWorkspaceFolderMenuHelper();
     const childHelper = useWorkspaceChildMenuHelper();
@@ -79,9 +77,9 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
             {children}
             
             <ControlledMenu
-                state={isOpen ? 'open' : 'closed'}
+                state={isContextMenuOpen ? 'open' : 'closed'}
                 anchorPoint={anchorPoint}
-                onClose={closeContextMenu}
+                onClose={() => setIsContextMenuOpen(false)}
                 menuClassName="context-menu"
                 transition
             >

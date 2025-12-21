@@ -20,7 +20,7 @@ import {useConfirmationPopover} from '@/shared/hooks';
 
 export const useContextMenuHelper = () => {
     const {
-        setIsOpen,
+        setIsContextMenuOpen,
         setAnchorPoint,
         setContextType,
         setContextData,
@@ -28,8 +28,6 @@ export const useContextMenuHelper = () => {
         setEditItemData,
         contextType,
         contextData,
-        isOpen,
-        anchorPoint,
     } = useContextMenuStore();
 
     const {
@@ -158,7 +156,7 @@ export const useContextMenuHelper = () => {
                         return { id: f.id!, type: typeCode };
                     });
 
-                    console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items', {
+                    console.log(`📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items`, {
                         items: deleteItems,
                         cascade: true
                     });
@@ -213,14 +211,7 @@ export const useContextMenuHelper = () => {
         setAnchorPoint({ x: event.clientX, y: event.clientY });
         setContextType(type);
         setContextData(data || null);
-        setIsOpen(true);
-    }
-
-    /**
-     * Close context menu
-     */
-    const closeContextMenu = () => {
-        setIsOpen(false);
+        setIsContextMenuOpen(true);
     }
 
     /**
@@ -230,7 +221,7 @@ export const useContextMenuHelper = () => {
      */
     const handleCreateItem = (itemType: ItemType, parentTag?: any) => {
         console.log(`📁 Context Menu: Add ${itemType} clicked for parent:`, parentTag);
-        closeContextMenu();
+        setIsContextMenuOpen(false);
         openFolderDialog('create', itemType, null, parentTag);
     };
 
@@ -239,7 +230,7 @@ export const useContextMenuHelper = () => {
      */
     const handleEditItem = (itemData: any) => {
         console.log('✏️ Context Menu: Edit item clicked', itemData);
-        closeContextMenu();
+        setIsContextMenuOpen(false);
         
         if (itemData) {
             // Determine item type from data
@@ -253,7 +244,7 @@ export const useContextMenuHelper = () => {
      */
     const handleAddFile = () => {
         console.log('📄 Context Menu: Add file clicked');
-        closeContextMenu();
+        setIsContextMenuOpen(false);
         // TODO: Implement add file functionality
     }
 
@@ -264,7 +255,7 @@ export const useContextMenuHelper = () => {
      */
     const handleAddNote = (parentFolder?: any) => {
         console.log('📝 Context Menu: Add note clicked for parent:', parentFolder);
-        closeContextMenu();
+        setIsContextMenuOpen(false);
 
         // Generate temporary negative ID (same pattern as NoteGrid)
         const tempId = -Math.floor(Math.random() * 10000);
@@ -491,7 +482,7 @@ export const useContextMenuHelper = () => {
             const token = storageService.getString('token');
 
             console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
-            console.log('📤 Calling API: DELETE /api/Notes/${noteData.id}');
+            console.log(`📤 Calling API: DELETE /api/Notes/${noteData.id}`);
 
             await _deleteNote(token ?? '', noteData.id.toString());
 
@@ -521,7 +512,7 @@ export const useContextMenuHelper = () => {
             const token = storageService.getString('token');
 
             console.log(`🗑️ Deleting file ID: ${fileData.id}`, fileData.name);
-            console.log('📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items');
+            console.log(`📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items`);
 
             const result = await _deleteWorkspaceItems(token ?? '', CURRENT_WORKSPACE_ID, {
                 items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
@@ -560,11 +551,11 @@ export const useContextMenuHelper = () => {
             // Check if this is a workspace root node (negative ID)
             if (itemData.tagId < 0 || itemData.id < 0) {
                 console.warn('⚠️ Cannot delete workspace root node');
-                closeContextMenu();
+                setIsContextMenuOpen(false);
                 return;
             }
 
-            closeContextMenu();
+            setIsContextMenuOpen(false);
 
             const selectedCount = selectedFolderIds.length;
             const isMultipleSelected = selectedCount > 1;
@@ -579,14 +570,14 @@ export const useContextMenuHelper = () => {
             }
         } else if (contextType === 'note' && itemData) {
             // Handle note deletion
-            closeContextMenu();
+            setIsContextMenuOpen(false);
             handleDeleteNote(itemData, isHardDelete);
         } else if (contextType === 'file' && itemData) {
             // Handle file deletion
-            closeContextMenu();
+            setIsContextMenuOpen(false);
             handleDeleteFile(itemData, isHardDelete);
         } else {
-            closeContextMenu();
+            setIsContextMenuOpen(false);
         }
     }
 
@@ -595,7 +586,7 @@ export const useContextMenuHelper = () => {
      */
     const handleViewInfo = () => {
         console.log('ℹ️ Context Menu: View info clicked');
-        closeContextMenu();
+        setIsContextMenuOpen(false);
         // TODO: Implement view info functionality
     }
 
@@ -625,11 +616,11 @@ export const useContextMenuHelper = () => {
             // Check if this is a workspace root node (negative ID)
             if (contextData.tagId < 0) {
                 console.warn('⚠️ Cannot delete workspace root node');
-                closeContextMenu();
+                setIsContextMenuOpen(false);
                 return;
             }
 
-            closeContextMenu();
+            setIsContextMenuOpen(false);
 
             // Extract anchor element from menu event
             const nativeEvent = event.syntheticEvent || event;
@@ -681,7 +672,7 @@ export const useContextMenuHelper = () => {
             });
         } else if (contextType === 'note' && contextData) {
             // Handle note deletion with confirmation
-            closeContextMenu();
+            setIsContextMenuOpen(false);
 
             // Extract anchor element from menu event
             const nativeEvent = event.syntheticEvent || event;
@@ -703,7 +694,7 @@ export const useContextMenuHelper = () => {
             });
         } else if (contextType === 'file' && contextData) {
             // Handle file deletion with confirmation
-            closeContextMenu();
+            setIsContextMenuOpen(false);
 
             // Extract anchor element from menu event
             const nativeEvent = event.syntheticEvent || event;
@@ -730,7 +721,6 @@ export const useContextMenuHelper = () => {
 
     return {
         showContextMenu,
-        closeContextMenu,
 
         handleCreateItem,
 
@@ -740,7 +730,7 @@ export const useContextMenuHelper = () => {
         handleEditItem,
         handleDeleteItem,
         handleViewInfo,
-        
+
         closeEditDialog,
         onDeleteItemClick,
         deleteConfirmation,

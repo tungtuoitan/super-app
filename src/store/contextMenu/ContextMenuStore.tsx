@@ -15,8 +15,8 @@ export type ContextMenuType = 'default' | 'tag' | 'note' | 'file' | 'folder' | '
 
 export interface ContextMenuStoreData {
     // Menu state
-    isOpen: boolean;
-    setIsOpen: Dispatch<SetStateAction<boolean>>;
+    isContextMenuOpen: boolean;
+    setIsContextMenuOpen: Dispatch<SetStateAction<boolean>>;
     anchorPoint: ContextMenuPosition;
     setAnchorPoint: Dispatch<SetStateAction<ContextMenuPosition>>;
     contextType: ContextMenuType;
@@ -38,8 +38,8 @@ export interface ContextMenuStoreData {
 }
 
 export const contextMenuStoreDefaultValue: ContextMenuStoreData = {
-    isOpen: false,
-    setIsOpen: () => {},
+    isContextMenuOpen: false,
+    setIsContextMenuOpen: () => {},
     anchorPoint: { x: 0, y: 0 },
     setAnchorPoint: () => {},
     contextType: 'default',
@@ -61,7 +61,7 @@ export const ContextMenuStore = createContext<ContextMenuStoreData>(contextMenuS
 export const useContextMenuStore = () => useContext(ContextMenuStore);
 
 export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
     const [anchorPoint, setAnchorPoint] = useState<ContextMenuPosition>({ x: 0, y: 0 });
     const [contextType, setContextType] = useState<ContextMenuType>('default');
     const [contextData, setContextData] = useState<any | null>(null);
@@ -73,8 +73,8 @@ export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>
     return (
         <ContextMenuStore.Provider
             value={{
-                isOpen,
-                setIsOpen,
+                isContextMenuOpen,
+                setIsContextMenuOpen,
                 anchorPoint,
                 setAnchorPoint,
                 contextType,

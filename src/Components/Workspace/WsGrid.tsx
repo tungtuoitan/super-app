@@ -41,7 +41,7 @@ export function WsGrid() {
         setColumnFilters
     } = useWsListStore();
 
-    const { loadWorkspaces, handleContextMenu, formatDateTime } = useWsListHelper();
+    const { loadWorkspaces, openContextMenu, formatDateTime } = useWsListHelper();
     const { openWorkspaceTab } = useWsTabHelper();
 
     // Load workspaces on mount
@@ -202,7 +202,7 @@ export function WsGrid() {
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest('tr[data-row]');
                     if (!isClickedOnRow) {
-                        handleContextMenu(e);
+                        openContextMenu(e);
                     }
                 }}
             >
@@ -255,7 +255,7 @@ export function WsGrid() {
                                     console.log('🏢 Workspace clicked, opening tab:', row.original);
                                     openWorkspaceTab(row.original);
                                 }}
-                                onContextMenu={(e) => handleContextMenu(e, row)}
+                                onContextMenu={(e) => openContextMenu(e, row)}
                             >
                                 {row.getVisibleCells().map(cell => (
                                     <td key={cell.id} className="text-left">

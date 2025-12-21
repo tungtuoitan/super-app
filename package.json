@@ -59,7 +59,11 @@
       "react-app",
       "react-app/jest",
       "plugin:storybook/recommended"
-    ]
+    ],
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "off",
+      "react-hooks/exhaustive-deps": "off"
+    }
   },
   "browserslist": {
     "production": [

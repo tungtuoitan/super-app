@@ -37,7 +37,7 @@ export const useWsListHelper = () => {
     } = useWsListStore();
 
     const { enqueueSnackbar } = useSnackbar();
-    const { setIsOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
+    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
     const { openWorkspaceTab } = useWsTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
 
@@ -155,7 +155,7 @@ export const useWsListHelper = () => {
     /**
      * Handle context menu
      */
-    const handleContextMenu = (event: React.MouseEvent, row?: any) => {
+    const openContextMenu = (event: React.MouseEvent, row?: any) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -194,10 +194,10 @@ export const useWsListHelper = () => {
             selectedWorkspaces,
             selectedIds,
             onDelete: (isHardDelete: boolean = false) => handleDeleteSelected(selectedIds, isHardDelete),
-            onAddWorkspace: createNewWorkspace,
+            addWorkspace: createNewWorkspace,
             onUndoDelete: handleUndoDelete,
         });
-        setIsOpen(true);
+        setIsContextMenuOpen(true);
     };
 
     /**
@@ -216,7 +216,7 @@ export const useWsListHelper = () => {
         createNewWorkspace,
         handleDeleteSelected,
         handleUndoDelete,
-        handleContextMenu,
+        openContextMenu,
         formatDateTime,
     };
 };

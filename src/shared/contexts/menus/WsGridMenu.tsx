@@ -6,6 +6,8 @@ import {
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
 import { useWsGridMenuHelper } from '@/shared/contexts/helpers/useWsGridMenuHelper';
+import {useContextMenuHelper} from '@/hooks/useContextMenuHelper';
+import {useContextMenuStore} from '@/store/index';
 
 /**
  * WsGridMenu
@@ -18,15 +20,26 @@ import { useWsGridMenuHelper } from '@/shared/contexts/helpers/useWsGridMenuHelp
  */
 export function WsGridMenu() {
     const {
-        wsGridHasSelection,
-        handleAddWorkspace,
         handleDelete,
     } = useWsGridMenuHelper();
+
+            const {
+        contextData,
+        setIsContextMenuOpen,
+    } = useContextMenuStore();
+
+
+
+    const wsGridHasSelection =  (contextData?.selectedIds?.length || 0) > 0;
+
 
     return (
         <>
             {/* Add Workspace */}
-            <MenuItem onClick={handleAddWorkspace}>
+            <MenuItem onClick={()=>{
+                setIsContextMenuOpen(false);
+                contextData?.addWorkspace()
+            }}>
                 <AddIcon className="w-4 h-4 mr-2" />
                 Add Workspace
             </MenuItem>

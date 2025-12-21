@@ -16,10 +16,8 @@ export const useWorkspaceChildMenuHelper = () => {
     const {
         contextType,
         contextData,
-        setIsOpen,
+        setIsContextMenuOpen,
     } = useContextMenuStore();
-
-    const closeContextMenu = () => setIsOpen(false);
 
     const {
         setSelectedFolderIds,
@@ -39,7 +37,7 @@ export const useWorkspaceChildMenuHelper = () => {
         if (!isNote || !contextData) return;
 
         console.log('✏️ Child Menu: Edit note clicked', contextData);
-        closeContextMenu();
+        setIsContextMenuOpen(false);
         openFolderDialog('edit', 'note', contextData, null);
     };
 
@@ -48,7 +46,7 @@ export const useWorkspaceChildMenuHelper = () => {
      */
     const handleViewInfo = () => {
         console.log('ℹ️ Child Menu: View info clicked', contextData);
-        closeContextMenu();
+        setIsContextMenuOpen(false);
         // TODO: Implement view info functionality
     };
 
@@ -147,7 +145,7 @@ export const useWorkspaceChildMenuHelper = () => {
     const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
         if (!contextData) return;
 
-        closeContextMenu();
+        setIsContextMenuOpen(false);
 
         // Extract anchor element from menu event
         const nativeEvent = event.syntheticEvent || event;

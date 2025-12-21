@@ -9,10 +9,8 @@ import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 export const useNoteGridMenuHelper = () => {
     const {
         contextData,
-        setIsOpen,
+        setIsContextMenuOpen,
     } = useContextMenuStore();
-
-    const closeContextMenu = () => setIsOpen(false);
 
     // Extract data from contextData
     const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
@@ -23,7 +21,7 @@ export const useNoteGridMenuHelper = () => {
      */
     const handleAddNote = () => {
         if (contextData?.onAddNote) {
-            closeContextMenu();
+            setIsContextMenuOpen(false);
             contextData.onAddNote();
         }
     };
@@ -45,7 +43,7 @@ export const useNoteGridMenuHelper = () => {
     const handleDelete = (event: any, isHardDelete: boolean = false) => {
         if (!contextData?.onDelete) return;
 
-        closeContextMenu();
+        setIsContextMenuOpen(false);
 
         // Extract anchor element from menu event
         const nativeEvent = event.syntheticEvent || event;

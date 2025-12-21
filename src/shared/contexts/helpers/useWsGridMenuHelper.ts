@@ -9,25 +9,14 @@ import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
 export const useWsGridMenuHelper = () => {
     const {
         contextData,
-        setIsOpen,
+        setIsContextMenuOpen,
     } = useContextMenuStore();
-
-    const closeContextMenu = () => setIsOpen(false);
 
     // Extract data from contextData
     const wsGridSelectedCount = contextData?.selectedIds?.length || 0;
     const wsGridIsMultiple = wsGridSelectedCount > 1;
     const wsGridHasSelection = wsGridSelectedCount > 0;
 
-    /**
-     * Handle add workspace
-     */
-    const handleAddWorkspace = () => {
-        if (contextData?.onAddWorkspace) {
-            closeContextMenu();
-            contextData.onAddWorkspace();
-        }
-    };
 
     /**
      * Confirmation popover for delete actions
@@ -46,7 +35,7 @@ export const useWsGridMenuHelper = () => {
     const handleDelete = (event: any, isHardDelete: boolean = false) => {
         if (!contextData?.onDelete) return;
 
-        closeContextMenu();
+        setIsContextMenuOpen(false);
 
         // Extract anchor element from menu event
         const nativeEvent = event.syntheticEvent || event;
@@ -79,7 +68,6 @@ export const useWsGridMenuHelper = () => {
         wsGridSelectedCount,
         wsGridIsMultiple,
         wsGridHasSelection,
-        handleAddWorkspace,
         handleDelete,
         deleteConfirmation,
     };

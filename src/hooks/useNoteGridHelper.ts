@@ -39,7 +39,7 @@ export const useNoteGridHelper = () => {
     const { openNoteTab } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { setIsOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
+    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
 
     // Create new note (temporary with negative ID)
     const createNewNote = () => {
@@ -118,7 +118,7 @@ export const useNoteGridHelper = () => {
             enqueueSnackbar('Failed to delete notes', { variant: 'error' });
         }
     };        // Handle context menu
-        const handleContextMenu = (event: React.MouseEvent, row?: any) => {
+        const openContextMenu = (event: React.MouseEvent, row?: any) => {
             event.preventDefault();
             event.stopPropagation();
     
@@ -157,7 +157,7 @@ export const useNoteGridHelper = () => {
             onDelete: () => handleDeleteSelected(selectedIds),  // Pass selectedIds directly
             onAddNote: createNewNote,
         });
-        setIsOpen(true);
+        setIsContextMenuOpen(true);
     };        // Helper function to format date/time (short format for grid)
         const formatDateTime = (date: Date): string => {
             return new Intl.DateTimeFormat('en-US', {
@@ -170,7 +170,7 @@ export const useNoteGridHelper = () => {
     
 
     return {
-        handleContextMenu,
+        openContextMenu,
         rowSelection,
         setRowSelection,
         loadNotes,

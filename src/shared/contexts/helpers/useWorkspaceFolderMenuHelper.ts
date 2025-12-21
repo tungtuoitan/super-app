@@ -16,10 +16,8 @@ import { storageService } from '@/services/storage.service';
 export const useWorkspaceFolderMenuHelper = () => {
     const {
         contextData,
-        setIsOpen,
+        setIsContextMenuOpen,
     } = useContextMenuStore();
-
-    const closeContextMenu = () => setIsOpen(false);
 
     const {
         selectedFolderIds,
@@ -79,7 +77,7 @@ export const useWorkspaceFolderMenuHelper = () => {
      */
     const handleCreateItem = (itemType: ItemType, parentTag?: any) => {
         console.log(`📁 Folder Menu: Add ${itemType} clicked for parent:`, parentTag);
-        closeContextMenu();
+        setIsContextMenuOpen(false);
         openFolderDialog('create', itemType, null, parentTag);
     };
 
@@ -88,7 +86,7 @@ export const useWorkspaceFolderMenuHelper = () => {
      */
     const handleEditItem = (itemData: any) => {
         console.log('✏️ Folder Menu: Edit folder clicked', itemData);
-        closeContextMenu();
+        setIsContextMenuOpen(false);
 
         if (itemData) {
             const itemType: ItemType = itemData.type || 'folder';
@@ -435,11 +433,11 @@ export const useWorkspaceFolderMenuHelper = () => {
         // Check if this is a workspace root node (negative ID)
         if (contextData.tagId < 0) {
             console.warn('⚠️ Cannot delete workspace root node');
-            closeContextMenu();
+            setIsContextMenuOpen(false);
             return;
         }
 
-        closeContextMenu();
+        setIsContextMenuOpen(false);
 
         // Extract anchor element from menu event
         const nativeEvent = event.syntheticEvent || event;
