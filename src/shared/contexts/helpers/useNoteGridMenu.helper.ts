@@ -73,9 +73,6 @@ export const useNoteGridMenuHelper = () => {
     };
 
     return {
-        noteGridSelectedCount,
-        noteGridIsMultiple,
-        allSelectedAreTempNotes,
         handleAddNote,
         handleDelete,
     };

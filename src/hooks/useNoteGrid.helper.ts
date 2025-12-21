@@ -193,8 +193,6 @@ export const useNoteGridHelper = () => {
 
     return {
         openContextMenu,
-        rowSelection,
-        setRowSelection,
         loadNotes,
         handleDeleteSelected,
         createNewNote,

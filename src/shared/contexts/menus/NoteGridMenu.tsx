@@ -6,6 +6,7 @@ import {
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
 import { useNoteGridMenuHelper } from '@/shared/contexts/helpers/useNoteGridMenu.helper';
+import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 
 /**
  * NoteGridMenu
@@ -17,13 +18,13 @@ import { useNoteGridMenuHelper } from '@/shared/contexts/helpers/useNoteGridMenu
  * - Hard delete (permanent)
  */
 export function NoteGridMenu() {
-    const {
-        noteGridSelectedCount,
-        noteGridIsMultiple,
-        allSelectedAreTempNotes,
-        handleAddNote,
-        handleDelete,
-    } = useNoteGridMenuHelper();
+    const { contextData } = useContextMenuStore();
+    const { handleAddNote, handleDelete } = useNoteGridMenuHelper();
+
+    // Calculate derived values from contextData
+    const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
+    const noteGridIsMultiple = noteGridSelectedCount > 1;
+    const allSelectedAreTempNotes = contextData?.selectedIds?.every((id: number) => id < 0) ?? false;
 
     return (
         <>

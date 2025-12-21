@@ -17,8 +17,7 @@ interface WsEditorPanelProps {
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { wsHasChanges } = useWsUIStore();
-    const { setSelectedWorkspace } = useWsUIHelper();
+    const { wsHasChanges, setSelectedWorkspace } = useWsUIStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);

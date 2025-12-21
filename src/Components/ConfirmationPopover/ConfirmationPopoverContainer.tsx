@@ -7,13 +7,15 @@
 import React from 'react';
 import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
 import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
+import { useConfirmationPopoverStore } from '@/store/confirmationPopover/ConfirmationPopover.store';
 
 /**
  * Container component that manages confirmation popover state
  * and renders the UI component
  */
 export function ConfirmationPopoverContainer() {
-    const { isOpen, options, handleConfirm, handleCancel } = useConfirmationPopoverHelper();
+    const { isOpen, options } = useConfirmationPopoverStore();
+    const { handleConfirm, handleCancel } = useConfirmationPopoverHelper();
 
     return (
         <ConfirmationPopover

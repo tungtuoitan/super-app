@@ -151,6 +151,5 @@ export const useEditorActionsHelper = () => {
         saveNote,
         cancelChanges,
         syncTabChangeState,
-        noteHasChanges,
     };
 };

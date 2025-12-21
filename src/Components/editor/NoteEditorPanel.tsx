@@ -8,6 +8,7 @@ import React, {useEffect} from 'react';
 import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
 import {useEditorActionsHelper} from '@/hooks/useEditorActions.helper';
 import {useEditorTabsStore} from '@/store/index';
+import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import {BaseTab} from '@/types/editor/tab.types';
 
 interface NoteEditorPanelProps {
@@ -15,7 +16,8 @@ interface NoteEditorPanelProps {
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { syncTabChangeState, noteHasChanges } = useEditorActionsHelper();
+    const { syncTabChangeState } = useEditorActionsHelper();
+    const { noteHasChanges } = useNoteUIStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);

@@ -21,6 +21,7 @@ import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
 import { useWsListHelper } from '@/hooks/useWsList.helper';
 import { useWsTabHelper } from '@/hooks/useWsTab.helper';
 import { useGridControlHelper } from '@/hooks/useGridControl.helper';
+import { useGridControlStore } from '@/store/grid/useGridControl.store';
 
 /**
  * WsGrid - Workspace list grid with table display
@@ -43,7 +44,8 @@ export function WsGrid() {
 
     const { loadWorkspaces, openContextMenu, formatDateTime } = useWsListHelper();
     const { openWorkspaceTab } = useWsTabHelper();
-    const { registerGrid, unregisterGrid, searchQuery } = useGridControlHelper();
+    const { registerGrid, unregisterGrid } = useGridControlHelper();
+    const { searchQuery } = useGridControlStore();
 
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Ws>[]>(() => {

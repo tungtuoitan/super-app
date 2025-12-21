@@ -9,6 +9,8 @@ import {
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
 import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorkspaceFolderMenu.helper';
+import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
+import { useExplorerStore } from '@/store/explorer/Explorer.store';
 
 /**
  * WorkspaceFolderNodeMenu
@@ -20,15 +22,17 @@ import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorks
  * - Delete / Hard Delete
  */
 export function WorkspaceFolderNodeMenu() {
+    const { contextData } = useContextMenuStore();
+    const { selectedFolderIds } = useExplorerStore();
     const {
-        contextData,
-        selectedFolderIds,
-        isWorkspaceRoot,
-        isMultipleSelected,
         handleCreateItem,
         handleEditItem,
         onDeleteItemClick,
     } = useWorkspaceFolderMenuHelper();
+
+    // Calculate derived values
+    const isWorkspaceRoot = contextData && contextData.tagId < 0;
+    const isMultipleSelected = selectedFolderIds.length > 1;
 
     const addMenuItems = [
         { type: 'folder' as const, icon: AddIcon, label: 'Add Folder', disabled: false },

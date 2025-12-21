@@ -9,6 +9,7 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { GenericFilterPopup } from './GenericFilterPopup';
 import { useGridControlHelper } from '@/hooks/useGridControl.helper';
+import { useGridControlStore } from '@/store/grid/useGridControl.store';
 
 export function GridControlBar() {
     const {
@@ -16,6 +17,9 @@ export function GridControlBar() {
         searchQuery,
         columnFilters,
         entityName,
+    } = useGridControlStore();
+
+    const {
         setSearchQuery,
         clearSearch,
         clearFilters,

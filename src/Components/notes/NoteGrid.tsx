@@ -20,6 +20,7 @@ import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
 import {useNoteGridHelper} from '@/hooks/useNoteGrid.helper';
 import { useGridControlHelper } from '@/hooks/useGridControl.helper';
+import { useGridControlStore } from '@/store/grid/useGridControl.store';
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -49,7 +50,8 @@ export function NoteGrid() {
 
     const { openNoteTab } = useEditorTabHelper();
     const { loadNotes, handleDeleteSelected, openContextMenu,formatDateTime } = useNoteGridHelper();
-    const { registerGrid, unregisterGrid, searchQuery } = useGridControlHelper();
+    const { registerGrid, unregisterGrid } = useGridControlHelper();
+    const { searchQuery } = useGridControlStore();
 
     // Helper to get badge variant by type
     const getTypeVariant = (type?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {

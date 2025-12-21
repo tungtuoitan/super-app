@@ -62,13 +62,9 @@ export const useWsUIHelper = () => {
     };
 
     return {
-        selectedWorkspace,
-        setSelectedWorkspace,
-        isDialogOpen,
         openDialog,
         closeDialog,
         updateSelectedWorkspace,
         resetWorkspace,
-        wsHasChanges,
     };
 };

@@ -51,9 +51,6 @@ export const useConfirmationPopoverHelper = () => {
     }
 
     return {
-        // State
-        isOpen,
-        options,
         // Actions
         showConfirmation,
         hide,

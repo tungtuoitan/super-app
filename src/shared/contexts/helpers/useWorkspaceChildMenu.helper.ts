@@ -186,10 +186,6 @@ export const useWorkspaceChildMenuHelper = () => {
     };
 
     return {
-        contextType,
-        contextData,
-        isNote,
-        isFile,
         handleEditItem,
         handleViewInfo,
         onDeleteItemClick,

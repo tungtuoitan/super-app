@@ -505,10 +505,6 @@ export const useWorkspaceFolderMenuHelper = () => {
     };
 
     return {
-        contextData,
-        selectedFolderIds,
-        isWorkspaceRoot,
-        isMultipleSelected,
         handleCreateItem,
         handleEditItem,
         onDeleteItemClick,

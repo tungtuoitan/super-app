@@ -8,6 +8,7 @@ import {
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
 import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorkspaceChildMenu.helper';
+import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 
 /**
  * WorkspaceChildNodeMenu
@@ -18,8 +19,8 @@ import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorksp
  * - File: View Details, Download (disabled), Delete, Hard Delete
  */
 export function WorkspaceChildNodeMenu() {
+    const { contextType } = useContextMenuStore();
     const {
-        contextType,
         handleEditItem,
         handleViewInfo,
         onDeleteItemClick,

@@ -71,12 +71,6 @@ export const useGridControlHelper = () => {
     };
 
     return {
-        // State
-        table,
-        searchQuery,
-        columnFilters,
-        entityName,
-
         // Actions
         registerGrid,
         unregisterGrid,
