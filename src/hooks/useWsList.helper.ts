@@ -8,6 +8,7 @@ import { storageService } from '@/services/storage.service';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useSnackbar } from 'notistack';
 import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
+import { constants } from '@/utils/constants';
 import { useWsTabHelper } from './useWsTab.helper';
 import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
 import {BaseTab} from '@/types/editor/tab.types';
@@ -114,7 +115,7 @@ export const useWsListHelper = () => {
 
             // Mark opened workspace tabs as deleted instead of closing them
             const updatedTabs = openTabs.map((tab: BaseTab) => {
-                if (tab.type === 'workspace' && selectedIds.includes((tab as any).workspaceId)) {
+                if (tab.type === constants.tabTypes.workspace && selectedIds.includes((tab as any).workspaceId)) {
                     return { ...tab, isDeleted: true };
                 }
                 return tab;

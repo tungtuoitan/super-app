@@ -14,6 +14,7 @@ import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
 import {FolderItem, isFolder} from '@/types/workspace.types';
+import { constants } from '@/utils/constants';
 
 
 
@@ -122,7 +123,7 @@ export function FolderNode({
         const _currentFolder = currentTree?.items.find(f => f.id === folderItem.id);
 
         // Open folder-specific context menu with folder data
-        showContextMenu(e, 'folder', {...folderItem, parentId: _currentFolder?.parentId ?? null });
+        showContextMenu(e, constants.itemTypes.folder, {...folderItem, parentId: _currentFolder?.parentId ?? null });
     };
     
     return (

@@ -25,6 +25,7 @@ import { useKeyboardShortcut } from '@/shared/hooks';
 import { useExplorerStore } from '@/store/index';
 import { useFolderDialogStore } from '@/store/explorer/FolderDialog.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
+import { constants } from '@/utils/constants';
 
 export function FolderDialog() {
     // Get state from ExplorerStore
@@ -165,9 +166,9 @@ export function FolderDialog() {
     // Dynamic labels based on itemType
     const getItemLabel = () => {
         switch (itemType) {
-            case 'folder': return 'Folder';
-            case 'note': return 'Note';
-            case 'file': return 'File';
+            case constants.itemTypes.folder: return constants.displayNames.folder;
+            case constants.itemTypes.note: return constants.displayNames.note;
+            case constants.itemTypes.file: return constants.displayNames.file;
             default: return 'Item';
         }
     };
@@ -215,7 +216,7 @@ export function FolderDialog() {
                     </div>
 
                     {/* Only show color picker for folders */}
-                    {itemType === 'folder' && (
+                    {itemType === constants.itemTypes.folder && (
                         <div className="space-y-2">
                             <Label htmlFor="color">Color</Label>
                             <div className="grid grid-cols-4 gap-2">

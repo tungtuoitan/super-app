@@ -11,6 +11,7 @@ import { useEditorTabHelper } from '@/hooks/useEditorTab.helper';
 import { TreeFolder } from '@/hooks/explorer/tree.helper';
 import { NoteItem } from '@/types/workspace.types';
 import { Note } from '@/types/note.types';
+import { constants } from '@/utils/constants';
 
 export function NoteNode({
     node,
@@ -83,7 +84,7 @@ export function NoteNode({
         const _currentItem = currentTree?.items.find(i => i.id === noteItem.id);
 
         // Open note-specific context menu
-        showContextMenu(e, 'note', { ...noteItem, parentId: _currentItem?.parentId ?? null });
+        showContextMenu(e, constants.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });
     };
 
     return (

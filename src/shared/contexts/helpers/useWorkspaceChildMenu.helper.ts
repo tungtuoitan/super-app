@@ -8,6 +8,7 @@ import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/Contex
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+import { constants } from '@/utils/constants';
 import { _deleteNote } from '@/services/note.service';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';
@@ -27,8 +28,8 @@ export const useWorkspaceChildMenuHelper = () => {
 
     const { openFolderDialog } = useFolderDialogHelper();
 
-    const isNote = contextType === 'note';
-    const isFile = contextType === 'file';
+    const isNote = contextType === constants.itemTypes.note;
+    const isFile = contextType === constants.itemTypes.file;
 
     /**
      * Handle edit item (note only)
@@ -38,7 +39,7 @@ export const useWorkspaceChildMenuHelper = () => {
 
         console.log('✏️ Child Menu: Edit note clicked', contextData);
         setIsContextMenuOpen(false);
-        openFolderDialog('edit', 'note', contextData, null);
+        openFolderDialog('edit', constants.itemTypes.note, contextData, null);
     };
 
     /**

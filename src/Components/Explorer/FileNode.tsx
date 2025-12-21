@@ -13,6 +13,7 @@ import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { TreeFolder } from '@/hooks/explorer/tree.helper';
 import { FileItem } from '@/types/workspace.types';
+import { constants } from '@/utils/constants';
 
 function getFileIcon(extension?: string) {
     if (!extension) return File;
@@ -100,7 +101,7 @@ export function FileNode({
         const _currentItem = currentTree?.items.find(i => i.id === fileItem.id);
 
         // Open file-specific context menu
-        showContextMenu(e, 'file', { ...fileItem, parentId: _currentItem?.parentId ?? null });
+        showContextMenu(e, constants.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });
     };
 
     return (

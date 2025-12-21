@@ -3,33 +3,76 @@
  * Non-configuration constants used throughout the app
  */
 
-export const NOTE_TYPES = {
-  MEETING: 'Meeting',
-  BRAINSTORM: 'Brainstorm',
-  RESEARCH: 'Research',
-  BUG: 'Bug',
+const noteTypes = {
+  meeting: 'Meeting',
+  brainstorm: 'Brainstorm',
+  research: 'Research',
+  bug: 'Bug',
 } as const;
 
-export const NOTE_TYPE_COLORS = {
-  [NOTE_TYPES.MEETING]: 'primary',
-  [NOTE_TYPES.BRAINSTORM]: 'warning',
-  [NOTE_TYPES.RESEARCH]: 'info',
-  [NOTE_TYPES.BUG]: 'error',
-  default: 'default',
-} as const;
+export const constants = {
+  noteTypes,
 
-export const PAGINATION = {
-  DEFAULT_PAGE_SIZE: 25,
-  PAGE_SIZE_OPTIONS: [25, 50, 100],
-} as const;
+  noteTypeColors: {
+    [noteTypes.meeting]: 'primary',
+    [noteTypes.brainstorm]: 'warning',
+    [noteTypes.research]: 'info',
+    [noteTypes.bug]: 'error',
+    default: 'default',
+  } as const,
 
-export const GRID = {
-  ROW_HEIGHT: 50,
-  HEADER_HEIGHT: 52,
-  COLUMN_BUFFER: 150,
-  ROW_BUFFER: 250,
-} as const;
+  tabTypes: {
+    note: 'note',
+    workspace: 'workspace',
+  } as const,
 
-export const WORKSPACE = {
-  ROOT_ID: -12345, // Virtual ID for workspace root node
+  itemTypes: {
+    note: 'note',
+    workspace: 'workspace',
+    file: 'file',
+    folder: 'folder',
+    tag: 'tag',
+  } as const,
+
+  contextMenuTypes: {
+    default: 'default',
+    tag: 'tag',
+    note: 'note',
+    file: 'file',
+    folder: 'folder',
+    noteGrid: 'note-grid',
+    workspaceGrid: 'workspace-grid',
+  } as const,
+
+  viewTypes: {
+    workspace: 'workspace',
+    workspaceList: 'workspaceList',
+    note: 'note',
+    notes: 'notes',
+  } as const,
+
+  displayNames: {
+    note: 'Note',
+    workspace: 'Workspace',
+    file: 'File',
+    folder: 'Folder',
+    tag: 'Tag',
+    notes: 'Notes',
+  } as const,
+
+  pagination: {
+    defaultPageSize: 25,
+    pageSizeOptions: [25, 50, 100],
+  } as const,
+
+  grid: {
+    rowHeight: 50,
+    headerHeight: 52,
+    columnBuffer: 150,
+    rowBuffer: 250,
+  } as const,
+
+  workspace: {
+    rootId: -12345, // Virtual ID for workspace root node
+  } as const,
 } as const;

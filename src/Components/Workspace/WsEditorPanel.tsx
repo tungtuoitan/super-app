@@ -11,6 +11,7 @@ import { useWsUIStore } from '@/store/ws/useWsUI.store';
 import { useWsUIHelper } from '@/hooks/useWsUI.helper';
 import { useEditorTabsStore } from '@/store/index';
 import { Ws } from '@/store/ws/useWsList.store';
+import { constants } from '@/utils/constants';
 
 interface WsEditorPanelProps {
     tab: BaseTab;
@@ -24,7 +25,7 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
 
     // Set selected workspace when tab is active
     useEffect(() => {
-        if (tab.type === 'workspace') {
+        if (tab.type === constants.tabTypes.workspace) {
             const wsData = tab.data as Ws;
             setSelectedWorkspace(wsData);
         }

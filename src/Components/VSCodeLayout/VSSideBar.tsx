@@ -6,6 +6,7 @@ import { WorkspaceView } from './WorkspaceView'
 import { WorkspaceListView } from './WorkspaceListView'
 import { GridControlBar } from '@/Components/shared/GridControlBar'
 import { GridControlProvider } from '@/store/grid/useGridControl.store'
+import { constants } from '@/utils/constants'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -58,8 +59,8 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
                 {/* Content */}
                 <div className="flex-1 overflow-hidden">
                   {activeView === 'workspaceList' && <WorkspaceListView />}
-                  {activeView === 'workspace' && <WorkspaceView />}
-                  {activeView === 'note' && <NotesView />}
+                  {activeView === constants.viewTypes.workspace && <WorkspaceView />}
+                  {activeView === constants.viewTypes.note && <NotesView />}
                 </div>
               </div>
             </Panel>
@@ -105,12 +106,12 @@ function NotesView() {
  */
 function getViewTitle(view: ActivityBarView): string {
   switch (view) {
-    case 'workspace':
-      return 'Workspace'
-    case 'workspaceList':
+    case constants.viewTypes.workspace:
+      return constants.displayNames.workspace
+    case constants.viewTypes.workspaceList:
       return 'WorkspaceList'
-    case 'note':
-      return 'Notes'
+    case constants.viewTypes.note:
+      return constants.displayNames.notes
     default:
       return 'View'
   }

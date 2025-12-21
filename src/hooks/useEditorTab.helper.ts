@@ -3,6 +3,7 @@ import {useNoteUIStore} from "../store/note/useNoteUI.store";
 import {useNoteGridPanelStore} from "../store/note/useNoteGridPanel.store";
 import {BaseTab} from "@/types/editor/tab.types";
 import {useEditorTabsStore} from "../store";
+import { constants } from '@/utils/constants';
 
 
 export const useEditorTabHelper = () => {
@@ -36,7 +37,7 @@ export const useEditorTabHelper = () => {
             const activeTab = tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId);
             console.log('🔍 Found active tab:', activeTab);
             
-            if (activeTab?.type === 'note') {
+            if (activeTab?.type === constants.tabTypes.note) {
                 const noteData = activeTab.data as Note;
                 console.log('✅ Setting selectedNote:', noteData);
                 
@@ -67,7 +68,7 @@ export const useEditorTabHelper = () => {
         
         // Check if tab already exists for this note
         const existingTab = openTabs.find(
-            (tab: BaseTab) => tab.type === 'note' && (tab.data as Note).id === note.id
+            (tab: BaseTab) => tab.type === constants.tabTypes.note && (tab.data as Note).id === note.id
         );
 
         if (existingTab) {
@@ -78,7 +79,7 @@ export const useEditorTabHelper = () => {
             // Create new tab
             const newTab: BaseTab = {
                 id: `note-${note.id}-${Date.now()}`,
-                type: 'note',
+                type: constants.tabTypes.note,
                 data: note,
                 title: note.name || 'Unsaved Note',
                 hasUnsavedChanges: false,
@@ -105,7 +106,7 @@ export const useEditorTabHelper = () => {
         // }
 
         // If closing a note tab with negative ID (temporary note), remove it from grid
-        if (tab?.type === 'note') {
+        if (tab?.type === constants.tabTypes.note) {
             const noteData = tab.data as Note;
             if (noteData.id < 0) {
                 console.log('🗑️ Removing temporary note from grid:', noteData.id);
@@ -168,7 +169,7 @@ export const useEditorTabHelper = () => {
         console.log('🔄 EditorTabContext - updateTabNote:', { tabId, note });
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((tab: BaseTab) => {
-                if (tab.id === tabId && tab.type === 'note') {
+                if (tab.id === tabId && tab.type === constants.tabTypes.note) {
                     return {
                         ...tab,
                         data: note,

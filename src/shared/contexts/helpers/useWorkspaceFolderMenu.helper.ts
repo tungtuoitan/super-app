@@ -8,6 +8,7 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+import { constants } from '@/utils/constants';
 import type { ItemType } from '@/store/explorer/FolderDialog.store';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
@@ -89,7 +90,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         setIsContextMenuOpen(false);
 
         if (itemData) {
-            const itemType: ItemType = itemData.type || 'folder';
+            const itemType: ItemType = itemData.type || constants.itemTypes.folder;
             openFolderDialog('edit', itemType, itemData, null);
         }
     };
@@ -150,11 +151,11 @@ export const useWorkspaceFolderMenuHelper = () => {
                     const itemType = (f as any).type;
                     let type: 2 | 3 | 4 = 2; // Default to folder
 
-                    if (itemType === 'folder' || itemType === 'tag') {
+                    if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
                         type = 2;
-                    } else if (itemType === 'note') {
+                    } else if (itemType === constants.itemTypes.note) {
                         type = 3;
-                    } else if (itemType === 'file') {
+                    } else if (itemType === constants.itemTypes.file) {
                         type = 4;
                     }
 
@@ -331,11 +332,11 @@ export const useWorkspaceFolderMenuHelper = () => {
                     const itemType = (f as any).type;
                     let type: 2 | 3 | 4 = 2;
 
-                    if (itemType === 'folder' || itemType === 'tag') {
+                    if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
                         type = 2;
-                    } else if (itemType === 'note') {
+                    } else if (itemType === constants.itemTypes.note) {
                         type = 3;
-                    } else if (itemType === 'file') {
+                    } else if (itemType === constants.itemTypes.file) {
                         type = 4;
                     }
 

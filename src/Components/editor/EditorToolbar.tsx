@@ -17,6 +17,7 @@ import {useEditorTabsStore} from '@/store/index';
 import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
 import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import {useEditorToolbarHelper} from '@/hooks/useEditorToolbar.helper';
+import { constants } from '@/utils/constants';
 
 
 export function EditorToolbar() {
@@ -50,10 +51,10 @@ export function EditorToolbar() {
             <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">
+                        <span className={`text-xs ${statusText === 'delete' ? 'text-red-500' : 'text-muted-foreground'}`}>
                             {statusText}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className={`text-xs ${itemId && itemId < 0 ? 'text-yellow-500' : 'text-muted-foreground'}`}>
                             ID: {itemId || '0'}
                         </span>
                     </div>
@@ -80,7 +81,7 @@ export function EditorToolbar() {
                                 </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Restore {activeTab.type === 'note' ? 'Note' : 'Workspace'}</p>
+                                <p>Restore {activeTab.type === constants.tabTypes.note ? constants.displayNames.note : constants.displayNames.workspace}</p>
                             </TooltipContent>
                         </Tooltip>
                     ) : (
@@ -127,7 +128,7 @@ export function EditorToolbar() {
                         <TooltipContent>
                             <p>
                                 {activeTab?.isDeleted 
-                                    ? `Cannot edit deleted ${activeTab.type}` 
+                                    ? `Cannot edit deleted ${activeTab.type === constants.tabTypes.note ? constants.displayNames.note : constants.displayNames.workspace}` 
                                     : 'Discard Changes'}
                             </p>
                         </TooltipContent>

@@ -1,13 +1,14 @@
 import React from 'react';
 import { MenuItem, MenuDivider } from '@szhsin/react-menu';
-import { 
-    Edit as EditIcon, 
-    Trash2 as DeleteIcon, 
+import {
+    Edit as EditIcon,
+    Trash2 as DeleteIcon,
     Info as InfoIcon,
     File as FileIcon,
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
 import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorkspaceChildMenu.helper';
+import { constants } from '@/utils/constants';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 
 /**
@@ -26,8 +27,8 @@ export function WorkspaceChildNodeMenu() {
         onDeleteItemClick,
     } = useWorkspaceChildMenuHelper();
 
-    const isNote = contextType === 'note';
-    const isFile = contextType === 'file';
+    const isNote = contextType === constants.itemTypes.note;
+    const isFile = contextType === constants.itemTypes.file;
 
     return (
         <>

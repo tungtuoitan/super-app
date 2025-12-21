@@ -8,6 +8,7 @@ import {useContextMenuStore, useEditorTabsStore} from '../store';
 import {useSnackbar} from 'notistack';
 import {useEditorTabHelper} from './useEditorTab.helper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
+import { constants } from '@/utils/constants';
 import {BaseTab} from '@/types/editor/tab.types';
 
 export const useNoteGridHelper = () => {
@@ -122,7 +123,7 @@ export const useNoteGridHelper = () => {
 
                 // Mark opened tabs as deleted instead of closing them
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === 'note' && persistedNoteIds.includes(tab.data.id)) {
+                    if (tab.type === constants.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
                         return { ...tab, isDeleted: true };
                     }
                     return tab;

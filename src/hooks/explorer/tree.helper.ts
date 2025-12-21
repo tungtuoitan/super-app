@@ -1,6 +1,7 @@
 import { WorkspaceItem, FolderItem, NoteItem, FileItem, isFolder, canHaveChildren } from "@/types/workspace.types";
 import { Folder } from "../../types";
 import { transformBackendItems, BackendWorkspaceItem } from "@/utils/workspace-mapper";
+import { constants } from '@/utils/constants';
 
 // ============================================
 // TREE NODE TYPES (for react-arborist)
@@ -387,7 +388,7 @@ export function transformToTreeData(
         // Create workspace root as a FolderItem
         const workspaceRoot: FolderItem = {
             id: -12345,  // Virtual ID for workspace root, -12345 is used to avoid conflicts
-            type: 'folder',
+            type: constants.itemTypes.folder,
             userId: data.userId,
             name: data.name,
             color: data.color,

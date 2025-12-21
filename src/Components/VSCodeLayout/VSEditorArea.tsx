@@ -6,6 +6,7 @@ import {useNoteUIStore} from '@/store/note/useNoteUI.store'
 import { WsEditorPanel } from '@/Components/Workspace'
 import {useEditorTabsStore} from '@/store/index'
 import {BaseTab} from '@/types/editor/tab.types'
+import { constants } from '@/utils/constants'
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -45,7 +46,7 @@ export function VSEditorArea() {
         {openTabs.length > 0 ? (
           <div className="flex-1 flex flex-wrap">
             {openTabs.map((tab: BaseTab) => {
-              const isDeleted = tab.type === 'note' && tab.isDeleted;
+              const isDeleted = tab.type === constants.tabTypes.note && tab.isDeleted;
               return (
                 <button
                   key={tab.id}
@@ -96,15 +97,15 @@ export function VSEditorArea() {
         {activeTab ? (
           // Render appropriate editor based on tab type
           <>
-            {activeTab.type === 'note' && <NoteEditorPanel tab={activeTab} />}
-            {activeTab.type === 'workspace' && <WsEditorPanel tab={activeTab} />}
+            {activeTab.type === constants.tabTypes.note && <NoteEditorPanel tab={activeTab} />}
+            {activeTab.type === constants.tabTypes.workspace && <WsEditorPanel tab={activeTab} />}
           </>
         ) : (
           // Welcome/empty state
           <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
             <div className="text-center">
               <h2 className="text-xl font-semibold mb-1">
-                Welcome to Notes
+                Welcome to {constants.displayNames.notes}
               </h2>
               <p className="text-sm">
                 Select a note from the sidebar to view its details

@@ -6,6 +6,7 @@ import { WorkspaceFolderNodeMenu } from './menus/WorkspaceFolderNodeMenu';
 import { WorkspaceChildNodeMenu } from './menus/WorkspaceChildNodeMenu';
 import { NoteGridMenu } from './menus/NoteGridMenu';
 import { WsGridMenu } from './menus/WsGridMenu';
+import { constants } from '@/utils/constants';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
 
@@ -33,11 +34,11 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
      */
     const renderMenuItems = () => {
         switch (contextType) {
-            case 'folder':
+            case constants.itemTypes.folder:
                 return <WorkspaceFolderNodeMenu />;
             
-            case 'note':
-            case 'file':
+            case constants.itemTypes.note:
+            case constants.itemTypes.file:
                 return <WorkspaceChildNodeMenu />;
 
             case 'note-grid':

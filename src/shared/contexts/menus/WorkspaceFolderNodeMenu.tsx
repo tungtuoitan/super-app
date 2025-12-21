@@ -1,13 +1,14 @@
 import React from 'react';
 import { MenuItem, MenuDivider } from '@szhsin/react-menu';
-import { 
-    Plus as AddIcon, 
-    Edit as EditIcon, 
-    Trash2 as DeleteIcon, 
+import {
+    Plus as AddIcon,
+    Edit as EditIcon,
+    Trash2 as DeleteIcon,
     File as FileIcon,
     FileText as NoteIcon,
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
+import { constants } from '@/utils/constants';
 import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorkspaceFolderMenu.helper';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
@@ -35,9 +36,9 @@ export function WorkspaceFolderNodeMenu() {
     const isMultipleSelected = selectedFolderIds.length > 1;
 
     const addMenuItems = [
-        { type: 'folder' as const, icon: AddIcon, label: 'Add Folder', disabled: false },
-        { type: 'file' as const, icon: FileIcon, label: 'Add File', disabled: true },
-        { type: 'note' as const, icon: NoteIcon, label: 'Add Note', disabled: false },
+        { type: constants.itemTypes.folder, icon: AddIcon, label: 'Add Folder', disabled: false },
+        { type: constants.itemTypes.file, icon: FileIcon, label: 'Add File', disabled: true },
+        { type: constants.itemTypes.note, icon: NoteIcon, label: 'Add Note', disabled: false },
     ];
 
     return (

@@ -9,6 +9,7 @@ import {
 import {SettingsDialog} from './SettingsDialog'
 import { useNavigationStore } from '@/contexts/NavigationContext'
 import type { ActivityBarView } from '@/config/routes'
+import { constants } from '@/utils/constants'
 
 interface ActivityBarProps {
   isSideBarVisible: boolean
@@ -17,8 +18,8 @@ interface ActivityBarProps {
 
 const activities = [
   { id: 'workspaceList' as const, icon: Boxes, label: 'WorkspaceList' },
-  { id: 'workspace' as const, icon: Folder, label: 'Workspace' },
-  { id: 'note' as const, icon: FileText, label: 'Notes' },
+  { id: constants.viewTypes.workspace, icon: Folder, label: constants.displayNames.workspace },
+  { id: constants.viewTypes.note, icon: FileText, label: constants.displayNames.notes },
 ]
 
 export function ActivityBar({ isSideBarVisible, onToggleSideBar }: ActivityBarProps) {

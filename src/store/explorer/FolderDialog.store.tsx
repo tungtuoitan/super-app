@@ -1,6 +1,7 @@
 
 import { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
 import type { WorkspaceItem } from '@/types/workspace.types';
+import { constants } from '@/utils/constants';
 
 export interface FolderDialogFormErrors {
     name?: string;
@@ -9,7 +10,7 @@ export interface FolderDialogFormErrors {
 }
 
 export type DialogMode = 'create' | 'edit';
-export type ItemType = 'folder' | 'note' | 'file';
+export type ItemType = typeof constants.itemTypes.folder | typeof constants.itemTypes.note | typeof constants.itemTypes.file | typeof constants.itemTypes.tag;
 
 export interface FolderDialogContextData {
     // Dialog state
@@ -49,7 +50,7 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     setIsFolderDialogOpen: () => {},
     mode: 'create',
     setMode: () => {},
-    itemType: 'folder',
+    itemType: constants.itemTypes.folder,
     setItemType: () => {},
     editingFolder: null,
     setEditingFolder: () => {},
@@ -92,7 +93,7 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
     // Dialog state
     const [isFolderDialogOpen, setIsFolderDialogOpen] = useState<boolean>(false);
     const [mode, setMode] = useState<DialogMode>('create');
-    const [itemType, setItemType] = useState<ItemType>('folder');
+    const [itemType, setItemType] = useState<ItemType>(constants.itemTypes.folder);
     const [editingFolder, setEditingFolder] = useState<any | null>(null);
     const [parentFolder, setParentFolder] = useState<any | null>(null);
     

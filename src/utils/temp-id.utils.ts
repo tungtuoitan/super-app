@@ -8,6 +8,7 @@
 
 import type { BaseTab } from '@/types/editor/tab.types';
 import type { Note } from '@/types/note.types';
+import { constants } from '@/utils/constants';
 import type { Ws } from '@/store/ws/useWsList.store';
 
 /**
@@ -18,10 +19,10 @@ export const collectIdsFromTabs = (openTabs: BaseTab[]): number[] => {
     const ids: number[] = [];
     
     openTabs.forEach(tab => {
-        if (tab.type === 'note') {
+        if (tab.type === constants.tabTypes.note) {
             const noteData = tab.data as Note;
             ids.push(noteData.id);
-        } else if (tab.type === 'workspace') {
+        } else if (tab.type === constants.tabTypes.workspace) {
             const wsData = tab.data as Ws;
             ids.push(wsData.id);
         }

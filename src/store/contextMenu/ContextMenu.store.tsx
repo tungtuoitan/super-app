@@ -5,13 +5,14 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
+import { constants } from '@/utils/constants';
 
 export interface ContextMenuPosition {
     x: number;
     y: number;
 }
 
-export type ContextMenuType = 'default' | 'tag' | 'note' | 'file' | 'folder' | 'note-grid' | 'workspace-grid';
+export type ContextMenuType = typeof constants.contextMenuTypes[keyof typeof constants.contextMenuTypes];
 
 export interface ContextMenuStoreData {
     // Menu state
@@ -63,7 +64,7 @@ export const useContextMenuStore = () => useContext(ContextMenuStore);
 export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
     const [anchorPoint, setAnchorPoint] = useState<ContextMenuPosition>({ x: 0, y: 0 });
-    const [contextType, setContextType] = useState<ContextMenuType>('default');
+    const [contextType, setContextType] = useState<ContextMenuType>(constants.contextMenuTypes.default);
     const [contextData, setContextData] = useState<any | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
     const [editItemData, setEditItemData] = useState<any | null>(null);

@@ -6,6 +6,7 @@
 import { Ws } from '@/store/ws/useWsList.store';
 import { BaseTab } from '@/types/editor/tab.types';
 import {useEditorTabsStore} from '../store';
+import { constants } from '@/utils/constants';
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -20,7 +21,7 @@ export const useWsTabHelper = () => {
 
         // Check if tab already exists for this workspace
         const existingTab = openTabs.find(
-            tab => tab.type === 'workspace' && (tab.data as Ws).id === workspace.id
+            tab => tab.type === constants.tabTypes.workspace && (tab.data as Ws).id === workspace.id
         );
 
         if (existingTab) {
@@ -31,7 +32,7 @@ export const useWsTabHelper = () => {
             // Create new workspace tab
             const newTab: BaseTab = {
                 id: `workspace-tab-${workspace.id}-${Date.now()}`,
-                type: 'workspace',
+                type: constants.tabTypes.workspace,
                 data: workspace,
                 title: workspace.name || 'Unsaved Workspace',
                 hasUnsavedChanges: false,
@@ -75,7 +76,7 @@ export const useWsTabHelper = () => {
         console.log('🏢 WsTabHelper - updateWorkspaceInTabs:', workspaceId, updatedWorkspace);
         
         setOpenTabs(prev => prev.map(tab => {
-            if (tab.type === 'workspace' && (tab.data as Ws).id === workspaceId) {
+            if (tab.type === constants.tabTypes.workspace && (tab.data as Ws).id === workspaceId) {
                 const wsData = tab.data as Ws;
                 return {
                     ...tab,

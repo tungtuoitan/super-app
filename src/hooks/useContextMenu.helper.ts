@@ -17,6 +17,7 @@ import { Note } from '@/types/note.types';
 import {useConfirmationPopover} from '@/shared/hooks';
 import {useEditorTabsStore} from '../store';
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from '../utils';
+import { constants } from '@/utils/constants';
 
 
 
@@ -149,11 +150,11 @@ export const useContextMenuHelper = () => {
                         const itemType = (f as any).type;
                         let typeCode: 2 | 3 | 4 = 2; // Default to folder
                         
-                        if (itemType === 'folder' || itemType === 'tag') {
+                        if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
                             typeCode = 2;
-                        } else if (itemType === 'note') {
+                        } else if (itemType === constants.itemTypes.note) {
                             typeCode = 3;
-                        } else if (itemType === 'file') {
+                        } else if (itemType === constants.itemTypes.file) {
                             typeCode = 4;
                         }
                         
@@ -238,7 +239,7 @@ export const useContextMenuHelper = () => {
         
         if (itemData) {
             // Determine item type from data
-            const itemType: ItemType = itemData.type || 'folder';
+            const itemType: ItemType = itemData.type || constants.itemTypes.folder;
             openFolderDialog('edit', itemType, itemData, null);
         }
     };
@@ -285,7 +286,7 @@ export const useContextMenuHelper = () => {
         if (currentTree) {
             const newNoteItem = {
                 id: tempId,
-                type: 'note' as const,
+                type: constants.itemTypes.note,
                 userId: currentTree.userId,
                 name: name,
                 accessType: 'owner' as const,
@@ -425,11 +426,11 @@ export const useContextMenuHelper = () => {
                     const itemType = (f as any).type;
                     let typeCode: 2 | 3 | 4 = 2; // Default to folder
                     
-                    if (itemType === 'folder' || itemType === 'tag') {
+                    if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
                         typeCode = 2;
-                    } else if (itemType === 'note') {
+                    } else if (itemType === constants.itemTypes.note) {
                         typeCode = 3;
-                    } else if (itemType === 'file') {
+                    } else if (itemType === constants.itemTypes.file) {
                         typeCode = 4;
                     }
                     
@@ -553,7 +554,7 @@ export const useContextMenuHelper = () => {
     const handleDeleteItem = (itemData: any, contextType: ContextMenuType, isHardDelete: boolean = false) => {
         console.log('🗑️ Context Menu: Delete item clicked for:', itemData, 'isHardDelete:', isHardDelete);
 
-        if ((contextType === 'tag' || contextType === 'folder') && itemData) {
+        if ((contextType === 'tag' || contextType === constants.itemTypes.folder) && itemData) {
             // Check if this is a workspace root node (negative ID)
             if (itemData.tagId < 0 || itemData.id < 0) {
                 console.warn('⚠️ Cannot delete workspace root node');
@@ -574,11 +575,11 @@ export const useContextMenuHelper = () => {
                 // Delete single folder
                 handleDeleteFolder(itemData, isHardDelete);
             }
-        } else if (contextType === 'note' && itemData) {
+        } else if (contextType === constants.itemTypes.note && itemData) {
             // Handle note deletion
             setIsContextMenuOpen(false);
             handleDeleteNote(itemData, isHardDelete);
-        } else if (contextType === 'file' && itemData) {
+        } else if (contextType === constants.itemTypes.file && itemData) {
             // Handle file deletion
             setIsContextMenuOpen(false);
             handleDeleteFile(itemData, isHardDelete);
@@ -618,7 +619,7 @@ export const useContextMenuHelper = () => {
      * @param isHardDelete - If true, permanently delete (hard delete)
      */
     const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
-        if (contextType === 'folder' && contextData) {
+        if (contextType === constants.itemTypes.folder && contextData) {
             // Check if this is a workspace root node (negative ID)
             if (contextData.tagId < 0) {
                 console.warn('⚠️ Cannot delete workspace root node');
@@ -676,7 +677,7 @@ export const useContextMenuHelper = () => {
                     handleDeleteItem(contextData, contextType, isHardDelete);
                 }
             });
-        } else if (contextType === 'note' && contextData) {
+        } else if (contextType === constants.itemTypes.note && contextData) {
             // Handle note deletion with confirmation
             setIsContextMenuOpen(false);
 
@@ -698,7 +699,7 @@ export const useContextMenuHelper = () => {
                     handleDeleteItem(contextData, contextType, isHardDelete);
                 }
             });
-        } else if (contextType === 'file' && contextData) {
+        } else if (contextType === constants.itemTypes.file && contextData) {
             // Handle file deletion with confirmation
             setIsContextMenuOpen(false);
 

@@ -5,9 +5,10 @@
 
 import {Note} from "@/types/note.types";
 import {Ws} from "@/store/ws/useWsList.store";
+import { constants } from '@/utils/constants';
 
 
-export type TabType = 'note' | 'tag' | 'settings' | 'workspace';
+export type TabType = typeof constants.tabTypes.note | typeof constants.tabTypes.workspace | 'tag' | 'settings';
 
 /**
  * Tab-specific view state for preserving UI state across tab switches

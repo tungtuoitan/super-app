@@ -8,6 +8,7 @@ import { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { PropsWithChildren } from 'react';
 import { ROUTE_TO_VIEW, VIEW_TO_ROUTE, type ActivityBarView } from '@/config/routes';
+import { constants } from '@/utils/constants';
 
 /**
  * Navigation context interface defining the shape of navigation state and actions
@@ -32,7 +33,7 @@ export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
     toggleNavigation: () => {},
     selectedItemId: null,
     setSelectedItemId: () => {},
-    activeView: 'workspace',
+    activeView: constants.viewTypes.workspace,
     navigateToView: () => {},
 };
 
@@ -63,7 +64,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const bodyWrapperRef = useRef<HTMLDivElement>(null);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-    const [activeView, setActiveView] = useState<ActivityBarView>('workspace');
+    const [activeView, setActiveView] = useState<ActivityBarView>(constants.viewTypes.workspace);
     
     const location = useLocation();
     const navigate = useNavigate();

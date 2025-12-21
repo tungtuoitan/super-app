@@ -8,11 +8,11 @@ import { getAllFoldersFlattened, isDescendant, findFolderById } from './tree.hel
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from './useFolderDialog.helper';
 import { useWorkspaceOperation } from './useWorkspaceOperation.helper';
+import { constants } from '@/utils/constants';
 import { _moveWorkspaceItems } from '@/services/workspace.service';
 import type { MoveItemsRequest } from '@/types/workspace.types';
 import { Folder } from '@/types/index';
 import { useSnackbar } from 'notistack';
-import { WORKSPACE } from '@/utils/constants';
 
 export const useTreeOperation = () => {
     const {
@@ -84,7 +84,7 @@ export const useTreeOperation = () => {
                         
                         // Check if this is a folder or note/file
                         if ('type' in itemData) {
-                            if (itemData.type === 'folder') {
+                            if (itemData.type === constants.itemTypes.folder) {
                                 // Dropping INTO a folder - use folder ID as parent
                                 newParentId = parentEntityId;
                             } else {
@@ -102,7 +102,7 @@ export const useTreeOperation = () => {
             // =================================================================
             // STEP 3: VALIDATION - PREVENT INVALID MOVES
             // =================================================================
-            const hasWorkspaceRoot = itemIds.some(id => id === WORKSPACE.ROOT_ID);
+            const hasWorkspaceRoot = itemIds.some(id => id === constants.workspace.rootId);
             if (hasWorkspaceRoot) {
                 console.warn('⚠️ Cannot move workspace root node');
                 setIsDragging(false);
@@ -198,11 +198,11 @@ export const useTreeOperation = () => {
                     // Map WorkspaceItem type to backend type codes
                     let typeCode: 2 | 3 | 4;
                     if ('type' in itemData) {
-                        if (itemData.type === 'folder') {
+                        if (itemData.type === constants.itemTypes.folder) {
                             typeCode = 2;
-                        } else if (itemData.type === 'note') {
+                        } else if (itemData.type === constants.itemTypes.note) {
                             typeCode = 3;
-                        } else if (itemData.type === 'file') {
+                        } else if (itemData.type === constants.itemTypes.file) {
                             typeCode = 4;
                         } else {
                             throw new Error(`Unknown item type: ${(itemData as any).type}`);
@@ -291,7 +291,7 @@ export const useTreeOperation = () => {
             foldersCount: folders.length,
         });
             
-        openFolderDialog('create', 'folder', null, parentFolder);
+        openFolderDialog('create', constants.itemTypes.folder, null, parentFolder);
     };
 
     return {

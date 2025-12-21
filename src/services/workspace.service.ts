@@ -11,6 +11,7 @@ import type {
     WorkspaceWithTreeResponse,
     WorkspaceListResponse
 } from '@/types/workspace.types';
+import { constants } from '@/utils/constants';
 
 /**
  * Request to create or update a folder in workspace
@@ -149,7 +150,7 @@ export const _upsertWorkspaceItem = async (
     workspaceId: number,
     data: {
         parentTagId?: number | null;
-        childType?: 'tag' | 'note' | 'folder';
+        childType?: typeof constants.itemTypes.note | typeof constants.itemTypes.folder | typeof constants.itemTypes.tag;
         childId?: number;
         label?: string;
         notes?: string;
@@ -318,7 +319,7 @@ export const _addItemToWorkspace = async (
     workspaceId: number,
     data: {
         parentTagId?: number | null;
-        childType: 'tag' | 'note' | 'folder';
+        childType: typeof constants.itemTypes.note | typeof constants.itemTypes.folder | typeof constants.itemTypes.tag;
         childId?: number;
         folderName?: string;
         label?: string;

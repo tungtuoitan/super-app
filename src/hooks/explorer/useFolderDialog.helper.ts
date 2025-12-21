@@ -8,6 +8,7 @@ import { _getWorkspaceTree, _upsertFolder } from '@/services/workspace.service';
 import type { FolderDialogFormErrors } from '@/store/explorer/FolderDialog.store';
 import type { Folder } from '@/types/folder.types';
 import {useWorkspaceOperation} from './useWorkspaceOperation.helper';
+import { constants } from '@/utils/constants';
 
 export const useFolderDialogHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
@@ -157,7 +158,7 @@ export const useFolderDialogHelper = () => {
      */
     const openFolderDialog = (
         dialogMode: 'create' | 'edit',
-        type: ItemType = 'folder',
+        type: ItemType = constants.itemTypes.folder,
         folder?: Folder | null,
         parentFolder?: Folder | null
     ) => {

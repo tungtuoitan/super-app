@@ -4,6 +4,13 @@
  * Note: Backend still uses "tag" terminology in API
  */
 
+import { constants } from '@/utils/constants';
+
+/**
+ * Type aliases for backend API compatibility
+ */
+export type ChildType = typeof constants.itemTypes.tag | typeof constants.itemTypes.note | typeof constants.itemTypes.folder;
+
 /**
  * Request to add an item (folder or note) to a workspace
  * Maps to backend AddItemToWorkspaceRequest
@@ -14,7 +21,7 @@ export interface AddItemToWorkspaceRequest {
     parentFolderId?: number | null; // Frontend alias
     
     /** Type of child entity - 'folder' for workspace folders, 'note' for notes */
-    childType: 'tag' | 'note' | 'folder'; // Backend accepts 'tag', frontend uses 'folder'
+    childType: ChildType; // Backend accepts 'tag', frontend uses 'folder'
     
     /** ID of the child entity (optional if creating new folder) */
     childId?: number;
@@ -321,7 +328,7 @@ export interface FolderItem extends BaseWorkspaceItem {
     id: number;
 
     /** Type of item */
-    type: 'folder';
+    type: typeof constants.itemTypes.folder;
 
     /** Folder-specific metadata */
     metadata?: FolderMetadata;
@@ -340,7 +347,7 @@ export interface NoteItem extends BaseWorkspaceItem {
     id: number;
 
     /** Type of item */
-    type: 'note';
+    type: typeof constants.itemTypes.note;
 
     /** Note-specific metadata */
     metadata?: NoteMetadata;
@@ -359,7 +366,7 @@ export interface FileItem extends BaseWorkspaceItem {
     id: number;
 
     /** Type of item */
-    type: 'file';
+    type: typeof constants.itemTypes.file;
 
     /** File-specific metadata */
     metadata?: FileMetadata;
@@ -382,35 +389,35 @@ export type WorkspaceItem = FolderItem | NoteItem | FileItem;
  * Type guard to check if item is a folder
  */
 export function isFolder(item: WorkspaceItem): item is FolderItem {
-    return item.type === 'folder';
+    return item.type === constants.itemTypes.folder;
 }
 
 /**
  * Type guard to check if item is a note
  */
 export function isNote(item: WorkspaceItem): item is NoteItem {
-    return item.type === 'note';
+    return item.type === constants.itemTypes.note;
 }
 
 /**
  * Type guard to check if item is a file
  */
 export function isFile(item: WorkspaceItem): item is FileItem {
-    return item.type === 'file';
+    return item.type === constants.itemTypes.file;
 }
 
 /**
  * Type guard to check if item is a leaf node (note or file)
  */
 export function isLeafNode(item: WorkspaceItem): item is NoteItem | FileItem {
-    return item.type === 'note' || item.type === 'file';
+    return item.type === constants.itemTypes.note || item.type === constants.itemTypes.file;
 }
 
 /**
  * Type guard to check if item can have children (folder)
  */
 export function canHaveChildren(item: WorkspaceItem): item is FolderItem {
-    return item.type === 'folder';
+    return item.type === constants.itemTypes.folder;
 }
 
 /**
