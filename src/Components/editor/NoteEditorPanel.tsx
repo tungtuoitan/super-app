@@ -15,15 +15,15 @@ interface NoteEditorPanelProps {
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { syncTabChangeState, hasUnsavedChanges } = useEditorActionsHelper();
+    const { syncTabChangeState, noteHasChanges } = useEditorActionsHelper();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Sync hasUnsavedChanges with tab state
+    // Sync noteHasChanges with tab state
     useEffect(() => {
         syncTabChangeState(tab.id);
-    }, [hasUnsavedChanges, tab.id]);
+    }, [noteHasChanges, tab.id]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {

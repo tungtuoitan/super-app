@@ -14,7 +14,7 @@ export const useEditorTabHelper = () => {
         confirmCloseTabId, 
         setConfirmCloseTabId,
     } = useEditorTabsStore();
-    const { setSelectedNote, originalNoteRef, setHasUnsavedChanges } = useNoteUIStore();
+    const { setSelectedNote, originalNoteRef, setNoteHasChanges } = useNoteUIStore();
     const { setNotes } = useNoteGridPanelStore();
 
     /**
@@ -44,20 +44,20 @@ export const useEditorTabHelper = () => {
                 if (!originalNoteRef.current || originalNoteRef.current.id !== noteData.id) {
                     console.log('📌 Initializing originalNoteRef in EditorTabHelper:', noteData);
                     originalNoteRef.current = { ...noteData };
-                    setHasUnsavedChanges(false); // Reset changes for newly opened note
+                    setNoteHasChanges(false); // Reset changes for newly opened note
                 }
                 
                 setSelectedNote(noteData);
             } else {
                 console.log('❌ No note tab found, clearing selectedNote');
                 originalNoteRef.current = null;
-                setHasUnsavedChanges(false);
+                setNoteHasChanges(false);
                 setSelectedNote(null);
             }
         } else {
             console.log('🚫 No active tab ID, clearing selectedNote');
             originalNoteRef.current = null;
-            setHasUnsavedChanges(false);
+            setNoteHasChanges(false);
             setSelectedNote(null);
         }
     }

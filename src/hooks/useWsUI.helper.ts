@@ -12,8 +12,8 @@ export const useWsUIHelper = () => {
         setSelectedWorkspace,
         isDialogOpen,
         setIsDialogOpen,
-        hasUnsavedChanges,
-        setHasUnsavedChanges,
+        wsHasChanges,
+        setWsHasChanges,
         originalWsRef,
     } = useWsUIStore();
 
@@ -24,7 +24,7 @@ export const useWsUIHelper = () => {
         setSelectedWorkspace(workspace);
         originalWsRef.current = JSON.parse(JSON.stringify(workspace)); // Deep clone
         setIsDialogOpen(true);
-        setHasUnsavedChanges(false);
+        setWsHasChanges(false);
     };
 
     /**
@@ -34,7 +34,7 @@ export const useWsUIHelper = () => {
         setIsDialogOpen(false);
         setSelectedWorkspace(null);
         originalWsRef.current = null;
-        setHasUnsavedChanges(false);
+        setWsHasChanges(false);
     };
 
     /**
@@ -48,7 +48,7 @@ export const useWsUIHelper = () => {
 
         // Check if changes differ from original
         const hasChanges = JSON.stringify(updatedWorkspace) !== JSON.stringify(originalWsRef.current);
-        setHasUnsavedChanges(hasChanges);
+        setWsHasChanges(hasChanges);
     };
 
     /**
@@ -57,7 +57,7 @@ export const useWsUIHelper = () => {
     const resetWorkspace = () => {
         if (originalWsRef.current) {
             setSelectedWorkspace(JSON.parse(JSON.stringify(originalWsRef.current)));
-            setHasUnsavedChanges(false);
+            setWsHasChanges(false);
         }
     };
 
@@ -69,6 +69,6 @@ export const useWsUIHelper = () => {
         closeDialog,
         updateSelectedWorkspace,
         resetWorkspace,
-        hasUnsavedChanges,
+        wsHasChanges,
     };
 };

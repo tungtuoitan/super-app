@@ -17,10 +17,10 @@ export interface NoteUIContextData {
     // Dialog state
     selectedNote: Note | null;
     isDialogOpen: boolean;
-    hasUnsavedChanges: boolean;
+    noteHasChanges: boolean;
     setSelectedNote: Dispatch<SetStateAction<Note | null>>;
     setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-    setHasUnsavedChanges: Dispatch<SetStateAction<boolean>>;
+    setNoteHasChanges: Dispatch<SetStateAction<boolean>>;
 
     // Original note ref for change tracking
     originalNoteRef: React.MutableRefObject<Note | null>;
@@ -64,10 +64,10 @@ export const noteUIContextDefaultValue: NoteUIContextData = {
     // Dialog state
     selectedNote: null,
     isDialogOpen: false,
-    hasUnsavedChanges: false,
+    noteHasChanges: false,
     setSelectedNote: () => {},
     setIsDialogOpen: () => {},
-    setHasUnsavedChanges: () => {},
+    setNoteHasChanges: () => {},
     originalNoteRef: { current: null },
 
     // Search UI state
@@ -113,7 +113,7 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     // Dialog state
     const [selectedNote, setSelectedNoteState] = useState<Note | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [noteHasChanges, setNoteHasChanges] = useState(false);
     const originalNoteRef = useRef<Note | null>(null);
 
     // Wrapped setSelectedNote with logging
@@ -168,8 +168,8 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
                 setSelectedNote,
                 isDialogOpen,
                 setIsDialogOpen,
-                hasUnsavedChanges,
-                setHasUnsavedChanges,
+                noteHasChanges,
+                setNoteHasChanges,
                 originalNoteRef,
 
                 // Search UI state

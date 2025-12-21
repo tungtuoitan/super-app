@@ -35,7 +35,7 @@ export function EditorToolbar() {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault()
-        if (activeTab && toolbarActions.hasUnsavedChanges && !toolbarActions.isSaving) {
+        if (activeTab && toolbarActions.anyHasChanges && !toolbarActions.isSaving) {
             toolbarActions.handleSave()
         }
         }
@@ -93,9 +93,9 @@ export function EditorToolbar() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={toolbarActions.handleSave}
-                                        disabled={!toolbarActions.hasUnsavedChanges || toolbarActions.isSaving}
+                                        disabled={!toolbarActions.anyHasChanges || toolbarActions.isSaving}
                                         className={`h-8 w-8 ${
-                                            toolbarActions.hasUnsavedChanges
+                                            toolbarActions.anyHasChanges
                                                 ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
                                                 : 'text-white/40'
                                         } disabled:text-white/20`}
@@ -118,7 +118,7 @@ export function EditorToolbar() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={toolbarActions.handleCancel}
-                                    disabled={!toolbarActions.hasUnsavedChanges || activeTab?.isDeleted}
+                                    disabled={!toolbarActions.anyHasChanges || activeTab?.isDeleted}
                                     className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                 >
                                     <RotateCcw className="h-[18px] w-[18px]" />

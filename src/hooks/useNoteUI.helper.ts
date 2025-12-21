@@ -7,8 +7,8 @@ export const useNoteUIHelper = () => {
         setSelectedNote,
         isDialogOpen,
         setIsDialogOpen,
-        hasUnsavedChanges,
-        setHasUnsavedChanges,
+        noteHasChanges,
+        setNoteHasChanges,
         originalNoteRef,
     } = useNoteUIStore();
 
@@ -31,9 +31,9 @@ export const useNoteUIHelper = () => {
                 note.description?.trim() ||
                 (note.tags && note.tags.length > 0) ||
                 note.type;
-            setHasUnsavedChanges(!!hasContent);
+            setNoteHasChanges(!!hasContent);
         } else {
-            setHasUnsavedChanges(false);
+            setNoteHasChanges(false);
         }
 
         setIsDialogOpen(true);
@@ -44,7 +44,7 @@ export const useNoteUIHelper = () => {
         setTimeout(() => {
             setSelectedNote(null);
             originalNoteRef.current = null;
-            setHasUnsavedChanges(false);
+            setNoteHasChanges(false);
         }, 200); // After animation
     };
 
@@ -66,7 +66,7 @@ export const useNoteUIHelper = () => {
         // If this was a new note and now has an ID, update the original reference
         if (wasNewNote && isNowSaved) {
             originalNoteRef.current = { ...updated };
-            setHasUnsavedChanges(false);
+            setNoteHasChanges(false);
             setSelectedNote(updated);
             return;
         }
@@ -87,7 +87,7 @@ export const useNoteUIHelper = () => {
                 hasContent,
             });
 
-            setHasUnsavedChanges(!!hasContent);
+            setNoteHasChanges(!!hasContent);
         } else {
             // For existing notes, compare with original
             if (originalNoteRef.current) {
@@ -117,7 +117,7 @@ export const useNoteUIHelper = () => {
                     checkedFields: fieldsToCheck,
                 });
 
-                setHasUnsavedChanges(hasChanges);
+                setNoteHasChanges(hasChanges);
             }
         }
 
@@ -127,21 +127,21 @@ export const useNoteUIHelper = () => {
     const markAsSaved = () => {
         if (selectedNote) {
             originalNoteRef.current = { ...selectedNote };
-            setHasUnsavedChanges(false);
+            setNoteHasChanges(false);
         }
     };
 
     const resetChanges = () => {
         if (originalNoteRef.current) {
             setSelectedNote({ ...originalNoteRef.current });
-            setHasUnsavedChanges(false);
+            setNoteHasChanges(false);
         }
     };
 
     return {
         selectedNote,
         isDialogOpen,
-        hasUnsavedChanges,
+        noteHasChanges,
         openDialog,
         closeDialog,
         updateSelectedNote,

@@ -16,8 +16,8 @@ export const useNoteGridHelper = () => {
         setSelectedNote,
         isDialogOpen,
         setIsDialogOpen,
-        hasUnsavedChanges,
-        setHasUnsavedChanges,
+        noteHasChanges,
+        setNoteHasChanges,
         originalNoteRef,
     } = useNoteUIStore();
 

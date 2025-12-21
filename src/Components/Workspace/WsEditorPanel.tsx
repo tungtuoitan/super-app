@@ -17,7 +17,7 @@ interface WsEditorPanelProps {
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { hasUnsavedChanges } = useWsUIStore();
+    const { wsHasChanges } = useWsUIStore();
     const { setSelectedWorkspace } = useWsUIHelper();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
@@ -35,10 +35,10 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
     useEffect(() => {
         setOpenTabs((prev: BaseTab[]) => prev.map(t => 
             t.id === tab.id 
-                ? { ...t, hasUnsavedChanges }
+                ? { ...t, hasUnsavedChanges: wsHasChanges }
                 : t
         ));
-    }, [hasUnsavedChanges, tab.id]);
+    }, [wsHasChanges, tab.id]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {

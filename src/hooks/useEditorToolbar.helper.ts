@@ -27,7 +27,7 @@ interface EditorToolbarActions {
     handleUndo: () => Promise<void>;
     
     // States
-    hasUnsavedChanges: boolean;
+    anyHasChanges: boolean;
     isSaving: boolean;
     isUndoing: boolean;
     
@@ -41,13 +41,13 @@ export const useEditorToolbarHelper = (tab: BaseTab | null): EditorToolbarAction
     const { setOpenTabs } = useEditorTabsStore();
     
     // Note-specific
-    const { selectedNote, hasUnsavedChanges: noteHasChanges } = useNoteUIStore();
+    const { selectedNote, noteHasChanges } = useNoteUIStore();
     
     const { saveNote, cancelChanges } = useEditorActionsHelper();
     const { loadNotes } = useNoteGridHelper();
     
     // Workspace-specific
-    const { selectedWorkspace, hasUnsavedChanges: wsHasChanges } = useWsUIStore();
+    const { selectedWorkspace, wsHasChanges } = useWsUIStore();
     const { resetWorkspace } = useWsUIHelper();
     const { loadWorkspaces } = useWsListHelper();
     const { _upsertWs } = require('@/services/ws.service');
@@ -55,10 +55,10 @@ export const useEditorToolbarHelper = (tab: BaseTab | null): EditorToolbarAction
     const [isSaving, setIsSaving] = useState(false);
     const [isUndoing, setIsUndoing] = useState(false);
 
-    // Determine which entity's state to use based on tab type
-    const hasUnsavedChanges = tab?.type === 'note' ? noteHasChanges : 
-                              tab?.type === 'workspace' ? wsHasChanges : 
-                              false;
+    // Determine if any entity has unsaved changes based on tab type
+    const anyHasChanges = tab?.type === 'note' ? noteHasChanges : 
+                          tab?.type === 'workspace' ? wsHasChanges : 
+                          false;
 
     // Get status text based on tab type and deletion state
     const statusText = (() => {
@@ -199,7 +199,7 @@ export const useEditorToolbarHelper = (tab: BaseTab | null): EditorToolbarAction
         handleSave,
         handleCancel,
         handleUndo,
-        hasUnsavedChanges,
+        anyHasChanges,
         isSaving,
         isUndoing,
         statusText,

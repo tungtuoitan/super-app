@@ -17,7 +17,7 @@ import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { transformNoteData } from '@/utils/note.utils';
 
 export const useEditorActionsHelper = () => {
-    const { selectedNote, hasUnsavedChanges } = useNoteUIStore();
+    const { selectedNote, noteHasChanges } = useNoteUIStore();
     const { setSelectedNote, markAsSaved, resetChanges } = useNoteUIHelper();
     const { updateTabNote, markTabAsChanged } = useEditorTabHelper();
     const { loadNotes } = useNoteGridHelper();
@@ -144,13 +144,13 @@ export const useEditorActionsHelper = () => {
      * Mark tab as changed based on hasUnsavedChanges state
      */
     const syncTabChangeState = (tabId: string) => {
-        markTabAsChanged(tabId, hasUnsavedChanges);
+        markTabAsChanged(tabId, noteHasChanges);
     }
 
     return {
         saveNote,
         cancelChanges,
         syncTabChangeState,
-        hasUnsavedChanges,
+        noteHasChanges,
     };
 };
