@@ -4,11 +4,11 @@ import {useNoteUIStore} from '@/store/note/useNoteUI.store';
 import { Note } from '@/types/note.types';
 import {collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotesData} from '../utils';
 import {useEffect} from 'react';
-import {useContextMenuStore} from '../store';
+import {useContextMenuStore, useEditorTabsStore} from '../store';
 import {useSnackbar} from 'notistack';
 import {useEditorTabHelper} from './useEditorTab.helper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
-import {useEditorTabsStore} from '@/store/editor/EditorTab.store';
+import {BaseTab} from '@/types/editor/tab.types';
 
 export const useNoteGridHelper = () => {
     const {
@@ -121,7 +121,7 @@ export const useNoteGridHelper = () => {
                 });
 
                 // Mark opened tabs as deleted instead of closing them
-                const updatedTabs = openTabs.map(tab => {
+                const updatedTabs = openTabs.map((tab: BaseTab) => {
                     if (tab.type === 'note' && persistedNoteIds.includes(tab.data.id)) {
                         return { ...tab, isDeleted: true };
                     }

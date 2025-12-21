@@ -1,9 +1,11 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import { X } from 'lucide-react'
-import { useEditorTabsStore, NoteEditorPanel, ConfirmCloseDialog } from '@/Components/Editor'
+import { NoteEditorPanel, ConfirmCloseDialog, EditorToolbar } from '@/Components/Editor'
 import {useEditorTabHelper} from '@/hooks/useEditorTab.helper'
 import {useNoteUIStore} from '@/store/note/useNoteUI.store'
 import { WsEditorPanel } from '@/Components/Workspace'
+import {useEditorTabsStore} from '@/store/index'
+import {BaseTab} from '@/types/editor/tab.types'
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -16,6 +18,9 @@ export function VSEditorArea() {
   const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
   const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
   const { selectedNote, setSelectedNote } = useNoteUIStore()
+
+  // Get active tab
+  const activeTab = activeTabId ? getTabById(activeTabId) : null
 
   const handleCloseTab = (event: React.MouseEvent, tabId: string) => {
     event.stopPropagation()
@@ -33,17 +38,13 @@ export function VSEditorArea() {
     setConfirmCloseTabId(null)
   }
 
-  // Get active tab
-  const activeTab = activeTabId ? getTabById(activeTabId) : null
-
-
   return (
     <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
       {/* Tab bar */}
       <div className="min-h-[35px] flex items-start border-b border-editor-border bg-editor-sidebar">
         {openTabs.length > 0 ? (
           <div className="flex-1 flex flex-wrap">
-            {openTabs.map((tab) => {
+            {openTabs.map((tab: BaseTab) => {
               const isDeleted = tab.type === 'note' && tab.isDeleted;
               return (
                 <button
@@ -62,7 +63,7 @@ export function VSEditorArea() {
                   <span className={`text-[13px] whitespace-nowrap ${
                     isDeleted ? 'text-red-500 line-through' : ''
                   }`}>
-                    {tab.title}
+                    {tab.title.length > 40 ? tab.title.slice(0, 17) + '...' : tab.title}
                     {tab.hasUnsavedChanges && ' ●'}
                     {isDeleted && ' [Deleted]'}
                   </span>
@@ -84,6 +85,11 @@ export function VSEditorArea() {
           </div>
         )}
       </div>
+
+      {/* Shared Toolbar */}
+      {activeTab && (
+        <EditorToolbar />
+      )}
 
       {/* Main content area */}
       <div className="flex-1 overflow-hidden flex">

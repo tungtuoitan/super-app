@@ -1,8 +1,8 @@
 import {Note} from "@/types/note.types";
-import {useEditorTabsStore} from "../store/editor/EditorTab.store";
 import {useNoteUIStore} from "../store/note/useNoteUI.store";
 import {useNoteGridPanelStore} from "../store/note/useNoteGridPanel.store";
-import {EditorTab} from "@/types/editor/tab.types";
+import {BaseTab} from "@/types/editor/tab.types";
+import {useEditorTabsStore} from "../store";
 
 
 export const useEditorTabHelper = () => {
@@ -33,7 +33,7 @@ export const useEditorTabHelper = () => {
         setActiveTabId(newActiveTabId);
         
         if (newActiveTabId) {
-            const activeTab = tabsToSearch.find(tab => tab.id === newActiveTabId);
+            const activeTab = tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId);
             console.log('🔍 Found active tab:', activeTab);
             
             if (activeTab?.type === 'note') {
@@ -67,7 +67,7 @@ export const useEditorTabHelper = () => {
         
         // Check if tab already exists for this note
         const existingTab = openTabs.find(
-            tab => tab.type === 'note' && (tab.data as Note).id === note.id
+            (tab: BaseTab) => tab.type === 'note' && (tab.data as Note).id === note.id
         );
 
         if (existingTab) {
@@ -76,7 +76,7 @@ export const useEditorTabHelper = () => {
             updateActiveTabIdAndSelectedNote(existingTab.id);
         } else {
             // Create new tab
-            const newTab: EditorTab = {
+            const newTab: BaseTab = {
                 id: `note-${note.id}-${Date.now()}`,
                 type: 'note',
                 data: note,
@@ -96,7 +96,7 @@ export const useEditorTabHelper = () => {
     }
 
     const closeTab = (tabId: string, force = false) => {
-        const tab = openTabs.find(t => t.id === tabId);
+        const tab = openTabs.find((t: BaseTab) => t.id === tabId);
         
         // If tab has unsaved changes and not forcing close, show confirm dialog
         // if (tab?.hasUnsavedChanges && !force) {
@@ -114,7 +114,7 @@ export const useEditorTabHelper = () => {
         }
 
         // Filter out the closed tab
-        const newTabs = openTabs.filter(t => t.id !== tabId);
+        const newTabs = openTabs.filter((t: BaseTab) => t.id !== tabId);
         setOpenTabs(newTabs);
 
         // If closing active tab, switch to another tab
@@ -130,7 +130,7 @@ export const useEditorTabHelper = () => {
     }
 
     const handleSetActiveTab = (tabId: string) => {
-        const tab = openTabs.find(t => t.id === tabId);
+        const tab = openTabs.find((t: BaseTab) => t.id === tabId);
         if (tab) {
             updateActiveTabIdAndSelectedNote(tabId);
         }
@@ -138,7 +138,7 @@ export const useEditorTabHelper = () => {
 
     const closeAllTabs = () => {
         // Check if any tab has unsaved changes
-        const hasUnsavedChanges = openTabs.some(tab => tab.hasUnsavedChanges);
+        const hasUnsavedChanges = openTabs.some((tab: BaseTab) => tab.hasUnsavedChanges);
         
         if (hasUnsavedChanges) {
             // TODO: Show confirm dialog for all tabs
@@ -151,8 +151,8 @@ export const useEditorTabHelper = () => {
     }
 
     const markTabAsChanged = (tabId: string, hasChanges: boolean) => {
-        setOpenTabs(prev => 
-            prev.map(tab => 
+        setOpenTabs((prev: BaseTab[]) => 
+            prev.map((tab: BaseTab) => 
                 tab.id === tabId 
                     ? { ...tab, hasUnsavedChanges: hasChanges }
                     : tab
@@ -161,13 +161,13 @@ export const useEditorTabHelper = () => {
     }
 
     const getTabById = (tabId: string) => {
-        return openTabs.find(tab => tab.id === tabId);
+        return openTabs.find((tab: BaseTab) => tab.id === tabId);
     };
 
     const updateTabNote = (tabId: string, note: Note) => {
         console.log('🔄 EditorTabContext - updateTabNote:', { tabId, note });
-        setOpenTabs(prev =>
-            prev.map(tab => {
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((tab: BaseTab) => {
                 if (tab.id === tabId && tab.type === 'note') {
                     return {
                         ...tab,

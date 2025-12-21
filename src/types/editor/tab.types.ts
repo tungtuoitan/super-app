@@ -34,9 +34,7 @@ export interface BaseTab {
     isDeleted?: boolean;  // Flag to indicate note has been deleted
 }
 
-export type EditorTab = BaseTab;
-
-export interface EditorState {
-    openTabs: EditorTab[];
+    export interface EditorState {
+    openTabs: BaseTab[];
     activeTabId: string | null;
 }

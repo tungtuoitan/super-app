@@ -10,10 +10,9 @@ export { DialogStore, DialogProvider, useDialogStore } from './dialog/Dialog.sto
 export type { DialogContextData } from './dialog/Dialog.store';
 
 export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from './editor/EditorTab.store';
-export type { EditorTabContextData } from './editor/EditorTab.store';
 
 export { NoteTabStore, NoteTabProvider, useNoteTabStore } from './note/useNoteTab.store';
-export type { NoteTabContextData, TabItem } from './note/useNoteTab.store';
+export type { NoteTabContextData } from './note/useNoteTab.store';
 
 export { ContextMenuStore, ContextMenuStoreProvider, useContextMenuStore } from './contextMenu/ContextMenu.store';
 export type { ContextMenuStoreData, ContextMenuPosition, ContextMenuType } from './contextMenu/ContextMenu.store';

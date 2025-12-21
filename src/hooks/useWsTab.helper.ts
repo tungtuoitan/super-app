@@ -4,8 +4,8 @@
  */
 
 import { Ws } from '@/store/ws/useWsList.store';
-import { useEditorTabsStore } from '@/Components/Editor';
-import { EditorTab } from '@/types/editor/tab.types';
+import { BaseTab } from '@/types/editor/tab.types';
+import {useEditorTabsStore} from '../store';
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -29,7 +29,7 @@ export const useWsTabHelper = () => {
             setActiveTabId(existingTab.id);
         } else {
             // Create new workspace tab
-            const newTab: EditorTab = {
+            const newTab: BaseTab = {
                 id: `workspace-tab-${workspace.id}-${Date.now()}`,
                 type: 'workspace',
                 data: workspace,
@@ -91,7 +91,7 @@ export const useWsTabHelper = () => {
      * Mark workspace tab as having unsaved changes
      */
     const markWorkspaceTabUnsaved = (tabId: string, hasChanges: boolean) => {
-        setOpenTabs(prev => prev.map(tab => 
+        setOpenTabs((prev: BaseTab[]) => prev.map(tab => 
             tab.id === tabId ? { ...tab, hasUnsavedChanges: hasChanges } : tab
         ));
     };

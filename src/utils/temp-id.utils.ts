@@ -6,7 +6,7 @@
  * Names: Unsaved-1, Unsaved-2, Unsaved-3, ...
  */
 
-import type { EditorTab } from '@/types/editor/tab.types';
+import type { BaseTab } from '@/types/editor/tab.types';
 import type { Note } from '@/types/note.types';
 import type { Ws } from '@/store/ws/useWsList.store';
 
@@ -14,7 +14,7 @@ import type { Ws } from '@/store/ws/useWsList.store';
  * Collect all IDs from open tabs
  * Extracts id from data field of all tab types
  */
-export const collectIdsFromTabs = (openTabs: EditorTab[]): number[] => {
+export const collectIdsFromTabs = (openTabs: BaseTab[]): number[] => {
     const ids: number[] = [];
     
     openTabs.forEach(tab => {

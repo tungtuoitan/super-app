@@ -2,7 +2,7 @@
  * Editor Feature Public Exports
  */
 
-export { EditorTabProvider, useEditorTabsStore } from '../../store/editor/EditorTab.store';
 export { NoteEditorPanel } from './NoteEditorPanel';
+export { EditorToolbar } from './EditorToolbar';
 export { ConfirmCloseDialog } from './ConfirmCloseDialog';
-export type { EditorTab, TabType } from '../../types/editor/tab.types';
+export type {TabType } from '../../types/editor/tab.types';

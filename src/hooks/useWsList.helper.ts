@@ -9,8 +9,9 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useSnackbar } from 'notistack';
 import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
 import { useWsTabHelper } from './useWsTab.helper';
-import { useEditorTabsStore } from '@/Components/Editor';
 import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
+import {BaseTab} from '@/types/editor/tab.types';
+import {useEditorTabsStore} from '../store';
 
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
@@ -112,7 +113,7 @@ export const useWsListHelper = () => {
             });
 
             // Mark opened workspace tabs as deleted instead of closing them
-            const updatedTabs = openTabs.map(tab => {
+            const updatedTabs = openTabs.map((tab: BaseTab) => {
                 if (tab.type === 'workspace' && selectedIds.includes((tab as any).workspaceId)) {
                     return { ...tab, isDeleted: true };
                 }

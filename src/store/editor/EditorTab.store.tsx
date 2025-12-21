@@ -5,11 +5,11 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback } from 'react';
-import type { EditorTab, TabViewState } from '../../types/editor/tab.types';
+import type { BaseTab, TabViewState } from '../../types/editor/tab.types';
 
 export interface EditorTabContextData {
-    openTabs: EditorTab[];
-    setOpenTabs: Dispatch<SetStateAction<EditorTab[]>>;
+    openTabs: BaseTab[];
+    setOpenTabs: Dispatch<SetStateAction<BaseTab[]>>;
     activeTabId: string | null;
     setActiveTabId: Dispatch<SetStateAction<string | null>>;
     confirmCloseTabId: string | null;
@@ -30,7 +30,7 @@ export const EditorTabStore = createContext<EditorTabContextData>(editorTabConte
 export const useEditorTabsStore = () => useContext(EditorTabStore);
 
 export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [openTabs, setOpenTabs] = useState<EditorTab[]>([]);
+    const [openTabs, setOpenTabs] = useState<BaseTab[]>([]);
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
     const [confirmCloseTabId, setConfirmCloseTabId] = useState<string | null>(null);
 
