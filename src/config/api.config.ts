@@ -22,7 +22,7 @@ const getBaseUrl = (): string => {
         return '';
     } else {
         // Use local API URL for development
-        return process.env.REACT_APP_PRO_API_URL || process.env.REACT_APP_LOCAL_API_URL || 'http://localhost:5000';
+        return process.env.REACT_APP_LOCAL_API_URL || 'http://localhost:5000';
     }
 };
 
