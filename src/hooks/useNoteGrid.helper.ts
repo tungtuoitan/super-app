@@ -78,9 +78,15 @@ export const useNoteGridHelper = () => {
         try {
             setIsLoading(true);
             const token = storageService.getString('token');
-            const data = await _getNotes(token??'', { getAll: true });
+            const result = await _getNotes(token??'', { getAll: true });
+            
+            // Check API response success
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to load notes');
+            }
+            
             // Transform dates from API strings to Date objects
-            const transformedData = transformNotesData(data);
+            const transformedData = transformNotesData(result.data || []);
             setNotes(transformedData);
             setError(null);
         } catch (err) {
@@ -115,7 +121,12 @@ export const useNoteGridHelper = () => {
             if (persistedNoteIds.length > 0) {
                 const token = storageService.getString('token') || '';
                 // Send comma-separated IDs to backend
-                await _deleteNote(token, persistedNoteIds.join(','));
+                const result = await _deleteNote(token, persistedNoteIds.join(','));
+                
+                // Check API response success
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to delete notes');
+                }
 
                 enqueueSnackbar(`Successfully deleted ${persistedNoteIds.length} note(s)`, {
                     variant: 'success'

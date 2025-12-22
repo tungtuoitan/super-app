@@ -106,14 +106,20 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                 if (!selectedWorkspace) return;
 
                 const token = storageService.getString('token') || '';
-                const savedWorkspace = await _upsertWs(token, {
+                const result = await _upsertWs(token, {
                     id: selectedWorkspace.id > 0 ? selectedWorkspace.id : null,
                     name: selectedWorkspace.name,
                     description: selectedWorkspace.description,
                     userId: selectedWorkspace.userId,
                 });
 
-                if (savedWorkspace) {
+                // Check API response success
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to save workspace');
+                }
+
+                if (result.object) {
+                    const savedWorkspace = result.object;
                     const updatedWorkspace: Ws = {
                         id: savedWorkspace.id,
                         name: savedWorkspace.name,
@@ -165,7 +171,12 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
             const token = storageService.getString('token') || '';
 
             if (tab.type === constants.tabTypes.note && selectedNote) {
-                await _undoDeleteNote(token, selectedNote.id);
+                const result = await _undoDeleteNote(token, selectedNote.id);
+                
+                // Check API response success
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to restore note');
+                }
 
                 // Update tab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>
@@ -179,7 +190,10 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
                 enqueueSnackbar('Note restored successfully', { variant: 'success' });
             } else if (tab.type === constants.tabTypes.workspace && selectedWorkspace) {
-                await _undoDeleteWs(token, selectedWorkspace.id);
+                const result = await _undoDeleteWs(token, selectedWorkspace.id);
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to restore workspace');
+                }
 
                 // Update tab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>

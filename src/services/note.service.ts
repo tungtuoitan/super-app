@@ -66,13 +66,7 @@ export const _getNotes = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<NoteDTO>;
-        
-        // Unwrap ResultOptions and return data array
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to fetch notes');
-        }
-        
-        return result.data || [];
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -105,12 +99,7 @@ export const _getNoteById = async (noteId: number) => {
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<NoteDTO>;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to fetch note');
-        }
-        
-        return result.object; // Single object from 'object' field
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -155,12 +144,7 @@ export const _upsertNote = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<NoteDTO>;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to upsert note');
-        }
-        
-        return result.object; // Single object from 'object' field
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -202,12 +186,7 @@ export const _createNote = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<NoteDTO>;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to create note');
-        }
-        
-        return result.object; // Single object from 'object' field
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -253,12 +232,7 @@ export const _updateNote = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<NoteDTO>;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to update note');
-        }
-        
-        return result.object; // Single object from 'object' field
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -294,12 +268,7 @@ export const _deleteNote = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to delete note');
-        }
-        
-        return; // No data returned for delete
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -335,12 +304,7 @@ export const _undoDeleteNote = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to restore note');
-        }
-        
-        return; // No data returned for undo
+        return result;
     } else {
         return Promise.reject(res);
     }

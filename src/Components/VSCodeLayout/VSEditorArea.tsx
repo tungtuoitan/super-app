@@ -46,7 +46,7 @@ export function VSEditorArea() {
         {openTabs.length > 0 ? (
           <div className="flex-1 flex flex-wrap">
             {openTabs.map((tab: BaseTab) => {
-              const isDeleted = tab.type === constants.tabTypes.note && tab.isDeleted;
+              const isDeleted = tab.isDeleted;
               return (
                 <button
                   key={tab.id}

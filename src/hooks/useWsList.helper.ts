@@ -51,10 +51,15 @@ export const useWsListHelper = () => {
         try {
             setIsLoading(true);
             const token = storageService.getString('token');
-            const data = await _getWsList(token ?? '', { getAll: true });
+            const result = await _getWsList(token ?? '', { getAll: true });
+            
+            // Check API response success
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to load workspaces');
+            }
             
             // Transform dates from API strings to Date objects
-            const transformedData = transformWsData(data);
+            const transformedData = transformWsData(result.data || []);
             setWorkspaces(transformedData);
             setError(null);
         } catch (err) {
@@ -64,6 +69,35 @@ export const useWsListHelper = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    /**
+     * Sync workspace grid changes to open tabs
+     * @param action - The action performed on workspaces ('delete', 'restore', etc.)
+     * @param workspaceIds - Array of workspace IDs affected
+     */
+    const syncWsGridToTab = (action: 'delete' | 'restore', workspaceIds: number[]) => {
+        if (workspaceIds.length === 0) return;
+
+        //* LOGIC: data trong Tab luôn là data cũ (tức là data mà user đang thao tác), k sync với db, nó chỉ sync những gì user thao tác
+        const updatedTabs = openTabs.map((tab: BaseTab) => {
+            if (tab.type === constants.tabTypes.workspace && workspaceIds.includes((tab as any).workspaceId)) {
+                switch (action) {
+                    case 'delete':
+                        // Mark tab as deleted instead of closing it
+                        return { ...tab, isDeleted: true };
+                    case 'restore':
+                        // Remove deleted flag when restoring
+                        return { ...tab, isDeleted: false };
+                    default:
+                        return tab;
+                }
+            }
+            return tab;
+        });
+
+        setOpenTabs(updatedTabs);
+        console.log(`🔄 Synced ${action} action for ${workspaceIds.length} workspace(s) to tabs`);
     };
 
     /**
@@ -106,24 +140,26 @@ export const useWsListHelper = () => {
             const token = storageService.getString('token') || '';
             
             // Send comma-separated IDs to backend
-            await _deleteWs(token, selectedIds.join(','), isHardDelete);
+            const result = await _deleteWs(token, selectedIds.join(','), isHardDelete);
 
-            const action = isHardDelete ? 'permanently deleted' : 'deleted';
-            enqueueSnackbar(`Successfully ${action} ${selectedIds.length} workspace(s)`, {
-                variant: 'success'
-            });
-
-            // Mark opened workspace tabs as deleted instead of closing them
-            const updatedTabs = openTabs.map((tab: BaseTab) => {
-                if (tab.type === constants.tabTypes.workspace && selectedIds.includes((tab as any).workspaceId)) {
-                    return { ...tab, isDeleted: true };
+            // Check API response success
+            if (result.success) {
+                const action = isHardDelete ? 'permanently deleted' : 'deleted';
+                enqueueSnackbar(`Successfully ${action} ${selectedIds.length} workspace(s)`, {
+                    variant: 'success'
+                });
+                // ✅ Chỉ sync tabs khi delete API thành công
+                if (selectedIds.length > 0) {
+                    syncWsGridToTab('delete', selectedIds);
                 }
-                return tab;
-            });
-            setOpenTabs(updatedTabs);
+    
+                // Clear selection and reload workspaces
+                setRowSelection({});
+            }
+            else {
+                throw new Error(result.message || 'Failed to delete workspace(s)');
+            }
 
-            // Clear selection and reload workspaces
-            setRowSelection({});
             await loadWorkspaces();
         } catch (error) {
             console.error('Failed to delete workspaces:', error);
@@ -141,11 +177,19 @@ export const useWsListHelper = () => {
             const token = storageService.getString('token') || '';
             
             // Send comma-separated IDs to backend
-            await _undoDeleteWs(token, ids.join(','));
+            const result = await _undoDeleteWs(token, ids.join(','));
+
+            // Check API response success
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to restore workspace(s)');
+            }
 
             enqueueSnackbar(`Successfully restored ${ids.length} workspace(s)`, {
                 variant: 'success'
             });
+
+            // Sync workspace grid changes to open tabs (restore)
+            syncWsGridToTab('restore', ids);
 
             // Reload workspaces to show restored items
             await loadWorkspaces();
@@ -218,6 +262,7 @@ export const useWsListHelper = () => {
         loadWorkspaces,
         createNewWorkspace,
         handleDeleteSelected,
+        syncWsGridToTab,
         handleUndoDelete,
         openContextMenu,
         formatDateTime,

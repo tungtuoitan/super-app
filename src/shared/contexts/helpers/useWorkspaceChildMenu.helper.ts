@@ -68,7 +68,12 @@ export const useWorkspaceChildMenuHelper = () => {
 
             console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
 
-            await _deleteNote(token ?? '', noteData.id.toString());
+            const result = await _deleteNote(token ?? '', noteData.id.toString());
+            
+            // Check API response success
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to delete note');
+            }
 
             console.log('✅ Successfully deleted note');
 

@@ -73,13 +73,7 @@ export const _getWsList = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<WsDTO>;
-        
-        // Unwrap ResultOptions and return data array
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to fetch workspaces');
-        }
-        
-        return result.data || [];
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -112,12 +106,7 @@ export const _getWsById = async (token: string, id: number) => {
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<WsDTO>;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to fetch workspace');
-        }
-        
-        return result.object; // Single object from 'object' field
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -160,12 +149,7 @@ export const _upsertWs = async (
 
     if (res.ok) {
         const result = await res.json() as ResultOptions<WsDTO>;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to upsert workspace');
-        }
-        
-        return result.object; // Single object from 'object' field
+        return result;
     } else {
         return Promise.reject(res);
     }
@@ -205,13 +189,8 @@ export const _deleteWs = async (
     );
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to delete workspace(s)');
-        }
-        
-        return; // No data returned for delete
+        const ret = await res.json();
+        return ret;
     } else {
         return Promise.reject(res);
     }
@@ -246,13 +225,8 @@ export const _undoDeleteWs = async (
     );
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions;
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to restore workspace(s)');
-        }
-        
-        return; // No data returned for undo
+        const ret = await res.json();
+        return ret;
     } else {
         return Promise.reject(res);
     }

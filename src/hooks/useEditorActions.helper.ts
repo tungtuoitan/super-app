@@ -54,7 +54,14 @@ export const useEditorActionsHelper = () => {
             };
 
             console.log(`📝 ${isCreateMode ? 'Creating' : 'Updating'} note with data:`, upsertData);
-            const savedNote = await _upsertNote(token, upsertData);
+            const result = await _upsertNote(token, upsertData);
+            
+            // Check API response success
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to save note');
+            }
+            
+            const savedNote = result.object;
             console.log('✅ Note saved successfully:', savedNote);
 
             if (!savedNote) {
