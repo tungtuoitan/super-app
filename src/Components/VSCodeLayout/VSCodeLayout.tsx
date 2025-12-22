@@ -7,6 +7,7 @@ import { VSPanel } from './VSPanel'
 import { StatusBar } from './StatusBar' 
 import {VSEditorArea} from './VSEditorArea'
 import { useNavigationStore } from '@/contexts/NavigationContext'
+import { useActivityBarStore } from '@/store/index'
 
 interface VSCodeLayoutProps {
   className?: string
@@ -42,7 +43,7 @@ interface VSCodeLayoutProps {
  */
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
   const { activeView } = useNavigationStore()
-  const [isSideBarVisible, setIsSideBarVisible] = useState(true)
+  const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore()
   const [isPanelVisible, setIsPanelVisible] = useState(true)
 
   return (
@@ -56,10 +57,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
       {/* Main content area with resizable panels */}
       <div className="flex-1 flex overflow-hidden">
         {/* Activity Bar - Fixed width, no resize */}
-        <ActivityBar 
-          isSideBarVisible={isSideBarVisible}
-          onToggleSideBar={() => setIsSideBarVisible(!isSideBarVisible)}
-        />
+        <ActivityBar />
 
         {/* Horizontal PanelGroup: SideBar | Editor+Panel */}
         <PanelGroup 

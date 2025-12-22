@@ -46,7 +46,7 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
       {isVisible && (
         <GridControlProvider>
           {/* Use a vertical PanelGroup to split the sidebar into two stacked panels */}
-          <PanelGroup direction="vertical" className="h-full">
+          <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
             {/* Top panel: original sidebar content */}
             <Panel defaultSize={70} minSize={20}>
               <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">

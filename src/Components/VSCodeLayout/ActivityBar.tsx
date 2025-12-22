@@ -1,20 +1,15 @@
-import { useState } from 'react'
-import { Folder, FileText, Settings, Boxes } from 'lucide-react'
+import { Folder, FileText, Settings, Boxes, UserCircle } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/Components/ui/tooltip'
-import {SettingsDialog} from './SettingsDialog'
-import { useNavigationStore } from '@/contexts/NavigationContext'
-import type { ActivityBarView } from '@/config/routes'
+import { SettingsDialog } from './SettingsDialog'
+import { AccountsDialog } from './AccountsDialog'
 import { constants } from '@/utils/constants'
-
-interface ActivityBarProps {
-  isSideBarVisible: boolean
-  onToggleSideBar: () => void
-}
+import { useActivityBarStore } from '@/store/index'
+import { useActivityBarHelper } from '@/hooks/useActivityBar.helper'
 
 const activities = [
   { id: 'workspaceList' as const, icon: Boxes, label: 'WorkspaceList' },
@@ -22,23 +17,16 @@ const activities = [
   { id: constants.viewTypes.note, icon: FileText, label: constants.displayNames.notes },
 ]
 
-export function ActivityBar({ isSideBarVisible, onToggleSideBar }: ActivityBarProps) {
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const { activeView, navigateToView } = useNavigationStore()
+export function ActivityBar() {
+  const {
+    setAccountsOpen,
+    setSettingsOpen,
+  } = useActivityBarStore()
 
-  const handleActivityClick = (view: ActivityBarView) => {
-    // Do nothing if clicking the already active view
-    if (activeView === view) {
-      return
-    }
-    
-    // Navigate to different view
-    navigateToView(view)
-    // Ensure sidebar is visible when switching views
-    if (!isSideBarVisible) {
-      onToggleSideBar()
-    }
-  }
+  const {
+    activeView,
+    handleActivityClick,
+  } = useActivityBarHelper()
 
   return (
     <>
@@ -73,6 +61,25 @@ export function ActivityBar({ isSideBarVisible, onToggleSideBar }: ActivityBarPr
           </TooltipProvider>
         </div> 
 
+        {/* Accounts at bottom */}
+        <div className="pb-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setAccountsOpen(true)}
+                  className="w-12 h-12 rounded-none text-[#6a6a6a] hover:text-white hover:bg-transparent transition-colors"
+                >
+                  <UserCircle className="w-6 h-6 mx-auto" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Accounts</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
         {/* Settings at bottom */}
         <div className="pb-1">
           <TooltipProvider>
@@ -93,8 +100,11 @@ export function ActivityBar({ isSideBarVisible, onToggleSideBar }: ActivityBarPr
         </div>
       </div>
 
+      {/* Accounts Dialog */}
+      <AccountsDialog />
+
       {/* Settings Dialog */}
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <SettingsDialog />
     </>
   )
 }

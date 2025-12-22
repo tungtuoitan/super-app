@@ -13,8 +13,13 @@
 
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { _getAllUserWorkspaces, _getWorkspaceTree } from '@/services/workspace.service';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import { useSnackbar } from 'notistack';
 
 export const useWorkspaceOperation = () => {
+    const { auth } = useAuthStore();
+    const { enqueueSnackbar } = useSnackbar();
     const {
         allWorkspaces,
         setAllWorkspaces,
@@ -34,8 +39,7 @@ export const useWorkspaceOperation = () => {
         try {
             setIsLoadingWorkspaces(true);
             
-            // TODO: Get actual token from auth context
-            const token = localStorage.getItem('userToken') || 'dummy-token';
+            const token = auth.userToken;
             const data = await _getAllUserWorkspaces(token);
             
             console.log('📦 Loaded workspaces:', data);
@@ -66,8 +70,7 @@ export const useWorkspaceOperation = () => {
         try {
             setIsLoadingTree(true);
             
-            // TODO: Get actual token from auth context
-            const token = localStorage.getItem('userToken') || 'dummy-token';
+            const token = auth.userToken;
             const treeData = await _getWorkspaceTree(token, workspaceId);
             
             console.log('🌳 Loaded tree for workspace:', workspaceId, treeData);

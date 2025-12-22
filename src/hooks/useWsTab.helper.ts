@@ -7,9 +7,11 @@ import { Ws } from '@/store/ws/useWsList.store';
 import { BaseTab } from '@/types/editor/tab.types';
 import {useEditorTabsStore} from '../store';
 import { constants } from '@/utils/constants';
+import { useEditorTabHelper } from './useEditorTab.helper';
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
 
     /**
      * Open workspace in editor tab
@@ -27,7 +29,7 @@ export const useWsTabHelper = () => {
         if (existingTab) {
             // Tab already exists, just activate it
             console.log('🏢 WsTabHelper - Tab exists, activating:', existingTab.id);
-            setActiveTabId(existingTab.id);
+            updateActiveTabIdAndSelectedNote(existingTab.id);
         } else {
             // Create new workspace tab
             const newTab: BaseTab = {
@@ -39,8 +41,9 @@ export const useWsTabHelper = () => {
             };
 
             console.log('🏢 WsTabHelper - Creating new tab:', newTab);
-            setOpenTabs(prev => [...prev, newTab]);
-            setActiveTabId(newTab.id);
+            const newTabs = [...openTabs, newTab];
+            setOpenTabs(newTabs);
+            updateActiveTabIdAndSelectedNote(newTab.id, newTabs);
         }
     };
 

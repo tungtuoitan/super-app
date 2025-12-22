@@ -34,16 +34,16 @@ export function EditorToolbar() {
     useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault()
-        if (activeTab && _hasAnyChanges && !isSaving) {
-            handleSave()
-        }
+            e.preventDefault()
+            if (activeTab && _hasAnyChanges && !isSaving) {
+                handleSave()
+            }
         }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [activeTab, _hasAnyChanges, isSaving, handleSave])
+    }, [activeTab, _hasAnyChanges, isSaving])
 
     return (
         <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">

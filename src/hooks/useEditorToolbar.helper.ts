@@ -18,6 +18,9 @@ import { useEditorToolbarStore } from '@/store/editor/EditorToolbar.store';
 import { storageService } from '@/services/storage.service';
 import { _undoDeleteNote } from '@/services/note.service';
 import { _undoDeleteWs } from '@/services/ws.service';
+import { _upsertWs } from '@/services/ws.service';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import { useNoteGridHelper } from './useNoteGrid.helper';
 import { useWsListHelper } from './useWsList.helper';
 import { useWsUIHelper } from './useWsUI.helper';
@@ -40,6 +43,7 @@ interface EditorToolbarActions {
 }
 
 export const useEditorToolbarHelper = (): EditorToolbarActions => {
+    const { auth } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { activeTabId } = useEditorTabsStore();
     const { getTabById } = useEditorTabHelper();
@@ -56,10 +60,9 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { loadNotes } = useNoteGridHelper();
     
     // Workspace-specific
-    const { selectedWorkspace, wsHasChanges } = useWsUIStore();
+    const { selectedWorkspace, wsHasChanges, setSelectedWorkspace } = useWsUIStore();
     const { resetWorkspace } = useWsUIHelper();
     const { loadWorkspaces } = useWsListHelper();
-    const { _upsertWs } = require('@/services/ws.service');
 
     // Determine if any entity has unsaved changes based on tab type
     const _hasAnyChanges = activeTab?.type === constants.tabTypes.note ? noteHasChanges : 
@@ -105,7 +108,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                 // Workspace save logic
                 if (!selectedWorkspace) return;
 
-                const token = storageService.getString('token') || '';
+                const token = auth.userToken;
                 const result = await _upsertWs(token, {
                     id: selectedWorkspace.id > 0 ? selectedWorkspace.id : null,
                     name: selectedWorkspace.name,
@@ -154,6 +157,9 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                         return updatedTabs;
                     });
 
+                    // Update selectedWorkspace to sync with new data
+                    setSelectedWorkspace(updatedWorkspace);
+
                     // Reload workspace list
                     await loadWorkspaces();
 
@@ -162,7 +168,14 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
             }
         } catch (error) {
             console.error('Failed to save:', error);
-            enqueueSnackbar(`Failed to save ${activeTab.type}`, { variant: 'error' });
+            const errorMessage = await parseApiError(error);
+
+            // Show specific message for unauthorized
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to save ${activeTab.type}: ${errorMessage}`, { variant: 'error' });
+            }
         } finally {
             setIsSaving(false);
         }
@@ -185,7 +198,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
         setIsUndoing(true);
         try {
-            const token = storageService.getString('token') || '';
+            const token = auth.userToken;
 
             if (activeTab.type === constants.tabTypes.note && selectedNote) {
                 const result = await _undoDeleteNote(token, selectedNote.id);
@@ -226,7 +239,14 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
             }
         } catch (error) {
             console.error('Failed to restore:', error);
-            enqueueSnackbar(`Failed to restore ${activeTab.type}`, { variant: 'error' });
+            const errorMessage = await parseApiError(error);
+
+            // Show specific message for unauthorized
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to restore ${activeTab.type}: ${errorMessage}`, { variant: 'error' });
+            }
         } finally {
             setIsUndoing(false);
         }

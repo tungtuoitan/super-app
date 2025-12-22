@@ -17,6 +17,7 @@ import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Textarea } from '@/Components/ui/textarea';
 import { useKeyboardShortcut } from '@/shared/hooks';
+import { parseApiError } from '@/utils/api-error.utils';
 
 interface NoteDialogProps {
     isOpen: boolean;
@@ -61,7 +62,8 @@ export function NoteDialog({ isOpen, parentFolderName, onClose, onSubmit }: Note
             await onSubmit(noteName.trim(), description.trim());
             handleClose();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create note');
+            const errorMessage = await parseApiError(err);
+            setError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

@@ -5,6 +5,7 @@ import { TopNav } from '../TopNav';
 import { VSCodeLayout } from '../VSCodeLayout';
 import {useContextMenuHelper} from '@/hooks/useContextMenu.helper';
 import { APP_ROUTES } from '@/config/routes';
+import { AuthCallback } from '@/pages/AuthCallback';
 
 /**
  * Main navigation component.
@@ -55,6 +56,7 @@ export default function MainNav() {
                             <Route path={APP_ROUTES.WORKSPACE_LIST} element={<VSCodeLayout />} />
                             <Route path={APP_ROUTES.WORKSPACE} element={<VSCodeLayout />} />
                             <Route path={APP_ROUTES.NOTES} element={<VSCodeLayout />} />
+                            <Route path="/auth/callback" element={<AuthCallback />} />
                         </Routes>
                     </div>
                 </div>

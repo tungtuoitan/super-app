@@ -19,10 +19,10 @@ const getBaseUrl = (): string => {
     // Note: NODE_ENV is automatically set by React build process
     if (process.env.NODE_ENV === 'production') {
         // Use REACT_APP_PRO_API_URL for production (from .env.production)
-        return process.env.REACT_APP_PRO_API_URL || 'http://157.66.101.51:5000';
+        return '';
     } else {
         // Use local API URL for development
-        return process.env.REACT_APP_PRO_API_URL || process.env.REACT_APP_LOCAL_API_URL || 'http://localhost:5000';
+        return process.env.REACT_APP_LOCAL_API_URL || 'http://localhost:5000';
     }
 };
 
@@ -45,6 +45,7 @@ export const API_CONFIG = {
 export const API_ENDPOINTS = {
     auth: {
         login: '/auth/login',
+        googleLogin: '/api/auth/google/login',
         exchangeToken: '/auth/exchangeAuthorizationCodeForToken',
     },
     notes: {

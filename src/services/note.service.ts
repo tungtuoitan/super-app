@@ -80,11 +80,11 @@ export const _getNotes = async (
  * @param noteId - The note ID to retrieve
  * @returns Note details or rejects with response
  */
-export const _getNoteById = async (noteId: number) => {
+export const _getNoteById = async (token: string, noteId: number) => {
     const headers = new Headers();
-    // const bearer = `Bearer ${token}`;
+    const bearer = `Bearer ${token}`;
 
-    // headers.append("Authorization", bearer);
+    headers.append("Authorization", bearer);
     headers.append("Content-Type", "application/json");
 
     const options = {
@@ -139,94 +139,6 @@ export const _upsertNote = async (
 
     const res = await window.fetch(
         `${API_CONFIG.baseURL}/api/notes`,
-        options
-    );
-
-    if (res.ok) {
-        const result = await res.json() as ResultOptions<NoteDTO>;
-        return result;
-    } else {
-        return Promise.reject(res);
-    }
-};
-
-/**
- * Create new note (legacy - consider using _upsertNote instead)
- * POST /api/notes
- * 
- * @param token - Authentication token
- * @param data - Note creation data
- * @returns Created note or rejects with response
- */
-export const _createNote = async (
-    token: string,
-    data: {
-        name: string;
-        description?: string;
-        type?: string;
-        tags?: number[]; // Backend expects 'tags' in JSON (JsonPropertyName mapping to TagIds)
-    }
-) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    const options = {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(data),
-    };
-
-    const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/notes`,
-        options
-    );
-
-    if (res.ok) {
-        const result = await res.json() as ResultOptions<NoteDTO>;
-        return result;
-    } else {
-        return Promise.reject(res);
-    }
-};
-
-/**
- * Update existing note
- * PUT /api/notes/{noteId}
- * 
- * @param token - Authentication token
- * @param noteId - The note ID to update
- * @param data - Note update data
- * @returns Updated note or rejects with response
- */
-export const _updateNote = async (
-    token: string,
-    noteId: number,
-    data: {
-        noteId: number; // Backend expects noteId in the request body
-        name?: string;
-        description?: string;
-        type?: string;
-        tags?: number[]; // Backend expects 'tags' in JSON (JsonPropertyName mapping to TagIds)
-        isArchived?: boolean;
-    }
-) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    const options = {
-        method: "PUT",
-        headers: headers,
-        body: JSON.stringify(data),
-    };
-
-    const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/notes/${noteId}`,
         options
     );
 

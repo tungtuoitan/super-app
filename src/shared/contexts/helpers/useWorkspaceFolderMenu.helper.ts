@@ -13,8 +13,13 @@ import type { ItemType } from '@/store/explorer/FolderDialog.store';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import { useSnackbar } from 'notistack';
 
 export const useWorkspaceFolderMenuHelper = () => {
+    const { auth } = useAuthStore();
+    const { enqueueSnackbar } = useSnackbar();
     const {
         contextData,
         setIsContextMenuOpen,
@@ -144,7 +149,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // Delete all folders using workspace service
         const deleteItems = async () => {
             try {
-                const token = storageService.getString('token');
+                const token = auth.userToken;
 
                 // Map items with proper type codes (2=folder, 3=note, 4=file)
                 const deleteItems = foldersToDelete.map((f) => {
@@ -227,7 +232,12 @@ export const useWorkspaceFolderMenuHelper = () => {
                 }
             } catch (error) {
                 console.error('❌ Failed to delete folders:', error);
-                alert('Failed to delete folders. Please try again.');
+                const errorMessage = await parseApiError(error);
+                if (isUnauthorizedError(error)) {
+                    enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                } else {
+                    enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: 'error' });
+                }
             }
         };
 
@@ -325,7 +335,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // Delete all folders using workspace service
         const deleteItems = async () => {
             try {
-                const token = storageService.getString('token');
+                const token = auth.userToken;
 
                 // Map items with proper type codes
                 const deleteItems = foldersToDelete.map((f) => {
@@ -407,7 +417,12 @@ export const useWorkspaceFolderMenuHelper = () => {
                 }
             } catch (error) {
                 console.error('❌ Failed to bulk delete folders:', error);
-                alert('Failed to delete folders. Please try again.');
+                const errorMessage = await parseApiError(error);
+                if (isUnauthorizedError(error)) {
+                    enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                } else {
+                    enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: 'error' });
+                }
             }
         };
 

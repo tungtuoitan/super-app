@@ -35,6 +35,31 @@ export interface LoginResponse {
     userId?: number;
 }
 
+export interface AuthResponse {
+    success: boolean;
+    message: string;
+    user?: UserData;
+    error?: string;
+    expiresAt?: string;
+}
+
+export interface UserData {
+    id: number;
+    email?: string;
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    picture?: string;
+    authType: 'google' | 'local';
+    token: string;
+    tokenType: string;
+    fullName?: string;
+}
+
+export interface GoogleCodeRequest {
+    code: string;
+}
+
 export interface ExchangeTokenResponse {
     access_token: string;
     token_type?: string;
