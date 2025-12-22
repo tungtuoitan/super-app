@@ -25,3 +25,9 @@ export type { ExplorerContextData } from './explorer/Explorer.store';
 
 export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from './explorer/FolderDialog.store';
 export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from './explorer/FolderDialog.store';
+
+export { ActivityBarProvider, useActivityBarStore } from './activityBar/ActivityBar.store';
+export type { ActivityBarContextData } from './activityBar/ActivityBar.store';
+
+export { AuthCallbackProvider, useAuthCallbackStore } from './authCallback/AuthCallback.store';
+export type { AuthCallbackContextData } from './authCallback/AuthCallback.store';

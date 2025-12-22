@@ -4,5 +4,6 @@
  */
 
 export * from './apiClient';
-export * from './auth.api';
 export * from './notes.api';
+
+

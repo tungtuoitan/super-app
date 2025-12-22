@@ -2,17 +2,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Label } from '@/Components/ui/label'
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useActivityBarStore } from '@/store/index'
 
-interface SettingsDialogProps {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-}
-
-export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
+export function SettingsDialog() {
     const { theme, setTheme } = useTheme()
+    const { settingsOpen, setSettingsOpen } = useActivityBarStore()
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Settings</DialogTitle>

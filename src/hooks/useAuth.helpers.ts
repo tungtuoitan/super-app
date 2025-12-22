@@ -4,10 +4,13 @@
  * Pattern: Separate business logic from store (similar to useTagUIHelper)
  */
 
-import { authApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { storageService, STORAGE_KEYS } from '@/services/storage.service';
+import { authApi } from '@/services/auth.service';
 import type { LoginRequest, ExchangeTokenResponse } from '@/types/index';
+import { useNavigate } from 'react-router-dom';
+import { extractAuthCodeFromUrl, extractOAuthError } from '@/utils/googleOAuth';
+import { useAuthCallbackStore } from '@/store/authCallback/AuthCallback.store';
 
 /**
  * Auth helper hook for authentication operations
@@ -28,6 +31,10 @@ export function useAuthHelper() {
         setTokenExchangeError,
         setError 
     } = useAuthStore();
+
+    // Navigation and callback store for OAuth flows
+    const navigate = useNavigate();
+    const { setCallbackError, setIsProcessing } = useAuthCallbackStore();
 
     /**
      * Login with username and password
@@ -97,13 +104,13 @@ export function useAuthHelper() {
             // Save token to localStorage
             if (response.access_token) {
                 storageService.setString(STORAGE_KEYS.USER_TOKEN, response.access_token);
-                
+
                 // Update auth store
                 setAuth(prev => ({
                     ...prev,
                     userToken: response.access_token,
                 }));
-                
+
                 setIsAuthenticated(true);
             }
 
@@ -118,9 +125,90 @@ export function useAuthHelper() {
         }
     };
 
+    /**
+     * Login with Google authorization code
+     * Exchanges code for JWT token
+     */
+    const loginWithGoogleCode = async (code: string): Promise<void> => {
+        setLoginLoading(true);
+        setLoginError(null);
+        setError(null);
+
+        try {
+            const response = await authApi.googleLogin(code);
+
+            if (!response.success || !response.user) {
+                throw new Error(response.error || 'Google login failed');
+            }
+
+            // Save token to localStorage
+            storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
+
+            // Update auth store
+            setAuth({
+                userName: response.user.email || '',
+                password: '', // No password for OAuth users
+                userToken: response.user.token,
+            });
+
+            setIsAuthenticated(true);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Google login failed';
+            setLoginError(errorMessage);
+            setError(errorMessage);
+            throw err;
+        } finally {
+            setLoginLoading(false);
+        }
+    };
+
+    /**
+     * Handle OAuth callback for Google authentication
+     */
+    const handleOAuthCallback = async (): Promise<void> => {
+        try {
+            // Check for OAuth error
+            const oauthError = extractOAuthError(window.location.search);
+            if (oauthError) {
+                setCallbackError(`Authentication cancelled or failed: ${oauthError}`);
+                setIsProcessing(false);
+                return;
+            }
+
+            // Extract authorization code
+            const code = extractAuthCodeFromUrl(window.location.search);
+
+            if (!code) {
+                setCallbackError('No authorization code received from Google');
+                setIsProcessing(false);
+                return;
+            }
+
+            // Exchange code for JWT token
+            await loginWithGoogleCode(code);
+
+            // Navigate to home page on success
+            navigate('/', { replace: true });
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+            setCallbackError(errorMessage);
+            setIsProcessing(false);
+        }
+    };
+
+    /**
+     * Navigate to home page
+     */
+    const navigateToHome = (): void => {
+        navigate('/', { replace: true });
+    };
+
     return {
         login,
         logout,
         exchangeToken,
+        loginWithGoogleCode,
+        handleOAuthCallback,
+        navigateToHome,
     };
 }

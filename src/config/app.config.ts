@@ -11,7 +11,7 @@
 export const APP_CONFIG = {
     name: 'SuperApp',
     version: '0.1.0',
-    environment: process.env.REACT_APP_ENVIRONMENT || process.env.NODE_ENV || 'development',
+    environment: process.env.ENVIRONMENT || process.env.NODE_ENV || 'development',
     enableLogging: process.env.REACT_APP_ENABLE_LOGGING === 'true',
     enableDarkMode: process.env.REACT_APP_ENABLE_DARK_MODE === 'true',
 } as const;

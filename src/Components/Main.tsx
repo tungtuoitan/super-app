@@ -18,6 +18,8 @@ import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanel.store';
 import { NavProvider } from '@/contexts/NavigationContext';
 import { WsListProvider } from '@/store/ws/useWsList.store';
 import { WsUIProvider } from '@/store/ws/useWsUI.store';
+import { ActivityBarProvider } from '@/store/index'
+import { AuthCallbackProvider } from '@/store/index'
 
 
 /**
@@ -44,7 +46,9 @@ export function Main() {
     return (
         <BrowserRouter>
             <NavProvider>
-                <SnackbarProvider autoHideDuration={3000}>
+                <AuthCallbackProvider>
+                    <ActivityBarProvider>
+                    <SnackbarProvider autoHideDuration={3000}>
                     <DndProvider backend={HTML5Backend}>
                         <AuthStoreProvider>
                             <ExplorerProvider>
@@ -76,7 +80,9 @@ export function Main() {
                         </AuthStoreProvider>
                     </DndProvider>
                 </SnackbarProvider>
-            </NavProvider>
-        </BrowserRouter>
+            </ActivityBarProvider>
+        </AuthCallbackProvider>
+    </NavProvider>
+    </BrowserRouter>
     );
 }

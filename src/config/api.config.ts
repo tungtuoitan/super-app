@@ -45,6 +45,7 @@ export const API_CONFIG = {
 export const API_ENDPOINTS = {
     auth: {
         login: '/auth/login',
+        googleLogin: '/api/auth/google/login',
         exchangeToken: '/auth/exchangeAuthorizationCodeForToken',
     },
     notes: {
