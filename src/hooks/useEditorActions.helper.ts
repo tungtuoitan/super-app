@@ -16,8 +16,11 @@ import { useWorkspaceOperation } from './explorer/useWorkspaceOperation.helper';
 import { useNoteUIStore } from '@/store/note/useNoteUI.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { transformNoteData } from '@/utils/note.utils';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 
 export const useEditorActionsHelper = () => {
+    const { auth } = useAuthStore();
     const { selectedNote, noteHasChanges } = useNoteUIStore();
     const { setSelectedNote, markAsSaved, resetChanges } = useNoteUIHelper();
     const { updateTabNote, markTabAsChanged } = useEditorTabHelper();
@@ -38,7 +41,7 @@ export const useEditorActionsHelper = () => {
 
         // Check if it's a new note (id === 0 or negative)
         const isCreateMode = selectedNote.id <= 0;
-        const token = storageService.getString('token') || '';
+        const token = auth.userToken;
 
         try {
             // Upsert data - works for both create and update
@@ -135,7 +138,14 @@ export const useEditorActionsHelper = () => {
             return transformedNote;
         } catch (error) {
             console.error('❌ Failed to save note:', error);
-            enqueueSnackbar('Failed to save note', { variant: 'error' });
+            const errorMessage = await parseApiError(error);
+
+            // Show specific message for unauthorized
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to save note: ${errorMessage}`, { variant: 'error' });
+            }
             return null;
         }
     }

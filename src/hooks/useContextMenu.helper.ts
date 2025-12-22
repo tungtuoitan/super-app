@@ -18,10 +18,15 @@ import {useConfirmationPopover} from '@/shared/hooks';
 import {useEditorTabsStore} from '../store';
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from '../utils';
 import { constants } from '@/utils/constants';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import { useSnackbar } from 'notistack';
 
 
 
 export const useContextMenuHelper = () => {
+    const { auth } = useAuthStore();
+    const { enqueueSnackbar } = useSnackbar();
     const {
         setIsContextMenuOpen,
         setAnchorPoint,
@@ -136,7 +141,7 @@ export const useContextMenuHelper = () => {
             // Delete all folders using workspace service
             const deleteItems = async () => {
                 try {
-                    const token = storageService.getString('token');
+                    const token = auth.userToken;
                     // if (!token) {
                     //     console.error('❌ No authentication token found');
                     //     alert('Authentication required. Please login again.');
@@ -195,7 +200,12 @@ export const useContextMenuHelper = () => {
                     }
                 } catch (error) {
                     console.error(`❌ Failed to delete folders:`, error);
-                    alert(`Error deleting folder: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    const errorMessage = await parseApiError(error);
+                    if (isUnauthorizedError(error)) {
+                        enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                    } else {
+                        enqueueSnackbar(`Error deleting folder: ${errorMessage}`, { variant: 'error' });
+                    }
                 }
             };
 
@@ -417,7 +427,7 @@ export const useContextMenuHelper = () => {
         // Delete all folders using workspace service
         const deleteItems = async () => {
             try {
-                const token = storageService.getString('token');
+                const token = auth.userToken;
 
             
                 // Map items with proper type codes (2=folder, 3=note, 4=file)
@@ -466,7 +476,12 @@ export const useContextMenuHelper = () => {
                 }
             } catch (error) {
                 console.error(`❌ Failed to delete folders:`, error);
-                alert(`Error deleting folders: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                const errorMessage = await parseApiError(error);
+                if (isUnauthorizedError(error)) {
+                    enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                } else {
+                    enqueueSnackbar(`Error deleting folders: ${errorMessage}`, { variant: 'error' });
+                }
             }
         };
 
@@ -486,7 +501,7 @@ export const useContextMenuHelper = () => {
         }
 
         try {
-            const token = storageService.getString('token');
+            const token = auth.userToken;
 
             console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
             console.log(`📤 Calling API: DELETE /api/Notes/${noteData.id}`);
@@ -504,7 +519,12 @@ export const useContextMenuHelper = () => {
             window.location.reload();
         } catch (error) {
             console.error('❌ Failed to delete note:', error);
-            alert(`Error deleting note: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Error deleting note: ${errorMessage}`, { variant: 'error' });
+            }
         }
     };
 
@@ -521,7 +541,7 @@ export const useContextMenuHelper = () => {
         }
 
         try {
-            const token = storageService.getString('token');
+            const token = auth.userToken;
 
             console.log(`🗑️ Deleting file ID: ${fileData.id}`, fileData.name);
             console.log(`📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items`);
@@ -549,7 +569,12 @@ export const useContextMenuHelper = () => {
             }
         } catch (error) {
             console.error('❌ Failed to delete file:', error);
-            alert(`Error deleting file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Error deleting file: ${errorMessage}`, { variant: 'error' });
+            }
         }
     };
 

@@ -81,7 +81,7 @@ export const useAuthStore = () => useContext(AuthStore);
 export const AuthStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Core auth data
     const [auth, setAuth] = useState<User>(DEFAULT_AUTH_STATE);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     
     // Auth operation states
     const [loading, setLoading] = useState<boolean>(false);

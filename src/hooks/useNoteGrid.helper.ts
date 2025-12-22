@@ -10,17 +10,11 @@ import {useEditorTabHelper} from './useEditorTab.helper';
 import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
 import { constants } from '@/utils/constants';
 import {BaseTab} from '@/types/editor/tab.types';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 
 export const useNoteGridHelper = () => {
-    const {
-        selectedNote,
-        setSelectedNote,
-        isDialogOpen,
-        setIsDialogOpen,
-        noteHasChanges,
-        setNoteHasChanges,
-        originalNoteRef,
-    } = useNoteUIStore();
+    const { auth } = useAuthStore();
 
     const {
         notes,
@@ -77,8 +71,8 @@ export const useNoteGridHelper = () => {
     const loadNotes = async () => {
         try {
             setIsLoading(true);
-            const token = storageService.getString('token');
-            const result = await _getNotes(token??'', { getAll: true });
+            const token = auth.userToken;
+            const result = await _getNotes(token, { getAll: true });
             
             // Check API response success
             if (!result.success) {
@@ -90,7 +84,13 @@ export const useNoteGridHelper = () => {
             setNotes(transformedData);
             setError(null);
         } catch (err) {
-            setError(err as Error);
+            const errorMessage = await parseApiError(err);
+            setError(new Error(errorMessage));
+
+            // Show snackbar for unauthorized errors
+            if (isUnauthorizedError(err)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            }
         } finally {
             setIsLoading(false);
         }
@@ -119,7 +119,7 @@ export const useNoteGridHelper = () => {
 
             // Handle persisted notes - call API
             if (persistedNoteIds.length > 0) {
-                const token = storageService.getString('token') || '';
+                const token = auth.userToken;
                 // Send comma-separated IDs to backend
                 const result = await _deleteNote(token, persistedNoteIds.join(','));
                 
@@ -149,7 +149,14 @@ export const useNoteGridHelper = () => {
             setRowSelection({});
         } catch (error) {
             console.error('Failed to delete notes:', error);
-            enqueueSnackbar('Failed to delete notes', { variant: 'error' });
+            const errorMessage = await parseApiError(error);
+
+            // Show specific message for unauthorized
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to delete notes: ${errorMessage}`, { variant: 'error' });
+            }
         }
     };        // Handle context menu
         const openContextMenu = (event: React.MouseEvent, row?: any) => {

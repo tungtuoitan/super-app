@@ -45,7 +45,7 @@ export const authApi = {
     /**
      * Google OAuth login
      * Exchange Google authorization code for JWT token
-     * POST /api/auth/google-login
+     * POST /api/auth/google/login
      *
      * @param code Google authorization code
      * @returns Auth response with JWT token and user data or rejects with response
@@ -64,7 +64,7 @@ export const authApi = {
         };
 
         const res = await window.fetch(
-            `${API_CONFIG.baseURL}/api/auth/google-login`,
+            `${API_CONFIG.baseURL}/api/auth/google/login`,
             options
         );
 

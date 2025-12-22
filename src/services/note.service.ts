@@ -80,11 +80,11 @@ export const _getNotes = async (
  * @param noteId - The note ID to retrieve
  * @returns Note details or rejects with response
  */
-export const _getNoteById = async (noteId: number) => {
+export const _getNoteById = async (token: string, noteId: number) => {
     const headers = new Headers();
-    // const bearer = `Bearer ${token}`;
+    const bearer = `Bearer ${token}`;
 
-    // headers.append("Authorization", bearer);
+    headers.append("Authorization", bearer);
     headers.append("Content-Type", "application/json");
 
     const options = {

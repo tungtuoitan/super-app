@@ -12,8 +12,13 @@ import { constants } from '@/utils/constants';
 import { _deleteNote } from '@/services/note.service';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import { useSnackbar } from 'notistack';
 
 export const useWorkspaceChildMenuHelper = () => {
+    const { auth } = useAuthStore();
+    const { enqueueSnackbar } = useSnackbar();
     const {
         contextType,
         contextData,
@@ -64,7 +69,7 @@ export const useWorkspaceChildMenuHelper = () => {
         }
 
         try {
-            const token = storageService.getString('token');
+            const token = auth.userToken;
 
             console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
 
@@ -85,7 +90,12 @@ export const useWorkspaceChildMenuHelper = () => {
             window.location.reload();
         } catch (error) {
             console.error('❌ Failed to delete note:', error);
-            alert(`Error deleting note: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Error deleting note: ${errorMessage}`, { variant: 'error' });
+            }
         }
     };
 
@@ -102,7 +112,7 @@ export const useWorkspaceChildMenuHelper = () => {
         }
 
         try {
-            const token = storageService.getString('token');
+            const token = auth.userToken;
             const workspaceId = currentTree?.workspaceId || 1;
 
             console.log(`🗑️ Deleting file ID: ${fileData.id}`, fileData.name);
@@ -130,7 +140,12 @@ export const useWorkspaceChildMenuHelper = () => {
             }
         } catch (error) {
             console.error('❌ Failed to delete file:', error);
-            alert(`Error deleting file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Error deleting file: ${errorMessage}`, { variant: 'error' });
+            }
         }
     };
 

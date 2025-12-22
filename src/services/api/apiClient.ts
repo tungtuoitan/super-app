@@ -95,6 +95,11 @@ class ApiClient {
             const response = await fetch(url, options);
 
             if (!response.ok) {
+                // Handle 401 Unauthorized - dispatch event to trigger logout
+                if (response.status === 401) {
+                    window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+                }
+
                 throw new ApiError(
                     response.status,
                     response.statusText,

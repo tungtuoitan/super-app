@@ -13,7 +13,7 @@ import { useWsTabHelper } from './useWsTab.helper';
 import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
 import {BaseTab} from '@/types/editor/tab.types';
 import {useEditorTabsStore} from '../store';
-
+import { useAuthStore } from '@/store/auth/Auth.store';import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
  */
@@ -30,6 +30,7 @@ const transformWsData = (dtos: WsDTO[]): Ws[] => {
 };
 
 export const useWsListHelper = () => {
+    const { auth } = useAuthStore();
     const {
         workspaces,
         setWorkspaces,
@@ -50,8 +51,8 @@ export const useWsListHelper = () => {
     const loadWorkspaces = async () => {
         try {
             setIsLoading(true);
-            const token = storageService.getString('token');
-            const result = await _getWsList(token ?? '', { getAll: true });
+            const token = auth.userToken;
+            const result = await _getWsList(token, { getAll: true });
             
             // Check API response success
             if (!result.success) {
@@ -64,8 +65,15 @@ export const useWsListHelper = () => {
             setError(null);
         } catch (err) {
             console.error('Failed to load workspaces:', err);
-            setError(err as Error);
-            enqueueSnackbar('Failed to load workspaces', { variant: 'error' });
+            const errorMessage = await parseApiError(err);
+            setError(new Error(errorMessage));
+
+            // Show specific message for unauthorized
+            if (isUnauthorizedError(err)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to load workspaces: ${errorMessage}`, { variant: 'error' });
+            }
         } finally {
             setIsLoading(false);
         }
@@ -137,7 +145,7 @@ export const useWsListHelper = () => {
         if (selectedIds.length === 0) return;
 
         try {
-            const token = storageService.getString('token') || '';
+            const token = auth.userToken;
             
             // Send comma-separated IDs to backend
             const result = await _deleteWs(token, selectedIds.join(','), isHardDelete);
@@ -163,7 +171,14 @@ export const useWsListHelper = () => {
             await loadWorkspaces();
         } catch (error) {
             console.error('Failed to delete workspaces:', error);
-            enqueueSnackbar('Failed to delete workspaces', { variant: 'error' });
+            const errorMessage = await parseApiError(error);
+
+            // Show specific message for unauthorized
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to delete workspaces: ${errorMessage}`, { variant: 'error' });
+            }
         }
     };
 
@@ -174,7 +189,7 @@ export const useWsListHelper = () => {
         if (ids.length === 0) return;
 
         try {
-            const token = storageService.getString('token') || '';
+            const token = auth.userToken;
             
             // Send comma-separated IDs to backend
             const result = await _undoDeleteWs(token, ids.join(','));
@@ -195,7 +210,14 @@ export const useWsListHelper = () => {
             await loadWorkspaces();
         } catch (error) {
             console.error('Failed to restore workspaces:', error);
-            enqueueSnackbar('Failed to restore workspaces', { variant: 'error' });
+            const errorMessage = await parseApiError(error);
+
+            // Show specific message for unauthorized
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to restore workspaces: ${errorMessage}`, { variant: 'error' });
+            }
         }
     };
 
