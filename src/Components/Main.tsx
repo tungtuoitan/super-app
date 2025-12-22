@@ -12,6 +12,7 @@ import { ConfirmationPopoverProvider } from '@/store/confirmationPopover/Confirm
 import { ConfirmationPopoverContainer } from '@/Components/ConfirmationPopover';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider, EditorTabProvider} from '@/store/index';
+import { EditorToolbarProvider } from '@/store/editor/EditorToolbar.store';
 import {NoteUIProvider} from '@/store/note/useNoteUI.store';
 import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanel.store';
 import { NavProvider } from '@/contexts/NavigationContext';
@@ -53,9 +54,10 @@ export function Main() {
                                             <NoteUIProvider>
                                                 <NoteGridPanelProvider>
                                                     <EditorTabProvider>
-                                                        <DialogProvider>
-                                                            <ContextMenuStoreProvider>
-                                                                <ConfirmationPopoverProvider>
+                                                        <EditorToolbarProvider>
+                                                            <DialogProvider>
+                                                                <ContextMenuStoreProvider>
+                                                                    <ConfirmationPopoverProvider>
                                                                     <ContextMenu>
                                                                         <MainNav />
                                                                     </ContextMenu>
@@ -63,7 +65,8 @@ export function Main() {
                                                                 </ConfirmationPopoverProvider>
                                                             </ContextMenuStoreProvider>
                                                         </DialogProvider>
-                                                    </EditorTabProvider>
+                                                    </EditorToolbarProvider>
+                                                </EditorTabProvider>
                                                 </NoteGridPanelProvider>
                                             </NoteUIProvider>
                                         </WsUIProvider>

@@ -4,7 +4,7 @@
  * Routes to appropriate service helpers based on active tab type
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useSnackbar } from 'notistack';
 import type { BaseTab } from '@/types/editor/tab.types';
 import type { Note } from '@/types/note.types';
@@ -14,6 +14,7 @@ import { useEditorTabHelper } from './useEditorTab.helper';
 import { useNoteUIStore } from '@/store/note/useNoteUI.store';
 import { useWsUIStore } from '@/store/ws/useWsUI.store';
 import { useEditorTabsStore } from '@/store/index';
+import { useEditorToolbarStore } from '@/store/editor/EditorToolbar.store';
 import { storageService } from '@/services/storage.service';
 import { _undoDeleteNote } from '@/services/note.service';
 import { _undoDeleteWs } from '@/services/ws.service';
@@ -42,6 +43,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { enqueueSnackbar } = useSnackbar();
     const { activeTabId } = useEditorTabsStore();
     const { getTabById } = useEditorTabHelper();
+    const { isSaving, setIsSaving, isUndoing, setIsUndoing } = useEditorToolbarStore();
     
     // Get active tab
     const tab = activeTabId ? getTabById(activeTabId) : null;
@@ -58,9 +60,6 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { resetWorkspace } = useWsUIHelper();
     const { loadWorkspaces } = useWsListHelper();
     const { _upsertWs } = require('@/services/ws.service');
-    
-    const [isSaving, setIsSaving] = useState(false);
-    const [isUndoing, setIsUndoing] = useState(false);
 
     // Determine if any entity has unsaved changes based on tab type
     const _hasAnyChanges = tab?.type === constants.tabTypes.note ? noteHasChanges : 
