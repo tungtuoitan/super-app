@@ -50,10 +50,15 @@ export interface NoteUIContextData {
     // Container refs
     noteMasterContainerRef: React.RefObject<HTMLDivElement>;
     noteDetailDialogRef: React.RefObject<HTMLDivElement>;
+    noteNameRef: React.RefObject<HTMLInputElement>;
 
     // Dialog styling
     noteDetailDialogSxProps: React.CSSProperties;
     setNoteDetailDialogSxProps: Dispatch<SetStateAction<React.CSSProperties>>;
+
+    // Focus state
+    shouldFocusNoteName: boolean;
+    setShouldFocusNoteName: Dispatch<SetStateAction<boolean>>;
 
     // Preview dialog state
     previewDialogProps: DialogProps;
@@ -95,6 +100,7 @@ export const noteUIContextDefaultValue: NoteUIContextData = {
     // Container refs
     noteMasterContainerRef: { current: null },
     noteDetailDialogRef: { current: null },
+    noteNameRef: { current: null },
 
     // Dialog styling
     noteDetailDialogSxProps: {},
@@ -103,6 +109,10 @@ export const noteUIContextDefaultValue: NoteUIContextData = {
     // Preview dialog state
     previewDialogProps: { open: false, loading: false },
     setPreviewDialogProps: () => {},
+
+    // Focus state
+    shouldFocusNoteName: false,
+    setShouldFocusNoteName: () => {},
 };
 
 const NoteUIContext = createContext<NoteUIContextData>(noteUIContextDefaultValue);
@@ -150,6 +160,7 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     // Container refs
     const noteMasterContainerRef = useRef<HTMLDivElement>(null);
     const noteDetailDialogRef = useRef<HTMLDivElement>(null);
+    const noteNameRef = useRef<HTMLInputElement>(null);
 
     // Dialog styling
     const [noteDetailDialogSxProps, setNoteDetailDialogSxProps] = useState<React.CSSProperties>({});
@@ -159,6 +170,9 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
         open: false,
         loading: false,
     });
+
+    // Focus state
+    const [shouldFocusNoteName, setShouldFocusNoteName] = useState(false);
 
     return (
         <NoteUIContext.Provider
@@ -197,6 +211,7 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
                 // Container refs
                 noteMasterContainerRef,
                 noteDetailDialogRef,
+                noteNameRef,
 
                 // Dialog styling
                 noteDetailDialogSxProps,
@@ -205,6 +220,10 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
                 // Preview dialog state
                 previewDialogProps,
                 setPreviewDialogProps,
+
+                // Focus state
+                shouldFocusNoteName,
+                setShouldFocusNoteName,
             }}
         >
             {children}

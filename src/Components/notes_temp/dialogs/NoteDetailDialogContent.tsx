@@ -4,7 +4,7 @@
  * Clean, organized design with shadcn/ui components
  */
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from '@/shared/components';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Textarea } from '@/Components/ui/textarea';
@@ -24,7 +24,7 @@ import {formatNoteDate} from '@/utils/note.utils';
  * - Right: Actions/metadata
  */
 export function NoteDetailDialogContent() {
-    const { selectedNote, isDialogOpen } = useNoteUIStore();
+    const { selectedNote, isDialogOpen, noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteUIStore();
     const { closeDialog, updateSelectedNote } = useNoteUIHelper();
     
     const [noteKey, setNoteKey] = React.useState(0);
@@ -33,6 +33,16 @@ export function NoteDetailDialogContent() {
             setNoteKey(prev => prev + 1);
         }
     }, [selectedNote?.id]);
+
+    // Focus vào Note Name field khi tạo note mới
+    useEffect(() => {
+        if (shouldFocusNoteName && noteNameRef.current) {
+            setTimeout(() => {
+                noteNameRef.current?.focus();
+                setShouldFocusNoteName(false); // Reset flag sau khi focus
+            }, 100);
+        }
+    }, [shouldFocusNoteName, noteNameRef]);
     
     // Fallback hashtags (no API call needed)
     const tagsLoading = false; // No longer loading from API
@@ -121,12 +131,12 @@ export function NoteDetailDialogContent() {
         <div key={noteKey} className="p-6 space-y-6 h-full ">
             {/* Full Width - Description */}
             <div className="border-none">
-                <CardHeader className="p-0 pb-2">
+                {/* <CardHeader className="p-0 pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <FileText className="w-5 h-5 text-primary" />
                         Description
                     </CardTitle>
-                </CardHeader>
+                </CardHeader> */}
                 <CardContent className="p-0">
                     <Textarea
                         value={selectedNote?.description || ''}
@@ -142,15 +152,16 @@ export function NoteDetailDialogContent() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column - Note Details */}
                 <div className="border-none">
-                    <CardHeader className="p-0 pb-2">
+                    {/* <CardHeader className="p-0 pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Info className="w-5 h-5 text-primary" />
                             Note Details
                         </CardTitle>
-                    </CardHeader>
+                    </CardHeader> */}
                     <CardContent className="p-0 space-y-2">
                         {/* Note Name */}
                         <GenericTextField
+                            ref={noteNameRef}
                             label="Note Name"
                             value={selectedNote?.name || ''}
                             onChange={(e) => handleFieldChange('name', e.target.value)}
@@ -177,12 +188,12 @@ export function NoteDetailDialogContent() {
 
                 {/* Right Column - Metadata */}
                 <div className="border-none">
-                    <CardHeader className="p-0 pb-2">
+                    {/* <CardHeader className="p-0 pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Calendar className="w-5 h-5 text-accent-foreground" />
                             Metadata
                         </CardTitle>
-                    </CardHeader>
+                    </CardHeader> */}
                     <CardContent className="p-0 space-y-4">
                         <GenericTextField
                             label="Created"

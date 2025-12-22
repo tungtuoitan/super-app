@@ -35,6 +35,7 @@ export const useNoteGridHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
+    const { setShouldFocusNoteName } = useNoteUIStore();
 
     // Create new note (temporary with negative ID)
     const createNewNote = () => {
@@ -63,6 +64,9 @@ export const useNoteGridHelper = () => {
 
         // Open note tab for editing
         openNoteTab(newNote);
+
+        // Focus vào Note Name field sau khi tab mở
+        setShouldFocusNoteName(true);
 
         console.log('✅ New note created and opened:', newNote);
     };
