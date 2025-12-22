@@ -5,7 +5,7 @@
  */
 
 import React, {useEffect} from 'react';
-import {NoteDetailDialogContent} from '@/Components/Notes/dialogs/NoteDetailDialogContent';
+import {NoteDetailDialogContent} from '@/Components/notes_temp/dialogs/NoteDetailDialogContent';
 import {useEditorActionsHelper} from '@/hooks/useEditorActions.helper';
 import {useEditorTabsStore} from '@/store/index';
 import {useNoteUIStore} from '@/store/note/useNoteUI.store';

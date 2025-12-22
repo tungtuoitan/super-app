@@ -1,6 +1,6 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '@/config/routes'
-import { NoteGrid } from '../Notes/NoteGrid'
+import { NoteGrid } from '../notes_temp/NoteGrid'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import { WorkspaceView } from './WorkspaceView'
 import { WorkspaceListView } from './WorkspaceListView'
