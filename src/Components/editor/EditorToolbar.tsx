@@ -29,13 +29,13 @@ export function EditorToolbar() {
     const activeTab = activeTabId ? getTabById(activeTabId) : null
 
     // Get toolbar actions for active tab
-    const { handleSave, handleCancel, handleUndo, anyHasChanges, isSaving, isUndoing, statusText, itemId } = useEditorToolbarHelper()
+    const { handleSave, handleCancel, handleUndo, _hasAnyChanges, isSaving, isUndoing, _statusText, _itemId } = useEditorToolbarHelper()
 
     useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault()
-        if (activeTab && anyHasChanges && !isSaving) {
+        if (activeTab && _hasAnyChanges && !isSaving) {
             handleSave()
         }
         }
@@ -43,7 +43,7 @@ export function EditorToolbar() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [activeTab, anyHasChanges, isSaving, handleSave])
+    }, [activeTab, _hasAnyChanges, isSaving, handleSave])
 
     return (
         <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
@@ -51,11 +51,11 @@ export function EditorToolbar() {
             <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className={`text-xs ${statusText === 'delete' ? 'text-red-500' : 'text-muted-foreground'}`}>
-                            {statusText}
+                        <span className={`text-xs ${_statusText === 'InActive' ? 'text-red-500' : 'text-muted-foreground'}`}>
+                            {_statusText}
                         </span>
-                        <span className={`text-xs ${itemId && itemId < 0 ? 'text-yellow-500' : 'text-muted-foreground'}`}>
-                            ID: {itemId || '0'}
+                        <span className={`text-xs ${_itemId && _itemId < 0 ? 'text-yellow-500' : 'text-muted-foreground'}`}>
+                            ID: {_itemId || '0'}
                         </span>
                     </div>
                 </div>
@@ -93,9 +93,9 @@ export function EditorToolbar() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={handleSave}
-                                        disabled={!anyHasChanges || isSaving}
+                                        disabled={!_hasAnyChanges || isSaving}
                                         className={`h-8 w-8 ${
-                                            anyHasChanges
+                                            _hasAnyChanges
                                                 ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
                                                 : 'text-white/40'
                                         } disabled:text-white/20`}
@@ -118,7 +118,7 @@ export function EditorToolbar() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={handleCancel}
-                                    disabled={!anyHasChanges || activeTab?.isDeleted}
+                                    disabled={!_hasAnyChanges || activeTab?.isDeleted}
                                     className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                 >
                                     <RotateCcw className="h-[18px] w-[18px]" />

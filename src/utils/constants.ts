@@ -74,4 +74,14 @@ export const constants = {
   workspace: {
     rootId: -12345, // Virtual ID for workspace root node
   } as const,
+
+  activeStatus: {
+    active: 'active',
+    inactive: 'inactive',
+  } as const,
+
+  activeStatusOptions: [
+    { id: 'active', code: 'active', desc: 'Active', label: 'Active' },
+    { id: 'inactive', code: 'inactive', desc: 'Inactive', label: 'Inactive' },
+  ] as const,
 } as const;

@@ -29,13 +29,13 @@ interface EditorToolbarActions {
     handleUndo: () => Promise<void>;
     
     // States
-    anyHasChanges: boolean;
+    _hasAnyChanges: boolean;
     isSaving: boolean;
     isUndoing: boolean;
     
     // Info
-    statusText: string;
-    itemId: number | null;
+    _statusText: string;
+    _itemId: number | null;
 }
 
 export const useEditorToolbarHelper = (): EditorToolbarActions => {
@@ -63,25 +63,25 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const [isUndoing, setIsUndoing] = useState(false);
 
     // Determine if any entity has unsaved changes based on tab type
-    const anyHasChanges = tab?.type === constants.tabTypes.note ? noteHasChanges : 
-                          tab?.type === constants.tabTypes.workspace ? wsHasChanges : 
-                          false;
-
+    const _hasAnyChanges = tab?.type === constants.tabTypes.note ? noteHasChanges : 
+               tab?.type === constants.tabTypes.workspace ? wsHasChanges : 
+               false;
+    
     // Get status text based on tab type and deletion state
-    const statusText = (() => {
+    const _statusText = (() => {
         if (!tab) return 'No Tab';
         
         if (tab.type === constants.tabTypes.note) {
-            return selectedNote?.deletedAt ? 'Deleted' : 'Active';
+            return selectedNote?.deletedAt ? 'InActive' : 'Active';
         } else if (tab.type === constants.tabTypes.workspace) {
-            return selectedWorkspace?.deletedAt ? 'Deleted' : 'Active';
+            return selectedWorkspace?.deletedAt ? 'InActive' : 'Active';
         }
         
         return 'Active';
     })();
 
     // Get item ID based on tab type
-    const itemId = (() => {
+    const _itemId = (() => {
         if (!tab) return null;
         
         if (tab.type === constants.tabTypes.note) {
@@ -206,10 +206,10 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         handleSave,
         handleCancel,
         handleUndo,
-        anyHasChanges,
+        _hasAnyChanges,
         isSaving,
         isUndoing,
-        statusText,
-        itemId,
+        _statusText,
+        _itemId,
     };
 };

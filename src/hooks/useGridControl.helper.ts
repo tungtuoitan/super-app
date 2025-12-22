@@ -66,7 +66,7 @@ export const useGridControlHelper = () => {
     /**
      * Check if grid is registered
      */
-    const isGridActive = () => {
+    const _isGridActive = () => {
         return table !== null;
     };
 
@@ -77,6 +77,6 @@ export const useGridControlHelper = () => {
         setSearchQuery,
         clearSearch,
         clearFilters,
-        isGridActive,
+        _isGridActive,
     };
 };

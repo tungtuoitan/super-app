@@ -23,11 +23,11 @@ export function GridControlBar() {
         setSearchQuery,
         clearSearch,
         clearFilters,
-        isGridActive,
+        _isGridActive,
     } = useGridControlHelper();
 
     // Don't render if no grid is active
-    if (!isGridActive() || !table) {
+    if (!_isGridActive() || !table) {
         return null;
     }
 

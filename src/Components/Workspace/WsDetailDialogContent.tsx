@@ -4,14 +4,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { GenericTextField } from '@/shared/components';
+import { GenericTextField, GenericAutoComplete, IAutoCompleteOptions } from '@/shared/components';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Textarea } from '@/Components/ui/textarea';
 import { ScrollArea } from '@/Components/ui/scroll-area';
-import { Briefcase, FileText, Calendar, User } from 'lucide-react';
+import { Briefcase, FileText, Calendar } from 'lucide-react';
 import { useWsUIStore } from '@/store/ws/useWsUI.store';
 import { useWsUIHelper } from '@/hooks/useWsUI.helper';
 import { Ws } from '@/store/ws/useWsList.store';
+import { constants } from '@/utils/constants';
 
 /**
  * Workspace Detail Dialog Content
@@ -28,10 +29,25 @@ export function WsDetailDialogContent() {
         }
     }, [selectedWorkspace?.id]);
 
+    // Check if workspace is inactive (soft deleted)
+    const isInactive = selectedWorkspace?.deletedAt !== null;
+
+    // Create current active value for autocomplete
+    const currentActiveValue: IAutoCompleteOptions | null = isInactive
+        ? constants.activeStatusOptions.find(option => option.code === constants.activeStatus.inactive) || null
+        : constants.activeStatusOptions.find(option => option.code === constants.activeStatus.active) || null;
+
     // Handlers for form interactions
     const handleFieldChange = (field: keyof Ws, value: any) => {
         updateSelectedWorkspace({ [field]: value });
         console.log(`Field ${String(field)} changed to:`, value);
+    };
+
+    const handleActiveChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
+        const isActiveSelected = newValue?.code === constants.activeStatus.active;
+        const newDeletedAt = isActiveSelected ? null : new Date();
+        updateSelectedWorkspace({ deletedAt: newDeletedAt });
+        console.log(`Workspace ${isActiveSelected ? 'activated' : 'deactivated'}`);
     };
 
     if (!selectedWorkspace) {
@@ -66,21 +82,27 @@ export function WsDetailDialogContent() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        {/* Active Status */}
+                        <GenericAutoComplete
+                            value={currentActiveValue}
+                            onChange={handleActiveChange}
+                            allOptions={constants.activeStatusOptions as unknown as IAutoCompleteOptions[]}
+                            inputProps={{
+                                name: 'activeStatus',
+                                label: 'Status',
+                            }}
+                            size="small"
+                        />
+
                         {/* Workspace Name */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                                <FileText className="h-4 w-4" />
-                                Workspace Name
-                            </label>
-                            <GenericTextField
-                                key={`name-${wsKey}`}
-                                label=""
-                                value={selectedWorkspace.name}
-                                onChange={(e) => handleFieldChange('name', e.target.value)}
-                                placeholder="Enter workspace name..."
-                                disabled={selectedWorkspace.id < 0 && selectedWorkspace.deletedAt !== null}
-                            />
-                        </div>
+                        <GenericTextField
+                            label="Workspace Name"
+                            value={selectedWorkspace.name}
+                            onChange={(e) => handleFieldChange('name', e.target.value)}
+                            placeholder="Enter workspace name..."
+                            size="small"
+                            disabled={isInactive}
+                        />
 
                         {/* Description */}
                         <div className="space-y-2">
@@ -94,7 +116,7 @@ export function WsDetailDialogContent() {
                                 onChange={(e) => handleFieldChange('description', e.target.value)}
                                 placeholder="Enter workspace description..."
                                 className="min-h-[120px] resize-none"
-                                disabled={selectedWorkspace.id < 0 && selectedWorkspace.deletedAt !== null}
+                                disabled={isInactive}
                             />
                         </div>
                     </CardContent>
@@ -109,64 +131,46 @@ export function WsDetailDialogContent() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Workspace ID */}
-                            <div className="space-y-1">
-                                <label className="text-xs font-medium text-muted-foreground">
-                                    Workspace ID
-                                </label>
-                                <p className="text-sm font-mono">
-                                    {selectedWorkspace.id > 0 ? selectedWorkspace.id : 'New (Unsaved)'}
-                                </p>
-                            </div>
+                        <GenericTextField
+                            label="Workspace ID"
+                            value={selectedWorkspace.id > 0 ? selectedWorkspace.id.toString() : 'New (Unsaved)'}
+                            disabled
+                            size="small"
+                        />
 
-                            {/* User ID */}
-                            {selectedWorkspace.userId && (
-                                <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                                        <User className="h-3 w-3" />
-                                        User ID
-                                    </label>
-                                    <p className="text-sm font-mono">
-                                        {selectedWorkspace.userId}
-                                    </p>
-                                </div>
-                            )}
+                        {selectedWorkspace.userId && (
+                            <GenericTextField
+                                label="User ID"
+                                value={selectedWorkspace.userId.toString()}
+                                disabled
+                                size="small"
+                            />
+                        )}
 
-                            {/* Created At */}
-                            <div className="space-y-1">
-                                <label className="text-xs font-medium text-muted-foreground">
-                                    Created At
-                                </label>
-                                <p className="text-sm">
-                                    {formatDate(selectedWorkspace.createdAt)}
-                                </p>
-                            </div>
+                        <GenericTextField
+                            label="Created At"
+                            value={formatDate(selectedWorkspace.createdAt)}
+                            disabled
+                            size="small"
+                        />
 
-                            {/* Updated At */}
-                            {selectedWorkspace.updatedAt && (
-                                <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground">
-                                        Updated At
-                                    </label>
-                                    <p className="text-sm">
-                                        {formatDate(selectedWorkspace.updatedAt)}
-                                    </p>
-                                </div>
-                            )}
+                        {selectedWorkspace.updatedAt && (
+                            <GenericTextField
+                                label="Updated At"
+                                value={formatDate(selectedWorkspace.updatedAt)}
+                                disabled
+                                size="small"
+                            />
+                        )}
 
-                            {/* Deleted At */}
-                            {selectedWorkspace.deletedAt && (
-                                <div className="space-y-1 col-span-2">
-                                    <label className="text-xs font-medium text-destructive">
-                                        Deleted At
-                                    </label>
-                                    <p className="text-sm text-destructive">
-                                        {formatDate(selectedWorkspace.deletedAt)}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+                        {selectedWorkspace.deletedAt && (
+                            <GenericTextField
+                                label="Deleted At"
+                                value={formatDate(selectedWorkspace.deletedAt)}
+                                disabled
+                                size="small"
+                            />
+                        )}
                     </CardContent>
                 </Card>
             </div>
