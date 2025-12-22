@@ -14,6 +14,9 @@ export interface WsUIContextData {
     wsHasChanges: boolean;
     setWsHasChanges: Dispatch<SetStateAction<boolean>>;
     originalWsRef: React.MutableRefObject<Ws | null>;
+    wsNameRef: React.RefObject<HTMLInputElement>;
+    shouldFocusWsName: boolean;
+    setShouldFocusWsName: Dispatch<SetStateAction<boolean>>;
 }
 
 export const wsUIContextDefaultValue: WsUIContextData = {
@@ -24,6 +27,9 @@ export const wsUIContextDefaultValue: WsUIContextData = {
     wsHasChanges: false,
     setWsHasChanges: () => {},
     originalWsRef: { current: null },
+    wsNameRef: { current: null },
+    shouldFocusWsName: false,
+    setShouldFocusWsName: () => {},
 };
 
 export const WsUIStore = createContext<WsUIContextData>(wsUIContextDefaultValue);
@@ -35,6 +41,8 @@ export const WsUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const [wsHasChanges, setWsHasChanges] = useState<boolean>(false);
     const originalWsRef = useRef<Ws | null>(null);
+    const wsNameRef = useRef<HTMLInputElement>(null);
+    const [shouldFocusWsName, setShouldFocusWsName] = useState<boolean>(false);
 
     return (
         <WsUIStore.Provider
@@ -46,6 +54,9 @@ export const WsUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
                 wsHasChanges,
                 setWsHasChanges,
                 originalWsRef,
+                wsNameRef,
+                shouldFocusWsName,
+                setShouldFocusWsName,
             }}
         >
             {children}

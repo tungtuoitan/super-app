@@ -19,7 +19,7 @@ import { constants } from '@/utils/constants';
  * Form for editing workspace details
  */
 export function WsDetailDialogContent() {
-    const { selectedWorkspace } = useWsUIStore();
+    const { selectedWorkspace, wsNameRef, shouldFocusWsName, setShouldFocusWsName } = useWsUIStore();
     const { updateSelectedWorkspace } = useWsUIHelper();
     
     const [wsKey, setWsKey] = React.useState(0);
@@ -28,6 +28,16 @@ export function WsDetailDialogContent() {
             setWsKey(prev => prev + 1);
         }
     }, [selectedWorkspace?.id]);
+
+    // Focus vào Workspace Name field khi tạo workspace mới
+    useEffect(() => {
+        if (shouldFocusWsName && wsNameRef.current) {
+            setTimeout(() => {
+                wsNameRef.current?.focus();
+                setShouldFocusWsName(false); // Reset flag sau khi focus
+            }, 100);
+        }
+    }, [shouldFocusWsName, wsNameRef]);
 
     // Check if workspace is inactive (soft deleted)
     const isInactive = selectedWorkspace?.deletedAt !== null;
@@ -96,6 +106,7 @@ export function WsDetailDialogContent() {
 
                         {/* Workspace Name */}
                         <GenericTextField
+                            ref={wsNameRef}
                             label="Workspace Name"
                             value={selectedWorkspace.name}
                             onChange={(e) => handleFieldChange('name', e.target.value)}

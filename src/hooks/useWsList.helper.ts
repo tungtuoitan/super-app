@@ -13,7 +13,9 @@ import { useWsTabHelper } from './useWsTab.helper';
 import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
 import {BaseTab} from '@/types/editor/tab.types';
 import {useEditorTabsStore} from '../store';
-import { useAuthStore } from '@/store/auth/Auth.store';import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import { useAuthStore } from '@/store/auth/Auth.store';
+import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import { useWsUIStore } from '@/store/ws/useWsUI.store';
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
  */
@@ -44,6 +46,7 @@ export const useWsListHelper = () => {
     const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
     const { openWorkspaceTab } = useWsTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { setShouldFocusWsName } = useWsUIStore();
 
     /**
      * Load workspaces from API
@@ -136,6 +139,9 @@ export const useWsListHelper = () => {
         // Open workspace in editor tab
         console.log('🏢 Opening new workspace in tab:', newWorkspace);
         openWorkspaceTab(newWorkspace);
+
+        // Focus vào Workspace Name field sau khi tab mở
+        setShouldFocusWsName(true);
     };
 
     /**
