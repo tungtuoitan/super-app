@@ -4,6 +4,8 @@ import {useNoteGridPanelStore} from "../store/note/useNoteGridPanel.store";
 import {BaseTab} from "@/types/editor/tab.types";
 import {useEditorTabsStore} from "../store";
 import { constants } from '@/utils/constants';
+import { useWsUIStore } from '@/store/ws/useWsUI.store';
+import { Ws } from '@/store/ws/useWsList.store';
 
 
 export const useEditorTabHelper = () => {
@@ -17,6 +19,7 @@ export const useEditorTabHelper = () => {
     } = useEditorTabsStore();
     const { setSelectedNote, originalNoteRef, setNoteHasChanges } = useNoteUIStore();
     const { setNotes } = useNoteGridPanelStore();
+    const { setSelectedWorkspace, originalWsRef, setWsHasChanges } = useWsUIStore();
 
     /**
      * Update active tab ID and sync selectedNote
@@ -49,17 +52,45 @@ export const useEditorTabHelper = () => {
                 }
                 
                 setSelectedNote(noteData);
-            } else {
-                console.log('❌ No note tab found, clearing selectedNote');
+                
+                // Clear workspace state when switching to note
+                originalWsRef.current = null;
+                setWsHasChanges(false);
+                setSelectedWorkspace(null);
+            } else if (activeTab?.type === constants.tabTypes.workspace) {
+                const wsData = activeTab.data as Ws;
+                console.log('✅ Setting selectedWorkspace:', wsData);
+                
+                // Initialize originalWsRef for change tracking
+                if (!originalWsRef.current || originalWsRef.current.id !== wsData.id) {
+                    console.log('📌 Initializing originalWsRef in EditorTabHelper:', wsData);
+                    originalWsRef.current = { ...wsData };
+                    setWsHasChanges(false); // Reset changes for newly opened workspace
+                }
+                
+                setSelectedWorkspace(wsData);
+                
+                // Clear note state when switching to workspace
                 originalNoteRef.current = null;
                 setNoteHasChanges(false);
                 setSelectedNote(null);
+            } else {
+                console.log('❌ No note/workspace tab found, clearing selected items');
+                originalNoteRef.current = null;
+                setNoteHasChanges(false);
+                setSelectedNote(null);
+                originalWsRef.current = null;
+                setWsHasChanges(false);
+                setSelectedWorkspace(null);
             }
         } else {
-            console.log('🚫 No active tab ID, clearing selectedNote');
+            console.log('🚫 No active tab ID, clearing selected items');
             originalNoteRef.current = null;
             setNoteHasChanges(false);
             setSelectedNote(null);
+            originalWsRef.current = null;
+            setWsHasChanges(false);
+            setSelectedWorkspace(null);
         }
     }
     const openNoteTab = (note: Note) => {
@@ -189,5 +220,6 @@ export const useEditorTabHelper = () => {
         markTabAsChanged,
         getTabById,
         updateTabNote,
+        updateActiveTabIdAndSelectedNote
     }
 }

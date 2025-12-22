@@ -60,7 +60,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { loadNotes } = useNoteGridHelper();
     
     // Workspace-specific
-    const { selectedWorkspace, wsHasChanges } = useWsUIStore();
+    const { selectedWorkspace, wsHasChanges, setSelectedWorkspace } = useWsUIStore();
     const { resetWorkspace } = useWsUIHelper();
     const { loadWorkspaces } = useWsListHelper();
 
@@ -139,6 +139,9 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                             ? { ...t, data: updatedWorkspace, title: updatedWorkspace.name, hasUnsavedChanges: false }
                             : t
                     ));
+
+                    // Update selectedWorkspace to sync with new data
+                    setSelectedWorkspace(updatedWorkspace);
 
                     // Reload workspace list
                     await loadWorkspaces();

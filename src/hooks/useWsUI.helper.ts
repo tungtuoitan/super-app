@@ -41,13 +41,19 @@ export const useWsUIHelper = () => {
      * Update selected workspace (triggers unsaved changes flag)
      */
     const updateSelectedWorkspace = (updates: Partial<Ws>) => {
-        if (!selectedWorkspace) return;
+        if (!selectedWorkspace) {
+            console.log('⚠️ updateSelectedWorkspace: selectedWorkspace is null');
+            return;
+        }
 
+        console.log('📝 updateSelectedWorkspace called:', { updates, currentWorkspace: selectedWorkspace });
         const updatedWorkspace = { ...selectedWorkspace, ...updates };
+        console.log('📝 updatedWorkspace:', updatedWorkspace);
         setSelectedWorkspace(updatedWorkspace);
 
         // Check if changes differ from original
         const hasChanges = JSON.stringify(updatedWorkspace) !== JSON.stringify(originalWsRef.current);
+        console.log('📝 hasChanges:', hasChanges, { original: originalWsRef.current });
         setWsHasChanges(hasChanges);
     };
 

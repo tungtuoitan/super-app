@@ -18,27 +18,24 @@ interface WsEditorPanelProps {
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { wsHasChanges, setSelectedWorkspace } = useWsUIStore();
+    const { wsHasChanges, selectedWorkspace } = useWsUIStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Set selected workspace when tab is active
-    useEffect(() => {
-        if (tab.type === constants.tabTypes.workspace) {
-            const wsData = tab.data as Ws;
-            setSelectedWorkspace(wsData);
-        }
-    }, [tab.id]);
-
-    // Sync hasUnsavedChanges with tab state
+    // Sync hasUnsavedChanges AND tab.data with selectedWorkspace state
     useEffect(() => {
         setOpenTabs((prev: BaseTab[]) => prev.map(t => 
             t.id === tab.id 
-                ? { ...t, hasUnsavedChanges: wsHasChanges }
+                ? { 
+                    ...t, 
+                    hasUnsavedChanges: wsHasChanges,
+                    // Sync tab.data with current selectedWorkspace (2-way binding)
+                    data: selectedWorkspace || t.data,
+                  }
                 : t
         ));
-    }, [wsHasChanges, tab.id]);
+    }, [wsHasChanges, selectedWorkspace, tab.id]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {
