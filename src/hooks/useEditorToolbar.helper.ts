@@ -46,8 +46,8 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { isSaving, setIsSaving, isUndoing, setIsUndoing } = useEditorToolbarStore();
     
     // Get active tab
-    const tab = activeTabId ? getTabById(activeTabId) : null;
-    const { setOpenTabs } = useEditorTabsStore();
+    const activeTab = activeTabId ? getTabById(activeTabId) : null;
+    const { setOpenTabs,openTabs} = useEditorTabsStore();
     
     // Note-specific
     const { selectedNote, noteHasChanges } = useNoteUIStore();
@@ -62,17 +62,17 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { _upsertWs } = require('@/services/ws.service');
 
     // Determine if any entity has unsaved changes based on tab type
-    const _hasAnyChanges = tab?.type === constants.tabTypes.note ? noteHasChanges : 
-               tab?.type === constants.tabTypes.workspace ? wsHasChanges : 
+    const _hasAnyChanges = activeTab?.type === constants.tabTypes.note ? noteHasChanges : 
+               activeTab?.type === constants.tabTypes.workspace ? wsHasChanges : 
                false;
     
     // Get status text based on tab type and deletion state
     const _statusText = (() => {
-        if (!tab) return 'No Tab';
+        if (!activeTab) return 'No Tab';
         
-        if (tab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.tabTypes.note) {
             return selectedNote?.deletedAt ? 'InActive' : 'Active';
-        } else if (tab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.tabTypes.workspace) {
             return selectedWorkspace?.deletedAt ? 'InActive' : 'Active';
         }
         
@@ -81,11 +81,11 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
     // Get item ID based on tab type
     const _itemId = (() => {
-        if (!tab) return null;
+        if (!activeTab) return null;
         
-        if (tab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.tabTypes.note) {
             return selectedNote?.id || null;
-        } else if (tab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.tabTypes.workspace) {
             return selectedWorkspace?.id || null;
         }
         
@@ -94,14 +94,14 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
     // Handle Save - routes to appropriate service
     const handleSave = async () => {
-        if (!tab) return;
+        if (!activeTab) return;
 
         setIsSaving(true);
         try {
-            if (tab.type === constants.tabTypes.note) {
+            if (activeTab.type === constants.tabTypes.note) {
                 // Use existing note save logic
-                await saveNote(tab.id);
-            } else if (tab.type === constants.tabTypes.workspace) {
+                await saveNote(activeTab.id);
+            } else if (activeTab.type === constants.tabTypes.workspace) {
                 // Workspace save logic
                 if (!selectedWorkspace) return;
 
@@ -129,13 +129,30 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                         deletedAt: savedWorkspace.deletedAt ? new Date(savedWorkspace.deletedAt) : null,
                         userId: savedWorkspace.userId,
                     };
+                    console.log('openTabs before update:', openTabs);
 
-                    // Update tab with saved data
-                    setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                        t.id === tab.id && t.type === constants.tabTypes.workspace
-                            ? { ...t, data: updatedWorkspace, title: updatedWorkspace.name, hasUnsavedChanges: false }
-                            : t
-                    ));
+                    // Update the active tab with the saved workspace data
+                    setOpenTabs((prev: BaseTab[]) => {
+                        const updatedTabs = prev.map(t => {
+                            // Check if this is the tab we just saved
+                            const isCurrentTab = t.id === activeTab.id && t.data.id === activeTab.data.id && t.type === constants.tabTypes.workspace;
+
+                            if (isCurrentTab) {
+                                // Update tab with new workspace data and mark as saved
+                                return {
+                                    ...t,
+                                    data: updatedWorkspace,
+                                    title: updatedWorkspace.name,
+                                    hasUnsavedChanges: false
+                                };
+                            }
+
+                            // Return unchanged tab
+                            return t;
+                        });
+
+                        return updatedTabs;
+                    });
 
                     // Reload workspace list
                     await loadWorkspaces();
@@ -145,7 +162,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
             }
         } catch (error) {
             console.error('Failed to save:', error);
-            enqueueSnackbar(`Failed to save ${tab.type}`, { variant: 'error' });
+            enqueueSnackbar(`Failed to save ${activeTab.type}`, { variant: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -153,24 +170,24 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
     // Handle Cancel - routes to appropriate reset logic
     const handleCancel = () => {
-        if (!tab) return;
+        if (!activeTab) return;
 
-        if (tab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.tabTypes.note) {
             cancelChanges();
-        } else if (tab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.tabTypes.workspace) {
             resetWorkspace();
         }
     }
 
     // Handle Undo - restore deleted item
     const handleUndo = async () => {
-        if (!tab || !tab.isDeleted) return;
+        if (!activeTab || !activeTab.isDeleted) return;
 
         setIsUndoing(true);
         try {
             const token = storageService.getString('token') || '';
 
-            if (tab.type === constants.tabTypes.note && selectedNote) {
+            if (activeTab.type === constants.tabTypes.note && selectedNote) {
                 const result = await _undoDeleteNote(token, selectedNote.id);
                 
                 // Check API response success
@@ -178,9 +195,9 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                     throw new Error(result.message || 'Failed to restore note');
                 }
 
-                // Update tab to remove isDeleted flag
+                // Update activeTab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === tab.id && t.type === constants.tabTypes.note
+                    t.id === activeTab.id && t.type === constants.tabTypes.note
                         ? { ...t, isDeleted: false }
                         : t
                 ));
@@ -189,15 +206,15 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                 await loadNotes();
 
                 enqueueSnackbar('Note restored successfully', { variant: 'success' });
-            } else if (tab.type === constants.tabTypes.workspace && selectedWorkspace) {
+            } else if (activeTab.type === constants.tabTypes.workspace && selectedWorkspace) {
                 const result = await _undoDeleteWs(token, selectedWorkspace.id);
                 if (!result.success) {
                     throw new Error(result.message || 'Failed to restore workspace');
                 }
 
-                // Update tab to remove isDeleted flag
+                // Update activeTab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === tab.id && t.type === constants.tabTypes.workspace
+                    t.id === activeTab.id && t.type === constants.tabTypes.workspace
                         ? { ...t, isDeleted: false }
                         : t
                 ));
@@ -209,7 +226,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
             }
         } catch (error) {
             console.error('Failed to restore:', error);
-            enqueueSnackbar(`Failed to restore ${tab.type}`, { variant: 'error' });
+            enqueueSnackbar(`Failed to restore ${activeTab.type}`, { variant: 'error' });
         } finally {
             setIsUndoing(false);
         }
