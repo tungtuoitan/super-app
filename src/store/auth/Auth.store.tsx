@@ -8,11 +8,17 @@ import { createContext, Dispatch, SetStateAction, useContext, useState } from "r
 
 /**
  * User interface representing authenticated user data
- * Contains user credentials and authentication token
+ * Contains user profile info and authentication token
  */
 export interface User {
+    userId: number | null;
     userName: string;
-    password: string;
+    email: string;
+    password?: string;
+    firstName?: string;
+    lastName?: string;
+    picture?: string;
+    authType?: 'google' | 'local';
     userToken: string;
 }
 
@@ -43,8 +49,14 @@ export interface AuthStoreData {
 }
 
 const DEFAULT_AUTH_STATE: User = {
+    userId: null,
     userName: '',
+    email: '',
     password: '',
+    firstName: '',
+    lastName: '',
+    picture: '',
+    authType: undefined,
     userToken: '',
 };
 

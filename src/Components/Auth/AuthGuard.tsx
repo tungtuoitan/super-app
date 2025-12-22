@@ -30,25 +30,29 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     // }, []);
 
     // Listen for 401 unauthorized events from API
-    useEffect(() => {
-        const handleUnauthorized = () => {
-            // Logout and show login dialog
-            logout();
-            setAccountsOpen(true);
-        };
+    // useEffect(() => {
+    //     const handleUnauthorized = () => {
+    //         // Logout and show login dialog
+    //         logout();
+    //         setAccountsOpen(true);
+    //     };
 
-        window.addEventListener('auth:unauthorized', handleUnauthorized);
+    //     window.addEventListener('auth:unauthorized', handleUnauthorized);
 
-        return () => {
-            window.removeEventListener('auth:unauthorized', handleUnauthorized);
-        };
-    }, []);
+    //     return () => {
+    //         window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    //     };
+    // }, []);
 
     // Auto show login dialog when not authenticated
     useEffect(() => {
         if (!isAuthenticated) {
             setAccountsOpen(true);
         }
+        else {
+            setAccountsOpen(false);
+        }
+    
     }, [isAuthenticated]);
 
     return <>{children}</>;

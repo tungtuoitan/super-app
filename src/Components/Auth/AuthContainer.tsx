@@ -41,7 +41,7 @@ export function AuthContainer() {
      */
     const handleLogin = async () => {
         try {
-            await login(auth.userName, auth.password);
+            await login(auth.userName, auth.password??'');
             // The useAuth hook handles setting the auth context and localStorage
         } catch (err) {
             console.error('Login failed:', err);

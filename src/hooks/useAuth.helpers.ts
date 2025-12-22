@@ -56,9 +56,12 @@ export function useAuthHelper() {
 
             // Update auth store (never store passwords)
             setAuth({
-                userName: username,
+                userId: response.userId || null,
+                userName: response.username || username,
+                email: '', // Email not provided in login response
                 password: '', // Never store actual passwords
                 userToken: response.token,
+                authType: 'local',
             });
 
             setIsAuthenticated(true);
@@ -84,17 +87,22 @@ export function useAuthHelper() {
     const logout = (): void => {
         // Clear auth store state
         setAuth({
+            userId: null,
             userName: '',
-            password: '',
+            email: '',
+            firstName: '',
+            lastName: '',
+            picture: '',
+            authType: undefined,
             userToken: '',
         });
         setIsAuthenticated(false);
-        
+
         // Clear any errors
         setError(null);
         setLoginError(null);
         setTokenExchangeError(null);
-        
+
         // Remove token from storage
         storageService.remove(STORAGE_KEYS.USER_TOKEN);
     };
@@ -151,12 +159,17 @@ export function useAuthHelper() {
             }
 
             // Save token to localStorage
-            // storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
+            storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
 
-            // Update auth store
+            // Update auth store with full user info
             setAuth({
+                userId: response.user.id,
                 userName: response.user.email || '',
-                password: '', // No password for OAuth users
+                email: response.user.email || '',
+                firstName: response.user.firstName,
+                lastName: response.user.lastName,
+                picture: response.user.picture,
+                authType: response.user.authType,
                 userToken: response.user.token,
             });
 

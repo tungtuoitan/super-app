@@ -56,15 +56,25 @@ export function AccountsDialog() {
                         // Authenticated - show user info
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <User className="h-5 w-5 text-primary" />
-                                </div>
+                                {auth.picture ? (
+                                    <img
+                                        src={auth.picture}
+                                        alt={auth.userName}
+                                        className="h-10 w-10 rounded-full"
+                                    />
+                                ) : (
+                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <User className="h-5 w-5 text-primary" />
+                                    </div>
+                                )}
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium truncate">
-                                        {auth.userName || 'User'}
+                                        {auth.firstName && auth.lastName
+                                            ? `${auth.firstName} ${auth.lastName}`
+                                            : auth.userName || 'User'}
                                     </div>
-                                    <div className="text-xs text-muted-foreground">
-                                        Signed in
+                                    <div className="text-xs text-muted-foreground truncate">
+                                        {auth.email}
                                     </div>
                                 </div>
                             </div>
