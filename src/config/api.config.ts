@@ -15,12 +15,14 @@
  * @returns Base URL for all API requests
  */
 const getBaseUrl = (): string => {
-    // Always use environment variable
-    // For production, set REACT_APP_API_URL in .env.local (gitignored)
-    if (process.env.ENVIRONMENT === 'production' && process.env.PRO_API_URL) {
-        return process.env.PRO_API_URL;
+    // Check if we're in production mode
+    // Note: NODE_ENV is automatically set by React build process
+    if (process.env.NODE_ENV === 'production') {
+        // Use REACT_APP_PRO_API_URL for production (from .env.production)
+        return process.env.REACT_APP_PRO_API_URL || 'http://157.66.101.51:5000';
     } else {
-        return process.env.LOCAL_API_URL || 'http://localhost:5000';
+        // Use local API URL for development
+        return process.env.REACT_APP_PRO_API_URL || process.env.REACT_APP_LOCAL_API_URL || 'http://localhost:5000';
     }
 };
 
