@@ -3,9 +3,28 @@
  * Handles Google OAuth 2.0 Authorization Code Flow
  */
 
+/**
+ * Get redirect URI based on environment
+ * Auto-detects production URL or uses env variable override
+ */
+const getRedirectUri = (): string => {
+  // Allow env variable override for custom domains
+  if (process.env.REACT_APP_GOOGLE_REDIRECT_URI && process.env.ENVIRONMENT === 'production') {
+    return process.env.REACT_APP_GOOGLE_REDIRECT_URI;
+  }
+
+  // Auto-detect based on current origin (works for localhost and production)
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/auth/callback`;
+  }
+
+  // Fallback for SSR/build time
+  return 'http://localhost:3000/auth/callback';
+};
+
 export const GOOGLE_OAUTH_CONFIG = {
   clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || '887853390661-j2bepobhb90k357d0k5p1atqd2k8oe6l.apps.googleusercontent.com',
-  redirectUri: process.env.REACT_APP_GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/callback',
+  redirectUri: getRedirectUri(),
   scope: 'openid profile email',
   responseType: 'code',
   authUrl: 'https://accounts.google.com/o/oauth2/v2/auth'
