@@ -4,7 +4,23 @@
       {
         "type": "chrome",
         "request": "launch",
-        "name": "Launch Chrome (Debug)",
+        "name": "Launch Chrome (Debug - OAuth Safe)",
+        "url": "http://localhost:3000",
+        "webRoot": "${workspaceFolder}",
+        "sourceMaps": true,
+        "sourceMapPathOverrides": {
+          "webpack:///src/*": "${webRoot}/src/*"
+        },
+        "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+        "runtimeArgs": [
+          "--no-first-run",
+          "--no-default-browser-check"
+        ]
+      },
+      {
+        "type": "chrome",
+        "request": "launch",
+        "name": "Launch Chrome (Debug - No Security)",
         "url": "http://localhost:3000",
         "webRoot": "${workspaceFolder}",
         "sourceMaps": true,

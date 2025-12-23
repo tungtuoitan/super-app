@@ -59,6 +59,14 @@ export const useNoteUIHelper = () => {
         console.log('✨ Updated state:', updated);
         console.log('📌 Original ref:', originalNoteRef.current);
 
+        // Log description specifically
+        console.log('🟢 [DESCRIPTION CHECK]', {
+            previousDescription: selectedNote.description,
+            updatedDescription: updated.description,
+            previousLength: selectedNote.description?.length || 0,
+            updatedLength: updated.description?.length || 0
+        });
+
         // Check if this was originally a new note (originalRef has id === 0 or < 0)
         const wasNewNote = originalNoteRef.current?.id === 0 || (originalNoteRef.current?.id && originalNoteRef.current.id < 0);
         const isNowSaved = updated.id > 0;
@@ -122,6 +130,12 @@ export const useNoteUIHelper = () => {
         }
 
         setSelectedNote(updated);
+        console.log('🔵 [AFTER setSelectedNote] State should be updated to:', {
+            id: updated.id,
+            name: updated.name,
+            descriptionLength: updated.description?.length || 0,
+            description: updated.description
+        });
     };
 
     const markAsSaved = () => {

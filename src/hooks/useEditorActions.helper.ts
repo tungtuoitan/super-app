@@ -3,6 +3,7 @@
  * Handles save/create/cancel actions for note editor
  */
 
+import { useCallback } from 'react';
 import { useSnackbar } from 'notistack';
 import { Note, UpsertNoteDTO } from '@/types/note.types';
 import { _upsertNote } from '@/services/note.service';
@@ -33,7 +34,7 @@ export const useEditorActionsHelper = () => {
      * Save current note (create or update using Upsert pattern)
      * @param tabId - Current tab ID to update after save
      */
-    const saveNote = async (tabId?: string): Promise<Note | null> => {
+    const saveNote = useCallback(async (tabId?: string): Promise<Note | null> => {
         if (!selectedNote) {
             console.warn('⚠️ No selected note to save');
             return null;
@@ -44,6 +45,15 @@ export const useEditorActionsHelper = () => {
         const token = auth.userToken;
 
         try {
+            // Log selectedNote state before creating upsert data
+            console.log('🟢 [BEFORE SAVE] selectedNote state:', {
+                id: selectedNote.id,
+                name: selectedNote.name,
+                descriptionLength: selectedNote.description?.length || 0,
+                description: selectedNote.description,
+                timestamp: new Date().toISOString()
+            });
+
             // Upsert data - works for both create and update
             const upsertData: UpsertNoteDTO = {
                 id: isCreateMode ? 0 : selectedNote.id, // Always use 0 for create
@@ -56,6 +66,13 @@ export const useEditorActionsHelper = () => {
                 type: selectedNote.type,
             };
 
+            console.log('🟡 [UPSERT DATA] Data being sent to API:', {
+                id: upsertData.id,
+                name: upsertData.name,
+                descriptionLength: upsertData.description?.length || 0,
+                description: upsertData.description,
+                timestamp: new Date().toISOString()
+            });
             console.log(`📝 ${isCreateMode ? 'Creating' : 'Updating'} note with data:`, upsertData);
             const result = await _upsertNote(token, upsertData);
             
@@ -65,6 +82,13 @@ export const useEditorActionsHelper = () => {
             }
             
             const savedNote = result.object;
+            console.log('🟢 [API RESPONSE] Note saved successfully:', {
+                id: savedNote?.id,
+                name: savedNote?.name,
+                descriptionLength: savedNote?.description?.length || 0,
+                description: savedNote?.description,
+                timestamp: new Date().toISOString()
+            });
             console.log('✅ Note saved successfully:', savedNote);
 
             if (!savedNote) {
@@ -148,7 +172,7 @@ export const useEditorActionsHelper = () => {
             }
             return null;
         }
-    }
+    }, [selectedNote, auth.userToken, setSelectedNote, updateTabNote, markAsSaved, loadNotes, loadTree, currentTree, enqueueSnackbar]);
 
     /**
      * Cancel/discard changes

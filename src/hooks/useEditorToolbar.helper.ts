@@ -96,7 +96,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     })();
 
     // Handle Save - routes to appropriate service
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!activeTab) return;
 
         setIsSaving(true);
@@ -179,10 +179,10 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         } finally {
             setIsSaving(false);
         }
-    }
+    }, [activeTab, selectedNote, selectedWorkspace, saveNote, setIsSaving, setOpenTabs, setSelectedWorkspace, loadWorkspaces, enqueueSnackbar, auth.userToken]);
 
     // Handle Cancel - routes to appropriate reset logic
-    const handleCancel = () => {
+    const handleCancel = useCallback(() => {
         if (!activeTab) return;
 
         if (activeTab.type === constants.tabTypes.note) {
@@ -190,10 +190,10 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         } else if (activeTab.type === constants.tabTypes.workspace) {
             resetWorkspace();
         }
-    }
+    }, [activeTab, cancelChanges, resetWorkspace]);
 
     // Handle Undo - restore deleted item
-    const handleUndo = async () => {
+    const handleUndo = useCallback(async () => {
         if (!activeTab || !activeTab.isDeleted) return;
 
         setIsUndoing(true);
@@ -250,7 +250,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         } finally {
             setIsUndoing(false);
         }
-    }
+    }, [activeTab, selectedNote, selectedWorkspace, setIsUndoing, setOpenTabs, loadNotes, loadWorkspaces, enqueueSnackbar, auth.userToken]);
 
     return {
         handleSave,
