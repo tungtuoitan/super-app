@@ -14,6 +14,9 @@
 # misc
 .DS_Store
 
+# VS Code debug profiles
+.vscode/chrome-debug-profile/
+
 # Environment variables
 .env.local
 .env.*.local

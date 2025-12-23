@@ -6,8 +6,6 @@
 
 import { useCallback } from 'react';
 import { useSnackbar } from 'notistack';
-import type { BaseTab } from '@/types/editor/tab.types';
-import type { Note } from '@/types/note.types';
 import { constants } from '@/utils/constants';
 import { useEditorActionsHelper } from './useEditorActions.helper';
 import { useEditorTabHelper } from './useEditorTab.helper';
@@ -25,6 +23,7 @@ import { useNoteGridHelper } from './useNoteGrid.helper';
 import { useWsListHelper } from './useWsList.helper';
 import { useWsUIHelper } from './useWsUI.helper';
 import { Ws } from '@/store/ws/useWsList.store';
+import { BaseTab } from '@/types/editor/tab.types';
 
 interface EditorToolbarActions {
     // Actions
@@ -50,7 +49,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { isSaving, setIsSaving, isUndoing, setIsUndoing } = useEditorToolbarStore();
     
     // Get active tab
-    const tab = activeTabId ? getTabById(activeTabId) : null;
+    const activeTab = activeTabId ? getTabById(activeTabId) : null;
     const { setOpenTabs } = useEditorTabsStore();
     
     // Note-specific
@@ -65,17 +64,17 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { loadWorkspaces } = useWsListHelper();
 
     // Determine if any entity has unsaved changes based on tab type
-    const _hasAnyChanges = tab?.type === constants.tabTypes.note ? noteHasChanges : 
-               tab?.type === constants.tabTypes.workspace ? wsHasChanges : 
+    const _hasAnyChanges = activeTab?.type === constants.tabTypes.note ? noteHasChanges : 
+               activeTab?.type === constants.tabTypes.workspace ? wsHasChanges : 
                false;
     
     // Get status text based on tab type and deletion state
     const _statusText = (() => {
-        if (!tab) return 'No Tab';
+        if (!activeTab) return 'No Tab';
         
-        if (tab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.tabTypes.note) {
             return selectedNote?.deletedAt ? 'InActive' : 'Active';
-        } else if (tab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.tabTypes.workspace) {
             return selectedWorkspace?.deletedAt ? 'InActive' : 'Active';
         }
         
@@ -84,11 +83,11 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
     // Get item ID based on tab type
     const _itemId = (() => {
-        if (!tab) return null;
+        if (!activeTab) return null;
         
-        if (tab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.tabTypes.note) {
             return selectedNote?.id || null;
-        } else if (tab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.tabTypes.workspace) {
             return selectedWorkspace?.id || null;
         }
         
@@ -96,15 +95,15 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     })();
 
     // Handle Save - routes to appropriate service
-    const handleSave = async () => {
-        if (!tab) return;
+    const handleSave = useCallback(async () => {
+        if (!activeTab) return;
 
         setIsSaving(true);
         try {
-            if (tab.type === constants.tabTypes.note) {
+            if (activeTab.type === constants.tabTypes.note) {
                 // Use existing note save logic
-                await saveNote(tab.id);
-            } else if (tab.type === constants.tabTypes.workspace) {
+                await saveNote(activeTab.id);
+            } else if (activeTab.type === constants.tabTypes.workspace) {
                 // Workspace save logic
                 if (!selectedWorkspace) return;
 
@@ -135,7 +134,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
                     // Update tab with saved data
                     setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                        t.id === tab.id && t.type === constants.tabTypes.workspace
+                        t.id === activeTab.id && t.type === constants.tabTypes.workspace
                             ? { ...t, data: updatedWorkspace, title: updatedWorkspace.name, hasUnsavedChanges: false }
                             : t
                     ));
@@ -157,33 +156,33 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
             if (isUnauthorizedError(error)) {
                 enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
             } else {
-                enqueueSnackbar(`Failed to save ${tab.type}: ${errorMessage}`, { variant: 'error' });
+                enqueueSnackbar(`Failed to save ${activeTab.type}: ${errorMessage}`, { variant: 'error' });
             }
         } finally {
             setIsSaving(false);
         }
-    }
+    }, [activeTab, selectedNote, selectedWorkspace, saveNote, setIsSaving, setOpenTabs, setSelectedWorkspace, loadWorkspaces, enqueueSnackbar, auth.userToken]);
 
     // Handle Cancel - routes to appropriate reset logic
-    const handleCancel = () => {
-        if (!tab) return;
+    const handleCancel = useCallback(() => {
+        if (!activeTab) return;
 
-        if (tab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.tabTypes.note) {
             cancelChanges();
-        } else if (tab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.tabTypes.workspace) {
             resetWorkspace();
         }
-    }
+    }, [activeTab, cancelChanges, resetWorkspace]);
 
     // Handle Undo - restore deleted item
-    const handleUndo = async () => {
-        if (!tab || !tab.isDeleted) return;
+    const handleUndo = useCallback(async () => {
+        if (!activeTab || !activeTab.isDeleted) return;
 
         setIsUndoing(true);
         try {
             const token = auth.userToken;
 
-            if (tab.type === constants.tabTypes.note && selectedNote) {
+            if (activeTab.type === constants.tabTypes.note && selectedNote) {
                 const result = await _undoDeleteNote(token, selectedNote.id);
                 
                 // Check API response success
@@ -193,7 +192,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
                 // Update tab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === tab.id && t.type === constants.tabTypes.note
+                    t.id === activeTab.id && t.type === constants.tabTypes.note
                         ? { ...t, isDeleted: false }
                         : t
                 ));
@@ -202,7 +201,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                 await loadNotes();
 
                 enqueueSnackbar('Note restored successfully', { variant: 'success' });
-            } else if (tab.type === constants.tabTypes.workspace && selectedWorkspace) {
+            } else if (activeTab.type === constants.tabTypes.workspace && selectedWorkspace) {
                 const result = await _undoDeleteWs(token, selectedWorkspace.id);
                 if (!result.success) {
                     throw new Error(result.message || 'Failed to restore workspace');
@@ -210,7 +209,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
                 // Update tab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === tab.id && t.type === constants.tabTypes.workspace
+                    t.id === activeTab.id && t.type === constants.tabTypes.workspace
                         ? { ...t, isDeleted: false }
                         : t
                 ));
@@ -228,12 +227,12 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
             if (isUnauthorizedError(error)) {
                 enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
             } else {
-                enqueueSnackbar(`Failed to restore ${tab.type}: ${errorMessage}`, { variant: 'error' });
+                enqueueSnackbar(`Failed to restore ${activeTab.type}: ${errorMessage}`, { variant: 'error' });
             }
         } finally {
             setIsUndoing(false);
         }
-    }
+    }, [activeTab, selectedNote, selectedWorkspace, setIsUndoing, setOpenTabs, loadNotes, loadWorkspaces, enqueueSnackbar, auth.userToken]);
 
     return {
         handleSave,

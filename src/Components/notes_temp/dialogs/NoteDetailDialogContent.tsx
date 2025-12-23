@@ -77,6 +77,12 @@ export function NoteDetailDialogContent() {
     
      // Handlers for form interactions
         const handleFieldChange = (field: keyof Note, value: any) => {
+            console.log('🔵 [FIELD CHANGE] Calling updateSelectedNote:', {
+                field,
+                valueLength: typeof value === 'string' ? value.length : 'N/A',
+                value: field === 'description' ? value : '(other field)',
+                timestamp: new Date().toISOString()
+            });
             updateSelectedNote({ [field]: value });
             console.log(`Field ${field} changed to:`, value);
         };
@@ -140,7 +146,15 @@ export function NoteDetailDialogContent() {
                 <CardContent className="p-0">
                     <Textarea
                         value={selectedNote?.description || ''}
-                        onChange={(e) => handleFieldChange('description', e.target.value)}
+                        onChange={(e) => {
+                            const newValue = e.target.value;
+                            console.log('🔵 [TYPING] Description changed:', {
+                                length: newValue.length,
+                                value: newValue,
+                                timestamp: new Date().toISOString()
+                            });
+                            handleFieldChange('description', newValue);
+                        }}
                         placeholder="Enter note description..."
                         className="min-h-[400px] resize-none font-mono text-sm"
                     />
