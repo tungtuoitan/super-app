@@ -3,13 +3,15 @@
  * Handles Google OAuth 2.0 Authorization Code Flow
  */
 
+import { constants } from '@/utils/constants';
+
 /**
  * Get redirect URI based on environment
  * Auto-detects production URL or uses env variable override
  */
 const getRedirectUri = (): string => {
   // Allow env variable override for custom domains
-  if (process.env.REACT_APP_GOOGLE_REDIRECT_URI && process.env.ENVIRONMENT === 'production') {
+  if (process.env.REACT_APP_GOOGLE_REDIRECT_URI && process.env.ENVIRONMENT === constants.environments.production) {
     return process.env.REACT_APP_GOOGLE_REDIRECT_URI;
   }
 

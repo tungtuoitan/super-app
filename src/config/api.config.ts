@@ -9,6 +9,8 @@
  * - Use .env.local for production URLs (gitignored)
  */
 
+import { constants } from '@/utils/constants';
+
 /**
  * Get the base URL for API requests
  * Prioritizes environment variable, then provides secure fallbacks
@@ -17,7 +19,7 @@
 const getBaseUrl = (): string => {
     // Check if we're in production mode
     // Note: NODE_ENV is automatically set by React build process
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === constants.environments.production) {
         // Use REACT_APP_PRO_API_URL for production (from .env.production)
         return '';
     } else {

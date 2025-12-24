@@ -13,6 +13,7 @@ import { extractAuthCodeFromUrl, extractOAuthError } from '@/utils/googleOAuth';
 import { useAuthCallbackStore } from '@/store/authCallback/AuthCallback.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import { useSnackbar } from 'notistack';
+import { constants } from '@/utils/constants';
 
 /**
  * Auth helper hook for authentication operations
@@ -228,7 +229,7 @@ export function useAuthHelper() {
     const initAuthFromStorageToken = (): boolean => {
         const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
 
-        if (process.env.NODE_ENV === 'development' && token) {
+        if (process.env.NODE_ENV === constants.environments.development && token) {
             // Restore auth state from stored token
             setAuth(prev => ({
                 ...prev,

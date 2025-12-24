@@ -4,6 +4,8 @@
  * Environment-based configuration with secure defaults
  */
 
+import { constants } from '@/utils/constants';
+
 /**
  * Main application configuration
  * Contains app metadata and feature flags based on environment variables
@@ -11,7 +13,7 @@
 export const APP_CONFIG = {
     name: 'SuperApp',
     version: '0.1.0',
-    environment: process.env.ENVIRONMENT || process.env.NODE_ENV || 'development',
+    environment: process.env.ENVIRONMENT || process.env.NODE_ENV || constants.environments.development,
     enableLogging: process.env.REACT_APP_ENABLE_LOGGING === 'true',
     enableDarkMode: process.env.REACT_APP_ENABLE_DARK_MODE === 'true',
 } as const;
