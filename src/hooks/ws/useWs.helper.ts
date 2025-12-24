@@ -83,22 +83,26 @@ export const useWsHelper = () => {
 
     /**
      * Sync workspace grid changes to open tabs
-     * @param action - The action performed on workspaces ('delete', 'restore', etc.)
+     * @param action - The action performed on workspaces ('delete', 'restore', 'hardDelete')
      * @param workspaceIds - Array of workspace IDs affected
      */
-    const syncWsGridToTab = (action: 'delete' | 'restore', workspaceIds: number[]) => {
+    const syncWsGridToTab = (action: 'delete' | 'restore' | 'hardDelete', workspaceIds: number[]) => {
         if (workspaceIds.length === 0) return;
 
         //* LOGIC: data trong Tab luôn là data cũ (tức là data mà user đang thao tác), k sync với db, nó chỉ sync những gì user thao tác
         const updatedTabs = openTabs.map((tab: BaseTab) => {
             if (tab.type === constants.vscode.tab.tabTypes.workspace && workspaceIds.includes((tab as any).data.id)) {
+                const wsData = tab.data as Ws;
                 switch (action) {
                     case 'delete':
-                        // Mark tab as deleted instead of closing it
-                        return { ...tab, isDeleted: true };
+                        // Mark tab data as soft deleted
+                        return { ...tab, data: { ...wsData, deletedAt: new Date() } };
                     case 'restore':
                         // Remove deleted flag when restoring
-                        return { ...tab, isDeleted: false };
+                        return { ...tab, data: { ...wsData, deletedAt: null, isHardDeleted: false } };
+                    case 'hardDelete':
+                        // Mark tab data as hard deleted
+                        return { ...tab, data: { ...wsData, deletedAt: null, isHardDeleted: true } };
                     default:
                         return tab;
                 }
@@ -158,9 +162,9 @@ export const useWsHelper = () => {
                 enqueueSnackbar(`Successfully ${action} ${selectedIds.length} workspace(s)`, {
                     variant: 'success'
                 });
-                // ✅ Chỉ sync tabs khi delete API thành công
+                // ✅ Sync tabs theo loại delete
                 if (selectedIds.length > 0) {
-                    syncWsGridToTab('delete', selectedIds);
+                    syncWsGridToTab(isHardDelete ? 'hardDelete' : 'delete', selectedIds);
                 }
     
                 // Clear selection and reload workspaces

@@ -156,11 +156,13 @@ export const _upsertNote = async (
  * 
  * @param token - Authentication token
  * @param noteId - Single note ID or comma-separated IDs
+ * @param isHardDelete - If true, permanently delete; if false, soft delete (default)
  * @returns void or rejects with response
  */
 export const _deleteNote = async (
     token: string,
-    noteId: number | string
+    noteId: number | string,
+    isHardDelete: boolean = false
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -173,10 +175,9 @@ export const _deleteNote = async (
         headers: headers,
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/notes/${noteId}`,
-        options
-    );
+    const url = `${config.api.baseURL}/api/notes/${noteId}${isHardDelete ? '?isHardDelete=true' : ''}`;
+
+    const res = await window.fetch(url, options);
 
     if (res.ok) {
         const result = await res.json() as ResultOptions;

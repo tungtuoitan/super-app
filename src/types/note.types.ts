@@ -44,6 +44,7 @@ export interface Note {
     createdAt: Date;
     updatedAt?: Date;
     deletedAt?: Date; // Track if note is deleted (soft delete)
+    isHardDeleted?: boolean; // Track if note is permanently deleted (hard delete)
     createdBy?: string; // Optional - may be removed from backend response for security
 }
 

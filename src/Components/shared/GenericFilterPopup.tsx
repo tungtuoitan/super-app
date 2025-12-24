@@ -53,7 +53,7 @@ export function GenericFilterPopup<T>({
             value: 'deleted',
             label: 'Deleted Only',
             icon: Archive,
-            color: 'text-red-500',
+            color: 'text-orange-500',
             description: `Deleted ${entityName.toLowerCase()}`,
         },
     ];

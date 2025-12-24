@@ -98,7 +98,7 @@ export const useNoteGridHelper = () => {
     };    
     
     // Delete selected notes (called from context menu after confirmation)
-    const handleDeleteSelected = async (ids?: number[]) => {
+    const handleDeleteSelected = async (ids?: number[], isHardDelete: boolean = false) => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(rowSelection).map(id => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -121,21 +121,25 @@ export const useNoteGridHelper = () => {
             if (persistedNoteIds.length > 0) {
                 const token = auth.userToken;
                 // Send comma-separated IDs to backend
-                const result = await _deleteNote(token, persistedNoteIds.join(','));
+                const result = await _deleteNote(token, persistedNoteIds.join(','), isHardDelete);
                 
                 // Check API response success
                 if (!result.success) {
                     throw new Error(result.message || 'Failed to delete notes');
                 }
 
-                enqueueSnackbar(`Successfully deleted ${persistedNoteIds.length} note(s)`, {
+                const action = isHardDelete ? 'permanently deleted' : 'deleted';
+                enqueueSnackbar(`Successfully ${action} ${persistedNoteIds.length} note(s)`, {
                     variant: 'success'
                 });
 
-                // Mark opened tabs as deleted instead of closing them
+                // Mark opened tabs as deleted/hard deleted instead of closing them
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
                     if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
-                        return { ...tab, isDeleted: true };
+                        const noteData = tab.data as Note;
+                        return isHardDelete 
+                            ? { ...tab, data: { ...noteData, deletedAt: new Date(), isHardDeleted: true } }
+                            : { ...tab, data: { ...noteData, deletedAt: new Date() } };
                     }
                     return tab;
                 });

@@ -31,12 +31,11 @@ interface EditorToolbarActions {
     // Actions
     handleSave: () => Promise<void>;
     handleCancel: () => void;
-    handleUndo: () => Promise<void>;
+    handleRestore: () => Promise<void>;
     
     // States
     _hasAnyChanges: boolean;
     isSaving: boolean;
-    isUndoing: boolean;
     
     // Info
     _statusText: string;
@@ -48,14 +47,14 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { enqueueSnackbar } = useSnackbar();
     const { activeTabId } = useEditorTabsStore();
     const { getTabById } = useEditorTabHelper();
-    const { isSaving, setIsSaving, isUndoing, setIsUndoing } = useEditorToolbarStore();
+    const { isSaving, setIsSaving } = useEditorToolbarStore();
     
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null;
     const { setOpenTabs,openTabs} = useEditorTabsStore();
     
     // Note-specific
-    const { selectedNote } = useNoteGridStore();
+    const { selectedNote, setSelectedNote } = useNoteGridStore();
     const { noteHasChanges } = useNoteDetailStore();
     
     const { saveNote, cancelChanges } = useEditorDetailHelper();
@@ -192,73 +191,41 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         }
     }, [activeTab, cancelChanges, resetWorkspace]);
 
-    // Handle Undo - restore deleted item
-    const handleUndo = useCallback(async () => {
-        if (!activeTab || !activeTab.isDeleted) return;
+    // Handle Restore - set deletedAt = null (active) then save
+    const handleRestore = useCallback(async () => {
+        if (!activeTab || !activeTab.data.deletedAt) return;
 
-        setIsUndoing(true);
         try {
-            const token = auth.userToken;
-
-            if (activeTab.type === constants.vscode.tab.tabTypes.note && selectedNote) {
-                const result = await _undoDeleteNote(token, selectedNote.id);
-                
-                // Check API response success
-                if (!result.success) {
-                    throw new Error(result.message || 'Failed to restore note');
+            if (activeTab.type === constants.vscode.tab.tabTypes.note) {
+                // Set note as active (deletedAt = null) in selectedNote first
+                if (selectedNote) {
+                    setSelectedNote({ ...selectedNote, deletedAt: undefined });
+                    // Wait a bit for state to update, then save
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    await saveNote(activeTab.id);
                 }
-
-                // Update activeTab to remove isDeleted flag
-                setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === activeTab.id && t.type === constants.vscode.tab.tabTypes.note
-                        ? { ...t, isDeleted: false }
-                        : t
-                ));
-
-                // Reload note grid
-                await loadNotes();
-
-                enqueueSnackbar('Note restored successfully', { variant: 'success' });
-            } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace && selectedWorkspace) {
-                const result = await _undoDeleteWs(token, selectedWorkspace.id);
-                if (!result.success) {
-                    throw new Error(result.message || 'Failed to restore workspace');
+            } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
+                // Set workspace as active (deletedAt = null) first
+                if (selectedWorkspace) {
+                    setSelectedWorkspace({ ...selectedWorkspace, deletedAt: null });
+                    // Wait a bit for state to update, then save
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    await handleSave();
                 }
-
-                // Update activeTab to remove isDeleted flag
-                setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === activeTab.id && t.type === constants.vscode.tab.tabTypes.workspace
-                        ? { ...t, isDeleted: false }
-                        : t
-                ));
-
-                // Reload workspace list
-                await loadWorkspaces();
-
-                enqueueSnackbar('Workspace restored successfully', { variant: 'success' });
             }
         } catch (error) {
             console.error('Failed to restore:', error);
             const errorMessage = await parseApiError(error);
-
-            // Show specific message for unauthorized
-            if (isUnauthorizedError(error)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
-            } else {
-                enqueueSnackbar(`Failed to restore ${activeTab.type}: ${errorMessage}`, { variant: 'error' });
-            }
-        } finally {
-            setIsUndoing(false);
+            enqueueSnackbar(`Failed to restore: ${errorMessage}`, { variant: 'error' });
         }
-    }, [activeTab, selectedNote, selectedWorkspace, setIsUndoing, setOpenTabs, loadNotes, loadWorkspaces, enqueueSnackbar, auth.userToken]);
+    }, [activeTab, selectedNote, selectedWorkspace, saveNote, handleSave, setSelectedNote, setSelectedWorkspace, enqueueSnackbar]);
 
     return {
         handleSave,
         handleCancel,
-        handleUndo,
+        handleRestore,
         _hasAnyChanges,
         isSaving,
-        isUndoing,
         _statusText,
         _itemId,
     };

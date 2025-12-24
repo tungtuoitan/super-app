@@ -10,30 +10,23 @@ export interface EditorToolbarContextData {
     // Loading states for toolbar actions
     isSaving: boolean;
     setIsSaving: Dispatch<SetStateAction<boolean>>;
-    isUndoing: boolean;
-    setIsUndoing: Dispatch<SetStateAction<boolean>>;
 }
 
 export const editorToolbarContextDefaultValue: EditorToolbarContextData = {
     isSaving: false,
     setIsSaving: () => {},
-    isUndoing: false,
-    setIsUndoing: () => {},
 };
 
 export const EditorToolbarStore = createContext<EditorToolbarContextData>(editorToolbarContextDefaultValue);
 
 export const EditorToolbarProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
-    const [isUndoing, setIsUndoing] = useState<boolean>(false);
 
     return (
         <EditorToolbarStore.Provider
             value={{
                 isSaving,
                 setIsSaving,
-                isUndoing,
-                setIsUndoing,
             }}
         >
             {children}
