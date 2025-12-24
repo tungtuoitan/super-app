@@ -13,6 +13,7 @@ import { _moveWorkspaceItems } from '@/services/workspace.service';
 import type { MoveItemsRequest } from '@/types/workspace.types';
 import { Folder } from '@/types/index';
 import { useSnackbar } from 'notistack';
+import { useAuthStore } from '@/store/auth/Auth.store';
 
 export const useTreeOperation = () => {
     const {
@@ -27,6 +28,7 @@ export const useTreeOperation = () => {
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceOperation();
     const { enqueueSnackbar } = useSnackbar();
+    const { auth } = useAuthStore();
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
@@ -220,7 +222,7 @@ export const useTreeOperation = () => {
             };
 
             try {
-                const result = await _moveWorkspaceItems('', workspaceId, moveRequest);
+                const result = await _moveWorkspaceItems(auth.userToken, workspaceId, moveRequest);
                 console.log(`✅ Successfully moved ${moveRequest.items.length} item(s):`, result);
                 
                 // Show success toast
