@@ -5,7 +5,7 @@
  */
 
 import React, {useEffect} from 'react';
-import {useEditorActionsHelper} from '@/hooks/useEditorActions.helper';
+import {useEditorDetailHelper} from '@/hooks/useEditorDetail.helper';
 import {useEditorTabsStore} from '@/store/index';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {BaseTab} from '@/types/editor/tab.types';
@@ -16,7 +16,7 @@ interface NoteEditorPanelProps {
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { syncTabChangeState } = useEditorActionsHelper();
+    const { syncTabChangeState } = useEditorDetailHelper();
     const { noteHasChanges } = useNoteDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     

@@ -17,7 +17,7 @@ export { useAuthHelper } from './useAuth.helpers';
 export * from './useNoteDetail.helper';
 export * from './useNoteTab.helper';
 export * from './useEditorTab.helper';
-export * from './useEditorActions.helper';
+export * from './useEditorDetail.helper';
 export * from './useActivityBar.helper';
 
 export * from './useContextMenu.helper';

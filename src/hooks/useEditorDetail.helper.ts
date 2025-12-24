@@ -21,7 +21,7 @@ import { transformNoteData } from '@/utils/note.utils';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 
-export const useEditorActionsHelper = () => {
+export const useEditorDetailHelper = () => {
     const { auth } = useAuthStore();
     const { selectedNote } = useNoteGridStore();
     const { noteHasChanges } = useNoteDetailStore();

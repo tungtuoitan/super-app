@@ -9,7 +9,7 @@ import { useSnackbar } from 'notistack';
 import type { BaseTab } from '@/types/editor/tab.types';
 import type { Note } from '@/types/note.types';
 import { constants } from '@/utils/constants';
-import { useEditorActionsHelper } from './useEditorActions.helper';
+import { useEditorDetailHelper } from './useEditorDetail.helper';
 import { useEditorTabHelper } from './useEditorTab.helper';
 import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
 import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
@@ -58,7 +58,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { selectedNote } = useNoteGridStore();
     const { noteHasChanges } = useNoteDetailStore();
     
-    const { saveNote, cancelChanges } = useEditorActionsHelper();
+    const { saveNote, cancelChanges } = useEditorDetailHelper();
     const { loadNotes } = useNoteGridHelper();
     
     // Workspace-specific
