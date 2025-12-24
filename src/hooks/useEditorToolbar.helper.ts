@@ -11,8 +11,8 @@ import type { Note } from '@/types/note.types';
 import { constants } from '@/utils/constants';
 import { useEditorActionsHelper } from './useEditorActions.helper';
 import { useEditorTabHelper } from './useEditorTab.helper';
-import { useNoteUIStore } from '@/store/note/useNoteUI.store';
-import { useWsUIStore } from '@/store/ws/useWsUI.store';
+import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
+import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
 import { useEditorTabsStore } from '@/store/index';
 import { useEditorToolbarStore } from '@/store/editor/EditorToolbar.store';
 import { storageService } from '@/services/storage.service';
@@ -22,9 +22,9 @@ import { _upsertWs } from '@/services/ws.service';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import { useNoteGridHelper } from './useNoteGrid.helper';
-import { useWsListHelper } from './useWsList.helper';
-import { useWsUIHelper } from './useWsUI.helper';
-import { Ws } from '@/store/ws/useWsList.store';
+import { useWsHelper } from './useWs.helper';
+import { useWsDetailHelper } from './useWsDetail.helper';
+import { Ws } from '@/store/ws/useWs.store';
 
 interface EditorToolbarActions {
     // Actions
@@ -54,15 +54,15 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { setOpenTabs,openTabs} = useEditorTabsStore();
     
     // Note-specific
-    const { selectedNote, noteHasChanges } = useNoteUIStore();
+    const { selectedNote, noteHasChanges } = useNoteDetailStore();
     
     const { saveNote, cancelChanges } = useEditorActionsHelper();
     const { loadNotes } = useNoteGridHelper();
     
     // Workspace-specific
-    const { selectedWorkspace, wsHasChanges, setSelectedWorkspace } = useWsUIStore();
-    const { resetWorkspace } = useWsUIHelper();
-    const { loadWorkspaces } = useWsListHelper();
+    const { selectedWorkspace, wsHasChanges, setSelectedWorkspace } = useWsDetailStore();
+    const { resetWorkspace } = useWsDetailHelper();
+    const { loadWorkspaces } = useWsHelper();
 
     // Determine if any entity has unsaved changes based on tab type
     const _hasAnyChanges = activeTab?.type === constants.vscode.tab.tabTypes.note ? noteHasChanges : 

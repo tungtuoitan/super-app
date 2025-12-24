@@ -4,7 +4,7 @@
  */
 
 import {Note} from "@/types/note.types";
-import {Ws} from "@/store/ws/useWsList.store";
+import {Ws} from "@/store/ws/useWs.store";
 import { constants } from '@/utils/constants';
 
 

@@ -14,7 +14,7 @@ export * from './useAuth.helpers';
 export { useAuthHelper } from './useAuth.helpers';
 
 // UI helpers
-export * from './useNoteUI.helper';
+export * from './useNoteDetail.helper';
 export * from './useNoteTab.helper';
 export * from './useEditorTab.helper';
 export * from './useEditorActions.helper';

@@ -15,7 +15,7 @@ import {
 } from '@/Components/ui/tooltip';
 import {useEditorTabsStore} from '@/store/index';
 import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
-import {useNoteUIStore} from '@/store/note/useNoteUI.store';
+import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {useEditorToolbarHelper} from '@/hooks/useEditorToolbar.helper';
 import { constants } from '@/utils/constants';
 

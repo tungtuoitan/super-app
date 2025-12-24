@@ -3,7 +3,7 @@
  * Helper functions for managing workspace editor tabs
  */
 
-import { Ws } from '@/store/ws/useWsList.store';
+import { Ws } from '@/store/ws/useWs.store';
 import { BaseTab } from '@/types/editor/tab.types';
 import {useEditorTabsStore} from '../store';
 import { constants } from '@/utils/constants';

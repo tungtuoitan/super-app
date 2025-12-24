@@ -1,13 +1,11 @@
-import {useNoteUIStore} from '@/store/note/useNoteUI.store'
+import {useNoteDetailStore} from '@/store/note/useNoteDetail.store'
 import { X, FileText, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Panel } from 'react-resizable-panels'
+import { useActivityBarStore } from '@/store/index'
 
 interface VSPanelProps {
-  isVisible: boolean
   onClose: () => void
-  onCollapse?: () => void
-  onExpand?: () => void
 }
 
 type PanelTab = 'noteDetail' | 'properties'
@@ -23,8 +21,9 @@ type PanelTab = 'noteDetail' | 'properties'
  * - When collapsed, panel size goes to 0 but resize handle remains visible
  * - User can drag the resize handle to expand the panel again (like VSCode)
  */
-export function VSPanel({ isVisible, onClose, onCollapse, onExpand }: VSPanelProps) {
+export function VSPanel({ onClose }: VSPanelProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>('noteDetail')
+  const { isPanelVisible, setIsPanelVisible } = useActivityBarStore()
 
   return (
     <Panel 
@@ -34,10 +33,10 @@ export function VSPanel({ isVisible, onClose, onCollapse, onExpand }: VSPanelPro
       maxSize={60}
       collapsible
       collapsedSize={0}
-      onCollapse={onCollapse}
-      onExpand={onExpand}
+      onCollapse={() => setIsPanelVisible(false)}
+      onExpand={() => setIsPanelVisible(true)}
     >
-      {isVisible && (
+      {isPanelVisible && (
         <div className="h-full border-t border-editor-border bg-editor-bg flex flex-col overflow-hidden">
           {/* Tabs Header */}
           <div className="flex items-center justify-between border-b border-editor-border h-[35px]">
@@ -89,7 +88,7 @@ export function VSPanel({ isVisible, onClose, onCollapse, onExpand }: VSPanelPro
  * Note Detail Tab - Display selected note details
  */
 function NoteDetailTab() {
-  const { selectedNote } = useNoteUIStore()
+  const { selectedNote } = useNoteDetailStore()
 
   if (!selectedNote) {
     return (
@@ -129,7 +128,7 @@ function NoteDetailTab() {
  * Properties Tab - Display note properties
  */
 function PropertiesTab() {
-  const { selectedNote } = useNoteUIStore()
+  const { selectedNote } = useNoteDetailStore()
 
   if (!selectedNote) {
     return (

@@ -5,4 +5,4 @@
 
 export { WsGrid } from './WsGrid';
 export { WsEditorPanel } from './WsEditorPanel';
-export { WsDetailDialogContent } from './WsDetailDialogContent';
+export { WsDetailContent } from './WsDetailContent';

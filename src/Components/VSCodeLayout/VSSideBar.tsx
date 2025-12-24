@@ -1,18 +1,16 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import type { ActivityBarView } from '@/utils/constants'
-import { NoteGrid } from '../notes_temp/NoteGrid'
+import { NoteGrid } from '../Note/NoteGrid'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import { WorkspaceView } from './WorkspaceView'
 import { WorkspaceListView } from './WorkspaceListView'
 import { GridControlBar } from '@/Components/shared/GridControlBar'
 import { GridControlProvider } from '@/store/grid/useGridControl.store'
 import { constants } from '@/utils/constants'
+import { useActivityBarStore } from '@/store/index'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
-  isVisible: boolean
-  onCollapse?: () => void  
-  onExpand?: () => void
 }
 
 /**
@@ -30,7 +28,9 @@ interface VSSideBarProps {
  * - When collapsed, panel size goes to 0 but resize handle remains visible
  * - User can drag the resize handle to expand the panel again (like VSCode)
  */
-export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSideBarProps) {
+export function VSSideBar({ activeView }: VSSideBarProps) {
+  const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore()
+
   return (
     <Panel
       id="sidebar"
@@ -39,11 +39,11 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
       maxSize={40}
       collapsible
       collapsedSize={0}
-      onCollapse={onCollapse}
-      onExpand={onExpand}
+      onCollapse={() => setIsSideBarVisible(false)}
+      onExpand={() => setIsSideBarVisible(true)}
     >
       {/* Only render inner panels when visible to avoid mounting when hidden */}
-      {isVisible && (
+      {isSideBarVisible && (
         <GridControlProvider>
           {/* Use a vertical PanelGroup to split the sidebar into two stacked panels */}
           <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">

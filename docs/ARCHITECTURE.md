@@ -256,7 +256,7 @@ class ValidationError extends Error {
 
 ## 🎪 Provider Hierarchy
 
-- Centralized ở Main.tsx: BrowserRouter, SnackbarProvider, AuthProvider, NoteUIProvider, v.v.
+- Centralized ở Main.tsx: BrowserRouter, SnackbarProvider, AuthProvider, NoteDetailProvider, v.v.
 - Pages: Direct dùng context, không wrap provider.
 
 ## 🚀 Performance Considerations

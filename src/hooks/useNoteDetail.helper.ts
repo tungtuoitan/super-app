@@ -1,7 +1,7 @@
-import {useNoteUIStore} from '@/store/note/useNoteUI.store';
+import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import { Note } from '@/types/note.types';
 
-export const useNoteUIHelper = () => {
+export const useNoteDetailHelper = () => {
     const {
         selectedNote,
         setSelectedNote,
@@ -10,7 +10,7 @@ export const useNoteUIHelper = () => {
         noteHasChanges,
         setNoteHasChanges,
         originalNoteRef,
-    } = useNoteUIStore();
+    } = useNoteDetailStore();
 
     const openDialog = (note: Note) => {
 

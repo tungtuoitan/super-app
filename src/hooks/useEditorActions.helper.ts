@@ -10,11 +10,11 @@ import { _upsertNote } from '@/services/note.service';
 import { _addItemToWorkspace } from '@/services/workspace.service';
 import { storageService } from '@/services/storage.service';
 import { constants } from '@/utils/constants';
-import { useNoteUIHelper } from './useNoteUI.helper';
+import { useNoteDetailHelper } from './useNoteDetail.helper';
 import { useEditorTabHelper } from './useEditorTab.helper';
 import { useNoteGridHelper } from './useNoteGrid.helper';
 import { useWorkspaceOperation } from './explorer/useWorkspaceOperation.helper';
-import { useNoteUIStore } from '@/store/note/useNoteUI.store';
+import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { transformNoteData } from '@/utils/note.utils';
 import { useAuthStore } from '@/store/auth/Auth.store';
@@ -22,8 +22,8 @@ import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 
 export const useEditorActionsHelper = () => {
     const { auth } = useAuthStore();
-    const { selectedNote, noteHasChanges } = useNoteUIStore();
-    const { setSelectedNote, markAsSaved, resetChanges } = useNoteUIHelper();
+    const { selectedNote, noteHasChanges } = useNoteDetailStore();
+    const { setSelectedNote, markAsSaved, resetChanges } = useNoteDetailHelper();
     const { updateTabNote, markTabAsChanged } = useEditorTabHelper();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceOperation();

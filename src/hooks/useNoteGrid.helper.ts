@@ -1,6 +1,6 @@
 import {_deleteNote, _getNotes} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
-import {useNoteUIStore} from '@/store/note/useNoteUI.store';
+import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import { Note } from '@/types/note.types';
 import {collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotesData} from '../utils';
 import {useEffect} from 'react';
@@ -35,7 +35,7 @@ export const useNoteGridHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
-    const { setShouldFocusNoteName } = useNoteUIStore();
+    const { setShouldFocusNoteName } = useNoteDetailStore();
 
     // Create new note (temporary with negative ID)
     const createNewNote = () => {

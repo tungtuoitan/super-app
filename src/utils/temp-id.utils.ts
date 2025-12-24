@@ -9,7 +9,7 @@
 import type { BaseTab } from '@/types/editor/tab.types';
 import type { Note } from '@/types/note.types';
 import { constants } from '@/utils/constants';
-import type { Ws } from '@/store/ws/useWsList.store';
+import type { Ws } from '@/store/ws/useWs.store';
 
 /**
  * Collect all IDs from open tabs

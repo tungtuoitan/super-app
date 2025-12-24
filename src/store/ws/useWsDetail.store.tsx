@@ -4,9 +4,9 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from 'react';
-import { Ws } from './useWsList.store';
+import { Ws } from './useWs.store';
 
-export interface WsUIContextData {
+export interface WsDetailContextData {
     selectedWorkspace: Ws | null;
     setSelectedWorkspace: Dispatch<SetStateAction<Ws | null>>;
     isDialogOpen: boolean;
@@ -19,7 +19,7 @@ export interface WsUIContextData {
     setShouldFocusWsName: Dispatch<SetStateAction<boolean>>;
 }
 
-export const wsUIContextDefaultValue: WsUIContextData = {
+export const wsDetailContextDefaultValue: WsDetailContextData = {
     selectedWorkspace: null,
     setSelectedWorkspace: () => {},
     isDialogOpen: false,
@@ -32,11 +32,11 @@ export const wsUIContextDefaultValue: WsUIContextData = {
     setShouldFocusWsName: () => {},
 };
 
-export const WsUIStore = createContext<WsUIContextData>(wsUIContextDefaultValue);
+export const WsDetailStore = createContext<WsDetailContextData>(wsDetailContextDefaultValue);
 
-export const useWsUIStore = () => useContext(WsUIStore);
+export const useWsDetailStore = () => useContext(WsDetailStore);
 
-export const WsUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const WsDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [selectedWorkspace, setSelectedWorkspace] = useState<Ws | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const [wsHasChanges, setWsHasChanges] = useState<boolean>(false);
@@ -45,7 +45,7 @@ export const WsUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
     const [shouldFocusWsName, setShouldFocusWsName] = useState<boolean>(false);
 
     return (
-        <WsUIStore.Provider
+        <WsDetailStore.Provider
             value={{
                 selectedWorkspace,
                 setSelectedWorkspace,
@@ -60,6 +60,6 @@ export const WsUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
             }}
         >
             {children}
-        </WsUIStore.Provider>
+        </WsDetailStore.Provider>
     );
 };

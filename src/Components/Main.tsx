@@ -13,11 +13,11 @@ import { ConfirmationPopoverContainer } from '@/Components/ConfirmationPopover';
 import MainNav from './MainNav/MainNav';
 import {DialogProvider, EditorTabProvider} from '@/store/index';
 import { EditorToolbarProvider } from '@/store/editor/EditorToolbar.store';
-import {NoteUIProvider} from '@/store/note/useNoteUI.store';
+import {NoteDetailProvider} from '@/store/note/useNoteDetail.store';
 import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanel.store';
 import { NavProvider } from '@/contexts/NavigationContext';
-import { WsListProvider } from '@/store/ws/useWsList.store';
-import { WsUIProvider } from '@/store/ws/useWsUI.store';
+import { WsListProvider } from '@/store/ws/useWs.store';
+import { WsDetailProvider } from '@/store/ws/useWsDetail.store';
 import { ActivityBarProvider } from '@/store/index'
 import { AuthCallbackProvider } from '@/store/index'
 import { AuthGuard } from '@/Components/Auth/AuthGuard';
@@ -55,8 +55,8 @@ export function Main() {
                             <ExplorerProvider>
                                 <FolderDialogProvider>
                                     <WsListProvider>
-                                        <WsUIProvider>
-                                            <NoteUIProvider>
+                                        <WsDetailProvider>
+                                            <NoteDetailProvider>
                                                 <NoteGridPanelProvider>
                                                     <EditorTabProvider>
                                                         <EditorToolbarProvider>
@@ -75,8 +75,8 @@ export function Main() {
                                                     </EditorToolbarProvider>
                                                 </EditorTabProvider>
                                                 </NoteGridPanelProvider>
-                                            </NoteUIProvider>
-                                        </WsUIProvider>
+                                            </NoteDetailProvider>
+                                        </WsDetailProvider>
                                     </WsListProvider>
                                 </FolderDialogProvider>
                             </ExplorerProvider>

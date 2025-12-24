@@ -2,7 +2,7 @@ import React from 'react'
 import { X } from 'lucide-react'
 import { NoteEditorPanel, ConfirmCloseDialog, EditorToolbar } from '@/Components/Editor'
 import {useEditorTabHelper} from '@/hooks/useEditorTab.helper'
-import {useNoteUIStore} from '@/store/note/useNoteUI.store'
+import {useNoteDetailStore} from '@/store/note/useNoteDetail.store'
 import { WsEditorPanel } from '@/Components/Workspace'
 import {useEditorTabsStore} from '@/store/index'
 import {BaseTab} from '@/types/editor/tab.types'
@@ -18,7 +18,7 @@ import { constants } from '@/utils/constants'
 export function VSEditorArea() {
   const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
   const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
-  const { selectedNote, setSelectedNote } = useNoteUIStore()
+  const { selectedNote, setSelectedNote } = useNoteDetailStore()
 
   // Get active tab
   const activeTab = activeTabId ? getTabById(activeTabId) : null

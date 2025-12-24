@@ -1,11 +1,11 @@
 import {Note} from "@/types/note.types";
-import {useNoteUIStore} from "../store/note/useNoteUI.store";
+import {useNoteDetailStore} from "../store/note/useNoteDetail.store";
 import {useNoteGridPanelStore} from "../store/note/useNoteGridPanel.store";
 import {BaseTab} from "@/types/editor/tab.types";
 import {useEditorTabsStore} from "../store";
 import { constants } from '@/utils/constants';
-import { useWsUIStore } from '@/store/ws/useWsUI.store';
-import { Ws } from '@/store/ws/useWsList.store';
+import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
+import { Ws } from '@/store/ws/useWs.store';
 
 
 export const useEditorTabHelper = () => {
@@ -17,9 +17,9 @@ export const useEditorTabHelper = () => {
         confirmCloseTabId, 
         setConfirmCloseTabId,
     } = useEditorTabsStore();
-    const { setSelectedNote, originalNoteRef, setNoteHasChanges } = useNoteUIStore();
+    const { setSelectedNote, originalNoteRef, setNoteHasChanges } = useNoteDetailStore();
     const { setNotes } = useNoteGridPanelStore();
-    const { setSelectedWorkspace, originalWsRef, setWsHasChanges } = useWsUIStore();
+    const { setSelectedWorkspace, originalWsRef, setWsHasChanges } = useWsDetailStore();
 
     /**
      * Update active tab ID and sync selectedNote

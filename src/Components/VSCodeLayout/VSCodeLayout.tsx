@@ -43,8 +43,7 @@ interface VSCodeLayoutProps {
  */
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
   const { activeView } = useNavigationStore()
-  const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore()
-  const [isPanelVisible, setIsPanelVisible] = useState(true)
+  const { isSideBarVisible, setIsSideBarVisible, isPanelVisible, setIsPanelVisible } = useActivityBarStore()
 
   return (
     <div
@@ -68,9 +67,6 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
           {/* Side Bar - Always rendered to allow resize handle interaction */}
           <VSSideBar
             activeView={activeView}
-            isVisible={isSideBarVisible}
-            onCollapse={() => setIsSideBarVisible(false)}
-            onExpand={() => setIsSideBarVisible(true)}
           />
 
           {/* Resize handle - Always visible to allow re-expanding */}
@@ -96,10 +92,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
 
               {/* Bottom Panel - NoteDetail and Properties */}
               <VSPanel 
-                isVisible={isPanelVisible} 
                 onClose={() => setIsPanelVisible(false)}
-                onCollapse={() => setIsPanelVisible(false)}
-                onExpand={() => setIsPanelVisible(true)}
               />
             </PanelGroup>
           </Panel>

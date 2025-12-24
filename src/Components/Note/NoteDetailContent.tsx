@@ -11,9 +11,9 @@ import { Textarea } from '@/Components/ui/textarea';
 import { Badge } from '@/Components/ui/badge';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-react';
-import {useNoteUIHelper} from '../../../hooks/useNoteUI.helper';
-import {Note, NOTE_TYPES, NoteType} from '../../../types/note.types';
-import {useNoteUIStore} from '@/store/note/useNoteUI.store';
+import {useNoteDetailHelper} from '../../hooks/useNoteDetail.helper';
+import {Note, NOTE_TYPES, NoteType} from '../../types/note.types';
+import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {formatNoteDate} from '@/utils/note.utils';
 
 /**
@@ -23,9 +23,9 @@ import {formatNoteDate} from '@/utils/note.utils';
  * - Center: Note content/description
  * - Right: Actions/metadata
  */
-export function NoteDetailDialogContent() {
-    const { selectedNote, isDialogOpen, noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteUIStore();
-    const { closeDialog, updateSelectedNote } = useNoteUIHelper();
+export function NoteDetailContent() {
+    const { selectedNote, isDialogOpen, noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteDetailStore();
+    const { closeDialog, updateSelectedNote } = useNoteDetailHelper();
     
     const [noteKey, setNoteKey] = React.useState(0);
     useEffect(() => {

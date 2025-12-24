@@ -113,7 +113,7 @@ export const noteService = new NoteService();
 // features/notes/store/NoteUIContext.tsx
 const NoteUIContext = createContext<NoteUIValue | null>(null);
 
-export function NoteUIProvider({ children }) {
+export function NoteDetailProvider({ children }) {
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     return (
         <NoteUIContext.Provider value={{ selectedNote, setSelectedNote }}>
@@ -122,9 +122,9 @@ export function NoteUIProvider({ children }) {
     );
 }
 
-export function useNoteUIStore() {
+export function useNoteDetailStore() {
     const ctx = useContext(NoteUIContext);
-    if (!ctx) throw new Error('useNoteUIStore requires NoteUIProvider');
+    if (!ctx) throw new Error('useNoteDetailStore requires NoteDetailProvider');
     return ctx;
 }
 ```
@@ -135,9 +135,9 @@ function Main() {
     return (
         <QueryClientProvider>
             <AuthProvider>
-                <NoteUIProvider>
+                <NoteDetailProvider>
                     <App />
-                </NoteUIProvider>
+                </NoteDetailProvider>
             </AuthProvider>
         </QueryClientProvider>
     );

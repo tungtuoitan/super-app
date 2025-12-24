@@ -13,7 +13,7 @@ interface DialogProps {
     loading: boolean;
 }
 
-export interface NoteUIContextData {
+export interface NoteDetailContextData {
     // Dialog state
     selectedNote: Note | null;
     isDialogOpen: boolean;
@@ -65,7 +65,7 @@ export interface NoteUIContextData {
     setPreviewDialogProps: Dispatch<SetStateAction<DialogProps>>;
 }
 
-export const noteUIContextDefaultValue: NoteUIContextData = {
+export const noteDetailContextDefaultValue: NoteDetailContextData = {
     // Dialog state
     selectedNote: null,
     isDialogOpen: false,
@@ -115,11 +115,11 @@ export const noteUIContextDefaultValue: NoteUIContextData = {
     setShouldFocusNoteName: () => {},
 };
 
-const NoteUIContext = createContext<NoteUIContextData>(noteUIContextDefaultValue);
+const NoteDetailContext = createContext<NoteDetailContextData>(noteDetailContextDefaultValue);
 
-export const useNoteUIStore = () => useContext(NoteUIContext);
+export const useNoteDetailStore = () => useContext(NoteDetailContext);
 
-export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Dialog state
     const [selectedNote, setSelectedNoteState] = useState<Note | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -172,7 +172,7 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     const [shouldFocusNoteName, setShouldFocusNoteName] = useState(false);
 
     return (
-        <NoteUIContext.Provider
+        <NoteDetailContext.Provider
             value={{
                 // Dialog state
                 selectedNote,
@@ -224,7 +224,7 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
             }}
         >
             {children}
-        </NoteUIContext.Provider>
+        </NoteDetailContext.Provider>
     );
 }
 

@@ -7,7 +7,7 @@ import { _deleteWs, _getWsList, _undoDeleteWs, WsDTO } from '@/services/ws.servi
 import { storageService } from '@/services/storage.service';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useSnackbar } from 'notistack';
-import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
+import { useWsListStore, Ws } from '@/store/ws/useWs.store';
 import { constants } from '@/utils/constants';
 import { useWsTabHelper } from './useWsTab.helper';
 import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
@@ -15,7 +15,7 @@ import {BaseTab} from '@/types/editor/tab.types';
 import {useEditorTabsStore} from '../store';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import { useWsUIStore } from '@/store/ws/useWsUI.store';
+import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
  */
@@ -31,7 +31,7 @@ const transformWsData = (dtos: WsDTO[]): Ws[] => {
     }));
 };
 
-export const useWsListHelper = () => {
+export const useWsHelper = () => {
     const { auth } = useAuthStore();
     const {
         workspaces,
@@ -46,7 +46,7 @@ export const useWsListHelper = () => {
     const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
     const { openWorkspaceTab } = useWsTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
-    const { setShouldFocusWsName } = useWsUIStore();
+    const { setShouldFocusWsName } = useWsDetailStore();
 
     /**
      * Load workspaces from API

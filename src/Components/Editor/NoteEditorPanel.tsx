@@ -1,23 +1,23 @@
 /**
  * Note Editor Panel
- * Reuses NoteDetailDialogContent for editor area tabs
+ * Reuses NoteDetailContent for editor area tabs
  * Toolbar is now shared in VSEditorArea
  */
 
 import React, {useEffect} from 'react';
-import {NoteDetailDialogContent} from '@/Components/notes_temp/dialogs/NoteDetailDialogContent';
 import {useEditorActionsHelper} from '@/hooks/useEditorActions.helper';
 import {useEditorTabsStore} from '@/store/index';
-import {useNoteUIStore} from '@/store/note/useNoteUI.store';
+import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {BaseTab} from '@/types/editor/tab.types';
-
+import {NoteDetailContent} from '../Note/NoteDetailContent';
+ 
 interface NoteEditorPanelProps {
     tab: BaseTab;
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     const { syncTabChangeState } = useEditorActionsHelper();
-    const { noteHasChanges } = useNoteUIStore();
+    const { noteHasChanges } = useNoteDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -53,7 +53,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                 onScroll={handleScroll}
                 className="flex-1 overflow-auto bg-background"
             >
-                <NoteDetailDialogContent />
+                <NoteDetailContent />
             </div>
         </div>
     );

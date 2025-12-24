@@ -3,10 +3,10 @@
  * Business logic for workspace UI interactions
  */
 
-import { useWsUIStore } from '@/store/ws/useWsUI.store';
-import { Ws } from '@/store/ws/useWsList.store';
+import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
+import { Ws } from '@/store/ws/useWs.store';
 
-export const useWsUIHelper = () => {
+export const useWsDetailHelper = () => {
     const {
         selectedWorkspace,
         setSelectedWorkspace,
@@ -15,7 +15,7 @@ export const useWsUIHelper = () => {
         wsHasChanges,
         setWsHasChanges,
         originalWsRef,
-    } = useWsUIStore();
+    } = useWsDetailStore();
 
     /**
      * Open workspace detail dialog

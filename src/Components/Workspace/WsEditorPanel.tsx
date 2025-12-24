@@ -6,19 +6,19 @@
 
 import React, { useEffect } from 'react';
 import type { BaseTab } from '@/types/editor/tab.types';
-import { WsDetailDialogContent } from './WsDetailDialogContent';
-import { useWsUIStore } from '@/store/ws/useWsUI.store';
-import { useWsUIHelper } from '@/hooks/useWsUI.helper';
+import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
+import { useWsDetailHelper } from '@/hooks/useWsDetail.helper';
 import { useEditorTabsStore } from '@/store/index';
-import { Ws } from '@/store/ws/useWsList.store';
+import { Ws } from '@/store/ws/useWs.store';
 import { constants } from '@/utils/constants';
+import {WsDetailContent} from './WsDetailContent';
 
 interface WsEditorPanelProps {
     tab: BaseTab;
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { wsHasChanges, selectedWorkspace } = useWsUIStore();
+    const { wsHasChanges, selectedWorkspace } = useWsDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -63,7 +63,7 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
                 onScroll={handleScroll}
                 className="flex-1 overflow-auto bg-background"
             >
-                <WsDetailDialogContent />
+                <WsDetailContent />
             </div>
         </div>
     );
