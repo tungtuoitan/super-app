@@ -7,13 +7,14 @@
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { storageService, STORAGE_KEYS } from '@/services/storage.service';
 import { authApi } from '@/services/auth.service';
+import { envConfig } from '@/config/env.config';
+import { constants } from '@/utils/constants';
 import type { LoginRequest, ExchangeTokenResponse } from '@/types/index';
 import { useNavigate } from 'react-router-dom';
 import { extractAuthCodeFromUrl, extractOAuthError } from '@/utils/googleOAuth';
 import { useAuthCallbackStore } from '@/store/authCallback/AuthCallback.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import { useSnackbar } from 'notistack';
-import { constants } from '@/utils/constants';
 
 /**
  * Auth helper hook for authentication operations
@@ -229,7 +230,7 @@ export function useAuthHelper() {
     const initAuthFromStorageToken = (): boolean => {
         const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
 
-        if (process.env.NODE_ENV === constants.environments.development && token) {
+        if (envConfig.NODE_ENV === constants.environments.development && token) {
             // Restore auth state from stored token
             setAuth(prev => ({
                 ...prev,

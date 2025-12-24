@@ -3,14 +3,14 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { config } from '@/config/config';
+import { config } from '@/config/app.config';
 import type {
     MoveItemsRequest,
     DeleteItemsRequest,
     WorkspaceOperationResult,
     WorkspaceWithTreeResponse,
     WorkspaceListResponse
-} from '@/types/workspace.types';
+} from '@/types/workspace.types'; 
 import { constants } from '@/utils/constants';
 
 /**

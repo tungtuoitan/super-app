@@ -3,6 +3,7 @@
  * Handles Google OAuth 2.0 Authorization Code Flow
  */
 
+import { envConfig } from '@/config/env.config';
 import { constants } from '@/utils/constants';
 
 /**
@@ -11,8 +12,8 @@ import { constants } from '@/utils/constants';
  */
 const getRedirectUri = (): string => {
   // Allow env variable override for custom domains
-  if (process.env.REACT_APP_GOOGLE_REDIRECT_URI && process.env.ENVIRONMENT === constants.environments.production) {
-    return process.env.REACT_APP_GOOGLE_REDIRECT_URI;
+  if (envConfig.REACT_APP_GOOGLE_REDIRECT_URI && envConfig.ENVIRONMENT === constants.environments.production) {
+    return envConfig.REACT_APP_GOOGLE_REDIRECT_URI;
   }
 
   // Auto-detect based on current origin (works for localhost and production)
@@ -25,7 +26,7 @@ const getRedirectUri = (): string => {
 };
 
 export const GOOGLE_OAUTH_CONFIG = {
-  clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || '887853390661-j2bepobhb90k357d0k5p1atqd2k8oe6l.apps.googleusercontent.com',
+  clientId: envConfig.REACT_APP_GOOGLE_CLIENT_ID || '887853390661-j2bepobhb90k357d0k5p1atqd2k8oe6l.apps.googleusercontent.com',
   redirectUri: getRedirectUri(),
   scope: 'openid profile email',
   responseType: 'code',

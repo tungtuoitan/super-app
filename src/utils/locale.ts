@@ -7,7 +7,7 @@
  * - Integration with application locale configuration
  */
 
-import { config, Locale } from '../config/config';
+import { config, Locale } from '../config/app.config';
 
 /**
  * Get the user's locale language based on browser settings.

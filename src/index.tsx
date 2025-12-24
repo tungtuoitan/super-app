@@ -3,8 +3,12 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { applyShadcnTheme } from './lib/theme/shadcn';
+import { validateEnvironmentConfig } from './config/app.config';
 
 import './index.css';
+
+// Validate environment configuration on app startup
+validateEnvironmentConfig();
 
 /**
  * Application entry point.

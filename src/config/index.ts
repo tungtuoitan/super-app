@@ -2,4 +2,5 @@
  * Config module exports
  */
 
-export * from './config';
+export * from './app.config';
+export * from './env.config';

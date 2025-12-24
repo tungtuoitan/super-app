@@ -3,7 +3,7 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { config } from '@/config/config';
+import { config } from '@/config/app.config';
 import type { ResultOptions, NoteDTO } from '@/types/note.types';
 
 /**

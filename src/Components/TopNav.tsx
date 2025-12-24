@@ -2,7 +2,7 @@ import { MouseEvent, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
 import { useAuthStore } from '@/store/auth/Auth.store';
-import { config } from '@/config/config';
+import { config } from '@/config/app.config';
 import { constants } from '@/utils/constants';
 
 /**
