@@ -3,7 +3,7 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { API_CONFIG } from '@/config/api.config';
+import { config } from '@/config/config';
 import type {
     MoveItemsRequest,
     DeleteItemsRequest,
@@ -48,7 +48,7 @@ export const _getAllUserWorkspaces = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/workspace`,
+        `${config.api.baseURL}/api/workspace`,
         options
     );
 
@@ -84,7 +84,7 @@ export const _getWorkspaceTree = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/tree`,
+        `${config.api.baseURL}/api/workspace/${workspaceId}/tree`,
         options
     );
 
@@ -122,7 +122,7 @@ export const _getWorkspaceItem = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/items/${itemId}`,
+        `${config.api.baseURL}/api/workspace/${workspaceId}/items/${itemId}`,
         options
     );
 
@@ -169,8 +169,8 @@ export const _upsertWorkspaceItem = async (
     const isUpdate = itemId !== null && itemId !== undefined;
     const method = isUpdate ? "PUT" : "POST";
     const url = isUpdate
-        ? `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/items/${itemId}`
-        : `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/items`;
+        ? `${config.api.baseURL}/api/workspace/${workspaceId}/items/${itemId}`
+        : `${config.api.baseURL}/api/workspace/${workspaceId}/items`;
 
     const options = {
         method: method,
@@ -215,7 +215,7 @@ export const _moveWorkspaceItems = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/items/move`,
+        `${config.api.baseURL}/api/workspace/${workspaceId}/items/move`,
         options
     );
 
@@ -254,7 +254,7 @@ export const _deleteWorkspaceItems = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/items`,
+        `${config.api.baseURL}/api/workspace/${workspaceId}/items`,
         options
     );
 
@@ -293,7 +293,7 @@ export const _upsertFolder = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/folders`,
+        `${config.api.baseURL}/api/workspace/${workspaceId}/folders`,
         options
     );
 
@@ -342,7 +342,7 @@ export const _addItemToWorkspace = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/workspace/${workspaceId}/items`,
+        `${config.api.baseURL}/api/workspace/${workspaceId}/items`,
         options
     );
 

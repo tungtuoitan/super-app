@@ -3,7 +3,7 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { API_CONFIG } from '@/config/api.config';
+import { config } from '@/config/config';
 
 /**
  * ResultOptions interface for API responses
@@ -61,8 +61,8 @@ export const _getWsList = async (
 
     const queryString = queryParams.toString();
     const url = queryString
-        ? `${API_CONFIG.baseURL}/api/WorkspaceList?${queryString}`
-        : `${API_CONFIG.baseURL}/api/WorkspaceList`;
+        ? `${config.api.baseURL}/api/WorkspaceList?${queryString}`
+        : `${config.api.baseURL}/api/WorkspaceList`;
 
     const options = {
         method: "GET",
@@ -100,7 +100,7 @@ export const _getWsById = async (token: string, id: number) => {
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/WorkspaceList/${id}`,
+        `${config.api.baseURL}/api/WorkspaceList/${id}`,
         options
     );
 
@@ -143,7 +143,7 @@ export const _upsertWs = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/WorkspaceList`,
+        `${config.api.baseURL}/api/WorkspaceList`,
         options
     );
 
@@ -184,7 +184,7 @@ export const _deleteWs = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/WorkspaceList/${id}?${queryParams.toString()}`,
+        `${config.api.baseURL}/api/WorkspaceList/${id}?${queryParams.toString()}`,
         options
     );
 
@@ -220,7 +220,7 @@ export const _undoDeleteWs = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/WorkspaceList/undo/${id}`,
+        `${config.api.baseURL}/api/WorkspaceList/undo/${id}`,
         options
     );
 

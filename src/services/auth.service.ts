@@ -3,7 +3,7 @@
  * Uses native fetch API without apiClient
  */
 
-import { API_CONFIG } from '@/config/api.config';
+import { config } from '@/config/config';
 import { getLocaleLanguage } from '@/utils/locale';
 import type { LoginRequest, LoginResponse, ExchangeTokenResponse, AuthResponse, GoogleCodeRequest } from '@/types/index';
 
@@ -30,7 +30,7 @@ export const authApi = {
         };
 
         const res = await window.fetch(
-            `${API_CONFIG.baseURL}/api/auth/login`,
+            `${config.api.baseURL}/api/auth/login`,
             options
         );
 
@@ -64,7 +64,7 @@ export const authApi = {
         };
 
         const res = await window.fetch(
-            `${API_CONFIG.baseURL}/api/auth/google/login`,
+            `${config.api.baseURL}/api/auth/google/login`,
             options
         );
 
@@ -95,7 +95,7 @@ export const authApi = {
         };
 
         const res = await window.fetch(
-            `${API_CONFIG.baseURL}/api/auth/exchange-token`,
+            `${config.api.baseURL}/api/auth/exchange-token`,
             options
         );
 

@@ -7,7 +7,7 @@
  * - Integration with application locale configuration
  */
 
-import { LOCALES, Locale } from '../config/app.config';
+import { config, Locale } from '../config/config';
 
 /**
  * Get the user's locale language based on browser settings.
@@ -27,7 +27,7 @@ import { LOCALES, Locale } from '../config/app.config';
  */
 export function getLocaleLanguage(): Locale {
     const defaultLocale: Locale = 'en-us';
-    const locales = Object.keys(LOCALES) as Locale[];
+    const locales = Object.keys(config.locales) as Locale[];
 
     try {
         const options: Intl.DateTimeFormatOptions = {

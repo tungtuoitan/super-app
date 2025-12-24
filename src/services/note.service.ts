@@ -3,7 +3,7 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { API_CONFIG } from '@/config/api.config';
+import { config } from '@/config/config';
 import type { ResultOptions, NoteDTO } from '@/types/note.types';
 
 /**
@@ -54,8 +54,8 @@ export const _getNotes = async (
 
     const queryString = queryParams.toString();
     const url = queryString
-        ? `${API_CONFIG.baseURL}/api/notes?${queryString}`
-        : `${API_CONFIG.baseURL}/api/notes`;
+        ? `${config.api.baseURL}/api/notes?${queryString}`
+        : `${config.api.baseURL}/api/notes`;
 
     const options = {
         method: "GET",
@@ -93,7 +93,7 @@ export const _getNoteById = async (token: string, noteId: number) => {
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/notes/${noteId}`,
+        `${config.api.baseURL}/api/notes/${noteId}`,
         options
     );
 
@@ -138,7 +138,7 @@ export const _upsertNote = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/notes`,
+        `${config.api.baseURL}/api/notes`,
         options
     );
 
@@ -174,7 +174,7 @@ export const _deleteNote = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/notes/${noteId}`,
+        `${config.api.baseURL}/api/notes/${noteId}`,
         options
     );
 
@@ -210,7 +210,7 @@ export const _undoDeleteNote = async (
     };
 
     const res = await window.fetch(
-        `${API_CONFIG.baseURL}/api/notes/undo/${noteId}`,
+        `${config.api.baseURL}/api/notes/undo/${noteId}`,
         options
     );
 
