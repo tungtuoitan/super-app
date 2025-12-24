@@ -158,7 +158,7 @@ export const useFolderDialogHelper = () => {
      */
     const openFolderDialog = (
         dialogMode: 'create' | 'edit',
-        type: ItemType = constants.itemTypes.folder,
+        type: ItemType = constants.workspace.itemTypes.folder,
         folder?: Folder | null,
         parentFolder?: Folder | null
     ) => {

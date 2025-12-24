@@ -13,8 +13,8 @@ import { useActivityBarHelper } from '@/hooks/useActivityBar.helper'
 
 const activities = [
   { id: 'workspaceList' as const, icon: Boxes, label: 'WorkspaceList' },
-  { id: constants.viewTypes.workspace, icon: Folder, label: constants.displayNames.workspace },
-  { id: constants.viewTypes.note, icon: FileText, label: constants.displayNames.notes },
+  { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
+  { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
 ]
 
 export function ActivityBar() {

@@ -92,7 +92,7 @@ export const useWsListHelper = () => {
 
         //* LOGIC: data trong Tab luôn là data cũ (tức là data mà user đang thao tác), k sync với db, nó chỉ sync những gì user thao tác
         const updatedTabs = openTabs.map((tab: BaseTab) => {
-            if (tab.type === constants.tabTypes.workspace && workspaceIds.includes((tab as any).data.id)) {
+            if (tab.type === constants.vscode.tab.tabTypes.workspace && workspaceIds.includes((tab as any).data.id)) {
                 switch (action) {
                     case 'delete':
                         // Mark tab as deleted instead of closing it

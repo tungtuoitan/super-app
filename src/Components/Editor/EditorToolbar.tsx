@@ -81,7 +81,7 @@ export function EditorToolbar() {
                                 </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Restore {activeTab.type === constants.tabTypes.note ? constants.displayNames.note : constants.displayNames.workspace}</p>
+                                <p>Restore {activeTab.type === constants.vscode.tab.tabTypes.note ? constants.vscode.displayNames.note : constants.vscode.displayNames.workspace}</p>
                             </TooltipContent>
                         </Tooltip>
                     ) : (
@@ -128,7 +128,7 @@ export function EditorToolbar() {
                         <TooltipContent>
                             <p>
                                 {activeTab?.isDeleted 
-                                    ? `Cannot edit deleted ${activeTab.type === constants.tabTypes.note ? constants.displayNames.note : constants.displayNames.workspace}` 
+                                    ? `Cannot edit deleted ${activeTab.type === constants.vscode.tab.tabTypes.note ? constants.vscode.displayNames.note : constants.vscode.displayNames.workspace}` 
                                     : 'Discard Changes'}
                             </p>
                         </TooltipContent>

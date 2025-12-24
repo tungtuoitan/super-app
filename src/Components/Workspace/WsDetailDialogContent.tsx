@@ -44,8 +44,8 @@ export function WsDetailDialogContent() {
 
     // Create current active value for autocomplete
     const currentActiveValue: IAutoCompleteOptions | null = isInactive
-        ? constants.activeStatusOptions.find(option => option.code === constants.activeStatus.inactive) || null
-        : constants.activeStatusOptions.find(option => option.code === constants.activeStatus.active) || null;
+        ? constants.standardRegistryFE.activeStatusOptions.find(option => option.code === constants.standardRegistryFE.activeStatus.inactive) || null
+        : constants.standardRegistryFE.activeStatusOptions.find(option => option.code === constants.standardRegistryFE.activeStatus.active) || null;
 
     // Handlers for form interactions
     const handleFieldChange = (field: keyof Ws, value: any) => {
@@ -54,7 +54,7 @@ export function WsDetailDialogContent() {
     };
 
     const handleActiveChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
-        const isActiveSelected = newValue?.code === constants.activeStatus.active;
+        const isActiveSelected = newValue?.code === constants.standardRegistryFE.activeStatus.active;
         const newDeletedAt = isActiveSelected ? null : new Date();
         updateSelectedWorkspace({ deletedAt: newDeletedAt });
         console.log(`Workspace ${isActiveSelected ? 'activated' : 'deactivated'}`);
@@ -96,7 +96,7 @@ export function WsDetailDialogContent() {
                         <GenericAutoComplete
                             value={currentActiveValue}
                             onChange={handleActiveChange}
-                            allOptions={constants.activeStatusOptions as unknown as IAutoCompleteOptions[]}
+                            allOptions={constants.standardRegistryFE.activeStatusOptions as unknown as IAutoCompleteOptions[]}
                             inputProps={{
                                 name: 'activeStatus',
                                 label: 'Status',

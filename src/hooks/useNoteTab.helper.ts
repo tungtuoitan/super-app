@@ -11,7 +11,7 @@ export const useNoteTabHelper = () => {
 
         // Check if tab already exists for this note
         const existingTab = openTabs.find(tab => 
-            tab.type === constants.tabTypes.note && (tab.data as Note).id === note.id
+            tab.type === constants.vscode.tab.tabTypes.note && (tab.data as Note).id === note.id
         );
 
         if (existingTab) {
@@ -22,7 +22,7 @@ export const useNoteTabHelper = () => {
             // Create new tab
             const newTab = {
                 id: `note-tab-${note.id}-${Date.now()}`,
-                type: constants.tabTypes.note,
+                type: constants.vscode.tab.tabTypes.note,
                 data: note,
                 title: note.name || 'Unsaved Note',
                 hasUnsavedChanges: false,

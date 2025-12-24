@@ -33,8 +33,8 @@ export const useWorkspaceChildMenuHelper = () => {
 
     const { openFolderDialog } = useFolderDialogHelper();
 
-    const isNote = contextType === constants.itemTypes.note;
-    const isFile = contextType === constants.itemTypes.file;
+    const isNote = contextType === constants.workspace.itemTypes.note;
+    const isFile = contextType === constants.workspace.itemTypes.file;
 
     /**
      * Handle edit item (note only)
@@ -44,7 +44,7 @@ export const useWorkspaceChildMenuHelper = () => {
 
         console.log('✏️ Child Menu: Edit note clicked', contextData);
         setIsContextMenuOpen(false);
-        openFolderDialog('edit', constants.itemTypes.note, contextData, null);
+        openFolderDialog('edit', constants.workspace.itemTypes.note, contextData, null);
     };
 
     /**

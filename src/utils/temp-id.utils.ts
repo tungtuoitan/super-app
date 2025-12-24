@@ -19,10 +19,10 @@ export const collectIdsFromTabs = (openTabs: BaseTab[]): number[] => {
     const ids: number[] = [];
     
     openTabs.forEach(tab => {
-        if (tab.type === constants.tabTypes.note) {
+        if (tab.type === constants.vscode.tab.tabTypes.note) {
             const noteData = tab.data as Note;
             ids.push(noteData.id);
-        } else if (tab.type === constants.tabTypes.workspace) {
+        } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
             const wsData = tab.data as Ws;
             ids.push(wsData.id);
         }

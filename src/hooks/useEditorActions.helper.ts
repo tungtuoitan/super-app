@@ -118,7 +118,7 @@ export const useEditorActionsHelper = () => {
                     try {
                         await _addItemToWorkspace(token, workspaceId, {
                             parentTagId: parentFolderId,
-                            childType: constants.itemTypes.note,
+                            childType: constants.workspace.itemTypes.note,
                             childId: transformedNote.id,
                         });
                         console.log('✅ Note added to workspace_items');

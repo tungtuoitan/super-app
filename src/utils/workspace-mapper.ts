@@ -19,7 +19,7 @@ import { constants } from '@/utils/constants';
 /**
  * Type aliases for backend API types
  */
-export type BackendItemType = typeof constants.itemTypes.tag | typeof constants.itemTypes.note | typeof constants.itemTypes.file | typeof constants.itemTypes.folder;
+export type BackendItemType = typeof constants.workspace.itemTypes.tag | typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.file | typeof constants.workspace.itemTypes.folder;
 
 /**
  * Backend WorkspaceItem response format
@@ -55,7 +55,7 @@ export interface BackendWorkspaceItem {
 function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
     return {
         id: item.id || item.childId!,        // ✅ folder ID (prefer 'id', fallback 'childId')
-        type: constants.itemTypes.folder,                      // ✅ type = 'folder'
+        type: constants.workspace.itemTypes.folder,                      // ✅ type = 'folder'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -83,7 +83,7 @@ function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
 function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
     return {
         id: item.id || item.childId!,        // ✅ note ID (prefer 'id', fallback 'childId')
-        type: constants.itemTypes.note,                        // ✅ type = 'note'
+        type: constants.workspace.itemTypes.note,                        // ✅ type = 'note'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -111,7 +111,7 @@ function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
 function transformToFileItem(item: BackendWorkspaceItem): FileItem {
     return {
         id: item.id || item.childId!,        // ✅ file ID (prefer 'id', fallback 'childId')
-        type: constants.itemTypes.file,                        // ✅ type = 'file'
+        type: constants.workspace.itemTypes.file,                        // ✅ type = 'file'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -142,13 +142,13 @@ export function transformBackendItem(item: BackendWorkspaceItem): WorkspaceItem 
 
     switch (itemType) {
         case 'tag':
-        case constants.itemTypes.folder:
+        case constants.workspace.itemTypes.folder:
             return transformToFolderItem(item);
 
-        case constants.itemTypes.note:
+        case constants.workspace.itemTypes.note:
             return transformToNoteItem(item);
 
-        case constants.itemTypes.file:
+        case constants.workspace.itemTypes.file:
             return transformToFileItem(item);
 
         default:
@@ -170,7 +170,7 @@ export function transformBackendItems(items: BackendWorkspaceItem[]): WorkspaceI
  */
 export function transformToBackendItem(item: WorkspaceItem): Partial<BackendWorkspaceItem> {
     return {
-        type: item.type === constants.itemTypes.folder ? 'tag' : item.type,
+        type: item.type === constants.workspace.itemTypes.folder ? 'tag' : item.type,
         id: item.id,
         childId: item.id,  // Legacy field for backward compatibility
         userId: item.userId,

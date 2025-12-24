@@ -101,7 +101,7 @@ export function FileNode({
         const _currentItem = currentTree?.items.find(i => i.id === fileItem.id);
 
         // Open file-specific context menu
-        showContextMenu(e, constants.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });
+        showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });
     };
 
     return (

@@ -97,15 +97,15 @@ export function VSEditorArea() {
         {activeTab ? (
           // Render appropriate editor based on tab type
           <>
-            {activeTab.type === constants.tabTypes.note && <NoteEditorPanel tab={activeTab} />}
-            {activeTab.type === constants.tabTypes.workspace && <WsEditorPanel tab={activeTab} />}
+            {activeTab.type === constants.vscode.tab.tabTypes.note && <NoteEditorPanel tab={activeTab} />}
+            {activeTab.type === constants.vscode.tab.tabTypes.workspace && <WsEditorPanel tab={activeTab} />}
           </>
         ) : (
           // Welcome/empty state
           <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
             <div className="text-center">
               <h2 className="text-xl font-semibold mb-1">
-                Welcome to {constants.displayNames.notes}
+                Welcome to {constants.vscode.displayNames.notes}
               </h2>
               <p className="text-sm">
                 Select a note from the sidebar to view its details

@@ -166,9 +166,9 @@ export function FolderDialog() {
     // Dynamic labels based on itemType
     const getItemLabel = () => {
         switch (itemType) {
-            case constants.itemTypes.folder: return constants.displayNames.folder;
-            case constants.itemTypes.note: return constants.displayNames.note;
-            case constants.itemTypes.file: return constants.displayNames.file;
+            case constants.workspace.itemTypes.folder: return constants.vscode.displayNames.folder;
+            case constants.workspace.itemTypes.note: return constants.vscode.displayNames.note;
+            case constants.workspace.itemTypes.file: return constants.vscode.displayNames.file;
             default: return 'Item';
         }
     };
@@ -216,7 +216,7 @@ export function FolderDialog() {
                     </div>
 
                     {/* Only show color picker for folders */}
-                    {itemType === constants.itemTypes.folder && (
+                    {itemType === constants.workspace.itemTypes.folder && (
                         <div className="space-y-2">
                             <Label htmlFor="color">Color</Label>
                             <div className="grid grid-cols-4 gap-2">

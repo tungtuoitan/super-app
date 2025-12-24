@@ -123,7 +123,7 @@ export function FolderNode({
         const _currentFolder = currentTree?.items.find(f => f.id === folderItem.id);
 
         // Open folder-specific context menu with folder data
-        showContextMenu(e, constants.itemTypes.folder, {...folderItem, parentId: _currentFolder?.parentId ?? null });
+        showContextMenu(e, constants.workspace.itemTypes.folder, {...folderItem, parentId: _currentFolder?.parentId ?? null });
     };
     
     return (

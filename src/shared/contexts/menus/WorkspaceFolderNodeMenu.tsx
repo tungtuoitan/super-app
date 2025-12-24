@@ -36,9 +36,9 @@ export function WorkspaceFolderNodeMenu() {
     const isMultipleSelected = selectedFolderIds.length > 1;
 
     const addMenuItems = [
-        { type: constants.itemTypes.folder, icon: AddIcon, label: 'Add Folder', disabled: false },
-        { type: constants.itemTypes.file, icon: FileIcon, label: 'Add File', disabled: true },
-        { type: constants.itemTypes.note, icon: NoteIcon, label: 'Add Note', disabled: false },
+        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: 'Add Folder', disabled: false },
+        { type: constants.workspace.itemTypes.file, icon: FileIcon, label: 'Add File', disabled: true },
+        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: 'Add Note', disabled: false },
     ];
 
     return (

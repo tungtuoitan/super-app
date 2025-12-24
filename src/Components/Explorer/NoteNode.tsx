@@ -84,7 +84,7 @@ export function NoteNode({
         const _currentItem = currentTree?.items.find(i => i.id === noteItem.id);
 
         // Open note-specific context menu
-        showContextMenu(e, constants.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });
+        showContextMenu(e, constants.workspace.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });
     };
 
     return (

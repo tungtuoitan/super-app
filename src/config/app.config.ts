@@ -18,15 +18,6 @@ export const APP_CONFIG = {
     enableDarkMode: process.env.REACT_APP_ENABLE_DARK_MODE === 'true',
 } as const;
 
-/**
- * Access rights configuration
- * Defines available access levels and permissions within the application
- */
-export const ACCESS_RIGHTS = {
-    finShark: 'finShark',
-    learnCSharp: 'learnCSharp',
-    nothing: 'nothing',
-} as const;
 
 /**
  * Supported locales configuration

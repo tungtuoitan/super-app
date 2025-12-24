@@ -3,54 +3,55 @@
  * Non-configuration constants used throughout the app
  */
 
-
-
 export const constants = {
-    note: {
-        
-    },
+    note: {},
     environments: {
-        development: 'development',
-        production: 'production',
-    } as const,
+        development: "development",
+        production: "production",
+    },
+    vscode: {
+        tab: {
+            tabTypes: {
+                note: "note",
+                workspace: "workspace",
+            } as const,
+        },
+        viewTypes: {
+            workspace: "workspace",
+            workspaceList: "workspaceList",
+            note: "note",
+            notes: "notes",
+        } as const,
+        displayNames: {
+            note: "Note",
+            workspace: "Workspace",
+            file: "File",
+            folder: "Folder",
+            notes: "Notes",
+        } as const,
+    },
+    workspace: {
+        itemTypes: {
+            note: "note",
+            workspace: "workspace",
+            file: "file",
+            folder: "folder",
+            tag: "tag",
+        } as const,
+        rootId: -12345, // Virtual ID for workspace root node
+    },
 
-    tabTypes: {
-        note: "note",
-        workspace: "workspace",
-    } as const,
-
-    itemTypes: {
-        note: "note",
-        workspace: "workspace",
-        file: "file",
-        folder: "folder",
-        tag: "tag",
-    } as const,
-
-    contextMenuTypes: {
-        default: "default",
-        tag: "tag",
-        note: "note",
-        file: "file",
-        folder: "folder",
-        noteGrid: "note-grid",
-        workspaceGrid: "workspace-grid",
-    } as const,
-
-    viewTypes: {
-        workspace: "workspace",
-        workspaceList: "workspaceList",
-        note: "note",
-        notes: "notes",
-    } as const,
-
-    displayNames: {
-        note: "Note",
-        workspace: "Workspace",
-        file: "File",
-        folder: "Folder",
-        notes: "Notes",
-    } as const,
+    contextMenu: {
+        contextMenuTypes: {
+            default: "default",
+            tag: "tag",
+            note: "note",
+            file: "file",
+            folder: "folder",
+            noteGrid: "note-grid",
+            workspaceGrid: "workspace-grid",
+        } as const,
+    },
 
     pagination: {
         defaultPageSize: 25,
@@ -64,22 +65,21 @@ export const constants = {
         rowBuffer: 250,
     } as const,
 
-    workspace: {
-        rootId: -12345, // Virtual ID for workspace root node
-    } as const,
 
-    activeStatus: {
-        active: "active",
-        inactive: "inactive",
-    } as const,
 
-    activeStatusOptions: [
-        { id: "active", code: "active", desc: "Active", label: "Active" },
-        {
-            id: "inactive",
-            code: "inactive",
-            desc: "Inactive",
-            label: "Inactive",
-        },
-    ] as const,
+    standardRegistryFE: {
+        activeStatus: {
+            active: "active",
+            inactive: "inactive",
+        } as const,
+        activeStatusOptions: [
+            { id: "active", code: "active", desc: "Active", label: "Active" },
+            {
+                id: "inactive",
+                code: "inactive",
+                desc: "Inactive",
+                label: "Inactive",
+            },
+        ] as const,
+    }
 } as const;

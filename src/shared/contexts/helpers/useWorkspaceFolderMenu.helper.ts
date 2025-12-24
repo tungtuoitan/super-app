@@ -95,7 +95,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         setIsContextMenuOpen(false);
 
         if (itemData) {
-            const itemType: ItemType = itemData.type || constants.itemTypes.folder;
+            const itemType: ItemType = itemData.type || constants.workspace.itemTypes.folder;
             openFolderDialog('edit', itemType, itemData, null);
         }
     };
@@ -156,11 +156,11 @@ export const useWorkspaceFolderMenuHelper = () => {
                     const itemType = (f as any).type;
                     let type: 2 | 3 | 4 = 2; // Default to folder
 
-                    if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
+                    if (itemType === constants.workspace.itemTypes.folder || itemType === constants.workspace.itemTypes.tag) {
                         type = 2;
-                    } else if (itemType === constants.itemTypes.note) {
+                    } else if (itemType === constants.workspace.itemTypes.note) {
                         type = 3;
-                    } else if (itemType === constants.itemTypes.file) {
+                    } else if (itemType === constants.workspace.itemTypes.file) {
                         type = 4;
                     }
 
@@ -342,11 +342,11 @@ export const useWorkspaceFolderMenuHelper = () => {
                     const itemType = (f as any).type;
                     let type: 2 | 3 | 4 = 2;
 
-                    if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
+                    if (itemType === constants.workspace.itemTypes.folder || itemType === constants.workspace.itemTypes.tag) {
                         type = 2;
-                    } else if (itemType === constants.itemTypes.note) {
+                    } else if (itemType === constants.workspace.itemTypes.note) {
                         type = 3;
-                    } else if (itemType === constants.itemTypes.file) {
+                    } else if (itemType === constants.workspace.itemTypes.file) {
                         type = 4;
                     }
 

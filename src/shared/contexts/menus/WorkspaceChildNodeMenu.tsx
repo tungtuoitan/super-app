@@ -27,8 +27,8 @@ export function WorkspaceChildNodeMenu() {
         onDeleteItemClick,
     } = useWorkspaceChildMenuHelper();
 
-    const isNote = contextType === constants.itemTypes.note;
-    const isFile = contextType === constants.itemTypes.file;
+    const isNote = contextType === constants.workspace.itemTypes.note;
+    const isFile = contextType === constants.workspace.itemTypes.file;
 
     return (
         <>

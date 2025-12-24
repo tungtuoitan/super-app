@@ -34,11 +34,11 @@ export function ContextMenu({ children }: ContextMenuProviderProps) {
      */
     const renderMenuItems = () => {
         switch (contextType) {
-            case constants.itemTypes.folder:
+            case constants.workspace.itemTypes.folder:
                 return <WorkspaceFolderNodeMenu />;
             
-            case constants.itemTypes.note:
-            case constants.itemTypes.file:
+            case constants.workspace.itemTypes.note:
+            case constants.workspace.itemTypes.file:
                 return <WorkspaceChildNodeMenu />;
 
             case 'note-grid':

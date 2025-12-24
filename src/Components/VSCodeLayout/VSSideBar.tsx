@@ -59,8 +59,8 @@ export function VSSideBar({ activeView, isVisible, onCollapse, onExpand }: VSSid
                 {/* Content */}
                 <div className="flex-1 overflow-hidden">
                   {activeView === 'workspaceList' && <WorkspaceListView />}
-                  {activeView === constants.viewTypes.workspace && <WorkspaceView />}
-                  {activeView === constants.viewTypes.note && <NotesView />}
+                  {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
+                  {activeView === constants.vscode.viewTypes.note && <NotesView />}
                 </div>
               </div>
             </Panel>
@@ -106,12 +106,12 @@ function NotesView() {
  */
 function getViewTitle(view: ActivityBarView): string {
   switch (view) {
-    case constants.viewTypes.workspace:
-      return constants.displayNames.workspace
-    case constants.viewTypes.workspaceList:
+    case constants.vscode.viewTypes.workspace:
+      return constants.vscode.displayNames.workspace
+    case constants.vscode.viewTypes.workspaceList:
       return 'WorkspaceList'
-    case constants.viewTypes.note:
-      return constants.displayNames.notes
+    case constants.vscode.viewTypes.note:
+      return constants.vscode.displayNames.notes
     default:
       return 'View'
   }

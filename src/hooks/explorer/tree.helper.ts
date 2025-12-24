@@ -388,7 +388,7 @@ export function transformToTreeData(
         // Create workspace root as a FolderItem
         const workspaceRoot: FolderItem = {
             id: -12345,  // Virtual ID for workspace root, -12345 is used to avoid conflicts
-            type: constants.itemTypes.folder,
+            type: constants.workspace.itemTypes.folder,
             userId: data.userId,
             name: data.name,
             color: data.color,

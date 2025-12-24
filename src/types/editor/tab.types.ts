@@ -8,7 +8,7 @@ import {Ws} from "@/store/ws/useWsList.store";
 import { constants } from '@/utils/constants';
 
 
-export type TabType = typeof constants.tabTypes.note | typeof constants.tabTypes.workspace | 'tag' | 'settings';
+export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | 'tag' | 'settings';
 
 /**
  * Tab-specific view state for preserving UI state across tab switches

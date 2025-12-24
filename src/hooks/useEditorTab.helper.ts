@@ -40,7 +40,7 @@ export const useEditorTabHelper = () => {
             const activeTab = tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId);
             console.log('🔍 Found active tab:', activeTab);
             
-            if (activeTab?.type === constants.tabTypes.note) {
+            if (activeTab?.type === constants.vscode.tab.tabTypes.note) {
                 const noteData = activeTab.data as Note;
                 console.log('✅ Setting selectedNote:', noteData);
                 
@@ -57,7 +57,7 @@ export const useEditorTabHelper = () => {
                 originalWsRef.current = null;
                 setWsHasChanges(false);
                 setSelectedWorkspace(null);
-            } else if (activeTab?.type === constants.tabTypes.workspace) {
+            } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
                 const wsData = activeTab.data as Ws;
                 console.log('✅ Setting selectedWorkspace:', wsData);
                 
@@ -99,7 +99,7 @@ export const useEditorTabHelper = () => {
         
         // Check if tab already exists for this note
         const existingTab = openTabs.find(
-            (tab: BaseTab) => tab.type === constants.tabTypes.note && (tab.data as Note).id === note.id
+            (tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.note && (tab.data as Note).id === note.id
         );
 
         if (existingTab) {
@@ -110,7 +110,7 @@ export const useEditorTabHelper = () => {
             // Create new tab
             const newTab: BaseTab = {
                 id: `note-${note.id}-${Date.now()}`,
-                type: constants.tabTypes.note,
+                type: constants.vscode.tab.tabTypes.note,
                 data: note,
                 title: note.name || 'Unsaved Note',
                 hasUnsavedChanges: false,
@@ -137,7 +137,7 @@ export const useEditorTabHelper = () => {
         // }
 
         // If closing a note tab with negative ID (temporary note), remove it from grid
-        if (tab?.type === constants.tabTypes.note) {
+        if (tab?.type === constants.vscode.tab.tabTypes.note) {
             const noteData = tab.data as Note;
             if (noteData.id < 0) {
                 console.log('🗑️ Removing temporary note from grid:', noteData.id);
@@ -200,7 +200,7 @@ export const useEditorTabHelper = () => {
         console.log('🔄 EditorTabContext - updateTabNote:', { tabId, note });
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((tab: BaseTab) => {
-                if (tab.id === tabId && tab.type === constants.tabTypes.note) {
+                if (tab.id === tabId && tab.type === constants.vscode.tab.tabTypes.note) {
                     return {
                         ...tab,
                         data: note,

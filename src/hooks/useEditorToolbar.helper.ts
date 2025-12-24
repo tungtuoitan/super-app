@@ -65,17 +65,17 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { loadWorkspaces } = useWsListHelper();
 
     // Determine if any entity has unsaved changes based on tab type
-    const _hasAnyChanges = activeTab?.type === constants.tabTypes.note ? noteHasChanges : 
-               activeTab?.type === constants.tabTypes.workspace ? wsHasChanges : 
+    const _hasAnyChanges = activeTab?.type === constants.vscode.tab.tabTypes.note ? noteHasChanges : 
+               activeTab?.type === constants.vscode.tab.tabTypes.workspace ? wsHasChanges : 
                false;
     
     // Get status text based on tab type and deletion state
     const _statusText = (() => {
         if (!activeTab) return 'No Tab';
         
-        if (activeTab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.vscode.tab.tabTypes.note) {
             return selectedNote?.deletedAt ? 'InActive' : 'Active';
-        } else if (activeTab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             return selectedWorkspace?.deletedAt ? 'InActive' : 'Active';
         }
         
@@ -86,9 +86,9 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const _itemId = (() => {
         if (!activeTab) return null;
         
-        if (activeTab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.vscode.tab.tabTypes.note) {
             return selectedNote?.id || null;
-        } else if (activeTab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             return selectedWorkspace?.id || null;
         }
         
@@ -101,10 +101,10 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
         setIsSaving(true);
         try {
-            if (activeTab.type === constants.tabTypes.note) {
+            if (activeTab.type === constants.vscode.tab.tabTypes.note) {
                 // Use existing note save logic
                 await saveNote(activeTab.id);
-            } else if (activeTab.type === constants.tabTypes.workspace) {
+            } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
                 // Workspace save logic
                 if (!selectedWorkspace) return;
 
@@ -138,7 +138,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                     setOpenTabs((prev: BaseTab[]) => {
                         const updatedTabs = prev.map(t => {
                             // Check if this is the tab we just saved
-                            const isCurrentTab = t.id === activeTab.id && t.data.id === activeTab.data.id && t.type === constants.tabTypes.workspace;
+                            const isCurrentTab = t.id === activeTab.id && t.data.id === activeTab.data.id && t.type === constants.vscode.tab.tabTypes.workspace;
 
                             if (isCurrentTab) {
                                 // Update tab with new workspace data and mark as saved
@@ -185,9 +185,9 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const handleCancel = useCallback(() => {
         if (!activeTab) return;
 
-        if (activeTab.type === constants.tabTypes.note) {
+        if (activeTab.type === constants.vscode.tab.tabTypes.note) {
             cancelChanges();
-        } else if (activeTab.type === constants.tabTypes.workspace) {
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             resetWorkspace();
         }
     }, [activeTab, cancelChanges, resetWorkspace]);
@@ -200,7 +200,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         try {
             const token = auth.userToken;
 
-            if (activeTab.type === constants.tabTypes.note && selectedNote) {
+            if (activeTab.type === constants.vscode.tab.tabTypes.note && selectedNote) {
                 const result = await _undoDeleteNote(token, selectedNote.id);
                 
                 // Check API response success
@@ -210,7 +210,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
                 // Update activeTab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === activeTab.id && t.type === constants.tabTypes.note
+                    t.id === activeTab.id && t.type === constants.vscode.tab.tabTypes.note
                         ? { ...t, isDeleted: false }
                         : t
                 ));
@@ -219,7 +219,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                 await loadNotes();
 
                 enqueueSnackbar('Note restored successfully', { variant: 'success' });
-            } else if (activeTab.type === constants.tabTypes.workspace && selectedWorkspace) {
+            } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace && selectedWorkspace) {
                 const result = await _undoDeleteWs(token, selectedWorkspace.id);
                 if (!result.success) {
                     throw new Error(result.message || 'Failed to restore workspace');
@@ -227,7 +227,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
 
                 // Update activeTab to remove isDeleted flag
                 setOpenTabs((prev: BaseTab[]) => prev.map(t =>
-                    t.id === activeTab.id && t.type === constants.tabTypes.workspace
+                    t.id === activeTab.id && t.type === constants.vscode.tab.tabTypes.workspace
                         ? { ...t, isDeleted: false }
                         : t
                 ));

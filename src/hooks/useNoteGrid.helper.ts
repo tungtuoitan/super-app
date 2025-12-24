@@ -138,7 +138,7 @@ export const useNoteGridHelper = () => {
 
                 // Mark opened tabs as deleted instead of closing them
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === constants.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
+                    if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
                         return { ...tab, isDeleted: true };
                     }
                     return tab;
