@@ -18,8 +18,6 @@ export const useWsTabHelper = () => {
      * If tab already exists, activate it; otherwise create new tab
      */
     const openWorkspaceTab = (workspace: Ws) => {
-        console.log('🏢 WsTabHelper - openWorkspaceTab called:', workspace);
-        console.log('🏢 WsTabHelper - Current openTabs:', openTabs);
 
         // Check if tab already exists for this workspace
         const existingTab = openTabs.find(

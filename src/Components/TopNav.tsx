@@ -4,6 +4,7 @@ import { useSnackbar } from 'notistack';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { config } from '@/config/app.config';
 import { constants } from '@/utils/constants';
+import {envConfig} from '../config';
 
 /**
  * Top navigation component.
@@ -22,7 +23,7 @@ export function TopNav() {
     const { enqueueSnackbar } = useSnackbar();
     const { auth } = useAuthStore();
 
-    const showDevBadge = config.app.environment !== constants.environments.production;
+    const showDevBadge = envConfig.ENVIRONMENT !== constants.environments.production;
 
     return (
         <div className="top-navigation flex-grow bg-black h-[36px] z-[10000000000] sticky top-0">

@@ -42,7 +42,6 @@ export const useWorkspaceChildMenuHelper = () => {
     const handleEditItem = () => {
         if (!isNote || !contextData) return;
 
-        console.log('✏️ Child Menu: Edit note clicked', contextData);
         setIsContextMenuOpen(false);
         openFolderDialog('edit', constants.workspace.itemTypes.note, contextData, null);
     };
@@ -51,7 +50,6 @@ export const useWorkspaceChildMenuHelper = () => {
      * Handle view info
      */
     const handleViewInfo = () => {
-        console.log('ℹ️ Child Menu: View info clicked', contextData);
         setIsContextMenuOpen(false);
         // TODO: Implement view info functionality
     };
@@ -60,7 +58,6 @@ export const useWorkspaceChildMenuHelper = () => {
      * Handle delete note
      */
     const handleDeleteNote = async (noteData: any, isHardDelete: boolean = false) => {
-        console.log('🗑️ Deleting note:', noteData, 'isHardDelete:', isHardDelete);
 
         if (!noteData?.id) {
             console.error('❌ Cannot delete note: missing id');
@@ -71,16 +68,7 @@ export const useWorkspaceChildMenuHelper = () => {
         try {
             const token = auth.userToken;
 
-            console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
-
             const result = await _deleteNote(token ?? '', noteData.id.toString());
-            
-            // Check API response success
-            if (!result.success) {
-                throw new Error(result.message || 'Failed to delete note');
-            }
-
-            console.log('✅ Successfully deleted note');
 
             // Clear selection
             setSelectedFolderIds([]);
@@ -103,7 +91,6 @@ export const useWorkspaceChildMenuHelper = () => {
      * Handle delete file
      */
     const handleDeleteFile = async (fileData: any, isHardDelete: boolean = false) => {
-        console.log('🗑️ Deleting file:', fileData, 'isHardDelete:', isHardDelete);
 
         if (!fileData?.id) {
             console.error('❌ Cannot delete file: missing id');
@@ -115,18 +102,13 @@ export const useWorkspaceChildMenuHelper = () => {
             const token = auth.userToken;
             const workspaceId = currentTree?.workspaceId || 1;
 
-            console.log(`🗑️ Deleting file ID: ${fileData.id}`, fileData.name);
-
             const result = await _deleteWorkspaceItems(token ?? '', workspaceId, {
                 items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
                 cascade: true,
                 isHardDelete: isHardDelete,
             });
 
-            console.log('✅ API response:', result);
-
             if (result.success || result.message === 'Items deleted successfully') {
-                console.log('✅ Successfully deleted file');
 
                 // Clear selection
                 setSelectedFolderIds([]);

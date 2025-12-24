@@ -344,7 +344,6 @@ export const useContextMenuHelper = () => {
      * Handle bulk delete for multiple selected folders
      */
     const handleBulkDeleteFolders = (selectedIds: number[], isHardDelete: boolean = false) => {
-        console.log('🗑️ Bulk deleting folders:', selectedIds, 'isHardDelete:', isHardDelete);
 
         if (!currentTree?.items) {
             console.error('❌ Cannot delete: no tree data');

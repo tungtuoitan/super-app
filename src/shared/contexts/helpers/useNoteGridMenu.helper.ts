@@ -41,7 +41,6 @@ export const useNoteGridMenuHelper = () => {
 
         // If all selected notes are temporary (negative IDs), delete immediately without confirmation
         if (allSelectedAreTempNotes) {
-            console.log('🗑️ Deleting temporary notes immediately (no confirmation):', contextData.selectedIds);
             contextData.onDelete(isHardDelete);
             return;
         }

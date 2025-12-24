@@ -82,7 +82,6 @@ export const useWorkspaceFolderMenuHelper = () => {
      * Handle create item action (folder/note/file)
      */
     const handleCreateItem = (itemType: ItemType, parentTag?: any) => {
-        console.log(`📁 Folder Menu: Add ${itemType} clicked for parent:`, parentTag);
         setIsContextMenuOpen(false);
         openFolderDialog('create', itemType, null, parentTag);
     };
@@ -91,7 +90,6 @@ export const useWorkspaceFolderMenuHelper = () => {
      * Handle edit folder action
      */
     const handleEditItem = (itemData: any) => {
-        console.log('✏️ Folder Menu: Edit folder clicked', itemData);
         setIsContextMenuOpen(false);
 
         if (itemData) {
@@ -131,11 +129,6 @@ export const useWorkspaceFolderMenuHelper = () => {
 
         // Collect all descendants (children, grandchildren, etc.) for cascade deletion
         const allFolders = collectAllDescendants(folder);
-        console.log(
-            `🗑️ Cascade delete: removing ${allFolders.length} folder(s) (including ${
-                allFolders.length - 1
-            } descendants)`
-        );
 
         // Filter out folders without ID and warn about them
         const foldersToDelete = allFolders.filter((f) => {
@@ -170,8 +163,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                     };
                 });
 
-                console.log('🗑️ Deleting items:', deleteItems);
-
                 const result = await _deleteWorkspaceItems(
                     token || '',
                     currentTree?.workspaceId || 1,
@@ -182,7 +173,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                 );
 
                 if (result && result.message === 'Items deleted successfully') {
-                    console.log('✅ Folders deleted successfully');
 
                     // Remove folders from tree
                     if (currentTree) {
@@ -215,9 +205,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                         if (nextFolderIdToSelect !== null) {
                             setSelectedFolderIds([nextFolderIdToSelect]);
                             setLastSelectedFolderId(nextFolderIdToSelect);
-                            console.log(
-                                `✅ VS Code navigation: selected next folder ${nextFolderIdToSelect}`
-                            );
                         } else {
                             // Clear selection if no next item
                             setSelectedFolderIds([]);
@@ -248,7 +235,6 @@ export const useWorkspaceFolderMenuHelper = () => {
      * Handle bulk delete for multiple selected folders
      */
     const handleBulkDeleteFolders = (selectedIds: number[], isHardDelete: boolean = false) => {
-        console.log('🗑️ Bulk deleting folders:', selectedIds, 'isHardDelete:', isHardDelete);
 
         if (!currentTree?.items) {
             console.error('❌ Cannot delete: no tree data');
@@ -328,9 +314,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         }
         const foldersToDelete = Array.from(uniqueFoldersMap.values());
 
-        console.log(
-            `🗑️ Bulk cascade delete: removing ${foldersToDelete.length} folder(s) total`
-        );
+        // Bulk delete: removing ${foldersToDelete.length} folders (logging removed)
 
         // Delete all folders using workspace service
         const deleteItems = async () => {
@@ -356,7 +340,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                     };
                 });
 
-                console.log('🗑️ Bulk deleting items:', deleteItems);
+                // Debug log removed: bulk deleting items
 
                 const result = await _deleteWorkspaceItems(
                     token || '',
@@ -368,7 +352,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                 );
 
                 if (result && result.message === 'Items deleted successfully') {
-                    console.log('✅ Folders bulk deleted successfully');
 
                     // Remove folders from tree
                     if (currentTree) {

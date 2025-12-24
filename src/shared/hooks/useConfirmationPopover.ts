@@ -64,20 +64,12 @@ export function useConfirmationPopover(options: UseConfirmationPopoverOptions = 
             }
         }
         
-        console.log('[useConfirmationPopover] show() called with:', {
-            anchor,
-            message: params.message,
-            hasOnConfirm: !!params.onConfirm
-        });
-        
         setState({
             isOpen: true,
             anchorEl: anchor,
             message: params.message,
             onConfirm: params.onConfirm,
         });
-        
-        console.log('[useConfirmationPopover] setState called with isOpen=true');
     };
 
     const hide = () => {
@@ -111,12 +103,6 @@ export function useConfirmationPopover(options: UseConfirmationPopoverOptions = 
     };
 
     const getPopoverProps = () => {
-        console.log('[useConfirmationPopover] getPopoverProps() called, state:', {
-            isOpen: state.isOpen,
-            hasAnchor: !!state.anchorEl,
-            hasMessage: !!state.message,
-            hasOnConfirm: !!state.onConfirm
-        });
         
         return {
             open: state.isOpen,
