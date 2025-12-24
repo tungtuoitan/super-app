@@ -20,14 +20,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { setAccountsOpen } = useActivityBarStore();
 
     // Initialize auth on mount
-    // useEffect(() => {
-    //     const hasToken = initAuthFromStorageToken();
+    useEffect(() => {
+        const hasToken = initAuthFromStorageToken();
 
-    //     // If no token, show login dialog
-    //     if (!hasToken) {
-    //         setAccountsOpen(true);
-    //     }
-    // }, []);
+        // If no token, show login dialog
+        if (!hasToken) {
+            setAccountsOpen(true);
+        }
+    }, []);
 
     // Listen for 401 unauthorized events from API
     // useEffect(() => {

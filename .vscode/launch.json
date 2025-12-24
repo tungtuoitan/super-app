@@ -13,21 +13,10 @@
         },
         "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
         "runtimeArgs": [
-          "--no-first-run",
+        "--no-first-run",
           "--no-default-browser-check"
-        ]
-      },
-      {
-        "type": "chrome",
-        "request": "launch",
-        "name": "Launch Chrome (Debug - No Security)",
-        "url": "http://localhost:3000",
-        "webRoot": "${workspaceFolder}",
-        "sourceMaps": true,
-        "sourceMapPathOverrides": {
-          "webpack:///src/*": "${webRoot}/src/*"
-        },
-        "runtimeArgs": ["--disable-web-security"]
+        ],
+        "port": 9222 //* REQUIRED FOR OAUTH FLOW, IF NOT HAVE THIS, CANT AUTHENTICATION WHEN DEBUGGING *
       },
       {
         "type": "chrome",

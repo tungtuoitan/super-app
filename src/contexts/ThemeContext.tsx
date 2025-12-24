@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             return stored
         }
         // Default to light mode
-        return 'light'
+        return 'dark'
     })
 
     useEffect(() => {

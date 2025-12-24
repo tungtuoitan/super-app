@@ -225,14 +225,10 @@ export function useAuthHelper() {
         navigate('/', { replace: true });
     };
 
-    /**
-     * Initialize auth state from localStorage
-     * Called on app startup to restore user session
-     */
     const initAuthFromStorageToken = (): boolean => {
         const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
 
-        if (token) {
+        if (process.env.NODE_ENV === 'development' && token) {
             // Restore auth state from stored token
             setAuth(prev => ({
                 ...prev,
