@@ -14,6 +14,7 @@ import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-reac
 import {useNoteDetailHelper} from '../../hooks/useNoteDetail.helper';
 import {Note, NOTE_TYPES, NoteType} from '../../types/note.types';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
+import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
 import {formatNoteDate} from '@/utils/note.utils';
 
 /**
@@ -24,8 +25,9 @@ import {formatNoteDate} from '@/utils/note.utils';
  * - Right: Actions/metadata
  */
 export function NoteDetailContent() {
-    const { selectedNote, isDialogOpen, noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteDetailStore();
-    const { closeDialog, updateSelectedNote } = useNoteDetailHelper();
+    const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteDetailStore();
+    const { selectedNote } = useNoteGridStore();
+    const { updateSelectedNote } = useNoteDetailHelper();
     
     const [noteKey, setNoteKey] = React.useState(0);
     useEffect(() => {

@@ -25,6 +25,7 @@ import { useNoteGridHelper } from './useNoteGrid.helper';
 import { useWsHelper } from './useWs.helper';
 import { useWsDetailHelper } from './useWsDetail.helper';
 import { Ws } from '@/store/ws/useWs.store';
+import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
 
 interface EditorToolbarActions {
     // Actions
@@ -54,7 +55,8 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { setOpenTabs,openTabs} = useEditorTabsStore();
     
     // Note-specific
-    const { selectedNote, noteHasChanges } = useNoteDetailStore();
+    const { selectedNote } = useNoteGridStore();
+    const { noteHasChanges } = useNoteDetailStore();
     
     const { saveNote, cancelChanges } = useEditorActionsHelper();
     const { loadNotes } = useNoteGridHelper();

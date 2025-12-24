@@ -7,7 +7,7 @@ import {useEffect} from 'react';
 import {useContextMenuStore, useEditorTabsStore} from '../store';
 import {useSnackbar} from 'notistack';
 import {useEditorTabHelper} from './useEditorTab.helper';
-import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
+import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
 import { constants } from '@/utils/constants';
 import {BaseTab} from '@/types/editor/tab.types';
 import { useAuthStore } from '@/store/auth/Auth.store';
@@ -29,7 +29,7 @@ export const useNoteGridHelper = () => {
         setPagination,
         rowSelection,
         setRowSelection,
-    } = useNoteGridPanelStore();
+    } = useNoteGridStore();
     
     const { openNoteTab } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();

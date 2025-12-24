@@ -12,7 +12,7 @@ export interface PaginationState {
     pageSize: number;
 }
 
-export interface NoteGridPanelContextData {
+export interface NoteGridContextData {
     notes: Note[];
     setNotes: Dispatch<SetStateAction<Note[]>>;
     isLoading: boolean;
@@ -27,9 +27,11 @@ export interface NoteGridPanelContextData {
     setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
     columnFilters: ColumnFiltersState;
     setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
+    selectedNote: Note | null;
+    setSelectedNote: Dispatch<SetStateAction<Note | null>>;
 }
 
-export const noteGridPanelContextDefaultValue: NoteGridPanelContextData = {
+export const noteGridContextDefaultValue: NoteGridContextData = {
     notes: [],
     isLoading: true,
     error: null,
@@ -37,6 +39,7 @@ export const noteGridPanelContextDefaultValue: NoteGridPanelContextData = {
     pagination: { pageIndex: 0, pageSize: 50 },
     rowSelection: {},
     columnFilters: [],
+    selectedNote: null,
     setNotes: () => {},
     setIsLoading: () => {},
     setError: () => {},
@@ -44,13 +47,14 @@ export const noteGridPanelContextDefaultValue: NoteGridPanelContextData = {
     setPagination: () => {},
     setRowSelection: () => {},
     setColumnFilters: () => {},
+    setSelectedNote: () => {},
 };
 
-export const NoteGridPanelStore = createContext<NoteGridPanelContextData>(noteGridPanelContextDefaultValue);
+export const NoteGridStore = createContext<NoteGridContextData>(noteGridContextDefaultValue);
 
-export const useNoteGridPanelStore = () => useContext(NoteGridPanelStore);
+export const useNoteGridStore = () => useContext(NoteGridStore);
 
-export const NoteGridPanelProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [notes, setNotes] = useState<Note[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<Error | null>(null);
@@ -58,9 +62,10 @@ export const NoteGridPanelProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
     return (
-        <NoteGridPanelStore.Provider
+        <NoteGridStore.Provider
             value={{
                 notes,
                 setNotes,
@@ -76,9 +81,11 @@ export const NoteGridPanelProvider: React.FC<React.PropsWithChildren<unknown>> =
                 setRowSelection,
                 columnFilters,
                 setColumnFilters,
+                selectedNote,
+                setSelectedNote,
             }}
         >
             {children}
-        </NoteGridPanelStore.Provider>
+        </NoteGridStore.Provider>
     );
 };

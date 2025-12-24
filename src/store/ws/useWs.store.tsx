@@ -24,7 +24,7 @@ export interface PaginationState {
     pageSize: number;
 }
 
-export interface WsListContextData {
+export interface WsContextData {
     workspaces: Ws[];
     setWorkspaces: Dispatch<SetStateAction<Ws[]>>;
     isLoading: boolean;
@@ -39,9 +39,11 @@ export interface WsListContextData {
     setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
     columnFilters: ColumnFiltersState;
     setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
+    shouldFocusWsName: boolean;
+    setShouldFocusWsName: Dispatch<SetStateAction<boolean>>;
 }
 
-export const wsListContextDefaultValue: WsListContextData = {
+export const wsContextDefaultValue: WsContextData = {
     workspaces: [],
     isLoading: true,
     error: null,
@@ -49,6 +51,7 @@ export const wsListContextDefaultValue: WsListContextData = {
     pagination: { pageIndex: 0, pageSize: 50 },
     rowSelection: {},
     columnFilters: [],
+    shouldFocusWsName: false,
     setWorkspaces: () => {},
     setIsLoading: () => {},
     setError: () => {},
@@ -56,13 +59,14 @@ export const wsListContextDefaultValue: WsListContextData = {
     setPagination: () => {},
     setRowSelection: () => {},
     setColumnFilters: () => {},
+    setShouldFocusWsName: () => {},
 };
 
-export const WsListStore = createContext<WsListContextData>(wsListContextDefaultValue);
+export const WsStore = createContext<WsContextData>(wsContextDefaultValue);
 
-export const useWsListStore = () => useContext(WsListStore);
+export const useWsStore = () => useContext(WsStore);
 
-export const WsListProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const WsProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [workspaces, setWorkspaces] = useState<Ws[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<Error | null>(null);
@@ -70,9 +74,10 @@ export const WsListProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [shouldFocusWsName, setShouldFocusWsName] = useState<boolean>(false);
 
     return (
-        <WsListStore.Provider
+        <WsStore.Provider
             value={{
                 workspaces,
                 setWorkspaces,
@@ -88,9 +93,11 @@ export const WsListProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
                 setRowSelection,
                 columnFilters,
                 setColumnFilters,
+                shouldFocusWsName,
+                setShouldFocusWsName,
             }}
         >
             {children}
-        </WsListStore.Provider>
+        </WsStore.Provider>
     );
 };

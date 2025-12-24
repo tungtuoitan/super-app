@@ -1,50 +1,15 @@
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
+import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
 import { Note } from '@/types/note.types';
 
 export const useNoteDetailHelper = () => {
     const {
-        selectedNote,
-        setSelectedNote,
-        isDialogOpen,
-        setIsDialogOpen,
         noteHasChanges,
         setNoteHasChanges,
         originalNoteRef,
     } = useNoteDetailStore();
-
-    const openDialog = (note: Note) => {
-
-        // Initialize originalNoteRef when a note is selected
-        if (!originalNoteRef.current || originalNoteRef.current.id !== note.id) {
-            originalNoteRef.current = { ...note };
-        }
-
-        setSelectedNote(note);
-
-        // For new notes, set hasUnsavedChanges based on existing content
-        const isNewNote = note.id === 0 || note.id < 0;
-        if (isNewNote) {
-            const hasContent =
-                note.name?.trim() ||
-                note.description?.trim() ||
-                (note.tags && note.tags.length > 0) ||
-                note.type;
-            setNoteHasChanges(!!hasContent);
-        } else {
-            setNoteHasChanges(false);
-        }
-
-        setIsDialogOpen(true);
-    };
-
-    const closeDialog = () => {
-        setIsDialogOpen(false);
-        setTimeout(() => {
-            setSelectedNote(null);
-            originalNoteRef.current = null;
-            setNoteHasChanges(false);
-        }, 200); // After animation
-    };
+    
+    const { selectedNote, setSelectedNote } = useNoteGridStore();
 
     const updateSelectedNote = (updatedNote: Partial<Note>) => {
 
@@ -118,10 +83,7 @@ export const useNoteDetailHelper = () => {
 
     return {
         selectedNote,
-        isDialogOpen,
         noteHasChanges,
-        openDialog,
-        closeDialog,
         updateSelectedNote,
         markAsSaved,
         resetChanges,

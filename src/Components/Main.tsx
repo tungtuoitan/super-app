@@ -14,9 +14,9 @@ import MainNav from './MainNav/MainNav';
 import {DialogProvider, EditorTabProvider} from '@/store/index';
 import { EditorToolbarProvider } from '@/store/editor/EditorToolbar.store';
 import {NoteDetailProvider} from '@/store/note/useNoteDetail.store';
-import {NoteGridPanelProvider} from '@/store/note/useNoteGridPanel.store';
+import {NoteGridProvider} from '@/store/note/useNoteGrid.store';
 import { NavProvider } from '@/contexts/NavigationContext';
-import { WsListProvider } from '@/store/ws/useWs.store';
+import { WsProvider } from '@/store/ws/useWs.store';
 import { WsDetailProvider } from '@/store/ws/useWsDetail.store';
 import { ActivityBarProvider } from '@/store/index'
 import { AuthCallbackProvider } from '@/store/index'
@@ -54,10 +54,10 @@ export function Main() {
                         <AuthStoreProvider>
                             <ExplorerProvider>
                                 <FolderDialogProvider>
-                                    <WsListProvider>
+                                    <WsProvider>
                                         <WsDetailProvider>
                                             <NoteDetailProvider>
-                                                <NoteGridPanelProvider>
+                                                <NoteGridProvider>
                                                     <EditorTabProvider>
                                                         <EditorToolbarProvider>
                                                             <DialogProvider>
@@ -74,10 +74,10 @@ export function Main() {
                                                         </DialogProvider>
                                                     </EditorToolbarProvider>
                                                 </EditorTabProvider>
-                                                </NoteGridPanelProvider>
+                                                </NoteGridProvider>
                                             </NoteDetailProvider>
                                         </WsDetailProvider>
-                                    </WsListProvider>
+                                    </WsProvider>
                                 </FolderDialogProvider>
                             </ExplorerProvider>
                         </AuthStoreProvider>

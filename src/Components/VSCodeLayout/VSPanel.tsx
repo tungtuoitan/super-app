@@ -1,4 +1,5 @@
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store'
+import {useNoteGridStore} from '@/store/note/useNoteGrid.store'
 import { X, FileText, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Panel } from 'react-resizable-panels'
@@ -88,7 +89,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
  * Note Detail Tab - Display selected note details
  */
 function NoteDetailTab() {
-  const { selectedNote } = useNoteDetailStore()
+  const { selectedNote } = useNoteGridStore()
 
   if (!selectedNote) {
     return (
@@ -128,7 +129,7 @@ function NoteDetailTab() {
  * Properties Tab - Display note properties
  */
 function PropertiesTab() {
-  const { selectedNote } = useNoteDetailStore()
+  const { selectedNote } = useNoteGridStore()
 
   if (!selectedNote) {
     return (

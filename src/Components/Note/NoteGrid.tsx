@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from '@/Components/ui/alert';
 import {Note} from '@/types/note.types';
 import {_getNotes, _deleteNote} from '@/services/note.service';
 import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
-import {useNoteGridPanelStore} from '@/store/note/useNoteGridPanel.store';
+import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
 import {useNoteGridHelper} from '@/hooks/useNoteGrid.helper';
 import { useGridControlHelper } from '@/hooks/useGridControl.helper';
 import { useGridControlStore } from '@/store/grid/useGridControl.store';
@@ -46,7 +46,7 @@ export function NoteGrid() {
         setRowSelection,
         columnFilters,
         setColumnFilters
-    } = useNoteGridPanelStore();
+    } = useNoteGridStore();
 
     const { openNoteTab } = useEditorTabHelper();
     const { loadNotes, handleDeleteSelected, openContextMenu,formatDateTime } = useNoteGridHelper();

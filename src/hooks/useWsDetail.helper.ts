@@ -10,32 +10,10 @@ export const useWsDetailHelper = () => {
     const {
         selectedWorkspace,
         setSelectedWorkspace,
-        isDialogOpen,
-        setIsDialogOpen,
-        wsHasChanges,
         setWsHasChanges,
         originalWsRef,
     } = useWsDetailStore();
 
-    /**
-     * Open workspace detail dialog
-     */
-    const openDialog = (workspace: Ws) => {
-        setSelectedWorkspace(workspace);
-        originalWsRef.current = JSON.parse(JSON.stringify(workspace)); // Deep clone
-        setIsDialogOpen(true);
-        setWsHasChanges(false);
-    };
-
-    /**
-     * Close workspace detail dialog
-     */
-    const closeDialog = () => {
-        setIsDialogOpen(false);
-        setSelectedWorkspace(null);
-        originalWsRef.current = null;
-        setWsHasChanges(false);
-    };
 
     /**
      * Update selected workspace (triggers unsaved changes flag)
@@ -64,8 +42,6 @@ export const useWsDetailHelper = () => {
     };
 
     return {
-        openDialog,
-        closeDialog,
         updateSelectedWorkspace,
         resetWorkspace,
     };

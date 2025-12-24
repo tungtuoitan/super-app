@@ -13,13 +13,15 @@ import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
 import { useWsDetailHelper } from '@/hooks/useWsDetail.helper';
 import { Ws } from '@/store/ws/useWs.store';
 import { constants } from '@/utils/constants';
+import { useWsStore } from '@/store/ws/useWs.store';
 
 /**
  * Workspace Detail Dialog Content
  * Form for editing workspace details
  */
 export function WsDetailContent() {
-    const { selectedWorkspace, wsNameRef, shouldFocusWsName, setShouldFocusWsName } = useWsDetailStore();
+    const { selectedWorkspace, wsNameRef } = useWsDetailStore();
+    const { shouldFocusWsName, setShouldFocusWsName } = useWsStore();
     const { updateSelectedWorkspace } = useWsDetailHelper();
     
     const [wsKey, setWsKey] = React.useState(0);

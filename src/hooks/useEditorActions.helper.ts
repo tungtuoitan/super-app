@@ -15,6 +15,7 @@ import { useEditorTabHelper } from './useEditorTab.helper';
 import { useNoteGridHelper } from './useNoteGrid.helper';
 import { useWorkspaceOperation } from './explorer/useWorkspaceOperation.helper';
 import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
+import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { transformNoteData } from '@/utils/note.utils';
 import { useAuthStore } from '@/store/auth/Auth.store';
@@ -22,7 +23,8 @@ import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 
 export const useEditorActionsHelper = () => {
     const { auth } = useAuthStore();
-    const { selectedNote, noteHasChanges } = useNoteDetailStore();
+    const { selectedNote } = useNoteGridStore();
+    const { noteHasChanges } = useNoteDetailStore();
     const { setSelectedNote, markAsSaved, resetChanges } = useNoteDetailHelper();
     const { updateTabNote, markTabAsChanged } = useEditorTabHelper();
     const { loadNotes } = useNoteGridHelper();

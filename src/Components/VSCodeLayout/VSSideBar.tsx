@@ -3,11 +3,11 @@ import type { ActivityBarView } from '@/utils/constants'
 import { NoteGrid } from '../Note/NoteGrid'
 import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
 import { WorkspaceView } from './WorkspaceView'
-import { WorkspaceListView } from './WorkspaceListView'
 import { GridControlBar } from '@/Components/shared/GridControlBar'
 import { GridControlProvider } from '@/store/grid/useGridControl.store'
 import { constants } from '@/utils/constants'
 import { useActivityBarStore } from '@/store/index'
+import {WsView} from './WsView'
 
 interface VSSideBarProps {
   activeView: ActivityBarView
@@ -58,7 +58,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
 
                 {/* Content */}
                 <div className="flex-1 overflow-hidden">
-                  {activeView === 'workspaceList' && <WorkspaceListView />}
+                  {activeView === 'workspaceList' && <WsView />}
                   {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
                   {activeView === constants.vscode.viewTypes.note && <NotesView />}
                 </div>

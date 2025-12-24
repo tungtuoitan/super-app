@@ -5,7 +5,7 @@
 
 import { WsGrid } from '../Workspace/WsGrid';
 
-export function WorkspaceListView() {
+export function WsView() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <WsGrid />

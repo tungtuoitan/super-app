@@ -1,6 +1,6 @@
 import {Note} from "@/types/note.types";
 import {useNoteDetailStore} from "../store/note/useNoteDetail.store";
-import {useNoteGridPanelStore} from "../store/note/useNoteGridPanel.store";
+import {useNoteGridStore} from "../store/note/useNoteGrid.store";
 import {BaseTab} from "@/types/editor/tab.types";
 import {useEditorTabsStore} from "../store";
 import { constants } from '@/utils/constants';
@@ -17,8 +17,8 @@ export const useEditorTabHelper = () => {
         confirmCloseTabId, 
         setConfirmCloseTabId,
     } = useEditorTabsStore();
-    const { setSelectedNote, originalNoteRef, setNoteHasChanges } = useNoteDetailStore();
-    const { setNotes } = useNoteGridPanelStore();
+    const { originalNoteRef, setNoteHasChanges } = useNoteDetailStore();
+    const { setNotes, selectedNote,setSelectedNote } = useNoteGridStore();
     const { setSelectedWorkspace, originalWsRef, setWsHasChanges } = useWsDetailStore();
 
     /**

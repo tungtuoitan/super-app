@@ -17,7 +17,7 @@ import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { useWsListStore, Ws } from '@/store/ws/useWs.store';
+import { useWsStore, Ws } from '@/store/ws/useWs.store';
 import { useWsHelper } from '@/hooks/useWs.helper';
 import { useWsTabHelper } from '@/hooks/useWsTab.helper';
 import { useGridControlHelper } from '@/hooks/useGridControl.helper';
@@ -40,7 +40,7 @@ export function WsGrid() {
         setRowSelection,
         columnFilters,
         setColumnFilters
-    } = useWsListStore();
+    } = useWsStore();
 
     const { loadWorkspaces, openContextMenu, formatDateTime } = useWsHelper();
     const { openWorkspaceTab } = useWsTabHelper();
