@@ -7,13 +7,40 @@
 import { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { PropsWithChildren } from 'react';
-import { routes } from '@/config/routes';
-import { constants } from '@/utils/constants';
+import { constants, ActivityBarView } from '@/utils/constants';
 
 /**
- * Activity bar view types
+ * Helper function to get view from route path
  */
-export type ActivityBarView = typeof routes.views.workspace | typeof routes.views.workspaceList | typeof routes.views.note;
+const getViewFromRoute = (pathname: string): ActivityBarView | null => {
+    switch (pathname) {
+        case '/':
+        case '/workspace':
+            return constants.navigation.views.workspace;
+        case '/workspaceList':
+            return constants.navigation.views.workspaceList;
+        case '/notes':
+            return constants.navigation.views.note;
+        default:
+            return null;
+    }
+};
+
+/**
+ * Helper function to get route from view
+ */
+const getRouteFromView = (view: ActivityBarView): string => {
+    switch (view) {
+        case constants.navigation.views.workspace:
+            return '/workspace';
+        case constants.navigation.views.workspaceList:
+            return '/workspaceList';
+        case constants.navigation.views.note:
+            return '/notes';
+        default:
+            return '/workspace';
+    }
+};
 
 /**
  * Navigation context interface defining the shape of navigation state and actions
@@ -38,7 +65,7 @@ export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
     toggleNavigation: () => {},
     selectedItemId: null,
     setSelectedItemId: () => {},
-    activeView: constants.vscode.viewTypes.workspace,
+    activeView: constants.navigation.views.workspace,
     navigateToView: () => {},
 };
 
@@ -69,14 +96,14 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const bodyWrapperRef = useRef<HTMLDivElement>(null);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-    const [activeView, setActiveView] = useState<ActivityBarView>(routes.views.workspace);
+    const [activeView, setActiveView] = useState<ActivityBarView>(constants.navigation.views.workspace);
     
     const location = useLocation();
     const navigate = useNavigate();
 
     // Sync activeView with current route
     useEffect(() => {
-        const view = routes.mappings.routeToView[location.pathname as keyof typeof routes.mappings.routeToView];
+        const view = getViewFromRoute(location.pathname);
         if (view && view !== activeView) {
             setActiveView(view);
         }
@@ -87,7 +114,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     };
 
     const navigateToView = (view: ActivityBarView) => {
-        const route = routes.mappings.viewToRoute[view];
+        const route = getRouteFromView(view);
         if (route && location.pathname !== route) {
             navigate(route);
         }

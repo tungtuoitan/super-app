@@ -9,6 +9,19 @@ export const constants = {
         development: "development",
         production: "production",
     },
+    navigation: {
+        path: {
+            home: "/",
+            workspace: "/workspace",
+            workspaceList: "/workspaceList",
+            notes: "/notes",
+        } as const,
+        views: {
+            workspace: "workspace",
+            workspaceList: "workspaceList",
+            note: "note",
+        } as const,
+    },
     vscode: {
         tab: {
             tabTypes: {
@@ -65,8 +78,6 @@ export const constants = {
         rowBuffer: 250,
     } as const,
 
-
-
     standardRegistryFE: {
         activeStatus: {
             active: "active",
@@ -81,5 +92,8 @@ export const constants = {
                 label: "Inactive",
             },
         ] as const,
-    }
+    },
 } as const;
+
+// Type exports
+export type ActivityBarView = typeof constants.navigation.views.workspace | typeof constants.navigation.views.workspaceList | typeof constants.navigation.views.note;
