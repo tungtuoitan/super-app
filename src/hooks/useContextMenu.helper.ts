@@ -127,12 +127,10 @@ export const useContextMenuHelper = () => {
     
             // Collect all descendants (children, grandchildren, etc.) for cascade deletion
             const allFolders = collectAllDescendants(folder);
-            console.log(`🗑️ Cascade delete: removing ${allFolders.length} folder(s) (including ${allFolders.length - 1} descendants)`);
     
             // Filter out folders without ID and warn about them
             const foldersToDelete = allFolders.filter(f => {
                 if (!f.id) {
-                    console.warn(`⚠️ Skipping folder without ID: ${f.name}`);
                     return false;
                 }
                 return true;
@@ -166,27 +164,18 @@ export const useContextMenuHelper = () => {
                         return { id: f.id!, type: typeCode };
                     });
 
-                    console.log(`📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items`, {
-                        items: deleteItems,
-                        cascade: true
-                    });
-
                     const result = await _deleteWorkspaceItems(token??'', CURRENT_WORKSPACE_ID, {
                         items: deleteItems,
                         cascade: true,
                         isHardDelete: isHardDelete
                     });
 
-                    console.log('✅ API response:', result);
-
                     if (result.success) {
-                        console.log(`✅ Successfully removed ${foldersToDelete.length} folder(s) from workspace`);
 
                         // VS Code behavior: Select next item after deletion
                         if (nextFolderIdToSelect !== null) {
                             setSelectedFolderIds([nextFolderIdToSelect]);
                             setLastSelectedFolderId(nextFolderIdToSelect);
-                            console.log(`✅ Selected next item: ${nextFolderIdToSelect}`);
                         } else {
                             setSelectedFolderIds([]);
                             setLastSelectedFolderId(null);
@@ -195,7 +184,6 @@ export const useContextMenuHelper = () => {
                         // Reload page to refresh tree
                         window.location.reload();
                     } else {
-                        console.error('❌ Delete failed:', result.message);
                         alert(`Failed to delete folder: ${result.message}`);
                     }
                 } catch (error) {
@@ -235,7 +223,6 @@ export const useContextMenuHelper = () => {
      * @param parentTag - Parent folder for the new item
      */
     const handleCreateItem = (itemType: ItemType, parentTag?: any) => {
-        console.log(`📁 Context Menu: Add ${itemType} clicked for parent:`, parentTag);
         setIsContextMenuOpen(false);
         openFolderDialog('create', itemType, null, parentTag);
     };
@@ -244,7 +231,6 @@ export const useContextMenuHelper = () => {
      * Handle edit item action
      */
     const handleEditItem = (itemData: any) => {
-        console.log('✏️ Context Menu: Edit item clicked', itemData);
         setIsContextMenuOpen(false);
         
         if (itemData) {
@@ -258,7 +244,6 @@ export const useContextMenuHelper = () => {
      * Handle add file action
      */
     const handleAddFile = () => {
-        console.log('📄 Context Menu: Add file clicked');
         setIsContextMenuOpen(false);
         // TODO: Implement add file functionality
     }
@@ -269,7 +254,6 @@ export const useContextMenuHelper = () => {
      * Note will be saved to DB only when user clicks Save in editor
      */
     const handleAddNote = (parentFolder?: any) => {
-        console.log('📝 Context Menu: Add note clicked for parent:', parentFolder);
         setIsContextMenuOpen(false);
 
         // Generate sequential temporary negative ID from open tabs
@@ -289,8 +273,6 @@ export const useContextMenuHelper = () => {
             updatedAt: new Date(),
             createdBy: 'You',
         };
-
-        console.log('✅ Created temporary note:', newNote);
 
         // ✅ Add note to workspace tree immediately (with unsaved state)
         if (currentTree) {
@@ -331,13 +313,10 @@ export const useContextMenuHelper = () => {
                 items: [...currentTree.items, newNoteItem],
             });
 
-            console.log('✅ Added temporary note to workspace tree');
         }
 
         // Open note tab for editing
         openNoteTab(newNote);
-
-        console.log('✅ Opened note tab for editing');
     };
 
     /**
@@ -421,8 +400,6 @@ export const useContextMenuHelper = () => {
             }
         }
 
-        console.log(`🗑️ Cascade bulk delete: removing ${allFoldersToDelete.length} folder(s) (${selectedFolders.length} selected + ${allFoldersToDelete.length - selectedFolders.length} descendants)`);
-
         // Delete all folders using workspace service
         const deleteItems = async () => {
             try {
@@ -452,16 +429,12 @@ export const useContextMenuHelper = () => {
                     isHardDelete: isHardDelete
                 });
 
-                console.log('✅ API response:', result);
-
                 if (result.success) {
-                    console.log(`✅ Successfully removed ${allFoldersToDelete.length} folder(s) from workspace`);
 
                     // VS Code behavior: Select next item after deletion
                     if (nextFolderIdToSelect !== null) {
                         setSelectedFolderIds([nextFolderIdToSelect]);
                         setLastSelectedFolderId(nextFolderIdToSelect);
-                        console.log(`✅ Selected next item: ${nextFolderIdToSelect}`);
                     } else {
                         setSelectedFolderIds([]);
                         setLastSelectedFolderId(null);
@@ -470,7 +443,6 @@ export const useContextMenuHelper = () => {
                     // Reload page to refresh tree
                     window.location.reload();
                 } else {
-                    console.error('❌ Delete failed:', result.message);
                     alert(`Failed to delete folders: ${result.message}`);
                 }
             } catch (error) {
@@ -491,19 +463,14 @@ export const useContextMenuHelper = () => {
      * Handle delete note action
      */
     const handleDeleteNote = async (noteData: any, isHardDelete: boolean = false) => {
-        console.log('🗑️ Deleting note:', noteData, 'isHardDelete:', isHardDelete);
 
         if (!noteData?.id) {
-            console.error('❌ Cannot delete note: missing id');
             alert('Cannot delete note: missing note information');
             return;
         }
 
         try {
             const token = auth.userToken;
-
-            console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
-            console.log(`📤 Calling API: DELETE /api/Notes/${noteData.id}`);
 
             const result = await _deleteNote(token ?? '', noteData.id.toString());
             
@@ -512,12 +479,9 @@ export const useContextMenuHelper = () => {
                 throw new Error(result.message || 'Failed to delete note');
             }
 
-            console.log('✅ Successfully deleted note');
-
             // Reload page to refresh data
             window.location.reload();
         } catch (error) {
-            console.error('❌ Failed to delete note:', error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
                 enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
@@ -531,10 +495,8 @@ export const useContextMenuHelper = () => {
      * Handle delete file action
      */
     const handleDeleteFile = async (fileData: any, isHardDelete: boolean = false) => {
-        console.log('🗑️ Deleting file:', fileData, 'isHardDelete:', isHardDelete);
 
         if (!fileData?.id) {
-            console.error('❌ Cannot delete file: missing id');
             alert('Cannot delete file: missing file information');
             return;
         }
@@ -542,19 +504,13 @@ export const useContextMenuHelper = () => {
         try {
             const token = auth.userToken;
 
-            console.log(`🗑️ Deleting file ID: ${fileData.id}`, fileData.name);
-            console.log(`📤 Calling API: DELETE /api/workspace/${CURRENT_WORKSPACE_ID}/items`);
-
             const result = await _deleteWorkspaceItems(token ?? '', CURRENT_WORKSPACE_ID, {
                 items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
                 cascade: true,
                 isHardDelete: isHardDelete
             });
 
-            console.log('✅ API response:', result);
-
             if (result.success) {
-                console.log('✅ Successfully deleted file');
 
                 // Clear selection
                 setSelectedFolderIds([]);
@@ -563,11 +519,9 @@ export const useContextMenuHelper = () => {
                 // Reload page to refresh data
                 window.location.reload();
             } else {
-                console.error('❌ Delete failed:', result.message);
                 alert(`Failed to delete file: ${result.message}`);
             }
         } catch (error) {
-            console.error('❌ Failed to delete file:', error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
                 enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
@@ -581,12 +535,10 @@ export const useContextMenuHelper = () => {
      * Handle delete item action
      */
     const handleDeleteItem = (itemData: any, contextType: ContextMenuType, isHardDelete: boolean = false) => {
-        console.log('🗑️ Context Menu: Delete item clicked for:', itemData, 'isHardDelete:', isHardDelete);
 
         if ((contextType === 'tag' || contextType === constants.workspace.itemTypes.folder) && itemData) {
             // Check if this is a workspace root node (negative ID)
             if (itemData.tagId < 0 || itemData.id < 0) {
-                console.warn('⚠️ Cannot delete workspace root node');
                 setIsContextMenuOpen(false);
                 return;
             }
@@ -598,7 +550,6 @@ export const useContextMenuHelper = () => {
 
             if (isMultipleSelected) {
                 // Bulk delete all selected folders
-                console.log('🗑️ Bulk deleting multiple folders:', selectedFolderIds);
                 handleBulkDeleteFolders(selectedFolderIds, isHardDelete);
             } else {
                 // Delete single folder
@@ -621,7 +572,6 @@ export const useContextMenuHelper = () => {
      * Handle view info action
      */
     const handleViewInfo = () => {
-        console.log('ℹ️ Context Menu: View info clicked');
         setIsContextMenuOpen(false);
         // TODO: Implement view info functionality
     }

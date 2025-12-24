@@ -58,7 +58,6 @@ export const useTreeSelection = () => {
      */
     const handleSelectionChange = (nodes: NodeApi<TreeFolder>[]) => {
         const selectedIds = nodes.map(node => node.id);
-        console.log('🎯 Tree selection changed:', selectedIds);
         const folderIds = selectedIds.map(id => parseInt(id)).filter(id => id > 0); // Filter out workspace nodes
         setSelectedFolderIds(folderIds);
         if (folderIds.length > 0) {

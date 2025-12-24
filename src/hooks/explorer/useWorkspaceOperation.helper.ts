@@ -42,7 +42,6 @@ export const useWorkspaceOperation = () => {
             const token = auth.userToken;
             const data = await _getAllUserWorkspaces(token);
             
-            console.log('📦 Loaded workspaces:', data);
             setAllWorkspaces(data);
 
             // Set default to first workspace if available and no tree loaded
@@ -73,15 +72,12 @@ export const useWorkspaceOperation = () => {
             const token = auth.userToken;
             const treeData = await _getWorkspaceTree(token, workspaceId);
             
-            console.log('🌳 Loaded tree for workspace:', workspaceId, treeData);
-            
             treeData.items = treeData.items.filter(item => item.deletedAt === null);
             // Set as current tree
             setCurrentTree(treeData);
             
             return treeData;
         } catch (error) {
-            console.error('❌ Failed to load tree for workspace:', workspaceId, error);
             throw error;
         } finally {
             setIsLoadingTree(false);
@@ -92,8 +88,6 @@ export const useWorkspaceOperation = () => {
      * Select a workspace and load its tree
      */
     const selectWorkspace = async (workspaceId: number) => {
-        console.log('🎯 Selecting workspace:', workspaceId);
-        
         // Load tree for selected workspace (will set currentTree which contains workspaceId)
         await loadTree(workspaceId);
     };

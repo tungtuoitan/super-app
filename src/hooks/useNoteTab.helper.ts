@@ -6,8 +6,6 @@ export const useNoteTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId, confirmCloseTabId, setConfirmCloseTabId } = useNoteTabStore();
 
     const openTab = (note: Note) => {
-        console.log('📝 NoteTabHelper - openTab called:', note);
-        console.log('📝 NoteTabHelper - Current openTabs:', openTabs);
 
         // Check if tab already exists for this note
         const existingTab = openTabs.find(tab => 
@@ -16,7 +14,6 @@ export const useNoteTabHelper = () => {
 
         if (existingTab) {
             // Tab already exists, just activate it
-            console.log('📝 NoteTabHelper - Tab exists, activating:', existingTab.id);
             setActiveTabId(existingTab.id);
         } else {
             // Create new tab
@@ -28,7 +25,6 @@ export const useNoteTabHelper = () => {
                 hasUnsavedChanges: false,
             };
 
-            console.log('📝 NoteTabHelper - Creating new tab:', newTab);
             setOpenTabs(prev => [...prev, newTab]);
             setActiveTabId(newTab.id);
         }
@@ -98,7 +94,6 @@ export const useNoteTabHelper = () => {
     };
 
     const updateTabNote = (tabId: string, note: Note) => {
-        console.log('🔄 NoteTabHelper - updateTabNote:', { tabId, note });
         setOpenTabs(prev =>
             prev.map(tab => {
                 if (tab.id === tabId) {

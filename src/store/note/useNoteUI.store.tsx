@@ -128,15 +128,12 @@ export const NoteUIProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
 
     // Wrapped setSelectedNote with logging
     const setSelectedNote = (note: Note | null | ((prev: Note | null) => Note | null)) => {
-        console.log('📌 NoteUIStore - setSelectedNote called:', note);
         if (typeof note === 'function') {
             setSelectedNoteState(prev => {
                 const result = note(prev);
-                console.log('📌 NoteUIStore - setSelectedNote (function):', { prev, result });
                 return result;
             });
         } else {
-            console.log('📌 NoteUIStore - setSelectedNote (direct):', note);
             setSelectedNoteState(note);
         }
     }

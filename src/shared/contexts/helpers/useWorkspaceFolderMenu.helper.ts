@@ -384,9 +384,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                         if (nextFolderIdToSelect !== null) {
                             setSelectedFolderIds([nextFolderIdToSelect]);
                             setLastSelectedFolderId(nextFolderIdToSelect);
-                            console.log(
-                                `✅ VS Code navigation: selected next folder ${nextFolderIdToSelect}`
-                            );
                         } else {
                             setSelectedFolderIds([]);
                             setLastSelectedFolderId(null);

@@ -170,7 +170,6 @@ export function NoteGrid() {
         );
     }, [notes, searchQuery]);
 
-console.log('NoteGrid rendered with notes::::::::::', notes);
     // Create table instance
     const table = useReactTable({
         data: filteredData.sort((a, b) =>

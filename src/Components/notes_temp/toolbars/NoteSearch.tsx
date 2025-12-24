@@ -14,7 +14,6 @@ export const NoteSearch = () => {
     const handleSearch = () => {
         if (searchTerm.trim()) {
             setSearchLoading(true);
-            console.log('Searching for:', searchTerm);
 
             // Simulate search delay
             setTimeout(() => {

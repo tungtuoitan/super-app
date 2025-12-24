@@ -266,7 +266,6 @@ export function WsGrid() {
                                     row.original.deletedAt ? 'opacity-60' : ''
                                 }`}
                                 onClick={() => {
-                                    console.log('🏢 Workspace clicked, opening tab:', row.original);
                                     openWorkspaceTab(row.original);
                                 }}
                                 onContextMenu={(e) => openContextMenu(e, row)}

@@ -13,11 +13,9 @@ export const useNoteUIHelper = () => {
     } = useNoteUIStore();
 
     const openDialog = (note: Note) => {
-        console.log('🚪 openDialog called:', note);
 
         // Initialize originalNoteRef when a note is selected
         if (!originalNoteRef.current || originalNoteRef.current.id !== note.id) {
-            console.log('📌 Initializing originalNoteRef:', note);
             originalNoteRef.current = { ...note };
         }
 
@@ -49,23 +47,10 @@ export const useNoteUIHelper = () => {
     };
 
     const updateSelectedNote = (updatedNote: Partial<Note>) => {
-        console.log('🔄 updateSelectedNote called with:', updatedNote);
 
         if (!selectedNote) return;
 
         const updated = { ...selectedNote, ...updatedNote };
-
-        console.log('📝 Previous state:', selectedNote);
-        console.log('✨ Updated state:', updated);
-        console.log('📌 Original ref:', originalNoteRef.current);
-
-        // Log description specifically
-        console.log('🟢 [DESCRIPTION CHECK]', {
-            previousDescription: selectedNote.description,
-            updatedDescription: updated.description,
-            previousLength: selectedNote.description?.length || 0,
-            updatedLength: updated.description?.length || 0
-        });
 
         // Check if this was originally a new note (originalRef has id === 0 or < 0)
         const wasNewNote = originalNoteRef.current?.id === 0 || (originalNoteRef.current?.id && originalNoteRef.current.id < 0);
@@ -87,14 +72,6 @@ export const useNoteUIHelper = () => {
                 (updated.tags && updated.tags.length > 0) ||
                 updated.type;
 
-            console.log('📄 New note content check:', {
-                name: updated.name,
-                description: updated.description,
-                tags: updated.tags,
-                type: updated.type,
-                hasContent,
-            });
-
             setNoteHasChanges(!!hasContent);
         } else {
             // For existing notes, compare with original
@@ -110,19 +87,12 @@ export const useNoteUIHelper = () => {
                         const originalTagIds = originalValue.map((t: any) => t.tagId || t.id).sort();
                         const updatedTagIds = updatedValue.map((t: any) => t.tagId || t.id).sort();
                         const isDifferent = JSON.stringify(originalTagIds) !== JSON.stringify(updatedTagIds);
-                        console.log(`  🏷️  ${key} comparison:`, { originalTagIds, updatedTagIds, isDifferent });
                         return isDifferent;
                     }
 
                     // For other values, direct comparison
                     const isDifferent = originalValue !== updatedValue;
-                    console.log(`  📊 ${key} comparison:`, { originalValue, updatedValue, isDifferent });
                     return isDifferent;
-                });
-
-                console.log('✅ Existing note change check result:', {
-                    hasChanges,
-                    checkedFields: fieldsToCheck,
                 });
 
                 setNoteHasChanges(hasChanges);
@@ -130,12 +100,6 @@ export const useNoteUIHelper = () => {
         }
 
         setSelectedNote(updated);
-        console.log('🔵 [AFTER setSelectedNote] State should be updated to:', {
-            id: updated.id,
-            name: updated.name,
-            descriptionLength: updated.description?.length || 0,
-            description: updated.description
-        });
     };
 
     const markAsSaved = () => {

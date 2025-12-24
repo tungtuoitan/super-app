@@ -132,8 +132,6 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                         deletedAt: savedWorkspace.deletedAt ? new Date(savedWorkspace.deletedAt) : null,
                         userId: savedWorkspace.userId,
                     };
-                    console.log('openTabs before update:', openTabs);
-
                     // Update the active tab with the saved workspace data
                     setOpenTabs((prev: BaseTab[]) => {
                         const updatedTabs = prev.map(t => {

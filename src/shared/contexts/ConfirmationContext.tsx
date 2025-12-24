@@ -31,25 +31,20 @@ export function ConfirmationProvider({ children }: { children: React.ReactNode }
     const [options, setOptions] = useState<ConfirmationOptions | null>(null);
 
     const showConfirmation = useCallback((opts: ConfirmationOptions) => {
-        console.log('[ConfirmationContext] showConfirmation called');
         setOptions(opts);
         setIsOpen(true);
     }, []);
 
     const handleConfirm = useCallback(() => {
-        console.log('[ConfirmationContext] handleConfirm');
         options?.onConfirm();
         setIsOpen(false);
         setTimeout(() => setOptions(null), 200);
     }, [options]);
 
     const handleCancel = useCallback(() => {
-        console.log('[ConfirmationContext] handleCancel');
         setIsOpen(false);
         setTimeout(() => setOptions(null), 200);
     }, []);
-
-    console.log('[ConfirmationContext] Render, isOpen:', isOpen, 'hasOptions:', !!options);
 
     return (
         <ConfirmationContext.Provider value={{ showConfirmation }}>

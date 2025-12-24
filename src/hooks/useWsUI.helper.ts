@@ -42,7 +42,6 @@ export const useWsUIHelper = () => {
      */
     const updateSelectedWorkspace = (updates: Partial<Ws>) => {
         if (!selectedWorkspace) {
-            console.log('⚠️ updateSelectedWorkspace: selectedWorkspace is null');
             return;
         }
 

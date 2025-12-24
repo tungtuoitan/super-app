@@ -61,7 +61,6 @@ export const useTreeOperation = () => {
             });
 
             if (itemIds.length === 0) {
-                console.log('⚠️ All selected items are descendants of other selected items - nothing to move');
                 setIsDragging(false);
                 return;
             }
@@ -223,7 +222,6 @@ export const useTreeOperation = () => {
 
             try {
                 const result = await _moveWorkspaceItems(auth.userToken, workspaceId, moveRequest);
-                console.log(`✅ Successfully moved ${moveRequest.items.length} item(s):`, result);
                 
                 // Show success toast
                 enqueueSnackbar(
@@ -272,11 +270,6 @@ export const useTreeOperation = () => {
     const handleNewFolder = (
         treeData: TreeFolder[]
     ) => {
-        console.log('📁 Add Folder clicked', {
-            treeDataLength: treeData.length,
-            selectedFolderIds,
-        });
-        
         const parentId = selectedFolderIds.length > 0 
             ? selectedFolderIds[0]
             : undefined;
@@ -286,12 +279,6 @@ export const useTreeOperation = () => {
         const parentFolder = parentId 
             ? findFolderById((folders || []) as unknown as Folder[], parentId)
             : undefined;
-        
-        console.log('📁 Opening dialog with:', {
-            parentFolder: parentFolder?.name || 'root',
-            parentId,
-            foldersCount: folders.length,
-        });
             
         openFolderDialog('create', constants.workspace.itemTypes.folder, null, parentFolder);
     };

@@ -77,14 +77,7 @@ export function NoteDetailDialogContent() {
     
      // Handlers for form interactions
         const handleFieldChange = (field: keyof Note, value: any) => {
-            console.log('🔵 [FIELD CHANGE] Calling updateSelectedNote:', {
-                field,
-                valueLength: typeof value === 'string' ? value.length : 'N/A',
-                value: field === 'description' ? value : '(other field)',
-                timestamp: new Date().toISOString()
-            });
             updateSelectedNote({ [field]: value });
-            console.log(`Field ${field} changed to:`, value);
         };
     
         const handleTypeChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
@@ -113,20 +106,16 @@ export function NoteDetailDialogContent() {
         }).filter(tag => tag !== null);
         
         handleFieldChange('tags', tagObjects);
-        console.log('HashTags changed:', { tagsString, tagIds, tagObjects });
     };        const handleDuplicate = () => {
             // TODO: Implement duplicate logic
-            console.log('Duplicating note');
         };
     
         const handleArchive = () => {
             // TODO: Implement archive logic
-            console.log('Toggling archive status');
         };
     
         const handleDelete = () => {
             // TODO: Implement delete logic
-            console.log('Deleting note');
         };
     
         if (!selectedNote) {
@@ -148,11 +137,6 @@ export function NoteDetailDialogContent() {
                         value={selectedNote?.description || ''}
                         onChange={(e) => {
                             const newValue = e.target.value;
-                            console.log('🔵 [TYPING] Description changed:', {
-                                length: newValue.length,
-                                value: newValue,
-                                timestamp: new Date().toISOString()
-                            });
                             handleFieldChange('description', newValue);
                         }}
                         placeholder="Enter note description..."

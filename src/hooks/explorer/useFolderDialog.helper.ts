@@ -118,8 +118,6 @@ export const useFolderDialogHelper = () => {
                     parentId: parentFolder?.id || null,
                 };
             
-            console.log('📤 Submitting folder data:', folderData);
-            
             // Call upsertFolder endpoint
             await _upsertFolder(token, selectedWorkspaceId, folderData);
             
@@ -162,8 +160,6 @@ export const useFolderDialogHelper = () => {
         folder?: Folder | null,
         parentFolder?: Folder | null
     ) => {
-        console.log('📂 Opening item dialog:', { mode: dialogMode, type, folder, parentFolder });
-        
         setMode(dialogMode);
         setItemType(type);
         
@@ -174,18 +170,8 @@ export const useFolderDialogHelper = () => {
         } else {
             // Edit mode: use folder parameter
             if (!folder) {
-                console.error('❌ Edit mode requires a folder');
                 return;
             }
-            
-            console.log('📝 Opening edit dialog for folder:', {
-                id: folder.id || (folder as any).tagId,
-                name: folder.name,
-                description: folder.description,
-                color: folder.color,
-                parentId: folder.parentId,
-                fullData: folder
-            });
             
             // Handle both folderId and tagId (for backward compatibility)
             const editData = {
@@ -200,12 +186,6 @@ export const useFolderDialogHelper = () => {
             setDescription(folder.description || '');
             setColor(folder.color || '#1976D2');
             
-            console.log('✅ Edit dialog opened with data:', {
-                name: folder.name || '',
-                description: folder.description || '',
-                color: folder.color || '#1976D2',
-                parentId: folder.parentId
-            });
         }
         
         // Clear any previous errors

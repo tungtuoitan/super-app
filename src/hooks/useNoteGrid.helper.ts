@@ -39,7 +39,6 @@ export const useNoteGridHelper = () => {
 
     // Create new note (temporary with negative ID)
     const createNewNote = () => {
-        console.log('➕ Creating new note...');
 
         // Generate sequential temporary negative ID from open tabs
         const existingIds = collectIdsFromTabs(openTabs);
@@ -67,8 +66,6 @@ export const useNoteGridHelper = () => {
 
         // Focus vào Note Name field sau khi tab mở
         setShouldFocusNoteName(true);
-
-        console.log('✅ New note created and opened:', newNote);
     };
 
     // Load notes
@@ -113,7 +110,6 @@ export const useNoteGridHelper = () => {
         try {
             // Handle temporary notes - just remove from grid locally
             if (tempNoteIds.length > 0) {
-                console.log('🗑️ Removing temporary notes from grid:', tempNoteIds);
                 setNotes(prevNotes => prevNotes.filter(note => !tempNoteIds.includes(note.id)));
                 
                 enqueueSnackbar(`Removed ${tempNoteIds.length} unsaved note(s)`, {

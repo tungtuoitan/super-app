@@ -68,7 +68,6 @@ export const useTreeExpansion = () => {
      * Collapse all nodes using tree ref (react-arborist API)
      */
     const handleCollapseAll = () => {
-        console.log('📂 Collapse All clicked');
         if (treeRef && treeRef.current) {
             treeRef.current.closeAll();
         }

@@ -90,7 +90,6 @@ export function FileNode({
             node.select();
 
             // TODO: Open file preview or download
-            console.log('Open file:', fileItem);
         }
     };
 

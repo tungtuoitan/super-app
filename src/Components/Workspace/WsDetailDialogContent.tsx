@@ -50,14 +50,12 @@ export function WsDetailDialogContent() {
     // Handlers for form interactions
     const handleFieldChange = (field: keyof Ws, value: any) => {
         updateSelectedWorkspace({ [field]: value });
-        console.log(`Field ${String(field)} changed to:`, value);
     };
 
     const handleActiveChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
         const isActiveSelected = newValue?.code === constants.standardRegistryFE.activeStatus.active;
         const newDeletedAt = isActiveSelected ? null : new Date();
         updateSelectedWorkspace({ deletedAt: newDeletedAt });
-        console.log(`Workspace ${isActiveSelected ? 'activated' : 'deactivated'}`);
     };
 
     if (!selectedWorkspace) {

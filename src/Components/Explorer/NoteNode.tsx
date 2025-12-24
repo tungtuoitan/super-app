@@ -72,7 +72,6 @@ export function NoteNode({
                 createdBy: 'You',
             };
 
-            console.log('📝 Opening note in tab:', note);
             openNoteTab(note);
         }
     };

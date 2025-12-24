@@ -111,33 +111,10 @@ export function FolderDialog() {
         );
     }, [newFolderName]);
 
-    // Initialize dialog when it opens
-    useEffect(() => {
-        if (isFolderDialogOpen) {
-            console.log('🔄 FolderDialog opened with mode:', mode);
-            console.log('📋 Form state BEFORE init:', {
-                newFolderName,
-                description,
-                color,
-                editingFolder
-            });
-            
-            // Log again after init to verify data retention
-            setTimeout(() => {
-                console.log('📋 Form state AFTER init:', {
-                    newFolderName,
-                    description,
-                    color
-                });
-            }, 100);
-        }
-    }, [isFolderDialogOpen, mode]); // Add mode to dependencies to track changes
-
     // Handle dialog close
     const handleClose = () => {
         closeFolderDialog();
     };
-    console.log('FolderDialog Render:', { isFolderDialogOpen, mode, parentFolder });
     
     // Keyboard Shortcuts
     useKeyboardShortcut({

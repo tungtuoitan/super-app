@@ -108,14 +108,12 @@ export const useWsListHelper = () => {
         });
 
         setOpenTabs(updatedTabs);
-        console.log(`🔄 Synced ${action} action for ${workspaceIds.length} workspace(s) to tabs`);
     };
 
     /**
      * Create new workspace (temporary with negative ID)
      */
     const createNewWorkspace = () => {
-        console.log('➕ Creating new workspace...');
 
         // Generate sequential temporary negative ID from open tabs
         const existingIds = collectIdsFromTabs(openTabs);
@@ -137,7 +135,6 @@ export const useWsListHelper = () => {
         setWorkspaces([newWorkspace, ...workspaces]);
 
         // Open workspace in editor tab
-        console.log('🏢 Opening new workspace in tab:', newWorkspace);
         openWorkspaceTab(newWorkspace);
 
         // Focus vào Workspace Name field sau khi tab mở
@@ -260,8 +257,6 @@ export const useWsListHelper = () => {
             // Clicked on empty area
             selectedIds = [];
         }
-
-        console.log('🏢 Context menu - selectedIds:', selectedIds);
 
         setAnchorPoint({ x: event.clientX, y: event.clientY });
         setContextType('workspace-grid');

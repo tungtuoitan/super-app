@@ -26,7 +26,6 @@ export const useWsTabHelper = () => {
 
         if (existingTab) {
             // Tab already exists, just activate it
-            console.log('🏢 WsTabHelper - Tab exists, activating:', existingTab.id);
             updateActiveTabIdAndSelectedNote(existingTab.id);
         } else {
             // Create new workspace tab
@@ -38,7 +37,6 @@ export const useWsTabHelper = () => {
                 hasUnsavedChanges: false,
             };
 
-            console.log('🏢 WsTabHelper - Creating new tab:', newTab);
             const newTabs = [...openTabs, newTab];
             setOpenTabs(newTabs);
             updateActiveTabIdAndSelectedNote(newTab.id, newTabs);
@@ -49,7 +47,6 @@ export const useWsTabHelper = () => {
      * Close workspace tab
      */
     const closeWorkspaceTab = (tabId: string) => {
-        console.log('🏢 WsTabHelper - closeWorkspaceTab:', tabId);
         
         setOpenTabs(prev => {
             const newTabs = prev.filter(t => t.id !== tabId);
@@ -74,7 +71,6 @@ export const useWsTabHelper = () => {
      * When workspace is updated, sync it across all open tabs
      */
     const updateWorkspaceInTabs = (workspaceId: number, updatedWorkspace: Partial<Ws>) => {
-        console.log('🏢 WsTabHelper - updateWorkspaceInTabs:', workspaceId, updatedWorkspace);
         
         setOpenTabs(prev => prev.map(tab => {
             if (tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspaceId) {

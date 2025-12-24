@@ -45,15 +45,6 @@ export const useEditorActionsHelper = () => {
         const token = auth.userToken;
 
         try {
-            // Log selectedNote state before creating upsert data
-            console.log('🟢 [BEFORE SAVE] selectedNote state:', {
-                id: selectedNote.id,
-                name: selectedNote.name,
-                descriptionLength: selectedNote.description?.length || 0,
-                description: selectedNote.description,
-                timestamp: new Date().toISOString()
-            });
-
             // Upsert data - works for both create and update
             const upsertData: UpsertNoteDTO = {
                 id: isCreateMode ? 0 : selectedNote.id, // Always use 0 for create
@@ -66,14 +57,6 @@ export const useEditorActionsHelper = () => {
                 type: selectedNote.type,
             };
 
-            console.log('🟡 [UPSERT DATA] Data being sent to API:', {
-                id: upsertData.id,
-                name: upsertData.name,
-                descriptionLength: upsertData.description?.length || 0,
-                description: upsertData.description,
-                timestamp: new Date().toISOString()
-            });
-            console.log(`📝 ${isCreateMode ? 'Creating' : 'Updating'} note with data:`, upsertData);
             const result = await _upsertNote(token, upsertData);
             
             // Check API response success
@@ -82,14 +65,6 @@ export const useEditorActionsHelper = () => {
             }
             
             const savedNote = result.object;
-            console.log('🟢 [API RESPONSE] Note saved successfully:', {
-                id: savedNote?.id,
-                name: savedNote?.name,
-                descriptionLength: savedNote?.description?.length || 0,
-                description: savedNote?.description,
-                timestamp: new Date().toISOString()
-            });
-            console.log('✅ Note saved successfully:', savedNote);
 
             if (!savedNote) {
                 throw new Error('Failed to save note: No data returned from server');
@@ -109,19 +84,12 @@ export const useEditorActionsHelper = () => {
                 const workspaceId = currentTree?.workspaceId;
 
                 if (workspaceId && parentFolderId) {
-                    console.log('📤 Adding note to workspace_items:', {
-                        workspaceId,
-                        parentFolderId,
-                        noteId: transformedNote.id
-                    });
-
                     try {
                         await _addItemToWorkspace(token, workspaceId, {
                             parentTagId: parentFolderId,
                             childType: constants.workspace.itemTypes.note,
                             childId: transformedNote.id,
                         });
-                        console.log('✅ Note added to workspace_items');
                     } catch (error) {
                         console.error('❌ Failed to add note to workspace:', error);
                         // Don't fail the whole save if this fails - note is still created
@@ -137,12 +105,10 @@ export const useEditorActionsHelper = () => {
             );
 
             // Update context with saved note from server
-            console.log('🔄 Setting selectedNote to saved note:', transformedNote);
             setSelectedNote(transformedNote);
 
             // Update tab with saved note if tabId provided
             if (tabId && updateTabNote) {
-                console.log('📑 Updating tab with saved note');
                 updateTabNote(tabId, transformedNote);
             }
 
@@ -150,12 +116,10 @@ export const useEditorActionsHelper = () => {
             markAsSaved();
 
             // Reload note grid to reflect changes
-            console.log('🔄 Reloading note grid...');
             await loadNotes();
 
             // ✅ Reload workspace tree if note was added to workspace (NO PAGE RELOAD!)
             if (isCreateMode && currentTree?.workspaceId) {
-                console.log('🔄 Reloading workspace tree...');
                 await loadTree(currentTree.workspaceId);
             }
 

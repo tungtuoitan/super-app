@@ -28,25 +28,16 @@ export const useEditorTabHelper = () => {
     const updateActiveTabIdAndSelectedNote = (newActiveTabId: string | null, tabs?: typeof openTabs) => {
         const tabsToSearch = tabs || openTabs;
         
-        console.log('🔄 updateActiveTabIdAndSelectedNote:', { 
-            newActiveTabId, 
-            tabsCount: tabsToSearch.length,
-            tabs: tabsToSearch 
-        });
-        
         setActiveTabId(newActiveTabId);
         
         if (newActiveTabId) {
             const activeTab = tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId);
-            console.log('🔍 Found active tab:', activeTab);
             
             if (activeTab?.type === constants.vscode.tab.tabTypes.note) {
                 const noteData = activeTab.data as Note;
-                console.log('✅ Setting selectedNote:', noteData);
                 
                 // Initialize originalNoteRef for change tracking
                 if (!originalNoteRef.current || originalNoteRef.current.id !== noteData.id) {
-                    console.log('📌 Initializing originalNoteRef in EditorTabHelper:', noteData);
                     originalNoteRef.current = { ...noteData };
                     setNoteHasChanges(false); // Reset changes for newly opened note
                 }
@@ -59,11 +50,9 @@ export const useEditorTabHelper = () => {
                 setSelectedWorkspace(null);
             } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
                 const wsData = activeTab.data as Ws;
-                console.log('✅ Setting selectedWorkspace:', wsData);
                 
                 // Initialize originalWsRef for change tracking
                 if (!originalWsRef.current || originalWsRef.current.id !== wsData.id) {
-                    console.log('📌 Initializing originalWsRef in EditorTabHelper:', wsData);
                     originalWsRef.current = { ...wsData };
                     setWsHasChanges(false); // Reset changes for newly opened workspace
                 }
@@ -75,7 +64,6 @@ export const useEditorTabHelper = () => {
                 setNoteHasChanges(false);
                 setSelectedNote(null);
             } else {
-                console.log('❌ No note/workspace tab found, clearing selected items');
                 originalNoteRef.current = null;
                 setNoteHasChanges(false);
                 setSelectedNote(null);
@@ -84,7 +72,6 @@ export const useEditorTabHelper = () => {
                 setSelectedWorkspace(null);
             }
         } else {
-            console.log('🚫 No active tab ID, clearing selected items');
             originalNoteRef.current = null;
             setNoteHasChanges(false);
             setSelectedNote(null);
@@ -94,8 +81,6 @@ export const useEditorTabHelper = () => {
         }
     }
     const openNoteTab = (note: Note) => {
-        console.log('📝 EditorTabContext - openNoteTab called:', note);
-        console.log('📝 EditorTabContext - Current openTabs:', openTabs);
         
         // Check if tab already exists for this note
         const existingTab = openTabs.find(
@@ -104,7 +89,6 @@ export const useEditorTabHelper = () => {
 
         if (existingTab) {
             // Tab already exists, just activate it
-            console.log('📝 EditorTabContext - Tab exists, activating:', existingTab.id);
             updateActiveTabIdAndSelectedNote(existingTab.id);
         } else {
             // Create new tab
@@ -116,7 +100,6 @@ export const useEditorTabHelper = () => {
                 hasUnsavedChanges: false,
             };
 
-            console.log('📝 EditorTabContext - Creating new tab:', newTab);
             
             // Update tabs first, then set active with the new tabs array
             const newTabs = [...openTabs, newTab];
@@ -140,7 +123,6 @@ export const useEditorTabHelper = () => {
         if (tab?.type === constants.vscode.tab.tabTypes.note) {
             const noteData = tab.data as Note;
             if (noteData.id < 0) {
-                console.log('🗑️ Removing temporary note from grid:', noteData.id);
                 setNotes(prevNotes => prevNotes.filter(note => note.id !== noteData.id));
             }
         }
@@ -197,7 +179,6 @@ export const useEditorTabHelper = () => {
     };
 
     const updateTabNote = (tabId: string, note: Note) => {
-        console.log('🔄 EditorTabContext - updateTabNote:', { tabId, note });
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((tab: BaseTab) => {
                 if (tab.id === tabId && tab.type === constants.vscode.tab.tabTypes.note) {

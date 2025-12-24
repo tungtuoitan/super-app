@@ -44,14 +44,14 @@ export function RightDialogContent() {
                             <Button 
                                 variant="outline" 
                                 className="w-full"
-                                onClick={() => console.log('Duplicate note')}
+                                onClick={() => {}}
                             >
                                 Duplicate
                             </Button>
                             <Button 
                                 variant="outline" 
                                 className="w-full text-destructive hover:text-destructive"
-                                onClick={() => console.log('Delete note')}
+                                onClick={() => {}}
                             >
                                 {selectedNote?.deletedAt ? 'Restore' : 'Delete'}
                             </Button>

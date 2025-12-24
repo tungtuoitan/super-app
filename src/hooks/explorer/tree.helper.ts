@@ -250,13 +250,6 @@ export function createWorkspaceRootFolder(
      * Benefits: smaller payload, better caching, easier updates
      */
     function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
-        console.log('🏗️ buildHierarchy - Input items:', items.map(i => ({
-            name: i.name,
-            id: i.id,
-            type: i.type,
-            parentId: i.parentId
-        })));
-
         // Create a map for O(1) lookup - include ALL item types
         const itemMap = new Map<number, WorkspaceItem>();
 
@@ -269,8 +262,6 @@ export function createWorkspaceRootFolder(
             itemMap.set(item.id, itemWithChildren);
         });
 
-        console.log('🗺️ buildHierarchy - Item map keys:', Array.from(itemMap.keys()));
-
         // Build parent-child relationships
         const roots: WorkspaceItem[] = [];
 
@@ -280,7 +271,6 @@ export function createWorkspaceRootFolder(
 
             if (item.parentId === null || item.parentId === undefined) {
                 // Root level item (no parent)
-                console.log(`✅ Root item: ${item.name} (id: ${item.id})`);
                 roots.push(currentItem);
             } else {
                 // Child item - add to parent's children array
@@ -288,21 +278,16 @@ export function createWorkspaceRootFolder(
                 if (parent) {
                     // Only add to parent if parent is a folder
                     if (isFolder(parent)) {
-                        console.log(`✅ Adding ${item.name} (id: ${item.id}) to parent ${parent.name} (id: ${parent.id})`);
                         parent.children.push(currentItem);
                     } else {
-                        console.warn(`⚠️ Item ${item.id} has parent ${item.parentId} which is not a folder`);
                         roots.push(currentItem);
                     }
                 } else {
                     // Orphan (parent not found) - treat as root
-                    console.warn(`⚠️ Orphan: ${item.name} (id: ${item.id}) has parentId ${item.parentId} but parent not found in map`);
                     roots.push(currentItem);
                 }
             }
         });
-
-        console.log('📦 buildHierarchy - Roots:', roots.map(r => ({ name: r.name, id: r.id, childrenCount: isFolder(r) ? r.children.length : 0 })));
 
         return roots;
     }
@@ -369,14 +354,12 @@ export function transformToTreeData(
     // We build the tree structure here in frontend for flexibility & caching benefits
     // ================================================================
     const hierarchicalItems = buildHierarchy(frontendItems);
-    console.log('🏗️ transformToTreeData - Built hierarchy:', hierarchicalItems);
     
     // ================================================================
     // STEP 4: Apply search filter (if needed)
     // TODO: Implement search filter for all item types (not just folders)
     // ================================================================
     const filteredItems = hierarchicalItems; // For now, no filtering
-    console.log('🔎 transformToTreeData - Filtered items:', filteredItems);
 
     // ================================================================
     // STEP 5: Create workspace root node (workspace mode only)
@@ -415,6 +398,5 @@ export function transformToTreeData(
     // ✅ Transform WorkspaceItem hierarchy (folders, notes, files) to TreeFolder
     // ================================================================
     const result = transformItemsToTreeData(itemsToTransform);
-    console.log('🌲 transformToTreeData - Final result:', result);
     return result;
 }
