@@ -10,6 +10,7 @@ import { AccountsDialog } from './AccountsDialog'
 import { constants } from '@/utils/constants'
 import { useActivityBarStore } from '@/store/index'
 import { useActivityBarHelper } from '@/hooks/useActivityBar.helper'
+import { useAuthStore } from '@/store/auth/Auth.store'
 
 const activities = [
   { id: 'workspaceList' as const, icon: Boxes, label: 'WorkspaceList' },
@@ -27,6 +28,8 @@ export function ActivityBar() {
     activeView,
     handleActivityClick,
   } = useActivityBarHelper()
+
+  const { isAuthenticated } = useAuthStore()
 
   return (
     <>
@@ -68,7 +71,9 @@ export function ActivityBar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setAccountsOpen(true)}
-                  className="w-12 h-12 rounded-none text-[#6a6a6a] hover:text-white hover:bg-transparent transition-colors"
+                  className={`w-12 h-12 rounded-none hover:text-white hover:bg-transparent transition-colors ${
+                    isAuthenticated ? 'text-[#6a6a6a]' : 'text-red-500'
+                  }`}
                 >
                   <UserCircle className="w-6 h-6 mx-auto" />
                 </button>
