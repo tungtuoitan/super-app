@@ -9,12 +9,12 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useSnackbar } from 'notistack';
 import { useWsStore, Ws } from '@/store/ws/useWs.store';
 import { constants } from '@/utils/constants';
-import { useWsTabHelper } from './useWsTab.helper';
 import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
 import {BaseTab} from '@/types/editor/tab.types';
-import {useEditorTabsStore} from '../store';
+import {useEditorTabsStore} from '../../store';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import {useWsTabHelper} from './useWsTab.helper';
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
  */

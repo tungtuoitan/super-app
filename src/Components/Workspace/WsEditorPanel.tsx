@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import type { BaseTab } from '@/types/editor/tab.types';
 import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
-import { useWsDetailHelper } from '@/hooks/useWsDetail.helper';
+import { useWsDetailHelper } from '@/hooks/ws/useWsDetail.helper';
 import { useEditorTabsStore } from '@/store/index';
 import { Ws } from '@/store/ws/useWs.store';
 import { constants } from '@/utils/constants';

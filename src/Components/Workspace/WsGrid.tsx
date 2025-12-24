@@ -18,9 +18,9 @@ import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import { useWsStore, Ws } from '@/store/ws/useWs.store';
-import { useWsHelper } from '@/hooks/useWs.helper';
-import { useWsTabHelper } from '@/hooks/useWsTab.helper';
-import { useGridControlHelper } from '@/hooks/useGridControl.helper';
+import { useWsHelper } from '@/hooks/ws/useWs.helper';
+import { useWsTabHelper } from '@/hooks/ws/useWsTab.helper';
+import { useGridControlHelper } from '@/hooks/vsCode/useGridControl.helper';
 import { useGridControlStore } from '@/store/grid/useGridControl.store';
 
 /**

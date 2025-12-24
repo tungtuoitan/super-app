@@ -1,7 +1,7 @@
 import React from 'react'
 import { X } from 'lucide-react'
 import { NoteEditorPanel, ConfirmCloseDialog, EditorToolbar } from '@/Components/Editor'
-import {useEditorTabHelper} from '@/hooks/useEditorTab.helper'
+import {useEditorTabHelper} from '@/hooks/vsCode/useEditorTab.helper'
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store'
 import {useNoteGridStore} from '@/store/note/useNoteGrid.store'
 import { WsEditorPanel } from '@/Components/Workspace'

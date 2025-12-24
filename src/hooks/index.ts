@@ -14,10 +14,28 @@ export * from './useAuth.helpers';
 export { useAuthHelper } from './useAuth.helpers';
 
 // UI helpers
-export * from './useNoteDetail.helper';
-export * from './useNoteTab.helper';
-export * from './useEditorTab.helper';
-export * from './useEditorDetail.helper';
+export * from './note/useNoteDetail.helper';
+export * from './note/useNoteTab.helper';
+export * from './note/useNoteGrid.helper';
+export * from './vsCode/useEditorTab.helper';
+export * from './vsCode/useEditorDetail.helper';
+export * from './vsCode/useEditorToolbar.helper';
+export * from './vsCode/useGridControl.helper';
 export * from './useActivityBar.helper';
 
+// Context menu helpers
 export * from './useContextMenu.helper';
+export * from './useConfirmationPopover.helper';
+
+// Workspace helpers
+export * from './ws/useWs.helper';
+export * from './ws/useWsDetail.helper';
+export * from './ws/useWsTab.helper';
+
+// Explorer helpers
+export * from './explorer/useWorkspaceOperation.helper';
+export * from './explorer/useFolderDialog.helper';
+export * from './explorer/useTreeSelection.helper';
+export * from './explorer/useTreeExpansion.helper';
+export * from './explorer/useTreeOperation.helper';
+export * from './explorer/tree.helper';

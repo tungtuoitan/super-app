@@ -8,7 +8,7 @@ import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/Contex
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 import type { ItemType } from '@/store/explorer/FolderDialog.store';
-import { useEditorTabHelper } from '@/hooks/useEditorTab.helper';
+import { useEditorTabHelper } from '@/hooks/vsCode/useEditorTab.helper';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems, _addItemToWorkspace } from '@/services/workspace.service';
 import { _deleteNote, _upsertNote } from '@/services/note.service';

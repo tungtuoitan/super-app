@@ -21,9 +21,9 @@ import { _undoDeleteWs } from '@/services/ws.service';
 import { _upsertWs } from '@/services/ws.service';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import { useNoteGridHelper } from './useNoteGrid.helper';
-import { useWsHelper } from './useWs.helper';
-import { useWsDetailHelper } from './useWsDetail.helper';
+import { useNoteGridHelper } from '../note/useNoteGrid.helper';
+import { useWsHelper } from '../ws/useWs.helper';
+import { useWsDetailHelper } from '../ws/useWsDetail.helper';
 import { Ws } from '@/store/ws/useWs.store';
 import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
 

@@ -1,5 +1,5 @@
 import { Note } from '@/types/note.types';
-import { useNoteTabStore } from '../store/note/useNoteTab.store';
+import { useNoteTabStore } from '../../store/note/useNoteTab.store';
 import { constants } from '@/utils/constants';
 
 export const useNoteTabHelper = () => {

@@ -16,10 +16,10 @@ import { Checkbox } from '@/Components/ui/checkbox';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import {Note} from '@/types/note.types';
 import {_getNotes, _deleteNote} from '@/services/note.service';
-import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
+import {useEditorTabHelper} from '@/hooks/vsCode/useEditorTab.helper';
 import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
-import {useNoteGridHelper} from '@/hooks/useNoteGrid.helper';
-import { useGridControlHelper } from '@/hooks/useGridControl.helper';
+import {useNoteGridHelper} from '@/hooks/note/useNoteGrid.helper';
+import { useGridControlHelper } from '@/hooks/vsCode/useGridControl.helper';
 import { useGridControlStore } from '@/store/grid/useGridControl.store';
 
 /**

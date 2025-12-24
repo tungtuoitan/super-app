@@ -1,8 +1,8 @@
 import {Note} from "@/types/note.types";
-import {useNoteDetailStore} from "../store/note/useNoteDetail.store";
-import {useNoteGridStore} from "../store/note/useNoteGrid.store";
+import {useNoteDetailStore} from "@/store/note/useNoteDetail.store";
+import {useNoteGridStore} from "@/store/note/useNoteGrid.store";
 import {BaseTab} from "@/types/editor/tab.types";
-import {useEditorTabsStore} from "../store";
+import {useEditorTabsStore} from "@/store/index";
 import { constants } from '@/utils/constants';
 import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
 import { Ws } from '@/store/ws/useWs.store';

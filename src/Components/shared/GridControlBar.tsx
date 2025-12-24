@@ -8,7 +8,7 @@ import { Search, X } from 'lucide-react';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { GenericFilterPopup } from './GenericFilterPopup';
-import { useGridControlHelper } from '@/hooks/useGridControl.helper';
+import { useGridControlHelper } from '@/hooks/vsCode/useGridControl.helper';
 import { useGridControlStore } from '@/store/grid/useGridControl.store';
 
 export function GridControlBar() {

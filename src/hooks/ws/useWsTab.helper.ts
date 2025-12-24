@@ -5,9 +5,9 @@
 
 import { Ws } from '@/store/ws/useWs.store';
 import { BaseTab } from '@/types/editor/tab.types';
-import {useEditorTabsStore} from '../store';
+import {useEditorTabsStore} from '../../store';
 import { constants } from '@/utils/constants';
-import { useEditorTabHelper } from './useEditorTab.helper';
+import { useEditorTabHelper } from '../vsCode/useEditorTab.helper';
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();

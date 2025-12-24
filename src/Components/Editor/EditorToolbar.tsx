@@ -14,9 +14,9 @@ import {
     TooltipTrigger,
 } from '@/Components/ui/tooltip';
 import {useEditorTabsStore} from '@/store/index';
-import {useEditorTabHelper} from '@/hooks/useEditorTab.helper';
+import {useEditorTabHelper} from '@/hooks/vsCode/useEditorTab.helper';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
-import {useEditorToolbarHelper} from '@/hooks/useEditorToolbar.helper';
+import {useEditorToolbarHelper} from '@/hooks/vsCode/useEditorToolbar.helper';
 import { constants } from '@/utils/constants';
 
 

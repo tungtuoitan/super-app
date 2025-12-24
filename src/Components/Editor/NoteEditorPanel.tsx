@@ -5,7 +5,7 @@
  */
 
 import React, {useEffect} from 'react';
-import {useEditorDetailHelper} from '@/hooks/useEditorDetail.helper';
+import {useEditorDetailHelper} from '@/hooks/vsCode/useEditorDetail.helper';
 import {useEditorTabsStore} from '@/store/index';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {BaseTab} from '@/types/editor/tab.types';

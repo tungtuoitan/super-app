@@ -1,36 +1,104 @@
-/**
- * Editor Actions Helper
- * Handles save/create/cancel actions for note editor
- */
-
 import { useCallback } from 'react';
 import { useSnackbar } from 'notistack';
+import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
+import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
 import { Note, UpsertNoteDTO } from '@/types/note.types';
 import { _upsertNote } from '@/services/note.service';
 import { _addItemToWorkspace } from '@/services/workspace.service';
-import { storageService } from '@/services/storage.service';
 import { constants } from '@/utils/constants';
-import { useNoteDetailHelper } from './useNoteDetail.helper';
-import { useEditorTabHelper } from './useEditorTab.helper';
+import { useEditorTabHelper } from '../vsCode/useEditorTab.helper';
 import { useNoteGridHelper } from './useNoteGrid.helper';
-import { useWorkspaceOperation } from './explorer/useWorkspaceOperation.helper';
-import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
-import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
+import { useWorkspaceOperation } from '../explorer/useWorkspaceOperation.helper';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { transformNoteData } from '@/utils/note.utils';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 
-export const useEditorDetailHelper = () => {
+export const useNoteDetailHelper = () => {
     const { auth } = useAuthStore();
     const { selectedNote } = useNoteGridStore();
-    const { noteHasChanges } = useNoteDetailStore();
-    const { setSelectedNote, markAsSaved, resetChanges } = useNoteDetailHelper();
-    const { updateTabNote, markTabAsChanged } = useEditorTabHelper();
+    const {
+        noteHasChanges,
+        setNoteHasChanges,
+        originalNoteRef,
+    } = useNoteDetailStore();
+
+    const { setSelectedNote } = useNoteGridStore();
+    const { updateTabNote } = useEditorTabHelper();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceOperation();
     const { currentTree } = useExplorerStore();
     const { enqueueSnackbar } = useSnackbar();
+
+    const updateSelectedNote = (updatedNote: Partial<Note>) => {
+
+        if (!selectedNote) return;
+
+        const updated = { ...selectedNote, ...updatedNote };
+
+        // Check if this was originally a new note (originalRef has id === 0 or < 0)
+        const wasNewNote = originalNoteRef.current?.id === 0 || (originalNoteRef.current?.id && originalNoteRef.current.id < 0);
+        const isNowSaved = updated.id > 0;
+
+        // If this was a new note and now has an ID, update the original reference
+        if (wasNewNote && isNowSaved) {
+            originalNoteRef.current = { ...updated };
+            setNoteHasChanges(false);
+            setSelectedNote(updated);
+            return;
+        }
+
+        // For new notes that are still unsaved (id === 0 or < 0)
+        if (updated.id === 0 || updated.id < 0) {
+            const hasContent =
+                updated.name?.trim() ||
+                updated.description?.trim() ||
+                (updated.tags && updated.tags.length > 0) ||
+                updated.type;
+
+            setNoteHasChanges(!!hasContent);
+        } else {
+            // For existing notes, compare with original
+            if (originalNoteRef.current) {
+                const fieldsToCheck: (keyof Note)[] = ['name', 'description', 'type', 'tags'];
+
+                const hasChanges = fieldsToCheck.some((key) => {
+                    const originalValue = originalNoteRef.current![key];
+                    const updatedValue = updated[key];
+
+                    // Deep comparison for arrays (tags)
+                    if (Array.isArray(originalValue) && Array.isArray(updatedValue)) {
+                        const originalTagIds = originalValue.map((t: any) => t.tagId || t.id).sort();
+                        const updatedTagIds = updatedValue.map((t: any) => t.tagId || t.id).sort();
+                        const isDifferent = JSON.stringify(originalTagIds) !== JSON.stringify(updatedTagIds);
+                        return isDifferent;
+                    }
+
+                    // For other values, direct comparison
+                    const isDifferent = originalValue !== updatedValue;
+                    return isDifferent;
+                });
+
+                setNoteHasChanges(hasChanges);
+            }
+        }
+
+        setSelectedNote(updated);
+    };
+
+    const markAsSaved = () => {
+        if (selectedNote) {
+            originalNoteRef.current = { ...selectedNote };
+            setNoteHasChanges(false);
+        }
+    };
+
+    const resetChanges = () => {
+        if (originalNoteRef.current) {
+            setSelectedNote({ ...originalNoteRef.current });
+            setNoteHasChanges(false);
+        }
+    };
 
     /**
      * Save current note (create or update using Upsert pattern)
@@ -60,12 +128,12 @@ export const useEditorDetailHelper = () => {
             };
 
             const result = await _upsertNote(token, upsertData);
-            
+
             // Check API response success
             if (!result.success) {
                 throw new Error(result.message || 'Failed to save note');
             }
-            
+
             const savedNote = result.object;
 
             if (!savedNote) {
@@ -140,24 +208,13 @@ export const useEditorDetailHelper = () => {
         }
     }, [selectedNote, auth.userToken, setSelectedNote, updateTabNote, markAsSaved, loadNotes, loadTree, currentTree, enqueueSnackbar]);
 
-    /**
-     * Cancel/discard changes
-     */
-    const cancelChanges = () => {
-        resetChanges();
-        enqueueSnackbar('Changes discarded', { variant: 'info' });
-    }
-
-    /**
-     * Mark tab as changed based on hasUnsavedChanges state
-     */
-    const syncTabChangeState = (tabId: string) => {
-        markTabAsChanged(tabId, noteHasChanges);
-    }
-
     return {
+        selectedNote,
+        noteHasChanges,
+        updateSelectedNote,
+        markAsSaved,
+        resetChanges,
+        setSelectedNote,
         saveNote,
-        cancelChanges,
-        syncTabChangeState,
     };
 };
