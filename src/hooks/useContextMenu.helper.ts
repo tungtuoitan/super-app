@@ -13,7 +13,7 @@ import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems, _addItemToWorkspace } from '@/services/workspace.service';
 import { _deleteNote } from '@/services/note.service';
 import { Note } from '@/types/note.types';
-import {useConfirmationPopover} from '@/shared/hooks';
+import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
 import {useEditorTabsStore} from '../store';
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from '../utils';
 import { constants } from '@/utils/constants';
@@ -252,7 +252,7 @@ export const useContextMenuHelper = () => {
      * Creates a temporary note with negative ID and opens it in editor
      * Note will be saved to DB only when user clicks Save in editor
      */
-    const handleAddNote = (parentFolder?: any) => {
+    const addNote = (parentFolder?: any) => {
         setIsContextMenuOpen(false);
 
         // Generate sequential temporary negative ID from open tabs
@@ -584,14 +584,7 @@ export const useContextMenuHelper = () => {
         setTimeout(() => setEditItemData(null), 200);
     }
 
-        // Confirmation popover for delete actions
-    const deleteConfirmation = useConfirmationPopover({
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-        confirmColor: 'destructive',
-        buttonVariant: 'default',
-        zIndex: 20000 // Higher than menu z-index
-    });
+    const { showConfirmation } = useConfirmationPopoverHelper();
 
     /**
      * Wrapper for handleDeleteItem with confirmation
@@ -649,9 +642,14 @@ export const useContextMenuHelper = () => {
                 }
             }
 
-            deleteConfirmation.show({
+            showConfirmation({
                 anchorEl: anchorElement,
                 message,
+                confirmText: isHardDelete ? 'Delete Permanently' : 'Delete',
+                cancelText: 'Cancel',
+                confirmColor: 'destructive',
+                buttonVariant: 'default',
+                zIndex: 20000,
                 onConfirm: () => {
                     handleDeleteItem(contextData, contextType, isHardDelete);
                 }
@@ -671,9 +669,14 @@ export const useContextMenuHelper = () => {
                 message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
             }
 
-            deleteConfirmation.show({
+            showConfirmation({
                 anchorEl: anchorElement,
                 message,
+                confirmText: isHardDelete ? 'Delete Permanently' : 'Delete',
+                cancelText: 'Cancel',
+                confirmColor: 'destructive',
+                buttonVariant: 'default',
+                zIndex: 20000,
                 onConfirm: () => {
                     handleDeleteItem(contextData, contextType, isHardDelete);
                 }
@@ -693,9 +696,14 @@ export const useContextMenuHelper = () => {
                 message = `Are you sure you want to delete "${contextData.name}"?\n\nThis action cannot be undone.`;
             }
 
-            deleteConfirmation.show({
+            showConfirmation({
                 anchorEl: anchorElement,
                 message,
+                confirmText: isHardDelete ? 'Delete Permanently' : 'Delete',
+                cancelText: 'Cancel',
+                confirmColor: 'destructive',
+                buttonVariant: 'default',
+                zIndex: 20000,
                 onConfirm: () => {
                     handleDeleteItem(contextData, contextType, isHardDelete);
                 }
@@ -711,7 +719,7 @@ export const useContextMenuHelper = () => {
         handleCreateItem,
 
         handleAddFile,
-        handleAddNote,
+        addNote,
 
         handleEditItem,
         handleDeleteItem,
@@ -719,6 +727,5 @@ export const useContextMenuHelper = () => {
 
         closeEditDialog,
         onDeleteItemClick,
-        deleteConfirmation,
     };
 };

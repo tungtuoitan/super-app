@@ -7,7 +7,7 @@
 import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenu.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
-import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
 import { constants } from '@/utils/constants';
 import { _deleteNote } from '@/services/note.service';
 import { _deleteWorkspaceItems } from '@/services/workspace.service';
@@ -131,16 +131,7 @@ export const useWorkspaceChildMenuHelper = () => {
         }
     };
 
-    /**
-     * Confirmation popover for delete actions
-     */
-    const deleteConfirmation = useConfirmationPopover({
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-        confirmColor: 'destructive',
-        buttonVariant: 'default',
-        zIndex: 20000,
-    });
+    const { showConfirmation } = useConfirmationPopoverHelper();
 
     /**
      * Handle delete with confirmation
@@ -175,9 +166,14 @@ export const useWorkspaceChildMenuHelper = () => {
             return;
         }
 
-        deleteConfirmation.show({
+        showConfirmation({
             anchorEl: anchorElement,
             message,
+            confirmText: isHardDelete ? 'Delete Permanently' : 'Delete',
+            cancelText: 'Cancel',
+            confirmColor: 'destructive',
+            buttonVariant: 'default',
+            zIndex: 20000,
             onConfirm: () => {
                 if (isNote) {
                     handleDeleteNote(contextData, isHardDelete);
@@ -192,6 +188,5 @@ export const useWorkspaceChildMenuHelper = () => {
         handleEditItem,
         handleViewInfo,
         onDeleteItemClick,
-        deleteConfirmation,
     };
 };

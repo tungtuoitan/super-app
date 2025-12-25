@@ -11,9 +11,6 @@ export type { DialogContextData } from './dialog/Dialog.store';
 
 export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from './editor/EditorTab.store';
 
-export { NoteTabStore, NoteTabProvider, useNoteTabStore } from './note/useNoteTab.store';
-export type { NoteTabContextData } from './note/useNoteTab.store';
-
 export { ContextMenuStore, ContextMenuStoreProvider, useContextMenuStore } from './contextMenu/ContextMenu.store';
 export type { ContextMenuStoreData, ContextMenuPosition, ContextMenuType } from './contextMenu/ContextMenu.store';
 

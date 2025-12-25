@@ -7,11 +7,9 @@ import {
     getFilteredRowModel,
     ColumnDef,
     flexRender,
-    RowSelectionState
 } from '@tanstack/react-table';
 import { Loader2, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import {Note} from '@/types/note.types';
@@ -34,18 +32,18 @@ export function NoteGrid() {
     const {
         notes,
         setNotes,
-        isLoading,
-        setIsLoading,
-        error,
-        setError,
-        sorting,
-        setSorting,
-        pagination,
-        setPagination,
-        rowSelection,
-        setRowSelection,
-        columnFilters,
-        setColumnFilters
+        noteGridIsLoading,
+        setNoteGridIsLoading,
+        noteGridError,
+        setNoteGridError,
+        noteGridSorting,
+        setNoteGridSorting,
+        noteGridPagination,
+        setNoteGridPagination,
+        noteGridRowSelection,
+        setNoteGridRowSelection,
+        noteGridColumnFilters,
+        setNoteGridColumnFilters
     } = useNoteGridStore();
 
     const { openTab } = useEditorTabHelper();
@@ -53,21 +51,6 @@ export function NoteGrid() {
     const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { searchQuery } = useGridControlStore();
 
-    // Helper to get badge variant by type
-    const getTypeVariant = (type?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
-        const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-            'meeting': 'default',
-            'brainstorm': 'secondary',
-            'research': 'outline',
-            'bug': 'destructive',
-            'task': 'default',
-            'idea': 'secondary',
-            'default': 'outline'
-        };
-        return variants[type?.toLowerCase() || 'default'] || variants.default;
-    };
-
-    
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Note>[]>(() => {
 
@@ -179,15 +162,15 @@ export function NoteGrid() {
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onSortingChange: setSorting,
-        onPaginationChange: setPagination,
-        onRowSelectionChange: setRowSelection,
-        onColumnFiltersChange: setColumnFilters,
+        onSortingChange: setNoteGridSorting,
+        onPaginationChange: setNoteGridPagination,
+        onRowSelectionChange: setNoteGridRowSelection,
+        onColumnFiltersChange: setNoteGridColumnFilters,
         state: {
-            sorting,
-            pagination,
-            rowSelection,
-            columnFilters,
+            sorting: noteGridSorting,
+            pagination: noteGridPagination,
+            rowSelection: noteGridRowSelection,
+            columnFilters: noteGridColumnFilters,
         },
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
@@ -199,12 +182,12 @@ export function NoteGrid() {
 
         // Set default filter to Active Only
         const deletedAtColumn = table.getColumn('deletedAt');
-        if (deletedAtColumn && !columnFilters.length) {
+        if (deletedAtColumn && !noteGridColumnFilters.length) {
             deletedAtColumn.setFilterValue('null');
         }
 
         // Register this grid with GridControl
-        registerGrid(table, columnFilters, setColumnFilters, 'Notes');
+        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, 'Notes');
 
         // Cleanup on unmount
         return () => {
@@ -214,20 +197,20 @@ export function NoteGrid() {
 
     // Update GridControl when columnFilters change
     useEffect(() => {
-        registerGrid(table, columnFilters, setColumnFilters, 'Notes');
-    }, [columnFilters, table]);
+        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, 'Notes');
+    }, [noteGridColumnFilters, table]);
 
     return (
         <div className="w-full h-full bg-background flex flex-col relative">
             {/* Loading Overlay */}
-            {isLoading && (
+            {noteGridIsLoading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
             )}
 
             {/* Error Overlay */}
-            {error && (
+            {noteGridError && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Alert variant="destructive" className="max-w-md">
                         <AlertDescription>Failed to load notes</AlertDescription>

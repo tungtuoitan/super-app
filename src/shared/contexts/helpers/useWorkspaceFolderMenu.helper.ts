@@ -7,7 +7,7 @@
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
-import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
+import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
 import { constants } from '@/utils/constants';
 import type { ItemType } from '@/store/explorer/FolderDialog.store';
 import { Folder } from '@/types/folder.types';
@@ -409,16 +409,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         deleteItems();
     };
 
-    /**
-     * Handle delete with confirmation
-     */
-    const deleteConfirmation = useConfirmationPopover({
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-        confirmColor: 'destructive',
-        buttonVariant: 'default',
-        zIndex: 20000,
-    });
+    const { showConfirmation } = useConfirmationPopoverHelper();
 
     /**
      * Wrapper for delete with confirmation popover
@@ -487,9 +478,14 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
         }
 
-        deleteConfirmation.show({
+        showConfirmation({
             anchorEl: anchorElement,
             message,
+            confirmText: isHardDelete ? 'Delete Permanently' : 'Delete',
+            cancelText: 'Cancel',
+            confirmColor: 'destructive',
+            buttonVariant: 'default',
+            zIndex: 20000,
             onConfirm: () => {
                 if (isMultipleSelected) {
                     handleBulkDeleteFolders(selectedFolderIds, isHardDelete);
@@ -504,6 +500,5 @@ export const useWorkspaceFolderMenuHelper = () => {
         handleCreateItem,
         handleEditItem,
         onDeleteItemClick,
-        deleteConfirmation,
     };
 };

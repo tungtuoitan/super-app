@@ -3,10 +3,9 @@ import { useSnackbar } from "notistack";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { Note, UpsertNoteDTO } from "@/types/note.types";
-import { _upsertNotesBatch } from "@/services/note.service";
+import { _upsertNotes } from "@/services/note.service";
 import { _addItemToWorkspace } from "@/services/workspace.service";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { useWorkspaceOperation } from "../explorer/useWorkspaceOperation.helper";
 import { useExplorerStore } from "@/store/explorer/Explorer.store";
@@ -14,76 +13,24 @@ import { transformNoteData } from "@/utils/note.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import {useEditorTabsStore} from "@/store/index";
+import { useEditorTabsStore } from "@/store/index";
 
 export const useNoteDetailHelper = () => {
     const { auth } = useAuthStore();
     const { selectedNote } = useNoteGridStore();
     const { originalNoteRef } = useNoteDetailStore();
-
     const { setSelectedNote } = useNoteGridStore();
-
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceOperation();
     const { currentTree } = useExplorerStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { setOpenTabs,activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabsStore();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
-        // Set tab as changed
-        setOpenTabs((prev: BaseTab[]) => 
-            prev.map((t: BaseTab) => 
-                t.id === activeTabId 
-                    ? { ...t, hasUnsavedChanges: true }
-                    : t
-            )
-        );
+        setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, hasUnsavedChanges: true } : t)));
 
-        // Update selected note logic
         if (!selectedNote) return;
-
         const updated = { ...selectedNote, [field]: value };
-
-        // Check if this was originally a new note (originalRef has id === 0 or < 0)
-        const wasNewNote = originalNoteRef.current?.id === 0 || (originalNoteRef.current?.id && originalNoteRef.current.id < 0);
-        const isNowSaved = updated.id > 0;
-
-        // If this was a new note and now has an ID, update the original reference
-        if (wasNewNote && isNowSaved) {
-            originalNoteRef.current = { ...updated };
-            setSelectedNote(updated);
-            return;
-        }
-
-        // For new notes that are still unsaved (id === 0 or < 0)
-        if (updated.id === 0 || updated.id < 0) {
-            // const hasContent = updated.name?.trim() || updated.description?.trim() || (updated.tags && updated.tags.length > 0) || updated.type;
-            // setNoteHasChanges(!!hasContent);
-        } else {
-            // For existing notes, compare with original
-            if (originalNoteRef.current) {
-                const fieldsToCheck: (keyof Note)[] = ["name", "description", "type", "tags"];
-
-                const hasChanges = fieldsToCheck.some((key) => {
-                    const originalValue = originalNoteRef.current![key];
-                    const updatedValue = updated[key];
-
-                    // Deep comparison for arrays (tags)
-                    if (Array.isArray(originalValue) && Array.isArray(updatedValue)) {
-                        const originalTagIds = originalValue.map((t: any) => t.tagId || t.id).sort();
-                        const updatedTagIds = updatedValue.map((t: any) => t.tagId || t.id).sort();
-                        const isDifferent = JSON.stringify(originalTagIds) !== JSON.stringify(updatedTagIds);
-                        return isDifferent;
-                    }
-
-                    // For other values, direct comparison
-                    const isDifferent = originalValue !== updatedValue;
-                    return isDifferent;
-                });
-
-            }
-        }
-
         setSelectedNote(updated);
     };
 
@@ -98,18 +45,22 @@ export const useNoteDetailHelper = () => {
                 return null;
             }
 
-            // Check if it's a new note (id === 0 or negative)
+            // ============================================================
+            // Step 2: Determine operation mode (create/update/restore)
+            // ============================================================
             const isCreateMode = selectedNote.id <= 0;
             const isRestoreMode = selectedNote.id > 0 && originalNoteRef.current?.deletedAt && !selectedNote.deletedAt;
             const token = auth.userToken;
 
             try {
-                // Upsert data - works for create, update, soft delete, and restore
+                // ============================================================
+                // Step 3: Prepare upsert data with proper tag handling
+                // ============================================================
                 const upsertData: UpsertNoteDTO = {
                     id: isCreateMode ? 0 : selectedNote.id, // Always use 0 for create
                     name: selectedNote.name,
                     description: selectedNote.description,
-                    // ✅ Send hashtags for workspace notes, or tags for regular notes
+                    // Send hashtags for workspace notes, or tags for regular notes
                     tags:
                         selectedNote.hashtags && selectedNote.hashtags.length > 0
                             ? selectedNote.hashtags.map((h: any) => (typeof h === "number" ? h : h?.id || h?.tagId)) // Extract IDs from hashtags
@@ -118,26 +69,29 @@ export const useNoteDetailHelper = () => {
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
                 };
 
-                // Use batch API with single element array
-                const result = await _upsertNotesBatch(token, [upsertData]);
-
-                // Check API response success
+                // ============================================================
+                // Step 4: Call batch API to upsert note
+                // ============================================================
+                const result = await _upsertNotes(token, [upsertData]);
                 if (!result.success) {
                     throw new Error(result.message || "Failed to save note");
                 }
 
-                // Extract note from batch response (Notes array)
+                // ============================================================
+                // Step 6: Extract and validate saved note from response
+                // ============================================================
                 const batchResult = result.object as any;
                 const savedNote = batchResult?.notes?.[0];
 
                 if (!savedNote) {
                     throw new Error("Failed to save note: No data returned from server");
                 }
-
-                // Transform dates from API response strings to Date objects
                 const transformedNote = transformNoteData(savedNote);
 
-                // ✅ If creating new note from workspace tree, add to workspace_items
+                
+                // ============================================================
+                // Step 8: If creating from workspace tree, add to workspace_items
+                // ============================================================
                 if (isCreateMode && selectedNote.hashtags && selectedNote.hashtags.length > 0) {
                     // Extract folder ID - hashtags can be number[] or Folder[]
                     const firstHashtag = selectedNote.hashtags[0];
@@ -161,12 +115,12 @@ export const useNoteDetailHelper = () => {
                     }
                 }
 
+            
+                // ============================================================
+                // Step 10: Update selected note in store with server response
+                // ============================================================
                 enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
-
-                // Update context with saved note from server
                 setSelectedNote(transformedNote);
-
-                // Update tab with saved note if tabId provided
                 if (tabId) {
                     setOpenTabs((prev) =>
                         prev.map((tab: BaseTab) => {
@@ -182,26 +136,20 @@ export const useNoteDetailHelper = () => {
                         })
                     );
                 }
-
-                // Mark as saved after all updates
-                if (selectedNote) {
-                    originalNoteRef.current = { ...selectedNote };
-                }
-
-                // Reload note grid to reflect changes
+            
+                originalNoteRef.current = { ...selectedNote };
                 await loadNotes();
-
-                // ✅ Reload workspace tree if note was added to workspace (NO PAGE RELOAD!)
+            
                 if (isCreateMode && currentTree?.workspaceId) {
                     await loadTree(currentTree.workspaceId);
                 }
 
                 return transformedNote;
+
             } catch (error) {
                 console.error("❌ Failed to save note:", error);
                 const errorMessage = await parseApiError(error);
 
-                // Show specific message for unauthorized
                 if (isUnauthorizedError(error)) {
                     enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
                 } else {
@@ -210,11 +158,11 @@ export const useNoteDetailHelper = () => {
                 return null;
             }
         },
-        [selectedNote, auth.userToken, setSelectedNote, loadNotes, loadTree, currentTree, enqueueSnackbar]
+        [selectedNote, loadNotes, loadTree, currentTree]
     );
 
     return {
         upsertNote,
-        handleNoteFieldChange
+        handleNoteFieldChange,
     };
 };

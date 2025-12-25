@@ -6,7 +6,7 @@ import {
     AlertTriangle as HardDeleteIcon,
     RotateCcw as RestoreIcon
 } from 'lucide-react';
-import { useNoteGridMenuHelper } from '@/shared/contexts/helpers/useNoteGridMenu.helper';
+import { useContextMenuHelper } from '@/shared/contexts/helpers/useContextMenu.helper';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 
 /**
@@ -21,11 +21,10 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
  */
 export function NoteGridMenu() {
     const { contextData } = useContextMenuStore();
-    const { handleAddNote, handleDelete, handleRestore } = useNoteGridMenuHelper();
+    const { openConfirmDialog, executeDirectly } = useContextMenuHelper();
 
     // Calculate derived values from contextData
     const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
-    const noteGridIsMultiple = noteGridSelectedCount > 1;
     const allSelectedAreTempNotes = contextData?.selectedIds?.every((id: number) => id < 0) ?? false;
 
     // Check if any selected notes have deletedAt (are in deleted state)
@@ -35,7 +34,7 @@ export function NoteGridMenu() {
     return (
         <>
             {/* Add Note */}
-            <MenuItem onClick={handleAddNote}>
+            <MenuItem onClick={() => executeDirectly({ callback: contextData?.onAddNote! })}>
                 <AddIcon className="w-4 h-4 mr-2" />
                 Add
             </MenuItem>
@@ -44,7 +43,14 @@ export function NoteGridMenu() {
 
             {/* Show Delete option only if notes are NOT deleted */}
             {!anySelectedDeleted && (
-                <MenuItem onClick={(e) => handleDelete(e, false)}>
+                <MenuItem onClick={(e) => openConfirmDialog({
+                    type: 'soft-delete',
+                    entityType: 'note',
+                    count: noteGridSelectedCount,
+                    allAreTempItems: allSelectedAreTempNotes,
+                    onConfirm: contextData?.onSoftDelete!,
+                    event: e,
+                })}>
                     <DeleteIcon className="w-4 h-4 mr-2" />
                     Delete
                 </MenuItem>
@@ -54,14 +60,21 @@ export function NoteGridMenu() {
             {anySelectedDeleted && !allSelectedAreTempNotes && (
                 <>
                     <MenuItem
-                        onClick={(e) => handleDelete(e, true)}
+                        onClick={(e) => openConfirmDialog({
+                            type: 'hard-delete',
+                            entityType: 'note',
+                            count: noteGridSelectedCount,
+                            allAreTempItems: false,
+                            onConfirm: contextData?.onHardDelete!,
+                            event: e,
+                        })}
                         className="text-red-600 hover:bg-red-50"
                     >
                         <HardDeleteIcon className="w-4 h-4 mr-2" />
                         Hard Delete
                     </MenuItem>
 
-                    <MenuItem onClick={handleRestore}>
+                    <MenuItem onClick={() => executeDirectly({ callback: contextData?.onRestore! })}>
                         <RestoreIcon className="w-4 h-4 mr-2" />
                         Restore
                     </MenuItem>

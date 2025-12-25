@@ -120,7 +120,7 @@ export const _getNoteById = async (token: string, noteId: number) => {
  * @param requests - Array of note upsert data
  * @returns Batch operation results or rejects with response
  */
-export const _upsertNotesBatch = async (
+export const _upsertNotes = async (
     token: string,
     requests: Array<{
         id: number;

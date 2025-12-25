@@ -15,38 +15,38 @@ export interface PaginationState {
 export interface NoteGridContextData {
     notes: Note[];
     setNotes: Dispatch<SetStateAction<Note[]>>;
-    isLoading: boolean;
-    setIsLoading: Dispatch<SetStateAction<boolean>>;
-    error: Error | null;
-    setError: Dispatch<SetStateAction<Error | null>>;
-    sorting: SortingState;
-    setSorting: Dispatch<SetStateAction<SortingState>>;
-    pagination: PaginationState;
-    setPagination: Dispatch<SetStateAction<PaginationState>>;
-    rowSelection: RowSelectionState;
-    setRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
-    columnFilters: ColumnFiltersState;
-    setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
+    noteGridIsLoading: boolean;
+    setNoteGridIsLoading: Dispatch<SetStateAction<boolean>>;
+    noteGridError: Error | null;
+    setNoteGridError: Dispatch<SetStateAction<Error | null>>;
+    noteGridSorting: SortingState;
+    setNoteGridSorting: Dispatch<SetStateAction<SortingState>>;
+    noteGridPagination: PaginationState;
+    setNoteGridPagination: Dispatch<SetStateAction<PaginationState>>;
+    noteGridRowSelection: RowSelectionState;
+    setNoteGridRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
+    noteGridColumnFilters: ColumnFiltersState;
+    setNoteGridColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
     selectedNote: Note | null;
     setSelectedNote: Dispatch<SetStateAction<Note | null>>;
 }
 
 export const noteGridContextDefaultValue: NoteGridContextData = {
     notes: [],
-    isLoading: true,
-    error: null,
-    sorting: [],
-    pagination: { pageIndex: 0, pageSize: 50 },
-    rowSelection: {},
-    columnFilters: [],
+    noteGridIsLoading: true,
+    noteGridError: null,
+    noteGridSorting: [],
+    noteGridPagination: { pageIndex: 0, pageSize: 50 },
+    noteGridRowSelection: {},
+    noteGridColumnFilters: [],
     selectedNote: null,
     setNotes: () => {},
-    setIsLoading: () => {},
-    setError: () => {},
-    setSorting: () => {},
-    setPagination: () => {},
-    setRowSelection: () => {},
-    setColumnFilters: () => {},
+    setNoteGridIsLoading: () => {},
+    setNoteGridError: () => {},
+    setNoteGridSorting: () => {},
+    setNoteGridPagination: () => {},
+    setNoteGridRowSelection: () => {},
+    setNoteGridColumnFilters: () => {},
     setSelectedNote: () => {},
 };
 
@@ -56,12 +56,12 @@ export const useNoteGridStore = () => useContext(NoteGridStore);
 
 export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [notes, setNotes] = useState<Note[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [error, setError] = useState<Error | null>(null);
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
-    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [noteGridIsLoading, setNoteGridIsLoading] = useState<boolean>(true);
+    const [noteGridError, setNoteGridError] = useState<Error | null>(null);
+    const [noteGridSorting, setNoteGridSorting] = useState<SortingState>([]);
+    const [noteGridPagination, setNoteGridPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
+    const [noteGridRowSelection, setNoteGridRowSelection] = useState<RowSelectionState>({});
+    const [noteGridColumnFilters, setNoteGridColumnFilters] = useState<ColumnFiltersState>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
     return (
@@ -69,18 +69,18 @@ export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
             value={{
                 notes,
                 setNotes,
-                isLoading,
-                setIsLoading,
-                error,
-                setError,
-                sorting,
-                setSorting,
-                pagination,
-                setPagination,
-                rowSelection,
-                setRowSelection,
-                columnFilters,
-                setColumnFilters,
+                noteGridIsLoading,
+                setNoteGridIsLoading,
+                noteGridError,
+                setNoteGridError,
+                noteGridSorting,
+                setNoteGridSorting,
+                noteGridPagination,
+                setNoteGridPagination,
+                noteGridRowSelection,
+                setNoteGridRowSelection,
+                noteGridColumnFilters,
+                setNoteGridColumnFilters,
                 selectedNote,
                 setSelectedNote,
             }}
