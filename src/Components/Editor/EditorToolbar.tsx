@@ -29,21 +29,21 @@ export function EditorToolbar() {
     const activeTab = activeTabId ? getTabById(activeTabId) : null
 
     // Get toolbar actions for active tab
-    const { handleSave, handleCancel, handleRestore, _hasAnyChanges, isSaving, _statusText, _itemId } = useEditorToolbarHelper()
+    const { handleUpsert, handleCancel, _hasAnyChanges, isSaving, _statusText, _itemId } = useEditorToolbarHelper()
 
     useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault()
             if (activeTab && _hasAnyChanges && !isSaving) {
-                handleSave()
+                handleUpsert()
             }
         }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [activeTab, _hasAnyChanges, isSaving, handleSave])
+    }, [activeTab, _hasAnyChanges, isSaving, handleUpsert])
 
     return (
         <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
@@ -72,7 +72,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={handleRestore}
+                                        onClick={handleUpsert}
                                         disabled={isSaving}
                                         className="h-8 w-8 text-green-500 hover:bg-green-500/10 disabled:text-white/20"
                                     >
@@ -97,7 +97,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={handleSave}
+                                        onClick={handleUpsert}
                                         disabled={!_hasAnyChanges || isSaving}
                                         className={`h-8 w-8 ${
                                             _hasAnyChanges

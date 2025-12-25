@@ -35,13 +35,14 @@ export function GenericFilterPopup<T>({
     const hasFilters = columnFilters.length > 0;
 
     const filterOptions = [
-        {
-            value: 'all',
-            label: `All ${entityName}`,
-            icon: Filter,
-            color: 'text-muted-foreground',
-            description: `Show all ${entityName.toLowerCase()}`,
-        },
+        // Hidden: All option
+        // {
+        //     value: 'all',
+        //     label: `All ${entityName}`,
+        //     icon: Filter,
+        //     color: 'text-muted-foreground',
+        //     description: `Show all ${entityName.toLowerCase()}`,
+        // },
         {
             value: 'active',
             label: 'Active Only',
@@ -74,7 +75,7 @@ export function GenericFilterPopup<T>({
     };
 
     const getCurrentFilterValue = () => {
-        if (currentFilter === undefined) return 'all';
+        if (currentFilter === undefined) return 'active'; // Default to 'active' instead of 'all'
         return currentFilter === 'null' ? 'active' : 'deleted';
     };
 

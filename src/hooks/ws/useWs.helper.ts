@@ -3,7 +3,7 @@
  * Business logic for workspace list operations
  */
 
-import { _deleteWs, _getWsList, _undoDeleteWs, WsDTO } from '@/services/ws.service';
+import { _deleteWs, _getWsList, _upsertWsBatch, WsDTO } from '@/services/ws.service';
 import { storageService } from '@/services/storage.service';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useSnackbar } from 'notistack';
@@ -146,34 +146,66 @@ export const useWsHelper = () => {
 
     /**
      * Delete selected workspaces (called from context menu after confirmation)
+     * - Hard delete: Permanently remove from DB via DELETE API
+     * - Soft delete: Set deletedAt via Upsert API
      */
     const handleDeleteSelected = async (selectedIds: number[], isHardDelete: boolean = false) => {
         if (selectedIds.length === 0) return;
 
         try {
             const token = auth.userToken;
-            
-            // Send comma-separated IDs to backend
-            const result = await _deleteWs(token, selectedIds.join(','), isHardDelete);
 
-            // Check API response success
-            if (result.success) {
-                const action = isHardDelete ? 'permanently deleted' : 'deleted';
-                enqueueSnackbar(`Successfully ${action} ${selectedIds.length} workspace(s)`, {
+            if (isHardDelete) {
+                // HARD DELETE: Use DELETE API (permanently remove)
+                const result = await _deleteWs(token, selectedIds.join(','));
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to hard delete workspace(s)');
+                }
+
+                enqueueSnackbar(`Successfully permanently deleted ${selectedIds.length} workspace(s)`, {
                     variant: 'success'
                 });
-                // ✅ Sync tabs theo loại delete
-                if (selectedIds.length > 0) {
-                    syncWsGridToTab(isHardDelete ? 'hardDelete' : 'delete', selectedIds);
+
+                // Sync tabs
+                syncWsGridToTab('hardDelete', selectedIds);
+            } else {
+                // SOFT DELETE: Use batch upsert API with deletedAt timestamp
+                const deletedAt = new Date().toISOString();
+
+                // Build batch soft delete requests
+                const batchRequests = selectedIds.map(id => {
+                    const workspace = workspaces.find(w => w.id === id);
+                    if (!workspace) {
+                        throw new Error(`Workspace ${id} not found`);
+                    }
+
+                    return {
+                        id: workspace.id,
+                        name: workspace.name,
+                        description: workspace.description,
+                        userId: workspace.userId,
+                        deletedAt: deletedAt, // Set soft delete timestamp
+                    };
+                });
+
+                // Call batch upsert API (single call instead of loop)
+                const result = await _upsertWsBatch(token, batchRequests);
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to soft delete workspaces');
                 }
-    
-                // Clear selection and reload workspaces
-                setRowSelection({});
-            }
-            else {
-                throw new Error(result.message || 'Failed to delete workspace(s)');
+
+                enqueueSnackbar(`Successfully soft deleted ${selectedIds.length} workspace(s)`, {
+                    variant: 'success'
+                });
+
+                // Sync tabs
+                syncWsGridToTab('delete', selectedIds);
             }
 
+            // Clear selection and reload workspaces
+            setRowSelection({});
             await loadWorkspaces();
         } catch (error) {
             console.error('Failed to delete workspaces:', error);
@@ -184,45 +216,6 @@ export const useWsHelper = () => {
                 enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
             } else {
                 enqueueSnackbar(`Failed to delete workspaces: ${errorMessage}`, { variant: 'error' });
-            }
-        }
-    };
-
-    /**
-     * Undo delete (restore) workspaces
-     */
-    const handleUndoDelete = async (ids: number[]) => {
-        if (ids.length === 0) return;
-
-        try {
-            const token = auth.userToken;
-            
-            // Send comma-separated IDs to backend
-            const result = await _undoDeleteWs(token, ids.join(','));
-
-            // Check API response success
-            if (!result.success) {
-                throw new Error(result.message || 'Failed to restore workspace(s)');
-            }
-
-            enqueueSnackbar(`Successfully restored ${ids.length} workspace(s)`, {
-                variant: 'success'
-            });
-
-            // Sync workspace grid changes to open tabs (restore)
-            syncWsGridToTab('restore', ids);
-
-            // Reload workspaces to show restored items
-            await loadWorkspaces();
-        } catch (error) {
-            console.error('Failed to restore workspaces:', error);
-            const errorMessage = await parseApiError(error);
-
-            // Show specific message for unauthorized
-            if (isUnauthorizedError(error)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
-            } else {
-                enqueueSnackbar(`Failed to restore workspaces: ${errorMessage}`, { variant: 'error' });
             }
         }
     };
@@ -268,7 +261,6 @@ export const useWsHelper = () => {
             selectedIds,
             onDelete: (isHardDelete: boolean = false) => handleDeleteSelected(selectedIds, isHardDelete),
             addWorkspace: createNewWorkspace,
-            onUndoDelete: handleUndoDelete,
         });
         setIsContextMenuOpen(true);
     };
@@ -289,7 +281,6 @@ export const useWsHelper = () => {
         createNewWorkspace,
         handleDeleteSelected,
         syncWsGridToTab,
-        handleUndoDelete,
         openContextMenu,
         formatDateTime,
     };

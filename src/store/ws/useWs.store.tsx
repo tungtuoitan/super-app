@@ -15,7 +15,7 @@ export interface Ws {
     description?: string | null;
     createdAt: Date;
     updatedAt?: Date | null;
-    deletedAt?: Date | null;
+    deletedAt: Date | null;
     isHardDeleted?: boolean;
     userId?: number;
 }

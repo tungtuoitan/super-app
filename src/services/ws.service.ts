@@ -113,22 +113,29 @@ export const _getWsById = async (token: string, id: number) => {
 };
 
 /**
- * Upsert workspace (create or update)
- * POST /api/WorkspaceList
- * Backend determines create vs update based on id (0 or null = create, >0 = update)
+ * Batch upsert multiple workspaces (create, update, soft delete, or restore)
+ * For single workspace operations, pass an array with 1 element
+ * POST /api/WorkspaceList (accepts both single array and batch array)
+ *
+ * Operations:
+ * - CREATE: id = 0 or null, deletedAt = undefined
+ * - UPDATE: id > 0, deletedAt = undefined
+ * - SOFT DELETE: id > 0, deletedAt = ISO timestamp string
+ * - RESTORE: id > 0, deletedAt = null
  *
  * @param token - Authentication token
- * @param data - Workspace upsert data
- * @returns Created or updated workspace or rejects with response
+ * @param requests - Array of workspace upsert data
+ * @returns Batch operation results or rejects with response
  */
-export const _upsertWs = async (
+export const _upsertWsBatch = async (
     token: string,
-    data: {
-        id?: number | null; // 0 or null = create new, > 0 = update existing
+    requests: Array<{
+        id?: number | null;
         name: string;
         description?: string | null;
         userId?: number;
-    }
+        deletedAt?: string | null;
+    }>
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -139,16 +146,16 @@ export const _upsertWs = async (
     const options = {
         method: "POST",
         headers: headers,
-        body: JSON.stringify(data),
+        body: JSON.stringify(requests),
     };
 
     const res = await window.fetch(
-        `${config.api.baseURL}/api/WorkspaceList`,
+        `${config.api.baseURL}/api/WorkspaceList/batch`,
         options
     );
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions<WsDTO>;
+        const result = await res.json() as ResultOptions;
         return result;
     } else {
         return Promise.reject(res);
@@ -156,55 +163,15 @@ export const _upsertWs = async (
 };
 
 /**
- * Delete single or multiple workspaces with CASCADE to all items
- * DELETE /api/WorkspaceList/{id}?isHardDelete=false
- * 
+ * Hard delete single or multiple workspaces (permanently removes from database)
+ * For soft delete, use _upsertWs with deletedAt timestamp
+ * DELETE /api/WorkspaceList/{id} or /api/WorkspaceList/{id1,id2,id3}
+ *
  * @param token - Authentication token
  * @param id - Single workspace ID or comma-separated IDs (e.g., "1,2,3")
- * @param isHardDelete - Hard delete flag (default: false = soft delete)
  * @returns void or rejects with response
  */
 export const _deleteWs = async (
-    token: string,
-    id: number | string,
-    isHardDelete: boolean = false
-) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    const queryParams = new URLSearchParams();
-    queryParams.append('isHardDelete', String(isHardDelete));
-
-    const options = {
-        method: "DELETE",
-        headers: headers,
-    };
-
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/WorkspaceList/${id}?${queryParams.toString()}`,
-        options
-    );
-
-    if (res.ok) {
-        const ret = await res.json();
-        return ret;
-    } else {
-        return Promise.reject(res);
-    }
-};
-
-/**
- * Undo delete (restore) single or multiple workspaces
- * POST /api/WorkspaceList/undo/{id}
- * 
- * @param token - Authentication token
- * @param id - Single workspace ID or comma-separated IDs (e.g., "1,2,3")
- * @returns void or rejects with response
- */
-export const _undoDeleteWs = async (
     token: string,
     id: number | string
 ) => {
@@ -215,18 +182,17 @@ export const _undoDeleteWs = async (
     headers.append("Content-Type", "application/json");
 
     const options = {
-        method: "POST",
+        method: "DELETE",
         headers: headers,
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/WorkspaceList/undo/${id}`,
-        options
-    );
+    const url = `${config.api.baseURL}/api/WorkspaceList/${id}`;
+
+    const res = await window.fetch(url, options);
 
     if (res.ok) {
-        const ret = await res.json();
-        return ret;
+        const result = await res.json() as ResultOptions;
+        return result;
     } else {
         return Promise.reject(res);
     }

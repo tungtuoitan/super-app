@@ -70,6 +70,7 @@ export function NoteNode({
                 createdAt: new Date(noteItem.createdAt),
                 updatedAt: noteItem.updatedAt ? new Date(noteItem.updatedAt) : undefined,
                 createdBy: 'You',
+                deletedAt: noteItem.deletedAt ? new Date(noteItem.deletedAt) : null,
             };
 
             openNoteTab(note);

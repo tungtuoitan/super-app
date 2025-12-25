@@ -10,7 +10,7 @@ import {useEditorTabHelper} from './useEditorTab.helper';
 
 export const useEditorDetailHelper = () => {
     const { noteHasChanges } = useNoteDetailStore();
-    const { saveNote, resetChanges } = useNoteDetailHelper();
+    const { upsertNote, resetChanges } = useNoteDetailHelper();
     const { markTabAsChanged } = useEditorTabHelper();
     const { enqueueSnackbar } = useSnackbar(); 
 
@@ -30,7 +30,7 @@ export const useEditorDetailHelper = () => {
     }
 
     return {
-        saveNote,
+        upsertNote,
         cancelChanges,
         syncTabChangeState,
     };

@@ -14,6 +14,8 @@ import { useWsDetailHelper } from '@/hooks/ws/useWsDetail.helper';
 import { Ws } from '@/store/ws/useWs.store';
 import { constants } from '@/utils/constants';
 import { useWsStore } from '@/store/ws/useWs.store';
+import {useEditorTabHelper} from '@/hooks/vsCode/useEditorTab.helper';
+import {useEditorTabsStore} from '@/store/editor/EditorTab.store';
 
 /**
  * Workspace Detail Dialog Content
@@ -23,7 +25,12 @@ export function WsDetailContent() {
     const { selectedWorkspace, wsNameRef } = useWsDetailStore();
     const { shouldFocusWsName, setShouldFocusWsName } = useWsStore();
     const { updateSelectedWorkspace } = useWsDetailHelper();
-    
+    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
+    const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
+
+    // Get active tab
+    const activeTab = activeTabId ? getTabById(activeTabId) : null
+
     const [wsKey, setWsKey] = React.useState(0);
     useEffect(() => {
         if (selectedWorkspace) {
@@ -42,10 +49,12 @@ export function WsDetailContent() {
     }, [shouldFocusWsName, wsNameRef]);
 
     // Check if workspace is inactive (soft deleted)
-    const isInactive = selectedWorkspace?.deletedAt !== null;
+    const isDeleted = selectedWorkspace?.deletedAt !== null;
+    const isHardDeleted = activeTab?.data && (activeTab.data as Ws).isHardDeleted;
+
 
     // Create current active value for autocomplete
-    const currentActiveValue: IAutoCompleteOptions | null = isInactive
+    const currentActiveValue: IAutoCompleteOptions | null = isDeleted
         ? constants.standardRegistryFE.activeStatusOptions.find(option => option.code === constants.standardRegistryFE.activeStatus.inactive) || null
         : constants.standardRegistryFE.activeStatusOptions.find(option => option.code === constants.standardRegistryFE.activeStatus.active) || null;
 
@@ -102,6 +111,7 @@ export function WsDetailContent() {
                                 label: 'Status',
                             }}
                             size="small"
+                            disabled={isDeleted || isHardDeleted}
                         />
 
                         {/* Workspace Name */}
@@ -112,7 +122,7 @@ export function WsDetailContent() {
                             onChange={(e) => handleFieldChange('name', e.target.value)}
                             placeholder="Enter workspace name..."
                             size="small"
-                            disabled={isInactive}
+                            disabled={isDeleted || isHardDeleted}
                         />
 
                         {/* Description */}
@@ -127,7 +137,7 @@ export function WsDetailContent() {
                                 onChange={(e) => handleFieldChange('description', e.target.value)}
                                 placeholder="Enter workspace description..."
                                 className="min-h-[120px] resize-none"
-                                disabled={isInactive}
+                                disabled={isDeleted || isHardDeleted}
                             />
                         </div>
                     </CardContent>

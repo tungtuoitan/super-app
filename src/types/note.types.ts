@@ -43,9 +43,10 @@ export interface Note {
     type?: string; // Changed from NoteType to string to match backend
     createdAt: Date;
     updatedAt?: Date;
-    deletedAt?: Date; // Track if note is deleted (soft delete)
+    deletedAt: Date | null; // Track if note is deleted (soft delete)
     isHardDeleted?: boolean; // Track if note is permanently deleted (hard delete)
     createdBy?: string; // Optional - may be removed from backend response for security
+
 }
 
 // API DTOs (what backend sends/receives)
@@ -82,14 +83,15 @@ export interface UpdateNoteDTO {
     isArchived?: boolean;
 }
 
-// Matches backend UpsertNoteRequest - unified create/update
+// Matches backend UpsertNoteRequest - unified create/update/soft delete/restore
 export interface UpsertNoteDTO {
-    id: number; // 0 = create new, > 0 = update existing
+    id: number; // 0 = create new, > 0 = update/soft delete/restore
     name: string;
     description?: string;
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
     type?: string;
     isArchived?: boolean;
+    deletedAt?: string | null; // ISO string for soft delete, null for restore, undefined for regular update
 }
 
 // Query parameters

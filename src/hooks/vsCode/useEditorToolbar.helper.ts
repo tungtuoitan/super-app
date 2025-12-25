@@ -16,9 +16,7 @@ import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
 import { useEditorTabsStore } from '@/store/index';
 import { useEditorToolbarStore } from '@/store/editor/EditorToolbar.store';
 import { storageService } from '@/services/storage.service';
-import { _undoDeleteNote } from '@/services/note.service';
-import { _undoDeleteWs } from '@/services/ws.service';
-import { _upsertWs } from '@/services/ws.service';
+import { _upsertWsBatch } from '@/services/ws.service';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import { useNoteGridHelper } from '../note/useNoteGrid.helper';
@@ -29,14 +27,13 @@ import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
 
 interface EditorToolbarActions {
     // Actions
-    handleSave: () => Promise<void>;
+    handleUpsert: () => Promise<void>;  // Orchestrator for all entity types (create/update/soft delete/restore)
     handleCancel: () => void;
-    handleRestore: () => Promise<void>;
-    
+
     // States
     _hasAnyChanges: boolean;
     isSaving: boolean;
-    
+
     // Info
     _statusText: string;
     _itemId: number | null;
@@ -57,7 +54,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     const { selectedNote, setSelectedNote } = useNoteGridStore();
     const { noteHasChanges } = useNoteDetailStore();
     
-    const { saveNote, cancelChanges } = useEditorDetailHelper();
+    const { upsertNote, cancelChanges } = useEditorDetailHelper();
     const { loadNotes } = useNoteGridHelper();
     
     // Workspace-specific
@@ -96,34 +93,38 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         return null;
     })();
 
-    // Handle Save - routes to appropriate service
-    const handleSave = useCallback(async () => {
+    // Handle Upsert - orchestrator for all entity types (create/update/soft delete/restore)
+    const handleUpsert = useCallback(async () => {
         if (!activeTab) return;
 
         setIsSaving(true);
         try {
             if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-                // Use existing note save logic
-                await saveNote(activeTab.id);
+                // Use existing note upsert logic
+                await upsertNote(activeTab.id);
             } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
                 // Workspace save logic
                 if (!selectedWorkspace) return;
 
                 const token = auth.userToken;
-                const result = await _upsertWs(token, {
+                // Use batch API with single element array
+                const result = await _upsertWsBatch(token, [{
                     id: selectedWorkspace.id > 0 ? selectedWorkspace.id : null,
                     name: selectedWorkspace.name,
                     description: selectedWorkspace.description,
                     userId: selectedWorkspace.userId,
-                });
+                }]);
 
                 // Check API response success
                 if (!result.success) {
                     throw new Error(result.message || 'Failed to save workspace');
                 }
 
-                if (result.object) {
-                    const savedWorkspace = result.object;
+                // Extract workspace from batch response (Workspaces array)
+                const batchResult = result.object as any;
+                const savedWorkspace = batchResult?.Workspaces?.[0];
+
+                if (savedWorkspace) {
                     const updatedWorkspace: Ws = {
                         id: savedWorkspace.id,
                         name: savedWorkspace.name,
@@ -178,7 +179,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         } finally {
             setIsSaving(false);
         }
-    }, [activeTab, selectedNote, selectedWorkspace, saveNote, setIsSaving, setOpenTabs, setSelectedWorkspace, loadWorkspaces, enqueueSnackbar, auth.userToken]);
+    }, [activeTab, selectedNote, selectedWorkspace, upsertNote, setIsSaving, setOpenTabs, setSelectedWorkspace, loadWorkspaces, enqueueSnackbar, auth.userToken]);
 
     // Handle Cancel - routes to appropriate reset logic
     const handleCancel = useCallback(() => {
@@ -191,39 +192,9 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
         }
     }, [activeTab, cancelChanges, resetWorkspace]);
 
-    // Handle Restore - set deletedAt = null (active) then save
-    const handleRestore = useCallback(async () => {
-        if (!activeTab || !activeTab.data.deletedAt) return;
-
-        try {
-            if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-                // Set note as active (deletedAt = null) in selectedNote first
-                if (selectedNote) {
-                    setSelectedNote({ ...selectedNote, deletedAt: undefined });
-                    // Wait a bit for state to update, then save
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    await saveNote(activeTab.id);
-                }
-            } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
-                // Set workspace as active (deletedAt = null) first
-                if (selectedWorkspace) {
-                    setSelectedWorkspace({ ...selectedWorkspace, deletedAt: null });
-                    // Wait a bit for state to update, then save
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    await handleSave();
-                }
-            }
-        } catch (error) {
-            console.error('Failed to restore:', error);
-            const errorMessage = await parseApiError(error);
-            enqueueSnackbar(`Failed to restore: ${errorMessage}`, { variant: 'error' });
-        }
-    }, [activeTab, selectedNote, selectedWorkspace, saveNote, handleSave, setSelectedNote, setSelectedWorkspace, enqueueSnackbar]);
-
     return {
-        handleSave,
+        handleUpsert,
         handleCancel,
-        handleRestore,
         _hasAnyChanges,
         isSaving,
         _statusText,

@@ -1,4 +1,4 @@
-import {_deleteNote, _getNotes} from '@/services/note.service';
+import {_deleteNote, _getNotes, _upsertNotesBatch} from '@/services/note.service';
 import {storageService} from '@/services/storage.service';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import { Note } from '@/types/note.types';
@@ -56,6 +56,7 @@ export const useNoteGridHelper = () => {
             createdAt: new Date(),
             updatedAt: new Date(),
             createdBy: 'You',
+            deletedAt: null,
         };
 
         // Insert at the beginning of notes array
@@ -97,7 +98,11 @@ export const useNoteGridHelper = () => {
         }
     };    
     
-    // Delete selected notes (called from context menu after confirmation)
+    /**
+     * Delete selected notes (called from context menu after confirmation)
+     * - Hard delete: Permanently remove from DB via DELETE API
+     * - Soft delete: Set deletedAt via Upsert API
+     */
     const handleDeleteSelected = async (ids?: number[], isHardDelete: boolean = false) => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(rowSelection).map(id => parseInt(id));
@@ -108,10 +113,12 @@ export const useNoteGridHelper = () => {
         const persistedNoteIds = selectedIds.filter(id => id > 0);
 
         try {
+            const token = auth.userToken;
+
             // Handle temporary notes - just remove from grid locally
             if (tempNoteIds.length > 0) {
                 setNotes(prevNotes => prevNotes.filter(note => !tempNoteIds.includes(note.id)));
-                
+
                 enqueueSnackbar(`Removed ${tempNoteIds.length} unsaved note(s)`, {
                     variant: 'success'
                 });
@@ -119,31 +126,69 @@ export const useNoteGridHelper = () => {
 
             // Handle persisted notes - call API
             if (persistedNoteIds.length > 0) {
-                const token = auth.userToken;
-                // Send comma-separated IDs to backend
-                const result = await _deleteNote(token, persistedNoteIds.join(','), isHardDelete);
-                
-                // Check API response success
-                if (!result.success) {
-                    throw new Error(result.message || 'Failed to delete notes');
-                }
+                if (isHardDelete) {
+                    // HARD DELETE: Use DELETE API (permanently remove)
+                    const result = await _deleteNote(token, persistedNoteIds.join(','));
 
-                const action = isHardDelete ? 'permanently deleted' : 'deleted';
-                enqueueSnackbar(`Successfully ${action} ${persistedNoteIds.length} note(s)`, {
-                    variant: 'success'
-                });
-
-                // Mark opened tabs as deleted/hard deleted instead of closing them
-                const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
-                        const noteData = tab.data as Note;
-                        return isHardDelete 
-                            ? { ...tab, data: { ...noteData, deletedAt: new Date(), isHardDeleted: true } }
-                            : { ...tab, data: { ...noteData, deletedAt: new Date() } };
+                    if (!result.success) {
+                        throw new Error(result.message || 'Failed to hard delete notes');
                     }
-                    return tab;
-                });
-                setOpenTabs(updatedTabs);
+
+                    enqueueSnackbar(`Successfully permanently deleted ${persistedNoteIds.length} note(s)`, {
+                        variant: 'success'
+                    });
+
+                    // Mark opened tabs as hard deleted
+                    const updatedTabs = openTabs.map((tab: BaseTab) => {
+                        if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
+                            const noteData = tab.data as Note;
+                            return { ...tab, data: { ...noteData, deletedAt: new Date(), isHardDeleted: true } };
+                        }
+                        return tab;
+                    });
+                    setOpenTabs(updatedTabs);
+                } else {
+                    // SOFT DELETE: Use batch upsert API with deletedAt timestamp
+                    const deletedAt = new Date().toISOString();
+
+                    // Build batch soft delete requests
+                    const batchRequests = persistedNoteIds.map(id => {
+                        const note = notes.find(n => n.id === id);
+                        if (!note) {
+                            throw new Error(`Note ${id} not found`);
+                        }
+
+                        return {
+                            id: note.id,
+                            name: note.name,
+                            description: note.description,
+                            tags: note.hashtags?.map(h => h.id),
+                            type: note.type,
+                            deletedAt: deletedAt, // Set soft delete timestamp
+                        };
+                    });
+
+                    // Call batch upsert API (single call instead of loop)
+                    const result = await _upsertNotesBatch(token, batchRequests);
+
+                    if (!result.success) {
+                        throw new Error(result.message || 'Failed to soft delete notes');
+                    }
+
+                    enqueueSnackbar(`Successfully soft deleted ${persistedNoteIds.length} note(s)`, {
+                        variant: 'success'
+                    });
+
+                    // Mark opened tabs as soft deleted
+                    const updatedTabs = openTabs.map((tab: BaseTab) => {
+                        if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
+                            const noteData = tab.data as Note;
+                            return { ...tab, data: { ...noteData, deletedAt: new Date() } };
+                        }
+                        return tab;
+                    });
+                    setOpenTabs(updatedTabs);
+                }
 
                 // Reload notes from API
                 await loadNotes();
@@ -162,44 +207,119 @@ export const useNoteGridHelper = () => {
                 enqueueSnackbar(`Failed to delete notes: ${errorMessage}`, { variant: 'error' });
             }
         }
-    };        // Handle context menu
-        const openContextMenu = (event: React.MouseEvent, row?: any) => {
-            event.preventDefault();
-            event.stopPropagation();
-    
-            let selectedIds: number[];
-            let selectedNotes: Note[] = [];
-    
-            // If row provided (clicked on a row)
-            if (row) {
-                // If row is not selected, add it to current selection
-                if (!row.getIsSelected()) {
-                    // Add this row to existing selection
-                    setRowSelection({ ...rowSelection, [row.id]: true });
-                    // Include this row in selectedIds along with existing selection
-                    selectedIds = [...Object.keys(rowSelection).map(id => parseInt(id)), parseInt(row.id)];
-                } else {
-                    // Row already selected, use current selection
-                    selectedIds = Object.keys(rowSelection).map(id => parseInt(id));
+    };
+
+    /**
+     * Restore deleted notes (soft delete restore - set deletedAt to null)
+     * Uses batch API for better performance
+     */
+    const handleRestoreSelected = async (ids?: number[]) => {
+        // Use provided ids or fall back to current selection
+        const selectedIds = ids ?? Object.keys(rowSelection).map(id => parseInt(id));
+        if (selectedIds.length === 0) return;
+
+        // Only restore persisted notes (positive IDs)
+        const persistedNoteIds = selectedIds.filter(id => id > 0);
+
+        try {
+            const token = auth.userToken;
+
+            if (persistedNoteIds.length > 0) {
+                // Build batch restore requests
+                const batchRequests = persistedNoteIds.map(id => {
+                    const note = notes.find(n => n.id === id);
+                    if (!note) {
+                        throw new Error(`Note ${id} not found`);
+                    }
+
+                    return {
+                        id: note.id,
+                        name: note.name,
+                        description: note.description,
+                        tags: note.hashtags?.map(h => h.id),
+                        type: note.type,
+                        deletedAt: null, // Clear soft delete timestamp
+                    };
+                });
+
+                // Call batch upsert API
+                const result = await _upsertNotesBatch(token, batchRequests);
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to restore notes');
                 }
-    
-                selectedNotes = [...notes]
-                    .sort((a, b) =>
-                        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .filter(note =>
-                        selectedIds.includes(note.id)
-                    );
-            } else {
-                // Clicked on empty area
-                selectedIds = [];
+
+                enqueueSnackbar(`Successfully restored ${persistedNoteIds.length} note(s)`, {
+                    variant: 'success'
+                });
+
+                // Update opened tabs to remove deletedAt
+                const updatedTabs = openTabs.map((tab: BaseTab) => {
+                    if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
+                        const noteData = tab.data as Note;
+                        return { ...tab, data: { ...noteData, deletedAt: null } };
+                    }
+                    return tab;
+                });
+                setOpenTabs(updatedTabs);
+
+                // Reload notes from API
+                await loadNotes();
             }
-    
+
+            // Clear selection
+            setRowSelection({});
+        } catch (error) {
+            console.error('Failed to restore notes:', error);
+            const errorMessage = await parseApiError(error);
+
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+            } else {
+                enqueueSnackbar(`Failed to restore notes: ${errorMessage}`, { variant: 'error' });
+            }
+        }
+    };
+
+    // Handle context menu
+    const openContextMenu = (event: React.MouseEvent, row?: any) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        let selectedIds: number[];
+        let selectedNotes: Note[] = [];
+
+        // If row provided (clicked on a row)
+        if (row) {
+            // If row is not selected, add it to current selection
+            if (!row.getIsSelected()) {
+                // Add this row to existing selection
+                setRowSelection({ ...rowSelection, [row.id]: true });
+                // Include this row in selectedIds along with existing selection
+                selectedIds = [...Object.keys(rowSelection).map(id => parseInt(id)), parseInt(row.id)];
+            } else {
+                // Row already selected, use current selection
+                selectedIds = Object.keys(rowSelection).map(id => parseInt(id));
+            }
+
+            selectedNotes = [...notes]
+                .sort((a, b) =>
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .filter(note =>
+                    selectedIds.includes(note.id)
+                );
+        } else {
+            // Clicked on empty area
+            selectedIds = [];
+        }
+
         setAnchorPoint({ x: event.clientX, y: event.clientY });
         setContextType('note-grid');
         setContextData({
             selectedNotes,
             selectedIds,
-            onDelete: () => handleDeleteSelected(selectedIds),  // Pass selectedIds directly
+            onDelete: (isHardDelete: boolean) => handleDeleteSelected(selectedIds, isHardDelete),  // Pass selectedIds and isHardDelete
+            onRestore: () => handleRestoreSelected(selectedIds),  // Add restore handler
             onAddNote: createNewNote,
         });
         setIsContextMenuOpen(true);
@@ -218,6 +338,7 @@ export const useNoteGridHelper = () => {
         openContextMenu,
         loadNotes,
         handleDeleteSelected,
+        handleRestoreSelected,
         createNewNote,
         formatDateTime,
         // Other helpers and state can be returned as needed

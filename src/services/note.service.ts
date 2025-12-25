@@ -106,24 +106,31 @@ export const _getNoteById = async (token: string, noteId: number) => {
 };
 
 /**
- * Upsert note (create or update) - RECOMMENDED
- * POST /api/notes
- * Backend determines create vs update based on noteId (0 = create, >0 = update)
+ * Batch upsert multiple notes (create, update, soft delete, or restore)
+ * For single note operations, pass an array with 1 element
+ * POST /api/notes (accepts both single array and batch array)
+ *
+ * Operations:
+ * - CREATE: id = 0, deletedAt = undefined
+ * - UPDATE: id > 0, deletedAt = undefined
+ * - SOFT DELETE: id > 0, deletedAt = ISO timestamp string
+ * - RESTORE: id > 0, deletedAt = null
  *
  * @param token - Authentication token
- * @param data - Note upsert data
- * @returns Created or updated note or rejects with response
+ * @param requests - Array of note upsert data
+ * @returns Batch operation results or rejects with response
  */
-export const _upsertNote = async (
+export const _upsertNotesBatch = async (
     token: string,
-    data: {
-        id: number; // 0 = create new, > 0 = update existing
+    requests: Array<{
+        id: number;
         name: string;
         description?: string;
-        tags?: number[]; // Backend expects 'tags' in JSON (JsonPropertyName mapping to TagIds)
+        tags?: number[];
         type?: string;
         isArchived?: boolean;
-    }
+        deletedAt?: string | null;
+    }>
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -134,16 +141,16 @@ export const _upsertNote = async (
     const options = {
         method: "POST",
         headers: headers,
-        body: JSON.stringify(data),
+        body: JSON.stringify(requests),
     };
 
     const res = await window.fetch(
-        `${config.api.baseURL}/api/notes`,
+        `${config.api.baseURL}/api/notes/batch`,
         options
     );
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions<NoteDTO>;
+        const result = await res.json() as ResultOptions;
         return result;
     } else {
         return Promise.reject(res);
@@ -151,18 +158,17 @@ export const _upsertNote = async (
 };
 
 /**
- * Delete single or multiple notes
+ * Hard delete single or multiple notes (permanently removes from database)
+ * For soft delete, use _upsertNote with deletedAt timestamp
  * DELETE /api/notes/{noteId} or /api/notes/{id1,id2,id3}
- * 
+ *
  * @param token - Authentication token
  * @param noteId - Single note ID or comma-separated IDs
- * @param isHardDelete - If true, permanently delete; if false, soft delete (default)
  * @returns void or rejects with response
  */
 export const _deleteNote = async (
     token: string,
-    noteId: number | string,
-    isHardDelete: boolean = false
+    noteId: number | string
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -175,45 +181,9 @@ export const _deleteNote = async (
         headers: headers,
     };
 
-    const url = `${config.api.baseURL}/api/notes/${noteId}${isHardDelete ? '?isHardDelete=true' : ''}`;
+    const url = `${config.api.baseURL}/api/notes/${noteId}`;
 
     const res = await window.fetch(url, options);
-
-    if (res.ok) {
-        const result = await res.json() as ResultOptions;
-        return result;
-    } else {
-        return Promise.reject(res);
-    }
-};
-
-/**
- * Undo delete (restore) single or multiple notes
- * POST /api/notes/undo/{noteId} or /api/notes/undo/{id1,id2,id3}
- * 
- * @param token - Authentication token
- * @param noteId - Single note ID or comma-separated IDs
- * @returns void or rejects with response
- */
-export const _undoDeleteNote = async (
-    token: string,
-    noteId: number | string
-) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    const options = {
-        method: "POST",
-        headers: headers,
-    };
-
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/notes/undo/${noteId}`,
-        options
-    );
 
     if (res.ok) {
         const result = await res.json() as ResultOptions;

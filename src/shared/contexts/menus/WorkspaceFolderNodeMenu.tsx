@@ -6,7 +6,8 @@ import {
     Trash2 as DeleteIcon,
     File as FileIcon,
     FileText as NoteIcon,
-    AlertTriangle as HardDeleteIcon
+    AlertTriangle as HardDeleteIcon,
+    RotateCcw as RestoreIcon
 } from 'lucide-react';
 import { constants } from '@/utils/constants';
 import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorkspaceFolderMenu.helper';
@@ -69,22 +70,32 @@ export function WorkspaceFolderNodeMenu() {
                 Edit
             </MenuItem>
             
-            {/* Delete - hidden for workspace root */}
-            {!isWorkspaceRoot && (
-                <>
+            {/* Delete/Restore - hidden for workspace root */}
+            {!isWorkspaceRoot && (() => {
+                // Check if folder is deleted
+                const isDeleted = contextData && contextData.deletedAt !== null && contextData.deletedAt !== undefined;
+
+                return isDeleted ? (
+                    <>
+                        <MenuItem
+                            onClick={(e) => onDeleteItemClick(e, true)}
+                            className="text-red-600 hover:bg-red-50"
+                        >
+                            <HardDeleteIcon className="w-4 h-4 mr-2" />
+                            Hard Delete
+                        </MenuItem>
+                        <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                            <RestoreIcon className="w-4 h-4 mr-2" />
+                            Restore
+                        </MenuItem>
+                    </>
+                ) : (
                     <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
                         <DeleteIcon className="w-4 h-4 mr-2" />
                         Delete
                     </MenuItem>
-                    <MenuItem 
-                        onClick={(e) => onDeleteItemClick(e, true)}
-                        className="text-red-600 hover:bg-red-50"
-                    >
-                        <HardDeleteIcon className="w-4 h-4 mr-2" />
-                        Hard Delete
-                    </MenuItem>
-                </>
-            )}
+                );
+            })()}
         </>
     );
 }

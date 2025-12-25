@@ -11,8 +11,7 @@ import type { ItemType } from '@/store/explorer/FolderDialog.store';
 import { useEditorTabHelper } from '@/hooks/vsCode/useEditorTab.helper';
 import { Folder } from '@/types/folder.types';
 import { _deleteWorkspaceItems, _addItemToWorkspace } from '@/services/workspace.service';
-import { _deleteNote, _upsertNote } from '@/services/note.service';
-import { storageService } from '@/services/storage.service';
+import { _deleteNote } from '@/services/note.service';
 import { Note } from '@/types/note.types';
 import {useConfirmationPopover} from '@/shared/hooks';
 import {useEditorTabsStore} from '../store';
@@ -272,6 +271,7 @@ export const useContextMenuHelper = () => {
             createdAt: new Date(),
             updatedAt: new Date(),
             createdBy: 'You',
+            deletedAt: null
         };
 
         // ✅ Add note to workspace tree immediately (with unsaved state)

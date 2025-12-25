@@ -16,6 +16,8 @@ import {Note, NOTE_TYPES, NoteType} from '../../types/note.types';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
 import {formatNoteDate} from '@/utils/note.utils';
+import {useEditorTabHelper} from '@/hooks/index';
+import {useEditorTabsStore} from '@/store/index';
 
 /**
  * Note Detail Dialog Content
@@ -28,6 +30,11 @@ export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteDetailStore();
     const { selectedNote } = useNoteGridStore();
     const { updateSelectedNote } = useNoteDetailHelper();
+    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
+    const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
+
+    // Get active tab
+    const activeTab = activeTabId ? getTabById(activeTabId) : null
     
     const [noteKey, setNoteKey] = React.useState(0);
     useEffect(() => {
@@ -123,6 +130,11 @@ export function NoteDetailContent() {
         if (!selectedNote) {
             return null;
         }
+
+    // Check if note is deleted (soft deleted)
+    const isDeleted = selectedNote?.deletedAt !== null 
+    const isHardDeleted = activeTab?.data && (activeTab.data as Note).isHardDeleted;
+    console.log('isDeleted', isDeleted);
     
     return (
         <div key={noteKey} className="p-6 space-y-6 h-full ">
@@ -143,6 +155,7 @@ export function NoteDetailContent() {
                         }}
                         placeholder="Enter note description..."
                         className="min-h-[400px] resize-none font-mono text-sm"
+                        disabled={isDeleted || isHardDeleted}
                     />
                 </CardContent>
             </div>
@@ -166,6 +179,7 @@ export function NoteDetailContent() {
                             value={selectedNote?.name || ''}
                             onChange={(e) => handleFieldChange('name', e.target.value)}
                             size="small"
+                            disabled={isDeleted || isHardDeleted}
                         />
 
                         {/* Status field removed - using deletedAt instead */}
@@ -180,7 +194,7 @@ export function NoteDetailContent() {
                                 placeholder={tagsLoading ? "Loading hashtags..." : "+ Add HashTag"}
                                 size="small"
                                 data-testid="note-tags"
-                                disabled={tagsLoading}
+                                disabled={tagsLoading || isDeleted || isHardDeleted}
                             />
                         </div>
                     </CardContent>

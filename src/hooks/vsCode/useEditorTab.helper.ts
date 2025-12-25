@@ -179,20 +179,21 @@ export const useEditorTabHelper = () => {
     };
 
     const updateTabNote = (tabId: string, note: Note) => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((tab: BaseTab) => {
-                if (tab.id === tabId && tab.type === constants.vscode.tab.tabTypes.note) {
+        setOpenTabs(prev =>
+            prev.map(tab => {
+                if (tab.id === tabId) {
                     return {
                         ...tab,
-                        data: note,
+                        noteId: note.id,
                         title: note.name || 'Unsaved Note',
+                        note: note,
                     };
                 }
                 return tab;
             })
         );
     };
-    
+
     return {
         openNoteTab,
         closeTab,
@@ -200,7 +201,7 @@ export const useEditorTabHelper = () => {
         closeAllTabs,
         markTabAsChanged,
         getTabById,
+        updateActiveTabIdAndSelectedNote,
         updateTabNote,
-        updateActiveTabIdAndSelectedNote
     }
 }

@@ -5,7 +5,8 @@ import {
     Trash2 as DeleteIcon,
     Info as InfoIcon,
     File as FileIcon,
-    AlertTriangle as HardDeleteIcon
+    AlertTriangle as HardDeleteIcon,
+    RotateCcw as RestoreIcon
 } from 'lucide-react';
 import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorkspaceChildMenu.helper';
 import { constants } from '@/utils/constants';
@@ -20,7 +21,8 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
  * - File: View Details, Download (disabled), Delete, Hard Delete
  */
 export function WorkspaceChildNodeMenu() {
-    const { contextType } = useContextMenuStore();
+    const { contextType, contextData } = useContextMenuStore();
+    
     const {
         handleEditItem,
         handleViewInfo,
@@ -55,21 +57,33 @@ export function WorkspaceChildNodeMenu() {
             )}
             
             <MenuDivider />
-            
-            {/* Delete - Shared */}
-            <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
-                <DeleteIcon className="w-4 h-4 mr-2" />
-                Delete
-            </MenuItem>
-            
-            {/* Hard Delete - Shared */}
-            <MenuItem
-                onClick={(e) => onDeleteItemClick(e, true)}
-                className="text-red-600 hover:bg-red-50"
-            >
-                <HardDeleteIcon className="w-4 h-4 mr-2" />
-                Hard Delete
-            </MenuItem>
+
+            {/* Delete/Restore - Shared */}
+            {(() => {
+                // Check if item is deleted (note or file)
+                const isDeleted = contextData && contextData.deletedAt !== null && contextData.deletedAt !== undefined;
+
+                return isDeleted ? (
+                    <>
+                        <MenuItem
+                            onClick={(e) => onDeleteItemClick(e, true)}
+                            className="text-red-600 hover:bg-red-50"
+                        >
+                            <HardDeleteIcon className="w-4 h-4 mr-2" />
+                            Hard Delete
+                        </MenuItem>
+                        <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                            <RestoreIcon className="w-4 h-4 mr-2" />
+                            Restore
+                        </MenuItem>
+                    </>
+                ) : (
+                    <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                        <DeleteIcon className="w-4 h-4 mr-2" />
+                        Delete
+                    </MenuItem>
+                );
+            })()}
         </>
     );
 }

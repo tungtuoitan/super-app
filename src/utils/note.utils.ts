@@ -22,7 +22,7 @@ export const transformNoteData = (dto: NoteDTO): Note => {
         type: dto.type,
         createdAt: new Date(dto.createdAt),
         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
-        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : undefined,
+        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
         createdBy: dto.createdBy,
     };
 };

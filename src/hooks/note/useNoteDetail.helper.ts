@@ -3,7 +3,7 @@ import { useSnackbar } from 'notistack';
 import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
 import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
 import { Note, UpsertNoteDTO } from '@/types/note.types';
-import { _upsertNote } from '@/services/note.service';
+import { _upsertNotesBatch } from '@/services/note.service';
 import { _addItemToWorkspace } from '@/services/workspace.service';
 import { constants } from '@/utils/constants';
 import { useEditorTabHelper } from '../vsCode/useEditorTab.helper';
@@ -13,6 +13,7 @@ import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { transformNoteData } from '@/utils/note.utils';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
+import {useNoteTabHelper} from './useNoteTab.helper';
 
 export const useNoteDetailHelper = () => {
     const { auth } = useAuthStore();
@@ -24,7 +25,7 @@ export const useNoteDetailHelper = () => {
     } = useNoteDetailStore();
 
     const { setSelectedNote } = useNoteGridStore();
-    const { updateTabNote } = useEditorTabHelper();
+    const { updateTabNote } = useNoteTabHelper();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceOperation();
     const { currentTree } = useExplorerStore();
@@ -104,18 +105,21 @@ export const useNoteDetailHelper = () => {
      * Save current note (create or update using Upsert pattern)
      * @param tabId - Current tab ID to update after save
      */
-    const saveNote = useCallback(async (tabId?: string): Promise<Note | null> => {
+    const upsertNote = useCallback(async (tabId?: string): Promise<Note | null> => {
         if (!selectedNote) {
-            console.warn('⚠️ No selected note to save');
+            console.warn('⚠️ No selected note to upsert');
             return null;
         }
 
         // Check if it's a new note (id === 0 or negative)
         const isCreateMode = selectedNote.id <= 0;
+        const isRestoreMode = selectedNote.id > 0 &&
+                              originalNoteRef.current?.deletedAt &&
+                              !selectedNote.deletedAt;
         const token = auth.userToken;
 
         try {
-            // Upsert data - works for both create and update
+            // Upsert data - works for create, update, soft delete, and restore
             const upsertData: UpsertNoteDTO = {
                 id: isCreateMode ? 0 : selectedNote.id, // Always use 0 for create
                 name: selectedNote.name,
@@ -125,16 +129,20 @@ export const useNoteDetailHelper = () => {
                     ? selectedNote.hashtags.map((h: any) => typeof h === 'number' ? h : h?.id || h?.tagId) // Extract IDs from hashtags
                     : selectedNote.tags?.map((tag: any) => tag.tagId), // Otherwise use tags
                 type: selectedNote.type,
+                deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
             };
 
-            const result = await _upsertNote(token, upsertData);
+            // Use batch API with single element array
+            const result = await _upsertNotesBatch(token, [upsertData]);
 
             // Check API response success
             if (!result.success) {
                 throw new Error(result.message || 'Failed to save note');
             }
 
-            const savedNote = result.object;
+            // Extract note from batch response (Notes array)
+            const batchResult = result.object as any;
+            const savedNote = batchResult?.notes?.[0];
 
             if (!savedNote) {
                 throw new Error('Failed to save note: No data returned from server');
@@ -215,6 +223,6 @@ export const useNoteDetailHelper = () => {
         markAsSaved,
         resetChanges,
         setSelectedNote,
-        saveNote,
+        upsertNote,
     };
 };

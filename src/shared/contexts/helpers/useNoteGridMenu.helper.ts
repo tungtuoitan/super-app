@@ -71,8 +71,19 @@ export const useNoteGridMenuHelper = () => {
         });
     };
 
+    /**
+     * Handle restore deleted notes
+     */
+    const handleRestore = () => {
+        if (!contextData?.onRestore) return;
+
+        setIsContextMenuOpen(false);
+        contextData.onRestore();
+    };
+
     return {
         handleAddNote,
         handleDelete,
+        handleRestore,
     };
 };
