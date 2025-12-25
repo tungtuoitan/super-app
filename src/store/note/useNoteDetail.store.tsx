@@ -10,8 +10,6 @@ import React, { useContext, createContext, Dispatch, SetStateAction, useState, u
 
 export interface NoteDetailContextData {
     // Dialog state
-    noteHasChanges: boolean;
-    setNoteHasChanges: Dispatch<SetStateAction<boolean>>;
     originalNoteRef: React.MutableRefObject<Note | null>;
 
     // Container refs
@@ -24,9 +22,7 @@ export interface NoteDetailContextData {
 
 export const noteDetailContextDefaultValue: NoteDetailContextData = {
     // Dialog state
-    noteHasChanges: false,
     originalNoteRef: { current: null },
-    setNoteHasChanges: () => {},
 
     // Container refs
     noteNameRef: { current: null },
@@ -41,8 +37,6 @@ const NoteDetailContext = createContext<NoteDetailContextData>(noteDetailContext
 export const useNoteDetailStore = () => useContext(NoteDetailContext);
 
 export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    // Dialog state
-    const [noteHasChanges, setNoteHasChanges] = useState(false);
 
     // Container refs
     const noteNameRef = useRef<HTMLInputElement>(null);
@@ -55,8 +49,6 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
         <NoteDetailContext.Provider
             value={{
                 // Dialog state
-                noteHasChanges,
-                setNoteHasChanges,
                 originalNoteRef,
 
                 // Container refs

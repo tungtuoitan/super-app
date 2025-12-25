@@ -9,7 +9,6 @@ import { useSnackbar } from 'notistack';
 import type { BaseTab } from '@/types/editor/tab.types';
 import type { Note } from '@/types/note.types';
 import { constants } from '@/utils/constants';
-import { useEditorDetailHelper } from './useEditorDetail.helper';
 import { useEditorTabHelper } from './useEditorTab.helper';
 import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
 import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
@@ -40,8 +39,8 @@ export const useEditorToolbarHelper = () => {
     
     // Note-specific
     const { selectedNote, setSelectedNote } = useNoteGridStore();
+    const { originalNoteRef } = useNoteDetailStore();
     
-    const { cancelChanges } = useEditorDetailHelper();
     const { upsertNote } = useNoteDetailHelper();
     
     // Workspace-specific
@@ -77,88 +76,122 @@ export const useEditorToolbarHelper = () => {
 
     // Handle Upsert - orchestrator for all entity types (create/update/soft delete/restore)
     const handleUpsert = useCallback(async () => {
+        // =====================================
+        // STEP 1: Validate Active Tab
+        // =====================================
         if (!activeTab) return;
 
+        // =====================================
+        // STEP 2: Set Saving State
+        // =====================================
         setIsSaving(true);
+
         try {
-            if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-                // Use existing note upsert logic
-                await upsertNote(activeTab.id);
-            } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
-                // Workspace save logic
-                if (!selectedWorkspace) return; 
+            // =====================================
+            // STEP 3: Route to Appropriate Handler Based on Tab Type
+            // =====================================
+            switch (activeTab.type) {
+                case constants.vscode.tab.tabTypes.note:
+                    // =====================================
+                    // NOTE HANDLER: Delegate to Note Upsert Logic
+                    // =====================================
+                    await upsertNote(activeTab.id);
+                    break;
 
-                const token = auth.userToken;
-                // Use batch API with single element array
-                const result = await _upsertWsBatch(token, [{
-                    id: selectedWorkspace.id > 0 ? selectedWorkspace.id : null,
-                    name: selectedWorkspace.name,
-                    description: selectedWorkspace.description,
-                    userId: selectedWorkspace.userId,
-                }]);
+                case constants.vscode.tab.tabTypes.workspace:
+                    // =====================================
+                    // WORKSPACE HANDLER: Multi-Step Save Process
+                    // =====================================
+                    
+                    // Step 3.1: Validate Selected Workspace
+                    if (!selectedWorkspace) return;
 
-                // Check API response success
-                if (!result.success) {
-                    throw new Error(result.message || 'Failed to save workspace');
-                }
+                    // Step 3.2: Prepare API Request
+                    const token = auth.userToken;
+                    const payload = [{
+                        id: selectedWorkspace.id > 0 ? selectedWorkspace.id : null,
+                        name: selectedWorkspace.name,
+                        description: selectedWorkspace.description,
+                        userId: selectedWorkspace.userId,
+                    }];
 
-                // Extract workspace from batch response (Workspaces array)
-                const batchResult = result.object as any;
-                const savedWorkspace = batchResult?.Workspaces?.[0];
+                    // Step 3.3: Call Batch Upsert API
+                    const result = await _upsertWsBatch(token, payload);
 
-                if (savedWorkspace) {
-                    const updatedWorkspace: Ws = {
-                        id: savedWorkspace.id,
-                        name: savedWorkspace.name,
-                        description: savedWorkspace.description,
-                        createdAt: new Date(savedWorkspace.createdAt),
-                        updatedAt: savedWorkspace.updatedAt ? new Date(savedWorkspace.updatedAt) : null,
-                        deletedAt: savedWorkspace.deletedAt ? new Date(savedWorkspace.deletedAt) : null,
-                        userId: savedWorkspace.userId,
-                    };
-                    // Update the active tab with the saved workspace data
-                    setOpenTabs((prev: BaseTab[]) => {
-                        const updatedTabs = prev.map(t => {
-                            // Check if this is the tab we just saved
-                            const isCurrentTab = t.id === activeTab.id && t.data.id === activeTab.data.id && t.type === constants.vscode.tab.tabTypes.workspace;
+                    // Step 3.4: Validate API Response
+                    if (!result.success) {
+                        throw new Error(result.message || 'Failed to save workspace');
+                    }
 
-                            if (isCurrentTab) {
-                                // Update tab with new workspace data and mark as saved
-                                return {
-                                    ...t,
-                                    data: updatedWorkspace,
-                                    title: updatedWorkspace.name,
-                                    hasUnsavedChanges: false
-                                };
-                            }
+                    // Step 3.5: Extract Saved Workspace from Response
+                    const batchResult = result.object as any;
+                    const savedWorkspace = batchResult?.Workspaces?.[0];
 
-                            // Return unchanged tab
-                            return t;
+                    if (savedWorkspace) {
+                        // Step 3.6: Transform API Response to Domain Model
+                        const updatedWorkspace: Ws = {
+                            id: savedWorkspace.id,
+                            name: savedWorkspace.name,
+                            description: savedWorkspace.description,
+                            createdAt: new Date(savedWorkspace.createdAt),
+                            updatedAt: savedWorkspace.updatedAt ? new Date(savedWorkspace.updatedAt) : null,
+                            deletedAt: savedWorkspace.deletedAt ? new Date(savedWorkspace.deletedAt) : null,
+                            userId: savedWorkspace.userId,
+                        };
+
+                        // Step 3.7: Update Active Tab with Saved Data
+                        setOpenTabs((prev: BaseTab[]) => {
+                            const updatedTabs = prev.map(t => {
+                                const isCurrentTab = t.id === activeTab.id && 
+                                                    t.data.id === activeTab.data.id && 
+                                                    t.type === constants.vscode.tab.tabTypes.workspace;
+
+                                if (isCurrentTab) {
+                                    return {
+                                        ...t,
+                                        data: updatedWorkspace,
+                                        title: updatedWorkspace.name,
+                                        hasUnsavedChanges: false
+                                    };
+                                }
+
+                                return t;
+                            });
+
+                            return updatedTabs;
                         });
 
-                        return updatedTabs;
-                    });
+                        // Step 3.8: Sync Selected Workspace State
+                        setSelectedWorkspace(updatedWorkspace);
 
-                    // Update selectedWorkspace to sync with new data
-                    setSelectedWorkspace(updatedWorkspace);
+                        // Step 3.9: Reload Workspace List
+                        await loadWorkspaces();
 
-                    // Reload workspace list
-                    await loadWorkspaces();
+                        // Step 3.10: Show Success Notification
+                        enqueueSnackbar('Workspace saved successfully', { variant: 'success' });
+                    }
+                    break;
 
-                    enqueueSnackbar('Workspace saved successfully', { variant: 'success' });
-                }
+                default:
+                    console.warn(`Unsupported tab type: ${activeTab.type}`);
+                    break;
             }
         } catch (error) {
+            // =====================================
+            // STEP 4: Handle Errors
+            // =====================================
             console.error('Failed to save:', error);
             const errorMessage = await parseApiError(error);
 
-            // Show specific message for unauthorized
             if (isUnauthorizedError(error)) {
                 enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
             } else {
                 enqueueSnackbar(`Failed to save ${activeTab.type}: ${errorMessage}`, { variant: 'error' });
             }
         } finally {
+            // =====================================
+            // STEP 5: Reset Saving State
+            // =====================================
             setIsSaving(false);
         }
     }, [activeTab, selectedNote, selectedWorkspace, upsertNote, setIsSaving, setOpenTabs, setSelectedWorkspace, loadWorkspaces, enqueueSnackbar, auth.userToken]);
@@ -168,16 +201,18 @@ export const useEditorToolbarHelper = () => {
         if (!activeTab) return;
 
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-            cancelChanges();
+            if (originalNoteRef.current) {
+                setSelectedNote({ ...originalNoteRef.current });
+            }
+            enqueueSnackbar('Changes discarded', { variant: 'info' });
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             resetWorkspace();
         }
-    }, [activeTab, cancelChanges, resetWorkspace]);
+    }, [activeTab, originalNoteRef, setSelectedNote, enqueueSnackbar, resetWorkspace]);
 
     return {
         handleUpsert,
         handleCancel,
-        isSaving,
         _statusText,
         _itemId,
     };

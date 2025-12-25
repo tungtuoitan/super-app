@@ -49,7 +49,7 @@ export function NoteGrid() {
     } = useNoteGridStore();
 
     const { openTab } = useEditorTabHelper();
-    const { loadNotes, handleDeleteSelected, openContextMenu,formatDateTime } = useNoteGridHelper();
+    const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { searchQuery } = useGridControlStore();
 
@@ -243,7 +243,7 @@ export function NoteGrid() {
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest('tr[data-row]');
                     if (!isClickedOnRow) {
-                        openContextMenu(e);
+                        openNoteContextMenu(e);
                     }
                 }}
             >
@@ -278,7 +278,7 @@ export function NoteGrid() {
                                     row.original.deletedAt ? 'opacity-60' : ''
                                 }`}
                                 onClick={() => openTab(row.original)}
-                                onContextMenu={(e) => openContextMenu(e, row)}
+                                onContextMenu={(e) => openNoteContextMenu(e, row)}
                             >
                                 {row.getVisibleCells().map(cell => (
                                     <td key={cell.id} className="text-left">

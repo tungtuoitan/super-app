@@ -149,7 +149,7 @@ export const useWsHelper = () => {
      * - Hard delete: Permanently remove from DB via DELETE API
      * - Soft delete: Set deletedAt via Upsert API
      */
-    const handleDeleteSelected = async (selectedIds: number[], isHardDelete: boolean = false) => {
+    const deleteSelectedWs = async (selectedIds: number[], isHardDelete: boolean = false) => {
         if (selectedIds.length === 0) return;
 
         try {
@@ -259,29 +259,17 @@ export const useWsHelper = () => {
         setContextData({
             selectedWorkspaces,
             selectedIds,
-            onDelete: (isHardDelete: boolean = false) => handleDeleteSelected(selectedIds, isHardDelete),
+            onDelete: (isHardDelete: boolean = false) => deleteSelectedWs(selectedIds, isHardDelete),
             addWorkspace: createNewWorkspace,
         });
         setIsContextMenuOpen(true);
     };
 
-    /**
-     * Helper function to format date/time (short format for grid)
-     */
-    const formatDateTime = (date: Date): string => {
-        return new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        }).format(date);
-    };
 
     return {
         loadWorkspaces,
         createNewWorkspace,
-        handleDeleteSelected,
         syncWsGridToTab,
         openContextMenu,
-        formatDateTime,
     };
 };

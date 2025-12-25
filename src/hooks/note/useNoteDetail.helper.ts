@@ -19,7 +19,7 @@ import {useEditorTabsStore} from "@/store/index";
 export const useNoteDetailHelper = () => {
     const { auth } = useAuthStore();
     const { selectedNote } = useNoteGridStore();
-    const { noteHasChanges, setNoteHasChanges, originalNoteRef } = useNoteDetailStore();
+    const { originalNoteRef } = useNoteDetailStore();
 
     const { setSelectedNote } = useNoteGridStore();
 
@@ -27,12 +27,22 @@ export const useNoteDetailHelper = () => {
     const { loadTree } = useWorkspaceOperation();
     const { currentTree } = useExplorerStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs,activeTabId } = useEditorTabsStore();
 
-    const updateSelectedNote = (updatedNote: Partial<Note>) => {
+    const handleNoteFieldChange = (field: keyof Note, value: any) => {
+        // Set tab as changed
+        setOpenTabs((prev: BaseTab[]) => 
+            prev.map((t: BaseTab) => 
+                t.id === activeTabId 
+                    ? { ...t, hasUnsavedChanges: true }
+                    : t
+            )
+        );
+
+        // Update selected note logic
         if (!selectedNote) return;
 
-        const updated = { ...selectedNote, ...updatedNote };
+        const updated = { ...selectedNote, [field]: value };
 
         // Check if this was originally a new note (originalRef has id === 0 or < 0)
         const wasNewNote = originalNoteRef.current?.id === 0 || (originalNoteRef.current?.id && originalNoteRef.current.id < 0);
@@ -41,16 +51,14 @@ export const useNoteDetailHelper = () => {
         // If this was a new note and now has an ID, update the original reference
         if (wasNewNote && isNowSaved) {
             originalNoteRef.current = { ...updated };
-            setNoteHasChanges(false);
             setSelectedNote(updated);
             return;
         }
 
         // For new notes that are still unsaved (id === 0 or < 0)
         if (updated.id === 0 || updated.id < 0) {
-            const hasContent = updated.name?.trim() || updated.description?.trim() || (updated.tags && updated.tags.length > 0) || updated.type;
-
-            setNoteHasChanges(!!hasContent);
+            // const hasContent = updated.name?.trim() || updated.description?.trim() || (updated.tags && updated.tags.length > 0) || updated.type;
+            // setNoteHasChanges(!!hasContent);
         } else {
             // For existing notes, compare with original
             if (originalNoteRef.current) {
@@ -73,25 +81,10 @@ export const useNoteDetailHelper = () => {
                     return isDifferent;
                 });
 
-                setNoteHasChanges(hasChanges);
             }
         }
 
         setSelectedNote(updated);
-    };
-
-    const markAsSaved = () => {
-        if (selectedNote) {
-            originalNoteRef.current = { ...selectedNote };
-            setNoteHasChanges(false);
-        }
-    };
-
-    const resetChanges = () => {
-        if (originalNoteRef.current) {
-            setSelectedNote({ ...originalNoteRef.current });
-            setNoteHasChanges(false);
-        }
     };
 
     /**
@@ -191,7 +184,9 @@ export const useNoteDetailHelper = () => {
                 }
 
                 // Mark as saved after all updates
-                markAsSaved();
+                if (selectedNote) {
+                    originalNoteRef.current = { ...selectedNote };
+                }
 
                 // Reload note grid to reflect changes
                 await loadNotes();
@@ -215,16 +210,11 @@ export const useNoteDetailHelper = () => {
                 return null;
             }
         },
-        [selectedNote, auth.userToken, setSelectedNote, markAsSaved, loadNotes, loadTree, currentTree, enqueueSnackbar]
+        [selectedNote, auth.userToken, setSelectedNote, loadNotes, loadTree, currentTree, enqueueSnackbar]
     );
 
     return {
-        selectedNote,
-        noteHasChanges,
-        updateSelectedNote,
-        markAsSaved,
-        resetChanges,
-        setSelectedNote,
         upsertNote,
+        handleNoteFieldChange
     };
 };

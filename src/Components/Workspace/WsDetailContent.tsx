@@ -26,7 +26,7 @@ export function WsDetailContent() {
     const { shouldFocusWsName, setShouldFocusWsName } = useWsStore();
     const { updateSelectedWorkspace } = useWsDetailHelper();
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
-    const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
+    const { closeTab, getTabById } = useEditorTabHelper()
 
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null

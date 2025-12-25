@@ -4,43 +4,30 @@
  * Clean, organized design with shadcn/ui components
  */
 
-import React, {useEffect, useRef} from 'react';
-import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from '@/shared/components';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
-import { Textarea } from '@/Components/ui/textarea';
-import { Badge } from '@/Components/ui/badge';
-import { ScrollArea } from '@/Components/ui/scroll-area';
-import { FileText, Calendar, User, Hash as HashTagIcon, Info } from 'lucide-react';
-import {useNoteDetailHelper} from '../../hooks/note/useNoteDetail.helper';
-import {Note, NOTE_TYPES, NoteType} from '../../types/note.types';
-import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
-import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
-import {formatNoteDate} from '@/utils/note.utils';
-import {useEditorTabHelper} from '@/hooks/index';
-import {useEditorTabsStore} from '@/store/index';
-import {BaseTab} from '@/types/editor/tab.types';
+import React, { useEffect, useRef } from "react";
+import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from "@/shared/components";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Textarea } from "@/Components/ui/textarea";
+import { Note } from "../../types/note.types";
+import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
+import { formatNoteDate } from "@/utils/note.utils";
+import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
+import { useEditorTabsStore } from "@/store/index";
+import { constants } from "@/utils/constants";
 
-/**
- * Note Detail Dialog Content
- * Three-column layout matching RFD dialog structure:
- * - Left: Note form fields
- * - Center: Note content/description
- * - Right: Actions/metadata
- */
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteDetailStore();
     const { selectedNote } = useNoteGridStore();
-    const { updateSelectedNote } = useNoteDetailHelper();
-    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, setOpenTabs } = useEditorTabsStore()
-    const { closeTab, getTabById } = useEditorTabHelper()
-
-    // Get active tab
-    const activeTab = activeTabId ? getTabById(activeTabId) : null
-    
+    const { handleNoteFieldChange } = useNoteDetailHelper();
+    const { activeTabId } = useEditorTabsStore();
+    const { getTabById } = useEditorTabHelper();
     const [noteKey, setNoteKey] = React.useState(0);
+    const activeTab = activeTabId ? getTabById(activeTabId) : null;
+
     useEffect(() => {
         if (selectedNote) {
-            setNoteKey(prev => prev + 1);
+            setNoteKey((prev) => prev + 1);
         }
     }, [selectedNote?.id]);
 
@@ -53,99 +40,64 @@ export function NoteDetailContent() {
             }, 100);
         }
     }, [shouldFocusNoteName, noteNameRef]);
-    
-    // Fallback hashtags (no API call needed)
-    const tagsLoading = false; // No longer loading from API
-    const fallbackTagOptions: IAutoCompleteOptions[] = [
-        { id: 'work', label: 'Work', desc: 'Work', active: true },
-        { id: 'personal', label: 'Personal', desc: 'Personal', active: true },
-        { id: 'important', label: 'Important', desc: 'Important', active: true },
-        { id: 'urgent', label: 'Urgent', desc: 'Urgent', active: true },
-    ];
-    
-    // Use fallback hashtags (API removed with TanStack Query)
-    const finalTagOptions = fallbackTagOptions;
-    
 
-    
     // Convert hashtags array to comma-separated string of IDs for TagAutoComplete
-        // Map selected hashtags to match the format expected by the component (comma-separated string of IDs)
+    // Map selected hashtags to match the format expected by the component (comma-separated string of IDs)
     const currentTagsValue = selectedNote?.tags
-        ? selectedNote.tags.map((tag:any) => tag.tagId.toString()).filter(Boolean).join(',')
-        : '';
-    
-     // Handlers for form interactions
-        const handleFieldChange = (field: keyof Note, value: any) => {
-            // Set tab as changed
-            setOpenTabs((prev: BaseTab[]) => 
-                prev.map((t: BaseTab) => 
-                    t.id === activeTabId 
-                        ? { ...t, hasUnsavedChanges: true }
-                        : t
-                )
-            );
-            updateSelectedNote({ [field]: value });
-        };
-    
-    
+        ? selectedNote.tags
+              .map((tag: any) => tag.tagId.toString())
+              .filter(Boolean)
+              .join(",")
+        : "";
+
     const handleTagsChange = (tagsString: string) => {
         // Convert comma-separated string of IDs back to hashtags array
-        const tagIds = tagsString ? tagsString.split(',').map(id => id.trim()).filter(id => id) : [];
-        
+        const tagIds = tagsString
+            ? tagsString
+                  .split(",")
+                  .map((id) => id.trim())
+                  .filter((id) => id)
+            : [];
+
         // Convert hashtag IDs to Tag objects by finding them in the options
-        const tagObjects = tagIds.map(tagId => {
-            const foundOption = finalTagOptions.find((option: IAutoCompleteOptions) => option.id === tagId);
-            if (foundOption) {
-                return {
-                    tagId: parseInt(foundOption.id as string),
-                    name: foundOption.label,
-                    description: foundOption.desc,
-                    isActive: foundOption.active,
-                    createdAt: new Date(),
-                    id: parseInt(foundOption.id as string), // Add alias for backward compatibility
-                };
-            }
-            return null;
-        }).filter(tag => tag !== null);
-        
-        handleFieldChange('tags', tagObjects);
-    };        const handleDuplicate = () => {
-            // TODO: Implement duplicate logic
-        };
-    
-        const handleArchive = () => {
-            // TODO: Implement archive logic
-        };
-    
-        const handleDelete = () => {
-            // TODO: Implement delete logic
-        };
-    
-        if (!selectedNote) {
-            return null;
-        }
+        const tagObjects = tagIds
+            .map((tagId) => {
+                const foundOption = constants.standardRegistryFE.fallbackTagOptions.find((option: IAutoCompleteOptions) => option.id === tagId);
+                if (foundOption) {
+                    return {
+                        tagId: parseInt(foundOption.id as string),
+                        name: foundOption.label,
+                        description: foundOption.desc,
+                        isActive: foundOption.active,
+                        createdAt: new Date(),
+                        id: parseInt(foundOption.id as string), // Add alias for backward compatibility
+                    };
+                }
+                return null;
+            })
+            .filter((tag) => tag !== null);
+
+        handleNoteFieldChange("tags", tagObjects);
+    };
+
+    if (!selectedNote) {
+        return null;
+    }
 
     // Check if note is deleted (soft deleted)
-    const isDeleted = selectedNote?.deletedAt !== null 
+    const isDeleted = selectedNote?.deletedAt !== null;
     const isHardDeleted = activeTab?.data && (activeTab.data as Note).isHardDeleted;
-    console.log('isDeleted', isDeleted);
-    
+
     return (
         <div key={noteKey} className="p-6 space-y-6 h-full ">
             {/* Full Width - Description */}
             <div className="border-none">
-                {/* <CardHeader className="p-0 pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-primary" />
-                        Description
-                    </CardTitle>
-                </CardHeader> */}
                 <CardContent className="p-0">
                     <Textarea
-                        value={selectedNote?.description || ''}
+                        value={selectedNote?.description || ""}
                         onChange={(e) => {
                             const newValue = e.target.value;
-                            handleFieldChange('description', newValue);
+                            handleNoteFieldChange("description", newValue);
                         }}
                         placeholder="Enter note description..."
                         className="min-h-[400px] resize-none font-mono text-sm"
@@ -153,42 +105,33 @@ export function NoteDetailContent() {
                     />
                 </CardContent>
             </div>
-            
 
             {/* Two Column Layout - Details and Metadata */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column - Note Details */}
                 <div className="border-none">
-                    {/* <CardHeader className="p-0 pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <Info className="w-5 h-5 text-primary" />
-                            Note Details
-                        </CardTitle>
-                    </CardHeader> */}
                     <CardContent className="p-0 space-y-2">
                         {/* Note Name */}
                         <GenericTextField
                             ref={noteNameRef}
                             label="Note Name"
-                            value={selectedNote?.name || ''}
-                            onChange={(e) => handleFieldChange('name', e.target.value)}
+                            value={selectedNote?.name || ""}
+                            onChange={(e) => handleNoteFieldChange("name", e.target.value)}
                             size="small"
                             disabled={isDeleted || isHardDeleted}
                         />
 
-                        {/* Status field removed - using deletedAt instead */}
-
                         {/* HashTags */}
                         <div className="space-y-2">
                             <GenericTagAutoComplete
-                                options={finalTagOptions}
+                                options={constants.standardRegistryFE.fallbackTagOptions as unknown as IAutoCompleteOptions[]    }
                                 value={currentTagsValue}
                                 onChange={handleTagsChange}
                                 label="HashTags"
-                                placeholder={tagsLoading ? "Loading hashtags..." : "+ Add HashTag"}
+                                placeholder={"+ Add HashTag"}
                                 size="small"
                                 data-testid="note-tags"
-                                disabled={tagsLoading || isDeleted || isHardDeleted}
+                                disabled={isDeleted || isHardDeleted}
                             />
                         </div>
                     </CardContent>
@@ -196,38 +139,15 @@ export function NoteDetailContent() {
 
                 {/* Right Column - Metadata */}
                 <div className="border-none">
-                    {/* <CardHeader className="p-0 pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-accent-foreground" />
-                            Metadata
-                        </CardTitle>
-                    </CardHeader> */}
                     <CardContent className="p-0 space-y-4">
-                        <GenericTextField
-                            label="Created"
-                            value={formatNoteDate(selectedNote?.createdAt)}
-                            disabled
-                            size="small"
-                        />
+                        <GenericTextField label="Created" value={formatNoteDate(selectedNote?.createdAt)} disabled size="small" />
 
-                        <GenericTextField
-                            label="Updated"
-                            value={formatNoteDate(selectedNote?.updatedAt)}
-                            disabled
-                            size="small"
-                        />
+                        <GenericTextField label="Updated" value={formatNoteDate(selectedNote?.updatedAt)} disabled size="small" />
 
-                        <GenericTextField
-                            label="Created by"
-                            value={selectedNote?.createdBy || '-'}
-                            disabled
-                            size="small"
-                        />
+                        <GenericTextField label="Created by" value={selectedNote?.createdBy || "-"} disabled size="small" />
                     </CardContent>
                 </div>
             </div>
-
-            
         </div>
     );
 }

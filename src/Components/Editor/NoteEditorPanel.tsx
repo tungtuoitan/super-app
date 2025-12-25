@@ -6,7 +6,6 @@
 
 import React, {useEffect} from 'react';
 import {useEditorTabsStore} from '@/store/index';
-import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {BaseTab} from '@/types/editor/tab.types';
 import {NoteDetailContent} from '../Note/NoteDetailContent';
  
@@ -15,7 +14,6 @@ interface NoteEditorPanelProps {
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { noteHasChanges } = useNoteDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);

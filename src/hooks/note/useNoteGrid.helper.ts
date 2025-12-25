@@ -1,9 +1,7 @@
 import {_deleteNote, _getNotes, _upsertNotesBatch} from '@/services/note.service';
-import {storageService} from '@/services/storage.service';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import { Note } from '@/types/note.types';
 import {collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotesData} from '../../utils';
-import {useEffect} from 'react';
 import {useContextMenuStore, useEditorTabsStore} from '../../store';
 import {useSnackbar} from 'notistack';
 import {useEditorTabHelper} from '../vsCode/useEditorTab.helper';
@@ -103,7 +101,7 @@ export const useNoteGridHelper = () => {
      * - Hard delete: Permanently remove from DB via DELETE API
      * - Soft delete: Set deletedAt via Upsert API
      */
-    const handleDeleteSelected = async (ids?: number[], isHardDelete: boolean = false) => {
+    const deleteSelectedNotes = async (ids?: number[], isHardDelete: boolean = false) => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(rowSelection).map(id => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -213,7 +211,7 @@ export const useNoteGridHelper = () => {
      * Restore deleted notes (soft delete restore - set deletedAt to null)
      * Uses batch API for better performance
      */
-    const handleRestoreSelected = async (ids?: number[]) => {
+    const restoreSelectedNotes = async (ids?: number[]) => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(rowSelection).map(id => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -282,7 +280,7 @@ export const useNoteGridHelper = () => {
     };
 
     // Handle context menu
-    const openContextMenu = (event: React.MouseEvent, row?: any) => {
+    const openNoteContextMenu = (event: React.MouseEvent, row?: any) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -318,30 +316,15 @@ export const useNoteGridHelper = () => {
         setContextData({
             selectedNotes,
             selectedIds,
-            onDelete: (isHardDelete: boolean) => handleDeleteSelected(selectedIds, isHardDelete),  // Pass selectedIds and isHardDelete
-            onRestore: () => handleRestoreSelected(selectedIds),  // Add restore handler
+            onDelete: (isHardDelete: boolean) => deleteSelectedNotes(selectedIds, isHardDelete),  // Pass selectedIds and isHardDelete
+            onRestore: () => restoreSelectedNotes(selectedIds),  // Add restore handler
             onAddNote: createNewNote,
         });
         setIsContextMenuOpen(true);
-    };        // Helper function to format date/time (short format for grid)
-        const formatDateTime = (date: Date): string => {
-            return new Intl.DateTimeFormat('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            }).format(date);
-        };
-
-    
+    };
 
     return {
-        openContextMenu,
+        openNoteContextMenu,
         loadNotes,
-        handleDeleteSelected,
-        handleRestoreSelected,
-        createNewNote,
-        formatDateTime,
-        // Other helpers and state can be returned as needed
-
     };
 };

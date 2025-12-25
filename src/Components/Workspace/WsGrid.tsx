@@ -42,7 +42,7 @@ export function WsGrid() {
         setColumnFilters
     } = useWsStore();
 
-    const { loadWorkspaces, openContextMenu, formatDateTime } = useWsHelper();
+    const { loadWorkspaces, openContextMenu } = useWsHelper();
     const { openWorkspaceTab } = useWsTabHelper();
     const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { searchQuery } = useGridControlStore();

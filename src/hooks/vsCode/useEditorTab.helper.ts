@@ -15,7 +15,7 @@ export const useEditorTabHelper = () => {
         activeTabId, 
         setActiveTabId, 
     } = useEditorTabsStore();
-    const { originalNoteRef, setNoteHasChanges } = useNoteDetailStore();
+    const { originalNoteRef } = useNoteDetailStore();
     const { setNotes, selectedNote,setSelectedNote } = useNoteGridStore();
     const { setSelectedWorkspace, originalWsRef, setWsHasChanges } = useWsDetailStore();
 
@@ -37,7 +37,6 @@ export const useEditorTabHelper = () => {
                 // Initialize originalNoteRef for change tracking
                 if (!originalNoteRef.current || originalNoteRef.current.id !== noteData.id) {
                     originalNoteRef.current = { ...noteData };
-                    setNoteHasChanges(false); // Reset changes for newly opened note
                 }
                 
                 setSelectedNote(noteData);
@@ -59,11 +58,9 @@ export const useEditorTabHelper = () => {
                 
                 // Clear note state when switching to workspace
                 originalNoteRef.current = null;
-                setNoteHasChanges(false);
                 setSelectedNote(null);
             } else {
                 originalNoteRef.current = null;
-                setNoteHasChanges(false);
                 setSelectedNote(null);
                 originalWsRef.current = null;
                 setWsHasChanges(false);
@@ -71,7 +68,6 @@ export const useEditorTabHelper = () => {
             }
         } else {
             originalNoteRef.current = null;
-            setNoteHasChanges(false);
             setSelectedNote(null);
             originalWsRef.current = null;
             setWsHasChanges(false);

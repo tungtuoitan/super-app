@@ -18,18 +18,20 @@ import {useEditorTabHelper} from '@/hooks/vsCode/useEditorTab.helper';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {useEditorToolbarHelper} from '@/hooks/vsCode/useEditorToolbar.helper';
 import { constants } from '@/utils/constants';
+import {useEditorToolbarStore} from '@/store/editor/EditorToolbar.store';
 
 
 export function EditorToolbar() {
 
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
     const { closeTab, getTabById } = useEditorTabHelper()
+    const { isSaving, setIsSaving } = useEditorToolbarStore();
 
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null
 
     // Get toolbar actions for active tab
-    const { handleUpsert, handleCancel, isSaving, _statusText, _itemId } = useEditorToolbarHelper()
+    const { handleUpsert, handleCancel, _statusText, _itemId } = useEditorToolbarHelper()
 
     useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

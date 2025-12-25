@@ -97,6 +97,12 @@ export const constants = {
                 label: "Inactive",
             },
         ] as const,
+        fallbackTagOptions: [
+            { id: "work", label: "Work", desc: "Work", active: true },
+            { id: "personal", label: "Personal", desc: "Personal", active: true },
+            { id: "important", label: "Important", desc: "Important", active: true },
+            { id: "urgent", label: "Urgent", desc: "Urgent", active: true },
+        ] as const,
     },
 } as const;
 
