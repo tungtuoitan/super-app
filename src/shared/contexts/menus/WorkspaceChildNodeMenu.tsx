@@ -9,7 +9,6 @@ import {
     RotateCcw as RestoreIcon
 } from 'lucide-react';
 import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorkspaceChildMenu.helper';
-import { constants } from '@/utils/constants';
 import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 
 /**
@@ -24,38 +23,11 @@ export function WorkspaceChildNodeMenu() {
     const { contextType, contextData } = useContextMenuStore();
     
     const {
-        handleEditItem,
-        handleViewInfo,
-        onDeleteItemClick,
+        deleteItems,
     } = useWorkspaceChildMenuHelper();
-
-    const isNote = contextType === constants.workspace.itemTypes.note;
-    const isFile = contextType === constants.workspace.itemTypes.file;
 
     return (
         <>
-            {/* Edit - Only for notes */}
-            {isNote && (
-                <MenuItem onClick={handleEditItem}>
-                    <EditIcon className="w-4 h-4 mr-2" />
-                    Edit
-                </MenuItem>
-            )}
-            
-            {/* View Details - Shared */}
-            <MenuItem onClick={handleViewInfo}>
-                <InfoIcon className="w-4 h-4 mr-2" />
-                View Details
-            </MenuItem>
-            
-            {/* Download - Only for files (disabled) */}
-            {isFile && (
-                <MenuItem onClick={handleViewInfo} disabled>
-                    <FileIcon className="w-4 h-4 mr-2" />
-                    Download
-                </MenuItem>
-            )}
-            
             <MenuDivider />
 
             {/* Delete/Restore - Shared */}
@@ -66,19 +38,19 @@ export function WorkspaceChildNodeMenu() {
                 return isDeleted ? (
                     <>
                         <MenuItem
-                            onClick={(e) => onDeleteItemClick(e, true)}
+                            onClick={(e) => deleteItems(e, true)}
                             className="text-red-600 hover:bg-red-50"
                         >
                             <HardDeleteIcon className="w-4 h-4 mr-2" />
                             Hard Delete
                         </MenuItem>
-                        <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                        <MenuItem onClick={(e) => deleteItems(e, false)}>
                             <RestoreIcon className="w-4 h-4 mr-2" />
                             Restore
                         </MenuItem>
                     </>
                 ) : (
-                    <MenuItem onClick={(e) => onDeleteItemClick(e, false)}>
+                    <MenuItem onClick={(e) => deleteItems(e, false)}>
                         <DeleteIcon className="w-4 h-4 mr-2" />
                         Delete
                     </MenuItem>

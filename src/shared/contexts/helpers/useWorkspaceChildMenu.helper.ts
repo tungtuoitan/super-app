@@ -39,19 +39,11 @@ export const useWorkspaceChildMenuHelper = () => {
     /**
      * Handle edit item (note only)
      */
-    const handleEditItem = () => {
+    const editItem = () => {
         if (!isNote || !contextData) return;
 
         setIsContextMenuOpen(false);
         openFolderDialog('edit', constants.workspace.itemTypes.note, contextData, null);
-    };
-
-    /**
-     * Handle view info
-     */
-    const handleViewInfo = () => {
-        setIsContextMenuOpen(false);
-        // TODO: Implement view info functionality
     };
 
     /**
@@ -136,7 +128,7 @@ export const useWorkspaceChildMenuHelper = () => {
     /**
      * Handle delete with confirmation
      */
-    const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
+    const deleteItems = (event: any, isHardDelete: boolean = false) => {
         if (!contextData) return;
 
         setIsContextMenuOpen(false);
@@ -185,8 +177,7 @@ export const useWorkspaceChildMenuHelper = () => {
     };
 
     return {
-        handleEditItem,
-        handleViewInfo,
-        onDeleteItemClick,
+        editItem,
+        deleteItems,
     };
 };

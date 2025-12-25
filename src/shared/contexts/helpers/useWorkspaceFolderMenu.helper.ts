@@ -81,7 +81,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     /**
      * Handle create item action (folder/note/file)
      */
-    const handleCreateItem = (itemType: ItemType, parentTag?: any) => {
+    const createItem = (itemType: ItemType, parentTag?: any) => {
         setIsContextMenuOpen(false);
         openFolderDialog('create', itemType, null, parentTag);
     };
@@ -89,7 +89,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     /**
      * Handle edit folder action
      */
-    const handleEditItem = (itemData: any) => {
+    const editItem = (itemData: any) => {
         setIsContextMenuOpen(false);
 
         if (itemData) {
@@ -414,7 +414,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     /**
      * Wrapper for delete with confirmation popover
      */
-    const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
+    const deleteItems = (event: any, isHardDelete: boolean = false) => {
         if (!contextData) return;
 
         // Check if this is a workspace root node (negative ID)
@@ -497,8 +497,8 @@ export const useWorkspaceFolderMenuHelper = () => {
     };
 
     return {
-        handleCreateItem,
-        handleEditItem,
-        onDeleteItemClick,
+        createItem,
+        editItem,
+        deleteItems,
     };
 };
