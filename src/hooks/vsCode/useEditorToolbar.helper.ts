@@ -24,22 +24,10 @@ import { useWsHelper } from '../ws/useWs.helper';
 import { useWsDetailHelper } from '../ws/useWsDetail.helper';
 import { Ws } from '@/store/ws/useWs.store';
 import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
+import {useNoteDetailHelper} from '../note/useNoteDetail.helper';
 
-interface EditorToolbarActions {
-    // Actions
-    handleUpsert: () => Promise<void>;  // Orchestrator for all entity types (create/update/soft delete/restore)
-    handleCancel: () => void;
 
-    // States
-    _hasAnyChanges: boolean;
-    isSaving: boolean;
-
-    // Info
-    _statusText: string;
-    _itemId: number | null;
-}
-
-export const useEditorToolbarHelper = (): EditorToolbarActions => {
+export const useEditorToolbarHelper = () => {
     const { auth } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { activeTabId } = useEditorTabsStore();
@@ -52,21 +40,15 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     
     // Note-specific
     const { selectedNote, setSelectedNote } = useNoteGridStore();
-    const { noteHasChanges } = useNoteDetailStore();
     
-    const { upsertNote, cancelChanges } = useEditorDetailHelper();
-    const { loadNotes } = useNoteGridHelper();
+    const { cancelChanges } = useEditorDetailHelper();
+    const { upsertNote } = useNoteDetailHelper();
     
     // Workspace-specific
     const { selectedWorkspace, wsHasChanges, setSelectedWorkspace } = useWsDetailStore();
     const { resetWorkspace } = useWsDetailHelper();
     const { loadWorkspaces } = useWsHelper();
 
-    // Determine if any entity has unsaved changes based on tab type
-    const _hasAnyChanges = activeTab?.type === constants.vscode.tab.tabTypes.note ? noteHasChanges : 
-               activeTab?.type === constants.vscode.tab.tabTypes.workspace ? wsHasChanges : 
-               false;
-    
     // Get status text based on tab type and deletion state
     const _statusText = (() => {
         if (!activeTab) return 'No Tab';
@@ -104,7 +86,7 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
                 await upsertNote(activeTab.id);
             } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
                 // Workspace save logic
-                if (!selectedWorkspace) return;
+                if (!selectedWorkspace) return; 
 
                 const token = auth.userToken;
                 // Use batch API with single element array
@@ -195,7 +177,6 @@ export const useEditorToolbarHelper = (): EditorToolbarActions => {
     return {
         handleUpsert,
         handleCancel,
-        _hasAnyChanges,
         isSaving,
         _statusText,
         _itemId,

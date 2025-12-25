@@ -45,7 +45,7 @@ export const useContextMenuHelper = () => {
         setCurrentTree
     } = useExplorerStore();
     const { openFolderDialog } = useFolderDialogHelper();
-    const { openNoteTab } = useEditorTabHelper();
+    const { openTab } = useEditorTabHelper();
     const { openTabs } = useEditorTabsStore();
 
     
@@ -316,7 +316,7 @@ export const useContextMenuHelper = () => {
         }
 
         // Open note tab for editing
-        openNoteTab(newNote);
+        openTab(newNote);
     };
 
     /**

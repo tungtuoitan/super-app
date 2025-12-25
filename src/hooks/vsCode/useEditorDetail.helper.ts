@@ -6,12 +6,9 @@
 import { useSnackbar } from 'notistack';
 import { useNoteDetailHelper } from '../note/useNoteDetail.helper';
 import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
-import {useEditorTabHelper} from './useEditorTab.helper';
 
 export const useEditorDetailHelper = () => {
-    const { noteHasChanges } = useNoteDetailStore();
-    const { upsertNote, resetChanges } = useNoteDetailHelper();
-    const { markTabAsChanged } = useEditorTabHelper();
+    const { resetChanges } = useNoteDetailHelper();
     const { enqueueSnackbar } = useSnackbar(); 
 
     /**
@@ -22,16 +19,7 @@ export const useEditorDetailHelper = () => {
         enqueueSnackbar('Changes discarded', { variant: 'info' });
     }
 
-    /**
-     * Mark tab as changed based on hasUnsavedChanges state
-     */
-    const syncTabChangeState = (tabId: string) => {
-        markTabAsChanged(tabId, noteHasChanges);
-    }
-
     return {
-        upsertNote,
         cancelChanges,
-        syncTabChangeState,
     };
 };

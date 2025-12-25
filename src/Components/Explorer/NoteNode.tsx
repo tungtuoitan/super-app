@@ -30,7 +30,7 @@ export function NoteNode({
     } = useExplorerStore();
     const { showContextMenu } = useContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
-    const { openNoteTab } = useEditorTabHelper();
+    const { openTab } = useEditorTabHelper();
 
     const noteItem = node.data.data as NoteItem;
     const isSelected = isFolderSelected(noteItem.id);
@@ -73,7 +73,7 @@ export function NoteNode({
                 deletedAt: noteItem.deletedAt ? new Date(noteItem.deletedAt) : null,
             };
 
-            openNoteTab(note);
+            openTab(note);
         }
     };
 

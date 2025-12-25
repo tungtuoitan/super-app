@@ -15,7 +15,6 @@ export { useAuthHelper } from './useAuth.helpers';
 
 // UI helpers
 export * from './note/useNoteDetail.helper';
-export * from './note/useNoteTab.helper';
 export * from './note/useNoteGrid.helper';
 export * from './vsCode/useEditorTab.helper';
 export * from './vsCode/useEditorDetail.helper';

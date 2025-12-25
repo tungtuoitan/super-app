@@ -31,7 +31,7 @@ export const useNoteGridHelper = () => {
         setRowSelection,
     } = useNoteGridStore();
     
-    const { openNoteTab } = useEditorTabHelper();
+    const { openTab } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
@@ -63,7 +63,7 @@ export const useNoteGridHelper = () => {
         setNotes([newNote, ...notes]);
 
         // Open note tab for editing
-        openNoteTab(newNote);
+        openTab(newNote);
 
         // Focus vào Note Name field sau khi tab mở
         setShouldFocusNoteName(true);

@@ -23,19 +23,19 @@ import { constants } from '@/utils/constants';
 export function EditorToolbar() {
 
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
-    const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
+    const { closeTab, getTabById } = useEditorTabHelper()
 
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null
 
     // Get toolbar actions for active tab
-    const { handleUpsert, handleCancel, _hasAnyChanges, isSaving, _statusText, _itemId } = useEditorToolbarHelper()
+    const { handleUpsert, handleCancel, isSaving, _statusText, _itemId } = useEditorToolbarHelper()
 
     useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault()
-            if (activeTab && _hasAnyChanges && !isSaving) {
+            if (activeTab && activeTab.hasUnsavedChanges && !isSaving) {
                 handleUpsert()
             }
         }
@@ -43,7 +43,7 @@ export function EditorToolbar() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [activeTab, _hasAnyChanges, isSaving, handleUpsert])
+    }, [activeTab, isSaving, handleUpsert])
 
     return (
         <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
@@ -98,9 +98,9 @@ export function EditorToolbar() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={handleUpsert}
-                                        disabled={!_hasAnyChanges || isSaving}
+                                        disabled={!activeTab?.hasUnsavedChanges || isSaving}
                                         className={`h-8 w-8 ${
-                                            _hasAnyChanges
+                                            activeTab?.hasUnsavedChanges
                                                 ? 'text-[#4FC3F7] hover:bg-[#4FC3F7]/10' 
                                                 : 'text-white/40'
                                         } disabled:text-white/20`}
@@ -124,7 +124,7 @@ export function EditorToolbar() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={handleCancel}
-                                        disabled={!_hasAnyChanges || !!activeTab?.data.deletedAt}
+                                        disabled={!activeTab?.hasUnsavedChanges || !!activeTab?.data.deletedAt}
                                         className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                     >
                                         <RotateCcw className="h-[18px] w-[18px]" />

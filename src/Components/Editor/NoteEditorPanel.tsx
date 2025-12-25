@@ -5,7 +5,6 @@
  */
 
 import React, {useEffect} from 'react';
-import {useEditorDetailHelper} from '@/hooks/vsCode/useEditorDetail.helper';
 import {useEditorTabsStore} from '@/store/index';
 import {useNoteDetailStore} from '@/store/note/useNoteDetail.store';
 import {BaseTab} from '@/types/editor/tab.types';
@@ -16,16 +15,11 @@ interface NoteEditorPanelProps {
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { syncTabChangeState } = useEditorDetailHelper();
     const { noteHasChanges } = useNoteDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
     
     const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Sync noteHasChanges with tab state
-    useEffect(() => {
-        syncTabChangeState(tab.id);
-    }, [noteHasChanges, tab.id]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {

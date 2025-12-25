@@ -18,6 +18,7 @@ import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
 import {formatNoteDate} from '@/utils/note.utils';
 import {useEditorTabHelper} from '@/hooks/index';
 import {useEditorTabsStore} from '@/store/index';
+import {BaseTab} from '@/types/editor/tab.types';
 
 /**
  * Note Detail Dialog Content
@@ -30,8 +31,8 @@ export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteDetailStore();
     const { selectedNote } = useNoteGridStore();
     const { updateSelectedNote } = useNoteDetailHelper();
-    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore()
-    const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper()
+    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, setOpenTabs } = useEditorTabsStore()
+    const { closeTab, getTabById } = useEditorTabHelper()
 
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null
@@ -65,18 +66,7 @@ export function NoteDetailContent() {
     // Use fallback hashtags (API removed with TanStack Query)
     const finalTagOptions = fallbackTagOptions;
     
-    // Create options for type autocomplete
-    const typeOptions: IAutoCompleteOptions[] = NOTE_TYPES.map((type) => ({
-        id: type,
-        label: type.charAt(0).toUpperCase() + type.slice(1),
-        desc: type.charAt(0).toUpperCase() + type.slice(1),
-        active: true,
-    }));
 
-    // Create current type value for autocomplete
-    const currentTypeValue = selectedNote?.type 
-        ? typeOptions.find(option => option.id === selectedNote.type) || null
-        : null;
     
     // Convert hashtags array to comma-separated string of IDs for TagAutoComplete
         // Map selected hashtags to match the format expected by the component (comma-separated string of IDs)
@@ -86,13 +76,17 @@ export function NoteDetailContent() {
     
      // Handlers for form interactions
         const handleFieldChange = (field: keyof Note, value: any) => {
+            // Set tab as changed
+            setOpenTabs((prev: BaseTab[]) => 
+                prev.map((t: BaseTab) => 
+                    t.id === activeTabId 
+                        ? { ...t, hasUnsavedChanges: true }
+                        : t
+                )
+            );
             updateSelectedNote({ [field]: value });
         };
     
-        const handleTypeChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
-            const typeValue = newValue?.id as NoteType;
-            handleFieldChange('type', typeValue);
-        };
     
     const handleTagsChange = (tagsString: string) => {
         // Convert comma-separated string of IDs back to hashtags array

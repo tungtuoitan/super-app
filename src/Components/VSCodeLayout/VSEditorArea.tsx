@@ -18,7 +18,7 @@ import { constants } from "@/utils/constants";
  */
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
-    const { closeTab, getTabById, handleSetActiveTab } = useEditorTabHelper();
+    const { closeTab, getTabById,updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
 
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null;
@@ -52,7 +52,7 @@ export function VSEditorArea() {
                             return (
                                 <button
                                     key={tab.id}
-                                    onClick={() => handleSetActiveTab(tab.id)}
+                                    onClick={() => updateActiveTabIdAndSelectedNote(tab.id)}
                                     className={`
                     h-[35px] px-3 flex items-center gap-2
                     border-r border-b border-editor-border

@@ -42,6 +42,11 @@ export const constants = {
             folder: "Folder",
             notes: "Notes",
         } as const,
+        tabTitles: {
+            unsavedNote: "Unsaved Note",
+            unsavedWorkspace: "Unsaved Workspace",
+            unknownTab: "Unknown Tab",
+        } as const,
     },
     workspace: {
         itemTypes: {
