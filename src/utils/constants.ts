@@ -136,35 +136,41 @@ export const constants = {
         } as const,
 
         // Filter field configurations
-        fields: {
+        groups: {
             noteGrid: [
                 {
                     key: "statusCode",
                     label: "Status",
-                    type: "checkbox",
+                    type: "radio",
                     standardRegistryType: "noteStatus",
                     defaultValue: "active",
+                },
+                {
+                    key: "deletedAt",
+                    label: "Deleted Status",
+                    type: "radio",
+                    defaultValue: "null",
                 },
                 {
                     key: "createdAt",
                     label: "Created Date",
                     type: "dateRange",
                     defaultValue: "",
-                },
-                {
-                    key: "deletedAt",
-                    label: "Deleted Status",
-                    type: "checkbox",
-                    defaultValue: "null",
                 },
             ],
             wsGrid: [
                 {
                     key: "statusCode",
                     label: "Status",
-                    type: "checkbox",
+                    type: "radio",
                     standardRegistryType: "workspaceStatus",
                     defaultValue: "active",
+                },
+                {
+                    key: "deletedAt",
+                    label: "Deleted Status",
+                    type: "radio",
+                    defaultValue: "null",
                 },
                 {
                     key: "createdAt",
@@ -172,20 +178,20 @@ export const constants = {
                     type: "dateRange",
                     defaultValue: "",
                 },
-                {
-                    key: "deletedAt",
-                    label: "Deleted Status",
-                    type: "checkbox",
-                    defaultValue: "null",
-                },
             ],
             workspace: [
                 {
                     key: "statusCode",
                     label: "Status",
-                    type: "checkbox",
+                    type: "radio",
                     standardRegistryType: "workspaceStatus",
                     defaultValue: "active",
+                },
+                {
+                    key: "deletedAt",
+                    label: "Deleted Status",
+                    type: "checkbox",
+                    defaultValue: "null",
                 },
                 {
                     key: "createdAt",

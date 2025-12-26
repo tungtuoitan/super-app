@@ -8,8 +8,14 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { useAuthHelper } from "@/hooks/useAuth.helpers";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
-import type { ViewFilter, UserFilters } from "@/types/common.types";
+import type { ViewFilter, UserFilters, FilterFieldConfig, UpdateUserProfileRequest } from "@/types/common.types";
 import { filterUtils } from "@/utils/filter.utils";
+import { useSnackbar } from "notistack";
+import { userProfileService } from "@/services/userProfile.service";
+import { envConfig } from "../config";
+import { STORAGE_KEYS, storageService } from "@/services/storage.service";
+import { parseApiError } from "../utils";
+import { set } from "lodash";
 
 /**
  * Generic filter helper hook for filter operations
@@ -19,25 +25,9 @@ import { filterUtils } from "@/utils/filter.utils";
  * @returns Object containing filter helper functions
  */
 export function useGenericFilterHelper() {
-    const { $user } = useAuthStore();
-    const { updateUserFilters } = useAuthHelper();
-    const { filterViewKey, pendingFilters, setPendingFilters } = useGridControlStore();
-
-    /**
-     * Get filters for a specific view with defaults applied
-     * @param filterViewKey View key (noteGrid, wsGrid, workspace)
-     * @returns ViewFilter with user preferences or defaults
-     */
-    const getViewFilter = (filterViewKey: keyof UserFilters): ViewFilter => {
-        // Get default filters for this view
-        const defaults = constants.filters.defaults[filterViewKey] as ViewFilter;
-
-        // Get user's custom filters
-        const userFilters = $user.filters?.[filterViewKey];
-
-        // Merge defaults with user filters (user filters override defaults)
-        return filterUtils._mergeFilters(defaults, userFilters);
-    };
+    const { filterViewKey, uiFilters, setUIFilters } = useGridControlStore();
+    const { enqueueSnackbar } = useSnackbar();
+    const { $user, set$User } = useAuthStore();
 
     /**
      * Update filter for a specific view and field
@@ -45,58 +35,48 @@ export function useGenericFilterHelper() {
      * @param fieldKey Field key (statusCode, deletedAt, createdAt, etc.)
      * @param value New filter value
      */
-    const updateViewFilter = async (filterViewKey: keyof UserFilters, fieldKey: keyof ViewFilter, value: string): Promise<void> => {
-        // Get current filters
-        const currentFilters: UserFilters = $user.filters || {};
+    const applyFilter = async (usingDefaultFilter: boolean = false): Promise<void> => {
+        try {
+            // ---------
+            // STEP 1: Upsert filters to backend
+            // ---------
+            if (!filterViewKey) {
+                throw new Error("Filter view key is not set");
+            }
+            // Get token from user state
+            const token = $user.userToken;
+            if (!token) {
+                throw new Error("User not authenticated");
+            }
+            const newUserFilters: UserFilters = $user.filters || {};
+            newUserFilters[filterViewKey as keyof UserFilters] = usingDefaultFilter ? constants.filters.defaults[filterViewKey] || {} : uiFilters;
 
-        // Get current view filters
-        const currentViewFilters: ViewFilter = currentFilters[filterViewKey] || {};
+            // Update backend - will upsert profile if not exists
+            const result = await userProfileService._upsertUserProfile(token, {
+                filters: JSON.stringify(newUserFilters), // Convert UserFilters object to JSON string
+            });
+            if (!result.success) {
+                throw new Error(result.message || "Failed to update user filters");
+            }
+            const newFilters = result.object?.filters;
 
-        // Update the specific field
-        const updatedViewFilters: ViewFilter = {
-            ...currentViewFilters,
-            [fieldKey]: value,
-        };
+            // Update local state
+            const updatedUser: typeof $user = {
+                ...$user,
+                filters: newFilters ? JSON.parse(newFilters) : undefined,
+            };
+            set$User(updatedUser);
+            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || {});
 
-        // Update the entire filters object
-        const updatedFilters: UserFilters = {
-            ...currentFilters,
-            [filterViewKey]: updatedViewFilters,
-        };
-
-        // Sync to backend and local state
-        await updateUserFilters(updatedFilters);
-    };
-
-    /**
-     * Clear all filters for a specific view (reset to defaults)
-     * @param filterViewKey View key (noteGrid, wsGrid, workspace)
-     */
-    const clearViewFilters = async (filterViewKey: keyof UserFilters): Promise<void> => {
-        // Get current filters
-        const currentFilters: UserFilters = $user.filters || {};
-
-        // Remove the view filters (will fall back to defaults)
-        const updatedFilters: UserFilters = {
-            ...currentFilters,
-            [filterViewKey]: undefined,
-        };
-
-        // Sync to backend and local state
-        await updateUserFilters(updatedFilters);
-    };
-
-    /**
-     * Get active filters count for a view
-     * @param filterViewKey View key (noteGrid, wsGrid, workspace)
-     * @returns Number of active filters (beyond defaults)
-     */
-    const getActiveFiltersCount = (filterViewKey: keyof UserFilters): number => {
-        const userFilters = $user.filters?.[filterViewKey];
-        if (!userFilters) return 0;
-
-        // Count non-empty filter values
-        return Object.values(userFilters).filter((v) => v && v.trim() !== "").length;
+            // In dev environment, update localStorage with new filters
+            if (envConfig.NODE_ENV === constants.environments.development) {
+                storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
+            }
+        } catch (err) {
+            const errorMessage = await parseApiError(err);
+            enqueueSnackbar(`Failed to update filters: ${errorMessage}`, { variant: "error" });
+            throw err;
+        }
     };
 
     /**
@@ -106,8 +86,8 @@ export function useGenericFilterHelper() {
      * @returns True if the value is active
      */
     const isPendingValueActive = (fieldKey: string, value: string): boolean => {
-        const filterValue = (pendingFilters as any)[fieldKey];
-        return filterUtils._hasFilterValue(filterValue, value);
+        const filterValue = (uiFilters as any)[fieldKey];
+        return filterUtils._hasValue(filterValue, value);
     };
 
     /**
@@ -116,9 +96,9 @@ export function useGenericFilterHelper() {
      * @param value Value to toggle
      */
     const handleCheckboxToggle = (fieldKey: string, value: string) => {
-        setPendingFilters((prev) => {
+        setUIFilters((prev) => {
             const currentValue = (prev as any)[fieldKey];
-            const newValue = filterUtils._toggleFilterValue(currentValue, value);
+            const newValue = filterUtils._toggle(currentValue, value);
             return {
                 ...prev,
                 [fieldKey]: newValue,
@@ -127,43 +107,76 @@ export function useGenericFilterHelper() {
     };
 
     /**
-     * Apply pending filters: save to backend
+     * Set radio value in local pending state (not saved yet)
+     * Unlike checkbox, radio only allows selecting one value
+     * @param fieldKey Field key
+     * @param value Value to set
      */
-    const handleApply = async () => {
-        if (!filterViewKey) return;
-
-        try {
-            // Update each field that changed
-            for (const [fieldKey, value] of Object.entries(pendingFilters)) {
-                await updateViewFilter(filterViewKey, fieldKey as any, value as string);
-            }
-        } catch (error) {
-            console.error("Failed to apply filters:", error);
-        }
+    const handleRadioChange = (fieldKey: string, value: string) => {
+        setUIFilters((prev) => {
+            return {
+                ...prev,
+                [fieldKey]: value,
+            };
+        });
     };
 
     /**
-     * Clear filters: reset to defaults
+     * Set date range value in local pending state (not saved yet)
+     * @param fieldKey Field key
+     * @param fromDate Date string in YYYY-MM format
+     * @param toDate Date string in YYYY-MM format
      */
-    const handleClearFilters = async () => {
-        if (!filterViewKey) return;
+    const handleDateRangeChange = (fieldKey: string, fromDate: string, toDate: string) => {
+        setUIFilters((prev) => {
+            // Store as comma-separated string: "YYYY-MM,YYYY-MM"
+            const value = fromDate && toDate ? `${fromDate},${toDate}` : "";
+            return {
+                ...prev,
+                [fieldKey]: value,
+            };
+        });
+    };
 
-        try {
-            await clearViewFilters(filterViewKey);
-            setPendingFilters(getViewFilter(filterViewKey)); // Reset pending to defaults
-        } catch (error) {
-            console.error("Failed to clear filters:", error);
-        }
+    /**
+     * Validate pending filters and get field errors
+     * A field is invalid if it exists in pending filters but has no values selected
+     * @returns Record of fieldKey -> error message
+     */
+    const getFieldErrors = (): Record<string, string> => {
+        if (!filterViewKey) return {};
+
+        const errors: Record<string, string> = {};
+        const fieldConfigs = (constants.filters.groups as any)[filterViewKey] as readonly FilterFieldConfig[];
+
+        fieldConfigs.forEach((fieldConfig) => {
+            const filterValue = (uiFilters as any)[fieldConfig.key];
+
+            // Check if field exists in pending filters but is empty
+            if (filterValue !== undefined && (!filterValue || filterValue.trim() === "")) {
+                errors[fieldConfig.key] = "Required";
+            }
+        });
+
+        return errors;
+    };
+
+    /**
+     * Check if Apply button should be disabled
+     * @returns True if there are validation errors
+     */
+    const isApplyDisabled = (): boolean => {
+        const errors = getFieldErrors();
+        return Object.keys(errors).length > 0;
     };
 
     return {
-        getViewFilter,
-        updateViewFilter,
-        clearViewFilters,
-        getActiveFiltersCount,
         isPendingValueActive,
         handleCheckboxToggle,
-        handleApply,
-        handleClearFilters,
+        handleRadioChange,
+        handleDateRangeChange,
+        applyFilter,
+        getFieldErrors,
+        isApplyDisabled,
     };
 }

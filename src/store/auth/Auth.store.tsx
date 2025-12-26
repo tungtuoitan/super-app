@@ -60,6 +60,7 @@ const DEFAULT_AUTH_STATE: User = {
     picture: "",
     authType: undefined,
     userToken: "",
+    filters: {},
 };
 
 const authStoreDefaultValue: AuthStoreData = {

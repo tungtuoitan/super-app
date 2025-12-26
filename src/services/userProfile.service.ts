@@ -46,7 +46,7 @@ const _getUserProfile = async (token: string): Promise<ResultOptions> => {
  * @param data - User profile data to update (all fields optional)
  * @returns ResultOptions with updated UserProfile in object field
  */
-const _updateUserProfile = async (token: string, data: UpdateUserProfileRequest): Promise<ResultOptions> => {
+const _upsertUserProfile = async (token: string, data: UpdateUserProfileRequest): Promise<ResultOptions> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -71,5 +71,5 @@ const _updateUserProfile = async (token: string, data: UpdateUserProfileRequest)
 
 export const userProfileService = {
     _getUserProfile,
-    _updateUserProfile,
+    _upsertUserProfile,
 };

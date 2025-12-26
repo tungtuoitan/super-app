@@ -23,8 +23,9 @@ export function WorkspaceView() {
 
     // Load workspaces on mount
     useEffect(() => {
+        if(!$user.userId || !$user.filters) return;
         loadAllWorkspaces();
-    }, [$user]);
+    }, [$user.userId, $user.filters]);
 
     // Sync selected option with currentTree.workspaceId from store
     useEffect(() => {

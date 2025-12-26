@@ -104,7 +104,7 @@ export interface UserFilters {
 export interface FilterFieldConfig {
     key: string; // Field name (e.g., "statusCode", "createdAt")
     label: string; // Display label (e.g., "Status", "Created Date")
-    type: "checkbox" | "dateRange" | "text"; // Filter UI type
+    type: "checkbox" | "radio" | "dateRange" | "text"; // Filter UI type
     standardRegistryType?: string; // If type=checkbox, which standard registry to use
     defaultValue?: FilterValue; // Default filter value
 }

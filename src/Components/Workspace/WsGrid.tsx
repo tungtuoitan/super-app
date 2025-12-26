@@ -15,6 +15,7 @@ import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
 import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
+import {useAuthStore} from "@/store/index";
 
 /**
  * WsGrid - ws grid with table display
@@ -27,6 +28,7 @@ export function WsGrid() {
     const { openWorkspaceTab } = useWsTabHelper();
     const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { searchQuery } = useGridControlStore();
+    const { $user } = useAuthStore();
 
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Ws>[]>(() => {
@@ -141,13 +143,9 @@ export function WsGrid() {
 
     // Register grid with GridControl and load data
     useEffect(() => {
+        // this will run every time user login, or $user.filters change
+        if(!$user.userId || !$user.filters) return;
         loadWorkspaces();
-
-        // Set default filter to Active Only
-        const deletedAtColumn = table.getColumn("deletedAt");
-        if (deletedAtColumn && !columnFilters.length) {
-            deletedAtColumn.setFilterValue("null");
-        }
 
         // Register this grid with GridControl
         registerGrid(constants.modules.workspace, constants.filters.views.wsGrid);
@@ -156,7 +154,7 @@ export function WsGrid() {
         return () => {
             unregisterGrid();
         };
-    }, []);
+    }, [$user.userId, $user.filters]);
 
     // Update GridControl when columnFilters change - no longer needed for backend filtering
     // Filters are now stored in userProfile and applied on backend

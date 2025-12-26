@@ -22,8 +22,8 @@ export interface GridControlContextData {
     setFilterViewKey: Dispatch<SetStateAction<keyof UserFilters | null>>;
 
     // Pending filters (local state for filter popup)
-    pendingFilters: ViewFilter;
-    setPendingFilters: Dispatch<SetStateAction<ViewFilter>>;
+    uiFilters: ViewFilter;
+    setUIFilters: Dispatch<SetStateAction<ViewFilter>>;
 }
 
 export const gridControlContextDefaultValue: GridControlContextData = {
@@ -33,8 +33,8 @@ export const gridControlContextDefaultValue: GridControlContextData = {
     setModuleName: () => {},
     filterViewKey: null,
     setFilterViewKey: () => {},
-    pendingFilters: {},
-    setPendingFilters: () => {},
+    uiFilters: {},
+    setUIFilters: () => {},
 };
 
 export const GridControlStore = createContext<GridControlContextData>(gridControlContextDefaultValue);
@@ -45,7 +45,7 @@ export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [moduleName, setModuleName] = useState<string>("");
     const [filterViewKey, setFilterViewKey] = useState<keyof UserFilters | null>(null);
-    const [pendingFilters, setPendingFilters] = useState<ViewFilter>({});
+    const [uiFilters, setUIFilters] = useState<ViewFilter>({});
 
     return (
         <GridControlStore.Provider
@@ -56,8 +56,8 @@ export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = (
                 setModuleName,
                 filterViewKey,
                 setFilterViewKey,
-                pendingFilters,
-                setPendingFilters,
+                uiFilters,
+                setUIFilters,
             }}
         >
             {children}

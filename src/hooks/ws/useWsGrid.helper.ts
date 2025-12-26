@@ -260,7 +260,7 @@ export const useWsGridHelper = () => {
             const wsGridFilters = $user.filters?.wsGrid;
 
             // Parse date range filters
-            const createdAtRange = filterUtils._parseDateRangeFilter(wsGridFilters?.createdAt);
+            const createdAtRange = filterUtils._parseDateRange(wsGridFilters?.createdAt);
 
             // Build filter params for API
             const filterParams = {

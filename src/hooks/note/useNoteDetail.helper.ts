@@ -9,7 +9,7 @@ import { constants } from "@/utils/constants";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { useWorkspaceOperation } from "../workspace/useWorkspaceOperation.helper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { transformNoteData } from "@/utils/note.utils";
+import { transformANote } from "@/utils/note.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
@@ -95,7 +95,7 @@ export const useNoteDetailHelper = () => {
                 if (!savedNote) {
                     throw new Error("Failed to save note: No data returned from server");
                 }
-                const transformedNote = transformNoteData(savedNote);
+                const transformedNote = transformANote(savedNote);
 
                 // ============================================================
                 // Step 8: If creating from workspace tree, add to workspace_items

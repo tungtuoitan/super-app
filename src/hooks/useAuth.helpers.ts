@@ -4,7 +4,7 @@
  * Pattern: Separate business logic from store (similar to useTagUIHelper)
  */
 
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore, User } from "@/store/auth/Auth.store";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { authApi } from "@/services/auth.service";
 import { userProfileService } from "@/services/userProfile.service";
@@ -17,6 +17,8 @@ import { extractAuthCodeFromUrl, extractOAuthError } from "@/utils/googleOAuth";
 import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
+import {useGridControlStore} from "@/store/grid/useGridControl.store";
+import {set} from "lodash";
 
 /**
  * Auth helper hook for authentication operations
@@ -30,7 +32,7 @@ export function useAuthHelper() {
     const { enqueueSnackbar } = useSnackbar();
     // Get state setters from AuthStore
     const { $user, set$User, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
-
+    const { uiFilters, setUIFilters, filterViewKey } = useGridControlStore();
     // Navigation and callback store for OAuth flows
     const navigate = useNavigate();
     const { setCallbackError, setIsProcessing } = useAuthCallbackStore();
@@ -91,6 +93,7 @@ export function useAuthHelper() {
             picture: "",
             authType: undefined,
             userToken: "",
+            filters: undefined,
         });
         setIsAuthenticated(false);
 
@@ -99,8 +102,9 @@ export function useAuthHelper() {
         setLoginError(null);
         setTokenExchangeError(null);
 
-        // Remove token from storage
+        // Remove token and profile from storage
         storageService.remove(STORAGE_KEYS.USER_TOKEN);
+        storageService.remove(STORAGE_KEYS.USER_PROFILE);
     };
 
     /**
@@ -154,11 +158,11 @@ export function useAuthHelper() {
                 throw new Error(response.error || "Google login failed");
             }
 
-            // Save token to localStorage
-            storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
+            // Parse filters if they exist
+            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : undefined;
 
-            // Update auth store with full user info including filters
-            set$User({
+            // Prepare user profile object
+            const userProfile = {
                 userId: response.user.id,
                 userName: response.user.email || "",
                 email: response.user.email || "",
@@ -167,8 +171,18 @@ export function useAuthHelper() {
                 picture: response.user.picture,
                 authType: response.user.authType,
                 userToken: response.user.token,
-                filters: response.user.filters ? JSON.parse(response.user.filters) : undefined,
-            });
+                filters: parsedFilters,
+            };
+
+            // In dev environment, save to localStorage
+            if (envConfig.NODE_ENV === constants.environments.development) {
+                storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
+                storageService.set(STORAGE_KEYS.USER_PROFILE, userProfile);
+            }
+
+            // Update auth store with full user info including filters
+            set$User(userProfile as User);
+            setUIFilters(parsedFilters || {});
 
             setIsAuthenticated(true);
         } catch (err) {
@@ -223,16 +237,28 @@ export function useAuthHelper() {
     };
 
     const initAuthFromStorageToken = (): boolean => {
-        const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
+        if (envConfig.NODE_ENV === constants.environments.development) {
+            const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
+            const userProfile = storageService.get(STORAGE_KEYS.USER_PROFILE);
 
-        if (envConfig.NODE_ENV === constants.environments.development && token) {
-            // Restore auth state from stored token
-            set$User((prev) => ({
-                ...prev,
-                userToken: token,
-            }));
-            setIsAuthenticated(true);
-            return true;
+            if (token && userProfile) {
+                // Restore full auth state from stored token and profile
+                const _userProfile = userProfile as User;
+                set$User(_userProfile);
+                // Get specific filter view from UserFilters using filterViewKey
+                const viewFilter = _userProfile.filters?.[filterViewKey as keyof UserFilters] || {};
+                setUIFilters(viewFilter);
+                setIsAuthenticated(true);
+                return true;
+            } else if (token) {
+                // Fallback: if only token exists (old behavior)
+                set$User((prev) => ({
+                    ...prev,
+                    userToken: token,
+                }));
+                setIsAuthenticated(true);
+                return true;
+            }
         }
 
         return false;
@@ -243,31 +269,41 @@ export function useAuthHelper() {
      * Syncs filter changes to backend and updates local state
      * Uses UpsertUserProfile endpoint with only filters field populated
      */
-    const updateUserFilters = async (filters: UserFilters): Promise<void> => {
+    const upsertUserFilters = async (): Promise<void> => {
         try {
             // Get token from user state
             const token = $user.userToken;
             if (!token) {
                 throw new Error("User not authenticated");
             }
+            const newUserFilters: UserFilters = $user.filters || {};
+            newUserFilters[filterViewKey as keyof UserFilters] = uiFilters;
+
+            // Merge existing filters with new filters
 
             // Prepare payload: only filters field, other fields are undefined (won't be updated)
             const payload: UpdateUserProfileRequest = {
-                filters: JSON.stringify(filters), // Convert UserFilters object to JSON string
+                filters: JSON.stringify(newUserFilters), // Convert UserFilters object to JSON string
             };
 
             // Update backend - will upsert profile if not exists
-            const result = await userProfileService._updateUserProfile(token, payload);
+            const result = await userProfileService._upsertUserProfile(token, payload);
+            const newFilters = result.object?.filters;
             if (!result.success) {
                 throw new Error(result.message || "Failed to update user filters");
             }
 
-            
             // Update local state
-            set$User((prev) => ({
-                ...prev,
-                filters,
-            }));
+            const updatedUser: typeof $user = {
+                ...$user,
+                filters: newFilters ? JSON.parse(newFilters) : undefined,
+            };
+            set$User(updatedUser);
+
+            // In dev environment, update localStorage with new filters
+            if (envConfig.NODE_ENV === constants.environments.development) {
+                storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
+            }
         } catch (err) {
             const errorMessage = await parseApiError(err);
             enqueueSnackbar(`Failed to update filters: ${errorMessage}`, { variant: "error" });
@@ -283,6 +319,6 @@ export function useAuthHelper() {
         handleOAuthCallback,
         navigateToHome,
         initAuthFromStorageToken,
-        updateUserFilters,
+        upsertUserFilters,
     };
 }

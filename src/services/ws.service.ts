@@ -4,6 +4,7 @@
  */
 
 import { config } from "@/config/app.config";
+import {ResultOptions} from "../types";
 
 
 /**

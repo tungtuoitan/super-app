@@ -12,7 +12,7 @@ import { Note, NoteDTO } from "@/types/note.types";
  * @param dto - Note DTO from API
  * @returns Note domain model
  */
-export const transformNoteData = (dto: NoteDTO): Note => {
+export const transformANote = (dto: NoteDTO): Note => {
     return {
         id: dto.id,
         name: dto.name,
@@ -24,6 +24,7 @@ export const transformNoteData = (dto: NoteDTO): Note => {
         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
         createdBy: dto.createdBy,
+        statusCode: dto.statusCode,
     };
 };
 
@@ -33,8 +34,8 @@ export const transformNoteData = (dto: NoteDTO): Note => {
  * @param dtos - Array of NoteDTOs from API
  * @returns Array of Note domain models with transformed dates
  */
-export const transformNotesData = (dtos: NoteDTO[]): Note[] => {
-    return dtos.map(transformNoteData);
+export const transformNotes = (dtos: NoteDTO[]): Note[] => {
+    return dtos.map(transformANote);
 };
 
 /**

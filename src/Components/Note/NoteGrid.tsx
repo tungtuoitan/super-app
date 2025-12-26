@@ -1,18 +1,15 @@
 import React, { useEffect, useMemo } from "react";
-import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
-import { Loader2, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { flexRender } from "@tanstack/react-table";
+import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/Components/ui/button";
-import { Checkbox } from "@/Components/ui/checkbox";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
-import { Note } from "@/types/note.types";
-import { noteService } from "@/services/note.service";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
 import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
-import {useAuthStore} from "@/store/index";
+import { useAuthStore } from "@/store/index";
+import { useNoteGridTableHelper } from "@/hooks/note/useNoteGrid.table.helper";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -22,146 +19,31 @@ import {useAuthStore} from "@/store/index";
  * @param sidebarMode - If true, shows only name column for compact sidebar view
  */
 export function NoteGrid() {
-    // State từ centralized store
-    const {
-        notes,
-        setNotes,
-        noteGridIsLoading,
-        setNoteGridIsLoading,
-        noteGridError,
-        setNoteGridError,
-        noteGridSorting,
-        setNoteGridSorting,
-        noteGridPagination,
-        setNoteGridPagination,
-        noteGridRowSelection,
-        setNoteGridRowSelection,
-        noteGridColumnFilters,
-        setNoteGridColumnFilters,
-    } = useNoteGridStore();
-
+    const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef } = useNoteGridStore();
     const { openTab } = useEditorTabHelper();
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { registerGrid, unregisterGrid } = useGridControlHelper();
-    const { searchQuery } = useGridControlStore();
     const { $user } = useAuthStore();
+    const { table } = useNoteGridTableHelper();
 
-    // Define columns for the data table
-    const columns = useMemo<ColumnDef<Note>[]>(() => {
-        // Full mode: show all columns
-        return [
-            {
-                id: "select",
-                header: ({ table }) => (
-                    <div className="flex items-center justify-center">
-                        <Checkbox checked={table.getIsAllPageRowsSelected()} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" />
-                    </div>
-                ),
-                cell: ({ row }) => (
-                    <div className="flex items-center justify-center">
-                        <Checkbox
-                            checked={row.getIsSelected()}
-                            onCheckedChange={(value) => row.toggleSelected(!!value)}
-                            aria-label="Select row"
-                            onClick={(e) => e.stopPropagation()} // Prevent row click
-                        />
-                    </div>
-                ),
-                size: 20,
-                enableSorting: false,
-                enableHiding: false,
-            },
-            {
-                accessorKey: "id",
-                header: () => <div className="text-left text-sm">ID</div>,
-                size: 20,
-                cell: ({ getValue }) => <div className="text-left text-sm">{getValue() as number}</div>,
-            },
-            {
-                accessorKey: "name",
-                header: () => <div className="text-left text-sm">Note Name</div>,
-                size: 200,
-                cell: ({ getValue, row }) => <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80">{(getValue() as string) || "—"}</div>,
-            },
-            {
-                accessorKey: "deletedAt",
-                header: () => <div className="text-left text-sm">Status</div>,
-                size: 60,
-                enableSorting: true,
-                filterFn: (row, columnId, filterValue) => {
-                    const deletedAt = row.original.deletedAt;
-                    if (filterValue === "null") {
-                        return deletedAt === null || deletedAt === undefined;
-                    }
-                    if (filterValue === "notNull") {
-                        return deletedAt !== null && deletedAt !== undefined;
-                    }
-                    return true; // 'all' - show everything
-                },
-                cell: ({ getValue }) => {
-                    const deletedAt = getValue() as Date | null | undefined;
+    // Update container width on resize
+    useEffect(() => {
+        if (!containerRef.current) return;
 
-                    if (!deletedAt) {
-                        return null;
-                    }
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                setContainerWidth(entry.contentRect.width);
+            }
+        });
 
-                    return (
-                        <div className="flex items-center justify-start pl-2" title="Deleted">
-                            <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                        </div>
-                    );
-                },
-            },
-        ];
+        resizeObserver.observe(containerRef.current);
+        return () => resizeObserver.disconnect();
     }, []);
-
-    // Filter data by search query
-    const filteredData = useMemo(() => {
-        if (!searchQuery) {
-            return notes;
-        }
-        const query = searchQuery.toLowerCase();
-        return notes.filter(
-            (note) =>
-                note.name?.toLowerCase().includes(query) ||
-                note.description?.toLowerCase().includes(query) ||
-                note.type?.toLowerCase().includes(query) ||
-                String(note.id).includes(query),
-        );
-    }, [notes, searchQuery]);
-
-    // Create table instance
-    const table = useReactTable({
-        data: filteredData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        onSortingChange: setNoteGridSorting,
-        onPaginationChange: setNoteGridPagination,
-        onRowSelectionChange: setNoteGridRowSelection,
-        onColumnFiltersChange: setNoteGridColumnFilters,
-        state: {
-            sorting: noteGridSorting,
-            pagination: noteGridPagination,
-            rowSelection: noteGridRowSelection,
-            columnFilters: noteGridColumnFilters,
-        },
-        getRowId: (row) => String(row.id),
-        enableRowSelection: true,
-    });
 
     // Register grid with GridControl and load data
     useEffect(() => {
-        if(!$user.userId) return;
+        if (!$user.userId || !$user.filters) return;
         loadNotes();
-
-        // Set default filter to Active Only
-        const deletedAtColumn = table.getColumn("deletedAt");
-        if (deletedAtColumn && !noteGridColumnFilters.length) {
-            deletedAtColumn.setFilterValue("null");
-        }
 
         // Register this grid with GridControl
         registerGrid(constants.modules.note, constants.filters.views.noteGrid);
@@ -170,13 +52,10 @@ export function NoteGrid() {
         return () => {
             unregisterGrid();
         };
-    }, [$user.userId]);
-
-    // Update GridControl when columnFilters change - no longer needed for backend filtering
-    // Filters are now stored in userProfile and applied on backend
+    }, [$user.userId, $user.filters]);
 
     return (
-        <div className="w-full h-full bg-background flex flex-col relative">
+        <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
             {/* Loading Overlay */}
             {noteGridIsLoading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">

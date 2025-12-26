@@ -3,7 +3,7 @@
  * Centralized state management for note grid panel
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { Note } from "../../types/note.types";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
 
@@ -29,6 +29,9 @@ export interface NoteGridContextData {
     setNoteGridColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
     selectedNote: Note | null; 
     setSelectedNote: Dispatch<SetStateAction<Note | null>>;
+    containerRef: RefObject<HTMLDivElement>;
+    containerWidth: number;
+    setContainerWidth: Dispatch<SetStateAction<number>>;
 }
 
 export const noteGridContextDefaultValue: NoteGridContextData = {
@@ -40,6 +43,8 @@ export const noteGridContextDefaultValue: NoteGridContextData = {
     noteGridRowSelection: {},
     noteGridColumnFilters: [],
     selectedNote: null,
+    containerRef: { current: null },
+    containerWidth: 0,
     setNotes: () => {},
     setNoteGridIsLoading: () => {},
     setNoteGridError: () => {},
@@ -48,6 +53,7 @@ export const noteGridContextDefaultValue: NoteGridContextData = {
     setNoteGridRowSelection: () => {},
     setNoteGridColumnFilters: () => {},
     setSelectedNote: () => {},
+    setContainerWidth: () => {},
 };
 
 export const NoteGridStore = createContext<NoteGridContextData>(noteGridContextDefaultValue);
@@ -63,6 +69,8 @@ export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const [noteGridRowSelection, setNoteGridRowSelection] = useState<RowSelectionState>({});
     const [noteGridColumnFilters, setNoteGridColumnFilters] = useState<ColumnFiltersState>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [containerWidth, setContainerWidth] = useState<number>(0);
 
     return (
         <NoteGridStore.Provider
@@ -83,6 +91,9 @@ export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 setNoteGridColumnFilters,
                 selectedNote,
                 setSelectedNote,
+                containerRef,
+                containerWidth,
+                setContainerWidth,
             }}
         >
             {children}

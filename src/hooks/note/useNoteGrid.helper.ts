@@ -1,7 +1,7 @@
 import { noteService } from "@/services/note.service";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { Note } from "@/types/note.types";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotesData } from "../../utils";
+import { collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotes } from "../../utils";
 import { useSnackbar } from "notistack";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
@@ -249,7 +249,7 @@ export const useNoteGridHelper = () => {
             const noteGridFilters = $user.filters?.noteGrid;
 
             // Parse date range filters
-            const createdAtRange = filterUtils._parseDateRangeFilter(noteGridFilters?.createdAt);
+            const createdAtRange = filterUtils._parseDateRange(noteGridFilters?.createdAt);
 
             // Build filter params for API
             const filterParams = {
@@ -267,7 +267,7 @@ export const useNoteGridHelper = () => {
             }
 
             // Transform dates from API strings to Date objects
-            const transformedData = transformNotesData(result.data || []);
+            const transformedData = transformNotes(result.data || []);
             setNotes(transformedData);
             setNoteGridError(null);
         } catch (err) {

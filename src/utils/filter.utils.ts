@@ -10,7 +10,7 @@ import { FilterValue, ViewFilter } from "@/types/common.types";
  * @param filterValue - Comma-separated string (e.g., "active,inactive")
  * @returns Array of values (e.g., ["active", "inactive"])
  */
-const _parseFilterValue = (filterValue?: FilterValue): string[] => {
+const _parse = (filterValue?: FilterValue): string[] => {
     if (!filterValue) return [];
     return filterValue.split(",").filter((v) => v.trim() !== "");
 };
@@ -20,7 +20,7 @@ const _parseFilterValue = (filterValue?: FilterValue): string[] => {
  * @param values - Array of values (e.g., ["active", "inactive"])
  * @returns Comma-separated string (e.g., "active,inactive")
  */
-const _stringifyFilterValue = (values: string[]): FilterValue => {
+const _stringify = (values: string[]): FilterValue => {
     return values.filter((v) => v.trim() !== "").join(",");
 };
 
@@ -30,8 +30,8 @@ const _stringifyFilterValue = (values: string[]): FilterValue => {
  * @param value - Value to check (e.g., "active")
  * @returns True if the filter value contains the value
  */
-const _hasFilterValue = (filterValue: FilterValue | undefined, value: string): boolean => {
-    const values = _parseFilterValue(filterValue);
+const _hasValue = (filterValue: FilterValue | undefined, value: string): boolean => {
+    const values = _parse(filterValue);
     return values.includes(value);
 };
 
@@ -41,12 +41,12 @@ const _hasFilterValue = (filterValue: FilterValue | undefined, value: string): b
  * @param value - Value to add (e.g., "inactive")
  * @returns Updated filter value (e.g., "active,inactive")
  */
-const _addFilterValue = (filterValue: FilterValue | undefined, value: string): FilterValue => {
-    const values = _parseFilterValue(filterValue);
+const _add = (filterValue: FilterValue | undefined, value: string): FilterValue => {
+    const values = _parse(filterValue);
     if (!values.includes(value)) {
         values.push(value);
     }
-    return _stringifyFilterValue(values);
+    return _stringify(values);
 };
 
 /**
@@ -55,10 +55,10 @@ const _addFilterValue = (filterValue: FilterValue | undefined, value: string): F
  * @param value - Value to remove (e.g., "inactive")
  * @returns Updated filter value (e.g., "active")
  */
-const _removeFilterValue = (filterValue: FilterValue | undefined, value: string): FilterValue => {
-    const values = _parseFilterValue(filterValue);
+const _remove = (filterValue: FilterValue | undefined, value: string): FilterValue => {
+    const values = _parse(filterValue);
     const filteredValues = values.filter((v) => v !== value);
-    return _stringifyFilterValue(filteredValues);
+    return _stringify(filteredValues);
 };
 
 /**
@@ -67,11 +67,11 @@ const _removeFilterValue = (filterValue: FilterValue | undefined, value: string)
  * @param value - Value to toggle (e.g., "inactive")
  * @returns Updated filter value (e.g., "active,inactive" or "active")
  */
-const _toggleFilterValue = (filterValue: FilterValue | undefined, value: string): FilterValue => {
-    if (_hasFilterValue(filterValue, value)) {
-        return _removeFilterValue(filterValue, value);
+const _toggle = (filterValue: FilterValue | undefined, value: string): FilterValue => {
+    if (_hasValue(filterValue, value)) {
+        return _remove(filterValue, value);
     }
-    return _addFilterValue(filterValue, value);
+    return _add(filterValue, value);
 };
 
 /**
@@ -79,72 +79,25 @@ const _toggleFilterValue = (filterValue: FilterValue | undefined, value: string)
  * @param filterValue - Date range string (e.g., "2024-01-01,2024-12-31")
  * @returns Object with from and to dates
  */
-const _parseDateRangeFilter = (filterValue?: FilterValue): { from?: string; to?: string } => {
+const _parseDateRange = (filterValue?: FilterValue): { from?: string; to?: string } => {
     if (!filterValue) return {};
-    const dates = _parseFilterValue(filterValue);
+    const dates = _parse(filterValue);
     return {
         from: dates[0] || undefined,
         to: dates[1] || undefined,
     };
 };
 
-/**
- * Create date range filter value
- * @param from - Start date (e.g., "2024-01-01")
- * @param to - End date (e.g., "2024-12-31")
- * @returns Date range filter value (e.g., "2024-01-01,2024-12-31")
- */
-const _createDateRangeFilter = (from?: string, to?: string): FilterValue => {
-    const dates: string[] = [];
-    if (from) dates.push(from);
-    if (to) dates.push(to);
-    return _stringifyFilterValue(dates);
-};
 
-/**
- * Check if a view filter is empty (no filters applied)
- * @param viewFilter - View filter object
- * @returns True if no filters are applied
- */
-const _isFilterEmpty = (viewFilter?: ViewFilter): boolean => {
-    if (!viewFilter) return true;
-    return Object.values(viewFilter).every((v) => !v || v.trim() === "");
-};
 
-/**
- * Get active filter count for a view
- * @param viewFilter - View filter object
- * @returns Number of active filters
- */
-const _getActiveFilterCount = (viewFilter?: ViewFilter): number => {
-    if (!viewFilter) return 0;
-    return Object.values(viewFilter).filter((v) => v && v.trim() !== "").length;
-};
-
-/**
- * Merge default filters with user filters
- * @param defaultFilters - Default filter values
- * @param userFilters - User-defined filter values
- * @returns Merged filter values
- */
-const _mergeFilters = (defaultFilters?: ViewFilter, userFilters?: ViewFilter): ViewFilter => {
-    return {
-        ...defaultFilters,
-        ...userFilters,
-    };
-};
 
 // Export as namespace for compatibility
 export const filterUtils = {
-    _parseFilterValue,
-    _stringifyFilterValue,
-    _hasFilterValue,
-    _addFilterValue,
-    _removeFilterValue,
-    _toggleFilterValue,
-    _parseDateRangeFilter,
-    _createDateRangeFilter,
-    _isFilterEmpty,
-    _getActiveFilterCount,
-    _mergeFilters,
+    _parse,
+    _stringify,
+    _hasValue,
+    _add,
+    _remove,
+    _toggle,
+    _parseDateRange,
 };
