@@ -27,13 +27,14 @@ export function WorkspaceFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
     const { selectedFolderIds } = useExplorerStore();
     const {
-        createItem,
-        editItem,
-        deleteItems,
+        createFolder,
+        editFolder,
+        deleteFolders,
     } = useWorkspaceFolderMenuHelper();
 
     // Calculate derived values
     const isWorkspaceRoot = contextData && contextData.tagId < 0;
+    const isMultipleSelected = selectedFolderIds.length > 1;
 
     const addMenuItems = [
         { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: 'Add Folder', disabled: false },
@@ -49,7 +50,7 @@ export function WorkspaceFolderNodeMenu() {
                 return (
                     <MenuItem 
                         key={item.type}
-                        onClick={() => createItem(item.type, contextData)} 
+                        onClick={() => createFolder(item.type, contextData)} 
                         disabled={item.disabled}
                     >
                         <Icon className="w-4 h-4 mr-2" />
@@ -60,6 +61,15 @@ export function WorkspaceFolderNodeMenu() {
             
             <MenuDivider />
             
+            {/* Edit - disabled if multiple items selected */}
+            <MenuItem 
+                onClick={() => editFolder(contextData)} 
+                disabled={isMultipleSelected}
+            >
+                <EditIcon className="w-4 h-4 mr-2" />
+                Edit
+            </MenuItem>
+            
             {/* Delete/Restore - hidden for workspace root */}
             {!isWorkspaceRoot && (() => {
                 // Check if folder is deleted
@@ -68,19 +78,19 @@ export function WorkspaceFolderNodeMenu() {
                 return isDeleted ? (
                     <>
                         <MenuItem
-                            onClick={(e) => deleteItems(e, true)}
+                            onClick={(e) => deleteFolders(e, true)}
                             className="text-red-600 hover:bg-red-50"
                         >
                             <HardDeleteIcon className="w-4 h-4 mr-2" />
                             Hard Delete
                         </MenuItem>
-                        <MenuItem onClick={(e) => deleteItems(e, false)}>
+                        <MenuItem onClick={(e) => deleteFolders(e, false)}>
                             <RestoreIcon className="w-4 h-4 mr-2" />
                             Restore
                         </MenuItem>
                     </>
                 ) : (
-                    <MenuItem onClick={(e) => deleteItems(e, false)}>
+                    <MenuItem onClick={(e) => deleteFolders(e, false)}>
                         <DeleteIcon className="w-4 h-4 mr-2" />
                         Delete
                     </MenuItem>

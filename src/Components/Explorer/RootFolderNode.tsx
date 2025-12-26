@@ -26,7 +26,7 @@ interface RootFolderNodeProps {
  */
 export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
     const { currentTree } = useExplorerStore();
-    const { handleNewFolder } = useTreeOperation();
+    const { addNewFolder } = useTreeOperation();
     const { _treeRef } = useExplorerStore();
     const { loadTree } = useWorkspaceOperation();
 
@@ -80,7 +80,7 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                     title="Add Folder"
                     onClick={(e) => {
                         e.stopPropagation();
-                        handleNewFolder(treeData);
+                        addNewFolder(treeData);
                     }}
                     className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                 >

@@ -3,28 +3,21 @@
  * Handles tree operations: drag & drop, refresh, new folder
  */
 
-import type { TreeFolder } from './tree.helper';
-import { getAllFoldersFlattened, isDescendant, findFolderById } from './tree.helper';
-import { useExplorerStore } from '@/store/explorer/Explorer.store';
-import { useFolderDialogHelper } from './useFolderDialog.helper';
-import { useWorkspaceOperation } from './useWorkspaceOperation.helper';
-import { constants } from '@/utils/constants';
-import { _moveWorkspaceItems } from '@/services/workspace.service';
-import type { MoveItemsRequest } from '@/types/workspace.types';
-import { Folder } from '@/types/index';
-import { useSnackbar } from 'notistack';
-import { useAuthStore } from '@/store/auth/Auth.store';
+import type { TreeFolder } from "./tree.helper";
+import { getAllFoldersFlattened, isDescendant, findFolderById } from "./tree.helper";
+import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useFolderDialogHelper } from "./useFolderDialog.helper";
+import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
+import { constants } from "@/utils/constants";
+import { _moveWorkspaceItems } from "@/services/workspace.service";
+import type { MoveItemsRequest } from "@/types/workspace.types";
+import { Folder } from "@/types/index";
+import { useSnackbar } from "notistack";
+import { useAuthStore } from "@/store/auth/Auth.store";
 
 export const useTreeOperation = () => {
-    const {
-        selectedFolderIds,
-        setSelectedFolderIds,
-        setLastSelectedFolderId,
-        setIsDragging,
-        currentTree,
-        setCurrentTree,
-    } = useExplorerStore();
-    
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentTree, setCurrentTree } = useExplorerStore();
+
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceOperation();
     const { enqueueSnackbar } = useSnackbar();
@@ -33,10 +26,7 @@ export const useTreeOperation = () => {
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
      */
-    const handleMove = async (
-        args: { dragIds: string[]; parentId: string | null; index: number },
-        treeData: TreeFolder[]
-    ) => {
+    const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }, treeData: TreeFolder[]) => {
         try {
             setIsDragging(true);
 
@@ -45,15 +35,15 @@ export const useTreeOperation = () => {
             // =================================================================
             const allItems = getAllFoldersFlattened(treeData);
             let itemIds = args.dragIds
-                .map(dragId => {
-                    const item = allItems.find(t => t.id === dragId);
+                .map((dragId) => {
+                    const item = allItems.find((t) => t.id === dragId);
                     return item?.data.id;
                 })
                 .filter((id): id is number => id !== undefined);
 
             // VS CODE BEHAVIOR: Filter out descendants of selected nodes
-            itemIds = itemIds.filter(itemId => {
-                const isDescendantOfOtherSelected = itemIds.some(otherItemId => {
+            itemIds = itemIds.filter((itemId) => {
+                const isDescendantOfOtherSelected = itemIds.some((otherItemId) => {
                     if (otherItemId === itemId) return false;
                     return isDescendant(itemId, otherItemId, treeData);
                 });
@@ -73,18 +63,18 @@ export const useTreeOperation = () => {
             // 2. A note/file ID (when dropping BETWEEN siblings - use their parent instead)
             let newParentId: number | undefined = undefined;
             if (args.parentId) {
-                const parentNode = allItems.find(t => t.id === args.parentId);
+                const parentNode = allItems.find((t) => t.id === args.parentId);
                 if (parentNode) {
                     const parentEntityId = parentNode.data.id;
-                    
+
                     // Negative IDs are workspace root nodes (virtual nodes)
                     if (parentEntityId < 0) {
                         newParentId = undefined; // Move to workspace root
                     } else {
                         const itemData = parentNode.data;
-                        
+
                         // Check if this is a folder or note/file
-                        if ('type' in itemData) {
+                        if ("type" in itemData) {
                             if (itemData.type === constants.workspace.itemTypes.folder) {
                                 // Dropping INTO a folder - use folder ID as parent
                                 newParentId = parentEntityId;
@@ -103,31 +93,31 @@ export const useTreeOperation = () => {
             // =================================================================
             // STEP 3: VALIDATION - PREVENT INVALID MOVES
             // =================================================================
-            const hasWorkspaceRoot = itemIds.some(id => id === constants.workspace.rootId);
+            const hasWorkspaceRoot = itemIds.some((id) => id === constants.workspace.rootId);
             if (hasWorkspaceRoot) {
-                console.warn('⚠️ Cannot move workspace root node');
+                console.warn("⚠️ Cannot move workspace root node");
                 setIsDragging(false);
                 return;
             }
-            if (itemIds.some(id => id < 0)) {
-                console.warn('⚠️ Cannot move items with invalid IDs');
+            if (itemIds.some((id) => id < 0)) {
+                console.warn("⚠️ Cannot move items with invalid IDs");
                 setIsDragging(false);
                 return;
             }
 
             if (newParentId !== undefined && itemIds.includes(newParentId)) {
-                console.warn('⚠️ Cannot move items into one of the selected items');
+                console.warn("⚠️ Cannot move items into one of the selected items");
                 setIsDragging(false);
                 return;
             }
 
             if (newParentId !== undefined) {
-                const isTargetDescendantOfSelected = itemIds.some(draggedId => {
+                const isTargetDescendantOfSelected = itemIds.some((draggedId) => {
                     return isDescendant(newParentId!, draggedId, treeData);
                 });
 
                 if (isTargetDescendantOfSelected) {
-                    console.warn('⚠️ Cannot move items into a descendant of selected items');
+                    console.warn("⚠️ Cannot move items into a descendant of selected items");
                     setIsDragging(false);
                     return;
                 }
@@ -136,14 +126,10 @@ export const useTreeOperation = () => {
             // =================================================================
             // STEP 4: VALIDATE DROP POSITION
             // =================================================================
-            const targetParentNode = newParentId !== undefined
-                ? getAllFoldersFlattened(treeData).find(t => t.data.id === newParentId)
-                : null;
+            const targetParentNode = newParentId !== undefined ? getAllFoldersFlattened(treeData).find((t) => t.data.id === newParentId) : null;
 
             // Filter out workspace root (negative entity IDs)
-            const targetSiblings = targetParentNode
-                ? (targetParentNode.children || [])
-                : treeData.filter(t => t.data.id > 0);
+            const targetSiblings = targetParentNode ? targetParentNode.children || [] : treeData.filter((t) => t.data.id > 0);
 
             if (args.index >= 0 && args.index <= targetSiblings.length) {
                 const itemBefore = args.index > 0 ? targetSiblings[args.index - 1] : null;
@@ -152,20 +138,15 @@ export const useTreeOperation = () => {
                 const itemBeforeId = itemBefore?.data.id ?? null;
                 const itemAfterId = itemAfter?.data.id ?? null;
 
-                const bothInSelection =
-                    (itemBeforeId && itemIds.includes(itemBeforeId)) &&
-                    (itemAfterId && itemIds.includes(itemAfterId));
+                const bothInSelection = itemBeforeId && itemIds.includes(itemBeforeId) && itemAfterId && itemIds.includes(itemAfterId);
 
-                const isSameParent = targetSiblings.some(sibling => {
+                const isSameParent = targetSiblings.some((sibling) => {
                     const siblingEntityId = sibling.data.id;
                     return itemIds.includes(siblingEntityId);
                 });
 
-                if (bothInSelection || (isSameParent && (
-                    (itemBeforeId && itemIds.includes(itemBeforeId)) ||
-                    (itemAfterId && itemIds.includes(itemAfterId))
-                ))) {
-                    console.warn('⚠️ Cannot drop between items in the same selection');
+                if (bothInSelection || (isSameParent && ((itemBeforeId && itemIds.includes(itemBeforeId)) || (itemAfterId && itemIds.includes(itemAfterId))))) {
+                    console.warn("⚠️ Cannot drop between items in the same selection");
                     setIsDragging(false);
                     return;
                 }
@@ -178,7 +159,7 @@ export const useTreeOperation = () => {
             // STEP 5: BUILD MOVE REQUEST & CALL API
             // =================================================================
             if (!currentTree?.workspaceId) {
-                console.error('❌ No workspace ID found');
+                console.error("❌ No workspace ID found");
                 setIsDragging(false);
                 return;
             }
@@ -188,17 +169,17 @@ export const useTreeOperation = () => {
             // Build move request matching backend API format
             // Only include items that passed validation (filtered itemIds)
             const moveRequest: MoveItemsRequest = {
-                items: itemIds.map(entityId => {
-                    const item = allItems.find(t => t.data.id === entityId);
+                items: itemIds.map((entityId) => {
+                    const item = allItems.find((t) => t.data.id === entityId);
                     if (!item) {
                         throw new Error(`Item with entity ID ${entityId} not found in tree`);
                     }
 
                     const itemData = item.data;
-                    
+
                     // Map WorkspaceItem type to backend type codes
                     let typeCode: 2 | 3 | 4;
-                    if ('type' in itemData) {
+                    if ("type" in itemData) {
                         if (itemData.type === constants.workspace.itemTypes.folder) {
                             typeCode = 2;
                         } else if (itemData.type === constants.workspace.itemTypes.note) {
@@ -222,21 +203,18 @@ export const useTreeOperation = () => {
 
             try {
                 const result = await _moveWorkspaceItems(auth.userToken, workspaceId, moveRequest);
-                
+                if (!result.success) {
+                    throw new Error("Move API returned unsuccessful response");
+                }
+
                 // Show success toast
-                enqueueSnackbar(
-                    `Successfully moved ${moveRequest.items.length} item(s)`,
-                    { variant: 'success' }
-                );
+                enqueueSnackbar(`Successfully moved ${moveRequest.items.length} item(s)`, { variant: "success" });
             } catch (error) {
                 console.error(`❌ Failed to move items:`, error);
-                
+
                 // Show error toast with user-friendly message
-                enqueueSnackbar(
-                    'Failed to move items. Please try again.',
-                    { variant: 'error' }
-                );
-                
+                enqueueSnackbar("Failed to move items. Please try again.", { variant: "error" });
+
                 throw error;
             }
 
@@ -251,13 +229,10 @@ export const useTreeOperation = () => {
                 setLastSelectedFolderId(itemIds[itemIds.length - 1]);
             }
         } catch (error) {
-            console.error('❌ Failed to move item(s):', error);
-            
+            console.error("❌ Failed to move item(s):", error);
+
             // Show error toast to user
-            enqueueSnackbar(
-                'An error occurred while moving items',
-                { variant: 'error' }
-            );
+            enqueueSnackbar("An error occurred while moving items", { variant: "error" });
         } finally {
             setIsDragging(false);
         }
@@ -267,24 +242,18 @@ export const useTreeOperation = () => {
      * Handle new folder action
      * Opens create dialog with selected folder as parent
      */
-    const handleNewFolder = (
-        treeData: TreeFolder[]
-    ) => {
-        const parentId = selectedFolderIds.length > 0 
-            ? selectedFolderIds[0]
-            : undefined;
-            
+    const addNewFolder = (treeData: TreeFolder[]) => {
+        const parentId = selectedFolderIds.length > 0 ? selectedFolderIds[0] : undefined;
+
         // Extract folders from treeData
-        const folders = getAllFoldersFlattened(treeData).map(t => t.data);
-        const parentFolder = parentId 
-            ? findFolderById((folders || []) as unknown as Folder[], parentId)
-            : undefined;
-            
-        openFolderDialog('create', constants.workspace.itemTypes.folder, null, parentFolder);
+        const folders = getAllFoldersFlattened(treeData).map((t) => t.data);
+        const parentFolder = parentId ? findFolderById((folders || []) as unknown as Folder[], parentId) : undefined;
+
+        openFolderDialog("create", constants.workspace.itemTypes.folder, null, parentFolder);
     };
 
     return {
         handleMove,
-        handleNewFolder,
+        addNewFolder,
     };
 };
