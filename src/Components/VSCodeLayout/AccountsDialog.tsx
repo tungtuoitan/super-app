@@ -13,7 +13,7 @@ import { Chrome, LogOut, User } from "lucide-react";
 import { useActivityBarStore } from "@/store/index";
 
 export function AccountsDialog() {
-    const { isAuthenticated, auth } = useAuthStore();
+    const { isAuthenticated, $user } = useAuthStore();
     const { logout } = useAuthHelper();
     const { accountsOpen, setAccountsOpen } = useActivityBarStore();
 
@@ -45,8 +45,8 @@ export function AccountsDialog() {
                         // Authenticated - show user info
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-                                {auth.picture ? (
-                                    <img src={auth.picture} alt={auth.userName} className="h-10 w-10 rounded-full" />
+                                {$user.picture ? (
+                                    <img src={$user.picture} alt={$user.userName} className="h-10 w-10 rounded-full" />
                                 ) : (
                                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                                         <User className="h-5 w-5 text-primary" />
@@ -54,9 +54,9 @@ export function AccountsDialog() {
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium truncate">
-                                        {auth.firstName && auth.lastName ? `${auth.firstName} ${auth.lastName}` : auth.userName || "User"}
+                                        {$user.firstName && $user.lastName ? `${$user.firstName} ${$user.lastName}` : $user.userName || "User"}
                                     </div>
-                                    <div className="text-xs text-muted-foreground truncate">{auth.email}</div>
+                                    <div className="text-xs text-muted-foreground truncate">{$user.email}</div>
                                 </div>
                             </div>
 

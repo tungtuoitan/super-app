@@ -14,7 +14,7 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export const useNoteGridHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
 
     const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection } = useNoteGridStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -70,7 +70,7 @@ export const useNoteGridHelper = () => {
         const persistedNoteIds = selectedIds.filter((id) => id > 0);
 
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             // Handle temporary notes - only for delete (remove from grid locally)
             if (type === "soft-delete" && tempNoteIds.length > 0) {
@@ -159,7 +159,7 @@ export const useNoteGridHelper = () => {
         const persistedNoteIds = selectedIds.filter((id) => id > 0);
 
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             if (persistedNoteIds.length > 0) {
                 // Use DELETE API (permanently remove)
@@ -243,7 +243,7 @@ export const useNoteGridHelper = () => {
     const loadNotes = async () => {
         try {
             setNoteGridIsLoading(true);
-            const token = auth.userToken;
+            const token = $user.userToken;
             const result = await noteService._getNotes(token);
 
             // Check API response success

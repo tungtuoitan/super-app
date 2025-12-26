@@ -20,9 +20,6 @@ import { envConfig } from "../config";
  * @returns The top navigation component
  */
 export function TopNav() {
-    const { enqueueSnackbar } = useSnackbar();
-    const { auth } = useAuthStore();
-
     const showDevBadge = envConfig.ENVIRONMENT !== constants.environments.production;
 
     return (

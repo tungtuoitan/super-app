@@ -21,7 +21,7 @@ export const useTreeOperation = () => {
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceOperation();
     const { enqueueSnackbar } = useSnackbar();
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
@@ -202,7 +202,7 @@ export const useTreeOperation = () => {
             };
 
             try {
-                const result = await workspaceService._moveWorkspaceItems(auth.userToken, workspaceId, moveRequest);
+                const result = await workspaceService._moveWorkspaceItems($user.userToken, workspaceId, moveRequest);
                 if (!result.success) {
                     throw new Error("Move API returned unsuccessful response");
                 }

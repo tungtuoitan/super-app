@@ -96,7 +96,7 @@ const $removeItems = (items: any[], idsToRemove: Set<number>): any[] => {
 };
 
 export const useWorkspaceFolderMenuHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
@@ -185,7 +185,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 4: Delete items via API
         // ----------------
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             // Map items with proper type codes (2=folder, 3=note, 4=file)
             const deleteItems = foldersToDelete.map((f) => {
@@ -335,7 +335,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 5: Execute bulk delete via API
         // ----------------
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             // Map items with proper type codes (2=folder, 3=note, 4=file)
             const deleteItems = foldersToDelete.map((f) => {

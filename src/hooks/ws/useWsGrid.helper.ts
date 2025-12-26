@@ -28,7 +28,7 @@ const transformWsData = (dtos: WsDTO[]): Ws[] => {
 };
 
 export const useWsGridHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
 
     const { workspaces, setWorkspaces, setIsLoading, setError, rowSelection, setRowSelection } = useWsStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -81,7 +81,7 @@ export const useWsGridHelper = () => {
         const persistedWsIds = selectedIds.filter((id) => id > 0);
 
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             // Handle temporary workspaces - only for delete (remove from grid locally)
             if (type === "soft-delete" && tempWsIds.length > 0) {
@@ -169,7 +169,7 @@ export const useWsGridHelper = () => {
         const persistedWsIds = selectedIds.filter((id) => id > 0);
 
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             if (persistedWsIds.length > 0) {
                 // Use DELETE API (permanently remove)
@@ -253,7 +253,7 @@ export const useWsGridHelper = () => {
     const loadWorkspaces = async () => {
         try {
             setIsLoading(true);
-            const token = auth.userToken;
+            const token = $user.userToken;
             const result = await wsService._getWs(token);
 
             // Check API response success

@@ -18,7 +18,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 
 export const useWorkspaceOperation = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { allWorkspaces, setAllWorkspaces, currentTree, setCurrentTree, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
 
@@ -30,7 +30,7 @@ export const useWorkspaceOperation = () => {
         try {
             setIsLoadingWorkspaces(true);
 
-            const token = auth.userToken;
+            const token = $user.userToken;
             const data = await workspaceService._getAllUserWorkspaces(token);
 
             setAllWorkspaces(data);
@@ -60,7 +60,7 @@ export const useWorkspaceOperation = () => {
         try {
             setIsLoadingTree(true);
 
-            const token = auth.userToken;
+            const token = $user.userToken;
             const treeData = await workspaceService._getWorkspaceTree(token, workspaceId);
 
             treeData.items = treeData.items.filter((item) => item.deletedAt === null);

@@ -94,7 +94,7 @@ Triển khai Google OAuth login với **Authorization Code Flow** và **Dialog/M
     const loginWithGoogleCode = async (code: string) => {
       const response = await authApi.googleLogin(code)
       storageService.setToken(response.token)
-      setAuth({ ... })
+      setUser({ ... })
       setIsAuthenticated(true)
     }
     ```

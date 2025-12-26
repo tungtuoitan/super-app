@@ -16,7 +16,7 @@ import {useAuthStore} from "@/store/auth/Auth.store";
  * Workspace View - WorkspaceTree for folder navigation with workspace selection
  */
 export function WorkspaceView() {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { allWorkspaces, currentTree, isLoadingWorkspaces, isLoadingTree } = useWorkspaceStore();
     const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
     const [selectedOption, setSelectedOption] = useState<IAutoCompleteOptions | null>(null);
@@ -24,7 +24,7 @@ export function WorkspaceView() {
     // Load workspaces on mount
     useEffect(() => {
         loadAllWorkspaces();
-    }, [auth]);
+    }, [$user]);
 
     // Sync selected option with currentTree.workspaceId from store
     useEffect(() => {

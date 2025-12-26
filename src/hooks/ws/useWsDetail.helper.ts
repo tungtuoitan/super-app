@@ -10,7 +10,7 @@ import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 
 export const useWsDetailHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { selectedWs } = useWsStore();
     const { originalWsRef } = useWsDetailStore();
     const { setSelectedWs } = useWsStore();
@@ -42,7 +42,7 @@ export const useWsDetailHelper = () => {
             // ============================================================
             const isCreateMode = selectedWs.id <= 0;
             const isRestoreMode = selectedWs.id > 0 && originalWsRef.current?.deletedAt && !selectedWs.deletedAt;
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             try {
                 // ============================================================

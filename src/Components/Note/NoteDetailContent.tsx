@@ -34,6 +34,16 @@ export function NoteDetailContent() {
         active: item.isActive,
     }));
 
+    // Get note status options from standard registry
+    const noteStatusOptions = registries
+        .filter((r) => r.type === constants.standardRegistryFE.types.noteStatus && r.isActive)
+        .map((item) => ({
+            id: item.code,
+            label: item.description || item.code,
+            desc: item.description || item.code,
+            active: item.isActive,
+        })) as IAutoCompleteOptions[];
+
     useEffect(() => {
         if (selectedNote) {
             setNoteKey((prev) => prev + 1);
@@ -129,6 +139,21 @@ export function NoteDetailContent() {
                             size="small"
                             disabled={isDeleted || isHardDeleted}
                         />
+
+                        {/* Status */}
+                        <div className="space-y-2">
+                            <GenericAutoComplete
+                                allOptions={noteStatusOptions}
+                                value={noteStatusOptions.find((option) => option.id === selectedNote?.statusCode) || null}
+                                onChange={(value) => handleNoteFieldChange("statusCode", value)}
+                                inputProps={{
+                                    name: "status",
+                                    label: "Status",
+                                }}
+                                size="small"
+                                disabled={isDeleted || isHardDeleted || registriesLoading}
+                            />
+                        </div>
 
                         {/* HashTags */}
                         <div className="space-y-2">

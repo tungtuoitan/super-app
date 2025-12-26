@@ -39,8 +39,8 @@ export const useFolderDialogHelper = () => {
     const { currentTree } = useWorkspaceStore();
 
     // Auth
-    const authStore = useAuthStore();
-    const token = authStore.auth.userToken;
+    const { $user } = useAuthStore();
+    const token = $user.userToken;
 
     // Computed value
     const selectedWorkspaceId = currentTree?.workspaceId;

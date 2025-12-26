@@ -24,7 +24,7 @@ const transformStandardRegistryData = (data: any[]): StandardRegistry[] => {
 };
 
 export const useStandardRegistryHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { registries, setRegistries, setRegistriesLoading, setRegistriesError } = useStandardRegistryStore();
     const { enqueueSnackbar } = useSnackbar();
 
@@ -35,7 +35,7 @@ export const useStandardRegistryHelper = () => {
     const loadStandardRegistries = async () => {
         try {
             setRegistriesLoading(true);
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             // Call API without type filter to get ALL registries
             const result = await standardRegistryService._getStandardRegistries(token, {

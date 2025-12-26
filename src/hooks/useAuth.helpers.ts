@@ -27,7 +27,7 @@ import { useSnackbar } from "notistack";
 export function useAuthHelper() {
     const { enqueueSnackbar } = useSnackbar();
     // Get state setters from AuthStore
-    const { setAuth, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
+    const { set$User, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
 
     // Navigation and callback store for OAuth flows
     const navigate = useNavigate();
@@ -49,7 +49,7 @@ export function useAuthHelper() {
             // storageService.setString(STORAGE_KEYS.USER_TOKEN, response.token);
 
             // Update auth store (never store passwords)
-            setAuth({
+            set$User({
                 userId: response.userId || null,
                 userName: response.username || username,
                 email: "", // Email not provided in login response
@@ -80,7 +80,7 @@ export function useAuthHelper() {
      */
     const logout = (): void => {
         // Clear auth store state
-        setAuth({
+        set$User({
             userId: null,
             userName: "",
             email: "",
@@ -117,7 +117,7 @@ export function useAuthHelper() {
                 // storageService.setString(STORAGE_KEYS.USER_TOKEN, response.access_token);
 
                 // Update auth store
-                setAuth((prev) => ({
+                set$User((prev) => ({
                     ...prev,
                     userToken: response.access_token,
                 }));
@@ -156,7 +156,7 @@ export function useAuthHelper() {
             storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
 
             // Update auth store with full user info
-            setAuth({
+            set$User({
                 userId: response.user.id,
                 userName: response.user.email || "",
                 email: response.user.email || "",
@@ -224,7 +224,7 @@ export function useAuthHelper() {
 
         if (envConfig.NODE_ENV === constants.environments.development && token) {
             // Restore auth state from stored token
-            setAuth((prev) => ({
+            set$User((prev) => ({
                 ...prev,
                 userToken: token,
             }));

@@ -26,7 +26,7 @@ export type NoteType = "meeting" | "brainstorm" | "research" | "bug" | "task" | 
 export const NOTE_TYPES: readonly NoteType[] = ["meeting", "brainstorm", "research", "bug", "task", "idea"] as const;
 
 // Domain Model (what we use in the app)
-// Backend returns: Id, Name, Description, Tags, Type, CreatedAt, UpdatedAt, DeletedAt
+// Backend returns: Id, Name, Description, Tags, Type, StatusCode, CreatedAt, UpdatedAt, DeletedAt
 export interface Note {
     id: number;
     name: string;
@@ -34,6 +34,7 @@ export interface Note {
     hashtags: Folder[]; // Array of Folder objects (note's hashtags)
     tags?: Folder[]; // DEPRECATED: Use hashtags instead. Kept for backward compatibility
     type?: string; // Changed from NoteType to string to match backend
+    statusCode?: string; // Note status (foreign key to standard_registries.code)
     createdAt: Date;
     updatedAt?: Date;
     deletedAt: Date | null; // Track if note is deleted (soft delete)
@@ -49,6 +50,7 @@ export interface NoteDTO {
     description?: string;
     tags: Folder[]; // Backend still uses "tags" field name (array of Folder/Tag objects)
     type?: string; // String type to match backend response
+    statusCode?: string; // Note status (foreign key to standard_registries.code)
     createdAt: string; // ISO string
     updatedAt?: string; // ISO string
     deletedAt?: string; // ISO string (nullable DateTime from backend)
@@ -63,6 +65,7 @@ export interface CreateNoteDTO {
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
     hashtagIds?: number[]; // Frontend alias for tags
     type?: string;
+    statusCode?: string; // Note status
 }
 
 // Matches backend UpdateNoteRequest with JsonPropertyName("tags") mapping
@@ -72,6 +75,7 @@ export interface UpdateNoteDTO {
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
     hashtagIds?: number[]; // Frontend alias for tags
     type?: string;
+    statusCode?: string; // Note status
     isArchived?: boolean;
 }
 
@@ -82,6 +86,7 @@ export interface UpsertNoteDTO {
     description?: string;
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
     type?: string;
+    statusCode?: string; // Note status
     isArchived?: boolean;
     deletedAt?: string | null; // ISO string for soft delete, null for restore, undefined for regular update
 }

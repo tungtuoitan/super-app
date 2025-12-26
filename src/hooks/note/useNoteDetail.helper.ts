@@ -16,7 +16,7 @@ import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 
 export const useNoteDetailHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { selectedNote } = useNoteGridStore();
     const { originalNoteRef } = useNoteDetailStore();
     const { setSelectedNote } = useNoteGridStore();
@@ -50,7 +50,7 @@ export const useNoteDetailHelper = () => {
             // ============================================================
             const isCreateMode = selectedNote.id <= 0;
             const isRestoreMode = selectedNote.id > 0 && originalNoteRef.current?.deletedAt && !selectedNote.deletedAt;
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             try {
                 // ============================================================
@@ -66,6 +66,7 @@ export const useNoteDetailHelper = () => {
                             ? selectedNote.hashtags.map((h: any) => (typeof h === "number" ? h : h?.id || h?.tagId)) // Extract IDs from hashtags
                             : selectedNote.tags?.map((tag: any) => tag.tagId), // Otherwise use tags
                     type: selectedNote.type,
+                    statusCode: selectedNote.statusCode, // Include status code
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
                 };
 

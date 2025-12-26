@@ -24,8 +24,8 @@ export interface User {
 
 export interface AuthStoreData {
     // Core auth data
-    auth: User;
-    setAuth: Dispatch<SetStateAction<User>>;
+    $user: User;
+    set$User: Dispatch<SetStateAction<User>>;
     isAuthenticated: boolean;
     setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
 
@@ -62,8 +62,8 @@ const DEFAULT_AUTH_STATE: User = {
 
 const authStoreDefaultValue: AuthStoreData = {
     // Core auth data
-    auth: DEFAULT_AUTH_STATE,
-    setAuth: () => {},
+    $user: DEFAULT_AUTH_STATE,
+    set$User: () => {},
     isAuthenticated: false,
     setIsAuthenticated: () => {},
 
@@ -92,7 +92,7 @@ export const useAuthStore = () => useContext(AuthStore);
 
 export const AuthStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Core auth data
-    const [auth, setAuth] = useState<User>(DEFAULT_AUTH_STATE);
+    const [$user, set$User] = useState<User>(DEFAULT_AUTH_STATE);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
     // Auth operation states
@@ -111,8 +111,8 @@ export const AuthStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
         <AuthStore.Provider
             value={{
                 // Core auth data
-                auth,
-                setAuth,
+                $user,
+                set$User,
                 isAuthenticated,
                 setIsAuthenticated,
 

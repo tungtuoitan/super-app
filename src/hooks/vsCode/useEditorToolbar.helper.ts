@@ -26,7 +26,7 @@ import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 
 export const useEditorToolbarHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { activeTabId } = useEditorTabsStore();
     const { getTabById } = useEditorTabHelper();

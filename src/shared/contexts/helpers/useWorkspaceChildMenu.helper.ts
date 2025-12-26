@@ -15,7 +15,7 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
 import {workspaceService} from "@/services/workspace.service";
 
 export const useWorkspaceChildMenuHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { enqueueSnackbar } = useSnackbar();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
@@ -41,7 +41,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // STEP 2: Delete note via service
         // ---------
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
             const result = await noteService._deleteNote(token ?? "", noteData.id.toString());
             // ---------
@@ -86,7 +86,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // STEP 2: Delete file via service
         // ---------
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
             const workspaceId = currentTree?.workspaceId || 1;
 
             const result = await workspaceService._deleteWorkspaceItems(token ?? "", workspaceId, {
