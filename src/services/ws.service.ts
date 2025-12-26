@@ -1,5 +1,5 @@
 /**
- * Workspace Service - API communication for workspace list operations
+ * WS Service - API communication for ws list operations
  * Uses native fetch API without TanStack Query
  */
 
@@ -31,13 +31,13 @@ export interface WsDTO {
 
 /**
  * Get all workspaces with optional filtering
- * GET /api/WorkspaceList?searchText=...&getAll=...
+ * GET /api/ws?searchText=...&getAll=...
  *
  * @param token - Authentication token
  * @param params - Optional query parameters for filtering
  * @returns Array of workspaces or rejects with response
  */
-const _getWsList = async (
+const _getWs = async (
     token: string,
     params?: {
         getAll?: boolean;
@@ -60,7 +60,7 @@ const _getWsList = async (
     }
 
     const queryString = queryParams.toString();
-    const url = queryString ? `${config.api.baseURL}/api/WorkspaceList?${queryString}` : `${config.api.baseURL}/api/WorkspaceList`;
+    const url = queryString ? `${config.api.baseURL}/api/ws?${queryString}` : `${config.api.baseURL}/api/ws`;
 
     const options = {
         method: "GET",
@@ -79,7 +79,7 @@ const _getWsList = async (
 
 /**
  * Get single workspace by ID
- * GET /api/WorkspaceList/{id}
+ * GET /api/ws/{id}
  *
  * @param token - Authentication token
  * @param id - The workspace ID to retrieve
@@ -97,7 +97,7 @@ const _getWsById = async (token: string, id: number) => {
         headers: headers,
     };
 
-    const res = await window.fetch(`${config.api.baseURL}/api/WorkspaceList/${id}`, options);
+    const res = await window.fetch(`${config.api.baseURL}/api/ws/${id}`, options);
 
     if (res.ok) {
         const result = (await res.json()) as ResultOptions<WsDTO>;
@@ -110,7 +110,7 @@ const _getWsById = async (token: string, id: number) => {
 /**
  * Batch upsert multiple workspaces (create, update, soft delete, or restore)
  * For single workspace operations, pass an array with 1 element
- * POST /api/WorkspaceList (accepts both single array and batch array)
+ * POST /api/ws (accepts both single array and batch array)
  *
  * Operations:
  * - CREATE: id = 0 or null, deletedAt = undefined
@@ -144,7 +144,7 @@ const _upsertWsBatch = async (
         body: JSON.stringify(requests),
     };
 
-    const res = await window.fetch(`${config.api.baseURL}/api/WorkspaceList/batch`, options);
+    const res = await window.fetch(`${config.api.baseURL}/api/ws/batch`, options);
 
     if (res.ok) {
         const result = (await res.json()) as ResultOptions;
@@ -157,7 +157,7 @@ const _upsertWsBatch = async (
 /**
  * Hard delete single or multiple workspaces (permanently removes from database)
  * For soft delete, use _upsertWs with deletedAt timestamp
- * DELETE /api/WorkspaceList/{id} or /api/WorkspaceList/{id1,id2,id3}
+ * DELETE /api/ws/{id} or /api/ws/{id1,id2,id3}
  *
  * @param token - Authentication token
  * @param id - Single workspace ID or comma-separated IDs (e.g., "1,2,3")
@@ -175,7 +175,7 @@ const _deleteWs = async (token: string, id: number | string) => {
         headers: headers,
     };
 
-    const url = `${config.api.baseURL}/api/WorkspaceList/${id}`;
+    const url = `${config.api.baseURL}/api/ws/${id}`;
 
     const res = await window.fetch(url, options);
 
@@ -188,7 +188,7 @@ const _deleteWs = async (token: string, id: number | string) => {
 };
 
 export const wsService = {
-    _getWsList,
+    _getWs,
     _getWsById,
     _upsertWsBatch,
     _deleteWs,

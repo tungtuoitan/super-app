@@ -1,9 +1,9 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
-import { useExplorerStore } from "@/store/index";
-import { useTreeSelection } from "@/hooks/explorer/useTreeSelection.helper";
-import { TreeFolder } from "@/hooks/explorer/tree.helper";
+import { useWorkspaceStore } from "@/store/index";
+import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
+import { TreeFolder } from "@/hooks/workspace/tree.helper";
 import { FileItem } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -37,7 +37,7 @@ function getFileIcon(extension?: string) {
 }
 
 export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useExplorerStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
 
@@ -56,10 +56,10 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection
             if (isSelected) {
-                setSelectedFolderIds((prev) => prev.filter((id) => id !== fileItem.id));
+                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== fileItem.id));
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev) => [...prev, fileItem.id]);
+                setSelectedFolderIds((prev: number[]) => [...prev, fileItem.id]);
                 node.selectMulti();
             }
             setLastSelectedFolderId(fileItem.id);
@@ -77,7 +77,7 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i) => i.id === fileItem.id);
+        const _currentItem = currentTree?.items.find((i: any) => i.id === fileItem.id);
 
         // Open file-specific context menu
         showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });

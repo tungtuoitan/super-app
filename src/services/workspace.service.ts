@@ -4,7 +4,7 @@
  */
 
 import { config } from "@/config/app.config";
-import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WorkspaceListResponse } from "@/types/workspace.types";
+import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import _ from "lodash";
 
@@ -28,7 +28,7 @@ export interface UpsertFolderRequest {
  * @param token - Authentication token
  * @returns Array of user's workspaces or rejects with response
  */
-const _getAllUserWorkspaces = async (token: string): Promise<WorkspaceListResponse[]> => {
+const _getAllUserWorkspaces = async (token: string): Promise<WsResponse[]> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 

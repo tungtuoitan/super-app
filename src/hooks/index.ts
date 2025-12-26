@@ -29,9 +29,9 @@ export * from "./ws/useWs.helper";
 export * from "./ws/useWsDetail.helper";
 export * from "./ws/useWsTab.helper";
 
-// Explorer helpers
-export * from "./explorer/useWorkspaceOperation.helper";
-export * from "./explorer/useFolderDialog.helper";
-export * from "./explorer/useTreeSelection.helper";
-export * from "./explorer/useTreeOperation.helper";
-export * from "./explorer/tree.helper";
+// Workspace helpers
+export * from "./workspace/useWorkspaceOperation.helper";
+export * from "./workspace/useFolderDialog.helper";
+export * from "./workspace/useTreeSelection.helper";
+export * from "./workspace/useTreeOperation.helper";
+export * from "./workspace/tree.helper";

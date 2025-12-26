@@ -16,14 +16,14 @@ import { isFolder } from "@/types/workspace.types";
 import { cn } from "@/lib/utils";
 import type { WorkspaceItem } from "@/types/workspace.types";
 import { useKeyboardShortcut } from "@/shared/hooks";
-import { useExplorerStore } from "@/store/index";
-import { useFolderDialogStore } from "@/store/explorer/FolderDialog.store";
-import { useFolderDialogHelper } from "@/hooks/explorer/useFolderDialog.helper";
+import { useWorkspaceStore } from "@/store/index";
+import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
+import { useFolderDialogHelper } from "@/hooks/workspace/useFolderDialog.helper";
 import { constants } from "@/utils/constants";
 
 export function FolderDialog() {
     // Get state from ExplorerStore
-    const { currentTree } = useExplorerStore();
+    const { currentTree } = useWorkspaceStore();
 
     // Get form state from FolderDialogStore (unified approach)
     const { isFolderDialogOpen, mode, itemType, editingFolder, parentFolder, newFolderName, setNewFolderName, description, setDescription, color, setColor, errors, isSubmitting } =
@@ -75,7 +75,7 @@ export function FolderDialog() {
 
         // If no parent, get root level folders
         return currentTree.items.filter(
-            (item) =>
+            (item: any) =>
                 // ✅ Use type guard and id field
                 isFolder(item) &&
                 // When editing, exclude the current folder being edited

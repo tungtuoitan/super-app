@@ -46,7 +46,7 @@ export const useWsHelper = () => {
         try {
             setIsLoading(true);
             const token = auth.userToken;
-            const result = await wsService._getWsList(token);
+            const result = await wsService._getWs(token);
 
             // Check API response success
             if (!result.success) {

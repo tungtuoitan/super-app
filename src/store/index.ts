@@ -14,11 +14,11 @@ export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "./editor/
 export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./hashtagUI/HashtagUI.store";
 export type { HashtagUIStoreData } from "./hashtagUI/HashtagUI.store";
 
-export { ExplorerStore, ExplorerProvider, useExplorerStore } from "./explorer/Explorer.store";
-export type { ExplorerContextData } from "./explorer/Explorer.store";
+export { WorkspaceStore, WorkspaceProvider, useWorkspaceStore } from "./workspace/Workspace.store";
+export type { WorkspaceContextData } from "./workspace/Workspace.store";
 
-export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from "./explorer/FolderDialog.store";
-export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from "./explorer/FolderDialog.store";
+export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from "./workspace/FolderDialog.store";
+export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from "./workspace/FolderDialog.store";
 
 export { ActivityBarProvider, useActivityBarStore } from "./activityBar/ActivityBar.store";
 export type { ActivityBarContextData } from "./activityBar/ActivityBar.store";

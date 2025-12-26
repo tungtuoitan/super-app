@@ -5,7 +5,7 @@
 
 import type { TreeFolder } from "./tree.helper";
 import { getAllFoldersFlattened, isDescendant, findFolderById } from "./tree.helper";
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useFolderDialogHelper } from "./useFolderDialog.helper";
 import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
 import { constants } from "@/utils/constants";
@@ -16,7 +16,7 @@ import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 
 export const useTreeOperation = () => {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentTree, setCurrentTree } = useExplorerStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentTree, setCurrentTree } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceOperation();

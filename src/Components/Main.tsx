@@ -4,8 +4,8 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { AuthStoreProvider } from "@/store/auth/Auth.store";
-import { ExplorerProvider } from "@/store/explorer/Explorer.store";
-import { FolderDialogProvider } from "@/store/explorer/FolderDialog.store";
+import { WorkspaceProvider } from "@/store/workspace/Workspace.store";
+import { FolderDialogProvider } from "@/store/workspace/FolderDialog.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
@@ -51,7 +51,7 @@ export function Main() {
                         <SnackbarProvider autoHideDuration={3000}>
                             <DndProvider backend={HTML5Backend}>
                                 <AuthStoreProvider>
-                                    <ExplorerProvider>
+                                    <WorkspaceProvider>
                                         <FolderDialogProvider>
                                             <WsProvider>
                                                 <WsDetailProvider>
@@ -78,7 +78,7 @@ export function Main() {
                                                 </WsDetailProvider>
                                             </WsProvider>
                                         </FolderDialogProvider>
-                                    </ExplorerProvider>
+                                    </WorkspaceProvider>
                                 </AuthStoreProvider>
                             </DndProvider>
                         </SnackbarProvider>

@@ -1,16 +1,16 @@
 /**
- * Explorer Store Context
+ * Workspace Store Context
  * Centralized state management for workspace explorer
  * Manages workspaces and their tree data, folder UI state
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
-import type { WorkspaceListResponse, WorkspaceWithTreeResponse } from "@/types/workspace.types";
+import type { WsResponse, WorkspaceWithTreeResponse } from "@/types/workspace.types";
 
-export interface ExplorerContextData {
+export interface WorkspaceContextData {
     // Workspace state
-    allWorkspaces: WorkspaceListResponse[];
-    setAllWorkspaces: Dispatch<SetStateAction<WorkspaceListResponse[]>>;
+    allWorkspaces: WsResponse[];
+    setAllWorkspaces: Dispatch<SetStateAction<WsResponse[]>>;
     currentTree: WorkspaceWithTreeResponse | null; // Current workspace tree data (contains workspaceId)
     setCurrentTree: Dispatch<SetStateAction<WorkspaceWithTreeResponse | null>>;
     isLoadingWorkspaces: boolean;
@@ -34,7 +34,7 @@ export interface ExplorerContextData {
     _treeRef: React.RefObject<any>;
 }
 
-export const explorerContextDefaultValue: ExplorerContextData = {
+export const workspaceContextDefaultValue: WorkspaceContextData = {
     allWorkspaces: [],
     setAllWorkspaces: () => {},
     currentTree: null,
@@ -58,12 +58,12 @@ export const explorerContextDefaultValue: ExplorerContextData = {
     _treeRef: { current: null },
 };
 
-export const ExplorerStore = createContext<ExplorerContextData>(explorerContextDefaultValue);
+export const WorkspaceStore = createContext<WorkspaceContextData>(workspaceContextDefaultValue);
 
-export const useExplorerStore = () => useContext(ExplorerStore);
+export const useWorkspaceStore = () => useContext(WorkspaceStore);
 
-export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [allWorkspaces, setAllWorkspaces] = useState<WorkspaceListResponse[]>([]);
+export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+    const [allWorkspaces, setAllWorkspaces] = useState<WsResponse[]>([]);
     const [currentTree, setCurrentTree] = useState<WorkspaceWithTreeResponse | null>(null);
     const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
@@ -78,7 +78,7 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const _treeRef = useRef<any>(null);
 
     return (
-        <ExplorerStore.Provider
+        <WorkspaceStore.Provider
             value={{
                 allWorkspaces,
                 setAllWorkspaces,
@@ -104,6 +104,6 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
             }}
         >
             {children}
-        </ExplorerStore.Provider>
+        </WorkspaceStore.Provider>
     );
 };

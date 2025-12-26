@@ -13,12 +13,12 @@ export const constants = {
         path: {
             home: "/",
             workspace: "/workspace",
-            workspaceList: "/workspaceList",
+            ws: "/ws",
             notes: "/notes",
         } as const,
         views: {
             workspace: "workspace",
-            workspaceList: "workspaceList",
+            ws: "ws",
             note: "note",
         } as const,
     },
@@ -31,13 +31,14 @@ export const constants = {
         },
         viewTypes: {
             workspace: "workspace",
-            workspaceList: "workspaceList",
+            ws: "ws",
             note: "note",
             notes: "notes",
         } as const,
         displayNames: {
             note: "Note",
             workspace: "Workspace",
+            ws: "All Workspaces",
             file: "File",
             folder: "Folder",
             notes: "Notes",
@@ -107,4 +108,4 @@ export const constants = {
 } as const;
 
 // Type exports
-export type ActivityBarView = typeof constants.navigation.views.workspace | typeof constants.navigation.views.workspaceList | typeof constants.navigation.views.note;
+export type ActivityBarView = typeof constants.navigation.views.workspace | typeof constants.navigation.views.ws | typeof constants.navigation.views.note;

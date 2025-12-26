@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon } from "lucide-react";
-import { getAllFoldersFlattened, TreeFolder } from "@/hooks/explorer/tree.helper";
+import { getAllFoldersFlattened, TreeFolder } from "@/hooks/workspace/tree.helper";
 
 /**
  * Custom Drag Preview Component (VS Code style)

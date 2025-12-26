@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 
 const activities = [
-    { id: "workspaceList" as const, icon: Boxes, label: "WorkspaceList" },
+    { id: constants.vscode.viewTypes.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
     { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
     { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
 ];

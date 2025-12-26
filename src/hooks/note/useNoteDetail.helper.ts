@@ -7,8 +7,8 @@ import { noteService } from "@/services/note.service";
 import { workspaceService } from "@/services/workspace.service";
 import { constants } from "@/utils/constants";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
-import { useWorkspaceOperation } from "../explorer/useWorkspaceOperation.helper";
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useWorkspaceOperation } from "../workspace/useWorkspaceOperation.helper";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { transformNoteData } from "@/utils/note.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -22,7 +22,7 @@ export const useNoteDetailHelper = () => {
     const { setSelectedNote } = useNoteGridStore();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceOperation();
-    const { currentTree } = useExplorerStore();
+    const { currentTree } = useWorkspaceStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
 

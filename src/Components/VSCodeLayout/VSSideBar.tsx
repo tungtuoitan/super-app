@@ -58,7 +58,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
 
                                 {/* Content */}
                                 <div className="flex-1 overflow-hidden">
-                                    {activeView === constants.vscode.viewTypes.workspaceList && <WsView />}
+                                    {activeView === constants.vscode.viewTypes.ws && <WsView />}
                                     {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
                                     {activeView === constants.vscode.viewTypes.note && <NotesView />}
                                 </div>
@@ -106,8 +106,8 @@ function getViewTitle(view: ActivityBarView): string {
     switch (view) {
         case constants.vscode.viewTypes.workspace:
             return constants.vscode.displayNames.workspace;
-        case constants.vscode.viewTypes.workspaceList:
-            return "WorkspaceList";
+        case constants.vscode.viewTypes.ws:
+            return "Ws";
         case constants.vscode.viewTypes.note:
             return constants.vscode.displayNames.notes;
         default:

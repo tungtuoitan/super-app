@@ -49,7 +49,7 @@ export default function MainNav() {
                     <div id="bodyWrapper" ref={bodyWrapperRef} className="w-full h-[calc(100vh-36px)]">
                         <Routes>
                             <Route path={constants.navigation.path.home} element={<Navigate to={constants.navigation.path.workspace} replace />} />
-                            <Route path={constants.navigation.path.workspaceList} element={<VSCodeLayout />} />
+                            <Route path={constants.navigation.path.ws} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.workspace} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.notes} element={<VSCodeLayout />} />
                             <Route path="/auth/callback" element={<AuthCallback />} />

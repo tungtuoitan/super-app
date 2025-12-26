@@ -420,10 +420,10 @@ export function canHaveChildren(item: WorkspaceItem): item is FolderItem {
 }
 
 /**
- * Workspace list item response - for workspace selection dropdown
- * Maps to backend WorkspaceListResponse
+ * Ws item response - for ws selection dropdown
+ * Maps to backend WsResponse
  */
-export interface WorkspaceListResponse {
+export interface WsResponse {
     /** Workspace ID */
     id: number;
 

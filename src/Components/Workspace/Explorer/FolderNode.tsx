@@ -1,15 +1,15 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers } from "lucide-react";
-import { useExplorerStore } from "@/store/index";
-import { useTreeSelection } from "@/hooks/explorer/useTreeSelection.helper";
-import { getAllVisibleFolderIds, TreeFolder } from "@/hooks/explorer/tree.helper";
+import { useWorkspaceStore } from "@/store/index";
+import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
+import { getAllVisibleFolderIds, TreeFolder } from "@/hooks/workspace/tree.helper";
 import { FolderItem, isFolder } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
-    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentTree } = useExplorerStore();
+    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
 
@@ -44,11 +44,11 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedFolderIds((prev) => prev.filter((id) => id !== folderItem.id));
+                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== folderItem.id));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev) => [...prev, folderItem.id]);
+                setSelectedFolderIds((prev: number[]) => [...prev, folderItem.id]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
@@ -94,7 +94,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             return;
         }
 
-        const _currentFolder = currentTree?.items.find((f) => f.id === folderItem.id);
+        const _currentFolder = currentTree?.items.find((f: any) => f.id === folderItem.id);
 
         // Open folder-specific context menu with folder data
         showContextMenu(e, constants.workspace.itemTypes.folder, { ...folderItem, parentId: _currentFolder?.parentId ?? null });

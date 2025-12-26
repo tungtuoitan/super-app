@@ -1,10 +1,10 @@
 import { useSnackbar } from "notistack";
-import { useFolderDialogStore } from "@/store/explorer/FolderDialog.store";
-import type { ItemType } from "@/store/explorer/FolderDialog.store";
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
+import type { ItemType } from "@/store/workspace/FolderDialog.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { workspaceService } from "@/services/workspace.service";
-import type { FolderDialogFormErrors } from "@/store/explorer/FolderDialog.store";
+import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.store";
 import type { Folder } from "@/types/folder.types";
 import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
 import { constants } from "@/utils/constants";
@@ -35,8 +35,8 @@ export const useFolderDialogHelper = () => {
         setColor,
     } = useFolderDialogStore();
 
-    // Explorer state
-    const { currentTree } = useExplorerStore();
+    // Workspace state
+    const { currentTree } = useWorkspaceStore();
 
     // Auth
     const authStore = useAuthStore();

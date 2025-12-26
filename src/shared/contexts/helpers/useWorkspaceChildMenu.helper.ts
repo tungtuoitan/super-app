@@ -1,10 +1,10 @@
 /**
  * Workspace Child Menu Helper Hook
  * Business logic for note and file context menu operations
- * Shared helper for both note and file nodes in explorer tree
+ * Shared helper for both note and file nodes in workspace tree
  */
 
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { constants } from "@/utils/constants";
 import { noteService } from "@/services/note.service";
@@ -19,7 +19,7 @@ export const useWorkspaceChildMenuHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { enqueueSnackbar } = useSnackbar();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
-    const { setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useExplorerStore();
+    const { setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
 
     const isNote = contextType === constants.workspace.itemTypes.note;
     const isFile = contextType === constants.workspace.itemTypes.file;
@@ -28,16 +28,25 @@ export const useWorkspaceChildMenuHelper = () => {
      * Handle delete note
      */
     const __deleteNote = async (noteData: any, isHardDelete: boolean = false) => {
+        // ---------
+        // STEP 1: Validate input data
+        // ---------
         if (!noteData?.id) {
             console.error("❌ Cannot delete note: missing id");
             alert("Cannot delete note: missing note information");
             return;
         }
 
+        // ---------
+        // STEP 2: Delete note via service
+        // ---------
         try {
             const token = auth.userToken;
 
             const result = await noteService._deleteNote(token ?? "", noteData.id.toString());
+            // ---------
+            // STEP 3: Handle success response
+            // ---------
             if (result.success) {
                 // Clear selection
                 setSelectedFolderIds([]);
@@ -47,6 +56,9 @@ export const useWorkspaceChildMenuHelper = () => {
             // Reload page to refresh data
             window.location.reload();
         } catch (error) {
+            // ---------
+            // STEP 4: Handle error
+            // ---------
             console.error("❌ Failed to delete note:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
@@ -61,12 +73,18 @@ export const useWorkspaceChildMenuHelper = () => {
      * Handle delete file
      */
     const __deleteFile = async (fileData: any, isHardDelete: boolean = false) => {
+        // ---------
+        // STEP 1: Validate input data
+        // ---------
         if (!fileData?.id) {
             console.error("❌ Cannot delete file: missing id");
             alert("Cannot delete file: missing file information");
             return;
         }
 
+        // ---------
+        // STEP 2: Delete file via service
+        // ---------
         try {
             const token = auth.userToken;
             const workspaceId = currentTree?.workspaceId || 1;
@@ -77,6 +95,9 @@ export const useWorkspaceChildMenuHelper = () => {
                 isHardDelete: isHardDelete,
             });
 
+            // ---------
+            // STEP 3: Handle success response
+            // ---------
             if (result.success || result.message === "Items deleted successfully") {
                 // Clear selection
                 setSelectedFolderIds([]);
@@ -89,6 +110,9 @@ export const useWorkspaceChildMenuHelper = () => {
                 alert(`Failed to delete file: ${result.message}`);
             }
         } catch (error) {
+            // ---------
+            // STEP 4: Handle error
+            // ---------
             console.error("❌ Failed to delete file:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
@@ -103,14 +127,23 @@ export const useWorkspaceChildMenuHelper = () => {
      * Handle delete with confirmation
      */
     const deleteItems = (event: any, isHardDelete: boolean = false) => {
+        // ---------
+        // STEP 1: Validate context data
+        // ---------
         if (!contextData) return;
 
+        // ---------
+        // STEP 2: Close context menu
+        // ---------
         setIsContextMenuOpen(false);
 
         // Extract anchor element from menu event
         const nativeEvent = event.syntheticEvent || event;
         const anchorElement = nativeEvent?.target as HTMLElement;
 
+        // ---------
+        // STEP 3: Prepare confirmation message
+        // ---------
         let message: string;
         let itemName = contextData.name || "this item";
 
@@ -132,6 +165,9 @@ export const useWorkspaceChildMenuHelper = () => {
             return;
         }
 
+        // ---------
+        // STEP 4: Show confirmation dialog
+        // ---------
         showConfirmation({
             anchorEl: anchorElement,
             message,

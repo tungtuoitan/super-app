@@ -2,16 +2,16 @@
  * Tree Selection Helper Hook
  * Handles folder selection operations (VS Code-like multi-selection)
  *
- * @pattern Functions only - State should be accessed directly from useExplorerStore()
+ * @pattern Functions only - State should be accessed directly from useWorkspaceStore()
  * @returns {Object} Selection action functions only (no state)
  */
 
 import type { NodeApi } from "react-arborist";
 import type { TreeFolder } from "./tree.helper";
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 
 export const useTreeSelection = () => {
-    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId } = useExplorerStore();
+    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId } = useWorkspaceStore();
 
     /**
      * Toggle selection for a single folder

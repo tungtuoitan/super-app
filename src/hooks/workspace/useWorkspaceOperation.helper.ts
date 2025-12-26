@@ -2,16 +2,16 @@
  * Workspace Operation Helper Hook
  * Handles loading workspaces and their tree data
  *
- * @pattern Functions only - State should be accessed directly from useExplorerStore()
+ * @pattern Functions only - State should be accessed directly from useWorkspaceStore()
  * @returns {Object} Workspace operation functions only (no state)
  * @example
  * // Get state from store
- * const { allWorkspaces, currentTree } = useExplorerStore();
+ * const { allWorkspaces, currentTree } = useWorkspaceStore();
  * // Get actions from helper
  * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
  */
 
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { workspaceService } from "@/services/workspace.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -20,7 +20,7 @@ import { useSnackbar } from "notistack";
 export const useWorkspaceOperation = () => {
     const { auth } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { allWorkspaces, setAllWorkspaces, currentTree, setCurrentTree, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useExplorerStore();
+    const { allWorkspaces, setAllWorkspaces, currentTree, setCurrentTree, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
 
     /**
      * Load all user workspaces
@@ -84,7 +84,7 @@ export const useWorkspaceOperation = () => {
     };
 
     return {
-        // Actions only - get state directly from useExplorerStore()
+        // Actions only - get state directly from useWorkspaceStore()
         loadAllWorkspaces,
         loadTree,
         selectWorkspace,

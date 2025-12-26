@@ -4,11 +4,11 @@
  * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
  */
 
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
-import { useFolderDialogHelper } from "@/hooks/explorer/useFolderDialog.helper";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useFolderDialogHelper } from "@/hooks/workspace/useFolderDialog.helper";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { constants } from "@/utils/constants";
-import type { ItemType } from "@/store/explorer/FolderDialog.store";
+import type { ItemType } from "@/store/workspace/FolderDialog.store";
 import { Folder } from "@/types/folder.types";
 import { workspaceService } from "@/services/workspace.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
@@ -100,7 +100,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree, setCurrentTree } = useExplorerStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree, setCurrentTree } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
 
     const selectedCount = selectedFolderIds.length;

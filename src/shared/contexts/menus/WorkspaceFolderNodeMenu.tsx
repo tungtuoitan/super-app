@@ -11,12 +11,12 @@ import {
 } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useWorkspaceFolderMenuHelper } from "@/shared/contexts/helpers/useWorkspaceFolderMenu.helper";
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
 /**
  * WorkspaceFolderNodeMenu
- * Context menu for folder nodes in workspace explorer tree
+ * Context menu for folder nodes in workspace workspace tree
  *
  * Menu Items:
  * - Add Folder/File/Note (submenu)
@@ -25,7 +25,7 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
  */
 export function WorkspaceFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
-    const { selectedFolderIds } = useExplorerStore();
+    const { selectedFolderIds } = useWorkspaceStore();
     const { createFolder, editFolder, deleteFolders } = useWorkspaceFolderMenuHelper();
 
     // Calculate derived values

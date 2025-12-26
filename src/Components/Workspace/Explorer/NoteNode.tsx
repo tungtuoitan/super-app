@@ -1,17 +1,17 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
 import { FileText } from "lucide-react";
-import { useExplorerStore } from "@/store/index";
-import { useTreeSelection } from "@/hooks/explorer/useTreeSelection.helper";
+import { useWorkspaceStore } from "@/store/index";
+import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { TreeFolder } from "@/hooks/explorer/tree.helper";
+import { TreeFolder } from "@/hooks/workspace/tree.helper";
 import { NoteItem } from "@/types/workspace.types";
 import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useExplorerStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
     const { openTab } = useEditorTabHelper();
@@ -30,10 +30,10 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection
             if (isSelected) {
-                setSelectedFolderIds((prev) => prev.filter((id) => id !== noteItem.id));
+                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== noteItem.id));
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev) => [...prev, noteItem.id]);
+                setSelectedFolderIds((prev: number[]) => [...prev, noteItem.id]);
                 node.selectMulti();
             }
             setLastSelectedFolderId(noteItem.id);
@@ -65,7 +65,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i) => i.id === noteItem.id);
+        const _currentItem = currentTree?.items.find((i: any) => i.id === noteItem.id);
 
         // Open note-specific context menu
         showContextMenu(e, constants.workspace.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });

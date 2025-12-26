@@ -2,19 +2,19 @@ import React, { useEffect, useMemo } from "react";
 import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
-import { useExplorerStore } from "@/store/index";
-import { useTreeSelection } from "@/hooks/explorer/useTreeSelection.helper";
-import { useTreeOperation } from "@/hooks/explorer/useTreeOperation.helper";
+import { useWorkspaceStore } from "@/store/index";
+import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
+import { useTreeOperation } from "@/hooks/workspace/useTreeOperation.helper";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { FolderNode } from "./FolderNode";
 import { RootFolderNode } from "./RootFolderNode";
 import { NoteNode } from "./NoteNode";
 import { FileNode } from "./FileNode";
-import { getAllVisibleFolderIds, transformToTreeData, TreeFolder } from "@/hooks/explorer/tree.helper";
+import { getAllVisibleFolderIds, transformToTreeData, TreeFolder } from "@/hooks/workspace/tree.helper";
 import { isFolder, isNote, isFile } from "@/types/workspace.types";
 
 export function WorkspaceTree() {
-    const { searchText, isDragging, currentTree, _treeRef } = useExplorerStore();
+    const { searchText, isDragging, currentTree, _treeRef } = useWorkspaceStore();
     const { handleSelectionChange, handleKeyDown } = useTreeSelection();
     const { handleMove } = useTreeOperation();
     const treeContainerRef = React.useRef<HTMLDivElement>(null);

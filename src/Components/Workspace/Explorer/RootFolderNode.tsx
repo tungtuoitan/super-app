@@ -1,10 +1,10 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
-import { useExplorerStore } from "@/store/index";
-import { useTreeOperation } from "@/hooks/explorer/useTreeOperation.helper";
-import { useWorkspaceOperation } from "@/hooks/explorer/useWorkspaceOperation.helper";
-import { TreeFolder } from "@/hooks/explorer/tree.helper";
+import { useWorkspaceStore } from "@/store/index";
+import { useTreeOperation } from "@/hooks/workspace/useTreeOperation.helper";
+import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
+import { TreeFolder } from "@/hooks/workspace/tree.helper";
 import { FolderItem } from "@/types/workspace.types";
 
 interface RootFolderNodeProps {
@@ -18,9 +18,9 @@ interface RootFolderNodeProps {
  * Shows workspace name and provides quick actions: Add Folder, Refresh, Collapse All
  */
 export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
-    const { currentTree } = useExplorerStore();
+    const { currentTree } = useWorkspaceStore();
     const { addNewFolder } = useTreeOperation();
-    const { _treeRef } = useExplorerStore();
+    const { _treeRef } = useWorkspaceStore();
     const { loadTree } = useWorkspaceOperation();
 
     const folderItem = node.data.data as FolderItem;

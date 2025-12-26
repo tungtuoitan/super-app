@@ -1,6 +1,6 @@
 /**
- * Workspace List Store
- * Centralized state management for workspace list grid
+ * Ws List Store
+ * Centralized state management for ws list grid
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";

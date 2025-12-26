@@ -1,23 +1,23 @@
 /**
- * Explorer View - Workspace tree navigation
+ * Workspace View - Workspace tree navigation
  * Extracted from VSSideBar for better separation of concerns
  */
 
 import { useState, useEffect } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
-import { WorkspaceTree } from "../Explorer/WorkspaceTree";
-import { useWorkspaceOperation } from "@/hooks/explorer/useWorkspaceOperation.helper";
-import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { WorkspaceTree } from "../Workspace/Explorer/WorkspaceTree";
+import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { Loader2 } from "lucide-react";
-import { FolderDialog } from "../Explorer/FolderDialog";
+import { FolderDialog } from "../Workspace/Explorer/FolderDialog/FolderDialog";
 import {useAuthStore} from "@/store/auth/Auth.store";
 
 /**
- * Explorer View - WorkspaceTree for folder navigation with workspace selection
+ * Workspace View - WorkspaceTree for folder navigation with workspace selection
  */
 export function WorkspaceView() {
     const { auth } = useAuthStore();
-    const { allWorkspaces, currentTree, isLoadingWorkspaces, isLoadingTree } = useExplorerStore();
+    const { allWorkspaces, currentTree, isLoadingWorkspaces, isLoadingTree } = useWorkspaceStore();
     const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
     const [selectedOption, setSelectedOption] = useState<IAutoCompleteOptions | null>(null);
 

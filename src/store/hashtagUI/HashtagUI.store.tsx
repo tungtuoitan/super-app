@@ -3,7 +3,7 @@
  * React Context store for managing hashtag UI state in notes
  * Pattern: Separate store from business logic (similar to EditorTabStore)
  *
- * NOTE: This is different from ExplorerStore which manages workspace folder tree
+ * NOTE: This is different from WorkspaceStore which manages workspace folder tree
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
