@@ -60,19 +60,19 @@
 
 ## 📝 Quick Reference
 
-| Anti-Pattern | Solution |
-|--------------|----------|
-| Context server | React Query |
-| Derived state | Calculate/useMemo |
-| Prop drilling | Context |
-| Massive components | Tách nhỏ |
-| Index key | Unique ID |
-| Conditional hooks | Top-level/enabled |
-| useEffect everywhere | React Query |
-| Type any | Proper types |
-| No error handling | Try/catch/boundaries |
-| Inline styles | sx/styled |
-| Context subscriptions | Props callbacks |
+| Anti-Pattern          | Solution             |
+| --------------------- | -------------------- |
+| Context server        | React Query          |
+| Derived state         | Calculate/useMemo    |
+| Prop drilling         | Context              |
+| Massive components    | Tách nhỏ             |
+| Index key             | Unique ID            |
+| Conditional hooks     | Top-level/enabled    |
+| useEffect everywhere  | React Query          |
+| Type any              | Proper types         |
+| No error handling     | Try/catch/boundaries |
+| Inline styles         | sx/styled            |
+| Context subscriptions | Props callbacks      |
 
 **Nhớ**: Review, linting, kinh nghiệm giúp tránh.
 
@@ -84,14 +84,14 @@
 
 ### Categories & Tools
 
-| Type | Tool | Example |
-|------|------|---------|
-| Server | React Query | API data: notes, profile |
-| Global UI | Context | Auth, theme |
-| Feature UI | Feature Context | Filters, dialogs |
-| Local UI | useState/Reducer | Inputs, toggles |
-| URL | Router | Page, filters |
-| Form | React Hook Form | Validation forms |
+| Type       | Tool             | Example                  |
+| ---------- | ---------------- | ------------------------ |
+| Server     | React Query      | API data: notes, profile |
+| Global UI  | Context          | Auth, theme              |
+| Feature UI | Feature Context  | Filters, dialogs         |
+| Local UI   | useState/Reducer | Inputs, toggles          |
+| URL        | Router           | Page, filters            |
+| Form       | React Hook Form  | Validation forms         |
 
 ### Best Practices
 

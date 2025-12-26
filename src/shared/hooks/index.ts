@@ -3,4 +3,4 @@
  * Exports all shared hooks
  */
 
-export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from './useKeyboardShortcut';
+export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from "./useKeyboardShortcut";

@@ -4,8 +4,8 @@
  * Supports multiple tab types: Note, Tag, etc.
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback } from 'react';
-import type { BaseTab, TabViewState } from '../../types/editor/tab.types';
+import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback } from "react";
+import type { BaseTab, TabViewState } from "../../types/editor/tab.types";
 
 export interface EditorTabContextData {
     openTabs: BaseTab[];
@@ -48,4 +48,4 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
             {children}
         </EditorTabStore.Provider>
     );
-}
+};

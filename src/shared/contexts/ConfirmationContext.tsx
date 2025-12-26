@@ -4,16 +4,16 @@
  * Following SuperApp architecture patterns
  */
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
+import React, { createContext, useContext, useState, useCallback } from "react";
+import { ConfirmationPopover } from "@/shared/components/feedback/ConfirmationPopover";
 
 interface ConfirmationOptions {
     message: string;
     confirmText?: string;
     cancelText?: string;
-    confirmColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    cancelColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    confirmColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    cancelColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     width?: string;
     zIndex?: number;
     anchorEl?: HTMLElement | null;
@@ -49,12 +49,12 @@ export function ConfirmationProvider({ children }: { children: React.ReactNode }
     return (
         <ConfirmationContext.Provider value={{ showConfirmation }}>
             {children}
-            
+
             {/* Single confirmation popover for entire app */}
             <ConfirmationPopover
                 open={isOpen}
                 anchorEl={options?.anchorEl || null}
-                message={options?.message || ''}
+                message={options?.message || ""}
                 confirmText={options?.confirmText}
                 cancelText={options?.cancelText}
                 confirmColor={options?.confirmColor}
@@ -72,7 +72,7 @@ export function ConfirmationProvider({ children }: { children: React.ReactNode }
 export function useConfirmation() {
     const context = useContext(ConfirmationContext);
     if (!context) {
-        throw new Error('useConfirmation must be used within ConfirmationProvider');
+        throw new Error("useConfirmation must be used within ConfirmationProvider");
     }
     return context;
 }

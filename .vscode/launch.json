@@ -1,31 +1,27 @@
 {
     "version": "0.2.0",
     "configurations": [
-      {
-        "type": "chrome",
-        "request": "launch",
-        "name": "Launch Chrome (Debug - OAuth Safe)",
-        "url": "http://localhost:3000",
-        "webRoot": "${workspaceFolder}",
-        "sourceMaps": true,
-        "sourceMapPathOverrides": {
-          "webpack:///src/*": "${webRoot}/src/*"
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome (Debug - OAuth Safe)",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "webpack:///src/*": "${webRoot}/src/*"
+            },
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+            "runtimeArgs": ["--no-first-run", "--no-default-browser-check"],
+            "port": 9222 //* REQUIRED FOR OAUTH FLOW, IF NOT HAVE THIS, CANT AUTHENTICATION WHEN DEBUGGING *
         },
-        "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
-        "runtimeArgs": [
-        "--no-first-run",
-          "--no-default-browser-check"
-        ],
-        "port": 9222 //* REQUIRED FOR OAUTH FLOW, IF NOT HAVE THIS, CANT AUTHENTICATION WHEN DEBUGGING *
-      },
-      {
-        "type": "chrome",
-        "request": "attach",
-        "name": "Attach to Edge",
-        "port": 9222,
-        "webRoot": "${workspaceFolder}",
-        "sourceMaps": true
-      }
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Attach to Edge",
+            "port": 9222,
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true
+        }
     ]
-  }
-  
+}

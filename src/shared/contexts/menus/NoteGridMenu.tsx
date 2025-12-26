@@ -1,13 +1,8 @@
-import React from 'react';
-import { MenuItem, MenuDivider } from '@szhsin/react-menu';
-import {
-    Plus as AddIcon,
-    Trash2 as DeleteIcon,
-    AlertTriangle as HardDeleteIcon,
-    RotateCcw as RestoreIcon
-} from 'lucide-react';
-import { useOrchestratorContextMenuHelper } from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
-import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
+import React from "react";
+import { MenuItem, MenuDivider } from "@szhsin/react-menu";
+import { Plus as AddIcon, Trash2 as DeleteIcon, AlertTriangle as HardDeleteIcon, RotateCcw as RestoreIcon } from "lucide-react";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
 /**
  * NoteGridMenu
@@ -42,14 +37,18 @@ export function NoteGridMenu() {
 
             {/* Show Delete option only if notes are NOT deleted */}
             {!anySelectedDeleted && (
-                <MenuItem onClick={(e) => openConfirmDialog({
-                    type: 'soft-delete',
-                    entityType: 'note',
-                    count: noteGridSelectedCount,
-                    allAreTempItems: allSelectedAreTempNotes,
-                    onConfirm: contextData?.onSoftDelete!,
-                    event: e,
-                })}>
+                <MenuItem
+                    onClick={(e) =>
+                        openConfirmDialog({
+                            type: "soft-delete",
+                            entityType: "note",
+                            count: noteGridSelectedCount,
+                            allAreTempItems: allSelectedAreTempNotes,
+                            onConfirm: contextData?.onSoftDelete!,
+                            event: e,
+                        })
+                    }
+                >
                     <DeleteIcon className="w-4 h-4 mr-2" />
                     Delete
                 </MenuItem>
@@ -59,14 +58,16 @@ export function NoteGridMenu() {
             {anySelectedDeleted && !allSelectedAreTempNotes && (
                 <>
                     <MenuItem
-                        onClick={(e) => openConfirmDialog({
-                            type: 'hard-delete',
-                            entityType: 'note',
-                            count: noteGridSelectedCount,
-                            allAreTempItems: false,
-                            onConfirm: contextData?.onHardDelete!,
-                            event: e,
-                        })}
+                        onClick={(e) =>
+                            openConfirmDialog({
+                                type: "hard-delete",
+                                entityType: "note",
+                                count: noteGridSelectedCount,
+                                allAreTempItems: false,
+                                onConfirm: contextData?.onHardDelete!,
+                                event: e,
+                            })
+                        }
                         className="text-red-600 hover:bg-red-50"
                     >
                         <HardDeleteIcon className="w-4 h-4 mr-2" />

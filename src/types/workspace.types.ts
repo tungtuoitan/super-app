@@ -4,7 +4,7 @@
  * Note: Backend still uses "tag" terminology in API
  */
 
-import { constants } from '@/utils/constants';
+import { constants } from "@/utils/constants";
 
 /**
  * Type aliases for backend API compatibility
@@ -19,32 +19,32 @@ export interface AddItemToWorkspaceRequest {
     /** Parent folder ID where the item will be placed (null for root items) */
     parentTagId?: number | null; // Backend field name (kept for API compatibility)
     parentFolderId?: number | null; // Frontend alias
-    
+
     /** Type of child entity - 'folder' for workspace folders, 'note' for notes */
     childType: ChildType; // Backend accepts 'tag', frontend uses 'folder'
-    
+
     /** ID of the child entity (optional if creating new folder) */
     childId?: number;
-    
+
     /** Folder name (required when childType='folder' and childId is not provided - will auto-create folder) */
     tagName?: string; // Backend field name (kept for API compatibility)
     folderName?: string; // Frontend alias
-    
+
     /** Optional relationship type (e.g., 'contains', 'references') */
     relationshipType?: string;
-    
+
     /** Custom label for this relationship */
     label?: string;
-    
+
     /** Additional notes about this relationship */
     notes?: string;
-    
+
     /** Sort order for display (default: 0) */
     sortOrder?: number;
-    
+
     /** Optional color for visual distinction (hex format #RRGGBB) */
     color?: string;
-    
+
     /** Optional icon identifier */
     icon?: string;
 }
@@ -83,16 +83,16 @@ export interface WorkspaceItemOperationResponse {
 export interface UpdateWorkspaceItemRequest {
     /** Custom label for this item */
     label?: string;
-    
+
     /** Additional notes about this item */
     notes?: string;
-    
+
     /** Color for visual distinction (hex format #RRGGBB) */
     color?: string;
-    
+
     /** Icon identifier */
     icon?: string;
-    
+
     /** Sort order for display */
     sortOrder?: number;
 }
@@ -112,7 +112,7 @@ export type UpdateWorkspaceItemResponse = WorkspaceItem & {
 export interface MoveItemIdentifier {
     /** Item type: 2 = folder, 3 = note, 4 = file */
     type: 2 | 3 | 4;
-    
+
     /** Item ID (folder/note/file entity ID) */
     id: number;
 }
@@ -124,10 +124,10 @@ export interface MoveItemIdentifier {
 export interface MoveItemsRequest {
     /** Array of items to move */
     items: MoveItemIdentifier[];
-    
+
     /** Target parent folder ID (null = move to root level) */
     targetParentId?: number | null;
-    
+
     /** Target workspace ID (null = same workspace) */
     targetWorkspaceId?: number | null;
 }
@@ -151,10 +151,10 @@ export interface DeleteItemRequest {
 export interface DeleteItemsRequest {
     /** Array of item IDs to delete */
     items: DeleteItemRequest[];
-    
+
     /** Whether to cascade delete child items (default: true) */
     cascade?: boolean;
-    
+
     /** Hard delete flag: true = permanently delete, false = soft delete (default) */
     isHardDelete?: boolean;
 }
@@ -212,7 +212,7 @@ export interface NoteMetadata {
     contentPreview?: string;
 
     /** Content type */
-    contentType?: 'markdown' | 'plain' | 'rich-text';
+    contentType?: "markdown" | "plain" | "rich-text";
 
     /** States */
     isArchived: boolean;
@@ -276,7 +276,6 @@ export interface FileMetadata {
  * Base workspace item - all items share these properties
  */
 interface BaseWorkspaceItem {
-
     /** User ID owner */
     userId: number;
 
@@ -294,7 +293,7 @@ interface BaseWorkspaceItem {
     icon?: string;
 
     /** Access info */
-    accessType: 'owner' | 'shared';
+    accessType: "owner" | "shared";
     isOriginal: boolean;
 
     /** Hierarchy info */

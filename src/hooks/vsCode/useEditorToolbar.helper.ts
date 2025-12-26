@@ -4,27 +4,26 @@
  * Routes to appropriate service helpers based on active tab type
  */
 
-import { useCallback } from 'react';
-import { useSnackbar } from 'notistack';
-import type { BaseTab } from '@/types/editor/tab.types';
-import type { Note } from '@/types/note.types';
-import { constants } from '@/utils/constants';
-import { useEditorTabHelper } from './useEditorTab.helper';
-import { useNoteDetailStore } from '@/store/note/useNoteDetail.store';
-import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
-import { useEditorTabsStore } from '@/store/index';
-import { useEditorToolbarStore } from '@/store/editor/EditorToolbar.store';
-import { storageService } from '@/services/storage.service';
-import { _upsertWsBatch } from '@/services/ws.service';
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import { useNoteGridHelper } from '../note/useNoteGrid.helper';
-import { useWsHelper } from '../ws/useWs.helper';
-import { useWsDetailHelper } from '../ws/useWsDetail.helper';
-import { Ws } from '@/store/ws/useWs.store';
-import { useNoteGridStore } from '@/store/note/useNoteGrid.store';
-import {useNoteDetailHelper} from '../note/useNoteDetail.helper';
-
+import { useCallback } from "react";
+import { useSnackbar } from "notistack";
+import type { BaseTab } from "@/types/editor/tab.types";
+import type { Note } from "@/types/note.types";
+import { constants } from "@/utils/constants";
+import { useEditorTabHelper } from "./useEditorTab.helper";
+import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
+import { useEditorTabsStore } from "@/store/index";
+import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
+import { storageService } from "@/services/storage.service";
+import { _upsertWsBatch } from "@/services/ws.service";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { useNoteGridHelper } from "../note/useNoteGrid.helper";
+import { useWsHelper } from "../ws/useWs.helper";
+import { useWsDetailHelper } from "../ws/useWsDetail.helper";
+import { Ws } from "@/store/ws/useWs.store";
+import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
+import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 
 export const useEditorToolbarHelper = () => {
     const { auth } = useAuthStore();
@@ -32,17 +31,17 @@ export const useEditorToolbarHelper = () => {
     const { activeTabId } = useEditorTabsStore();
     const { getTabById } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
-    
+
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null;
-    const { setOpenTabs,openTabs} = useEditorTabsStore();
-    
+    const { setOpenTabs, openTabs } = useEditorTabsStore();
+
     // Note-specific
     const { selectedNote, setSelectedNote } = useNoteGridStore();
     const { originalNoteRef } = useNoteDetailStore();
-    
+
     const { upsertNote } = useNoteDetailHelper();
-    
+
     // Workspace-specific
     const { selectedWorkspace, wsHasChanges, setSelectedWorkspace } = useWsDetailStore();
     const { resetWorkspace } = useWsDetailHelper();
@@ -50,27 +49,27 @@ export const useEditorToolbarHelper = () => {
 
     // Get status text based on tab type and deletion state
     const _statusText = (() => {
-        if (!activeTab) return 'No Tab';
-        
+        if (!activeTab) return "No Tab";
+
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-            return selectedNote?.deletedAt ? 'InActive' : 'Active';
+            return selectedNote?.deletedAt ? "InActive" : "Active";
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
-            return selectedWorkspace?.deletedAt ? 'InActive' : 'Active';
+            return selectedWorkspace?.deletedAt ? "InActive" : "Active";
         }
-        
-        return 'Active';
+
+        return "Active";
     })();
 
     // Get item ID based on tab type
     const _itemId = (() => {
         if (!activeTab) return null;
-        
+
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
             return selectedNote?.id || null;
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             return selectedWorkspace?.id || null;
         }
-        
+
         return null;
     })();
 
@@ -102,25 +101,27 @@ export const useEditorToolbarHelper = () => {
                     // =====================================
                     // WORKSPACE HANDLER: Multi-Step Save Process
                     // =====================================
-                    
+
                     // Step 3.1: Validate Selected Workspace
                     if (!selectedWorkspace) return;
 
                     // Step 3.2: Prepare API Request
                     const token = auth.userToken;
-                    const payload = [{
-                        id: selectedWorkspace.id > 0 ? selectedWorkspace.id : null,
-                        name: selectedWorkspace.name,
-                        description: selectedWorkspace.description,
-                        userId: selectedWorkspace.userId,
-                    }];
+                    const payload = [
+                        {
+                            id: selectedWorkspace.id > 0 ? selectedWorkspace.id : null,
+                            name: selectedWorkspace.name,
+                            description: selectedWorkspace.description,
+                            userId: selectedWorkspace.userId,
+                        },
+                    ];
 
                     // Step 3.3: Call Batch Upsert API
                     const result = await _upsertWsBatch(token, payload);
 
                     // Step 3.4: Validate API Response
                     if (!result.success) {
-                        throw new Error(result.message || 'Failed to save workspace');
+                        throw new Error(result.message || "Failed to save workspace");
                     }
 
                     // Step 3.5: Extract Saved Workspace from Response
@@ -141,17 +142,15 @@ export const useEditorToolbarHelper = () => {
 
                         // Step 3.7: Update Active Tab with Saved Data
                         setOpenTabs((prev: BaseTab[]) => {
-                            const updatedTabs = prev.map(t => {
-                                const isCurrentTab = t.id === activeTab.id && 
-                                                    t.data.id === activeTab.data.id && 
-                                                    t.type === constants.vscode.tab.tabTypes.workspace;
+                            const updatedTabs = prev.map((t) => {
+                                const isCurrentTab = t.id === activeTab.id && t.data.id === activeTab.data.id && t.type === constants.vscode.tab.tabTypes.workspace;
 
                                 if (isCurrentTab) {
                                     return {
                                         ...t,
                                         data: updatedWorkspace,
                                         title: updatedWorkspace.name,
-                                        hasUnsavedChanges: false
+                                        hasUnsavedChanges: false,
                                     };
                                 }
 
@@ -168,7 +167,7 @@ export const useEditorToolbarHelper = () => {
                         await loadWorkspaces();
 
                         // Step 3.10: Show Success Notification
-                        enqueueSnackbar('Workspace saved successfully', { variant: 'success' });
+                        enqueueSnackbar("Workspace saved successfully", { variant: "success" });
                     }
                     break;
 
@@ -180,13 +179,13 @@ export const useEditorToolbarHelper = () => {
             // =====================================
             // STEP 4: Handle Errors
             // =====================================
-            console.error('Failed to save:', error);
+            console.error("Failed to save:", error);
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             } else {
-                enqueueSnackbar(`Failed to save ${activeTab.type}: ${errorMessage}`, { variant: 'error' });
+                enqueueSnackbar(`Failed to save ${activeTab.type}: ${errorMessage}`, { variant: "error" });
             }
         } finally {
             // =====================================
@@ -204,7 +203,7 @@ export const useEditorToolbarHelper = () => {
             if (originalNoteRef.current) {
                 setSelectedNote({ ...originalNoteRef.current });
             }
-            enqueueSnackbar('Changes discarded', { variant: 'info' });
+            enqueueSnackbar("Changes discarded", { variant: "info" });
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             resetWorkspace();
         }

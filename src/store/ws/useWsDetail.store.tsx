@@ -3,8 +3,8 @@
  * State management for workspace UI interactions (similar to NoteUIStore)
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from 'react';
-import { Ws } from './useWs.store';
+import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
+import { Ws } from "./useWs.store";
 
 export interface WsDetailContextData {
     selectedWorkspace: Ws | null;

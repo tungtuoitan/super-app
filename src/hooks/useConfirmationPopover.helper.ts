@@ -4,8 +4,8 @@
  * Following SuperApp architecture patterns
  */
 
-import { useCallback } from 'react';
-import { useConfirmationPopoverStore, ConfirmationPopoverOptions } from '@/store/confirmationPopover/ConfirmationPopover.store';
+import { useCallback } from "react";
+import { useConfirmationPopoverStore, ConfirmationPopoverOptions } from "@/store/confirmationPopover/ConfirmationPopover.store";
 
 export const useConfirmationPopoverHelper = () => {
     const { isOpen, setIsOpen, options, setOptions } = useConfirmationPopoverStore();
@@ -16,7 +16,7 @@ export const useConfirmationPopoverHelper = () => {
     const showConfirmation = (opts: ConfirmationPopoverOptions) => {
         setOptions(opts);
         setIsOpen(true);
-    }
+    };
 
     /**
      * Hide confirmation popover
@@ -27,7 +27,7 @@ export const useConfirmationPopoverHelper = () => {
         setTimeout(() => {
             setOptions(null);
         }, 200);
-    }
+    };
 
     /**
      * Handle confirm action
@@ -37,14 +37,14 @@ export const useConfirmationPopoverHelper = () => {
             options.onConfirm();
         }
         hide();
-    }
+    };
 
     /**
      * Handle cancel action
      */
     const handleCancel = () => {
         hide();
-    }
+    };
 
     return {
         // Actions

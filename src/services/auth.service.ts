@@ -3,9 +3,9 @@
  * Uses native fetch API without apiClient
  */
 
-import { config } from '@/config/app.config';
-import { getLocaleLanguage } from '@/utils/locale';
-import type { LoginRequest, LoginResponse, ExchangeTokenResponse, AuthResponse, GoogleCodeRequest } from '@/types/index';
+import { config } from "@/config/app.config";
+import { getLocaleLanguage } from "@/utils/locale";
+import type { LoginRequest, LoginResponse, ExchangeTokenResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
 
 export const authApi = {
     /**
@@ -17,8 +17,8 @@ export const authApi = {
      */
     async login(credentials: LoginRequest): Promise<LoginResponse> {
         const formData = new FormData();
-        formData.append('username', credentials.username);
-        formData.append('password', credentials.password);
+        formData.append("username", credentials.username);
+        formData.append("password", credentials.password);
 
         const headers = new Headers();
         headers.append("Accept-Language", getLocaleLanguage());
@@ -29,13 +29,10 @@ export const authApi = {
             body: formData,
         };
 
-        const res = await window.fetch(
-            `${config.api.baseURL}/api/auth/login`,
-            options
-        );
+        const res = await window.fetch(`${config.api.baseURL}/api/auth/login`, options);
 
         if (res.ok) {
-            const result = await res.json() as LoginResponse;
+            const result = (await res.json()) as LoginResponse;
             return result;
         } else {
             return Promise.reject(res);
@@ -63,13 +60,10 @@ export const authApi = {
             body: JSON.stringify(request),
         };
 
-        const res = await window.fetch(
-            `${config.api.baseURL}/api/auth/google/login`,
-            options
-        );
+        const res = await window.fetch(`${config.api.baseURL}/api/auth/google/login`, options);
 
         if (res.ok) {
-            const result = await res.json() as AuthResponse;
+            const result = (await res.json()) as AuthResponse;
             return result;
         } else {
             return Promise.reject(res);
@@ -94,13 +88,10 @@ export const authApi = {
             body: JSON.stringify({ code }),
         };
 
-        const res = await window.fetch(
-            `${config.api.baseURL}/api/auth/exchange-token`,
-            options
-        );
+        const res = await window.fetch(`${config.api.baseURL}/api/auth/exchange-token`, options);
 
         if (res.ok) {
-            const result = await res.json() as ExchangeTokenResponse;
+            const result = (await res.json()) as ExchangeTokenResponse;
             return result;
         } else {
             return Promise.reject(res);

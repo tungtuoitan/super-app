@@ -15,7 +15,7 @@ export async function parseApiError(error: any): Promise<string> {
 
         // Handle unauthorized (401) and forbidden (403)
         if (status === 401 || status === 403) {
-            return 'Unauthorized. Please login again.';
+            return "Unauthorized. Please login again.";
         }
 
         // Try to get error message from response
@@ -34,12 +34,12 @@ export async function parseApiError(error: any): Promise<string> {
     }
 
     // Handle string errors
-    if (typeof error === 'string') {
+    if (typeof error === "string") {
         return error;
     }
 
     // Fallback
-    return 'An unexpected error occurred';
+    return "An unexpected error occurred";
 }
 
 /**

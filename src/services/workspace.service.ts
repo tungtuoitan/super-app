@@ -3,15 +3,9 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { config } from '@/config/app.config';
-import type {
-    MoveItemsRequest,
-    DeleteItemsRequest,
-    WorkspaceOperationResult,
-    WorkspaceWithTreeResponse,
-    WorkspaceListResponse
-} from '@/types/workspace.types'; 
-import { constants } from '@/utils/constants';
+import { config } from "@/config/app.config";
+import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WorkspaceListResponse } from "@/types/workspace.types";
+import { constants } from "@/utils/constants";
 
 /**
  * Request to create or update a folder in workspace
@@ -33,9 +27,7 @@ export interface UpsertFolderRequest {
  * @param token - Authentication token
  * @returns Array of user's workspaces or rejects with response
  */
-export const _getAllUserWorkspaces = async (
-    token: string
-): Promise<WorkspaceListResponse[]> => {
+export const _getAllUserWorkspaces = async (token: string): Promise<WorkspaceListResponse[]> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -47,10 +39,7 @@ export const _getAllUserWorkspaces = async (
         headers: headers,
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/workspace`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace`, options);
 
     if (res.ok) {
         const ret = await res.json();
@@ -68,10 +57,7 @@ export const _getAllUserWorkspaces = async (
  * @param workspaceId - The workspace ID
  * @returns Workspace tree with all items or rejects with response
  */
-export const _getWorkspaceTree = async (
-    token: string,
-    workspaceId: number
-): Promise<WorkspaceWithTreeResponse> => {
+export const _getWorkspaceTree = async (token: string, workspaceId: number): Promise<WorkspaceWithTreeResponse> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -83,10 +69,7 @@ export const _getWorkspaceTree = async (
         headers: headers,
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/workspace/${workspaceId}/tree`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/tree`, options);
 
     if (res.ok) {
         const ret = await res.json();
@@ -105,11 +88,7 @@ export const _getWorkspaceTree = async (
  * @param itemId - The workspace item ID to retrieve
  * @returns Workspace item details or rejects with response
  */
-export const _getWorkspaceItem = async (
-    token: string,
-    workspaceId: number,
-    itemId: number
-) => {
+export const _getWorkspaceItem = async (token: string, workspaceId: number, itemId: number) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -121,10 +100,7 @@ export const _getWorkspaceItem = async (
         headers: headers,
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/workspace/${workspaceId}/items/${itemId}`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items/${itemId}`, options);
 
     if (res.ok) {
         const ret = await res.json();
@@ -138,7 +114,7 @@ export const _getWorkspaceItem = async (
  * Upsert (Create or Update) workspace item
  * POST /api/workspace/{workspaceId}/items (create)
  * PUT /api/workspace/{workspaceId}/items/{itemId} (update)
- * 
+ *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
  * @param data - Workspace item data
@@ -158,7 +134,7 @@ export const _upsertWorkspaceItem = async (
         icon?: string;
         sortOrder?: number;
     },
-    itemId?: number | null
+    itemId?: number | null,
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -168,9 +144,7 @@ export const _upsertWorkspaceItem = async (
 
     const isUpdate = itemId !== null && itemId !== undefined;
     const method = isUpdate ? "PUT" : "POST";
-    const url = isUpdate
-        ? `${config.api.baseURL}/api/workspace/${workspaceId}/items/${itemId}`
-        : `${config.api.baseURL}/api/workspace/${workspaceId}/items`;
+    const url = isUpdate ? `${config.api.baseURL}/api/workspace/${workspaceId}/items/${itemId}` : `${config.api.baseURL}/api/workspace/${workspaceId}/items`;
 
     const options = {
         method: method,
@@ -191,17 +165,13 @@ export const _upsertWorkspaceItem = async (
 /**
  * Move multiple workspace items with cascade support
  * PATCH /api/workspace/{workspaceId}/items/move
- * 
+ *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
  * @param data - Move items request data
  * @returns Operation result or rejects with response
  */
-export const _moveWorkspaceItems = async (
-    token: string,
-    workspaceId: number,
-    data: MoveItemsRequest
-): Promise<WorkspaceOperationResult> => {
+export const _moveWorkspaceItems = async (token: string, workspaceId: number, data: MoveItemsRequest): Promise<WorkspaceOperationResult> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -214,10 +184,7 @@ export const _moveWorkspaceItems = async (
         body: JSON.stringify(data),
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/workspace/${workspaceId}/items/move`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items/move`, options);
 
     if (res.ok) {
         const ret = await res.json();
@@ -230,17 +197,13 @@ export const _moveWorkspaceItems = async (
 /**
  * Delete multiple workspace items with cascade support
  * DELETE /api/workspace/{workspaceId}/items
- * 
+ *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
  * @param data - Delete items request data
  * @returns Operation result or rejects with response
  */
-export const _deleteWorkspaceItems = async (
-    token: string,
-    workspaceId: number,
-    data: DeleteItemsRequest
-): Promise<WorkspaceOperationResult> => {
+export const _deleteWorkspaceItems = async (token: string, workspaceId: number, data: DeleteItemsRequest): Promise<WorkspaceOperationResult> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -253,10 +216,7 @@ export const _deleteWorkspaceItems = async (
         body: JSON.stringify(data),
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/workspace/${workspaceId}/items`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items`, options);
 
     if (res.ok) {
         const ret = await res.json();
@@ -269,17 +229,13 @@ export const _deleteWorkspaceItems = async (
 /**
  * Create or update a folder in workspace
  * POST /api/workspace/{workspaceId}/folders
- * 
+ *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
  * @param data - Folder data (name, description, color, etc.)
  * @returns Operation result or rejects with response
  */
-export const _upsertFolder = async (
-    token: string,
-    workspaceId: number,
-    data: UpsertFolderRequest
-): Promise<WorkspaceOperationResult> => {
+export const _upsertFolder = async (token: string, workspaceId: number, data: UpsertFolderRequest): Promise<WorkspaceOperationResult> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -292,10 +248,7 @@ export const _upsertFolder = async (
         body: JSON.stringify(data),
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/workspace/${workspaceId}/folders`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/folders`, options);
 
     if (res.ok) {
         const ret = await res.json();
@@ -308,7 +261,7 @@ export const _upsertFolder = async (
 /**
  * Add an item (folder/note/file) to workspace
  * POST /api/workspace/{workspaceId}/items
- * 
+ *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
  * @param data - Item data (childType, childId, etc.)
@@ -327,7 +280,7 @@ export const _addItemToWorkspace = async (
         color?: string;
         icon?: string;
         sortOrder?: number;
-    }
+    },
 ): Promise<WorkspaceOperationResult> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -341,10 +294,7 @@ export const _addItemToWorkspace = async (
         body: JSON.stringify(data),
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/workspace/${workspaceId}/items`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items`, options);
 
     if (res.ok) {
         const ret = await res.json();

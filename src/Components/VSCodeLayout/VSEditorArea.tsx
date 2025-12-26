@@ -18,7 +18,7 @@ import { constants } from "@/utils/constants";
  */
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
-    const { closeTab, getTabById,updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
+    const { closeTab, getTabById, updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
 
     // Get active tab
     const activeTab = activeTabId ? getTabById(activeTabId) : null;

@@ -5,30 +5,26 @@
  * This mapper bridges the gap between backend and frontend type systems
  */
 
-import {
-    WorkspaceItem,
-    FolderItem,
-    NoteItem,
-    FileItem,
-    FolderMetadata,
-    NoteMetadata,
-    FileMetadata,
-} from '@/types/workspace.types';
-import { constants } from '@/utils/constants';
+import { WorkspaceItem, FolderItem, NoteItem, FileItem, FolderMetadata, NoteMetadata, FileMetadata } from "@/types/workspace.types";
+import { constants } from "@/utils/constants";
 
 /**
  * Type aliases for backend API types
  */
-export type BackendItemType = typeof constants.workspace.itemTypes.tag | typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.file | typeof constants.workspace.itemTypes.folder;
+export type BackendItemType =
+    | typeof constants.workspace.itemTypes.tag
+    | typeof constants.workspace.itemTypes.note
+    | typeof constants.workspace.itemTypes.file
+    | typeof constants.workspace.itemTypes.folder;
 
 /**
  * Backend WorkspaceItem response format
  * This matches the structure from backend API
  */
 export interface BackendWorkspaceItem {
-    type: BackendItemType;  // Backend uses 'folder' or 'note' or 'file'
-    id: number;                          // Entity ID (folder/note/file ID)
-    childId?: number;                    // Legacy field (some APIs still use this)
+    type: BackendItemType; // Backend uses 'folder' or 'note' or 'file'
+    id: number; // Entity ID (folder/note/file ID)
+    childId?: number; // Legacy field (some APIs still use this)
     userId: number;
     name: string;
     parentId?: number | null;
@@ -54,15 +50,15 @@ export interface BackendWorkspaceItem {
  */
 function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
     return {
-        id: item.id || item.childId!,        // ✅ folder ID (prefer 'id', fallback 'childId')
-        type: constants.workspace.itemTypes.folder,                      // ✅ type = 'folder'
+        id: item.id || item.childId!, // ✅ folder ID (prefer 'id', fallback 'childId')
+        type: constants.workspace.itemTypes.folder, // ✅ type = 'folder'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
         slug: item.slug,
         color: item.color,
         icon: item.icon,
-        accessType: item.accessType as 'owner' | 'shared',
+        accessType: item.accessType as "owner" | "shared",
         isOriginal: item.isOriginal,
         level: item.level,
         depth: item.depth,
@@ -73,7 +69,7 @@ function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         metadata: item.metadata as FolderMetadata | undefined,
-        children: item.children.map(transformBackendItem),  // Recursive transform
+        children: item.children.map(transformBackendItem), // Recursive transform
     };
 }
 
@@ -82,15 +78,15 @@ function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
  */
 function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
     return {
-        id: item.id || item.childId!,        // ✅ note ID (prefer 'id', fallback 'childId')
-        type: constants.workspace.itemTypes.note,                        // ✅ type = 'note'
+        id: item.id || item.childId!, // ✅ note ID (prefer 'id', fallback 'childId')
+        type: constants.workspace.itemTypes.note, // ✅ type = 'note'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
         slug: item.slug,
         color: item.color,
         icon: item.icon,
-        accessType: item.accessType as 'owner' | 'shared',
+        accessType: item.accessType as "owner" | "shared",
         isOriginal: item.isOriginal,
         level: item.level,
         depth: item.depth,
@@ -101,7 +97,7 @@ function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         metadata: item.metadata as NoteMetadata | undefined,
-        children: [],  // Notes cannot have children
+        children: [], // Notes cannot have children
     };
 }
 
@@ -110,15 +106,15 @@ function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
  */
 function transformToFileItem(item: BackendWorkspaceItem): FileItem {
     return {
-        id: item.id || item.childId!,        // ✅ file ID (prefer 'id', fallback 'childId')
-        type: constants.workspace.itemTypes.file,                        // ✅ type = 'file'
+        id: item.id || item.childId!, // ✅ file ID (prefer 'id', fallback 'childId')
+        type: constants.workspace.itemTypes.file, // ✅ type = 'file'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
         slug: item.slug,
         color: item.color,
         icon: item.icon,
-        accessType: item.accessType as 'owner' | 'shared',
+        accessType: item.accessType as "owner" | "shared",
         isOriginal: item.isOriginal,
         level: item.level,
         depth: item.depth,
@@ -129,7 +125,7 @@ function transformToFileItem(item: BackendWorkspaceItem): FileItem {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         metadata: item.metadata as FileMetadata | undefined,
-        children: [],  // Files cannot have children
+        children: [], // Files cannot have children
     };
 }
 
@@ -139,9 +135,8 @@ function transformToFileItem(item: BackendWorkspaceItem): FileItem {
 export function transformBackendItem(item: BackendWorkspaceItem): WorkspaceItem {
     const itemType = item.type?.toLowerCase();
 
-
     switch (itemType) {
-        case 'tag':
+        case "tag":
         case constants.workspace.itemTypes.folder:
             return transformToFolderItem(item);
 
@@ -170,9 +165,9 @@ export function transformBackendItems(items: BackendWorkspaceItem[]): WorkspaceI
  */
 export function transformToBackendItem(item: WorkspaceItem): Partial<BackendWorkspaceItem> {
     return {
-        type: item.type === constants.workspace.itemTypes.folder ? 'tag' : item.type,
+        type: item.type === constants.workspace.itemTypes.folder ? "tag" : item.type,
         id: item.id,
-        childId: item.id,  // Legacy field for backward compatibility
+        childId: item.id, // Legacy field for backward compatibility
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -190,6 +185,6 @@ export function transformToBackendItem(item: WorkspaceItem): Partial<BackendWork
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         metadata: item.metadata,
-        children: 'children' in item ? item?.children?.map(transformToBackendItem) as BackendWorkspaceItem[] : [],
+        children: "children" in item ? (item?.children?.map(transformToBackendItem) as BackendWorkspaceItem[]) : [],
     };
 }

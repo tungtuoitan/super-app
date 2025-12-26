@@ -1,5 +1,5 @@
-import React, { CSSProperties } from 'react';
-import { cn } from '@/lib/utils';
+import React, { CSSProperties } from "react";
+import { cn } from "@/lib/utils";
 
 export interface AutoCompleteOptionProps extends React.HTMLAttributes<HTMLLIElement> {
     /** Child content to display in the option */
@@ -20,22 +20,9 @@ export interface AutoCompleteOptionProps extends React.HTMLAttributes<HTMLLIElem
  * </AutoCompleteOption>
  * ```
  */
-export function AutoCompleteOption({
-    children,
-    disabled,
-    className,
-    style,
-    ...props
-}: AutoCompleteOptionProps) {
+export function AutoCompleteOption({ children, disabled, className, style, ...props }: AutoCompleteOptionProps) {
     return (
-        <li
-            {...props}
-            className={cn(
-                disabled && 'opacity-50 pointer-events-none',
-                className
-            )}
-            style={style}
-        >
+        <li {...props} className={cn(disabled && "opacity-50 pointer-events-none", className)} style={style}>
             {children}
         </li>
     );

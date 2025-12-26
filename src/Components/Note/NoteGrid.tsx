@@ -1,24 +1,16 @@
-import React, { useEffect, useMemo } from 'react';
-import {
-    useReactTable,
-    getCoreRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    getFilteredRowModel,
-    ColumnDef,
-    flexRender,
-} from '@tanstack/react-table';
-import { Loader2, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { Button } from '@/Components/ui/button';
-import { Checkbox } from '@/Components/ui/checkbox';
-import { Alert, AlertDescription } from '@/Components/ui/alert';
-import {Note} from '@/types/note.types';
-import {_deleteNote} from '@/services/note.service';
-import {useEditorTabHelper} from '@/hooks/vsCode/useEditorTab.helper';
-import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
-import {useNoteGridHelper} from '@/hooks/note/useNoteGrid.helper';
-import { useGridControlHelper } from '@/hooks/vsCode/useGridControl.helper';
-import { useGridControlStore } from '@/store/grid/useGridControl.store';
+import React, { useEffect, useMemo } from "react";
+import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
+import { Loader2, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Button } from "@/Components/ui/button";
+import { Checkbox } from "@/Components/ui/checkbox";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Note } from "@/types/note.types";
+import { _deleteNote } from "@/services/note.service";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
+import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
+import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -43,7 +35,7 @@ export function NoteGrid() {
         noteGridRowSelection,
         setNoteGridRowSelection,
         noteGridColumnFilters,
-        setNoteGridColumnFilters
+        setNoteGridColumnFilters,
     } = useNoteGridStore();
 
     const { openTab } = useEditorTabHelper();
@@ -53,18 +45,13 @@ export function NoteGrid() {
 
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Note>[]>(() => {
-
         // Full mode: show all columns
         return [
             {
-                id: 'select',
+                id: "select",
                 header: ({ table }) => (
                     <div className="flex items-center justify-center">
-                        <Checkbox
-                            checked={table.getIsAllPageRowsSelected()}
-                            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                            aria-label="Select all"
-                        />
+                        <Checkbox checked={table.getIsAllPageRowsSelected()} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" />
                     </div>
                 ),
                 cell: ({ row }) => (
@@ -82,60 +69,46 @@ export function NoteGrid() {
                 enableHiding: false,
             },
             {
-                accessorKey: 'id',
-                header: () => (
-                    <div className="text-left text-sm">ID</div>
-                ),
+                accessorKey: "id",
+                header: () => <div className="text-left text-sm">ID</div>,
                 size: 20,
-                cell: ({ getValue }) => (
-                    <div className="text-left text-sm">
-                        {getValue() as number}
-                    </div>
-                ),
+                cell: ({ getValue }) => <div className="text-left text-sm">{getValue() as number}</div>,
             },
             {
-                accessorKey: 'name',
-                header: () => (
-                    <div className="text-left text-sm">Note Name</div>
-                ),
+                accessorKey: "name",
+                header: () => <div className="text-left text-sm">Note Name</div>,
                 size: 200,
-                cell: ({ getValue, row }) => (
-                    <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80">
-                        {(getValue() as string) || '—'}
-                    </div>
-                ),
+                cell: ({ getValue, row }) => <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80">{(getValue() as string) || "—"}</div>,
             },
             {
-                accessorKey: 'deletedAt',
-                header: () => (
-                    <div className="text-left text-sm">Status</div>
-                ),
+                accessorKey: "deletedAt",
+                header: () => <div className="text-left text-sm">Status</div>,
                 size: 60,
                 enableSorting: true,
                 filterFn: (row, columnId, filterValue) => {
                     const deletedAt = row.original.deletedAt;
-                    if (filterValue === 'null') {
+                    if (filterValue === "null") {
                         return deletedAt === null || deletedAt === undefined;
                     }
-                    if (filterValue === 'notNull') {
+                    if (filterValue === "notNull") {
                         return deletedAt !== null && deletedAt !== undefined;
                     }
                     return true; // 'all' - show everything
                 },
                 cell: ({ getValue }) => {
                     const deletedAt = getValue() as Date | null | undefined;
-                    
+
                     if (!deletedAt) {
                         return null;
                     }
-                    
+
                     return (
                         <div className="flex items-center justify-start pl-2" title="Deleted">
                             <div className="w-2 h-2 rounded-full bg-destructive"></div>
                         </div>
                     );
-                }
-            }
+                },
+            },
         ];
     }, []);
 
@@ -145,18 +118,18 @@ export function NoteGrid() {
             return notes;
         }
         const query = searchQuery.toLowerCase();
-        return notes.filter((note) =>
-            note.name?.toLowerCase().includes(query) ||
-            note.description?.toLowerCase().includes(query) ||
-            note.type?.toLowerCase().includes(query) ||
-            String(note.id).includes(query)
+        return notes.filter(
+            (note) =>
+                note.name?.toLowerCase().includes(query) ||
+                note.description?.toLowerCase().includes(query) ||
+                note.type?.toLowerCase().includes(query) ||
+                String(note.id).includes(query),
         );
     }, [notes, searchQuery]);
 
     // Create table instance
     const table = useReactTable({
-        data: filteredData.sort((a, b) =>
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        data: filteredData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -181,13 +154,13 @@ export function NoteGrid() {
         loadNotes();
 
         // Set default filter to Active Only
-        const deletedAtColumn = table.getColumn('deletedAt');
+        const deletedAtColumn = table.getColumn("deletedAt");
         if (deletedAtColumn && !noteGridColumnFilters.length) {
-            deletedAtColumn.setFilterValue('null');
+            deletedAtColumn.setFilterValue("null");
         }
 
         // Register this grid with GridControl
-        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, 'Notes');
+        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, "Notes");
 
         // Cleanup on unmount
         return () => {
@@ -197,7 +170,7 @@ export function NoteGrid() {
 
     // Update GridControl when columnFilters change
     useEffect(() => {
-        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, 'Notes');
+        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, "Notes");
     }, [noteGridColumnFilters, table]);
 
     return (
@@ -219,12 +192,12 @@ export function NoteGrid() {
             )}
 
             {/* Table */}
-            <div 
+            <div
                 className="flex-1 overflow-auto rounded-md border"
                 onContextMenu={(e) => {
                     // Only show context menu if clicking on empty area (not on a row)
                     const target = e.target as HTMLElement;
-                    const isClickedOnRow = target.closest('tr[data-row]');
+                    const isClickedOnRow = target.closest("tr[data-row]");
                     if (!isClickedOnRow) {
                         openNoteContextMenu(e);
                     }
@@ -233,42 +206,28 @@ export function NoteGrid() {
                 <table className="w-full">
                     <thead className="bg-muted/50 sticky top-0 z-10">
                         {/* Column Headers */}
-                        {table.getHeaderGroups().map(headerGroup => (
+                        {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className="border-b">
-                                {headerGroup.headers.map(header => (
-                                    <th
-                                        key={header.id}
-                                        className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground"
-                                        style={{ width: header.getSize() }}
-                                    >
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
+                                {headerGroup.headers.map((header) => (
+                                    <th key={header.id} className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground" style={{ width: header.getSize() }}>
+                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                     </th>
                                 ))}
                             </tr>
                         ))}
                     </thead>
                     <tbody>
-                        {table.getRowModel().rows.map(row => (
+                        {table.getRowModel().rows.map((row) => (
                             <tr
                                 key={row.id}
                                 data-row
-                                className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${
-                                    row.original.deletedAt ? 'opacity-60' : ''
-                                }`}
+                                className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${row.original.deletedAt ? "opacity-60" : ""}`}
                                 onClick={() => openTab(row.original)}
                                 onContextMenu={(e) => openNoteContextMenu(e, row)}
                             >
-                                {row.getVisibleCells().map(cell => (
+                                {row.getVisibleCells().map((cell) => (
                                     <td key={cell.id} className="text-left">
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 ))}
                             </tr>
@@ -280,49 +239,23 @@ export function NoteGrid() {
             {/* Pagination */}
             <div className="flex items-center justify-between px-4 py-1 bg-background">
                 <div className="flex-1 text-sm text-left text-muted-foreground">
-                    Page {table.getState().pagination.pageIndex + 1} of{' '}
-                    {table.getPageCount()} ({notes.length} total)
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({notes.length} total)
                 </div>
-                
+
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => table.setPageIndex(0)}
-                        disabled={!table.getCanPreviousPage()}
-                        className="h-8 w-8"
-                        title="First page"
-                    >
+                    <Button variant="outline" size="icon" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()} className="h-8 w-8" title="First page">
                         <ChevronsLeft className="h-4 w-4" />
                     </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                        className="h-8 w-8"
-                        title="Previous page"
-                    >
+                    <Button variant="outline" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-8 w-8" title="Previous page">
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    
+
                     <div className="flex items-center gap-1 px-2">
-                        <span className="text-sm font-medium">
-                            {table.getState().pagination.pageIndex + 1}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                            / {table.getPageCount()}
-                        </span>
+                        <span className="text-sm font-medium">{table.getState().pagination.pageIndex + 1}</span>
+                        <span className="text-sm text-muted-foreground">/ {table.getPageCount()}</span>
                     </div>
-                    
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                        className="h-8 w-8"
-                        title="Next page"
-                    >
+
+                    <Button variant="outline" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-8 w-8" title="Next page">
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                     <Button

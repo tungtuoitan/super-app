@@ -1,4 +1,4 @@
-import { SnackbarKey, useSnackbar } from 'notistack';
+import { SnackbarKey, useSnackbar } from "notistack";
 
 /**
  * Props interface for the CloseNotiBtn component.
@@ -35,10 +35,5 @@ export function CloseNotiBtn({ id }: CloseNotiProps) {
         closeSnackbar(id);
     };
 
-    return (
-        <div
-            className="absolute left-0 top-0 w-full h-full cursor-pointer hover:bg-black/10"
-            onClick={handleClose}
-        />
-    );
+    return <div className="absolute left-0 top-0 w-full h-full cursor-pointer hover:bg-black/10" onClick={handleClose} />;
 }

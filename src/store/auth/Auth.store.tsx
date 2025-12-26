@@ -18,7 +18,7 @@ export interface User {
     firstName?: string;
     lastName?: string;
     picture?: string;
-    authType?: 'google' | 'local';
+    authType?: "google" | "local";
     userToken: string;
 }
 
@@ -50,40 +50,40 @@ export interface AuthStoreData {
 
 const DEFAULT_AUTH_STATE: User = {
     userId: null,
-    userName: '',
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    picture: '',
+    userName: "",
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    picture: "",
     authType: undefined,
-    userToken: '',
+    userToken: "",
 };
 
 const authStoreDefaultValue: AuthStoreData = {
     // Core auth data
     auth: DEFAULT_AUTH_STATE,
-    setAuth: () => { },
+    setAuth: () => {},
     isAuthenticated: false,
-    setIsAuthenticated: () => { },
-    
+    setIsAuthenticated: () => {},
+
     // Auth operation states
     loading: false,
-    setLoading: () => { },
+    setLoading: () => {},
     error: null,
-    setError: () => { },
-    
+    setError: () => {},
+
     // Login specific states
     loginLoading: false,
-    setLoginLoading: () => { },
+    setLoginLoading: () => {},
     loginError: null,
-    setLoginError: () => { },
-    
+    setLoginError: () => {},
+
     // Token exchange states
     tokenExchangeLoading: false,
-    setTokenExchangeLoading: () => { },
+    setTokenExchangeLoading: () => {},
     tokenExchangeError: null,
-    setTokenExchangeError: () => { },
+    setTokenExchangeError: () => {},
 };
 
 export const AuthStore = createContext<AuthStoreData>(authStoreDefaultValue);
@@ -94,19 +94,19 @@ export const AuthStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     // Core auth data
     const [auth, setAuth] = useState<User>(DEFAULT_AUTH_STATE);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    
+
     // Auth operation states
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     // Login specific states
     const [loginLoading, setLoginLoading] = useState<boolean>(false);
     const [loginError, setLoginError] = useState<string | null>(null);
-    
+
     // Token exchange states
     const [tokenExchangeLoading, setTokenExchangeLoading] = useState<boolean>(false);
     const [tokenExchangeError, setTokenExchangeError] = useState<string | null>(null);
-    
+
     return (
         <AuthStore.Provider
             value={{
@@ -115,25 +115,26 @@ export const AuthStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 setAuth,
                 isAuthenticated,
                 setIsAuthenticated,
-                
+
                 // Auth operation states
                 loading,
                 setLoading,
                 error,
                 setError,
-                
+
                 // Login specific states
                 loginLoading,
                 setLoginLoading,
                 loginError,
                 setLoginError,
-                
+
                 // Token exchange states
                 tokenExchangeLoading,
                 setTokenExchangeLoading,
                 tokenExchangeError,
                 setTokenExchangeError,
-            }}>
+            }}
+        >
             {children}
         </AuthStore.Provider>
     );

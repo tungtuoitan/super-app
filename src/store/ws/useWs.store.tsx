@@ -3,8 +3,8 @@
  * Centralized state management for workspace list grid
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import { RowSelectionState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
+import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
 
 /**
  * Workspace interface (domain model with Date objects)

@@ -1,6 +1,7 @@
 # Google OAuth Login - Implementation Plan
 
 ## Tổng Quan
+
 Triển khai Google OAuth login với **Authorization Code Flow** và **Dialog/Modal UI** từ ActivityBar.
 
 ---
@@ -8,151 +9,168 @@ Triển khai Google OAuth login với **Authorization Code Flow** và **Dialog/M
 ## Backend Tasks (C:\Users\Admin\source\Timeline)
 
 ### 1. DTOs & Models
+
 - [ ] `SuperAppModels/DTOs/Responses/AuthResponse.cs` - Response cho login
-  - Token, UserId, Email, FirstName, LastName, Picture, AuthType
+    - Token, UserId, Email, FirstName, LastName, Picture, AuthType
 
 ### 2. Services & Repository
+
 - [ ] `SuperAppServices/Interfaces/IAuthService.cs` - Interface
 - [ ] `SuperAppServices/Services/AuthService.cs` - Business logic
-  - `GoogleLoginAsync(code)` - Main method
-  - `ExchangeCodeForGoogleTokenAsync(code)` - Call Google API
-  - `VerifyGoogleIdTokenAsync(idToken)` - Verify token
-  - `GetOrCreateGoogleUserAsync(googleInfo)` - Get/Create user
-  - `GenerateJwtToken(user)` - Generate JWT
+    - `GoogleLoginAsync(code)` - Main method
+    - `ExchangeCodeForGoogleTokenAsync(code)` - Call Google API
+    - `VerifyGoogleIdTokenAsync(idToken)` - Verify token
+    - `GetOrCreateGoogleUserAsync(googleInfo)` - Get/Create user
+    - `GenerateJwtToken(user)` - Generate JWT
 - [ ] `SuperAppDataRepositories/Repositories/UserRepository.cs` - Add methods:
-  - `GetByEmailAsync(email)`
-  - `CreateAsync(user)`
-  - `UpdateAsync(user)`
+    - `GetByEmailAsync(email)`
+    - `CreateAsync(user)`
+    - `UpdateAsync(user)`
 
 ### 3. Controller
+
 - [ ] `SuperAppAPI/Controllers/AuthController.cs` - NEW controller
-  - `POST /api/auth/google/login` - Accept code, return JWT
+    - `POST /api/auth/google/login` - Accept code, return JWT
 
 ### 4. Configuration
+
 - [ ] `appsettings.json` - Fix RedirectUri: `http://localhost:3000/auth/callback`
 - [ ] `Startup.cs` - Register services:
-  ```csharp
-  services.AddScoped<IAuthService, AuthService>();
-  services.AddHttpClient();
-  ```
+    ```csharp
+    services.AddScoped<IAuthService, AuthService>();
+    services.AddHttpClient();
+    ```
 
 ---
 
 ## Frontend Tasks (C:\Users\Admin\source\SuperApp)
 
 ### 1. OAuth Helper
-- [ ] `src/utils/googleOAuth.ts` - NEW
-  ```typescript
-  export const GOOGLE_OAUTH_CONFIG = {
-    clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-    redirectUri: 'http://localhost:3000/auth/callback',
-    scope: 'openid profile email',
-    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth'
-  }
 
-  export function initiateGoogleLogin(): void {
-    // Build URL và redirect đến Google
-  }
-  ```
+- [ ] `src/utils/googleOAuth.ts` - NEW
+
+    ```typescript
+    export const GOOGLE_OAUTH_CONFIG = {
+        clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+        redirectUri: "http://localhost:3000/auth/callback",
+        scope: "openid profile email",
+        authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+    };
+
+    export function initiateGoogleLogin(): void {
+        // Build URL và redirect đến Google
+    }
+    ```
 
 ### 2. Components
+
 - [ ] `src/Components/VSCodeLayout/AccountsDialog.tsx` - NEW
-  - Dialog với "Sign in with Google" button
-  - Show user info khi đã authenticated
+    - Dialog với "Sign in with Google" button
+    - Show user info khi đã authenticated
 
 - [ ] `src/pages/AuthCallback.tsx` - NEW
-  - Handle redirect từ Google
-  - Extract `code` từ URL
-  - Call API để exchange code for JWT
-  - Navigate về home sau khi thành công
+    - Handle redirect từ Google
+    - Extract `code` từ URL
+    - Call API để exchange code for JWT
+    - Navigate về home sau khi thành công
 
 - [ ] `src/Components/VSCodeLayout/ActivityBar.tsx` - UPDATE
-  - Add Accounts icon (UserCircle from lucide-react)
-  - Add state: `useState(false)` cho dialog
-  - Render `<AccountsDialog />`
+    - Add Accounts icon (UserCircle from lucide-react)
+    - Add state: `useState(false)` cho dialog
+    - Render `<AccountsDialog />`
 
 ### 3. API & Hooks
+
 - [ ] `src/services/api/auth.api.ts` - UPDATE
-  ```typescript
-  async googleLogin(code: string): Promise<AuthResponse> {
-    return apiClient.post('/api/auth/google/login', { code })
-  }
-  ```
+
+    ```typescript
+    async googleLogin(code: string): Promise<AuthResponse> {
+      return apiClient.post('/api/auth/google/login', { code })
+    }
+    ```
 
 - [ ] `src/hooks/useAuth.helpers.ts` - UPDATE
-  ```typescript
-  const loginWithGoogleCode = async (code: string) => {
-    const response = await authApi.googleLogin(code)
-    storageService.setToken(response.token)
-    setAuth({ ... })
-    setIsAuthenticated(true)
-  }
-  ```
+    ```typescript
+    const loginWithGoogleCode = async (code: string) => {
+      const response = await authApi.googleLogin(code)
+      storageService.setToken(response.token)
+      setAuth({ ... })
+      setIsAuthenticated(true)
+    }
+    ```
 
 ### 4. Types & Config
+
 - [ ] `src/types/index.ts` - UPDATE
-  ```typescript
-  export interface AuthResponse {
-    token: string
-    userId: number
-    email: string
-    firstName?: string
-    lastName?: string
-    picture?: string
-    authType: 'google' | 'local'
-  }
-  ```
+
+    ```typescript
+    export interface AuthResponse {
+        token: string;
+        userId: number;
+        email: string;
+        firstName?: string;
+        lastName?: string;
+        picture?: string;
+        authType: "google" | "local";
+    }
+    ```
 
 - [ ] `src/config/api.config.ts` - UPDATE
-  ```typescript
-  auth: {
-    googleLogin: '/api/auth/google/login',
-  }
-  ```
+    ```typescript
+    auth: {
+      googleLogin: '/api/auth/google/login',
+    }
+    ```
 
 ### 5. Routing
+
 - [ ] `src/App.tsx` - UPDATE
-  ```tsx
-  <Route path="/auth/callback" element={<AuthCallback />} />
-  ```
+    ```tsx
+    <Route path="/auth/callback" element={<AuthCallback />} />
+    ```
 
 ### 6. Environment
+
 - [ ] `.env` - UPDATE
-  ```
-  REACT_APP_GOOGLE_CLIENT_ID=887853390661-j2bepobhb90k357d0k5p1atqd2k8oe6l.apps.googleusercontent.com
-  REACT_APP_GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
-  ```
+    ```
+    REACT_APP_GOOGLE_CLIENT_ID=887853390661-j2bepobhb90k357d0k5p1atqd2k8oe6l.apps.googleusercontent.com
+    REACT_APP_GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
+    ```
 
 ---
 
 ## Google Cloud Console
 
 - [ ] Update Authorized redirect URIs:
-  - `http://localhost:3000/auth/callback`
-  - Production URL khi deploy
+    - `http://localhost:3000/auth/callback`
+    - Production URL khi deploy
 
 ---
 
 ## Implementation Order
 
 ### Phase 1: Backend (BE trước để test API)
+
 1. AuthService + UserRepository
 2. AuthController
 3. Register services
 4. Test với Postman
 
 ### Phase 2: Frontend UI
+
 1. AccountsDialog component
 2. Update ActivityBar với Accounts icon
 3. Test dialog open/close
 
 ### Phase 3: OAuth Flow
+
 1. googleOAuth.ts helper
 2. AuthCallback page
 3. Update API service + hooks
 4. Add route + env vars
 
 ### Phase 4: Integration
+
 1. Test full flow end-to-end
 2. Error handling
 3. Test với new/existing users
@@ -200,12 +218,14 @@ Triển khai Google OAuth login với **Authorization Code Flow** và **Dialog/M
 ## Critical Files
 
 ### Backend
+
 - `SuperAppServices/Services/AuthService.cs` - NEW
 - `SuperAppAPI/Controllers/AuthController.cs` - NEW
 - `SuperAppModels/DTOs/Responses/AuthResponse.cs` - NEW
 - `SuperAppDataRepositories/Repositories/UserRepository.cs` - UPDATE
 
 ### Frontend
+
 - `src/utils/googleOAuth.ts` - NEW
 - `src/Components/VSCodeLayout/AccountsDialog.tsx` - NEW
 - `src/pages/AuthCallback.tsx` - NEW

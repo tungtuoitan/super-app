@@ -18,7 +18,7 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
 
 export const useWorkspaceChildMenuHelper = () => {
     const { auth } = useAuthStore();
-        const { showConfirmation } = useConfirmationPopoverHelper();
+    const { showConfirmation } = useConfirmationPopoverHelper();
     const { enqueueSnackbar } = useSnackbar();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useExplorerStore();

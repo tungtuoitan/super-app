@@ -5,7 +5,7 @@
 
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { OrchestratorContextMenuType, useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import {Folder} from "@/types/folder.types";
+import { Folder } from "@/types/folder.types";
 
 type EntityType = "note" | "workspace" | "folder";
 type DeleteType = "soft-delete" | "hard-delete";
@@ -136,7 +136,6 @@ export const useOrchestratorContextMenuHelper = () => {
         setContextData(data || null);
         setIsContextMenuOpen(true);
     };
-
 
     return {
         openConfirmDialog,

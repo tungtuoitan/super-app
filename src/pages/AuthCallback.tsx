@@ -3,17 +3,16 @@
  * Handles Google OAuth redirect with authorization code
  */
 
-import { useEffect } from 'react';
-import { useAuthCallbackStore } from '@/store/index';
-import { useAuthHelper } from '@/hooks/useAuth.helpers';
-import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { useEffect } from "react";
+import { useAuthCallbackStore } from "@/store/index";
+import { useAuthHelper } from "@/hooks/useAuth.helpers";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 export function AuthCallback() {
     const { callbackError, isProcessing } = useAuthCallbackStore();
     const { handleOAuthCallback, navigateToHome } = useAuthHelper();
     useEffect(() => {
-
         handleOAuthCallback();
     }, []);
 
@@ -24,12 +23,8 @@ export function AuthCallback() {
                     <div className="flex flex-col items-center gap-4 text-center">
                         <Loader2 className="h-12 w-12 animate-spin text-primary" />
                         <div className="space-y-2">
-                            <h2 className="text-xl font-semibold text-foreground">
-                                Completing sign in...
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                                Please wait while we authenticate your account
-                            </p>
+                            <h2 className="text-xl font-semibold text-foreground">Completing sign in...</h2>
+                            <p className="text-sm text-muted-foreground">Please wait while we authenticate your account</p>
                         </div>
                     </div>
                 ) : callbackError ? (
@@ -39,10 +34,7 @@ export function AuthCallback() {
                             <AlertDescription>{callbackError}</AlertDescription>
                         </Alert>
                         <div className="text-center">
-                            <button
-                                onClick={navigateToHome}
-                                className="text-sm text-primary hover:underline"
-                            >
+                            <button onClick={navigateToHome} className="text-sm text-primary hover:underline">
                                 Return to home
                             </button>
                         </div>

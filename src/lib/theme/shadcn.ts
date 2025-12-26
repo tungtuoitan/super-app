@@ -10,10 +10,10 @@
  * applyShadcnTheme(document.documentElement)
  *
  */
-import { colors, semanticColors } from './colors'
-import { spacing, semanticSpacing } from './spacing'
-import { borderRadius, semanticBorderRadius } from './borderRadius'
-import { fonts, typography, fontWeights } from './typography'
+import { colors, semanticColors } from "./colors";
+import { spacing, semanticSpacing } from "./spacing";
+import { borderRadius, semanticBorderRadius } from "./borderRadius";
+import { fonts, typography, fontWeights } from "./typography";
 
 // Token object exported for programmatic usage
 export const shadcnTokens = {
@@ -52,56 +52,56 @@ export const shadcnTokens = {
     },
     typography,
     fontWeights,
-} as const
+} as const;
 
 // Utility: apply CSS variables to an element (documentElement recommended)
 export function applyShadcnTheme(el: HTMLElement = document.documentElement) {
-    const set = (k: string, v: string) => el.style.setProperty(k, v)
+    const set = (k: string, v: string) => el.style.setProperty(k, v);
 
     // Colors
-    set('--shadcn-col-primary', shadcnTokens.colors.primary)
-    set('--shadcn-col-secondary', shadcnTokens.colors.secondary)
-    set('--shadcn-col-success', shadcnTokens.colors.success)
-    set('--shadcn-col-warning', shadcnTokens.colors.warning)
-    set('--shadcn-col-error', shadcnTokens.colors.error)
-    set('--shadcn-col-info', shadcnTokens.colors.info)
-    set('--shadcn-col-bg', shadcnTokens.colors.background)
-    set('--shadcn-col-surface', shadcnTokens.colors.surface)
-    set('--shadcn-col-text-primary', shadcnTokens.colors.textPrimary)
-    set('--shadcn-col-text-secondary', shadcnTokens.colors.textSecondary)
-    set('--shadcn-col-border', shadcnTokens.colors.border)
+    set("--shadcn-col-primary", shadcnTokens.colors.primary);
+    set("--shadcn-col-secondary", shadcnTokens.colors.secondary);
+    set("--shadcn-col-success", shadcnTokens.colors.success);
+    set("--shadcn-col-warning", shadcnTokens.colors.warning);
+    set("--shadcn-col-error", shadcnTokens.colors.error);
+    set("--shadcn-col-info", shadcnTokens.colors.info);
+    set("--shadcn-col-bg", shadcnTokens.colors.background);
+    set("--shadcn-col-surface", shadcnTokens.colors.surface);
+    set("--shadcn-col-text-primary", shadcnTokens.colors.textPrimary);
+    set("--shadcn-col-text-secondary", shadcnTokens.colors.textSecondary);
+    set("--shadcn-col-border", shadcnTokens.colors.border);
 
     // Neutral scale
     Object.entries(shadcnTokens.colors.neutral).forEach(([k, v]) => {
-        set(`--shadcn-neutral-${k}`, v)
-    })
+        set(`--shadcn-neutral-${k}`, v);
+    });
 
     // Spacing (limited set)
     Object.entries(shadcnTokens.spacing).forEach(([k, v]) => {
-        set(`--shadcn-space-${k}`, v)
-    })
+        set(`--shadcn-space-${k}`, v);
+    });
 
     // Border radius
     Object.entries(shadcnTokens.borderRadius).forEach(([k, v]) => {
-        set(`--shadcn-radius-${k}`, v)
-    })
+        set(`--shadcn-radius-${k}`, v);
+    });
 
     // Fonts
-    set('--shadcn-font-primary', shadcnTokens.fonts.primary)
-    set('--shadcn-font-secondary', shadcnTokens.fonts.secondary)
-    set('--shadcn-font-mono', shadcnTokens.fonts.mono)
+    set("--shadcn-font-primary", shadcnTokens.fonts.primary);
+    set("--shadcn-font-secondary", shadcnTokens.fonts.secondary);
+    set("--shadcn-font-mono", shadcnTokens.fonts.mono);
 
     // Typography sizes (map a few semantic tokens)
-    set('--shadcn-typo-h1', (typography.h1.fontSize as string))
-    set('--shadcn-typo-h2', (typography.h2.fontSize as string))
-    set('--shadcn-typo-h3', (typography.h3.fontSize as string))
-    set('--shadcn-typo-body', (typography.body1.fontSize as string))
-    set('--shadcn-typo-small', (typography.caption.fontSize as string))
+    set("--shadcn-typo-h1", typography.h1.fontSize as string);
+    set("--shadcn-typo-h2", typography.h2.fontSize as string);
+    set("--shadcn-typo-h3", typography.h3.fontSize as string);
+    set("--shadcn-typo-body", typography.body1.fontSize as string);
+    set("--shadcn-typo-small", typography.caption.fontSize as string);
 
     // Font weights
     Object.entries(fontWeights).forEach(([k, v]) => {
-        set(`--shadcn-font-weight-${k}`, String(v))
-    })
+        set(`--shadcn-font-weight-${k}`, String(v));
+    });
 }
 
-export default shadcnTokens
+export default shadcnTokens;

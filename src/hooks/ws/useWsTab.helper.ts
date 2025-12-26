@@ -3,11 +3,11 @@
  * Helper functions for managing workspace editor tabs
  */
 
-import { Ws } from '@/store/ws/useWs.store';
-import { BaseTab } from '@/types/editor/tab.types';
-import {useEditorTabsStore} from '../../store';
-import { constants } from '@/utils/constants';
-import { useEditorTabHelper } from '../vsCode/useEditorTab.helper';
+import { Ws } from "@/store/ws/useWs.store";
+import { BaseTab } from "@/types/editor/tab.types";
+import { useEditorTabsStore } from "../../store";
+import { constants } from "@/utils/constants";
+import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -18,11 +18,8 @@ export const useWsTabHelper = () => {
      * If tab already exists, activate it; otherwise create new tab
      */
     const openWorkspaceTab = (workspace: Ws) => {
-
         // Check if tab already exists for this workspace
-        const existingTab = openTabs.find(
-            tab => tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspace.id
-        );
+        const existingTab = openTabs.find((tab) => tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspace.id);
 
         if (existingTab) {
             // Tab already exists, just activate it
@@ -33,7 +30,7 @@ export const useWsTabHelper = () => {
                 id: `workspace-tab-${workspace.id}-${Date.now()}`,
                 type: constants.vscode.tab.tabTypes.workspace,
                 data: workspace,
-                title: workspace.name || 'Unsaved Workspace',
+                title: workspace.name || "Unsaved Workspace",
                 hasUnsavedChanges: false,
             };
 
@@ -47,9 +44,8 @@ export const useWsTabHelper = () => {
      * Close workspace tab
      */
     const closeWorkspaceTab = (tabId: string) => {
-        
-        setOpenTabs(prev => {
-            const newTabs = prev.filter(t => t.id !== tabId);
+        setOpenTabs((prev) => {
+            const newTabs = prev.filter((t) => t.id !== tabId);
 
             // If closing active tab, switch to another tab
             if (activeTabId === tabId) {
@@ -71,27 +67,26 @@ export const useWsTabHelper = () => {
      * When workspace is updated, sync it across all open tabs
      */
     const updateWorkspaceInTabs = (workspaceId: number, updatedWorkspace: Partial<Ws>) => {
-        
-        setOpenTabs(prev => prev.map(tab => {
-            if (tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspaceId) {
-                const wsData = tab.data as Ws;
-                return {
-                    ...tab,
-                    data: { ...wsData, ...updatedWorkspace },
-                    title: updatedWorkspace.name || tab.title,
-                };
-            }
-            return tab;
-        }));
+        setOpenTabs((prev) =>
+            prev.map((tab) => {
+                if (tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspaceId) {
+                    const wsData = tab.data as Ws;
+                    return {
+                        ...tab,
+                        data: { ...wsData, ...updatedWorkspace },
+                        title: updatedWorkspace.name || tab.title,
+                    };
+                }
+                return tab;
+            }),
+        );
     };
 
     /**
      * Mark workspace tab as having unsaved changes
      */
     const markWorkspaceTabUnsaved = (tabId: string, hasChanges: boolean) => {
-        setOpenTabs((prev: BaseTab[]) => prev.map(tab => 
-            tab.id === tabId ? { ...tab, hasUnsavedChanges: hasChanges } : tab
-        ));
+        setOpenTabs((prev: BaseTab[]) => prev.map((tab) => (tab.id === tabId ? { ...tab, hasUnsavedChanges: hasChanges } : tab)));
     };
 
     return {

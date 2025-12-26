@@ -1,18 +1,18 @@
 /**
  * Style mixins and utility functions for consistent styling.
- * 
+ *
  * This module provides reusable style objects and functions that can be
  * applied throughout the application for consistent design patterns.
  * All mixins return React.CSSProperties types for type safety.
  */
 
-import { CSSProperties } from 'react';
+import { CSSProperties } from "react";
 
 /**
  * Truncate single-line text with ellipsis overflow.
- * 
+ *
  * @returns CSS object for single-line text truncation
- * 
+ *
  * @example
  * ```typescript
  * <div style={truncateText()}>
@@ -22,18 +22,18 @@ import { CSSProperties } from 'react';
  */
 export function truncateText(): CSSProperties {
     return {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
     };
 }
 
 /**
  * Truncate multi-line text with ellipsis overflow.
- * 
+ *
  * @param lines - Number of lines to show before truncation (default: 2)
  * @returns CSS object for multi-line text truncation
- * 
+ *
  * @example
  * ```typescript
  * <div style={truncateMultiline(3)}>
@@ -43,21 +43,21 @@ export function truncateText(): CSSProperties {
  */
 export function truncateMultiline(lines: number = 2): CSSProperties {
     return {
-        display: '-webkit-box',
+        display: "-webkit-box",
         WebkitLineClamp: lines,
-        WebkitBoxOrient: 'vertical',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
     };
 }
 
 /**
  * Apply smooth CSS transition to properties.
- * 
+ *
  * @param property - CSS property to transition (default: 'all')
  * @param duration - Transition duration (default: '0.3s')
  * @returns CSS object for smooth transitions
- * 
+ *
  * @example
  * ```typescript
  * <div style={{
@@ -67,7 +67,7 @@ export function truncateMultiline(lines: number = 2): CSSProperties {
  * </div>
  * ```
  */
-export function smoothTransition(property: string = 'all', duration: string = '0.3s'): CSSProperties {
+export function smoothTransition(property: string = "all", duration: string = "0.3s"): CSSProperties {
     return {
         transition: `${property} ${duration} ease`,
     };
@@ -75,11 +75,11 @@ export function smoothTransition(property: string = 'all', duration: string = '0
 
 /**
  * Hide scrollbars while maintaining scroll functionality.
- * 
+ *
  * Works across all major browsers (Chrome, Safari, Firefox, IE/Edge).
- * 
+ *
  * @returns CSS object to hide scrollbars
- * 
+ *
  * @example
  * ```typescript
  * <div className="overflow-auto" style={hideScrollbar()}>
@@ -89,19 +89,19 @@ export function smoothTransition(property: string = 'all', duration: string = '0
  */
 export function hideScrollbar(): CSSProperties {
     return {
-        scrollbarWidth: 'none' as const, // Firefox
-        msOverflowStyle: 'none' as const, // IE and Edge
+        scrollbarWidth: "none" as const, // Firefox
+        msOverflowStyle: "none" as const, // IE and Edge
     };
 }
 
 /**
  * Center an absolutely positioned element.
- * 
+ *
  * Uses transform to center the element both horizontally and vertically
  * relative to its positioned parent.
- * 
+ *
  * @returns CSS object for absolute centering
- * 
+ *
  * @example
  * ```typescript
  * <div className="relative">
@@ -113,9 +113,9 @@ export function hideScrollbar(): CSSProperties {
  */
 export function absoluteCenter(): CSSProperties {
     return {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
     };
 }

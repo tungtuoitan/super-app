@@ -4,8 +4,8 @@
  * Manages workspaces and their tree data, folder UI state
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from 'react';
-import type { WorkspaceListResponse, WorkspaceWithTreeResponse } from '@/types/workspace.types';
+import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
+import type { WorkspaceListResponse, WorkspaceWithTreeResponse } from "@/types/workspace.types";
 
 export interface ExplorerContextData {
     // Workspace state
@@ -17,7 +17,7 @@ export interface ExplorerContextData {
     setIsLoadingWorkspaces: Dispatch<SetStateAction<boolean>>;
     isLoadingTree: boolean;
     setIsLoadingTree: Dispatch<SetStateAction<boolean>>;
-    
+
     // Folder UI state (workspace folder UI, selection)
     selectedRowIds: number[];
     setSelectedRowIds: Dispatch<SetStateAction<number[]>>;
@@ -32,7 +32,6 @@ export interface ExplorerContextData {
     isDragging: boolean;
     setIsDragging: Dispatch<SetStateAction<boolean>>;
     _treeRef: React.RefObject<any>;
-
 }
 
 export const explorerContextDefaultValue: ExplorerContextData = {
@@ -48,7 +47,7 @@ export const explorerContextDefaultValue: ExplorerContextData = {
     setSelectedRowIds: () => {},
     expandedNodes: new Set(),
     setExpandedNodes: () => {},
-    searchText: '',
+    searchText: "",
     setSearchText: () => {},
     selectedFolderIds: [],
     setSelectedFolderIds: () => {},
@@ -68,11 +67,11 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const [currentTree, setCurrentTree] = useState<WorkspaceWithTreeResponse | null>(null);
     const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
-    
+
     // Folder UI state
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
     const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
-    const [searchText, setSearchText] = useState<string>('');
+    const [searchText, setSearchText] = useState<string>("");
     const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
     const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);

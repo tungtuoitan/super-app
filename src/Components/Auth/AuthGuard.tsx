@@ -9,10 +9,10 @@
  * - Prevent unauthorized access to the app
  */
 
-import { useEffect } from 'react';
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { useAuthHelper } from '@/hooks/useAuth.helpers';
-import { useActivityBarStore } from '@/store/activityBar/ActivityBar.store';
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthHelper } from "@/hooks/useAuth.helpers";
+import { useActivityBarStore } from "@/store/activityBar/ActivityBar.store";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated } = useAuthStore();
@@ -48,11 +48,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!isAuthenticated) {
             setAccountsOpen(true);
-        }
-        else {
+        } else {
             setAccountsOpen(false);
         }
-    
     }, [isAuthenticated]);
 
     return <>{children}</>;

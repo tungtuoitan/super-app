@@ -3,23 +3,23 @@
  * Business logic for workspace list operations
  */
 
-import { _deleteWs, _getWsList, _upsertWsBatch, WsDTO } from '@/services/ws.service';
-import { storageService } from '@/services/storage.service';
-import { useSnackbar } from 'notistack';
-import { useWsStore, Ws } from '@/store/ws/useWs.store';
-import { constants } from '@/utils/constants';
-import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
-import {BaseTab} from '@/types/editor/tab.types';
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import {useWsTabHelper} from './useWsTab.helper';
-import {useEditorTabsStore} from '@/store/index';
-import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
+import { _deleteWs, _getWsList, _upsertWsBatch, WsDTO } from "@/services/ws.service";
+import { storageService } from "@/services/storage.service";
+import { useSnackbar } from "notistack";
+import { useWsStore, Ws } from "@/store/ws/useWs.store";
+import { constants } from "@/utils/constants";
+import { generateTempId, generateUnsavedName, collectIdsFromTabs } from "@/utils/temp-id.utils";
+import { BaseTab } from "@/types/editor/tab.types";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { useWsTabHelper } from "./useWsTab.helper";
+import { useEditorTabsStore } from "@/store/index";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
  */
 const transformWsData = (dtos: WsDTO[]): Ws[] => {
-    return dtos.map(dto => ({
+    return dtos.map((dto) => ({
         id: dto.id,
         name: dto.name,
         description: dto.description,
@@ -32,15 +32,7 @@ const transformWsData = (dtos: WsDTO[]): Ws[] => {
 
 export const useWsHelper = () => {
     const { auth } = useAuthStore();
-    const {
-        workspaces,
-        setWorkspaces,
-        setIsLoading,
-        setError,
-        rowSelection,
-        setRowSelection,
-        setShouldFocusWsName,
-    } = useWsStore();
+    const { workspaces, setWorkspaces, setIsLoading, setError, rowSelection, setRowSelection, setShouldFocusWsName } = useWsStore();
 
     const { enqueueSnackbar } = useSnackbar();
     const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useOrchestratorContextMenuStore();
@@ -55,26 +47,26 @@ export const useWsHelper = () => {
             setIsLoading(true);
             const token = auth.userToken;
             const result = await _getWsList(token);
-            
+
             // Check API response success
             if (!result.success) {
-                throw new Error(result.message || 'Failed to load workspaces');
+                throw new Error(result.message || "Failed to load workspaces");
             }
-            
+
             // Transform dates from API strings to Date objects
             const transformedData = transformWsData(result.data || []);
             setWorkspaces(transformedData);
             setError(null);
         } catch (err) {
-            console.error('Failed to load workspaces:', err);
+            console.error("Failed to load workspaces:", err);
             const errorMessage = await parseApiError(err);
             setError(new Error(errorMessage));
 
             // Show specific message for unauthorized
             if (isUnauthorizedError(err)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             } else {
-                enqueueSnackbar(`Failed to load workspaces: ${errorMessage}`, { variant: 'error' });
+                enqueueSnackbar(`Failed to load workspaces: ${errorMessage}`, { variant: "error" });
             }
         } finally {
             setIsLoading(false);
@@ -86,7 +78,7 @@ export const useWsHelper = () => {
      * @param action - The action performed on workspaces ('delete', 'restore', 'hardDelete')
      * @param workspaceIds - Array of workspace IDs affected
      */
-    const syncWsGridToTab = (action: 'delete' | 'restore' | 'hardDelete', workspaceIds: number[]) => {
+    const syncWsGridToTab = (action: "delete" | "restore" | "hardDelete", workspaceIds: number[]) => {
         if (workspaceIds.length === 0) return;
 
         //* LOGIC: data trong Tab luôn là data cũ (tức là data mà user đang thao tác), k sync với db, nó chỉ sync những gì user thao tác
@@ -94,13 +86,13 @@ export const useWsHelper = () => {
             if (tab.type === constants.vscode.tab.tabTypes.workspace && workspaceIds.includes((tab as any).data.id)) {
                 const wsData = tab.data as Ws;
                 switch (action) {
-                    case 'delete':
+                    case "delete":
                         // Mark tab data as soft deleted
                         return { ...tab, data: { ...wsData, deletedAt: new Date() } };
-                    case 'restore':
+                    case "restore":
                         // Remove deleted flag when restoring
                         return { ...tab, data: { ...wsData, deletedAt: null, isHardDeleted: false } };
-                    case 'hardDelete':
+                    case "hardDelete":
                         // Mark tab data as hard deleted
                         return { ...tab, data: { ...wsData, deletedAt: null, isHardDeleted: true } };
                     default:
@@ -117,17 +109,16 @@ export const useWsHelper = () => {
      * Create new workspace (temporary with negative ID)
      */
     const createNewWorkspace = () => {
-
         // Generate sequential temporary negative ID from open tabs
         const existingIds = collectIdsFromTabs(openTabs);
         const tempId = generateTempId(existingIds);
         const name = generateUnsavedName(tempId);
-        
+
         // Create temporary workspace
         const newWorkspace: Ws = {
             id: tempId,
             name: name,
-            description: '',
+            description: "",
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
@@ -157,25 +148,25 @@ export const useWsHelper = () => {
 
             if (isHardDelete) {
                 // HARD DELETE: Use DELETE API (permanently remove)
-                const result = await _deleteWs(token, selectedIds.join(','));
+                const result = await _deleteWs(token, selectedIds.join(","));
 
                 if (!result.success) {
-                    throw new Error(result.message || 'Failed to hard delete workspace(s)');
+                    throw new Error(result.message || "Failed to hard delete workspace(s)");
                 }
 
                 enqueueSnackbar(`Successfully permanently deleted ${selectedIds.length} workspace(s)`, {
-                    variant: 'success'
+                    variant: "success",
                 });
 
                 // Sync tabs
-                syncWsGridToTab('hardDelete', selectedIds);
+                syncWsGridToTab("hardDelete", selectedIds);
             } else {
                 // SOFT DELETE: Use batch upsert API with deletedAt timestamp
                 const deletedAt = new Date().toISOString();
 
                 // Build batch soft delete requests
-                const batchRequests = selectedIds.map(id => {
-                    const workspace = workspaces.find(w => w.id === id);
+                const batchRequests = selectedIds.map((id) => {
+                    const workspace = workspaces.find((w) => w.id === id);
                     if (!workspace) {
                         throw new Error(`Workspace ${id} not found`);
                     }
@@ -193,29 +184,29 @@ export const useWsHelper = () => {
                 const result = await _upsertWsBatch(token, batchRequests);
 
                 if (!result.success) {
-                    throw new Error(result.message || 'Failed to soft delete workspaces');
+                    throw new Error(result.message || "Failed to soft delete workspaces");
                 }
 
                 enqueueSnackbar(`Successfully soft deleted ${selectedIds.length} workspace(s)`, {
-                    variant: 'success'
+                    variant: "success",
                 });
 
                 // Sync tabs
-                syncWsGridToTab('delete', selectedIds);
+                syncWsGridToTab("delete", selectedIds);
             }
 
             // Clear selection and reload workspaces
             setRowSelection({});
             await loadWorkspaces();
         } catch (error) {
-            console.error('Failed to delete workspaces:', error);
+            console.error("Failed to delete workspaces:", error);
             const errorMessage = await parseApiError(error);
 
             // Show specific message for unauthorized
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             } else {
-                enqueueSnackbar(`Failed to delete workspaces: ${errorMessage}`, { variant: 'error' });
+                enqueueSnackbar(`Failed to delete workspaces: ${errorMessage}`, { variant: "error" });
             }
         }
     };
@@ -238,24 +229,20 @@ export const useWsHelper = () => {
                 // Add this row to existing selection
                 setRowSelection({ ...rowSelection, [row.id]: true });
                 // Include this row in selectedIds along with existing selection
-                selectedIds = [...Object.keys(rowSelection).map(id => parseInt(id)), rowId];
+                selectedIds = [...Object.keys(rowSelection).map((id) => parseInt(id)), rowId];
             } else {
                 // Row already selected, use current selection
-                selectedIds = Object.keys(rowSelection).map(id => parseInt(id));
+                selectedIds = Object.keys(rowSelection).map((id) => parseInt(id));
             }
 
-            selectedWorkspaces = [...workspaces]
-                .sort((a, b) =>
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                )
-                .filter(ws => selectedIds.includes(ws.id));
+            selectedWorkspaces = [...workspaces].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).filter((ws) => selectedIds.includes(ws.id));
         } else {
             // Clicked on empty area
             selectedIds = [];
         }
 
         setAnchorPoint({ x: event.clientX, y: event.clientY });
-        setContextType('workspace-grid');
+        setContextType("workspace-grid");
         setContextData({
             selectedWorkspaces,
             selectedIds,
@@ -264,7 +251,6 @@ export const useWsHelper = () => {
         });
         setIsContextMenuOpen(true);
     };
-
 
     return {
         loadWorkspaces,

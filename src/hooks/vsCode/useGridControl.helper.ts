@@ -3,31 +3,17 @@
  * Business logic for grid controls (search, filter)
  */
 
-import { useGridControlStore } from '@/store/grid/useGridControl.store';
-import { Table } from '@tanstack/react-table';
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { Table } from "@tanstack/react-table";
 
 export const useGridControlHelper = () => {
-    const {
-        table,
-        setTable,
-        searchQuery,
-        setSearchQuery,
-        columnFilters,
-        setColumnFilters,
-        entityName,
-        setEntityName,
-    } = useGridControlStore();
+    const { table, setTable, searchQuery, setSearchQuery, columnFilters, setColumnFilters, entityName, setEntityName } = useGridControlStore();
 
     /**
      * Register grid table instance and metadata
      * Called by grid components (WsGrid, NoteGrid) on mount/update
      */
-    const registerGrid = (
-        tableInstance: Table<any>,
-        filters: any[],
-        filtersSetter: (filters: any[]) => void,
-        name: string
-    ) => {
+    const registerGrid = (tableInstance: Table<any>, filters: any[], filtersSetter: (filters: any[]) => void, name: string) => {
         setTable(tableInstance);
         setColumnFilters(filters);
         setEntityName(name);
@@ -43,15 +29,15 @@ export const useGridControlHelper = () => {
     const unregisterGrid = () => {
         setTable(null);
         setColumnFilters([]);
-        setEntityName('');
-        setSearchQuery('');
+        setEntityName("");
+        setSearchQuery("");
     };
 
     /**
      * Clear search query
      */
     const clearSearch = () => {
-        setSearchQuery('');
+        setSearchQuery("");
     };
 
     /**

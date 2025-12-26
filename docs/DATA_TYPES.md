@@ -52,22 +52,21 @@
 
 18. **Magic Numbers**: Áp dụng theme tokens/constants.
 
-
 ## 📝 Quick Reference
 
-| Anti-Pattern | Solution |
-|--------------|----------|
-| Context server | React Query |
-| Derived state | Compute/useMemo |
-| Prop drilling | Context |
-| Massive comp | Tách nhỏ |
-| Index key | Unique ID |
-| Conditional hooks | Top-level/enabled |
-| useEffect everywhere | React Query |
-| Type any | Proper types |
-| No error handling | Try/catch/boundaries |
-| Inline styles | sx/styled |
-| Context subscriptions | Props callbacks |
+| Anti-Pattern          | Solution             |
+| --------------------- | -------------------- |
+| Context server        | React Query          |
+| Derived state         | Compute/useMemo      |
+| Prop drilling         | Context              |
+| Massive comp          | Tách nhỏ             |
+| Index key             | Unique ID            |
+| Conditional hooks     | Top-level/enabled    |
+| useEffect everywhere  | React Query          |
+| Type any              | Proper types         |
+| No error handling     | Try/catch/boundaries |
+| Inline styles         | sx/styled            |
+| Context subscriptions | Props callbacks      |
 
 **Nhớ**: Review và linting giúp phát hiện sớm.
 
@@ -79,14 +78,14 @@
 
 ### Phân Loại & Công Cụ
 
-| Loại | Công Cụ | Ví Dụ |
-|------|---------|-------|
-| Server | React Query | Data API: notes, profile |
-| Global UI | Context | Auth, theme |
-| Feature UI | Feature Context | Filters, dialogs |
-| Local UI | useState/Reducer | Inputs, toggles |
-| URL | Router | Page, filters |
-| Form | React Hook Form | Forms validation |
+| Loại       | Công Cụ          | Ví Dụ                    |
+| ---------- | ---------------- | ------------------------ |
+| Server     | React Query      | Data API: notes, profile |
+| Global UI  | Context          | Auth, theme              |
+| Feature UI | Feature Context  | Filters, dialogs         |
+| Local UI   | useState/Reducer | Inputs, toggles          |
+| URL        | Router           | Page, filters            |
+| Form       | React Hook Form  | Forms validation         |
 
 ### Nguyên Tắc Hay
 

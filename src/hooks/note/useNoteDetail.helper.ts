@@ -88,7 +88,6 @@ export const useNoteDetailHelper = () => {
                 }
                 const transformedNote = transformNoteData(savedNote);
 
-                
                 // ============================================================
                 // Step 8: If creating from workspace tree, add to workspace_items
                 // ============================================================
@@ -115,7 +114,6 @@ export const useNoteDetailHelper = () => {
                     }
                 }
 
-            
                 // ============================================================
                 // Step 10: Update selected note in store with server response
                 // ============================================================
@@ -133,19 +131,18 @@ export const useNoteDetailHelper = () => {
                                 };
                             }
                             return tab;
-                        })
+                        }),
                     );
                 }
-            
+
                 originalNoteRef.current = { ...selectedNote };
                 await loadNotes();
-            
+
                 if (isCreateMode && currentTree?.workspaceId) {
                     await loadTree(currentTree.workspaceId);
                 }
 
                 return transformedNote;
-
             } catch (error) {
                 console.error("❌ Failed to save note:", error);
                 const errorMessage = await parseApiError(error);
@@ -158,7 +155,7 @@ export const useNoteDetailHelper = () => {
                 return null;
             }
         },
-        [selectedNote, loadNotes, loadTree, currentTree]
+        [selectedNote, loadNotes, loadTree, currentTree],
     );
 
     return {

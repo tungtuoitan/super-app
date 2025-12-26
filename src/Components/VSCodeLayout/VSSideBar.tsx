@@ -1,92 +1,90 @@
-import { Panel, PanelGroup } from 'react-resizable-panels'
-import type { ActivityBarView } from '@/utils/constants'
-import { NoteGrid } from '../Note/NoteGrid'
-import {VSCodeResizeHandle} from '@/Components/VSCodeLayout/VSCodeResizeHandle'
-import { WorkspaceView } from './WorkspaceView'
-import { GridControlBar } from '@/Components/shared/GridControlBar'
-import { GridControlProvider } from '@/store/grid/useGridControl.store'
-import { constants } from '@/utils/constants'
-import { useActivityBarStore } from '@/store/index'
-import {WsView} from './WsView'
+import { Panel, PanelGroup } from "react-resizable-panels";
+import type { ActivityBarView } from "@/utils/constants";
+import { NoteGrid } from "../Note/NoteGrid";
+import { VSCodeResizeHandle } from "@/Components/VSCodeLayout/VSCodeResizeHandle";
+import { WorkspaceView } from "./WorkspaceView";
+import { GridControlBar } from "@/Components/shared/GridControlBar";
+import { GridControlProvider } from "@/store/grid/useGridControl.store";
+import { constants } from "@/utils/constants";
+import { useActivityBarStore } from "@/store/index";
+import { WsView } from "./WsView";
 
 interface VSSideBarProps {
-  activeView: ActivityBarView
+    activeView: ActivityBarView;
 }
 
 /**
  * VSSideBar - Sidebar content for VS Code style layout
- * 
+ *
  * Now wraps itself in a Panel for direct integration with PanelGroup.
  * This allows the sidebar and main content to be siblings in the panel hierarchy.
- * 
+ *
  * Views:
  * - Explorer: WorkspaceTree component for workspace navigation
  * - Workspace: Workspace management (currently same as Explorer)
  * - Notes: Notes list interface with search
- * 
+ *
  * Collapse behavior:
  * - When collapsed, panel size goes to 0 but resize handle remains visible
  * - User can drag the resize handle to expand the panel again (like VSCode)
  */
 export function VSSideBar({ activeView }: VSSideBarProps) {
-  const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore()
+    const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
 
-  return (
-    <Panel
-      id="sidebar"
-      defaultSize={20}
-      minSize={5}
-      maxSize={40}
-      collapsible
-      collapsedSize={0}
-      onCollapse={() => setIsSideBarVisible(false)}
-      onExpand={() => setIsSideBarVisible(true)}
-    >
-      {/* Only render inner panels when visible to avoid mounting when hidden */}
-      {isSideBarVisible && (
-        <GridControlProvider>
-          {/* Use a vertical PanelGroup to split the sidebar into two stacked panels */}
-          <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
-            {/* Top panel: original sidebar content */}
-            <Panel defaultSize={70} minSize={20}>
-              <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
-                {/* Header */}
-                <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
-                  <span>{getViewTitle(activeView)}</span>
-                  <GridControlBar />
-                </div>
+    return (
+        <Panel
+            id="sidebar"
+            defaultSize={20}
+            minSize={5}
+            maxSize={40}
+            collapsible
+            collapsedSize={0}
+            onCollapse={() => setIsSideBarVisible(false)}
+            onExpand={() => setIsSideBarVisible(true)}
+        >
+            {/* Only render inner panels when visible to avoid mounting when hidden */}
+            {isSideBarVisible && (
+                <GridControlProvider>
+                    {/* Use a vertical PanelGroup to split the sidebar into two stacked panels */}
+                    <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
+                        {/* Top panel: original sidebar content */}
+                        <Panel defaultSize={70} minSize={20}>
+                            <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
+                                {/* Header */}
+                                <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
+                                    <span>{getViewTitle(activeView)}</span>
+                                    <GridControlBar />
+                                </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-hidden">
-                  {activeView === 'workspaceList' && <WsView />}
-                  {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
-                  {activeView === constants.vscode.viewTypes.note && <NotesView />}
-                </div>
-              </div>
-            </Panel>
+                                {/* Content */}
+                                <div className="flex-1 overflow-hidden">
+                                    {activeView === "workspaceList" && <WsView />}
+                                    {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
+                                    {activeView === constants.vscode.viewTypes.note && <NotesView />}
+                                </div>
+                            </div>
+                        </Panel>
 
-          <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
+                        <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
 
-          {/* Bottom panel: secondary area (e.g., quick actions, details) */}
-          <Panel defaultSize={30} minSize={5} collapsible collapsedSize={0}>
-            {/* Mirror VSEditorArea structure but leave content empty */}
-            <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden border-1 border-red-0">
-              {/* Tab bar style header */}
-              <div className="h-[35px] flex items-center border-b border-editor-border bg-editor-sidebar overflow-hidden px-3">
-                <div className="text-[13px] text-muted-foreground">Secondary</div>
-              </div>
+                        {/* Bottom panel: secondary area (e.g., quick actions, details) */}
+                        <Panel defaultSize={30} minSize={5} collapsible collapsedSize={0}>
+                            {/* Mirror VSEditorArea structure but leave content empty */}
+                            <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden border-1 border-red-0">
+                                {/* Tab bar style header */}
+                                <div className="h-[35px] flex items-center border-b border-editor-border bg-editor-sidebar overflow-hidden px-3">
+                                    <div className="text-[13px] text-muted-foreground">Secondary</div>
+                                </div>
 
-              {/* Main content area (intentionally empty) */}
-              <div className="flex-1 overflow-hidden flex">
-                {/* Intentionally left blank - secondary panel content goes here */}
-              </div>
-            </div>
-          </Panel>
-        </PanelGroup>
-        </GridControlProvider>
-      )}
-    </Panel>
-  )
+                                {/* Main content area (intentionally empty) */}
+                                <div className="flex-1 overflow-hidden flex">{/* Intentionally left blank - secondary panel content goes here */}</div>
+                            </div>
+                        </Panel>
+                    </PanelGroup>
+                </GridControlProvider>
+            )}
+        </Panel>
+    );
 }
 
 /**
@@ -94,25 +92,25 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
  * Shows full note grid with all columns
  */
 function NotesView() {
-  return (
-    <div className="h-full flex flex-col overflow-hidden">
-      <NoteGrid />
-    </div>
-  )
+    return (
+        <div className="h-full flex flex-col overflow-hidden">
+            <NoteGrid />
+        </div>
+    );
 }
 
 /**
  * Get view title for header
  */
 function getViewTitle(view: ActivityBarView): string {
-  switch (view) {
-    case constants.vscode.viewTypes.workspace:
-      return constants.vscode.displayNames.workspace
-    case constants.vscode.viewTypes.workspaceList:
-      return 'WorkspaceList'
-    case constants.vscode.viewTypes.note:
-      return constants.vscode.displayNames.notes
-    default:
-      return 'View'
-  }
+    switch (view) {
+        case constants.vscode.viewTypes.workspace:
+            return constants.vscode.displayNames.workspace;
+        case constants.vscode.viewTypes.workspaceList:
+            return "WorkspaceList";
+        case constants.vscode.viewTypes.note:
+            return constants.vscode.displayNames.notes;
+        default:
+            return "View";
+    }
 }

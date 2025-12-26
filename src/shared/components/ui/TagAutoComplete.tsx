@@ -1,22 +1,12 @@
-import React, { useState } from 'react';
-import { X, Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/Components/ui/badge';
-import { Button } from '@/Components/ui/button';
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-} from '@/Components/ui/command';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/Components/ui/popover';
-import { Label } from '@/Components/ui/label';
-import { IAutoCompleteOptions } from './GenericAutoComplete';
+import React, { useState } from "react";
+import { X, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/Components/ui/badge";
+import { Button } from "@/Components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/Components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
+import { Label } from "@/Components/ui/label";
+import { IAutoCompleteOptions } from "./GenericAutoComplete";
 
 export interface GenericTagAutoCompleteProps {
     /** Array of available tag options */
@@ -34,14 +24,14 @@ export interface GenericTagAutoCompleteProps {
     /** Additional CSS class */
     className?: string;
     /** Size of the component */
-    size?: 'small' | 'medium';
+    size?: "small" | "medium";
     /** Test ID for testing purposes */
-    'data-testid'?: string;
+    "data-testid"?: string;
 }
 
 /**
  * Reusable multi-select autocomplete component for tags
- * 
+ *
  * @example
  * ```tsx
  * <GenericTagAutoComplete
@@ -59,56 +49,46 @@ export function GenericTagAutoComplete({
     value,
     onChange,
     disabled = false,
-    label = 'Tags',
-    placeholder = '+ Add Tag',
+    label = "Tags",
+    placeholder = "+ Add Tag",
     className,
-    size = 'small',
-    'data-testid': testId,
+    size = "small",
+    "data-testid": testId,
 }: GenericTagAutoCompleteProps) {
     const [open, setOpen] = useState(false);
-    
+
     // Convert comma-separated string to array of selected options
-    const selectedIds = value ? value.split(',').filter(Boolean) : [];
-    const selectedOptions = selectedIds.length > 0 
-        ? options.filter(option => selectedIds.includes(String(option.id)))
-        : [];
+    const selectedIds = value ? value.split(",").filter(Boolean) : [];
+    const selectedOptions = selectedIds.length > 0 ? options.filter((option) => selectedIds.includes(String(option.id))) : [];
 
     // Filter out already selected options from available options
-    const availableOptions = selectedIds.length > 0 
-        ? options.filter(option => !selectedIds.includes(String(option.id)))
-        : options;
+    const availableOptions = selectedIds.length > 0 ? options.filter((option) => !selectedIds.includes(String(option.id))) : options;
 
     // Handle adding a tag
     const handleSelect = (option: IAutoCompleteOptions) => {
         const newSelectedOptions = [...selectedOptions, option];
-        const idsString = newSelectedOptions.map(opt => opt.id).join(',');
+        const idsString = newSelectedOptions.map((opt) => opt.id).join(",");
         onChange(idsString);
     };
 
     // Handle removing a tag
     const handleRemove = (optionId: number | string) => {
-        const newSelectedOptions = selectedOptions.filter(opt => opt.id !== optionId);
-        const idsString = newSelectedOptions.map(opt => opt.id).join(',');
+        const newSelectedOptions = selectedOptions.filter((opt) => opt.id !== optionId);
+        const idsString = newSelectedOptions.map((opt) => opt.id).join(",");
         onChange(idsString);
     };
 
-    const sizeClasses = size === 'small' ? 'h-9 text-sm' : 'h-10 text-base';
+    const sizeClasses = size === "small" ? "h-9 text-sm" : "h-10 text-base";
 
     return (
         <div className={cn("w-full space-y-2", className)} data-testid={testId}>
-            {label && (
-                <Label className="block text-left text-sm font-medium">{label}</Label>
-            )}
-            
+            {label && <Label className="block text-left text-sm font-medium">{label}</Label>}
+
             {/* Selected tags display */}
             {selectedOptions.length > 0 && (
                 <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-background min-h-[40px]">
                     {selectedOptions.map((option) => (
-                        <Badge 
-                            key={option.id} 
-                            variant="secondary"
-                            className="gap-1 pl-2 pr-1"
-                        >
+                        <Badge key={option.id} variant="secondary" className="gap-1 pl-2 pr-1">
                             <span>{option.label || option.desc}</span>
                             {!disabled && (
                                 <button
@@ -126,7 +106,7 @@ export function GenericTagAutoComplete({
                     ))}
                 </div>
             )}
-            
+
             {/* Add tag dropdown */}
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
@@ -135,16 +115,10 @@ export function GenericTagAutoComplete({
                         role="combobox"
                         aria-expanded={open}
                         disabled={disabled || availableOptions.length === 0}
-                        className={cn(
-                            "w-full justify-between",
-                            sizeClasses,
-                            !selectedOptions.length && "text-muted-foreground"
-                        )}
+                        className={cn("w-full justify-between", sizeClasses, !selectedOptions.length && "text-muted-foreground")}
                         data-testid={testId ? `${testId}-trigger` : undefined}
                     >
-                        <span className="truncate">
-                            {selectedOptions.length === 0 ? placeholder : `${selectedOptions.length} selected`}
-                        </span>
+                        <span className="truncate">{selectedOptions.length === 0 ? placeholder : `${selectedOptions.length} selected`}</span>
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
@@ -155,7 +129,7 @@ export function GenericTagAutoComplete({
                         <CommandGroup className="max-h-[200px] overflow-auto">
                             {availableOptions.map((option) => {
                                 const isDisabled = option.isActive === false;
-                                const label = option.label || option.desc || '';
+                                const label = option.label || option.desc || "";
 
                                 return (
                                     <CommandItem
@@ -168,15 +142,9 @@ export function GenericTagAutoComplete({
                                             }
                                         }}
                                         disabled={isDisabled}
-                                        className={cn(
-                                            isDisabled && "opacity-50 cursor-not-allowed"
-                                        )}
+                                        className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
                                     >
-                                        <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4 opacity-0"
-                                            )}
-                                        />
+                                        <Check className={cn("mr-2 h-4 w-4 opacity-0")} />
                                         <span>{label}</span>
                                     </CommandItem>
                                 );

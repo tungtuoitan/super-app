@@ -8,10 +8,7 @@ import { envConfig } from "./env.config";
 
 export const config = {
     api: {
-        baseURL:
-            envConfig.NODE_ENV === "production"
-                ? ""
-                : envConfig.REACT_APP_LOCAL_API_URL || "http://localhost:5000",
+        baseURL: envConfig.NODE_ENV === "production" ? "" : envConfig.REACT_APP_LOCAL_API_URL || "http://localhost:5000",
         timeout: 30000,
         headers: {
             "Content-Type": "application/json",

@@ -1,7 +1,6 @@
-
-import { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
-import type { WorkspaceItem } from '@/types/workspace.types';
-import { constants } from '@/utils/constants';
+import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import type { WorkspaceItem } from "@/types/workspace.types";
+import { constants } from "@/utils/constants";
 
 export interface FolderDialogFormErrors {
     name?: string;
@@ -9,8 +8,12 @@ export interface FolderDialogFormErrors {
     color?: string;
 }
 
-export type DialogMode = 'create' | 'edit';
-export type ItemType = typeof constants.workspace.itemTypes.folder | typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.file | typeof constants.workspace.itemTypes.tag;
+export type DialogMode = "create" | "edit";
+export type ItemType =
+    | typeof constants.workspace.itemTypes.folder
+    | typeof constants.workspace.itemTypes.note
+    | typeof constants.workspace.itemTypes.file
+    | typeof constants.workspace.itemTypes.tag;
 
 export interface FolderDialogContextData {
     // Dialog state
@@ -24,7 +27,7 @@ export interface FolderDialogContextData {
     setEditingFolder: Dispatch<SetStateAction<any | null>>;
     parentFolder: any | null;
     setParentFolder: Dispatch<SetStateAction<any | null>>;
-    
+
     // Form fields
     newFolderName: string;
     setNewFolderName: Dispatch<SetStateAction<string>>;
@@ -32,11 +35,11 @@ export interface FolderDialogContextData {
     setDescription: Dispatch<SetStateAction<string>>;
     color: string;
     setColor: Dispatch<SetStateAction<string>>;
-    
+
     // Validation errors
     errors: FolderDialogFormErrors;
     setErrors: Dispatch<SetStateAction<FolderDialogFormErrors>>;
-    
+
     // Loading states
     isSubmitting: boolean;
     setIsSubmitting: Dispatch<SetStateAction<boolean>>;
@@ -48,7 +51,7 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     // Dialog state
     isFolderDialogOpen: false,
     setIsFolderDialogOpen: () => {},
-    mode: 'create',
+    mode: "create",
     setMode: () => {},
     itemType: constants.workspace.itemTypes.folder,
     setItemType: () => {},
@@ -56,19 +59,19 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     setEditingFolder: () => {},
     parentFolder: null,
     setParentFolder: () => {},
-    
+
     // Form fields
-    newFolderName: '',
+    newFolderName: "",
     setNewFolderName: () => {},
-    description: '',
+    description: "",
     setDescription: () => {},
-    color: '#1976D2', // Default blue
+    color: "#1976D2", // Default blue
     setColor: () => {},
-    
+
     // Validation errors
     errors: {},
     setErrors: () => {},
-    
+
     // Loading states
     isSubmitting: false,
     setIsSubmitting: () => {},
@@ -76,15 +79,12 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     setIsLoadingTree: () => {},
 };
 
-
-export const FolderDialogStore = createContext<FolderDialogContextData>(
-    folderDialogContextDefaultValue
-);
+export const FolderDialogStore = createContext<FolderDialogContextData>(folderDialogContextDefaultValue);
 
 export const useFolderDialogStore = () => {
     const context = useContext(FolderDialogStore);
     if (!context) {
-        throw new Error('useFolderDialogStore must be used within FolderDialogProvider');
+        throw new Error("useFolderDialogStore must be used within FolderDialogProvider");
     }
     return context;
 };
@@ -92,23 +92,22 @@ export const useFolderDialogStore = () => {
 export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Dialog state
     const [isFolderDialogOpen, setIsFolderDialogOpen] = useState<boolean>(false);
-    const [mode, setMode] = useState<DialogMode>('create');
+    const [mode, setMode] = useState<DialogMode>("create");
     const [itemType, setItemType] = useState<ItemType>(constants.workspace.itemTypes.folder);
     const [editingFolder, setEditingFolder] = useState<any | null>(null);
     const [parentFolder, setParentFolder] = useState<any | null>(null);
-    
+
     // Form fields
-    const [newFolderName, setNewFolderName] = useState<string>('');
-    const [description, setDescription] = useState<string>('');
-    const [color, setColor] = useState<string>('#1976D2'); // Default blue
-    
+    const [newFolderName, setNewFolderName] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
+    const [color, setColor] = useState<string>("#1976D2"); // Default blue
+
     // Validation errors
     const [errors, setErrors] = useState<FolderDialogFormErrors>({});
-    
+
     // Loading states
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
-    
 
     return (
         <FolderDialogStore.Provider
@@ -124,7 +123,7 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 setEditingFolder,
                 parentFolder,
                 setParentFolder,
-                
+
                 // Form fields
                 newFolderName,
                 setNewFolderName,
@@ -132,11 +131,11 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 setDescription,
                 color,
                 setColor,
-                
+
                 // Validation errors
                 errors,
                 setErrors,
-                
+
                 // Loading states
                 isSubmitting,
                 setIsSubmitting,

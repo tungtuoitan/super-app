@@ -38,9 +38,10 @@ export function WorkspaceTree() {
         };
 
         document.addEventListener("keydown", handleKeyDownWrapper);
-        return () => document.removeEventListener("keydown", (e: KeyboardEvent) => {
-            handleKeyDown(e, allVisibleFolderIds);
-        });
+        return () =>
+            document.removeEventListener("keydown", (e: KeyboardEvent) => {
+                handleKeyDown(e, allVisibleFolderIds);
+            });
     }, [handleKeyDown, allVisibleFolderIds]);
 
     return (

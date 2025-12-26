@@ -3,17 +3,11 @@
  * Business logic for workspace UI interactions
  */
 
-import { useWsDetailStore } from '@/store/ws/useWsDetail.store';
-import { Ws } from '@/store/ws/useWs.store';
+import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
+import { Ws } from "@/store/ws/useWs.store";
 
 export const useWsDetailHelper = () => {
-    const {
-        selectedWorkspace,
-        setSelectedWorkspace,
-        setWsHasChanges,
-        originalWsRef,
-    } = useWsDetailStore();
-
+    const { selectedWorkspace, setSelectedWorkspace, setWsHasChanges, originalWsRef } = useWsDetailStore();
 
     /**
      * Update selected workspace (triggers unsaved changes flag)

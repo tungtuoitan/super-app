@@ -1,18 +1,11 @@
-import React from 'react';
-import { NodeApi } from 'react-arborist';
-import {
-    ChevronDown,
-    ChevronRight,
-    Layers,
-    Plus,
-    RefreshCw,
-    ChevronsUp
-} from 'lucide-react';
-import { useExplorerStore } from '@/store/index';
-import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
-import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
-import { TreeFolder } from '@/hooks/explorer/tree.helper';
-import { FolderItem } from '@/types/workspace.types';
+import React from "react";
+import { NodeApi } from "react-arborist";
+import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
+import { useExplorerStore } from "@/store/index";
+import { useTreeOperation } from "@/hooks/explorer/useTreeOperation.helper";
+import { useWorkspaceOperation } from "@/hooks/explorer/useWorkspaceOperation.helper";
+import { TreeFolder } from "@/hooks/explorer/tree.helper";
+import { FolderItem } from "@/types/workspace.types";
 
 interface RootFolderNodeProps {
     node: NodeApi<TreeFolder>;
@@ -52,26 +45,19 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                     e.preventDefault();
                     node.toggle();
                 }}
-                className={`p-0.5 ${hasChildren ? 'visible' : 'invisible'} text-editor-fg`}
+                className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
             >
-                {hasChildren ? (
-                    node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                ) : null}
+                {hasChildren ? node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" /> : null}
             </button>
 
             {/* Workspace Icon */}
             <div className="mr-2 flex items-center">
-                <Layers
-                    className="w-4 h-4"
-                    style={{ color: folderItem.color || '#75beff' }}
-                />
+                <Layers className="w-4 h-4" style={{ color: folderItem.color || "#75beff" }} />
             </div>
 
             {/* Workspace Name */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate">
-                    {folderItem.name}
-                </span>
+                <span className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate">{folderItem.name}</span>
             </div>
 
             {/* Action Buttons - Hidden by default, shown on hover */}
@@ -104,7 +90,7 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                     title="Collapse All"
                     onClick={(e) => {
                         e.stopPropagation();
-                        _treeRef?.current?.closeAll()
+                        _treeRef?.current?.closeAll();
                     }}
                     className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                 >

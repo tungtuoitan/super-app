@@ -5,32 +5,22 @@
  * @template T - The entity type (Ws, Note, Task, etc.)
  */
 
-import React from 'react';
-import { Filter, CheckCircle2, Archive, X } from 'lucide-react';
-import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/Components/ui/popover';
-import { Table } from '@tanstack/react-table';
+import React from "react";
+import { Filter, CheckCircle2, Archive, X } from "lucide-react";
+import { Button } from "@/Components/ui/button";
+import { Badge } from "@/Components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
+import { Table } from "@tanstack/react-table";
 
 interface GenericFilterPopupProps<T> {
     table: Table<T>;
     columnFilters: any[];
     onClearFilters: () => void;
-    entityName: string;        // e.g., "Workspaces", "Notes", "Tasks"
-    columnId?: string;          // default: "deletedAt"
+    entityName: string; // e.g., "Workspaces", "Notes", "Tasks"
+    columnId?: string; // default: "deletedAt"
 }
 
-export function GenericFilterPopup<T>({
-    table,
-    columnFilters,
-    onClearFilters,
-    entityName,
-    columnId = 'deletedAt'
-}: GenericFilterPopupProps<T>) {
+export function GenericFilterPopup<T>({ table, columnFilters, onClearFilters, entityName, columnId = "deletedAt" }: GenericFilterPopupProps<T>) {
     const currentFilter = table.getColumn(columnId)?.getFilterValue();
     const hasFilters = columnFilters.length > 0;
 
@@ -44,17 +34,17 @@ export function GenericFilterPopup<T>({
         //     description: `Show all ${entityName.toLowerCase()}`,
         // },
         {
-            value: 'active',
-            label: 'Active Only',
+            value: "active",
+            label: "Active Only",
             icon: CheckCircle2,
-            color: 'text-green-500',
-            description: 'Not deleted',
+            color: "text-green-500",
+            description: "Not deleted",
         },
         {
-            value: 'deleted',
-            label: 'Deleted Only',
+            value: "deleted",
+            label: "Deleted Only",
             icon: Archive,
-            color: 'text-orange-500',
+            color: "text-orange-500",
             description: `Deleted ${entityName.toLowerCase()}`,
         },
     ];
@@ -62,12 +52,12 @@ export function GenericFilterPopup<T>({
     const handleFilterChange = (value: string) => {
         const column = table.getColumn(columnId);
 
-        if (value === 'active') {
+        if (value === "active") {
             // Active = not deleted (deletedAt is null)
-            column?.setFilterValue('null');
-        } else if (value === 'deleted') {
+            column?.setFilterValue("null");
+        } else if (value === "deleted") {
             // Deleted = has deletedAt value
-            column?.setFilterValue('notNull');
+            column?.setFilterValue("notNull");
         } else {
             // 'all' = no filter (show everything)
             column?.setFilterValue(undefined);
@@ -75,22 +65,16 @@ export function GenericFilterPopup<T>({
     };
 
     const getCurrentFilterValue = () => {
-        if (currentFilter === undefined) return 'active'; // Default to 'active' instead of 'all'
-        return currentFilter === 'null' ? 'active' : 'deleted';
+        if (currentFilter === undefined) return "active"; // Default to 'active' instead of 'all'
+        return currentFilter === "null" ? "active" : "deleted";
     };
 
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 relative"
-                >
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 relative">
                     <Filter className="h-4 w-4" />
-                    {hasFilters && (
-                        <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
-                    )}
+                    {hasFilters && <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-3" align="end">
@@ -102,12 +86,7 @@ export function GenericFilterPopup<T>({
                             <h4 className="font-medium text-sm">Filter {entityName}</h4>
                         </div>
                         {hasFilters && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={onClearFilters}
-                                className="h-7 px-2 text-xs"
-                            >
+                            <Button variant="ghost" size="sm" onClick={onClearFilters} className="h-7 px-2 text-xs">
                                 <X className="h-3 w-3 mr-1" />
                                 Clear
                             </Button>
@@ -129,13 +108,10 @@ export function GenericFilterPopup<T>({
                                     className={`
                                         w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm
                                         transition-colors
-                                        ${isSelected
-                                            ? 'bg-primary/10 text-primary font-medium'
-                                            : 'hover:bg-muted text-foreground'
-                                        }
+                                        ${isSelected ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted text-foreground"}
                                     `}
                                 >
-                                    <Icon className={`h-4 w-4 ${isSelected ? 'text-primary' : option.color}`} />
+                                    <Icon className={`h-4 w-4 ${isSelected ? "text-primary" : option.color}`} />
                                     <span className="flex-1 text-left">{option.label}</span>
                                     {isSelected && (
                                         <Badge variant="secondary" className="h-5 px-1.5 text-xs">
@@ -153,9 +129,7 @@ export function GenericFilterPopup<T>({
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>Showing results</span>
                         <Badge variant="outline" className="gap-1">
-                            <span className="font-medium text-foreground">
-                                {table.getFilteredRowModel().rows.length}
-                            </span>
+                            <span className="font-medium text-foreground">{table.getFilteredRowModel().rows.length}</span>
                             <span>/</span>
                             <span>{table.getRowModel().rows.length}</span>
                         </Badge>

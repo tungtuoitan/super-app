@@ -5,8 +5,8 @@
  * Tab management is handled by NoteTabStore
  */
 
-import {Note} from '@/types/note.types';
-import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from 'react';
+import { Note } from "@/types/note.types";
+import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 
 export interface NoteDetailContextData {
     // Dialog state
@@ -37,7 +37,6 @@ const NoteDetailContext = createContext<NoteDetailContextData>(noteDetailContext
 export const useNoteDetailStore = () => useContext(NoteDetailContext);
 
 export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-
     // Container refs
     const noteNameRef = useRef<HTMLInputElement>(null);
     const originalNoteRef = useRef<Note | null>(null);
@@ -62,5 +61,4 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
             {children}
         </NoteDetailContext.Provider>
     );
-}
-
+};

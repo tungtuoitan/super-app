@@ -4,8 +4,8 @@
  * Shared between sidebar header and grid components
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import { Table } from '@tanstack/react-table';
+import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import { Table } from "@tanstack/react-table";
 
 export interface GridControlContextData {
     // Table instance from the active grid
@@ -28,11 +28,11 @@ export interface GridControlContextData {
 export const gridControlContextDefaultValue: GridControlContextData = {
     table: null,
     setTable: () => {},
-    searchQuery: '',
+    searchQuery: "",
     setSearchQuery: () => {},
     columnFilters: [],
     setColumnFilters: () => {},
-    entityName: '',
+    entityName: "",
     setEntityName: () => {},
 };
 
@@ -42,9 +42,9 @@ export const useGridControlStore = () => useContext(GridControlStore);
 
 export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [table, setTable] = useState<Table<any> | null>(null);
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [searchQuery, setSearchQuery] = useState<string>("");
     const [columnFilters, setColumnFilters] = useState<any[]>([]);
-    const [entityName, setEntityName] = useState<string>('');
+    const [entityName, setEntityName] = useState<string>("");
 
     return (
         <GridControlStore.Provider

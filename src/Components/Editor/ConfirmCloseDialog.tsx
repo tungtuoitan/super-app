@@ -3,17 +3,10 @@
  * Shows confirmation when closing tab with unsaved changes
  */
 
-import React from 'react';
-import { AlertTriangle } from 'lucide-react';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
+import React from "react";
+import { AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
+import { Button } from "@/Components/ui/button";
 
 interface ConfirmCloseDialogProps {
     open: boolean;
@@ -22,12 +15,7 @@ interface ConfirmCloseDialogProps {
     onCancel: () => void;
 }
 
-export function ConfirmCloseDialog({
-    open,
-    tabTitle,
-    onConfirm,
-    onCancel,
-}: ConfirmCloseDialogProps) {
+export function ConfirmCloseDialog({ open, tabTitle, onConfirm, onCancel }: ConfirmCloseDialogProps) {
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
             <DialogContent className="bg-card text-foreground border sm:max-w-md">
@@ -40,22 +28,14 @@ export function ConfirmCloseDialog({
                         <p className="text-base text-foreground">
                             Do you want to close <strong>"{tabTitle}"</strong> without saving changes?
                         </p>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Your changes will be lost if you don't save them.
-                        </p>
+                        <p className="mt-2 text-sm text-muted-foreground">Your changes will be lost if you don't save them.</p>
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="gap-2">
-                    <Button
-                        onClick={onCancel}
-                        variant="ghost"
-                    >
+                    <Button onClick={onCancel} variant="ghost">
                         Cancel
                     </Button>
-                    <Button
-                        onClick={onConfirm}
-                        variant="destructive"
-                    >
+                    <Button onClick={onConfirm} variant="destructive">
                         Close Without Saving
                     </Button>
                 </DialogFooter>

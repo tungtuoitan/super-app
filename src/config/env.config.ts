@@ -3,7 +3,7 @@
  * All environment variables are centralized here for easy management and validation
  */
 
-import {constants} from "../utils";
+import { constants } from "../utils";
 
 export const envConfig = {
     // Environment
@@ -22,7 +22,6 @@ export const envConfig = {
     REACT_APP_GOOGLE_REDIRECT_URI: process.env.REACT_APP_GOOGLE_REDIRECT_URI,
 } as const;
 
-
 /**
  * Validate environment configuration
  * Checks if all required environment variables are present and logs the status
@@ -34,19 +33,12 @@ export function validateEnvironmentConfig(): {
 } {
     const missing: string[] = [];
     const warnings: string[] = [];
- 
+
     // Required variables
-    const required = [
-        "NODE_ENV", 
-        "ENVIRONMENT", 
-        "REACT_APP_GOOGLE_CLIENT_ID",
-        "REACT_APP_GOOGLE_REDIRECT_URI",
-    ];
+    const required = ["NODE_ENV", "ENVIRONMENT", "REACT_APP_GOOGLE_CLIENT_ID", "REACT_APP_GOOGLE_REDIRECT_URI"];
 
     // Recommended variables for production
-    const recommended = [
-        "REACT_APP_LOCAL_API_URL",
-    ];
+    const recommended = ["REACT_APP_LOCAL_API_URL"];
 
     // Check required variables
     required.forEach((key) => {
@@ -58,9 +50,7 @@ export function validateEnvironmentConfig(): {
     // Check recommended variables
     recommended.forEach((key) => {
         if (!envConfig[key as keyof typeof envConfig]) {
-            warnings.push(
-                `${key} is not set (recommended for full functionality)`
-            );
+            warnings.push(`${key} is not set (recommended for full functionality)`);
         }
     });
 

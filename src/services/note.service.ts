@@ -3,13 +3,13 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { config } from '@/config/app.config';
-import type { ResultOptions, NoteDTO } from '@/types/note.types';
+import { config } from "@/config/app.config";
+import type { ResultOptions, NoteDTO } from "@/types/note.types";
 
 /**
  * Get all notes with optional filtering
  * GET /api/notes?searchText=...&page=...&pageSize=...&type=...&isArchived=...
- * 
+ *
  * @param token - Authentication token
  * @param params - Optional query parameters for filtering
  * @returns Array of notes or rejects with response
@@ -22,7 +22,7 @@ export const _getNotes = async (
         pageSize?: number;
         type?: string;
         isArchived?: boolean;
-    }
+    },
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -33,25 +33,23 @@ export const _getNotes = async (
     // Build query string
     const queryParams = new URLSearchParams();
     if (params?.searchText) {
-        queryParams.append('searchText', params.searchText);
+        queryParams.append("searchText", params.searchText);
     }
     if (params?.page !== undefined) {
-        queryParams.append('page', String(params.page));
+        queryParams.append("page", String(params.page));
     }
     if (params?.pageSize !== undefined) {
-        queryParams.append('pageSize', String(params.pageSize));
+        queryParams.append("pageSize", String(params.pageSize));
     }
     if (params?.type) {
-        queryParams.append('type', params.type);
+        queryParams.append("type", params.type);
     }
     if (params?.isArchived !== undefined) {
-        queryParams.append('isArchived', String(params.isArchived));
+        queryParams.append("isArchived", String(params.isArchived));
     }
 
     const queryString = queryParams.toString();
-    const url = queryString
-        ? `${config.api.baseURL}/api/notes?${queryString}`
-        : `${config.api.baseURL}/api/notes`;
+    const url = queryString ? `${config.api.baseURL}/api/notes?${queryString}` : `${config.api.baseURL}/api/notes`;
 
     const options = {
         method: "GET",
@@ -61,7 +59,7 @@ export const _getNotes = async (
     const res = await window.fetch(url, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions<NoteDTO>;
+        const result = (await res.json()) as ResultOptions<NoteDTO>;
         return result;
     } else {
         return Promise.reject(res);
@@ -88,13 +86,10 @@ export const _getNoteById = async (token: string, noteId: number) => {
         headers: headers,
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/notes/${noteId}`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/notes/${noteId}`, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions<NoteDTO>;
+        const result = (await res.json()) as ResultOptions<NoteDTO>;
         return result;
     } else {
         return Promise.reject(res);
@@ -126,7 +121,7 @@ export const _upsertNotes = async (
         type?: string;
         isArchived?: boolean;
         deletedAt?: string | null;
-    }>
+    }>,
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -140,13 +135,10 @@ export const _upsertNotes = async (
         body: JSON.stringify(requests),
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/notes/batch`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/notes/batch`, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions;
+        const result = (await res.json()) as ResultOptions;
         return result;
     } else {
         return Promise.reject(res);
@@ -162,10 +154,7 @@ export const _upsertNotes = async (
  * @param noteId - Single note ID or comma-separated IDs
  * @returns void or rejects with response
  */
-export const _deleteNote = async (
-    token: string,
-    noteId: number | string
-) => {
+export const _deleteNote = async (token: string, noteId: number | string) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -182,7 +171,7 @@ export const _deleteNote = async (
     const res = await window.fetch(url, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions;
+        const result = (await res.json()) as ResultOptions;
         return result;
     } else {
         return Promise.reject(res);

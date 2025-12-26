@@ -3,15 +3,12 @@
  * Business logic for workspace grid context menu operations
  */
 
-import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
-import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
 export const useWsGridMenuHelper = () => {
-    const {
-        contextData,
-        setIsContextMenuOpen,
-    } = useOrchestratorContextMenuStore();
-    
+    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+
     const { showConfirmation } = useConfirmationPopoverHelper();
 
     // Extract data from contextData
@@ -47,10 +44,10 @@ export const useWsGridMenuHelper = () => {
         showConfirmation({
             anchorEl: anchorElement,
             message,
-            confirmText: 'Delete',
-            cancelText: 'Cancel',
-            confirmColor: 'destructive',
-            buttonVariant: 'default',
+            confirmText: "Delete",
+            cancelText: "Cancel",
+            confirmColor: "destructive",
+            buttonVariant: "default",
             zIndex: 20000,
             onConfirm: () => {
                 contextData.onDelete(isHardDelete);

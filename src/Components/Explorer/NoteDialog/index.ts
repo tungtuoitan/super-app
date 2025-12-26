@@ -1,1 +1,1 @@
-export { NoteDialog } from './NoteDialog';
+export { NoteDialog } from "./NoteDialog";

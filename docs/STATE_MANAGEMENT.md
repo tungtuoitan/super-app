@@ -6,14 +6,14 @@
 
 ### Decision Matrix
 
-| State Type | Solution | When | Example |
-|------------|----------|------|---------|
-| Server | React Query | API data | Notes, profile |
-| Global UI | Context | App-wide | Auth, theme |
-| Feature UI | Context | Feature-specific | Filters, dialogs |
-| Local UI | useState | Component | Inputs, toggles |
-| URL | React Router | Shareable | Page, filters |
-| Form | React Hook Form | Complex forms | Editor, settings |
+| State Type | Solution        | When             | Example          |
+| ---------- | --------------- | ---------------- | ---------------- |
+| Server     | React Query     | API data         | Notes, profile   |
+| Global UI  | Context         | App-wide         | Auth, theme      |
+| Feature UI | Context         | Feature-specific | Filters, dialogs |
+| Local UI   | useState        | Component        | Inputs, toggles  |
+| URL        | React Router    | Shareable        | Page, filters    |
+| Form       | React Hook Form | Complex forms    | Editor, settings |
 
 ## 🚀 React Query (Server)
 

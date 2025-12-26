@@ -1,6 +1,6 @@
-import { useNavigationStore } from '@/contexts/NavigationContext';
-import { useActivityBarStore } from '@/store/index';
-import type { ActivityBarView } from '@/utils/constants';
+import { useNavigationStore } from "@/contexts/NavigationContext";
+import { useActivityBarStore } from "@/store/index";
+import type { ActivityBarView } from "@/utils/constants";
 
 export interface UseActivityBarHelperReturn {
     // Navigation

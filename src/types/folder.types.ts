@@ -86,12 +86,12 @@ export interface GetFoldersParams {
     search?: string;
     parentId?: number; // For fetching children of specific folder
     isArchived?: boolean;
-    sortBy?: 'name' | 'createdAt' | 'updatedAt';
-    sortOrder?: 'asc' | 'desc';
+    sortBy?: "name" | "createdAt" | "updatedAt";
+    sortOrder?: "asc" | "desc";
 }
 
 // Layout types for FolderPage
-export type FolderLayoutType = 'grid' | 'tree' | 'card';
+export type FolderLayoutType = "grid" | "tree" | "card";
 
 // Tree node for FolderTree component
 export interface FolderTreeNode extends Folder {

@@ -1,19 +1,12 @@
-
-import React from 'react';
-import { NodeApi } from 'react-arborist';
-import {
-    File,
-    FileImage,
-    FileVideo,
-    FileArchive,
-    FileCode,
-} from 'lucide-react';
-import { useExplorerStore } from '@/store/index';
-import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
-import { TreeFolder } from '@/hooks/explorer/tree.helper';
-import { FileItem } from '@/types/workspace.types';
-import { constants } from '@/utils/constants';
-import {useOrchestratorContextMenuHelper} from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
+import React from "react";
+import { NodeApi } from "react-arborist";
+import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
+import { useExplorerStore } from "@/store/index";
+import { useTreeSelection } from "@/hooks/explorer/useTreeSelection.helper";
+import { TreeFolder } from "@/hooks/explorer/tree.helper";
+import { FileItem } from "@/types/workspace.types";
+import { constants } from "@/utils/constants";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 function getFileIcon(extension?: string) {
     if (!extension) return File;
@@ -21,43 +14,30 @@ function getFileIcon(extension?: string) {
     const ext = extension.toLowerCase();
 
     // Images
-    if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(ext)) {
+    if (["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp"].includes(ext)) {
         return FileImage;
     }
 
     // Videos
-    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(ext)) {
+    if (["mp4", "avi", "mov", "wmv", "flv", "webm"].includes(ext)) {
         return FileVideo;
     }
 
     // Archives
-    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+    if (["zip", "rar", "7z", "tar", "gz"].includes(ext)) {
         return FileArchive;
     }
 
     // Code
-    if (['js', 'ts', 'jsx', 'tsx', 'py', 'java', 'cs', 'cpp', 'c', 'html', 'css', 'json', 'xml'].includes(ext)) {
+    if (["js", "ts", "jsx", "tsx", "py", "java", "cs", "cpp", "c", "html", "css", "json", "xml"].includes(ext)) {
         return FileCode;
     }
 
     return File;
 }
 
-export function FileNode({
-    node,
-    style,
-    dragHandle,
-}: {
-    node: NodeApi<TreeFolder>;
-    style: React.CSSProperties;
-    dragHandle?: any;
-}) {
-    const {
-        selectedFolderIds,
-        setSelectedFolderIds,
-        setLastSelectedFolderId,
-        currentTree,
-    } = useExplorerStore();
+export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useExplorerStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
 
@@ -70,16 +50,16 @@ export function FileNode({
         e.preventDefault();
 
         // Focus the tree container for keyboard navigation
-        const treeContainer = document.querySelector('[data-workspace-tree]') as HTMLElement;
+        const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
         treeContainer?.focus();
 
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection
             if (isSelected) {
-                setSelectedFolderIds(prev => prev.filter(id => id !== fileItem.id));
+                setSelectedFolderIds((prev) => prev.filter((id) => id !== fileItem.id));
                 node.deselect();
             } else {
-                setSelectedFolderIds(prev => [...prev, fileItem.id]);
+                setSelectedFolderIds((prev) => [...prev, fileItem.id]);
                 node.selectMulti();
             }
             setLastSelectedFolderId(fileItem.id);
@@ -97,7 +77,7 @@ export function FileNode({
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find(i => i.id === fileItem.id);
+        const _currentItem = currentTree?.items.find((i) => i.id === fileItem.id);
 
         // Open file-specific context menu
         showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });
@@ -106,11 +86,11 @@ export function FileNode({
     return (
         <div
             ref={(el) => {
-                if (dragHandle && typeof dragHandle === 'function' && el) {
+                if (dragHandle && typeof dragHandle === "function" && el) {
                     try {
                         dragHandle(el);
                     } catch (error) {
-                        console.warn('Error setting dragHandle:', error);
+                        console.warn("Error setting dragHandle:", error);
                     }
                 }
             }}
@@ -120,11 +100,8 @@ export function FileNode({
             className={`
                 flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
                 transition-all duration-150 ease-in-out
-                ${node.state.isDragging ? 'opacity-40' : 'opacity-100'}
-                ${isSelected
-                    ? 'bg-editor-hover text-white border-l-2 border-editor-active'
-                    : 'bg-transparent hover:bg-editor-hover'
-                }
+                ${node.state.isDragging ? "opacity-40" : "opacity-100"}
+                ${isSelected ? "bg-editor-hover text-white border-l-2 border-editor-active" : "bg-transparent hover:bg-editor-hover"}
             `}
         >
             {/* Spacer for alignment with folder chevrons */}
@@ -132,21 +109,13 @@ export function FileNode({
 
             {/* File Icon */}
             <div className="mr-2 flex items-center">
-                <FileIcon
-                    className="w-4 h-4 text-gray-400"
-                />
+                <FileIcon className="w-4 h-4 text-gray-400" />
             </div>
 
             {/* File Info */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className="text-sm truncate text-editor-fg">
-                    {fileItem.name}
-                </span>
-                {fileItem.metadata?.fileSizeFormatted && (
-                    <span className="text-xs text-gray-500">
-                        {fileItem.metadata.fileSizeFormatted}
-                    </span>
-                )}
+                <span className="text-sm truncate text-editor-fg">{fileItem.name}</span>
+                {fileItem.metadata?.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.metadata.fileSizeFormatted}</span>}
             </div>
         </div>
     );

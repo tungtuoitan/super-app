@@ -1,14 +1,14 @@
-import React from 'react';
-import { ControlledMenu, MenuItem, MenuDivider } from '@szhsin/react-menu';
-import { Info as InfoIcon } from 'lucide-react';
-import { WorkspaceFolderNodeMenu } from './menus/WorkspaceFolderNodeMenu';
-import { WorkspaceChildNodeMenu } from './menus/WorkspaceChildNodeMenu';
-import { NoteGridMenu } from './menus/NoteGridMenu';
-import { WsGridMenu } from './menus/WsGridMenu';
-import { constants } from '@/utils/constants';
-import '@szhsin/react-menu/dist/index.css';
-import '@szhsin/react-menu/dist/transitions/slide.css';
-import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
+import React from "react";
+import { ControlledMenu, MenuItem, MenuDivider } from "@szhsin/react-menu";
+import { Info as InfoIcon } from "lucide-react";
+import { WorkspaceFolderNodeMenu } from "./menus/WorkspaceFolderNodeMenu";
+import { WorkspaceChildNodeMenu } from "./menus/WorkspaceChildNodeMenu";
+import { NoteGridMenu } from "./menus/NoteGridMenu";
+import { WsGridMenu } from "./menus/WsGridMenu";
+import { constants } from "@/utils/constants";
+import "@szhsin/react-menu/dist/index.css";
+import "@szhsin/react-menu/dist/transitions/slide.css";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -21,13 +21,7 @@ interface ContextMenuProviderProps {
  */
 export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) {
     // Store state
-    const {
-        isContextMenuOpen,
-        anchorPoint,
-        contextType,
-        setIsContextMenuOpen,
-    } = useOrchestratorContextMenuStore();
-
+    const { isContextMenuOpen, anchorPoint, contextType, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
 
     /**
      * Render menu items based on context type
@@ -36,23 +30,21 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
         switch (contextType) {
             case constants.workspace.itemTypes.folder:
                 return <WorkspaceFolderNodeMenu />;
-            
+
             case constants.workspace.itemTypes.note:
             case constants.workspace.itemTypes.file:
                 return <WorkspaceChildNodeMenu />;
 
-            case 'note-grid':
+            case "note-grid":
                 return <NoteGridMenu />;
-            
-            case 'workspace-grid':
+
+            case "workspace-grid":
                 return <WsGridMenu />;
-            
+
             default:
                 return (
                     <>
-                        <MenuItem disabled>
-                            Context Menu
-                        </MenuItem>
+                        <MenuItem disabled>Context Menu</MenuItem>
                         <MenuDivider />
                         <MenuItem disabled>
                             <InfoIcon className="w-4 h-4 mr-2" />
@@ -66,9 +58,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
     return (
         <>
             {children}
-            
+
             <ControlledMenu
-                state={isContextMenuOpen ? 'open' : 'closed'}
+                state={isContextMenuOpen ? "open" : "closed"}
                 anchorPoint={anchorPoint}
                 onClose={() => setIsContextMenuOpen(false)}
                 menuClassName="context-menu"
@@ -79,4 +71,3 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
         </>
     );
 }
-

@@ -4,15 +4,15 @@
  * Following SuperApp architecture patterns
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
+import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
 export interface ConfirmationPopoverOptions {
     message: string;
     confirmText?: string;
     cancelText?: string;
-    confirmColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    cancelColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    confirmColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    cancelColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     width?: string;
     zIndex?: number;
     anchorEl?: HTMLElement | null;
@@ -33,9 +33,7 @@ export const confirmationPopoverStoreDefaultValue: ConfirmationPopoverStoreData 
     setOptions: () => {},
 };
 
-export const ConfirmationPopoverStore = createContext<ConfirmationPopoverStoreData>(
-    confirmationPopoverStoreDefaultValue
-);
+export const ConfirmationPopoverStore = createContext<ConfirmationPopoverStoreData>(confirmationPopoverStoreDefaultValue);
 
 export const useConfirmationPopoverStore = () => useContext(ConfirmationPopoverStore);
 

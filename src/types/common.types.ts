@@ -3,7 +3,7 @@
  * Reusable type definitions for props, components, and shared interfaces
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from "react";
 
 /**
  * Component Props
@@ -54,17 +54,7 @@ export interface GridContainerProps extends BaseComponentProps {
  * Available icon types for the application
  * Used to identify different icon categories in the icon system
  */
-export type IconType =
-    | 'accounts'
-    | 'conversation'
-    | 'finance'
-    | 'folder'
-    | 'gratefulList'
-    | 'home'
-    | 'link'
-    | 'library'
-    | 'notes'
-    | 'sidebar';
+export type IconType = "accounts" | "conversation" | "finance" | "folder" | "gratefulList" | "home" | "link" | "library" | "notes" | "sidebar";
 
 /**
  * Props for icon components

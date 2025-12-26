@@ -3,7 +3,7 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { config } from '@/config/app.config';
+import { config } from "@/config/app.config";
 
 /**
  * ResultOptions interface for API responses
@@ -32,7 +32,7 @@ export interface WsDTO {
 /**
  * Get all workspaces with optional filtering
  * GET /api/WorkspaceList?searchText=...&getAll=...
- * 
+ *
  * @param token - Authentication token
  * @param params - Optional query parameters for filtering
  * @returns Array of workspaces or rejects with response
@@ -42,7 +42,7 @@ export const _getWsList = async (
     params?: {
         getAll?: boolean;
         searchText?: string;
-    }
+    },
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -53,16 +53,14 @@ export const _getWsList = async (
     // Build query string
     const queryParams = new URLSearchParams();
     if (params?.getAll !== undefined) {
-        queryParams.append('getAll', String(params.getAll));
+        queryParams.append("getAll", String(params.getAll));
     }
     if (params?.searchText) {
-        queryParams.append('searchText', params.searchText);
+        queryParams.append("searchText", params.searchText);
     }
 
     const queryString = queryParams.toString();
-    const url = queryString
-        ? `${config.api.baseURL}/api/WorkspaceList?${queryString}`
-        : `${config.api.baseURL}/api/WorkspaceList`;
+    const url = queryString ? `${config.api.baseURL}/api/WorkspaceList?${queryString}` : `${config.api.baseURL}/api/WorkspaceList`;
 
     const options = {
         method: "GET",
@@ -72,7 +70,7 @@ export const _getWsList = async (
     const res = await window.fetch(url, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions<WsDTO>;
+        const result = (await res.json()) as ResultOptions<WsDTO>;
         return result;
     } else {
         return Promise.reject(res);
@@ -99,13 +97,10 @@ export const _getWsById = async (token: string, id: number) => {
         headers: headers,
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/WorkspaceList/${id}`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/WorkspaceList/${id}`, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions<WsDTO>;
+        const result = (await res.json()) as ResultOptions<WsDTO>;
         return result;
     } else {
         return Promise.reject(res);
@@ -135,7 +130,7 @@ export const _upsertWsBatch = async (
         description?: string | null;
         userId?: number;
         deletedAt?: string | null;
-    }>
+    }>,
 ) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
@@ -149,13 +144,10 @@ export const _upsertWsBatch = async (
         body: JSON.stringify(requests),
     };
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/WorkspaceList/batch`,
-        options
-    );
+    const res = await window.fetch(`${config.api.baseURL}/api/WorkspaceList/batch`, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions;
+        const result = (await res.json()) as ResultOptions;
         return result;
     } else {
         return Promise.reject(res);
@@ -171,10 +163,7 @@ export const _upsertWsBatch = async (
  * @param id - Single workspace ID or comma-separated IDs (e.g., "1,2,3")
  * @returns void or rejects with response
  */
-export const _deleteWs = async (
-    token: string,
-    id: number | string
-) => {
+export const _deleteWs = async (token: string, id: number | string) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -191,7 +180,7 @@ export const _deleteWs = async (
     const res = await window.fetch(url, options);
 
     if (res.ok) {
-        const result = await res.json() as ResultOptions;
+        const result = (await res.json()) as ResultOptions;
         return result;
     } else {
         return Promise.reject(res);

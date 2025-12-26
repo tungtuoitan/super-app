@@ -1,30 +1,25 @@
 /**
  * Tree Selection Helper Hook
  * Handles folder selection operations (VS Code-like multi-selection)
- * 
+ *
  * @pattern Functions only - State should be accessed directly from useExplorerStore()
  * @returns {Object} Selection action functions only (no state)
  */
 
-import type { NodeApi } from 'react-arborist';
-import type { TreeFolder } from './tree.helper';
-import { useExplorerStore } from '@/store/explorer/Explorer.store';
+import type { NodeApi } from "react-arborist";
+import type { TreeFolder } from "./tree.helper";
+import { useExplorerStore } from "@/store/explorer/Explorer.store";
 
 export const useTreeSelection = () => {
-    const {
-        selectedFolderIds,
-        setSelectedFolderIds,
-        lastSelectedFolderId,
-        setLastSelectedFolderId,
-    } = useExplorerStore();
+    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId } = useExplorerStore();
 
     /**
      * Toggle selection for a single folder
      */
     const toggleFolderSelection = (folderId: number) => {
-        setSelectedFolderIds(prev => {
+        setSelectedFolderIds((prev) => {
             if (prev.includes(folderId)) {
-                return prev.filter(id => id !== folderId);
+                return prev.filter((id) => id !== folderId);
             } else {
                 return [...prev, folderId];
             }
@@ -57,8 +52,8 @@ export const useTreeSelection = () => {
      * Handle selection change from react-arborist tree
      */
     const handleSelectionChange = (nodes: NodeApi<TreeFolder>[]) => {
-        const selectedIds = nodes.map(node => node.id);
-        const folderIds = selectedIds.map(id => parseInt(id)).filter(id => id > 0); // Filter out workspace nodes
+        const selectedIds = nodes.map((node) => node.id);
+        const folderIds = selectedIds.map((id) => parseInt(id)).filter((id) => id > 0); // Filter out workspace nodes
         setSelectedFolderIds(folderIds);
         if (folderIds.length > 0) {
             setLastSelectedFolderId(folderIds[folderIds.length - 1]);
@@ -70,7 +65,7 @@ export const useTreeSelection = () => {
      * Supports: Arrow Up/Down, Shift+Arrow for range selection, Ctrl+A, Escape
      */
     const handleKeyDown = (e: KeyboardEvent, allVisibleFolderIds: number[]) => {
-        if (e.target !== document.body && !(e.target as Element).closest('[data-workspace-tree]')) {
+        if (e.target !== document.body && !(e.target as Element).closest("[data-workspace-tree]")) {
             return; // Only handle when tree is focused
         }
 
@@ -79,7 +74,7 @@ export const useTreeSelection = () => {
         const currentIndex = lastSelected ? allVisibleFolderIds.indexOf(lastSelected) : -1;
 
         switch (e.key) {
-            case 'ArrowUp':
+            case "ArrowUp":
                 e.preventDefault();
                 if (currentIndex > 0) {
                     const newFolderId = allVisibleFolderIds[currentIndex - 1];
@@ -98,7 +93,7 @@ export const useTreeSelection = () => {
                 }
                 break;
 
-            case 'ArrowDown':
+            case "ArrowDown":
                 e.preventDefault();
                 if (currentIndex < allVisibleFolderIds.length - 1) {
                     const newFolderId = allVisibleFolderIds[currentIndex + 1];
@@ -117,7 +112,7 @@ export const useTreeSelection = () => {
                 }
                 break;
 
-            case 'a':
+            case "a":
                 if (e.ctrlKey || e.metaKey) {
                     e.preventDefault();
                     // Ctrl+A: Select all
@@ -126,7 +121,7 @@ export const useTreeSelection = () => {
                 }
                 break;
 
-            case 'Escape':
+            case "Escape":
                 // Clear selection
                 clearSelection();
                 setLastSelectedFolderId(null);

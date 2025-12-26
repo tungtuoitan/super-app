@@ -5,7 +5,7 @@
  * Navigation is handled by NavigationContext
  */
 
-import React, { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
+import React, { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
 export interface ActivityBarContextData {
     // Dialog states
@@ -40,7 +40,7 @@ const ActivityBarContext = createContext<ActivityBarContextData>(activityBarCont
 export const useActivityBarStore = () => {
     const ctx = useContext(ActivityBarContext);
     if (!ctx) {
-        throw new Error('useActivityBarStore must be used within ActivityBarProvider');
+        throw new Error("useActivityBarStore must be used within ActivityBarProvider");
     }
     return ctx;
 };

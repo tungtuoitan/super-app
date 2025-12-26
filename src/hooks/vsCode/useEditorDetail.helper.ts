@@ -4,6 +4,5 @@
  */
 
 export const useEditorDetailHelper = () => {
-    return {
-    };
+    return {};
 };

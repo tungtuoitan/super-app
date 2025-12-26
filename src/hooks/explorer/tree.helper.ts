@@ -1,7 +1,7 @@
 import { WorkspaceItem, FolderItem, NoteItem, FileItem, isFolder, canHaveChildren } from "@/types/workspace.types";
 import { Folder } from "../../types";
 import { transformBackendItems, BackendWorkspaceItem } from "@/utils/workspace-mapper";
-import { constants } from '@/utils/constants';
+import { constants } from "@/utils/constants";
 
 // ============================================
 // TREE NODE TYPES (for react-arborist)
@@ -14,7 +14,7 @@ import { constants } from '@/utils/constants';
 export interface TreeNode {
     id: string;
     name: string;
-    data: WorkspaceItem;  // Can be FolderItem | NoteItem | FileItem
+    data: WorkspaceItem; // Can be FolderItem | NoteItem | FileItem
     children: TreeNode[];
 }
 
@@ -34,15 +34,9 @@ export function getAllFoldersFlattened(treeData: TreeFolder[]): TreeFolder[] {
     return result;
 }
 
-export function isDescendant(
-    targetId: number,
-    potentialParentId: number,
-    treeData: TreeFolder[]
-): boolean {
+export function isDescendant(targetId: number, potentialParentId: number, treeData: TreeFolder[]): boolean {
     // Find the potential parent node
-    const parentNode = getAllFoldersFlattened(treeData).find(
-        (t) => t.data.id === potentialParentId
-    );
+    const parentNode = getAllFoldersFlattened(treeData).find((t) => t.data.id === potentialParentId);
 
     if (!parentNode) return false;
 
@@ -62,10 +56,7 @@ export function isDescendant(
     return checkSubtree(parentNode);
 }
 
-export function findFolderById(
-    folders: Folder[],
-    targetId: number
-): Folder | undefined {
+export function findFolderById(folders: Folder[], targetId: number): Folder | undefined {
     for (const folder of folders) {
         if (folder.id === targetId) {
             return folder;
@@ -111,25 +102,21 @@ export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
  * Only transforms FolderItem - notes and files return null
  * ✅ Updated to use new type system
  */
-export function transformTreeItemToFolder(
-    item: WorkspaceItem
-): Folder | null {
+export function transformTreeItemToFolder(item: WorkspaceItem): Folder | null {
     // Only transform folder items
     if (!isFolder(item)) {
         return null;
     }
 
     const folder: Folder = {
-        id: item.id,                      // ✅ Folder ID (from FolderItem.id)
+        id: item.id, // ✅ Folder ID (from FolderItem.id)
         name: item.name,
         color: item.color,
         createdAt: new Date(item.createdAt),
         isActive: true,
         depth: item.level,
         isExpanded: item.isExpanded,
-        children: item.children
-            .map(transformTreeItemToFolder)
-            .filter((child): child is Folder => child !== null),
+        children: item.children.map(transformTreeItemToFolder).filter((child): child is Folder => child !== null),
     };
 
     return folder;
@@ -142,18 +129,13 @@ export function transformTreeItemToFolder(
  */
 export function transformItemsToTreeData(items: WorkspaceItem[]): TreeFolder[] {
     return items
-        .filter(
-            (item) =>
-                item && item.id !== undefined && item.id !== null
-        )
+        .filter((item) => item && item.id !== undefined && item.id !== null)
         .map((item) => ({
             id: item.id.toString(),
             name: item.name || "Unsaved",
             data: item,
             // Only folders can have children - notes/files are always leaf nodes
-            children: isFolder(item) && item.children && item.children.length > 0
-                ? transformItemsToTreeData(item.children)
-                : [],
+            children: isFolder(item) && item.children && item.children.length > 0 ? transformItemsToTreeData(item.children) : [],
         }));
 }
 
@@ -164,19 +146,13 @@ export function transformItemsToTreeData(items: WorkspaceItem[]): TreeFolder[] {
  */
 export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
     return folders
-        .filter(
-            (folder) =>
-                folder && folder.id !== undefined && folder.id !== null
-        )
+        .filter((folder) => folder && folder.id !== undefined && folder.id !== null)
         .map((folder) => ({
             id: folder.id.toString(),
             name: folder.name || "Unsaved",
             data: folder as any, // Cast for backward compatibility
             // Always provide children array (empty if no children) to enable drop into nodes
-            children:
-                folder.children && folder.children.length > 0
-                    ? transformFoldersToTreeData(folder.children)
-                    : [],
+            children: folder.children && folder.children.length > 0 ? transformFoldersToTreeData(folder.children) : [],
         }));
 }
 
@@ -184,32 +160,21 @@ export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
  * Filter folder tree based on search text
  * Includes folder if it matches OR any descendant matches
  */
-export function filterTreeBySearch(
-    nodes: Folder[],
-    searchText: string
-): Folder[] {
+export function filterTreeBySearch(nodes: Folder[], searchText: string): Folder[] {
     if (!searchText) return nodes;
 
     return nodes
         .filter((folder) => {
-            const matchesSearch = folder.name
-                .toLowerCase()
-                .includes(searchText.toLowerCase());
+            const matchesSearch = folder.name.toLowerCase().includes(searchText.toLowerCase());
 
             // Include if this folder matches OR any descendant matches
-            const hasMatchingDescendant =
-                folder.children && folder.children.length > 0
-                    ? filterTreeBySearch(folder.children, searchText).length > 0
-                    : false;
+            const hasMatchingDescendant = folder.children && folder.children.length > 0 ? filterTreeBySearch(folder.children, searchText).length > 0 : false;
 
             return matchesSearch || hasMatchingDescendant;
         })
         .map((folder) => ({
             ...folder,
-            children:
-                folder.children && folder.children.length > 0
-                    ? filterTreeBySearch(folder.children, searchText)
-                    : [],
+            children: folder.children && folder.children.length > 0 ? filterTreeBySearch(folder.children, searchText) : [],
         }));
 }
 
@@ -226,7 +191,7 @@ export function createWorkspaceRootFolder(
         createdAt: string;
         isArchived: boolean;
     },
-    children: Folder[]
+    children: Folder[],
 ): Folder {
     return {
         id: -workspaceId,
@@ -242,79 +207,74 @@ export function createWorkspaceRootFolder(
     };
 }
 
+/**
+ * Build hierarchical structure from flat list using parentId
+ * ✅ Supports all item types: folders (can have children), notes & files (leaf nodes)
+ * Backend returns flat array with parentId, we build hierarchy here
+ * Benefits: smaller payload, better caching, easier updates
+ */
+function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
+    // Create a map for O(1) lookup - include ALL item types
+    const itemMap = new Map<number, WorkspaceItem>();
 
-    /**
-     * Build hierarchical structure from flat list using parentId
-     * ✅ Supports all item types: folders (can have children), notes & files (leaf nodes)
-     * Backend returns flat array with parentId, we build hierarchy here
-     * Benefits: smaller payload, better caching, easier updates
-     */
-    function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
-        // Create a map for O(1) lookup - include ALL item types
-        const itemMap = new Map<number, WorkspaceItem>();
+    items.forEach((item) => {
+        // Only folders can have children
+        const itemWithChildren: WorkspaceItem = isFolder(item) ? { ...item, children: [] } : { ...item, children: [] as any }; // Notes/files will keep empty children
 
-        items.forEach(item => {
-            // Only folders can have children
-            const itemWithChildren: WorkspaceItem = isFolder(item)
-                ? { ...item, children: [] }
-                : { ...item, children: [] as any };  // Notes/files will keep empty children
+        itemMap.set(item.id, itemWithChildren);
+    });
 
-            itemMap.set(item.id, itemWithChildren);
-        });
+    // Build parent-child relationships
+    const roots: WorkspaceItem[] = [];
 
-        // Build parent-child relationships
-        const roots: WorkspaceItem[] = [];
+    items.forEach((item) => {
+        const currentItem = itemMap.get(item.id);
+        if (!currentItem) return;
 
-        items.forEach(item => {
-            const currentItem = itemMap.get(item.id);
-            if (!currentItem) return;
-
-            if (item.parentId === null || item.parentId === undefined) {
-                // Root level item (no parent)
-                roots.push(currentItem);
-            } else {
-                // Child item - add to parent's children array
-                const parent = itemMap.get(item.parentId);
-                if (parent) {
-                    // Only add to parent if parent is a folder
-                    if (isFolder(parent)) {
-                        parent.children.push(currentItem);
-                    } else {
-                        roots.push(currentItem);
-                    }
+        if (item.parentId === null || item.parentId === undefined) {
+            // Root level item (no parent)
+            roots.push(currentItem);
+        } else {
+            // Child item - add to parent's children array
+            const parent = itemMap.get(item.parentId);
+            if (parent) {
+                // Only add to parent if parent is a folder
+                if (isFolder(parent)) {
+                    parent.children.push(currentItem);
                 } else {
-                    // Orphan (parent not found) - treat as root
                     roots.push(currentItem);
                 }
+            } else {
+                // Orphan (parent not found) - treat as root
+                roots.push(currentItem);
             }
-        });
-
-        return roots;
-    }
-
-    /**
-     * Transform WorkspaceItem to Folder (for backward compatibility)
-     * Only transforms FolderItem - notes and files return null
-     */
-    function transformItem(item: WorkspaceItem): Folder | null {
-        // Only transform folder items
-        if (!isFolder(item)) {
-            return null;
         }
+    });
 
-        return {
-            id: item.id,                      // ✅ Folder ID (from FolderItem.id)
-            name: item.name,
-            color: item.color,
-            createdAt: new Date(item.createdAt),
-            isActive: true,
-            depth: item.level,
-            isExpanded: item.isExpanded,
-            children: item.children
-                .map(transformItem)
-                .filter((child): child is Folder => child !== null),
-        };
+    return roots;
+}
+
+/**
+ * Transform WorkspaceItem to Folder (for backward compatibility)
+ * Only transforms FolderItem - notes and files return null
+ */
+function transformItem(item: WorkspaceItem): Folder | null {
+    // Only transform folder items
+    if (!isFolder(item)) {
+        return null;
     }
+
+    return {
+        id: item.id, // ✅ Folder ID (from FolderItem.id)
+        name: item.name,
+        color: item.color,
+        createdAt: new Date(item.createdAt),
+        isActive: true,
+        depth: item.level,
+        isExpanded: item.isExpanded,
+        children: item.children.map(transformItem).filter((child): child is Folder => child !== null),
+    };
+}
 
 /**
  * Transform workspace data to react-arborist tree data
@@ -330,13 +290,27 @@ export function createWorkspaceRootFolder(
  * @returns TreeFolder array ready for react-arborist
  */
 export function transformToTreeData(
-    data: { workspaceId: number; name: string; description?: string; color?: string; createdAt: string; isArchived: boolean; items: any[], userId: number, updatedAt?: string, icon?: string } | null | undefined,
-    searchText: string
+    data:
+        | {
+              workspaceId: number;
+              name: string;
+              description?: string;
+              color?: string;
+              createdAt: string;
+              isArchived: boolean;
+              items: any[];
+              userId: number;
+              updatedAt?: string;
+              icon?: string;
+          }
+        | null
+        | undefined,
+    searchText: string,
 ): TreeFolder[] {
     // ================================================================
     // STEP 1: Validate input data
     // ================================================================
-    if (!data || !('items' in data)) {
+    if (!data || !("items" in data)) {
         return [];
     }
 
@@ -354,7 +328,7 @@ export function transformToTreeData(
     // We build the tree structure here in frontend for flexibility & caching benefits
     // ================================================================
     const hierarchicalItems = buildHierarchy(frontendItems);
-    
+
     // ================================================================
     // STEP 4: Apply search filter (if needed)
     // TODO: Implement search filter for all item types (not just folders)
@@ -367,16 +341,16 @@ export function transformToTreeData(
     // ================================================================
     let itemsToTransform: WorkspaceItem[];
 
-    if (data && 'workspaceId' in data) {
+    if (data && "workspaceId" in data) {
         // Create workspace root as a FolderItem
         const workspaceRoot: FolderItem = {
-            id: -12345,  // Virtual ID for workspace root, -12345 is used to avoid conflicts
+            id: -12345, // Virtual ID for workspace root, -12345 is used to avoid conflicts
             type: constants.workspace.itemTypes.folder,
             userId: data.userId,
             name: data.name,
             color: data.color,
             icon: data.icon,
-            accessType: 'owner',
+            accessType: "owner",
             isOriginal: true,
             level: 0,
             depth: 0,

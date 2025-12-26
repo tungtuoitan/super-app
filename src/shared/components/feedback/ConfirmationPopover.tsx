@@ -2,15 +2,15 @@
  * ConfirmationPopover Component
  * Shared confirmation popover component based on Portal's PopoverBox pattern
  * Following SuperApp architecture guidelines
- * 
+ *
  * Note: Using native implementation since shadcn Popover component is not available.
  * This provides a positioned confirmation dialog near the trigger element.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { Button } from '@/Components/ui/button';
-import { cn } from '@/lib/utils';
-import { useTheme } from '@/contexts/ThemeContext';
+import React, { useEffect, useRef } from "react";
+import { Button } from "@/Components/ui/button";
+import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export interface ConfirmationPopoverProps {
     /** Whether the popover is open */
@@ -24,11 +24,11 @@ export interface ConfirmationPopoverProps {
     /** Text for the cancel button */
     cancelText?: string;
     /** Color for the confirm button */
-    confirmColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    confirmColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     /** Color for the cancel button */
-    cancelColor?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    cancelColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     /** Variant for buttons */
-    buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     /** Custom width for the popover */
     width?: string;
     /** Z-index for the popover */
@@ -45,12 +45,12 @@ export function ConfirmationPopover({
     open,
     anchorEl,
     message,
-    confirmText = 'Ok',
-    cancelText = 'Cancel',
-    confirmColor = 'default',
-    cancelColor = 'ghost',
+    confirmText = "Ok",
+    cancelText = "Cancel",
+    confirmColor = "default",
+    cancelColor = "ghost",
     buttonVariant,
-    width = '300px',
+    width = "300px",
     zIndex = 10000,
     onConfirm,
     onCancel,
@@ -64,7 +64,7 @@ export function ConfirmationPopover({
     useEffect(() => {
         if (open && popoverRef.current) {
             const popoverRect = popoverRef.current.getBoundingClientRect();
-            
+
             // Center horizontally and vertically
             const top = (window.innerHeight - popoverRect.height) / 2 + window.scrollY;
             const left = (window.innerWidth - popoverRect.width) / 2 + window.scrollX;
@@ -78,18 +78,13 @@ export function ConfirmationPopover({
         if (!open) return;
 
         const handleClickOutside = (event: MouseEvent) => {
-            if (
-                popoverRef.current &&
-                !popoverRef.current.contains(event.target as Node) &&
-                anchorEl &&
-                !anchorEl.contains(event.target as Node)
-            ) {
+            if (popoverRef.current && !popoverRef.current.contains(event.target as Node) && anchorEl && !anchorEl.contains(event.target as Node)) {
                 handleClose();
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [open, anchorEl]);
 
     const handleClose = () => {
@@ -110,11 +105,7 @@ export function ConfirmationPopover({
     return (
         <>
             {/* Backdrop */}
-            <div
-                className="fixed inset-0 bg-transparent"
-                style={{ zIndex: zIndex - 1 }}
-                onClick={handleClose}
-            />
+            <div className="fixed inset-0 bg-transparent" style={{ zIndex: zIndex - 1 }} onClick={handleClose} />
 
             {/* Popover */}
             <div
@@ -122,9 +113,7 @@ export function ConfirmationPopover({
                 className={cn(
                     "fixed rounded-lg shadow-lg border",
                     "px-4 py-3",
-                    theme === 'dark' 
-                        ? 'bg-gray-800 border-gray-700 text-white' 
-                        : 'bg-white border-gray-200 text-gray-900'
+                    theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-200 text-gray-900",
                 )}
                 style={{
                     top: position.top,
@@ -134,25 +123,12 @@ export function ConfirmationPopover({
                 }}
             >
                 <p className="text-sm mb-3 whitespace-pre-line">{message}</p>
-                <hr className={cn(
-                    "mb-3",
-                    theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-                )} />
+                <hr className={cn("mb-3", theme === "dark" ? "border-gray-700" : "border-gray-200")} />
                 <div className="flex justify-end gap-2">
-                    <Button
-                        size="sm"
-                        variant={buttonVariant || confirmColor}
-                        onClick={handleConfirm}
-                        className="normal-case"
-                    >
+                    <Button size="sm" variant={buttonVariant || confirmColor} onClick={handleConfirm} className="normal-case">
                         {confirmText}
                     </Button>
-                    <Button
-                        size="sm"
-                        variant={cancelColor}
-                        onClick={handleCancel}
-                        className="normal-case"
-                    >
+                    <Button size="sm" variant={cancelColor} onClick={handleCancel} className="normal-case">
                         {cancelText}
                     </Button>
                 </div>

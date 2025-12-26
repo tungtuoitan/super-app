@@ -1,41 +1,15 @@
+import React from "react";
+import { NodeApi } from "react-arborist";
+import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers } from "lucide-react";
+import { useExplorerStore } from "@/store/index";
+import { useTreeSelection } from "@/hooks/explorer/useTreeSelection.helper";
+import { getAllVisibleFolderIds, TreeFolder } from "@/hooks/explorer/tree.helper";
+import { FolderItem, isFolder } from "@/types/workspace.types";
+import { constants } from "@/utils/constants";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
-import React from 'react';
-import { NodeApi } from 'react-arborist';
-import {
-    ChevronDown,
-    ChevronRight,
-    Tag as TagIcon,
-    FolderOpen,
-    Folder as FolderIcon,
-    Layers
-} from 'lucide-react';
-import { useExplorerStore } from '@/store/index';
-import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
-import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
-import {FolderItem, isFolder} from '@/types/workspace.types';
-import { constants } from '@/utils/constants';
-import {useOrchestratorContextMenuHelper} from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
-
-
-
-export function FolderNode({ 
-    node, 
-    style, 
-    dragHandle, 
-    treeData,
-}: { 
-    node: NodeApi<TreeFolder>; 
-    style: React.CSSProperties;
-    dragHandle?: any;
-    treeData: TreeFolder[];
-}) {
-    const {
-        selectedFolderIds,
-        setSelectedFolderIds,
-        lastSelectedFolderId,
-        setLastSelectedFolderId,
-        currentTree,
-    } = useExplorerStore();
+export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
+    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentTree } = useExplorerStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
 
@@ -46,14 +20,14 @@ export function FolderNode({
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
-    
+
     // Check if this node is a valid drop target (being dragged over)
     const isDropTarget = node.state.willReceiveDrop;
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault(); // Prevent tree activation that causes scrolling
-        
+
         // Don't allow selection of workspace root node
         if (isWorkspaceRoot) {
             // Only allow expand/collapse for workspace root
@@ -62,19 +36,19 @@ export function FolderNode({
             }
             return;
         }
-        
+
         // Focus the tree container for keyboard navigation
-        const treeContainer = document.querySelector('[data-workspace-tree]') as HTMLElement;
+        const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
         treeContainer?.focus();
-        
+
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedFolderIds(prev => prev.filter(id => id !== folderItem.id));
+                setSelectedFolderIds((prev) => prev.filter((id) => id !== folderItem.id));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedFolderIds(prev => [...prev, folderItem.id]);
+                setSelectedFolderIds((prev) => [...prev, folderItem.id]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
@@ -120,21 +94,21 @@ export function FolderNode({
             return;
         }
 
-        const _currentFolder = currentTree?.items.find(f => f.id === folderItem.id);
+        const _currentFolder = currentTree?.items.find((f) => f.id === folderItem.id);
 
         // Open folder-specific context menu with folder data
-        showContextMenu(e, constants.workspace.itemTypes.folder, {...folderItem, parentId: _currentFolder?.parentId ?? null });
+        showContextMenu(e, constants.workspace.itemTypes.folder, { ...folderItem, parentId: _currentFolder?.parentId ?? null });
     };
-    
+
     return (
         <div
             ref={(el) => {
                 // Make entire node draggable (VS Code style - no special cursor)
-                if (dragHandle && typeof dragHandle === 'function' && el) {
+                if (dragHandle && typeof dragHandle === "function" && el) {
                     try {
                         dragHandle(el);
                     } catch (error) {
-                        console.warn('Error setting dragHandle:', error);
+                        console.warn("Error setting dragHandle:", error);
                     }
                 }
             }}
@@ -144,23 +118,13 @@ export function FolderNode({
             className={`
                 flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
                 transition-all duration-150 ease-in-out
-                ${isDragging ? 'opacity-40' : 'opacity-100'}
-                ${isSelected
-                    ? 'bg-editor-hover text-white border-l-2 border-editor-active'
-                    : 'bg-transparent hover:bg-editor-hover'
-                }
-                ${isWorkspaceRoot ? 'font-semibold' : ''}
-                ${isDragging && isSelected
-                    ? 'bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1'
-                    : ''
-                }
-                ${isDropTarget
-                    ? 'bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1'
-                    : ''
-                }
+                ${isDragging ? "opacity-40" : "opacity-100"}
+                ${isSelected ? "bg-editor-hover text-white border-l-2 border-editor-active" : "bg-transparent hover:bg-editor-hover"}
+                ${isWorkspaceRoot ? "font-semibold" : ""}
+                ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1" : ""}
+                ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1" : ""}
             `}
         >
-
             {/* Expand/Collapse Button */}
             <button
                 onClick={(e) => {
@@ -168,30 +132,24 @@ export function FolderNode({
                     e.preventDefault();
                     node.toggle();
                 }}
-                className={`p-0.5 ${hasChildren ? 'visible' : 'invisible'} text-editor-fg`}
+                className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
             >
-                {hasChildren ? (
-                    node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                ) : null}
+                {hasChildren ? node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" /> : null}
             </button>
 
             {/* Folder Icon */}
             <div className="mr-2 flex items-center">
                 {/* Workspace root node */}
                 {folderItem.id < 0 ? (
-                    <Layers
-                        className="w-4 h-4"
-                        style={{ color: folderItem.color || '#75beff' }}
-                    />
+                    <Layers className="w-4 h-4" style={{ color: folderItem.color || "#75beff" }} />
                 ) : hasChildren ? (
-                    node.isOpen ?
-                        <FolderOpen className="w-4 h-4 text-yellow-500" /> :
+                    node.isOpen ? (
+                        <FolderOpen className="w-4 h-4 text-yellow-500" />
+                    ) : (
                         <FolderIcon className="w-4 h-4 text-yellow-500" />
+                    )
                 ) : (
-                    <TagIcon
-                        className="w-4 h-4"
-                        style={{ color: folderItem.color || '#75beff' }}
-                    />
+                    <TagIcon className="w-4 h-4" style={{ color: folderItem.color || "#75beff" }} />
                 )}
             </div>
 
@@ -201,16 +159,15 @@ export function FolderNode({
                     <span
                         className={`
                             text-sm truncate
-                            ${hasChildren ? 'font-semibold' : 'font-normal'}
-                            ${isWorkspaceRoot ? 'uppercase tracking-wide' : ''}
+                            ${hasChildren ? "font-semibold" : "font-normal"}
+                            ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
                             text-editor-fg
                         `}
                     >
-                        {folderItem.name +'-'+ folderItem.id}
+                        {folderItem.name + "-" + folderItem.id}
                     </span>
                 </div>
             </div>
-
         </div>
     );
 }

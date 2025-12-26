@@ -3,7 +3,7 @@
  * Domain models and DTOs for the notes feature
  */
 
-import type { Folder } from '@/types/folder.types';
+import type { Folder } from "@/types/folder.types";
 
 // Backend ResultOptions wrapper (from SuperAppModels.DTOs.ResultOptions)
 export interface ResultOptions<T = any> {
@@ -20,17 +20,10 @@ export interface ResultOptions<T = any> {
 }
 
 // Note types
-export type NoteType = 'meeting' | 'brainstorm' | 'research' | 'bug' | 'task' | 'idea';
+export type NoteType = "meeting" | "brainstorm" | "research" | "bug" | "task" | "idea";
 
 // Available note types
-export const NOTE_TYPES: readonly NoteType[] = [
-    'meeting',
-    'brainstorm', 
-    'research',
-    'bug',
-    'task',
-    'idea'
-] as const;
+export const NOTE_TYPES: readonly NoteType[] = ["meeting", "brainstorm", "research", "bug", "task", "idea"] as const;
 
 // Domain Model (what we use in the app)
 // Backend returns: Id, Name, Description, Tags, Type, CreatedAt, UpdatedAt, DeletedAt
@@ -46,13 +39,12 @@ export interface Note {
     deletedAt: Date | null; // Track if note is deleted (soft delete)
     isHardDeleted?: boolean; // Track if note is permanently deleted (hard delete)
     createdBy?: string; // Optional - may be removed from backend response for security
-
 }
 
 // API DTOs (what backend sends/receives)
 // Matches backend NoteResponse DTO exactly
 export interface NoteDTO {
-    id: number;  // Backend returns 'id' (from NoteResponse.Id)
+    id: number; // Backend returns 'id' (from NoteResponse.Id)
     name: string;
     description?: string;
     tags: Folder[]; // Backend still uses "tags" field name (array of Folder/Tag objects)

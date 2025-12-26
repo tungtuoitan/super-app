@@ -1,10 +1,10 @@
 /**
  * Local storage service for type-safe browser storage operations.
- * 
+ *
  * This service provides a consistent interface for localStorage operations
  * with proper error handling and type safety. It handles JSON serialization
  * and parsing automatically for complex objects.
- * 
+ *
  * Features:
  * - Type-safe generic methods
  * - Automatic JSON serialization/deserialization
@@ -16,11 +16,11 @@
 export const storageService = {
     /**
      * Get an item from localStorage with automatic JSON parsing.
-     * 
+     *
      * @template T - The expected type of the stored value
      * @param key - The storage key to retrieve
      * @returns The parsed value or null if not found/invalid
-     * 
+     *
      * @example
      * ```typescript
      * interface User { id: number; name: string; }
@@ -41,11 +41,11 @@ export const storageService = {
 
     /**
      * Set an item in localStorage with automatic JSON serialization.
-     * 
+     *
      * @template T - The type of the value to store
      * @param key - The storage key to use
      * @param value - The value to store
-     * 
+     *
      * @example
      * ```typescript
      * const user = { id: 1, name: 'John' };
@@ -63,7 +63,7 @@ export const storageService = {
 
     /**
      * Remove an item from localStorage.
-     * 
+     *
      * @param key - The storage key to remove
      */
     remove(key: string): void {
@@ -82,14 +82,14 @@ export const storageService = {
         try {
             localStorage.clear();
         } catch (error) {
-            console.error('Error clearing localStorage', error);
+            console.error("Error clearing localStorage", error);
         }
     },
 
     /**
      * Get a string value directly from localStorage without JSON parsing.
      * Useful for simple string values like tokens.
-     * 
+     *
      * @param key - The storage key to retrieve
      * @returns The string value or null if not found
      */
@@ -99,7 +99,7 @@ export const storageService = {
 
     /**
      * Set a string value directly in localStorage without JSON serialization.
-     * 
+     *
      * @param key - The storage key to use
      * @param value - The string value to store
      */
@@ -110,7 +110,7 @@ export const storageService = {
 
 // Storage keys constants
 export const STORAGE_KEYS = {
-  USER_TOKEN: 'userToken',
-  OAUTH_STATE: 'oauth_state',
-  ACCESS_TOKEN: 'access_token',
+    USER_TOKEN: "userToken",
+    OAUTH_STATE: "oauth_state",
+    ACCESS_TOKEN: "access_token",
 } as const;

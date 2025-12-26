@@ -1,5 +1,5 @@
-import { CSSProperties, LegacyRef, ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import { CSSProperties, LegacyRef, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 /**
  * Props interface for the GridContainer component.
@@ -37,36 +37,16 @@ export interface GridContainerProps {
  * @param props - Grid container configuration props
  * @returns Styled container component for grid layouts
  */
-export function GridContainer({
-    children,
-    className,
-    style,
-    ref,
-    id,
-    noBackground = false,
-    noPadding = false,
-    ...props
-}: GridContainerProps) {
+export function GridContainer({ children, className, style, ref, id, noBackground = false, noPadding = false, ...props }: GridContainerProps) {
     return (
         <div
             ref={ref}
             id={id}
-            className={cn(
-                'w-full h-full flex flex-col overflow-x-auto overflow-y-hidden',
-                !noBackground && 'bg-[rgb(246,246,246)]',
-                className
-            )}
+            className={cn("w-full h-full flex flex-col overflow-x-auto overflow-y-hidden", !noBackground && "bg-[rgb(246,246,246)]", className)}
             style={style}
             {...props}
         >
-            <div
-                className={cn(
-                    'flex-1 overflow-auto',
-                    !noPadding && 'm-1.5'
-                )}
-            >
-                {children}
-            </div>
+            <div className={cn("flex-1 overflow-auto", !noPadding && "m-1.5")}>{children}</div>
         </div>
     );
 }

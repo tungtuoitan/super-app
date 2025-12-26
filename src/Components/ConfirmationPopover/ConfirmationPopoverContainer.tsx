@@ -4,10 +4,10 @@
  * Following SuperApp architecture patterns
  */
 
-import React from 'react';
-import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
-import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
-import { useConfirmationPopoverStore } from '@/store/confirmationPopover/ConfirmationPopover.store';
+import React from "react";
+import { ConfirmationPopover } from "@/shared/components/feedback/ConfirmationPopover";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { useConfirmationPopoverStore } from "@/store/confirmationPopover/ConfirmationPopover.store";
 
 /**
  * Container component that manages confirmation popover state
@@ -21,7 +21,7 @@ export function ConfirmationPopoverContainer() {
         <ConfirmationPopover
             open={isOpen}
             anchorEl={options?.anchorEl || null}
-            message={options?.message || ''}
+            message={options?.message || ""}
             confirmText={options?.confirmText}
             cancelText={options?.cancelText}
             confirmColor={options?.confirmColor}

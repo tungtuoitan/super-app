@@ -4,7 +4,7 @@
  * Manages loading states for save/undo operations
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
+import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
 export interface EditorToolbarContextData {
     // Loading states for toolbar actions
@@ -37,7 +37,7 @@ export const EditorToolbarProvider: React.FC<React.PropsWithChildren<unknown>> =
 export function useEditorToolbarStore(): EditorToolbarContextData {
     const ctx = useContext(EditorToolbarStore);
     if (!ctx) {
-        throw new Error('useEditorToolbarStore requires EditorToolbarProvider');
+        throw new Error("useEditorToolbarStore requires EditorToolbarProvider");
     }
     return ctx;
 }

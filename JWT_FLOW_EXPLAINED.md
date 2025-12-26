@@ -157,6 +157,7 @@ Return user-specific data
 ## 🎯 Tóm tắt: userId từ đâu ra?
 
 ### Backend:
+
 ```
 Database (urm.users)
     → user.Id = 1
@@ -167,12 +168,14 @@ Database (urm.users)
 ```
 
 ### Frontend:
+
 ```
 Login response.user.token = "eyJhbGc..."
     → localStorage.setItem("user_token", token)
 ```
 
 ### Mỗi API Request:
+
 ```
 Frontend sends: Authorization: Bearer eyJhbGc...
     → Backend JWT Middleware decodes token
@@ -188,6 +191,7 @@ Frontend sends: Authorization: Bearer eyJhbGc...
 ## 🔍 Chi tiết Claims trong JWT
 
 ### JWT Token Structure (decoded):
+
 ```json
 {
   "header": {
@@ -207,6 +211,7 @@ Frontend sends: Authorization: Bearer eyJhbGc...
 ```
 
 ### Khi Backend validate token:
+
 ```csharp
 // ASP.NET Core JWT Middleware tự động:
 1. Verify signature với secret key
@@ -233,6 +238,7 @@ User.GetUserId()
 ## 📦 JWT Token được lưu Ở ĐÂU?
 
 ### Frontend (Browser):
+
 ```
 localStorage
     └─ key: "user_token"
@@ -240,6 +246,7 @@ localStorage
 ```
 
 ### Backend KHÔNG LƯU JWT Token!
+
 - Backend chỉ **generate** token và gửi về client
 - Backend chỉ **validate** token khi nhận request
 - Token được lưu ở **client side** (localStorage/memory)
@@ -250,11 +257,13 @@ localStorage
 ## ⚡ Tại sao JWT Claims có thể lưu userId?
 
 JWT (JSON Web Token) được thiết kế để:
+
 1. **Self-contained**: Token chứa TẤT CẢ thông tin cần thiết (claims)
 2. **Stateless**: Backend KHÔNG cần lưu session, chỉ cần verify signature
 3. **Secure**: Signature đảm bảo token không bị giả mạo
 
 ### Structure:
+
 ```
 JWT = Base64(Header) + "." + Base64(Payload) + "." + Signature
 
@@ -265,6 +274,7 @@ Signature = HMACSHA256(
 ```
 
 ### Bảo mật:
+
 - Payload (claims) có thể **đọc được** (base64 decode)
 - Nhưng **KHÔNG THỂ SỬA** vì sửa → signature sai → backend reject
 - Chỉ server có SecretKey mới tạo được signature hợp lệ
@@ -274,16 +284,19 @@ Signature = HMACSHA256(
 ## 🔐 Security Notes
 
 ### ✅ An toàn:
+
 - JWT chứa userId, email (public info)
 - Signature đảm bảo không ai sửa được
 - Token có expiration time (hết hạn)
 
 ### ❌ KHÔNG NÊN lưu trong JWT:
+
 - Password
 - Sensitive personal data (SSN, credit card...)
 - Large data (JWT nên nhỏ gọn)
 
 ### 🛡️ Best Practices:
+
 - Luôn dùng HTTPS
 - Set expiration time ngắn (15-60 phút)
 - Có refresh token mechanism

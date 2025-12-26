@@ -1,14 +1,14 @@
-import { forwardRef, useState } from 'react';
-import { Input } from '@/Components/ui/input';
-import { Label } from '@/Components/ui/label';
-import { cn } from '@/lib/utils';
+import { forwardRef, useState } from "react";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import { cn } from "@/lib/utils";
 
 /**
  * Props interface for the GenericTextField component.
  */
-export interface GenericTextFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface GenericTextFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
     /** Size variant for the component */
-    size?: 'small' | 'tiny';
+    size?: "small" | "tiny";
     /** Optional label for the input */
     label?: string;
     /** Whether the field has an error */
@@ -40,41 +40,23 @@ export interface GenericTextFieldProps extends Omit<React.InputHTMLAttributes<HT
  * @returns Configured text field component
  */
 export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, GenericTextFieldProps>(
-    ({
-        size = 'small',
-        label,
-        error,
-        helperText,
-        required,
-        multiline = false,
-        rows = 3,
-        className,
-        id,
-        ...props
-    }, ref) => {
+    ({ size = "small", label, error, helperText, required, multiline = false, rows = 3, className, id, ...props }, ref) => {
         const [inputId] = useState(() => id || `input-${Math.random().toString(36).slice(2)}`);
 
         const inputClassName = cn(
-            'w-full rounded',
-            size === 'tiny' && 'h-8 text-xs py-1.5',
-            size === 'small' && 'h-9 text-sm',
-            error && 'border-destructive focus-visible:ring-destructive',
-            className
+            "w-full rounded",
+            size === "tiny" && "h-8 text-xs py-1.5",
+            size === "small" && "h-9 text-sm",
+            error && "border-destructive focus-visible:ring-destructive",
+            className,
         );
 
-        const InputComponent = multiline ? 'textarea' : Input;
+        const InputComponent = multiline ? "textarea" : Input;
 
         return (
             <div className="w-full">
                 {label && (
-                    <Label
-                        htmlFor={inputId}
-                        className={cn(
-                            'block text-left mb-2',
-                            size === 'tiny' && 'text-xs',
-                            error && 'text-destructive'
-                        )}
-                    >
+                    <Label htmlFor={inputId} className={cn("block text-left mb-2", size === "tiny" && "text-xs", error && "text-destructive")}>
                         {label}
                         {required && <span className="text-destructive ml-1">*</span>}
                     </Label>
@@ -86,13 +68,13 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
                         rows={rows}
                         className={cn(
                             "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none",
-                            size === 'tiny' && 'text-xs py-1.5 px-2',
-                            error && 'border-destructive focus-visible:ring-destructive',
-                            className
+                            size === "tiny" && "text-xs py-1.5 px-2",
+                            error && "border-destructive focus-visible:ring-destructive",
+                            className,
                         )}
                         aria-invalid={error}
                         aria-describedby={helperText ? `${inputId}-helper` : undefined}
-                        {...props as React.TextareaHTMLAttributes<HTMLTextAreaElement>}
+                        {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
                     />
                 ) : (
                     <InputComponent
@@ -101,23 +83,17 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
                         className={inputClassName}
                         aria-invalid={error}
                         aria-describedby={helperText ? `${inputId}-helper` : undefined}
-                        {...props as any}
+                        {...(props as any)}
                     />
                 )}
                 {helperText && (
-                    <p
-                        id={`${inputId}-helper`}
-                        className={cn(
-                            'mt-1 text-xs',
-                            error ? 'text-destructive' : 'text-muted-foreground'
-                        )}
-                    >
+                    <p id={`${inputId}-helper`} className={cn("mt-1 text-xs", error ? "text-destructive" : "text-muted-foreground")}>
                         {helperText}
                     </p>
                 )}
             </div>
         );
-    }
+    },
 );
 
-GenericTextField.displayName = 'GenericTextField';
+GenericTextField.displayName = "GenericTextField";

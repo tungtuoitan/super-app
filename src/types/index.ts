@@ -3,19 +3,18 @@
  * Central export for all type definitions
  */
 
-export * from './common.types';
+export * from "./common.types";
 
 // Export folder types (new)
-export * from './folder.types';
+export * from "./folder.types";
 
 // Export tag types (backward compatibility - re-exports from folder.types)
-
 
 /**
  * API Client Types
  */
 export interface ApiRequestConfig {
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     headers?: Record<string, string>;
     body?: any;
     params?: Record<string, string | number | boolean>;
@@ -50,7 +49,7 @@ export interface UserData {
     firstName?: string;
     lastName?: string;
     picture?: string;
-    authType: 'google' | 'local';
+    authType: "google" | "local";
     token: string;
     tokenType: string;
     fullName?: string;
@@ -72,20 +71,10 @@ export interface ExchangeTokenResponse {
  * Note Types
  * Re-export from notes feature with aliases for API compatibility
  */
-export type {
-    Note,
-    NoteType,
-    NoteDTO,
-    GetNotesParams,
-    NotesResponse,
-} from '@/types/note.types';
+export type { Note, NoteType, NoteDTO, GetNotesParams, NotesResponse } from "@/types/note.types";
 
 // API compatibility aliases
-export type {
-    CreateNoteDTO as CreateNoteRequest,
-    UpdateNoteDTO as UpdateNoteRequest,
-    NoteDTO as NoteResponse,
-} from '@/types/note.types';
+export type { CreateNoteDTO as CreateNoteRequest, UpdateNoteDTO as UpdateNoteRequest, NoteDTO as NoteResponse } from "@/types/note.types";
 
 // Response wrapper type for create/update operations
 export interface NoteCreateUpdateResponse {

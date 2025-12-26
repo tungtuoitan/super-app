@@ -1,10 +1,11 @@
 # ✅ Fix Google OAuth với ngrok - Checklist
 
 ## ❌ Lỗi hiện tại:
+
 ```json
 {
-  "error": "invalid_grant",
-  "error_description": "Bad Request"
+    "error": "invalid_grant",
+    "error_description": "Bad Request"
 }
 ```
 
@@ -15,6 +16,7 @@
 ## ✅ Đã fix (Backend):
 
 ### 1. ✅ `appsettings.pro.json` - Thêm đầy đủ path
+
 ```json
 "OAuth": {
   "Google": {
@@ -25,6 +27,7 @@
 ```
 
 ### 2. ✅ `AllowedOrigins` - Thêm ngrok URL
+
 ```json
 "AllowedOrigins": [
   "https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev"
@@ -44,6 +47,7 @@ https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev/auth/callback
 ```
 
 **Cách làm**:
+
 1. Vào [Google Cloud Console](https://console.cloud.google.com/)
 2. Chọn project của bạn
 3. **APIs & Services** → **Credentials**
@@ -60,6 +64,7 @@ https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev/auth/callback
 Backend cần reload config để apply changes:
 
 **Nếu đang chạy dotnet run**:
+
 ```bash
 # Ctrl+C để stop
 # Sau đó chạy lại:
@@ -68,11 +73,13 @@ dotnet run --environment Production
 ```
 
 **Nếu đang chạy như service**:
+
 ```bash
 sudo systemctl restart superapp-backend
 ```
 
 **Hoặc đơn giản**:
+
 - Stop backend process
 - Start lại
 
@@ -83,8 +90,8 @@ sudo systemctl restart superapp-backend
 1. Vào: `https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev`
 2. Click **"Sign in with Google"**
 3. Kiểm tra browser address bar khi redirect về:
-   - ✅ Phải là: `https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev/auth/callback?code=...`
-   - ❌ Không được là localhost
+    - ✅ Phải là: `https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev/auth/callback?code=...`
+    - ❌ Không được là localhost
 4. Login thành công → Redirect về workspace
 
 ---
@@ -94,16 +101,20 @@ sudo systemctl restart superapp-backend
 ### Lỗi: Vẫn "invalid_grant"
 
 **Check 1**: Google Console đã save chưa?
+
 - Vào lại Credentials → OAuth Client
 - Xem có URL `https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev/auth/callback` trong list không
 
 **Check 2**: Backend đã restart chưa?
+
 - Restart để reload `appsettings.pro.json`
 
 **Check 3**: Đợi vài phút
+
 - Google có thể mất 5-10 phút để propagate changes
 
 **Check 4**: Clear browser cache
+
 - Ctrl+Shift+Delete → Clear cache
 - Hoặc thử Incognito mode
 
@@ -112,6 +123,7 @@ sudo systemctl restart superapp-backend
 ### Lỗi: CORS error
 
 **Frontend console hiển thị**:
+
 ```
 Access to XMLHttpRequest at 'https://...ngrok-free.dev/api/auth/google/login'
 from origin 'https://...ngrok-free.dev' has been blocked by CORS policy
@@ -124,6 +136,7 @@ from origin 'https://...ngrok-free.dev' has been blocked by CORS policy
 ### Lỗi: "redirect_uri_mismatch"
 
 **Frontend console/network tab**:
+
 ```
 Error: redirect_uri_mismatch
 ```
@@ -151,20 +164,25 @@ Sử dụng checklist này để verify từng bước:
 ## 🔍 Verify Redirect URI đang dùng:
 
 ### Check Frontend:
+
 Mở browser console trên `https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev`:
+
 ```javascript
 console.log(window.location.origin);
 // Should print: https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev
 ```
 
 ### Check Backend:
+
 Thêm log tạm vào `AuthService.cs:177`:
+
 ```csharp
 var redirectUri = _configuration["OAuth:Google:RedirectUri"] ?? "";
 _logger.LogInformation("Using redirect_uri: {RedirectUri}", redirectUri);
 ```
 
 Check backend logs khi login → Phải thấy:
+
 ```
 Using redirect_uri: https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev/auth/callback
 ```
@@ -174,18 +192,21 @@ Using redirect_uri: https://unparcelled-geralyn-deutoplasmic.ngrok-free.dev/auth
 ## ⚠️ Lưu ý quan trọng về ngrok FREE tier:
 
 **Mỗi lần restart ngrok**, URL sẽ thay đổi:
+
 ```
 https://abc123.ngrok-free.dev  (session 1)
 https://xyz789.ngrok-free.dev  (session 2 - sau khi restart)
 ```
 
 **Khi đó phải**:
+
 1. Update `appsettings.pro.json` với URL mới
 2. Update Google Cloud Console với redirect URI mới
 3. Update `AllowedOrigins` với URL mới
 4. Restart backend
 
 **Để tránh phải update liên tục** → Xem xét:
+
 - Dùng **Cloudflare Tunnel** (miễn phí, URL cố định)
 - Hoặc upgrade **ngrok paid** ($8/tháng) để có static domain
 

@@ -1,7 +1,7 @@
 /**
  * Workspace Operation Helper Hook
  * Handles loading workspaces and their tree data
- * 
+ *
  * @pattern Functions only - State should be accessed directly from useExplorerStore()
  * @returns {Object} Workspace operation functions only (no state)
  * @example
@@ -11,25 +11,16 @@
  * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
  */
 
-import { useExplorerStore } from '@/store/explorer/Explorer.store';
-import { _getAllUserWorkspaces, _getWorkspaceTree } from '@/services/workspace.service';
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import { useSnackbar } from 'notistack';
+import { useExplorerStore } from "@/store/explorer/Explorer.store";
+import { _getAllUserWorkspaces, _getWorkspaceTree } from "@/services/workspace.service";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { useSnackbar } from "notistack";
 
 export const useWorkspaceOperation = () => {
     const { auth } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
-    const {
-        allWorkspaces,
-        setAllWorkspaces,
-        currentTree,
-        setCurrentTree,
-        isLoadingWorkspaces,
-        setIsLoadingWorkspaces,
-        isLoadingTree,
-        setIsLoadingTree,
-    } = useExplorerStore();
+    const { allWorkspaces, setAllWorkspaces, currentTree, setCurrentTree, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useExplorerStore();
 
     /**
      * Load all user workspaces
@@ -38,23 +29,23 @@ export const useWorkspaceOperation = () => {
     const loadAllWorkspaces = async () => {
         try {
             setIsLoadingWorkspaces(true);
-            
+
             const token = auth.userToken;
             const data = await _getAllUserWorkspaces(token);
-            
+
             setAllWorkspaces(data);
 
             // Set default to first workspace if available and no tree loaded
             if (data.length > 0 && !currentTree) {
                 const defaultWorkspaceId = data[0].id;
-                
+
                 // Auto-load tree for default workspace
                 await loadTree(defaultWorkspaceId);
             }
-            
+
             return data;
         } catch (error) {
-            console.error('❌ Failed to load workspaces:', error);
+            console.error("❌ Failed to load workspaces:", error);
             throw error;
         } finally {
             setIsLoadingWorkspaces(false);
@@ -68,14 +59,14 @@ export const useWorkspaceOperation = () => {
     const loadTree = async (workspaceId: number) => {
         try {
             setIsLoadingTree(true);
-            
+
             const token = auth.userToken;
             const treeData = await _getWorkspaceTree(token, workspaceId);
-            
-            treeData.items = treeData.items.filter(item => item.deletedAt === null);
+
+            treeData.items = treeData.items.filter((item) => item.deletedAt === null);
             // Set as current tree
             setCurrentTree(treeData);
-            
+
             return treeData;
         } catch (error) {
             throw error;

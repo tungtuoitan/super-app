@@ -4,15 +4,15 @@
  * Pattern: Separate store from business logic (similar to EditorTabStore)
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import { constants } from '@/utils/constants';
+import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import { constants } from "@/utils/constants";
 
 export interface ContextMenuPosition {
     x: number;
     y: number;
 }
 
-export type OrchestratorContextMenuType = typeof constants.contextMenu.contextMenuTypes[keyof typeof constants.contextMenu.contextMenuTypes];
+export type OrchestratorContextMenuType = (typeof constants.contextMenu.contextMenuTypes)[keyof typeof constants.contextMenu.contextMenuTypes];
 
 export interface OrchestratorContextMenuStoreData {
     // Menu state
@@ -43,7 +43,7 @@ export const contextMenuStoreDefaultValue: OrchestratorContextMenuStoreData = {
     setIsContextMenuOpen: () => {},
     anchorPoint: { x: 0, y: 0 },
     setAnchorPoint: () => {},
-    contextType: 'default',
+    contextType: "default",
     setContextType: () => {},
     contextData: null,
     setContextData: () => {},
