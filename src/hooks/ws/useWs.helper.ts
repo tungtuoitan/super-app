@@ -5,16 +5,16 @@
 
 import { _deleteWs, _getWsList, _upsertWsBatch, WsDTO } from '@/services/ws.service';
 import { storageService } from '@/services/storage.service';
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useSnackbar } from 'notistack';
 import { useWsStore, Ws } from '@/store/ws/useWs.store';
 import { constants } from '@/utils/constants';
 import { generateTempId, generateUnsavedName, collectIdsFromTabs } from '@/utils/temp-id.utils';
 import {BaseTab} from '@/types/editor/tab.types';
-import {useEditorTabsStore} from '../../store';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import {useWsTabHelper} from './useWsTab.helper';
+import {useEditorTabsStore} from '@/store/index';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
  */
@@ -43,7 +43,7 @@ export const useWsHelper = () => {
     } = useWsStore();
 
     const { enqueueSnackbar } = useSnackbar();
-    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
+    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useOrchestratorContextMenuStore();
     const { openWorkspaceTab } = useWsTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
 
@@ -54,7 +54,7 @@ export const useWsHelper = () => {
         try {
             setIsLoading(true);
             const token = auth.userToken;
-            const result = await _getWsList(token, { getAll: true });
+            const result = await _getWsList(token);
             
             // Check API response success
             if (!result.success) {

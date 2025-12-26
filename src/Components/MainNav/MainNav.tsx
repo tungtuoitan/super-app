@@ -3,9 +3,9 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { useNavigationStore } from '../../contexts/NavigationContext';
 import { TopNav } from '../TopNav';
 import { VSCodeLayout } from '../VSCodeLayout';
-import {useContextMenuHelper} from '@/hooks/useContextMenu.helper';
 import { AuthCallback } from '@/pages/AuthCallback';
 import {constants} from '@/utils/index';
+import {useOrchestratorContextMenuHelper} from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
 
 /**
  * Main navigation component.
@@ -26,7 +26,7 @@ import {constants} from '@/utils/index';
  */
 export default function MainNav() {
     const { bodyWrapperRef } = useNavigationStore();
-    const { showContextMenu } = useContextMenuHelper();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
     
         const handleGlobalRightClick = (e: React.MouseEvent) => {
             e.preventDefault(); // Always disable default context menu

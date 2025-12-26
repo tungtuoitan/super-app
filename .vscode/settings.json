@@ -20,6 +20,7 @@
         "extension.easyLogSign": ":",
         "editor.insertSpaces": true,
         "editor.detectIndentation": false,
-        "editor.unicodeHighlight.ambiguousCharacters": false
+        "editor.unicodeHighlight.ambiguousCharacters": false,
+        "claudeCodeChat.permissions.yoloMode": true
     // }
 }

@@ -6,8 +6,7 @@ import {
     AlertTriangle as HardDeleteIcon
 } from 'lucide-react';
 import { useWsGridMenuHelper } from '@/shared/contexts/helpers/useWsGridMenu.helper';
-import {useContextMenuHelper} from '@/hooks/useContextMenu.helper';
-import {useContextMenuStore} from '@/store/index';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 /**
  * WsGridMenu
@@ -26,7 +25,7 @@ export function WsGridMenu() {
     const {
         contextData,
         setIsContextMenuOpen,
-    } = useContextMenuStore();
+    } = useOrchestratorContextMenuStore();
 
 
 

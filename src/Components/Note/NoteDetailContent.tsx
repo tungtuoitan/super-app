@@ -124,7 +124,7 @@ export function NoteDetailContent() {
                         {/* HashTags */}
                         <div className="space-y-2">
                             <GenericTagAutoComplete
-                                options={constants.standardRegistryFE.fallbackTagOptions as unknown as IAutoCompleteOptions[]    }
+                                options={constants.standardRegistryFE.fallbackTagOptions as unknown as IAutoCompleteOptions[]}
                                 value={currentTagsValue}
                                 onChange={handleTagsChange}
                                 label="HashTags"

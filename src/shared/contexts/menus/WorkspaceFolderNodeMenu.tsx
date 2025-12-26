@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 import { constants } from '@/utils/constants';
 import { useWorkspaceFolderMenuHelper } from '@/shared/contexts/helpers/useWorkspaceFolderMenu.helper';
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 /**
  * WorkspaceFolderNodeMenu
@@ -24,7 +24,7 @@ import { useExplorerStore } from '@/store/explorer/Explorer.store';
  * - Delete / Hard Delete
  */
 export function WorkspaceFolderNodeMenu() {
-    const { contextData } = useContextMenuStore();
+    const { contextData } = useOrchestratorContextMenuStore();
     const { selectedFolderIds } = useExplorerStore();
     const {
         createItem,

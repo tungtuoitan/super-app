@@ -3,14 +3,14 @@
  * Business logic for workspace grid context menu operations
  */
 
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 export const useWsGridMenuHelper = () => {
     const {
         contextData,
         setIsContextMenuOpen,
-    } = useContextMenuStore();
+    } = useOrchestratorContextMenuStore();
     
     const { showConfirmation } = useConfirmationPopoverHelper();
 

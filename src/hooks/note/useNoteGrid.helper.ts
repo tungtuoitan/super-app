@@ -2,7 +2,6 @@ import { _deleteNote, _getNotes, _upsertNotes } from "@/services/note.service";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { Note } from "@/types/note.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotesData } from "../../utils";
-import { useContextMenuStore, useEditorTabsStore } from "../../store";
 import { useSnackbar } from "notistack";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
@@ -10,6 +9,8 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import {useEditorTabsStore} from "@/store/index";
+import {useOrchestratorContextMenuStore} from "@/store/contextMenu/ContextMenu.store";
 
 export const useNoteGridHelper = () => {
     const { auth } = useAuthStore();
@@ -26,7 +27,7 @@ export const useNoteGridHelper = () => {
     const { openTab } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useContextMenuStore();
+    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useOrchestratorContextMenuStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 
     // Create new note (temporary with negative ID)
@@ -259,7 +260,7 @@ export const useNoteGridHelper = () => {
         try {
             setNoteGridIsLoading(true);
             const token = auth.userToken;
-            const result = await _getNotes(token, { getAll: true });
+            const result = await _getNotes(token);
 
             // Check API response success
             if (!result.success) {

@@ -6,8 +6,8 @@ import {
     AlertTriangle as HardDeleteIcon,
     RotateCcw as RestoreIcon
 } from 'lucide-react';
-import { useContextMenuHelper } from '@/shared/contexts/helpers/useContextMenu.helper';
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
+import { useOrchestratorContextMenuHelper } from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 /**
  * NoteGridMenu
@@ -20,8 +20,8 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
  * - Restore - only shown if notes ARE deleted
  */
 export function NoteGridMenu() {
-    const { contextData } = useContextMenuStore();
-    const { openConfirmDialog, executeDirectly } = useContextMenuHelper();
+    const { contextData } = useOrchestratorContextMenuStore();
+    const { openConfirmDialog, executeDirectly } = useOrchestratorContextMenuHelper();
 
     // Calculate derived values from contextData
     const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
@@ -29,7 +29,6 @@ export function NoteGridMenu() {
 
     // Check if any selected notes have deletedAt (are in deleted state)
     const anySelectedDeleted = contextData?.selectedNotes?.some((note: any) => note.deletedAt !== null && note.deletedAt !== undefined) ?? false;
-    const allSelectedDeleted = contextData?.selectedNotes?.every((note: any) => note.deletedAt !== null && note.deletedAt !== undefined) ?? false;
 
     return (
         <>

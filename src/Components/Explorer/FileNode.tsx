@@ -8,12 +8,12 @@ import {
     FileArchive,
     FileCode,
 } from 'lucide-react';
-import { useContextMenuHelper } from '@/hooks/useContextMenu.helper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { TreeFolder } from '@/hooks/explorer/tree.helper';
 import { FileItem } from '@/types/workspace.types';
 import { constants } from '@/utils/constants';
+import {useOrchestratorContextMenuHelper} from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
 
 function getFileIcon(extension?: string) {
     if (!extension) return File;
@@ -58,7 +58,7 @@ export function FileNode({
         setLastSelectedFolderId,
         currentTree,
     } = useExplorerStore();
-    const { showContextMenu } = useContextMenuHelper();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
 
     const fileItem = node.data.data as FileItem;

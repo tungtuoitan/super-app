@@ -8,7 +8,7 @@ import type { ResultOptions, NoteDTO } from '@/types/note.types';
 
 /**
  * Get all notes with optional filtering
- * GET /api/notes?searchText=...&page=...&pageSize=...&type=...&isArchived=...&getAll=...
+ * GET /api/notes?searchText=...&page=...&pageSize=...&type=...&isArchived=...
  * 
  * @param token - Authentication token
  * @param params - Optional query parameters for filtering
@@ -17,7 +17,6 @@ import type { ResultOptions, NoteDTO } from '@/types/note.types';
 export const _getNotes = async (
     token: string,
     params?: {
-        getAll?: boolean;
         searchText?: string;
         page?: number;
         pageSize?: number;
@@ -33,9 +32,6 @@ export const _getNotes = async (
 
     // Build query string
     const queryParams = new URLSearchParams();
-    if (params?.getAll !== undefined) {
-        queryParams.append('getAll', String(params.getAll));
-    }
     if (params?.searchText) {
         queryParams.append('searchText', params.searchText);
     }

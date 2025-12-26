@@ -9,7 +9,7 @@ import {
     RotateCcw as RestoreIcon
 } from 'lucide-react';
 import { useWorkspaceChildMenuHelper } from '@/shared/contexts/helpers/useWorkspaceChildMenu.helper';
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 /**
  * WorkspaceChildNodeMenu
@@ -20,7 +20,7 @@ import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
  * - File: View Details, Download (disabled), Delete, Hard Delete
  */
 export function WorkspaceChildNodeMenu() {
-    const { contextType, contextData } = useContextMenuStore();
+    const { contextType, contextData } = useOrchestratorContextMenuStore();
     
     const {
         deleteItems,

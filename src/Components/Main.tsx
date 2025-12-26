@@ -6,8 +6,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AuthStoreProvider } from '@/store/auth/Auth.store';
 import { ExplorerProvider } from '@/store/explorer/Explorer.store';
 import { FolderDialogProvider } from '@/store/explorer/FolderDialog.store';
-import { ContextMenu } from '@/shared/contexts';
-import { ContextMenuStoreProvider } from '@/store/contextMenu/ContextMenu.store';
+import { OrchestratorContextMenu } from '@/shared/contexts';
 import { ConfirmationPopoverProvider } from '@/store/confirmationPopover/ConfirmationPopover.store';
 import { ConfirmationPopoverContainer } from '@/Components/ConfirmationPopover';
 import MainNav from './MainNav/MainNav';
@@ -21,6 +20,7 @@ import { WsDetailProvider } from '@/store/ws/useWsDetail.store';
 import { ActivityBarProvider } from '@/store/index'
 import { AuthCallbackProvider } from '@/store/index'
 import { AuthGuard } from '@/Components/Auth/AuthGuard';
+import {OrchestratorContextMenuStoreProvider} from '@/store/contextMenu/ContextMenu.store';
 
 
 /**
@@ -61,16 +61,16 @@ export function Main() {
                                                     <EditorTabProvider>
                                                         <EditorToolbarProvider>
                                                             <DialogProvider>
-                                                                <ContextMenuStoreProvider>
+                                                                <OrchestratorContextMenuStoreProvider>
                                                                     <ConfirmationPopoverProvider>
-                                                                    <ContextMenu>
+                                                                    <OrchestratorContextMenu>
                                                                         <AuthGuard>
                                                                             <MainNav />
                                                                         </AuthGuard>
-                                                                    </ContextMenu>
+                                                                    </OrchestratorContextMenu>
                                                                     <ConfirmationPopoverContainer />
                                                                 </ConfirmationPopoverProvider>
-                                                            </ContextMenuStoreProvider>
+                                                            </OrchestratorContextMenuStoreProvider>
                                                         </DialogProvider>
                                                     </EditorToolbarProvider>
                                                 </EditorTabProvider>

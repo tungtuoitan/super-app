@@ -22,7 +22,6 @@ export * from './vsCode/useGridControl.helper';
 export * from './useActivityBar.helper';
 
 // Context menu helpers
-export * from './useContextMenu.helper';
 export * from './useConfirmationPopover.helper';
 
 // Workspace helpers

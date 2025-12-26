@@ -13,7 +13,7 @@ import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 import {Note} from '@/types/note.types';
-import {_getNotes, _deleteNote} from '@/services/note.service';
+import {_deleteNote} from '@/services/note.service';
 import {useEditorTabHelper} from '@/hooks/vsCode/useEditorTab.helper';
 import {useNoteGridStore} from '@/store/note/useNoteGrid.store';
 import {useNoteGridHelper} from '@/hooks/note/useNoteGrid.helper';

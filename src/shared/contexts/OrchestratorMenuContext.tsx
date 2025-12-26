@@ -1,7 +1,6 @@
 import React from 'react';
 import { ControlledMenu, MenuItem, MenuDivider } from '@szhsin/react-menu';
 import { Info as InfoIcon } from 'lucide-react';
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { WorkspaceFolderNodeMenu } from './menus/WorkspaceFolderNodeMenu';
 import { WorkspaceChildNodeMenu } from './menus/WorkspaceChildNodeMenu';
 import { NoteGridMenu } from './menus/NoteGridMenu';
@@ -9,6 +8,7 @@ import { WsGridMenu } from './menus/WsGridMenu';
 import { constants } from '@/utils/constants';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -19,14 +19,14 @@ interface ContextMenuProviderProps {
  * Pure UI component that renders menu, popover, and dialogs
  * All logic delegated to store and helper
  */
-export function ContextMenu({ children }: ContextMenuProviderProps) {
+export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) {
     // Store state
     const {
         isContextMenuOpen,
         anchorPoint,
         contextType,
         setIsContextMenuOpen,
-    } = useContextMenuStore();
+    } = useOrchestratorContextMenuStore();
 
 
     /**

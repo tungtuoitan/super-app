@@ -4,7 +4,6 @@ import { NodeApi } from 'react-arborist';
 import {
     FileText,
 } from 'lucide-react';
-import { useContextMenuHelper } from '@/hooks/useContextMenu.helper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import { useEditorTabHelper } from '@/hooks/vsCode/useEditorTab.helper';
@@ -12,6 +11,7 @@ import { TreeFolder } from '@/hooks/explorer/tree.helper';
 import { NoteItem } from '@/types/workspace.types';
 import { Note } from '@/types/note.types';
 import { constants } from '@/utils/constants';
+import {useOrchestratorContextMenuHelper} from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
 
 export function NoteNode({
     node,
@@ -28,7 +28,7 @@ export function NoteNode({
         setLastSelectedFolderId,
         currentTree,
     } = useExplorerStore();
-    const { showContextMenu } = useContextMenuHelper();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
     const { openTab } = useEditorTabHelper();
 

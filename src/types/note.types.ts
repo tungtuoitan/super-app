@@ -99,7 +99,6 @@ export interface GetNotesParams {
     page?: number;
     pageSize?: number;
     searchText?: string;
-    getAll?: boolean;
     type?: string;
     isArchived?: boolean;
 }

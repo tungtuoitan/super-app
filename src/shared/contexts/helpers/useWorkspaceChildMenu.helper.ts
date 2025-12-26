@@ -4,7 +4,6 @@
  * Shared helper for both note and file nodes in explorer tree
  */
 
-import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenu.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
@@ -15,6 +14,7 @@ import { storageService } from '@/services/storage.service';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import { useSnackbar } from 'notistack';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 export const useWorkspaceChildMenuHelper = () => {
     const { auth } = useAuthStore();
@@ -23,7 +23,7 @@ export const useWorkspaceChildMenuHelper = () => {
         contextType,
         contextData,
         setIsContextMenuOpen,
-    } = useContextMenuStore();
+    } = useOrchestratorContextMenuStore();
 
     const {
         setSelectedFolderIds,

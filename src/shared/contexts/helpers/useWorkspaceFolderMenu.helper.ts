@@ -1,10 +1,9 @@
 /**
  * Workspace Folder Menu Helper Hook
  * Business logic for folder context menu operations
- * Extracted from useContextMenuHelper for folder-specific logic
+ * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
  */
 
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
 import { useExplorerStore } from '@/store/explorer/Explorer.store';
 import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
 import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
@@ -16,6 +15,7 @@ import { storageService } from '@/services/storage.service';
 import { useAuthStore } from '@/store/auth/Auth.store';
 import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
 import { useSnackbar } from 'notistack';
+import {useOrchestratorContextMenuStore} from '@/store/contextMenu/ContextMenu.store';
 
 export const useWorkspaceFolderMenuHelper = () => {
     const { auth } = useAuthStore();
@@ -23,7 +23,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const {
         contextData,
         setIsContextMenuOpen,
-    } = useContextMenuStore();
+    } = useOrchestratorContextMenuStore();
 
     const {
         selectedFolderIds,

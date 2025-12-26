@@ -9,12 +9,12 @@ import {
     Folder as FolderIcon,
     Layers
 } from 'lucide-react';
-import { useContextMenuHelper } from '@/hooks/useContextMenu.helper';
 import { useExplorerStore } from '@/store/index';
 import { useTreeSelection } from '@/hooks/explorer/useTreeSelection.helper';
 import {getAllVisibleFolderIds, TreeFolder} from '@/hooks/explorer/tree.helper';
 import {FolderItem, isFolder} from '@/types/workspace.types';
 import { constants } from '@/utils/constants';
+import {useOrchestratorContextMenuHelper} from '@/shared/contexts/helpers/useOrchestratorContextMenu.helper';
 
 
 
@@ -36,7 +36,7 @@ export function FolderNode({
         setLastSelectedFolderId,
         currentTree,
     } = useExplorerStore();
-    const { showContextMenu } = useContextMenuHelper();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelection();
 
     const folderItem = node.data.data as FolderItem;
