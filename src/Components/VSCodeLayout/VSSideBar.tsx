@@ -58,7 +58,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
 
                                 {/* Content */}
                                 <div className="flex-1 overflow-hidden">
-                                    {activeView === "workspaceList" && <WsView />}
+                                    {activeView === constants.vscode.viewTypes.workspaceList && <WsView />}
                                     {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
                                     {activeView === constants.vscode.viewTypes.note && <NotesView />}
                                 </div>

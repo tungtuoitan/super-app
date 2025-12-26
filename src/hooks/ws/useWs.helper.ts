@@ -3,7 +3,7 @@
  * Business logic for workspace list operations
  */
 
-import { _deleteWs, _getWsList, _upsertWsBatch, WsDTO } from "@/services/ws.service";
+import { wsService, WsDTO } from "@/services/ws.service";
 import { storageService } from "@/services/storage.service";
 import { useSnackbar } from "notistack";
 import { useWsStore, Ws } from "@/store/ws/useWs.store";
@@ -46,7 +46,7 @@ export const useWsHelper = () => {
         try {
             setIsLoading(true);
             const token = auth.userToken;
-            const result = await _getWsList(token);
+            const result = await wsService._getWsList(token);
 
             // Check API response success
             if (!result.success) {
@@ -148,7 +148,7 @@ export const useWsHelper = () => {
 
             if (isHardDelete) {
                 // HARD DELETE: Use DELETE API (permanently remove)
-                const result = await _deleteWs(token, selectedIds.join(","));
+                const result = await wsService._deleteWs(token, selectedIds.join(","));
 
                 if (!result.success) {
                     throw new Error(result.message || "Failed to hard delete workspace(s)");
@@ -181,7 +181,7 @@ export const useWsHelper = () => {
                 });
 
                 // Call batch upsert API (single call instead of loop)
-                const result = await _upsertWsBatch(token, batchRequests);
+                const result = await wsService._upsertWsBatch(token, batchRequests);
 
                 if (!result.success) {
                     throw new Error(result.message || "Failed to soft delete workspaces");

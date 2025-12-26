@@ -37,7 +37,7 @@ export interface WsDTO {
  * @param params - Optional query parameters for filtering
  * @returns Array of workspaces or rejects with response
  */
-export const _getWsList = async (
+const _getWsList = async (
     token: string,
     params?: {
         getAll?: boolean;
@@ -85,7 +85,7 @@ export const _getWsList = async (
  * @param id - The workspace ID to retrieve
  * @returns Workspace details or rejects with response
  */
-export const _getWsById = async (token: string, id: number) => {
+const _getWsById = async (token: string, id: number) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -122,7 +122,7 @@ export const _getWsById = async (token: string, id: number) => {
  * @param requests - Array of workspace upsert data
  * @returns Batch operation results or rejects with response
  */
-export const _upsertWsBatch = async (
+const _upsertWsBatch = async (
     token: string,
     requests: Array<{
         id?: number | null;
@@ -163,7 +163,7 @@ export const _upsertWsBatch = async (
  * @param id - Single workspace ID or comma-separated IDs (e.g., "1,2,3")
  * @returns void or rejects with response
  */
-export const _deleteWs = async (token: string, id: number | string) => {
+const _deleteWs = async (token: string, id: number | string) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -186,3 +186,10 @@ export const _deleteWs = async (token: string, id: number | string) => {
         return Promise.reject(res);
     }
 };
+
+export const wsService = {
+    _getWsList,
+    _getWsById,
+    _upsertWsBatch,
+    _deleteWs,
+}

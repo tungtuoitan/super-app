@@ -6,6 +6,7 @@
 import { config } from "@/config/app.config";
 import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WorkspaceListResponse } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
+import _ from "lodash";
 
 /**
  * Request to create or update a folder in workspace
@@ -27,7 +28,7 @@ export interface UpsertFolderRequest {
  * @param token - Authentication token
  * @returns Array of user's workspaces or rejects with response
  */
-export const _getAllUserWorkspaces = async (token: string): Promise<WorkspaceListResponse[]> => {
+const _getAllUserWorkspaces = async (token: string): Promise<WorkspaceListResponse[]> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -57,7 +58,7 @@ export const _getAllUserWorkspaces = async (token: string): Promise<WorkspaceLis
  * @param workspaceId - The workspace ID
  * @returns Workspace tree with all items or rejects with response
  */
-export const _getWorkspaceTree = async (token: string, workspaceId: number): Promise<WorkspaceWithTreeResponse> => {
+const _getWorkspaceTree = async (token: string, workspaceId: number): Promise<WorkspaceWithTreeResponse> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -88,7 +89,7 @@ export const _getWorkspaceTree = async (token: string, workspaceId: number): Pro
  * @param itemId - The workspace item ID to retrieve
  * @returns Workspace item details or rejects with response
  */
-export const _getWorkspaceItem = async (token: string, workspaceId: number, itemId: number) => {
+const _getWorkspaceItem = async (token: string, workspaceId: number, itemId: number) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -121,7 +122,7 @@ export const _getWorkspaceItem = async (token: string, workspaceId: number, item
  * @param itemId - Optional item ID for update (if null, creates new)
  * @returns Created/Updated workspace item or rejects with response
  */
-export const _upsertWorkspaceItem = async (
+const _upsertWorkspaceItem = async (
     token: string,
     workspaceId: number,
     data: {
@@ -171,7 +172,7 @@ export const _upsertWorkspaceItem = async (
  * @param data - Move items request data
  * @returns Operation result or rejects with response
  */
-export const _moveWorkspaceItems = async (token: string, workspaceId: number, data: MoveItemsRequest): Promise<WorkspaceOperationResult> => {
+const _moveWorkspaceItems = async (token: string, workspaceId: number, data: MoveItemsRequest): Promise<WorkspaceOperationResult> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -203,7 +204,7 @@ export const _moveWorkspaceItems = async (token: string, workspaceId: number, da
  * @param data - Delete items request data
  * @returns Operation result or rejects with response
  */
-export const _deleteWorkspaceItems = async (token: string, workspaceId: number, data: DeleteItemsRequest): Promise<WorkspaceOperationResult> => {
+const _deleteWorkspaceItems = async (token: string, workspaceId: number, data: DeleteItemsRequest): Promise<WorkspaceOperationResult> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -235,7 +236,7 @@ export const _deleteWorkspaceItems = async (token: string, workspaceId: number, 
  * @param data - Folder data (name, description, color, etc.)
  * @returns Operation result or rejects with response
  */
-export const _upsertFolder = async (token: string, workspaceId: number, data: UpsertFolderRequest): Promise<WorkspaceOperationResult> => {
+const _upsertFolder = async (token: string, workspaceId: number, data: UpsertFolderRequest): Promise<WorkspaceOperationResult> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -267,7 +268,7 @@ export const _upsertFolder = async (token: string, workspaceId: number, data: Up
  * @param data - Item data (childType, childId, etc.)
  * @returns Operation result or rejects with response
  */
-export const _addItemToWorkspace = async (
+const _addItemToWorkspace = async (
     token: string,
     workspaceId: number,
     data: {
@@ -303,3 +304,15 @@ export const _addItemToWorkspace = async (
         return Promise.reject(res);
     }
 };
+
+
+export const workspaceService = {
+    _getAllUserWorkspaces,
+    _getWorkspaceTree,
+    _getWorkspaceItem,
+    _upsertWorkspaceItem,
+    _moveWorkspaceItems,
+    _deleteWorkspaceItems,
+    _upsertFolder,
+    _addItemToWorkspace,
+}

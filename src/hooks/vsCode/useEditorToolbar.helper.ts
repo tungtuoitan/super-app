@@ -15,7 +15,7 @@ import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
 import { storageService } from "@/services/storage.service";
-import { _upsertWsBatch } from "@/services/ws.service";
+import { wsService } from "@/services/ws.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useNoteGridHelper } from "../note/useNoteGrid.helper";
@@ -117,7 +117,7 @@ export const useEditorToolbarHelper = () => {
                     ];
 
                     // Step 3.3: Call Batch Upsert API
-                    const result = await _upsertWsBatch(token, payload);
+                    const result = await wsService._upsertWsBatch(token, payload);
 
                     // Step 3.4: Validate API Response
                     if (!result.success) {

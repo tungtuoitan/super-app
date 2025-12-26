@@ -14,7 +14,7 @@ import type { ResultOptions, NoteDTO } from "@/types/note.types";
  * @param params - Optional query parameters for filtering
  * @returns Array of notes or rejects with response
  */
-export const _getNotes = async (
+const _getNotes = async (
     token: string,
     params?: {
         searchText?: string;
@@ -74,7 +74,7 @@ export const _getNotes = async (
  * @param noteId - The note ID to retrieve
  * @returns Note details or rejects with response
  */
-export const _getNoteById = async (token: string, noteId: number) => {
+const _getNoteById = async (token: string, noteId: number) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -111,7 +111,7 @@ export const _getNoteById = async (token: string, noteId: number) => {
  * @param requests - Array of note upsert data
  * @returns Batch operation results or rejects with response
  */
-export const _upsertNotes = async (
+const _upsertNotes = async (
     token: string,
     requests: Array<{
         id: number;
@@ -154,7 +154,7 @@ export const _upsertNotes = async (
  * @param noteId - Single note ID or comma-separated IDs
  * @returns void or rejects with response
  */
-export const _deleteNote = async (token: string, noteId: number | string) => {
+const _deleteNote = async (token: string, noteId: number | string) => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -177,3 +177,11 @@ export const _deleteNote = async (token: string, noteId: number | string) => {
         return Promise.reject(res);
     }
 };
+
+
+export const noteService = {
+    _getNotes,
+    _getNoteById,
+    _upsertNotes,
+    _deleteNote,
+}

@@ -3,8 +3,6 @@ import { useActivityBarStore } from "@/store/index";
 import type { ActivityBarView } from "@/utils/constants";
 
 export interface UseActivityBarHelperReturn {
-    // Navigation
-    activeView: ActivityBarView;
     handleActivityClick: (view: ActivityBarView) => void;
 
     // Sidebar
@@ -34,11 +32,8 @@ export const useActivityBarHelper = (): UseActivityBarHelperReturn => {
     };
 
     return {
-        // Navigation
-        activeView,
         handleActivityClick,
 
-        // Sidebar
         toggleSideBar,
     };
 };

@@ -12,7 +12,7 @@
  */
 
 import { useExplorerStore } from "@/store/explorer/Explorer.store";
-import { _getAllUserWorkspaces, _getWorkspaceTree } from "@/services/workspace.service";
+import { workspaceService } from "@/services/workspace.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
@@ -31,7 +31,7 @@ export const useWorkspaceOperation = () => {
             setIsLoadingWorkspaces(true);
 
             const token = auth.userToken;
-            const data = await _getAllUserWorkspaces(token);
+            const data = await workspaceService._getAllUserWorkspaces(token);
 
             setAllWorkspaces(data);
 
@@ -61,7 +61,7 @@ export const useWorkspaceOperation = () => {
             setIsLoadingTree(true);
 
             const token = auth.userToken;
-            const treeData = await _getWorkspaceTree(token, workspaceId);
+            const treeData = await workspaceService._getWorkspaceTree(token, workspaceId);
 
             treeData.items = treeData.items.filter((item) => item.deletedAt === null);
             // Set as current tree

@@ -10,7 +10,7 @@ import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.hel
 import { constants } from "@/utils/constants";
 import type { ItemType } from "@/store/explorer/FolderDialog.store";
 import { Folder } from "@/types/folder.types";
-import { _deleteWorkspaceItems } from "@/services/workspace.service";
+import { workspaceService } from "@/services/workspace.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
@@ -206,7 +206,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 };
             });
 
-            const result = await _deleteWorkspaceItems(token || "", currentTree?.workspaceId || 1, {
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.workspaceId || 1, {
                 items: deleteItems,
                 isHardDelete,
             });
@@ -356,7 +356,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 };
             });
 
-            const result = await _deleteWorkspaceItems(token || "", currentTree?.workspaceId || 1, {
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.workspaceId || 1, {
                 items: deleteItems,
                 isHardDelete,
             });

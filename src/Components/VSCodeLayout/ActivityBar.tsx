@@ -6,6 +6,7 @@ import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
 import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
+import { useNavigationStore } from "@/contexts/NavigationContext";
 
 const activities = [
     { id: "workspaceList" as const, icon: Boxes, label: "WorkspaceList" },
@@ -15,7 +16,8 @@ const activities = [
 
 export function ActivityBar() {
     const { setAccountsOpen, setSettingsOpen } = useActivityBarStore();
-    const { activeView, handleActivityClick } = useActivityBarHelper();
+    const { handleActivityClick } = useActivityBarHelper();
+    const { activeView } = useNavigationStore();
     const { isAuthenticated } = useAuthStore();
 
     return (

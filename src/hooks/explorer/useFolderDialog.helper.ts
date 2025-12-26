@@ -3,7 +3,7 @@ import { useFolderDialogStore } from "@/store/explorer/FolderDialog.store";
 import type { ItemType } from "@/store/explorer/FolderDialog.store";
 import { useExplorerStore } from "@/store/explorer/Explorer.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { _getWorkspaceTree, _upsertFolder } from "@/services/workspace.service";
+import { workspaceService } from "@/services/workspace.service";
 import type { FolderDialogFormErrors } from "@/store/explorer/FolderDialog.store";
 import type { Folder } from "@/types/folder.types";
 import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
@@ -116,7 +116,7 @@ export const useFolderDialogHelper = () => {
                       };
 
             // Call upsertFolder endpoint
-            await _upsertFolder(token, selectedWorkspaceId, folderData);
+            await workspaceService._upsertFolder(token, selectedWorkspaceId, folderData);
 
             // Success message based on mode
             const successMessage = mode === "edit" ? `Folder "${newFolderName}" updated successfully!` : `Folder "${newFolderName}" created successfully!`;

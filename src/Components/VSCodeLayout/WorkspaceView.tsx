@@ -10,23 +10,21 @@ import { useWorkspaceOperation } from "@/hooks/explorer/useWorkspaceOperation.he
 import { useExplorerStore } from "@/store/explorer/Explorer.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "../Explorer/FolderDialog";
+import {useAuthStore} from "@/store/auth/Auth.store";
 
 /**
  * Explorer View - WorkspaceTree for folder navigation with workspace selection
  */
 export function WorkspaceView() {
-    // Get state directly from store
+    const { auth } = useAuthStore();
     const { allWorkspaces, currentTree, isLoadingWorkspaces, isLoadingTree } = useExplorerStore();
-
-    // Get actions from helper
     const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
-
     const [selectedOption, setSelectedOption] = useState<IAutoCompleteOptions | null>(null);
 
     // Load workspaces on mount
     useEffect(() => {
         loadAllWorkspaces();
-    }, []);
+    }, [auth]);
 
     // Sync selected option with currentTree.workspaceId from store
     useEffect(() => {

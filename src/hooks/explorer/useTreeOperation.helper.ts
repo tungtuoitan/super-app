@@ -9,7 +9,7 @@ import { useExplorerStore } from "@/store/explorer/Explorer.store";
 import { useFolderDialogHelper } from "./useFolderDialog.helper";
 import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
 import { constants } from "@/utils/constants";
-import { _moveWorkspaceItems } from "@/services/workspace.service";
+import { workspaceService } from "@/services/workspace.service";
 import type { MoveItemsRequest } from "@/types/workspace.types";
 import { Folder } from "@/types/index";
 import { useSnackbar } from "notistack";
@@ -202,7 +202,7 @@ export const useTreeOperation = () => {
             };
 
             try {
-                const result = await _moveWorkspaceItems(auth.userToken, workspaceId, moveRequest);
+                const result = await workspaceService._moveWorkspaceItems(auth.userToken, workspaceId, moveRequest);
                 if (!result.success) {
                     throw new Error("Move API returned unsuccessful response");
                 }

@@ -1,4 +1,4 @@
-import { _deleteNote, _getNotes, _upsertNotes } from "@/services/note.service";
+import { noteService } from "@/services/note.service";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { Note } from "@/types/note.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotesData } from "../../utils";
@@ -8,7 +8,7 @@ import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils"; 
 import { useEditorTabsStore } from "@/store/index";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -104,7 +104,7 @@ export const useNoteGridHelper = () => {
                 });
 
                 // Call batch upsert API
-                const result = await _upsertNotes(token, batchRequests);
+                const result = await noteService._upsertNotes(token, batchRequests);
 
                 if (!result.success) {
                     throw new Error(result.message || `Failed to ${type === "soft-delete" ? "delete" : "restore"} notes`);
@@ -163,7 +163,7 @@ export const useNoteGridHelper = () => {
 
             if (persistedNoteIds.length > 0) {
                 // Use DELETE API (permanently remove)
-                const result = await _deleteNote(token, persistedNoteIds.join(","));
+                const result = await noteService._deleteNote(token, persistedNoteIds.join(","));
 
                 if (!result.success) {
                     throw new Error(result.message || "Failed to hard delete notes");
@@ -244,7 +244,7 @@ export const useNoteGridHelper = () => {
         try {
             setNoteGridIsLoading(true);
             const token = auth.userToken;
-            const result = await _getNotes(token);
+            const result = await noteService._getNotes(token);
 
             // Check API response success
             if (!result.success) {

@@ -5,16 +5,14 @@
  */
 
 import { useExplorerStore } from "@/store/explorer/Explorer.store";
-import { useFolderDialogHelper } from "@/hooks/explorer/useFolderDialog.helper";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { constants } from "@/utils/constants";
-import { _deleteNote } from "@/services/note.service";
-import { _deleteWorkspaceItems } from "@/services/workspace.service";
-import { storageService } from "@/services/storage.service";
+import { noteService } from "@/services/note.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import {workspaceService} from "@/services/workspace.service";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { auth } = useAuthStore();
@@ -39,7 +37,7 @@ export const useWorkspaceChildMenuHelper = () => {
         try {
             const token = auth.userToken;
 
-            const result = await _deleteNote(token ?? "", noteData.id.toString());
+            const result = await noteService._deleteNote(token ?? "", noteData.id.toString());
             if (result.success) {
                 // Clear selection
                 setSelectedFolderIds([]);
@@ -73,7 +71,7 @@ export const useWorkspaceChildMenuHelper = () => {
             const token = auth.userToken;
             const workspaceId = currentTree?.workspaceId || 1;
 
-            const result = await _deleteWorkspaceItems(token ?? "", workspaceId, {
+            const result = await workspaceService._deleteWorkspaceItems(token ?? "", workspaceId, {
                 items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
                 cascade: true,
                 isHardDelete: isHardDelete,

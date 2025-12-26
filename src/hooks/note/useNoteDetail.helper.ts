@@ -3,8 +3,8 @@ import { useSnackbar } from "notistack";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { Note, UpsertNoteDTO } from "@/types/note.types";
-import { _upsertNotes } from "@/services/note.service";
-import { _addItemToWorkspace } from "@/services/workspace.service";
+import { noteService } from "@/services/note.service";
+import { workspaceService } from "@/services/workspace.service";
 import { constants } from "@/utils/constants";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { useWorkspaceOperation } from "../explorer/useWorkspaceOperation.helper";
@@ -72,7 +72,7 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 4: Call batch API to upsert note
                 // ============================================================
-                const result = await _upsertNotes(token, [upsertData]);
+                const result = await noteService._upsertNotes(token, [upsertData]);
                 if (!result.success) {
                     throw new Error(result.message || "Failed to save note");
                 }
@@ -100,7 +100,7 @@ export const useNoteDetailHelper = () => {
 
                     if (workspaceId && parentFolderId) {
                         try {
-                            await _addItemToWorkspace(token, workspaceId, {
+                            await workspaceService._addItemToWorkspace(token, workspaceId, {
                                 parentTagId: parentFolderId,
                                 childType: constants.workspace.itemTypes.note,
                                 childId: transformedNote.id,
