@@ -28,9 +28,20 @@ export const useNoteDetailHelper = () => {
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
         setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, hasUnsavedChanges: true } : t)));
-
+        
         if (!selectedNote) return;
-        const updated = { ...selectedNote, [field]: value };
+        
+        // Extract value based on field type
+        let _value;
+        if (field === 'statusCode') {
+            // value is synthetic event with structure: { target: { value: { id, label, ... } } }
+            _value = value?.target?.value?.id || null;
+            // console.log("Changing statusCode to:", _value, "from event:", value);
+        } else {
+            _value = value;
+        }
+        
+        const updated = { ...selectedNote, [field]: _value };
         setSelectedNote(updated);
     };
 

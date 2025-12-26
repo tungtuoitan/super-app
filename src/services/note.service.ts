@@ -138,6 +138,7 @@ const _upsertNotes = async (
         description?: string;
         tags?: number[];
         type?: string;
+        statusCode?: string;
         isArchived?: boolean;
         deletedAt?: string | null;
     }>,
