@@ -38,3 +38,8 @@ export * from "./workspace/tree.helper";
 
 // Standard Registry helpers
 export * from "./standardRegistry/useStandardRegistry.helper";
+
+// Filter helpers
+export * from "./filter/useFilter.helper";
+export { useFilterHelper } from "./filter/useFilter.helper";
+export { useGenericFilterHelper } from "./useGenericFilterHelper";

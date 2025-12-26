@@ -2,38 +2,39 @@
  * Grid Control Store
  * Centralized state management for grid controls (search, filter)
  * Shared between sidebar header and grid components
+ * Note: Filters are stored in userProfile and applied on backend
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
-import { Table } from "@tanstack/react-table";
+import type { UserFilters, ViewFilter } from "@/types/common.types";
 
 export interface GridControlContextData {
-    // Table instance from the active grid
-    table: Table<any> | null;
-    setTable: Dispatch<SetStateAction<Table<any> | null>>;
-
     // Search query
     searchQuery: string;
     setSearchQuery: Dispatch<SetStateAction<string>>;
 
-    // Column filters (passed from grid)
-    columnFilters: any[];
-    setColumnFilters: Dispatch<SetStateAction<any[]>>;
-
     // Entity name for labels (e.g., "Workspaces", "Notes")
-    entityName: string;
-    setEntityName: Dispatch<SetStateAction<string>>;
+    moduleName: string;
+    setModuleName: Dispatch<SetStateAction<string>>;
+
+    // View key for filters (e.g., "noteGrid", "wsGrid")
+    filterViewKey: keyof UserFilters | null;
+    setFilterViewKey: Dispatch<SetStateAction<keyof UserFilters | null>>;
+
+    // Pending filters (local state for filter popup)
+    pendingFilters: ViewFilter;
+    setPendingFilters: Dispatch<SetStateAction<ViewFilter>>;
 }
 
 export const gridControlContextDefaultValue: GridControlContextData = {
-    table: null,
-    setTable: () => {},
     searchQuery: "",
     setSearchQuery: () => {},
-    columnFilters: [],
-    setColumnFilters: () => {},
-    entityName: "",
-    setEntityName: () => {},
+    moduleName: "",
+    setModuleName: () => {},
+    filterViewKey: null,
+    setFilterViewKey: () => {},
+    pendingFilters: {},
+    setPendingFilters: () => {},
 };
 
 export const GridControlStore = createContext<GridControlContextData>(gridControlContextDefaultValue);
@@ -41,22 +42,22 @@ export const GridControlStore = createContext<GridControlContextData>(gridContro
 export const useGridControlStore = () => useContext(GridControlStore);
 
 export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [table, setTable] = useState<Table<any> | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [columnFilters, setColumnFilters] = useState<any[]>([]);
-    const [entityName, setEntityName] = useState<string>("");
+    const [moduleName, setModuleName] = useState<string>("");
+    const [filterViewKey, setFilterViewKey] = useState<keyof UserFilters | null>(null);
+    const [pendingFilters, setPendingFilters] = useState<ViewFilter>({});
 
     return (
         <GridControlStore.Provider
             value={{
-                table,
-                setTable,
                 searchQuery,
                 setSearchQuery,
-                columnFilters,
-                setColumnFilters,
-                entityName,
-                setEntityName,
+                moduleName,
+                setModuleName,
+                filterViewKey,
+                setFilterViewKey,
+                pendingFilters,
+                setPendingFilters,
             }}
         >
             {children}

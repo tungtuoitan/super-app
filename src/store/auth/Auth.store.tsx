@@ -5,6 +5,7 @@
  */
 
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import { UserFilters } from "@/types/common.types";
 
 /**
  * User interface representing authenticated user data
@@ -20,6 +21,7 @@ export interface User {
     picture?: string;
     authType?: "google" | "local";
     userToken: string;
+    filters?: UserFilters; // User-level filter preferences for different views
 }
 
 export interface AuthStoreData {

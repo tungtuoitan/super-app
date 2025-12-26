@@ -53,6 +53,7 @@ export interface UserData {
     token: string;
     tokenType: string;
     fullName?: string;
+    filters?: string;
 }
 
 export interface GoogleCodeRequest {

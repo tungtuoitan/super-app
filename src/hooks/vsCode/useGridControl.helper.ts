@@ -1,68 +1,36 @@
 /**
  * Grid Control Helper
  * Business logic for grid controls (search, filter)
+ * Note: Filters are stored in userProfile and applied on backend
  */
 
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import { Table } from "@tanstack/react-table";
+import type { UserFilters } from "@/types/common.types";
 
 export const useGridControlHelper = () => {
-    const { table, setTable, searchQuery, setSearchQuery, columnFilters, setColumnFilters, entityName, setEntityName } = useGridControlStore();
+    const { searchQuery, setSearchQuery, moduleName, setModuleName, filterViewKey, setFilterViewKey } = useGridControlStore();
 
     /**
-     * Register grid table instance and metadata
+     * Register grid metadata
      * Called by grid components (WsGrid, NoteGrid) on mount/update
      */
-    const registerGrid = (tableInstance: Table<any>, filters: any[], filtersSetter: (filters: any[]) => void, name: string) => {
-        setTable(tableInstance);
-        setColumnFilters(filters);
-        setEntityName(name);
-
-        // Store the setter for later use
-        // We'll use this when clearing filters from header
-        (tableInstance as any)._setColumnFilters = filtersSetter;
+    const registerGrid = (name: string, filterViewKey: keyof UserFilters) => {
+        setModuleName(name);
+        setFilterViewKey(filterViewKey);
     };
 
     /**
      * Unregister grid (cleanup on unmount)
      */
     const unregisterGrid = () => {
-        setTable(null);
-        setColumnFilters([]);
-        setEntityName("");
+        setModuleName("");
         setSearchQuery("");
-    };
-
-    /**
-     * Clear search query
-     */
-    const clearSearch = () => {
-        setSearchQuery("");
-    };
-
-    /**
-     * Clear all filters
-     */
-    const clearFilters = () => {
-        if (table && (table as any)._setColumnFilters) {
-            (table as any)._setColumnFilters([]);
-        }
-    };
-
-    /**
-     * Check if grid is registered
-     */
-    const _isGridActive = () => {
-        return table !== null;
+        setFilterViewKey(null);
     };
 
     return {
         // Actions
         registerGrid,
         unregisterGrid,
-        setSearchQuery,
-        clearSearch,
-        clearFilters,
-        _isGridActive,
     };
 };

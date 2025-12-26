@@ -14,6 +14,7 @@ import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";
 import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
 import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { constants } from "@/utils/constants";
 
 /**
  * WsGrid - ws grid with table display
@@ -149,7 +150,7 @@ export function WsGrid() {
         }
 
         // Register this grid with GridControl
-        registerGrid(table, columnFilters, setColumnFilters, "Workspaces");
+        registerGrid(constants.modules.workspace, constants.filters.views.wsGrid);
 
         // Cleanup on unmount
         return () => {
@@ -157,10 +158,8 @@ export function WsGrid() {
         };
     }, []);
 
-    // Update GridControl when columnFilters change
-    useEffect(() => {
-        registerGrid(table, columnFilters, setColumnFilters, "Workspaces");
-    }, [columnFilters, table]);
+    // Update GridControl when columnFilters change - no longer needed for backend filtering
+    // Filters are now stored in userProfile and applied on backend
 
     return (
         <div className="w-full h-full bg-background flex flex-col relative">

@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabsStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import {filterUtils} from "@/utils/filter.utils";
 
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
@@ -249,12 +250,27 @@ export const useWsGridHelper = () => {
     // =============================================================================
     // =============================================================================
 
-    // Load workspaces
+    // Load workspaces with filters from user state
     const loadWorkspaces = async () => {
         try {
             setIsLoading(true);
             const token = $user.userToken;
-            const result = await wsService._getWs(token);
+
+            // Get filters from user state
+            const wsGridFilters = $user.filters?.wsGrid;
+
+            // Parse date range filters
+            const createdAtRange = filterUtils._parseDateRangeFilter(wsGridFilters?.createdAt);
+
+            // Build filter params for API
+            const filterParams = {
+                statusCode: wsGridFilters?.statusCode,
+                deletedAt: wsGridFilters?.deletedAt,
+                createdAtFrom: createdAtRange.from,
+                createdAtTo: createdAtRange.to,
+            };
+
+            const result = await wsService._getWs(token, filterParams);
 
             // Check API response success
             if (!result.success) {

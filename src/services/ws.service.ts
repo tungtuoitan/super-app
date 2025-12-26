@@ -31,7 +31,7 @@ export interface WsDTO {
 
 /**
  * Get all workspaces with optional filtering
- * GET /api/ws?searchText=...&getAll=...
+ * GET /api/ws?searchText=...&getAll=...&statusCode=...&deletedAt=...&createdAtFrom=...&createdAtTo=...
  *
  * @param token - Authentication token
  * @param params - Optional query parameters for filtering
@@ -42,6 +42,11 @@ const _getWs = async (
     params?: {
         getAll?: boolean;
         searchText?: string;
+        // Filter parameters
+        statusCode?: string; // Comma-separated: "active,inactive"
+        deletedAt?: string; // "null" or "notNull"
+        createdAtFrom?: string; // ISO date string
+        createdAtTo?: string; // ISO date string
     },
 ) => {
     const headers = new Headers();
@@ -57,6 +62,19 @@ const _getWs = async (
     }
     if (params?.searchText) {
         queryParams.append("searchText", params.searchText);
+    }
+    // Add filter parameters
+    if (params?.statusCode) {
+        queryParams.append("statusCode", params.statusCode);
+    }
+    if (params?.deletedAt) {
+        queryParams.append("deletedAt", params.deletedAt);
+    }
+    if (params?.createdAtFrom) {
+        queryParams.append("createdAtFrom", params.createdAtFrom);
+    }
+    if (params?.createdAtTo) {
+        queryParams.append("createdAtTo", params.createdAtTo);
     }
 
     const queryString = queryParams.toString();

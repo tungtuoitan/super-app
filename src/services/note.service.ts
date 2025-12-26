@@ -8,7 +8,7 @@ import type { ResultOptions, NoteDTO } from "@/types/note.types";
 
 /**
  * Get all notes with optional filtering
- * GET /api/notes?searchText=...&page=...&pageSize=...&type=...&isArchived=...
+ * GET /api/notes?searchText=...&page=...&pageSize=...&type=...&isArchived=...&statusCode=...&deletedAt=...&createdAtFrom=...&createdAtTo=...
  *
  * @param token - Authentication token
  * @param params - Optional query parameters for filtering
@@ -22,6 +22,11 @@ const _getNotes = async (
         pageSize?: number;
         type?: string;
         isArchived?: boolean;
+        // Filter parameters
+        statusCode?: string; // Comma-separated: "active,inactive"
+        deletedAt?: string; // "null" or "notNull"
+        createdAtFrom?: string; // ISO date string
+        createdAtTo?: string; // ISO date string
     },
 ) => {
     const headers = new Headers();
@@ -46,6 +51,19 @@ const _getNotes = async (
     }
     if (params?.isArchived !== undefined) {
         queryParams.append("isArchived", String(params.isArchived));
+    }
+    // Add filter parameters
+    if (params?.statusCode) {
+        queryParams.append("statusCode", params.statusCode);
+    }
+    if (params?.deletedAt) {
+        queryParams.append("deletedAt", params.deletedAt);
+    }
+    if (params?.createdAtFrom) {
+        queryParams.append("createdAtFrom", params.createdAtFrom);
+    }
+    if (params?.createdAtTo) {
+        queryParams.append("createdAtTo", params.createdAtTo);
     }
 
     const queryString = queryParams.toString();

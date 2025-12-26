@@ -105,6 +105,97 @@ export const constants = {
             },
         ] as const,
     },
+
+    modules: {
+        note: "Note",
+        workspace: "Workspace",
+        task: "Task",
+    } as const,
+    filters: {
+        // Filter view keys
+        views: {
+            noteGrid: "noteGrid",
+            wsGrid: "wsGrid",
+            workspace: "workspace",
+        } as const,
+
+        // Default filter values for each view
+        defaults: {
+            noteGrid: {
+                statusCode: "active",
+                deletedAt: "null",
+            },
+            wsGrid: {
+                statusCode: "active",
+                deletedAt: "null",
+            },
+            workspace: {
+                statusCode: "active",
+                deletedAt: "null",
+            },
+        } as const,
+
+        // Filter field configurations
+        fields: {
+            noteGrid: [
+                {
+                    key: "statusCode",
+                    label: "Status",
+                    type: "checkbox",
+                    standardRegistryType: "noteStatus",
+                    defaultValue: "active",
+                },
+                {
+                    key: "createdAt",
+                    label: "Created Date",
+                    type: "dateRange",
+                    defaultValue: "",
+                },
+                {
+                    key: "deletedAt",
+                    label: "Deleted Status",
+                    type: "checkbox",
+                    defaultValue: "null",
+                },
+            ],
+            wsGrid: [
+                {
+                    key: "statusCode",
+                    label: "Status",
+                    type: "checkbox",
+                    standardRegistryType: "workspaceStatus",
+                    defaultValue: "active",
+                },
+                {
+                    key: "createdAt",
+                    label: "Created Date",
+                    type: "dateRange",
+                    defaultValue: "",
+                },
+                {
+                    key: "deletedAt",
+                    label: "Deleted Status",
+                    type: "checkbox",
+                    defaultValue: "null",
+                },
+            ],
+            workspace: [
+                {
+                    key: "statusCode",
+                    label: "Status",
+                    type: "checkbox",
+                    standardRegistryType: "workspaceStatus",
+                    defaultValue: "active",
+                },
+                {
+                    key: "createdAt",
+                    label: "Created Date",
+                    type: "dateRange",
+                    defaultValue: "",
+                },
+            ],
+        } as const,
+    },
 } as const;
 
 // Type exports

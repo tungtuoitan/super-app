@@ -12,14 +12,7 @@ import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 
 export function GridControlBar() {
-    const { table, searchQuery, columnFilters, entityName } = useGridControlStore();
-
-    const { setSearchQuery, clearSearch, clearFilters, _isGridActive } = useGridControlHelper();
-
-    // Don't render if no grid is active
-    if (!_isGridActive() || !table) {
-        return null;
-    }
+    const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useGridControlStore();
 
     return (
         <div className="flex items-center gap-2">
@@ -35,14 +28,14 @@ export function GridControlBar() {
                     style={{ outline: "none" }}
                 />
                 {searchQuery && (
-                    <Button variant="ghost" size="sm" onClick={clearSearch} className="absolute right-0 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent">
+                    <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")} className="absolute right-0 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent">
                         <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                     </Button>
                 )}
             </div>
 
             {/* Filter Popup */}
-            <GenericFilterPopup table={table} columnFilters={columnFilters} onClearFilters={clearFilters} entityName={entityName} />
+            <GenericFilterPopup />
         </div>
     );
 }

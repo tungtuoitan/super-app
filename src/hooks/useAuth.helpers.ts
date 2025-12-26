@@ -7,9 +7,11 @@
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { authApi } from "@/services/auth.service";
+import { userProfileService } from "@/services/userProfile.service";
 import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
 import type { LoginRequest, ExchangeTokenResponse } from "@/types/index";
+import type { UserFilters } from "@/types/common.types";
 import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError } from "@/utils/googleOAuth";
 import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
@@ -27,7 +29,7 @@ import { useSnackbar } from "notistack";
 export function useAuthHelper() {
     const { enqueueSnackbar } = useSnackbar();
     // Get state setters from AuthStore
-    const { set$User, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
+    const { $user, set$User, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
 
     // Navigation and callback store for OAuth flows
     const navigate = useNavigate();
@@ -155,7 +157,7 @@ export function useAuthHelper() {
             // Save token to localStorage
             storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
 
-            // Update auth store with full user info
+            // Update auth store with full user info including filters
             set$User({
                 userId: response.user.id,
                 userName: response.user.email || "",
@@ -165,6 +167,7 @@ export function useAuthHelper() {
                 picture: response.user.picture,
                 authType: response.user.authType,
                 userToken: response.user.token,
+                filters: response.user.filters ? JSON.parse(response.user.filters) : undefined,
             });
 
             setIsAuthenticated(true);
@@ -235,6 +238,35 @@ export function useAuthHelper() {
         return false;
     };
 
+    /**
+     * Update user filter preferences
+     * Syncs filter changes to backend and updates local state
+     */
+    const updateUserFilters = async (filters: UserFilters): Promise<void> => {
+        try {
+            // Get token from user state
+            const token = $user.userToken;
+            if (!token) {
+                throw new Error("User not authenticated");
+            }
+
+            // Update backend
+            const result = await userProfileService._updateFilters(token, filters);
+            if (!result.success) {
+                throw new Error(result.message || "Failed to update user filters");
+            }
+            // Update local state
+            set$User((prev) => ({
+                ...prev,
+                filters,
+            }));
+        } catch (err) {
+            const errorMessage = await parseApiError(err);
+            enqueueSnackbar(`Failed to update filters: ${errorMessage}`, { variant: "error" });
+            throw err;
+        }
+    };
+
     return {
         login,
         logout,
@@ -243,5 +275,6 @@ export function useAuthHelper() {
         handleOAuthCallback,
         navigateToHome,
         initAuthFromStorageToken,
+        updateUserFilters,
     };
 }

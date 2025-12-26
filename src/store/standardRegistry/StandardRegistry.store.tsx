@@ -4,13 +4,16 @@
  * Pattern: Similar to NoteGridStore - React Context with useState
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import { useContext, createContext, Dispatch, SetStateAction, useState, useMemo } from "react";
 import { StandardRegistry } from "@/types/standardRegistry.types";
 
 export interface StandardRegistryContextData {
-    // All standard registries loaded from backend
+    // All standard registries loaded from backend (flat array)
     registries: StandardRegistry[];
     setRegistries: Dispatch<SetStateAction<StandardRegistry[]>>;
+
+    // Registries grouped by type (for easy lookup)
+    registriesByType: Record<string, StandardRegistry[]>;
 
     // Loading state
     registriesLoading: boolean;
@@ -23,6 +26,7 @@ export interface StandardRegistryContextData {
 
 export const standardRegistryContextDefaultValue: StandardRegistryContextData = {
     registries: [],
+    registriesByType: {},
     registriesLoading: true,
     registriesError: null,
     setRegistries: () => {},
@@ -39,10 +43,23 @@ export const StandardRegistryProvider: React.FC<React.PropsWithChildren<unknown>
     const [registriesLoading, setRegistriesLoading] = useState<boolean>(true);
     const [registriesError, setRegistriesError] = useState<Error | null>(null);
 
+    // Group registries by type for easy lookup
+    const registriesByType = useMemo(() => {
+        const grouped: Record<string, StandardRegistry[]> = {};
+        registries.forEach((registry) => {
+            if (!grouped[registry.type]) {
+                grouped[registry.type] = [];
+            }
+            grouped[registry.type].push(registry);
+        });
+        return grouped;
+    }, [registries]);
+
     return (
         <StandardRegistryStore.Provider
             value={{
                 registries,
+                registriesByType,
                 setRegistries,
                 registriesLoading,
                 setRegistriesLoading,

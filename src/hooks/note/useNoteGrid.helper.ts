@@ -8,10 +8,10 @@ import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils"; 
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabsStore } from "@/store/index";
-import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import {filterUtils} from "@/utils/filter.utils";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
@@ -239,12 +239,27 @@ export const useNoteGridHelper = () => {
     // =============================================================================
     // =============================================================================
 
-    // Load notes
+    // Load notes with filters from user state
     const loadNotes = async () => {
         try {
             setNoteGridIsLoading(true);
             const token = $user.userToken;
-            const result = await noteService._getNotes(token);
+
+            // Get filters from user state
+            const noteGridFilters = $user.filters?.noteGrid;
+
+            // Parse date range filters
+            const createdAtRange = filterUtils._parseDateRangeFilter(noteGridFilters?.createdAt);
+
+            // Build filter params for API
+            const filterParams = {
+                statusCode: noteGridFilters?.statusCode,
+                deletedAt: noteGridFilters?.deletedAt,
+                createdAtFrom: createdAtRange.from,
+                createdAtTo: createdAtRange.to,
+            };
+
+            const result = await noteService._getNotes(token, filterParams);
 
             // Check API response success
             if (!result.success) {

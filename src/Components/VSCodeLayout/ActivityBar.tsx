@@ -8,7 +8,7 @@ import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 
-const activities = [
+const activityModules = [
     { id: constants.vscode.viewTypes.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
     { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
     { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
@@ -26,7 +26,7 @@ export function ActivityBar() {
                 {/* Activity icons */}
                 <div className="flex-1">
                     <TooltipProvider>
-                        {activities.map((activity) => {
+                        {activityModules.map((activity) => {
                             const Icon = activity.icon;
                             const isActive = activeView === activity.id;
 

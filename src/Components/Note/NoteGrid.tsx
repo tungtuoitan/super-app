@@ -11,6 +11,7 @@ import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
 import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { constants } from "@/utils/constants";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -160,7 +161,7 @@ export function NoteGrid() {
         }
 
         // Register this grid with GridControl
-        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, "Notes");
+        registerGrid(constants.modules.note, constants.filters.views.noteGrid);
 
         // Cleanup on unmount
         return () => {
@@ -168,10 +169,8 @@ export function NoteGrid() {
         };
     }, []);
 
-    // Update GridControl when columnFilters change
-    useEffect(() => {
-        registerGrid(table, noteGridColumnFilters, setNoteGridColumnFilters, "Notes");
-    }, [noteGridColumnFilters, table]);
+    // Update GridControl when columnFilters change - no longer needed for backend filtering
+    // Filters are now stored in userProfile and applied on backend
 
     return (
         <div className="w-full h-full bg-background flex flex-col relative">
