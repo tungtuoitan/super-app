@@ -4,7 +4,8 @@
  */
 
 import { config } from "@/config/app.config";
-import type { ResultOptions, StandardRegistryDTO } from "@/types/standardRegistry.types";
+import type { ResultOptions } from "@/types/common.types";
+import type { StandardRegistryDTO } from "@/types/standardRegistry.types";
 
 /**
  * Get all standard registry entries with optional type filtering

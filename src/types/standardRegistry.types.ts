@@ -5,14 +5,6 @@
 
 import { constants } from "@/utils/constants";
 
-// Backend ResultOptions wrapper (from SuperAppModels.DTOs.ResultOptions)
-export interface ResultOptions<T = any> {
-    success: boolean;
-    message?: string;
-    object?: T; // Single object result
-    data?: T[]; // Array result
-    status?: number;
-}
 
 // Standard Registry Types
 export type RegistryType = typeof constants.standardRegistryFE.types.hashtag | typeof constants.standardRegistryFE.types.entity | typeof constants.standardRegistryFE.types.workspaceStatus | typeof constants.standardRegistryFE.types.noteStatus | string;

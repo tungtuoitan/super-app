@@ -18,6 +18,10 @@ export interface NoteDetailContextData {
     // Focus state
     shouldFocusNoteName: boolean;
     setShouldFocusNoteName: Dispatch<SetStateAction<boolean>>;
+
+    // Validation state
+    nameError: string;
+    setNameError: Dispatch<SetStateAction<string>>;
 }
 
 export const noteDetailContextDefaultValue: NoteDetailContextData = {
@@ -30,6 +34,10 @@ export const noteDetailContextDefaultValue: NoteDetailContextData = {
     // Focus state
     shouldFocusNoteName: false,
     setShouldFocusNoteName: () => {},
+
+    // Validation state
+    nameError: "",
+    setNameError: () => {},
 };
 
 const NoteDetailContext = createContext<NoteDetailContextData>(noteDetailContextDefaultValue);
@@ -44,6 +52,9 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     // Focus state
     const [shouldFocusNoteName, setShouldFocusNoteName] = useState(false);
 
+    // Validation state
+    const [nameError, setNameError] = useState("");
+
     return (
         <NoteDetailContext.Provider
             value={{
@@ -56,6 +67,10 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 // Focus state
                 shouldFocusNoteName,
                 setShouldFocusNoteName,
+
+                // Validation state
+                nameError,
+                setNameError,
             }}
         >
             {children}

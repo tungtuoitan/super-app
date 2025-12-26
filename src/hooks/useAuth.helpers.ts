@@ -11,7 +11,7 @@ import { userProfileService } from "@/services/userProfile.service";
 import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
 import type { LoginRequest, ExchangeTokenResponse } from "@/types/index";
-import type { UserFilters } from "@/types/common.types";
+import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
 import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError } from "@/utils/googleOAuth";
 import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
@@ -241,6 +241,7 @@ export function useAuthHelper() {
     /**
      * Update user filter preferences
      * Syncs filter changes to backend and updates local state
+     * Uses UpsertUserProfile endpoint with only filters field populated
      */
     const updateUserFilters = async (filters: UserFilters): Promise<void> => {
         try {
@@ -250,11 +251,18 @@ export function useAuthHelper() {
                 throw new Error("User not authenticated");
             }
 
-            // Update backend
-            const result = await userProfileService._updateFilters(token, filters);
+            // Prepare payload: only filters field, other fields are undefined (won't be updated)
+            const payload: UpdateUserProfileRequest = {
+                filters: JSON.stringify(filters), // Convert UserFilters object to JSON string
+            };
+
+            // Update backend - will upsert profile if not exists
+            const result = await userProfileService._updateUserProfile(token, payload);
             if (!result.success) {
                 throw new Error(result.message || "Failed to update user filters");
             }
+
+            
             // Update local state
             set$User((prev) => ({
                 ...prev,

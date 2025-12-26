@@ -5,19 +5,6 @@
 
 import type { Folder } from "@/types/folder.types";
 
-// Backend ResultOptions wrapper (from SuperAppModels.DTOs.ResultOptions)
-export interface ResultOptions<T = any> {
-    success: boolean;
-    message?: string;
-    object?: T; // Single object result
-    data?: T[]; // Array result
-    status?: number;
-    reference?: string;
-    reference2?: string;
-    reference3?: string;
-    reference4?: string;
-    reference5?: string;
-}
 
 // Note types
 export type NoteType = "meeting" | "brainstorm" | "research" | "bug" | "task" | "idea";

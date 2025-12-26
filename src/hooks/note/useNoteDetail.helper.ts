@@ -46,6 +46,14 @@ export const useNoteDetailHelper = () => {
             }
 
             // ============================================================
+            // Step 1.5: Validate name field
+            // ============================================================
+            if (!selectedNote.name || selectedNote.name.trim() === "") {
+                enqueueSnackbar("Note name is required", { variant: "error" });
+                return null;
+            }
+
+            // ============================================================
             // Step 2: Determine operation mode (create/update/restore)
             // ============================================================
             const isCreateMode = selectedNote.id <= 0;

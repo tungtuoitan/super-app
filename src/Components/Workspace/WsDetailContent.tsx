@@ -22,7 +22,7 @@ import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
  * Form for editing workspace details
  */
 export function WsDetailContent() {
-    const { wsNameRef, shouldFocusWsName, setShouldFocusWsName } = useWsDetailStore();
+    const { wsNameRef, shouldFocusWsName, setShouldFocusWsName, nameError, setNameError } = useWsDetailStore();
     const { selectedWs } = useWsStore();
     const { handleWsFieldChange } = useWsDetailHelper();
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
@@ -35,6 +35,7 @@ export function WsDetailContent() {
     useEffect(() => {
         if (selectedWs) {
             setWsKey((prev) => prev + 1);
+            setNameError(""); // Reset error khi chuyển workspace
         }
     }, [selectedWs?.id]);
 
@@ -118,10 +119,18 @@ export function WsDetailContent() {
                             ref={wsNameRef}
                             label="Workspace Name"
                             value={selectedWs.name}
-                            onChange={(e) => handleFieldChange("name", e.target.value)}
+                            onChange={(e) => {
+                                handleFieldChange("name", e.target.value);
+                                if (e.target.value && e.target.value.trim() !== "")
+                                    setNameError("");
+                                else 
+                                    setNameError("Workspace Name is required");
+                            }}
                             placeholder="Enter workspace name..."
                             size="small"
                             disabled={isDeleted || isHardDeleted}
+                            error={!!nameError}
+                            helperText={nameError}
                         />
 
                         {/* Description */}

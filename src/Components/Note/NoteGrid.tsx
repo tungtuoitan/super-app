@@ -12,6 +12,7 @@ import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
 import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
+import {useAuthStore} from "@/store/index";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -43,6 +44,7 @@ export function NoteGrid() {
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { searchQuery } = useGridControlStore();
+    const { $user } = useAuthStore();
 
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Note>[]>(() => {
@@ -152,6 +154,7 @@ export function NoteGrid() {
 
     // Register grid with GridControl and load data
     useEffect(() => {
+        if(!$user.userId) return;
         loadNotes();
 
         // Set default filter to Active Only
@@ -167,7 +170,7 @@ export function NoteGrid() {
         return () => {
             unregisterGrid();
         };
-    }, []);
+    }, [$user.userId]);
 
     // Update GridControl when columnFilters change - no longer needed for backend filtering
     // Filters are now stored in userProfile and applied on backend

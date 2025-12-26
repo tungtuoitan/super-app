@@ -18,6 +18,10 @@ export interface WsDetailContextData {
     // Focus state
     shouldFocusWsName: boolean;
     setShouldFocusWsName: Dispatch<SetStateAction<boolean>>;
+
+    // Validation state
+    nameError: string;
+    setNameError: Dispatch<SetStateAction<string>>;
 }
 
 export const wsDetailContextDefaultValue: WsDetailContextData = {
@@ -30,6 +34,10 @@ export const wsDetailContextDefaultValue: WsDetailContextData = {
     // Focus state
     shouldFocusWsName: false,
     setShouldFocusWsName: () => {},
+
+    // Validation state
+    nameError: "",
+    setNameError: () => {},
 };
 
 const WsDetailContext = createContext<WsDetailContextData>(wsDetailContextDefaultValue);
@@ -44,6 +52,9 @@ export const WsDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     // Focus state
     const [shouldFocusWsName, setShouldFocusWsName] = useState(false);
 
+    // Validation state
+    const [nameError, setNameError] = useState("");
+
     return (
         <WsDetailContext.Provider
             value={{
@@ -56,6 +67,10 @@ export const WsDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 // Focus state
                 shouldFocusWsName,
                 setShouldFocusWsName,
+
+                // Validation state
+                nameError,
+                setNameError,
             }}
         >
             {children}

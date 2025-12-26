@@ -55,11 +55,18 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
 
         return (
             <div className="w-full">
-                {label && (
-                    <Label htmlFor={inputId} className={cn("block text-left mb-2", size === "tiny" && "text-xs", error && "text-destructive")}>
-                        {label}
-                        {required && <span className="text-destructive ml-1">*</span>}
-                    </Label>
+                {(label || helperText) && (
+                    <div className="flex justify-between items-center mb-2 h-3">
+                        <Label htmlFor={inputId} className={cn("text-left", size === "tiny" && "text-xs", error && "text-destructive")}>
+                            {label}
+                            {required && <span className="text-destructive ml-1">*</span>}
+                        </Label>
+                        {helperText && (
+                            <p id={`${inputId}-helper`} className={cn("text-xs", error ? "text-destructive" : "text-muted-foreground")}>
+                                {helperText}
+                            </p>
+                        )}
+                    </div>
                 )}
                 {multiline ? (
                     <textarea
@@ -85,11 +92,6 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
                         aria-describedby={helperText ? `${inputId}-helper` : undefined}
                         {...(props as any)}
                     />
-                )}
-                {helperText && (
-                    <p id={`${inputId}-helper`} className={cn("mt-1 text-xs", error ? "text-destructive" : "text-muted-foreground")}>
-                        {helperText}
-                    </p>
                 )}
             </div>
         );

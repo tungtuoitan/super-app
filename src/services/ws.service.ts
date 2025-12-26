@@ -5,16 +5,6 @@
 
 import { config } from "@/config/app.config";
 
-/**
- * ResultOptions interface for API responses
- */
-export interface ResultOptions<T = any> {
-    success: boolean;
-    message?: string;
-    data?: T[];
-    object?: T;
-    status: number;
-}
 
 /**
  * Workspace DTO from API (dates as strings)

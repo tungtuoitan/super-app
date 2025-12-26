@@ -108,3 +108,47 @@ export interface FilterFieldConfig {
     standardRegistryType?: string; // If type=checkbox, which standard registry to use
     defaultValue?: FilterValue; // Default filter value
 }
+
+/**
+ * User Profile Types
+ */
+
+/**
+ * Request payload for updating/upserting user profile
+ * Matches backend UpdateUserProfileRequest DTO
+ * All fields are optional - only non-null fields will be updated
+ */
+export interface UpdateUserProfileRequest {
+    firstName?: string | null;
+    lastName?: string | null;
+    avatarUrl?: string | null;
+    bio?: string | null;
+    dateOfBirth?: string | null; // ISO date string
+    gender?: string | null;
+    country?: string | null;
+    city?: string | null;
+    timezone?: string | null;
+    language?: string | null;
+    filters?: string | null; // JSON string of UserFilters
+}
+
+/**
+ * API Response Types
+ */
+
+/**
+ * Standard API response wrapper
+ * Matches backend ResultOptions DTO
+ */
+export interface ResultOptions<T = any> {
+    success: boolean;
+    message?: string;
+    object?: T; // Single object result
+    data?: T[]; // Array result
+    status?: number;
+    reference?: string;
+    reference2?: string;
+    reference3?: string;
+    reference4?: string;
+    reference5?: string;
+}

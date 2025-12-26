@@ -17,7 +17,7 @@ import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 
 export function NoteDetailContent() {
-    const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName } = useNoteDetailStore();
+    const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { selectedNote } = useNoteGridStore();
     const { handleNoteFieldChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabsStore();
@@ -47,6 +47,7 @@ export function NoteDetailContent() {
     useEffect(() => {
         if (selectedNote) {
             setNoteKey((prev) => prev + 1);
+            setNameError(""); // Reset error khi chuyển note
         }
     }, [selectedNote?.id]);
 
@@ -135,9 +136,17 @@ export function NoteDetailContent() {
                             ref={noteNameRef}
                             label="Note Name"
                             value={selectedNote?.name || ""}
-                            onChange={(e) => handleNoteFieldChange("name", e.target.value)}
+                            onChange={(e) => {
+                                handleNoteFieldChange("name", e.target.value);
+                                if (e.target.value && e.target.value.trim() !== "")
+                                    setNameError("");
+                                else 
+                                    setNameError("Note Name is required");
+                            }}
                             size="small"
                             disabled={isDeleted || isHardDeleted}
+                            error={!!nameError}
+                            helperText={nameError}
                         />
 
                         {/* Status */}

@@ -38,6 +38,14 @@ export const useWsDetailHelper = () => {
             }
 
             // ============================================================
+            // Step 1.5: Validate name field
+            // ============================================================
+            if (!selectedWs.name || selectedWs.name.trim() === "") {
+                enqueueSnackbar("Workspace name is required", { variant: "error" });
+                return null;
+            }
+
+            // ============================================================
             // Step 2: Determine operation mode (create/update/restore)
             // ============================================================
             const isCreateMode = selectedWs.id <= 0;

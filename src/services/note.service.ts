@@ -4,7 +4,8 @@
  */
 
 import { config } from "@/config/app.config";
-import type { ResultOptions, NoteDTO } from "@/types/note.types";
+import type { ResultOptions } from "@/types/common.types";
+import type { NoteDTO } from "@/types/note.types";
 
 /**
  * Get all notes with optional filtering

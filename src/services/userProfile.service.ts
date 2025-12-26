@@ -4,16 +4,16 @@
  */
 
 import { config } from "@/config/app.config";
-import type { UserFilters } from "@/types/common.types";
+import type { UpdateUserProfileRequest, ResultOptions } from "@/types/common.types";
 
 /**
  * Get user profile (includes filters)
  * GET /api/userprofile
  *
  * @param token - Authentication token
- * @returns User profile with filters or rejects with response
+ * @returns ResultOptions with UserProfile in object field
  */
-const _getUserProfile = async (token: string) => {
+const _getUserProfile = async (token: string): Promise<ResultOptions> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -28,7 +28,7 @@ const _getUserProfile = async (token: string) => {
     const res = await window.fetch(`${config.api.baseURL}/api/userprofile`, options);
 
     if (res.ok) {
-        const result = await res.json();
+        const result: ResultOptions = await res.json();
         return result;
     } else {
         return Promise.reject(res);
@@ -36,32 +36,33 @@ const _getUserProfile = async (token: string) => {
 };
 
 /**
- * Update user filter preferences
- * PATCH /api/userprofile/filters
+ * Update/Upsert user profile
+ * PUT /api/userprofile
+ *
+ * Partial update: Only provided fields will be updated, null/undefined fields are ignored
+ * If profile doesn't exist, it will be created
  *
  * @param token - Authentication token
- * @param filters - User filter preferences object
- * @returns Updated user profile or rejects with response
+ * @param data - User profile data to update (all fields optional)
+ * @returns ResultOptions with updated UserProfile in object field
  */
-const _updateFilters = async (token: string, filters: UserFilters) => {
+const _updateUserProfile = async (token: string, data: UpdateUserProfileRequest): Promise<ResultOptions> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
     headers.append("Authorization", bearer);
     headers.append("Content-Type", "application/json");
 
-    const filtersJson = JSON.stringify(filters);
-
     const options = {
-        method: "PATCH",
+        method: "PUT",
         headers: headers,
-        body: JSON.stringify({ filters: filtersJson }),
+        body: JSON.stringify(data),
     };
 
-    const res = await window.fetch(`${config.api.baseURL}/api/userprofile/filters`, options);
+    const res = await window.fetch(`${config.api.baseURL}/api/userprofile`, options);
 
     if (res.ok) {
-        const result = await res.json();
+        const result: ResultOptions = await res.json();
         return result;
     } else {
         return Promise.reject(res);
@@ -70,5 +71,5 @@ const _updateFilters = async (token: string, filters: UserFilters) => {
 
 export const userProfileService = {
     _getUserProfile,
-    _updateFilters,
+    _updateUserProfile,
 };
