@@ -13,7 +13,7 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { formatNoteDate } from "@/utils/note.utils";
 import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 
 export function NoteDetailContent() {
@@ -24,6 +24,15 @@ export function NoteDetailContent() {
     const { getTabById } = useEditorTabHelper();
     const [noteKey, setNoteKey] = React.useState(0);
     const activeTab = activeTabId ? getTabById(activeTabId) : null;
+
+    // Get standard registry data from global state
+    const { registries, registriesLoading } = useStandardRegistryStore();
+    const hashtagOptions = registries.filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive).map((item) => ({
+        id: item.code,
+        label: item.code,
+        desc: item.description || item.code,
+        active: item.isActive,
+    }));
 
     useEffect(() => {
         if (selectedNote) {
@@ -62,7 +71,7 @@ export function NoteDetailContent() {
         // Convert hashtag IDs to Tag objects by finding them in the options
         const tagObjects = tagIds
             .map((tagId) => {
-                const foundOption = constants.standardRegistryFE.fallbackTagOptions.find((option: IAutoCompleteOptions) => option.id === tagId);
+                const foundOption = hashtagOptions.find((option: IAutoCompleteOptions) => option.id === tagId);
                 if (foundOption) {
                     return {
                         tagId: parseInt(foundOption.id as string),
@@ -124,14 +133,14 @@ export function NoteDetailContent() {
                         {/* HashTags */}
                         <div className="space-y-2">
                             <GenericTagAutoComplete
-                                options={constants.standardRegistryFE.fallbackTagOptions as unknown as IAutoCompleteOptions[]}
+                                options={hashtagOptions as unknown as IAutoCompleteOptions[]}
                                 value={currentTagsValue}
                                 onChange={handleTagsChange}
                                 label="HashTags"
-                                placeholder={"+ Add HashTag"}
+                                placeholder={registriesLoading ? "Loading hashtags..." : "+ Add HashTag"}
                                 size="small"
                                 data-testid="note-tags"
-                                disabled={isDeleted || isHardDeleted}
+                                disabled={isDeleted || isHardDeleted || registriesLoading}
                             />
                         </div>
                     </CardContent>

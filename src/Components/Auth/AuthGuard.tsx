@@ -13,11 +13,13 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useAuthHelper } from "@/hooks/useAuth.helpers";
 import { useActivityBarStore } from "@/store/activityBar/ActivityBar.store";
+import { useStandardRegistryHelper } from "@/hooks/index";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated } = useAuthStore();
     const { initAuthFromStorageToken, logout } = useAuthHelper();
     const { setAccountsOpen } = useActivityBarStore();
+    const { loadStandardRegistries } = useStandardRegistryHelper();
 
     // Initialize auth on mount
     useEffect(() => {
@@ -50,6 +52,13 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             setAccountsOpen(true);
         } else {
             setAccountsOpen(false);
+        }
+    }, [isAuthenticated]);
+
+    // Load standard registries when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            loadStandardRegistries();
         }
     }, [isAuthenticated]);
 

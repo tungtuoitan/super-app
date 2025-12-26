@@ -85,6 +85,12 @@ export const constants = {
     } as const,
 
     standardRegistryFE: {
+        types: {
+            hashtag: "hashtag",
+            entity: "entity",
+            workspaceStatus: "workspaceStatus",
+            noteStatus: "noteStatus",
+        } as const,
         activeStatus: {
             active: "active",
             inactive: "inactive",
@@ -97,12 +103,6 @@ export const constants = {
                 desc: "Inactive",
                 label: "Inactive",
             },
-        ] as const,
-        fallbackTagOptions: [
-            { id: "work", label: "Work", desc: "Work", active: true },
-            { id: "personal", label: "Personal", desc: "Personal", active: true },
-            { id: "important", label: "Important", desc: "Important", active: true },
-            { id: "urgent", label: "Urgent", desc: "Urgent", active: true },
         ] as const,
     },
 } as const;

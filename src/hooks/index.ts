@@ -35,3 +35,6 @@ export * from "./workspace/useFolderDialog.helper";
 export * from "./workspace/useTreeSelection.helper";
 export * from "./workspace/useTreeOperation.helper";
 export * from "./workspace/tree.helper";
+
+// Standard Registry helpers
+export * from "./standardRegistry/useStandardRegistry.helper";

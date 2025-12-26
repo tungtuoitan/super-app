@@ -25,3 +25,6 @@ export type { ActivityBarContextData } from "./activityBar/ActivityBar.store";
 
 export { AuthCallbackProvider, useAuthCallbackStore } from "./authCallback/AuthCallback.store";
 export type { AuthCallbackContextData } from "./authCallback/AuthCallback.store";
+
+export { StandardRegistryStore, StandardRegistryProvider, useStandardRegistryStore } from "./standardRegistry/StandardRegistry.store";
+export type { StandardRegistryContextData } from "./standardRegistry/StandardRegistry.store";

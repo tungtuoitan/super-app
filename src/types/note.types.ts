@@ -94,7 +94,7 @@ export interface GetNotesParams {
     type?: string;
     isArchived?: boolean;
 }
-
+  
 // API Response wrapper
 export interface NotesResponse {
     data: NoteDTO[];

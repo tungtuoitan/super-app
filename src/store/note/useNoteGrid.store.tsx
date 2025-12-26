@@ -27,7 +27,7 @@ export interface NoteGridContextData {
     setNoteGridRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
     noteGridColumnFilters: ColumnFiltersState;
     setNoteGridColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
-    selectedNote: Note | null;
+    selectedNote: Note | null; 
     setSelectedNote: Dispatch<SetStateAction<Note | null>>;
 }
 
