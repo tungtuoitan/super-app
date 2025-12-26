@@ -6,8 +6,6 @@ import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
-import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
-import { constants } from "@/utils/constants";
 import { useAuthStore } from "@/store/index";
 import { useNoteGridTableHelper } from "@/hooks/note/useNoteGrid.table.helper";
 
@@ -22,7 +20,6 @@ export function NoteGrid() {
     const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef } = useNoteGridStore();
     const { openTab } = useEditorTabHelper();
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
-    const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { $user } = useAuthStore();
     const { table } = useNoteGridTableHelper();
 
@@ -40,18 +37,10 @@ export function NoteGrid() {
         return () => resizeObserver.disconnect();
     }, []);
 
-    // Register grid with GridControl and load data
+    // Load data when user is ready
     useEffect(() => {
         if (!$user.userId || !$user.filters) return;
         loadNotes();
-
-        // Register this grid with GridControl
-        registerGrid(constants.modules.note, constants.filters.views.noteGrid);
-
-        // Cleanup on unmount
-        return () => {
-            unregisterGrid();
-        };
     }, [$user.userId, $user.filters]);
 
     return (

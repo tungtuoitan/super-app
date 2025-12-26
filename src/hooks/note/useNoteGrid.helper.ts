@@ -9,7 +9,7 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import {filterUtils} from "@/utils/filter.utils";
 
@@ -23,6 +23,7 @@ export const useNoteGridHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setShouldFocusNoteName } = useNoteDetailStore();
+    const { registries } = useStandardRegistryStore();
 
     // Create new note (temporary with negative ID)
     const __createNewNote = () => {
@@ -37,6 +38,7 @@ export const useNoteGridHelper = () => {
             name: name,
             description: "",
             hashtags: [],
+            statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
             tags: [],
             type: "idea",
             createdAt: new Date(),

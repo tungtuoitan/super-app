@@ -18,7 +18,6 @@ export * from "./note/useNoteDetail.helper";
 export * from "./note/useNoteGrid.helper";
 export * from "./vsCode/useEditorTab.helper";
 export * from "./vsCode/useEditorToolbar.helper";
-export * from "./vsCode/useGridControl.helper";
 export * from "./useActivityBar.helper";
 
 // Context menu helpers

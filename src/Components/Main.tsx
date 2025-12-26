@@ -21,6 +21,7 @@ import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";
 import { AuthGuard } from "@/Components/Auth/AuthGuard";
 import { OrchestratorContextMenuStoreProvider } from "@/store/contextMenu/ContextMenu.store";
+import {GridControlProvider} from "@/store/grid/useGridControl.store";
 
 /**
  * Main application layout component.
@@ -65,7 +66,9 @@ export function Main() {
                                                                                 <ConfirmationPopoverProvider>
                                                                                     <OrchestratorContextMenu>
                                                                                         <AuthGuard>
-                                                                                            <MainNav />
+                                                                                            <GridControlProvider>
+                                                                                                <MainNav />
+                                                                                            </GridControlProvider>
                                                                                         </AuthGuard>
                                                                                     </OrchestratorContextMenu>
                                                                                     <ConfirmationPopoverContainer />

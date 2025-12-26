@@ -9,7 +9,6 @@ import { noteService } from "@/services/note.service";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
-import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
 import { useAuthStore } from "@/store/index";

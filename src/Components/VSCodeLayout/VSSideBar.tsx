@@ -44,7 +44,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
         >
             {/* Only render inner panels when visible to avoid mounting when hidden */}
             {isSideBarVisible && (
-                <GridControlProvider>
+                <>
                     {/* Use a vertical PanelGroup to split the sidebar into two stacked panels */}
                     <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
                         {/* Top panel: original sidebar content */}
@@ -81,7 +81,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                             </div>
                         </Panel>
                     </PanelGroup>
-                </GridControlProvider>
+                </>
             )}
         </Panel>
     );

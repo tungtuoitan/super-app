@@ -12,7 +12,6 @@ import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { useWsStore, Ws } from "@/store/ws/useWs.store";
 import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";
 import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
-import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
 import {useAuthStore} from "@/store/index";
@@ -26,7 +25,6 @@ export function WsGrid() {
 
     const { loadWorkspaces, openWsContextMenu } = useWsGridHelper();
     const { openWorkspaceTab } = useWsTabHelper();
-    const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { searchQuery } = useGridControlStore();
     const { $user } = useAuthStore();
 
@@ -141,19 +139,11 @@ export function WsGrid() {
         enableRowSelection: true,
     });
 
-    // Register grid with GridControl and load data
+    // Load data when user is ready
     useEffect(() => {
         // this will run every time user login, or $user.filters change
         if(!$user.userId || !$user.filters) return;
         loadWorkspaces();
-
-        // Register this grid with GridControl
-        registerGrid(constants.modules.workspace, constants.filters.views.wsGrid);
-
-        // Cleanup on unmount
-        return () => {
-            unregisterGrid();
-        };
     }, [$user.userId, $user.filters]);
 
     // Update GridControl when columnFilters change - no longer needed for backend filtering

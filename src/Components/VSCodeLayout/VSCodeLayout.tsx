@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Panel, PanelGroup } from "react-resizable-panels";
 import { ActivityBar } from "./ActivityBar";
 import { VSCodeResizeHandle } from "./VSCodeResizeHandle";
@@ -8,6 +8,8 @@ import { StatusBar } from "./StatusBar";
 import { VSEditorArea } from "./VSEditorArea";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 import { useActivityBarStore } from "@/store/index";
+import {useGridAutoRegisterHelper} from "@/hooks/vsCode/useGridAutoRegister.helper";
+import {useLocation} from "react-router-dom";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -43,7 +45,15 @@ interface VSCodeLayoutProps {
  */
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const { activeView } = useNavigationStore();
+    const location = useLocation();
     const { isSideBarVisible, setIsSideBarVisible, isPanelVisible, setIsPanelVisible } = useActivityBarStore();
+    
+    // Auto-register grid based on current URL
+    const { getGridConfigFromPath, registerGrid } = useGridAutoRegisterHelper();
+
+    useEffect(() => {
+        registerGrid();
+    }, [location.pathname]);
 
     return (
         <div

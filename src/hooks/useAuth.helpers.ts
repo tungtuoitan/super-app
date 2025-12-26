@@ -12,13 +12,13 @@ import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
 import type { LoginRequest, ExchangeTokenResponse } from "@/types/index";
 import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError } from "@/utils/googleOAuth";
 import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
-import {set} from "lodash";
+import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
 
 /**
  * Auth helper hook for authentication operations
@@ -182,7 +182,6 @@ export function useAuthHelper() {
 
             // Update auth store with full user info including filters
             set$User(userProfile as User);
-            setUIFilters(parsedFilters || {});
 
             setIsAuthenticated(true);
         } catch (err) {
@@ -245,9 +244,6 @@ export function useAuthHelper() {
                 // Restore full auth state from stored token and profile
                 const _userProfile = userProfile as User;
                 set$User(_userProfile);
-                // Get specific filter view from UserFilters using filterViewKey
-                const viewFilter = _userProfile.filters?.[filterViewKey as keyof UserFilters] || {};
-                setUIFilters(viewFilter);
                 setIsAuthenticated(true);
                 return true;
             } else if (token) {

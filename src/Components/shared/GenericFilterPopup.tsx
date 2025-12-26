@@ -76,14 +76,12 @@ export function GenericFilterPopup() {
     })();
 
     // Handle popover open/close - reset filters when closing
-    const handleOpenChange = (newOpen: boolean) => {
+    const togglePopup = (newOpen: boolean) => {
         setOpen(newOpen);
 
-        // When closing, reset UI filters to saved state
-        if (!newOpen && filterViewKey) {
-            setTimeout(() => {
-                setUIFilters($user.filters?.[filterViewKey] || {});
-            }, 200);
+        // When opening, load current user filters into UI
+        if (newOpen && filterViewKey) {
+            setUIFilters($user.filters?.[filterViewKey] || {});
         }
     };
 
@@ -96,7 +94,7 @@ export function GenericFilterPopup() {
     const groups = (constants.filters.groups as any)[filterViewKey] as readonly FilterFieldConfig[];
 
     return (
-        <Popover open={open} onOpenChange={handleOpenChange}>
+        <Popover open={open} onOpenChange={togglePopup}>
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 relative">
                     <Filter className="h-4 w-4" />
