@@ -9,29 +9,23 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import {useEditorTabsStore} from "@/store/index";
-import {useOrchestratorContextMenuStore} from "@/store/contextMenu/ContextMenu.store";
+import { useEditorTabsStore } from "@/store/index";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export const useNoteGridHelper = () => {
     const { auth } = useAuthStore();
 
-    const {
-        notes,
-        setNotes,
-        setNoteGridIsLoading,
-        setNoteGridError,
-        noteGridRowSelection,
-        setNoteGridRowSelection,
-    } = useNoteGridStore();
+    const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection } = useNoteGridStore();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     const { openTab } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useOrchestratorContextMenuStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 
     // Create new note (temporary with negative ID)
-    const _createNewNote = () => {
+    const __createNewNote = () => {
         // Generate sequential temporary negative ID from open tabs
         const existingIds = collectIdsFromTabs(openTabs);
         const tempId = generateTempId(existingIds);
@@ -66,7 +60,7 @@ export const useNoteGridHelper = () => {
      * - type = 'soft-delete': Set deletedAt timestamp (soft delete)
      * - type = 'restore': Clear deletedAt (restore)
      */
-    const __toggleSelectedNotes = async (ids?: number[], type: 'soft-delete' | 'restore' = 'soft-delete') => {
+    const __toggleSelectedNotes = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(noteGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -79,7 +73,7 @@ export const useNoteGridHelper = () => {
             const token = auth.userToken;
 
             // Handle temporary notes - only for delete (remove from grid locally)
-            if (type === 'soft-delete' && tempNoteIds.length > 0) {
+            if (type === "soft-delete" && tempNoteIds.length > 0) {
                 setNotes((prevNotes) => prevNotes.filter((note) => !tempNoteIds.includes(note.id)));
 
                 enqueueSnackbar(`Removed ${tempNoteIds.length} unsaved note(s)`, {
@@ -90,7 +84,7 @@ export const useNoteGridHelper = () => {
             // Handle persisted notes - call API
             if (persistedNoteIds.length > 0) {
                 // Determine deletedAt value based on action
-                const deletedAt = type === 'soft-delete' ? new Date().toISOString() : null;
+                const deletedAt = type === "soft-delete" ? new Date().toISOString() : null;
 
                 // Build batch requests
                 const batchRequests = persistedNoteIds.map((id) => {
@@ -113,13 +107,10 @@ export const useNoteGridHelper = () => {
                 const result = await _upsertNotes(token, batchRequests);
 
                 if (!result.success) {
-                    throw new Error(result.message || `Failed to ${type === 'soft-delete' ? 'delete' : 'restore'} notes`);
+                    throw new Error(result.message || `Failed to ${type === "soft-delete" ? "delete" : "restore"} notes`);
                 }
 
-                enqueueSnackbar(
-                    `Successfully ${type === 'soft-delete' ? 'soft deleted' : 'restored'} ${persistedNoteIds.length} note(s)`,
-                    { variant: "success" }
-                );
+                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedNoteIds.length} note(s)`, { variant: "success" });
 
                 // Update opened tabs
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
@@ -129,7 +120,7 @@ export const useNoteGridHelper = () => {
                             ...tab,
                             data: {
                                 ...noteData,
-                                deletedAt: type === 'soft-delete' ? new Date() : null,
+                                deletedAt: type === "soft-delete" ? new Date() : null,
                             },
                         };
                     }
@@ -144,16 +135,13 @@ export const useNoteGridHelper = () => {
             // Clear selection
             setNoteGridRowSelection({});
         } catch (error) {
-            console.error(`Failed to ${type === 'soft-delete' ? 'delete' : 'restore'} notes:`, error);
+            console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} notes:`, error);
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
                 enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             } else {
-                enqueueSnackbar(
-                    `Failed to ${type === 'soft-delete' ? 'delete' : 'restore'} notes: ${errorMessage}`,
-                    { variant: "error" }
-                );
+                enqueueSnackbar(`Failed to ${type === "soft-delete" ? "delete" : "restore"} notes: ${errorMessage}`, { variant: "error" });
             }
         }
     };
@@ -239,18 +227,14 @@ export const useNoteGridHelper = () => {
             // Clicked on empty area
             selectedIds = [];
         }
-
-        setAnchorPoint({ x: event.clientX, y: event.clientY });
-        setContextType("note-grid");
-        setContextData({
+        showContextMenu(event, "note-grid", {
             selectedNotes,
             selectedIds,
-            onSoftDelete: () => __toggleSelectedNotes(selectedIds, 'soft-delete'),
+            onSoftDelete: () => __toggleSelectedNotes(selectedIds, "soft-delete"),
             onHardDelete: () => __hardDeleteSelectedNotes(selectedIds),
-            onRestore: () => __toggleSelectedNotes(selectedIds, 'restore'),
-            onAddNote: _createNewNote,
+            onRestore: () => __toggleSelectedNotes(selectedIds, "restore"),
+            onAddNote: __createNewNote,
         });
-        setIsContextMenuOpen(true);
     };
     // =============================================================================
     // =============================================================================

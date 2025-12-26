@@ -4,9 +4,8 @@
  * Manages workspaces and their tree data, folder UI state
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
+import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from 'react';
 import type { WorkspaceListResponse, WorkspaceWithTreeResponse } from '@/types/workspace.types';
-import type { Folder, FolderLayoutType } from '@/types/folder.types';
 
 export interface ExplorerContextData {
     // Workspace state
@@ -32,8 +31,8 @@ export interface ExplorerContextData {
     setLastSelectedFolderId: Dispatch<SetStateAction<number | null>>;
     isDragging: boolean;
     setIsDragging: Dispatch<SetStateAction<boolean>>;
-    treeRef: React.RefObject<any> | null;
-    setTreeRef: (ref: React.RefObject<any> | null) => void;
+    _treeRef: React.RefObject<any>;
+
 }
 
 export const explorerContextDefaultValue: ExplorerContextData = {
@@ -57,8 +56,7 @@ export const explorerContextDefaultValue: ExplorerContextData = {
     setLastSelectedFolderId: () => {},
     isDragging: false,
     setIsDragging: () => {},
-    treeRef: null,
-    setTreeRef: () => {},
+    _treeRef: { current: null },
 };
 
 export const ExplorerStore = createContext<ExplorerContextData>(explorerContextDefaultValue);
@@ -78,7 +76,7 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
     const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
-    const [treeRef, setTreeRef] = useState<React.RefObject<any> | null>(null);
+    const _treeRef = useRef<any>(null);
 
     return (
         <ExplorerStore.Provider
@@ -103,8 +101,7 @@ export const ExplorerProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 setLastSelectedFolderId,
                 isDragging,
                 setIsDragging,
-                treeRef,
-                setTreeRef,
+                _treeRef,
             }}
         >
             {children}

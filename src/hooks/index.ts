@@ -33,6 +33,5 @@ export * from './ws/useWsTab.helper';
 export * from './explorer/useWorkspaceOperation.helper';
 export * from './explorer/useFolderDialog.helper';
 export * from './explorer/useTreeSelection.helper';
-export * from './explorer/useTreeExpansion.helper';
 export * from './explorer/useTreeOperation.helper';
 export * from './explorer/tree.helper';

@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { useExplorerStore } from '@/store/index';
 import { useTreeOperation } from '@/hooks/explorer/useTreeOperation.helper';
-import { useTreeExpansion } from '@/hooks/explorer/useTreeExpansion.helper';
 import { useWorkspaceOperation } from '@/hooks/explorer/useWorkspaceOperation.helper';
 import { TreeFolder } from '@/hooks/explorer/tree.helper';
 import { FolderItem } from '@/types/workspace.types';
@@ -28,7 +27,7 @@ interface RootFolderNodeProps {
 export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
     const { currentTree } = useExplorerStore();
     const { handleNewFolder } = useTreeOperation();
-    const { handleCollapseAll } = useTreeExpansion();
+    const { _treeRef } = useExplorerStore();
     const { loadTree } = useWorkspaceOperation();
 
     const folderItem = node.data.data as FolderItem;
@@ -105,7 +104,7 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                     title="Collapse All"
                     onClick={(e) => {
                         e.stopPropagation();
-                        handleCollapseAll();
+                        _treeRef?.current?.closeAll()
                     }}
                     className="p-1 text-editor-fg hover:bg-editor-hover rounded"
                 >
