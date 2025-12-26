@@ -1,6 +1,6 @@
 /**
- * Workspace List Helper
- * Business logic for workspace list operations
+ * ws Helper
+ * Business logic for ws operations
  */
 
 import { wsService, WsDTO } from "@/services/ws.service";

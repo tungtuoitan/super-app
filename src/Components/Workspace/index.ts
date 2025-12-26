@@ -1,6 +1,6 @@
 /**
  * Workspace Components
- * Public exports for workspace list functionality
+ * Public exports for ws functionality
  */
 
 export { WsGrid } from "./WsGrid";

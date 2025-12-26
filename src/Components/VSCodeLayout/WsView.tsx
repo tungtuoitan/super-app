@@ -1,5 +1,5 @@
 /**
- * Workspace List View - Displays workspace list grid
+ * wsView - Displays ws grid
  * Shows all workspaces with filtering and management capabilities
  */
 

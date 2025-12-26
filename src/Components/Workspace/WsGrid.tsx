@@ -1,5 +1,5 @@
 /**
- * WsGrid - Workspace List Grid Component
+ * WsGrid - ws Grid Component
  * VSCode-style dark theme table for workspaces
  */
 
@@ -16,7 +16,7 @@ import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 
 /**
- * WsGrid - Workspace list grid with table display
+ * WsGrid - ws grid with table display
  */
 export function WsGrid() {
     // State from centralized store

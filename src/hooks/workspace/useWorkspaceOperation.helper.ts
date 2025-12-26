@@ -24,7 +24,7 @@ export const useWorkspaceOperation = () => {
 
     /**
      * Load all user workspaces
-     * Fetches workspace list and sets the first one as default
+     * Fetches ws and sets the first one as default
      */
     const loadAllWorkspaces = async () => {
         try {
