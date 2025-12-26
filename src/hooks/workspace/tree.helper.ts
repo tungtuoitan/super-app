@@ -140,23 +140,6 @@ export function transformItemsToTreeData(items: WorkspaceItem[]): TreeFolder[] {
 }
 
 /**
- * @deprecated Use transformItemsToTreeData instead
- * Transform folder hierarchy to react-arborist tree data
- * NOTE: All nodes must have children array (even if empty) to allow drop into them
- */
-export function transformFoldersToTreeData(folders: Folder[]): TreeFolder[] {
-    return folders
-        .filter((folder) => folder && folder.id !== undefined && folder.id !== null)
-        .map((folder) => ({
-            id: folder.id.toString(),
-            name: folder.name || "Unsaved",
-            data: folder as any, // Cast for backward compatibility
-            // Always provide children array (empty if no children) to enable drop into nodes
-            children: folder.children && folder.children.length > 0 ? transformFoldersToTreeData(folder.children) : [],
-        }));
-}
-
-/**
  * Filter folder tree based on search text
  * Includes folder if it matches OR any descendant matches
  */

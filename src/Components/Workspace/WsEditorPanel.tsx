@@ -7,10 +7,8 @@
 import React, { useEffect } from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
-import { useWsDetailHelper } from "@/hooks/ws/useWsDetail.helper";
+import { useWsStore, Ws } from "@/store/ws/useWs.store";
 import { useEditorTabsStore } from "@/store/index";
-import { Ws } from "@/store/ws/useWs.store";
-import { constants } from "@/utils/constants";
 import { WsDetailContent } from "./WsDetailContent";
 
 interface WsEditorPanelProps {
@@ -18,12 +16,18 @@ interface WsEditorPanelProps {
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { wsHasChanges, selectedWorkspace } = useWsDetailStore();
+    const { selectedWs } = useWsStore();
+    const { originalWsRef } = useWsDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
 
     const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Sync hasUnsavedChanges AND tab.data with selectedWorkspace state
+    // Calculate hasChanges by comparing selectedWs with original
+    const wsHasChanges = selectedWs && originalWsRef.current 
+        ? JSON.stringify(selectedWs) !== JSON.stringify(originalWsRef.current)
+        : false;
+
+    // Sync hasUnsavedChanges AND tab.data with selectedWs state
     useEffect(() => {
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((t) =>
@@ -31,13 +35,13 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
                     ? {
                           ...t,
                           hasUnsavedChanges: wsHasChanges,
-                          // Sync tab.data with current selectedWorkspace (2-way binding)
-                          data: selectedWorkspace || t.data,
+                          // Sync tab.data with current selectedWs (2-way binding)
+                          data: selectedWs || t.data,
                       }
                     : t,
             ),
         );
-    }, [wsHasChanges, selectedWorkspace, tab.id]);
+    }, [wsHasChanges, selectedWs, tab.id]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {

@@ -22,9 +22,9 @@ import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
  * Form for editing workspace details
  */
 export function WsDetailContent() {
-    const { selectedWorkspace, wsNameRef } = useWsDetailStore();
-    const { shouldFocusWsName, setShouldFocusWsName } = useWsStore();
-    const { updateSelectedWorkspace } = useWsDetailHelper();
+    const { wsNameRef, shouldFocusWsName, setShouldFocusWsName } = useWsDetailStore();
+    const { selectedWs } = useWsStore();
+    const { handleWsFieldChange } = useWsDetailHelper();
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
     const { closeTab, getTabById } = useEditorTabHelper();
 
@@ -33,10 +33,10 @@ export function WsDetailContent() {
 
     const [wsKey, setWsKey] = React.useState(0);
     useEffect(() => {
-        if (selectedWorkspace) {
+        if (selectedWs) {
             setWsKey((prev) => prev + 1);
         }
-    }, [selectedWorkspace?.id]);
+    }, [selectedWs?.id]);
 
     // Focus vào Workspace Name field khi tạo workspace mới
     useEffect(() => {
@@ -49,7 +49,7 @@ export function WsDetailContent() {
     }, [shouldFocusWsName, wsNameRef]);
 
     // Check if workspace is inactive (soft deleted)
-    const isDeleted = selectedWorkspace?.deletedAt !== null;
+    const isDeleted = selectedWs?.deletedAt !== null;
     const isHardDeleted = activeTab?.data && (activeTab.data as Ws).isHardDeleted;
 
     // Create current active value for autocomplete
@@ -59,16 +59,16 @@ export function WsDetailContent() {
 
     // Handlers for form interactions
     const handleFieldChange = (field: keyof Ws, value: any) => {
-        updateSelectedWorkspace({ [field]: value });
+        handleWsFieldChange(field, value);
     };
 
     const handleActiveChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
         const isActiveSelected = newValue?.code === constants.standardRegistryFE.activeStatus.active;
         const newDeletedAt = isActiveSelected ? null : new Date();
-        updateSelectedWorkspace({ deletedAt: newDeletedAt });
+        handleWsFieldChange('deletedAt', newDeletedAt);
     };
 
-    if (!selectedWorkspace) {
+    if (!selectedWs) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
                 <p>No workspace selected</p>
@@ -117,7 +117,7 @@ export function WsDetailContent() {
                         <GenericTextField
                             ref={wsNameRef}
                             label="Workspace Name"
-                            value={selectedWorkspace.name}
+                            value={selectedWs.name}
                             onChange={(e) => handleFieldChange("name", e.target.value)}
                             placeholder="Enter workspace name..."
                             size="small"
@@ -132,7 +132,7 @@ export function WsDetailContent() {
                             </label>
                             <Textarea
                                 key={`description-${wsKey}`}
-                                value={selectedWorkspace.description || ""}
+                                value={selectedWs.description || ""}
                                 onChange={(e) => handleFieldChange("description", e.target.value)}
                                 placeholder="Enter workspace description..."
                                 className="min-h-[120px] resize-none"
@@ -151,15 +151,15 @@ export function WsDetailContent() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        <GenericTextField label="Workspace ID" value={selectedWorkspace.id > 0 ? selectedWorkspace.id.toString() : "New (Unsaved)"} disabled size="small" />
+                        <GenericTextField label="Workspace ID" value={selectedWs.id > 0 ? selectedWs.id.toString() : "New (Unsaved)"} disabled size="small" />
 
-                        {selectedWorkspace.userId && <GenericTextField label="User ID" value={selectedWorkspace.userId.toString()} disabled size="small" />}
+                        {selectedWs.userId && <GenericTextField label="User ID" value={selectedWs.userId.toString()} disabled size="small" />}
 
-                        <GenericTextField label="Created At" value={formatDate(selectedWorkspace.createdAt)} disabled size="small" />
+                        <GenericTextField label="Created At" value={formatDate(selectedWs.createdAt)} disabled size="small" />
 
-                        {selectedWorkspace.updatedAt && <GenericTextField label="Updated At" value={formatDate(selectedWorkspace.updatedAt)} disabled size="small" />}
+                        {selectedWs.updatedAt && <GenericTextField label="Updated At" value={formatDate(selectedWs.updatedAt)} disabled size="small" />}
 
-                        {selectedWorkspace.deletedAt && <GenericTextField label="Deleted At" value={formatDate(selectedWorkspace.deletedAt)} disabled size="small" />}
+                        {selectedWs.deletedAt && <GenericTextField label="Deleted At" value={formatDate(selectedWs.deletedAt)} disabled size="small" />}
                     </CardContent>
                 </Card>
             </div>

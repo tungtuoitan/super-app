@@ -10,7 +10,7 @@ import { Button } from "@/Components/ui/button";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { useWsStore, Ws } from "@/store/ws/useWs.store";
-import { useWsHelper } from "@/hooks/ws/useWs.helper";
+import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";
 import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
 import { useGridControlHelper } from "@/hooks/vsCode/useGridControl.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
@@ -22,7 +22,7 @@ export function WsGrid() {
     // State from centralized store
     const { workspaces, isLoading, error, sorting, setSorting, pagination, setPagination, rowSelection, setRowSelection, columnFilters, setColumnFilters } = useWsStore();
 
-    const { loadWorkspaces, openContextMenu } = useWsHelper();
+    const { loadWorkspaces, openWsContextMenu } = useWsGridHelper();
     const { openWorkspaceTab } = useWsTabHelper();
     const { registerGrid, unregisterGrid } = useGridControlHelper();
     const { searchQuery } = useGridControlStore();
@@ -187,7 +187,7 @@ export function WsGrid() {
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest("tr[data-row]");
                     if (!isClickedOnRow) {
-                        openContextMenu(e);
+                        openWsContextMenu(e);
                     }
                 }}
             >
@@ -213,7 +213,7 @@ export function WsGrid() {
                                 onClick={() => {
                                     openWorkspaceTab(row.original);
                                 }}
-                                onContextMenu={(e) => openContextMenu(e, row)}
+                                onContextMenu={(e) => openWsContextMenu(e, row)}
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <td key={cell.id} className="text-left">

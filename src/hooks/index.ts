@@ -25,7 +25,7 @@ export * from "./useActivityBar.helper";
 export * from "./useConfirmationPopover.helper";
 
 // Workspace helpers
-export * from "./ws/useWs.helper";
+export * from "./ws/useWsGrid.helper";
 export * from "./ws/useWsDetail.helper";
 export * from "./ws/useWsTab.helper";
 

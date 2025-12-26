@@ -5,4 +5,3 @@
 
 export { useWorkspaceFolderMenuHelper } from "./useWorkspaceFolderMenu.helper";
 export { useWorkspaceChildMenuHelper } from "./useWorkspaceChildMenu.helper";
-export { useWsGridMenuHelper } from "./useWsGridMenu.helper";

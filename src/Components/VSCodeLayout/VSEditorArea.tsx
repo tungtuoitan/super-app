@@ -46,7 +46,6 @@ export function VSEditorArea() {
                 {openTabs.length > 0 ? (
                     <div className="flex-1 flex flex-wrap">
                         {openTabs.map((tab: BaseTab) => {
-                            console.log("Rendering tab:", tab);
                             const isDeleted = !!tab.data.deletedAt;
                             const isHardDeleted = !!(tab.data as any).isHardDeleted;
                             return (

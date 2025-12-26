@@ -1,51 +1,64 @@
 /**
- * Workspace UI Store
- * State management for workspace UI interactions (similar to NoteUIStore)
+ * Workspace UI Context
+ * Minimal UI state management for workspace feature
+ * Server state is handled by React Query hooks
+ * Tab management is handled by WorkspaceTabStore
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 import { Ws } from "./useWs.store";
+import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 
 export interface WsDetailContextData {
-    selectedWorkspace: Ws | null;
-    setSelectedWorkspace: Dispatch<SetStateAction<Ws | null>>;
-    wsHasChanges: boolean;
-    setWsHasChanges: Dispatch<SetStateAction<boolean>>;
+    // Dialog state
     originalWsRef: React.MutableRefObject<Ws | null>;
+
+    // Container refs
     wsNameRef: React.RefObject<HTMLInputElement>;
+
+    // Focus state
+    shouldFocusWsName: boolean;
+    setShouldFocusWsName: Dispatch<SetStateAction<boolean>>;
 }
 
 export const wsDetailContextDefaultValue: WsDetailContextData = {
-    selectedWorkspace: null,
-    setSelectedWorkspace: () => {},
-    wsHasChanges: false,
-    setWsHasChanges: () => {},
+    // Dialog state
     originalWsRef: { current: null },
+
+    // Container refs
     wsNameRef: { current: null },
+
+    // Focus state
+    shouldFocusWsName: false,
+    setShouldFocusWsName: () => {},
 };
 
-export const WsDetailStore = createContext<WsDetailContextData>(wsDetailContextDefaultValue);
+const WsDetailContext = createContext<WsDetailContextData>(wsDetailContextDefaultValue);
 
-export const useWsDetailStore = () => useContext(WsDetailStore);
+export const useWsDetailStore = () => useContext(WsDetailContext);
 
 export const WsDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [selectedWorkspace, setSelectedWorkspace] = useState<Ws | null>(null);
-    const [wsHasChanges, setWsHasChanges] = useState<boolean>(false);
-    const originalWsRef = useRef<Ws | null>(null);
+    // Container refs
     const wsNameRef = useRef<HTMLInputElement>(null);
+    const originalWsRef = useRef<Ws | null>(null);
+
+    // Focus state
+    const [shouldFocusWsName, setShouldFocusWsName] = useState(false);
 
     return (
-        <WsDetailStore.Provider
+        <WsDetailContext.Provider
             value={{
-                selectedWorkspace,
-                setSelectedWorkspace,
-                wsHasChanges,
-                setWsHasChanges,
+                // Dialog state
                 originalWsRef,
+
+                // Container refs
                 wsNameRef,
+
+                // Focus state
+                shouldFocusWsName,
+                setShouldFocusWsName,
             }}
         >
             {children}
-        </WsDetailStore.Provider>
+        </WsDetailContext.Provider>
     );
 };

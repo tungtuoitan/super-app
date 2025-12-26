@@ -5,13 +5,14 @@ import { BaseTab, TabType } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
-import { Ws } from "@/store/ws/useWs.store";
+import { useWsStore, Ws } from "@/store/ws/useWs.store";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { originalNoteRef } = useNoteDetailStore();
     const { setNotes, selectedNote, setSelectedNote } = useNoteGridStore();
-    const { setSelectedWorkspace, originalWsRef, setWsHasChanges } = useWsDetailStore();
+    const { originalWsRef } = useWsDetailStore();
+    const { setSelectedWs } = useWsStore();
 
     /**
      * Update active tab ID and sync selectedNote
@@ -37,18 +38,16 @@ export const useEditorTabHelper = () => {
 
                 // Clear workspace state when switching to note
                 originalWsRef.current = null;
-                setWsHasChanges(false);
-                setSelectedWorkspace(null);
+                setSelectedWs(null);
             } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
                 const wsData = activeTab.data as Ws;
 
                 // Initialize originalWsRef for change tracking
                 if (!originalWsRef.current || originalWsRef.current.id !== wsData.id) {
                     originalWsRef.current = { ...wsData };
-                    setWsHasChanges(false); // Reset changes for newly opened workspace
                 }
 
-                setSelectedWorkspace(wsData);
+                setSelectedWs(wsData);
 
                 // Clear note state when switching to workspace
                 originalNoteRef.current = null;
@@ -57,15 +56,13 @@ export const useEditorTabHelper = () => {
                 originalNoteRef.current = null;
                 setSelectedNote(null);
                 originalWsRef.current = null;
-                setWsHasChanges(false);
-                setSelectedWorkspace(null);
+                setSelectedWs(null);
             }
         } else {
             originalNoteRef.current = null;
             setSelectedNote(null);
             originalWsRef.current = null;
-            setWsHasChanges(false);
-            setSelectedWorkspace(null);
+            setSelectedWs(null);
         }
     };
     // ================================================================
