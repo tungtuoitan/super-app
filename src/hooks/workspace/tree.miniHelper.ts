@@ -4,6 +4,109 @@ import { transformBackendItems, BackendWorkspaceItem } from "@/utils/workspace-m
 import { constants } from "@/utils/constants";
 
 // ============================================
+// RECURSIVE HELPER FUNCTIONS (prefix with $)
+// ============================================
+
+/**
+ * Recursive traverse helper for tree structures
+ * Generic traversal that collects items matching predicate
+ */
+export function $traverse<T extends { children?: T[] }>(nodes: T[], predicate: (node: T) => boolean = () => true): T[] {
+    const result: T[] = [];
+
+    function $_traverse(items: T[]) {
+        for (const item of items) {
+            if (predicate(item)) {
+                result.push(item);
+            }
+            if (item.children && item.children.length > 0) {
+                $_traverse(item.children);
+            }
+        }
+    }
+
+    $_traverse(nodes);
+    return result;
+}
+
+/**
+ * Recursive check if targetId exists in subtree of a node
+ */
+export function $checkSubtree(node: TreeFolder, targetId: number): boolean {
+    if (node.data.id === targetId) {
+        return true;
+    }
+
+    if (node.children && node.children.length > 0) {
+        return node.children.some((child) => $checkSubtree(child, targetId));
+    }
+
+    return false;
+}
+
+/**
+ * Recursive find folder by ID in nested structure
+ */
+export function $findFolderById(folders: Folder[], targetId: number): Folder | undefined {
+    for (const folder of folders) {
+        if (folder.id === targetId) {
+            return folder;
+        }
+        if (folder.children && folder.children.length > 0) {
+            const found = $findFolderById(folder.children, targetId);
+            if (found) return found;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Recursive filter tree by search text
+ * Includes node if it matches OR any descendant matches
+ */
+export function $filterTreeBySearch(nodes: Folder[], searchText: string): Folder[] {
+    if (!searchText) return nodes;
+
+    return nodes
+        .filter((folder) => {
+            const matchesSearch = folder.name.toLowerCase().includes(searchText.toLowerCase());
+
+            const hasMatchingDescendant =
+                folder.children && folder.children.length > 0
+                    ? $filterTreeBySearch(folder.children, searchText).length > 0
+                    : false;
+
+            return matchesSearch || hasMatchingDescendant;
+        })
+        .map((folder) => ({
+            ...folder,
+            children:
+                folder.children && folder.children.length > 0 ? $filterTreeBySearch(folder.children, searchText) : [],
+        }));
+}
+
+/**
+ * Recursive transform WorkspaceItem to Folder
+ * Only transforms FolderItem - notes and files return null
+ */
+export function $transformItemToFolder(item: WorkspaceItem): Folder | null {
+    if (!isFolder(item)) {
+        return null;
+    }
+
+    return {
+        id: item.id,
+        name: item.name,
+        color: item.color,
+        createdAt: new Date(item.createdAt),
+        isActive: true,
+        depth: item.level,
+        isExpanded: item.isExpanded,
+        children: item.children.map($transformItemToFolder).filter((child): child is Folder => child !== null),
+    };
+}
+
+// ============================================
 // TREE NODE TYPES (for react-arborist)
 // ============================================
 
@@ -18,55 +121,14 @@ export interface TreeNode {
     children: TreeNode[];
 }
 
-export function getAllFoldersFlattened(treeData: TreeFolder[]): TreeFolder[] {
-    const result: TreeFolder[] = [];
-
-    function traverse(nodes: TreeFolder[]) {
-        for (const node of nodes) {
-            result.push(node);
-            if (node.children && node.children.length > 0) {
-                traverse(node.children);
-            }
-        }
-    }
-
-    traverse(treeData);
-    return result;
-}
-
 export function isDescendant(targetId: number, potentialParentId: number, treeData: TreeFolder[]): boolean {
     // Find the potential parent node
-    const parentNode = getAllFoldersFlattened(treeData).find((t) => t.data.id === potentialParentId);
+    const parentNode = $traverse(treeData).find((t) => t.data.id === potentialParentId);
 
     if (!parentNode) return false;
 
     // Recursively check if targetId exists in the subtree of parentNode
-    function checkSubtree(node: TreeFolder): boolean {
-        if (node.data.id === targetId) {
-            return true; // Found targetId in descendants
-        }
-
-        if (node.children && node.children.length > 0) {
-            return node.children.some((child) => checkSubtree(child));
-        }
-
-        return false;
-    }
-
-    return checkSubtree(parentNode);
-}
-
-export function findFolderById(folders: Folder[], targetId: number): Folder | undefined {
-    for (const folder of folders) {
-        if (folder.id === targetId) {
-            return folder;
-        }
-        if (folder.children && folder.children.length > 0) {
-            const found = findFolderById(folder.children, targetId);
-            if (found) return found;
-        }
-    }
-    return undefined;
+    return $checkSubtree(parentNode, targetId);
 }
 
 // ✅ Updated to support all item types (folder/note/file)
@@ -78,49 +140,12 @@ export interface TreeFolder {
 }
 
 export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
-    const result: number[] = [];
-
-    function traverse(nodes: TreeFolder[]) {
-        for (const node of nodes) {
-            result.push(node.data.id);
-            if (node.children && node.children.length > 0) {
-                traverse(node.children);
-            }
-        }
-    }
-
-    traverse(treeData);
-    return result;
+    return $traverse(treeData).map((node) => node.data.id);
 }
 
 /**
  * Flatten tree data for lookup
  */
-
-/**
- * Transform WorkspaceItem to Folder
- * Only transforms FolderItem - notes and files return null
- * ✅ Updated to use new type system
- */
-export function transformTreeItemToFolder(item: WorkspaceItem): Folder | null {
-    // Only transform folder items
-    if (!isFolder(item)) {
-        return null;
-    }
-
-    const folder: Folder = {
-        id: item.id, // ✅ Folder ID (from FolderItem.id)
-        name: item.name,
-        color: item.color,
-        createdAt: new Date(item.createdAt),
-        isActive: true,
-        depth: item.level,
-        isExpanded: item.isExpanded,
-        children: item.children.map(transformTreeItemToFolder).filter((child): child is Folder => child !== null),
-    };
-
-    return folder;
-}
 
 /**
  * Transform WorkspaceItem hierarchy to react-arborist tree data
@@ -136,28 +161,6 @@ export function transformItemsToTreeData(items: WorkspaceItem[]): TreeFolder[] {
             data: item,
             // Only folders can have children - notes/files are always leaf nodes
             children: isFolder(item) && item.children && item.children.length > 0 ? transformItemsToTreeData(item.children) : [],
-        }));
-}
-
-/**
- * Filter folder tree based on search text
- * Includes folder if it matches OR any descendant matches
- */
-export function filterTreeBySearch(nodes: Folder[], searchText: string): Folder[] {
-    if (!searchText) return nodes;
-
-    return nodes
-        .filter((folder) => {
-            const matchesSearch = folder.name.toLowerCase().includes(searchText.toLowerCase());
-
-            // Include if this folder matches OR any descendant matches
-            const hasMatchingDescendant = folder.children && folder.children.length > 0 ? filterTreeBySearch(folder.children, searchText).length > 0 : false;
-
-            return matchesSearch || hasMatchingDescendant;
-        })
-        .map((folder) => ({
-            ...folder,
-            children: folder.children && folder.children.length > 0 ? filterTreeBySearch(folder.children, searchText) : [],
         }));
 }
 
@@ -237,27 +240,6 @@ function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
     return roots;
 }
 
-/**
- * Transform WorkspaceItem to Folder (for backward compatibility)
- * Only transforms FolderItem - notes and files return null
- */
-function transformItem(item: WorkspaceItem): Folder | null {
-    // Only transform folder items
-    if (!isFolder(item)) {
-        return null;
-    }
-
-    return {
-        id: item.id, // ✅ Folder ID (from FolderItem.id)
-        name: item.name,
-        color: item.color,
-        createdAt: new Date(item.createdAt),
-        isActive: true,
-        depth: item.level,
-        isExpanded: item.isExpanded,
-        children: item.children.map(transformItem).filter((child): child is Folder => child !== null),
-    };
-}
 
 /**
  * Transform workspace data to react-arborist tree data
@@ -356,4 +338,17 @@ export function transformToTreeData(
     // ================================================================
     const result = transformItemsToTreeData(itemsToTransform);
     return result;
-}
+};
+
+export const treeMiniHelper = {
+    $traverse,
+    $checkSubtree,
+    $findFolderById,
+    $filterTreeBySearch,
+    $transformItemToFolder,
+    isDescendant,
+    getAllVisibleFolderIds,
+    transformItemsToTreeData,
+    createWorkspaceRootFolder,
+    transformToTreeData,
+};

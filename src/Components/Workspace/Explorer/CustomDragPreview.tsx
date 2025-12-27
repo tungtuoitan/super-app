@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon } from "lucide-react";
-import { getAllFoldersFlattened, TreeFolder } from "@/hooks/workspace/tree.helper";
+import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 
 /**
  * Custom Drag Preview Component (VS Code style)
@@ -34,7 +34,7 @@ export function CustomDragPreview({
 
         // Single item: show folder name
         if (itemCount === 1 && id) {
-            const allFolders = getAllFoldersFlattened(treeData);
+            const allFolders = treeMiniHelper.$traverse(treeData);
             const folder = allFolders.find((t: TreeFolder) => t.id === id);
             return folder?.name || "Moving...";
         }

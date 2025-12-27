@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
 import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
-import { TreeFolder } from "@/hooks/workspace/tree.helper";
+import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { FolderItem } from "@/types/workspace.types";
 
 interface RootFolderNodeProps {

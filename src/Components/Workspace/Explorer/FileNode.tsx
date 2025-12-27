@@ -3,7 +3,7 @@ import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
-import { TreeFolder } from "@/hooks/workspace/tree.helper";
+import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { FileItem } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";

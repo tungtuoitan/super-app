@@ -3,7 +3,7 @@ import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
-import { getAllVisibleFolderIds, TreeFolder } from "@/hooks/workspace/tree.helper";
+import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { FolderItem, isFolder } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -55,7 +55,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             setLastSelectedFolderId(folderItem.id);
         } else if (e.shiftKey && lastSelectedFolderId) {
             // Shift+Click: Range selection (like VS Code)
-            const allVisibleFolders = getAllVisibleFolderIds(treeData);
+            const allVisibleFolders = treeMiniHelper.getAllVisibleFolderIds(treeData);
             const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
             const currentIndex = allVisibleFolders.indexOf(folderItem.id);
 

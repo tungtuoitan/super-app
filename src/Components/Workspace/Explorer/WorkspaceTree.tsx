@@ -11,7 +11,7 @@ import { FolderNode } from "./FolderNode";
 import { RootFolderNode } from "./RootFolderNode";
 import { NoteNode } from "./NoteNode";
 import { FileNode } from "./FileNode";
-import { getAllVisibleFolderIds, transformToTreeData, TreeFolder } from "@/hooks/workspace/tree.helper";
+import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { isFolder, isNote, isFile } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 
@@ -26,12 +26,12 @@ export function WorkspaceTree() {
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
     const treeData = useMemo(() => {
-        return transformToTreeData(currentTree, searchText);
+        return treeMiniHelper.transformToTreeData(currentTree, searchText);
     }, [currentTree, searchText]);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
-        return getAllVisibleFolderIds(treeData);
+        return treeMiniHelper.getAllVisibleFolderIds(treeData);
     }, [treeData]);
 
     // Keyboard navigation (VS Code-like)

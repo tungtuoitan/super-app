@@ -4,7 +4,7 @@ import { FileText } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { TreeFolder } from "@/hooks/workspace/tree.helper";
+import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { NoteItem } from "@/types/workspace.types";
 import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";

@@ -10,4 +10,4 @@ export { useTreeSelectionHelper } from "./useTreeSelectionHelper";
 export { useTreeHelper } from "./useTreeHelper";
 
 // Tree helper utilities (pure functions)
-export * from "./tree.helper";
+export * from "./tree.miniHelper";

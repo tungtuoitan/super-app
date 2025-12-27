@@ -7,7 +7,8 @@
  */
 
 import type { NodeApi } from "react-arborist";
-import type { TreeFolder } from "./tree.helper";
+import type { TreeFolder } from "./tree.miniHelper";
+import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 
 export const useTreeSelectionHelper = () => {

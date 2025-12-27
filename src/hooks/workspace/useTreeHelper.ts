@@ -3,8 +3,8 @@
  * Handles tree operations: drag & drop, refresh, new folder
  */
 
-import type { TreeFolder } from "./tree.helper";
-import { getAllFoldersFlattened, isDescendant, findFolderById } from "./tree.helper";
+import type { TreeFolder } from "./tree.miniHelper";
+import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useFolderDialogHelper } from "./useFolderDialog.helper";
 import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
@@ -33,7 +33,7 @@ export const useTreeHelper = () => {
             // =================================================================
             // STEP 1: EXTRACT ENTITY IDS FROM DRAGGED ITEMS
             // =================================================================
-            const allItems = getAllFoldersFlattened(treeData);
+            const allItems = treeMiniHelper.$traverse(treeData);
             let itemIds = args.dragIds
                 .map((dragId) => {
                     const item = allItems.find((t) => t.id === dragId);
@@ -45,7 +45,7 @@ export const useTreeHelper = () => {
             itemIds = itemIds.filter((itemId) => {
                 const isDescendantOfOtherSelected = itemIds.some((otherItemId) => {
                     if (otherItemId === itemId) return false;
-                    return isDescendant(itemId, otherItemId, treeData);
+                    return treeMiniHelper.isDescendant(itemId, otherItemId, treeData);
                 });
                 return !isDescendantOfOtherSelected;
             });
@@ -59,17 +59,29 @@ export const useTreeHelper = () => {
             // STEP 2: EXTRACT TARGET PARENT ID
             // =================================================================
             // IMPORTANT: args.parentId can be:
-            // 1. A folder ID (when dropping INTO a folder)
-            // 2. A note/file ID (when dropping BETWEEN siblings - use their parent instead)
+            // 1. null (when dropping at root level - bottom of tree)
+            // 2. A folder ID (when dropping INTO a folder)
+            // 3. A note/file ID (when dropping BETWEEN siblings - use their parent instead)
             let newParentId: number | undefined = undefined;
-            if (args.parentId) {
+            
+            if (!args.parentId) {
+                // Case 1: Drop at root level (bottom of tree)
+                newParentId = undefined;
+                console.log("🎯 Drop target: Root level (parentId is null)");
+            } else {
                 const parentNode = allItems.find((t) => t.id === args.parentId);
-                if (parentNode) {
+                
+                if (!parentNode) {
+                    // Parent node not found - treat as root level drop
+                    newParentId = undefined;
+                    console.log("🎯 Drop target: Root level (parentNode not found)");
+                } else {
                     const parentEntityId = parentNode.data.id;
 
                     // Negative IDs are workspace root nodes (virtual nodes)
                     if (parentEntityId < 0) {
                         newParentId = undefined; // Move to workspace root
+                        console.log("🎯 Drop target: Root level (negative entity ID)");
                     } else {
                         const itemData = parentNode.data;
 
@@ -78,13 +90,16 @@ export const useTreeHelper = () => {
                             if (itemData.type === constants.workspace.itemTypes.folder) {
                                 // Dropping INTO a folder - use folder ID as parent
                                 newParentId = parentEntityId;
+                                console.log(`🎯 Drop target: Folder ${parentEntityId}`);
                             } else {
                                 // Dropping BETWEEN siblings (note/file) - use their parent instead
                                 newParentId = itemData.parentId ?? undefined;
+                                console.log(`🎯 Drop target: ${newParentId === undefined ? 'Root level' : `Parent ${newParentId}`} (between siblings)`);
                             }
                         } else {
                             // Fallback: assume folder
                             newParentId = parentEntityId;
+                            console.log(`🎯 Drop target: Folder ${parentEntityId} (fallback)`);
                         }
                     }
                 }
@@ -113,7 +128,7 @@ export const useTreeHelper = () => {
 
             if (newParentId !== undefined) {
                 const isTargetDescendantOfSelected = itemIds.some((draggedId) => {
-                    return isDescendant(newParentId!, draggedId, treeData);
+                    return treeMiniHelper.isDescendant(newParentId!, draggedId, treeData);
                 });
 
                 if (isTargetDescendantOfSelected) {
@@ -126,7 +141,7 @@ export const useTreeHelper = () => {
             // =================================================================
             // STEP 4: VALIDATE DROP POSITION
             // =================================================================
-            const targetParentNode = newParentId !== undefined ? getAllFoldersFlattened(treeData).find((t) => t.data.id === newParentId) : null;
+            const targetParentNode = newParentId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => t.data.id === newParentId) : null;
 
             // Filter out workspace root (negative entity IDs)
             const targetSiblings = targetParentNode ? targetParentNode.children || [] : treeData.filter((t) => t.data.id > 0);
@@ -243,8 +258,8 @@ export const useTreeHelper = () => {
         const parentId = selectedFolderIds.length > 0 ? selectedFolderIds[0] : undefined;
 
         // Extract folders from treeData
-        const folders = getAllFoldersFlattened(treeData).map((t) => t.data);
-        const parentFolder = parentId ? findFolderById((folders || []) as unknown as Folder[], parentId) : undefined;
+        const folders = treeMiniHelper.$traverse(treeData).map((t) => t.data);
+        const parentFolder = parentId ? treeMiniHelper.$findFolderById((folders || []) as unknown as Folder[], parentId) : undefined;
 
         openFolderDialog("create", constants.workspace.itemTypes.folder, null, parentFolder);
     };
