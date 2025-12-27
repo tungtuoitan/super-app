@@ -112,7 +112,7 @@ export const useFolderDialogHelper = () => {
                           name: newFolderName.trim(),
                           description: description.trim() || undefined,
                           color,
-                          parentId: parentFolder?.id || null,
+                          parentId: parentFolder?.id > 0 ? parentFolder.id : null, //* khi parent là root thì để null
                       };
 
             // Call upsertFolder endpoint

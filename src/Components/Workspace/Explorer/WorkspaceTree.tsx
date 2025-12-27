@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
 import { useTreeOperation } from "@/hooks/workspace/useTreeOperation.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { FolderNode } from "./FolderNode";
 import { RootFolderNode } from "./RootFolderNode";
@@ -12,11 +13,13 @@ import { NoteNode } from "./NoteNode";
 import { FileNode } from "./FileNode";
 import { getAllVisibleFolderIds, transformToTreeData, TreeFolder } from "@/hooks/workspace/tree.helper";
 import { isFolder, isNote, isFile } from "@/types/workspace.types";
+import { constants } from "@/utils/constants";
 
 export function WorkspaceTree() {
     const { searchText, isDragging, currentTree, _treeRef } = useWorkspaceStore();
     const { handleSelectionChange, handleKeyDown } = useTreeSelection();
     const { handleMove } = useTreeOperation();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const manager = useDragDropManager();
 
@@ -44,13 +47,39 @@ export function WorkspaceTree() {
             });
     }, [handleKeyDown, allVisibleFolderIds]);
 
+    // Handle context menu on empty space (treat as root workspace)
+    const handleContainerContextMenu = (e: React.MouseEvent) => {
+        // Check if click is on an actual tree node
+        const target = e.target as HTMLElement;
+        const isTreeNode = target.closest('[role="treeitem"]') || target.closest('.tree-node');
+        
+        // If clicked on a tree node, let the node handle it
+        if (isTreeNode) {
+            return;
+        }
+
+        // Clicked on empty space - show root workspace context menu
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Get root workspace data
+        if (treeData && treeData.length > 0) {
+            const rootData = treeData[0].data; // Root is first item in treeData
+            showContextMenu(e, constants.workspace.itemTypes.folder, { 
+                ...rootData, 
+                parentId: null
+            });
+        }
+    };
+
     return (
         <>
             <div
                 ref={treeContainerRef}
                 data-workspace-tree
                 tabIndex={0}
-                className="h-full flex flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
+                onContextMenu={handleContainerContextMenu}
+                className="h-full flex bred flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
                 {/* Loading overlay when dragging */}
                 {isDragging && (
