@@ -28,29 +28,35 @@ export const useTreeHelper = () => {
      */
     const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }, treeData: TreeFolder[]) => {
         try {
+            console.log("🚀 handleMove called:", { dragIds: args.dragIds, parentId: args.parentId, index: args.index });
+            
             setIsDragging(true);
 
             // =================================================================
             // STEP 1: EXTRACT ENTITY IDS FROM DRAGGED ITEMS
             // =================================================================
-            const allItems = treeMiniHelper.$traverse(treeData);
-            let itemIds = args.dragIds
+            const allTreeNodes = treeMiniHelper.$traverse(treeData);
+            
+            // ---- Filter out the drop zone node (drop zone node is a FAKE node with ID -1)---- 
+            const validTreeNodes = allTreeNodes.filter(node => node.data.id !== -1);
+            
+            let selectedEntityIds = args.dragIds
                 .map((dragId) => {
-                    const item = allItems.find((t) => t.id === dragId);
+                    const item = validTreeNodes.find((t) => t.id === dragId);
                     return item?.data.id;
                 })
-                .filter((id): id is number => id !== undefined);
+                .filter((id): id is number => id !== undefined && id !== -1); // Filter out drop zone ID
 
-            // VS CODE BEHAVIOR: Filter out descendants of selected nodes
-            itemIds = itemIds.filter((itemId) => {
-                const isDescendantOfOtherSelected = itemIds.some((otherItemId) => {
-                    if (otherItemId === itemId) return false;
-                    return treeMiniHelper.isDescendant(itemId, otherItemId, treeData);
+            // ---- VS CODE BEHAVIOR: Filter out descendants of selected nodes ----
+            selectedEntityIds = selectedEntityIds.filter((entityId) => {
+                const isDescendantOfOtherSelected = selectedEntityIds.some((otherEntityId) => {
+                    if (otherEntityId === entityId) return false;
+                    return treeMiniHelper.isDescendant(entityId, otherEntityId, treeData);
                 });
                 return !isDescendantOfOtherSelected;
             });
 
-            if (itemIds.length === 0) {
+            if (selectedEntityIds.length === 0) {
                 setIsDragging(false);
                 return;
             }
@@ -62,44 +68,77 @@ export const useTreeHelper = () => {
             // 1. null (when dropping at root level - bottom of tree)
             // 2. A folder ID (when dropping INTO a folder)
             // 3. A note/file ID (when dropping BETWEEN siblings - use their parent instead)
-            let newParentId: number | undefined = undefined;
+            // 4. Drop zone ID (special ID -1 for root level drops)
+            let targetParentEntityId: number | undefined = undefined;
             
             if (!args.parentId) {
-                // Case 1: Drop at root level (bottom of tree)
-                newParentId = undefined;
+                // ---- Case 1: Drop at root level (bottom of tree) ----
+                targetParentEntityId = undefined;
                 console.log("🎯 Drop target: Root level (parentId is null)");
             } else {
-                const parentNode = allItems.find((t) => t.id === args.parentId);
+                const targetParentTreeNode = validTreeNodes.find((t) => t.id === args.parentId);
                 
-                if (!parentNode) {
-                    // Parent node not found - treat as root level drop
-                    newParentId = undefined;
-                    console.log("🎯 Drop target: Root level (parentNode not found)");
+                if (!targetParentTreeNode) {
+                    // ---- Check if it's the drop zone node ----
+                    const dropZoneNode = allTreeNodes.find((t) => t.id === args.parentId);
+                    if (dropZoneNode && dropZoneNode.data.id === -1) {
+                        targetParentEntityId = undefined;
+                        console.log("🎯 Drop target: Root level (drop zone)");
+                        
+                        // ---- VALIDATION: If all items already root-level, prevent drop ----
+                        const allAlreadyRoot = selectedEntityIds.every(id => {
+                            const item = validTreeNodes.find(t => t.data.id === id);
+                            return !item?.data.parentId || item.data.parentId === null;
+                        });
+                        if (allAlreadyRoot) {
+                            console.warn("⚠️ All items are already at root level");
+                            setIsDragging(false);
+                            return;
+                        }
+                    } else {
+                        // ---- Parent node not found - treat as root level drop ----
+                        targetParentEntityId = undefined;
+                        console.log("🎯 Drop target: Root level (parentNode not found)");
+                    }
                 } else {
-                    const parentEntityId = parentNode.data.id;
+                    const targetEntityId = targetParentTreeNode.data.id;
 
-                    // Negative IDs are workspace root nodes (virtual nodes)
-                    if (parentEntityId < 0) {
-                        newParentId = undefined; // Move to workspace root
+                    // ---- Negative IDs are workspace root nodes or drop zone ----
+                    if (targetEntityId < 0) {
+                        targetParentEntityId = undefined; // Move to workspace root
                         console.log("🎯 Drop target: Root level (negative entity ID)");
                     } else {
-                        const itemData = parentNode.data;
+                        const targetNodeData = targetParentTreeNode.data;
 
-                        // Check if this is a folder or note/file
-                        if ("type" in itemData) {
-                            if (itemData.type === constants.workspace.itemTypes.folder) {
-                                // Dropping INTO a folder - use folder ID as parent
-                                newParentId = parentEntityId;
-                                console.log(`🎯 Drop target: Folder ${parentEntityId}`);
+                        // ---- VALIDATION: Check if all items already have this parent ----
+                        const allSameParent = selectedEntityIds.every((id: number) => {
+                            const item = validTreeNodes.find((t) => t.data.id === id);
+                            if (!item) return false;
+                            const currentParentId = "parentId" in item.data ? item.data.parentId : undefined;
+                            return currentParentId === targetEntityId;
+                        });
+                        
+                        if (allSameParent) {
+                            console.warn("⚠️ All items already have this parent - no change needed");
+                            setIsDragging(false);
+                            return;
+                        }
+
+                        // ---- Check if this is a folder or note/file ----
+                        if ("type" in targetNodeData) {
+                            if (targetNodeData.type === constants.workspace.itemTypes.folder) {
+                                // ---- Dropping INTO a folder ----
+                                targetParentEntityId = targetEntityId;
+                                console.log(`🎯 Drop target: Folder ${targetEntityId}`);
                             } else {
-                                // Dropping BETWEEN siblings (note/file) - use their parent instead
-                                newParentId = itemData.parentId ?? undefined;
-                                console.log(`🎯 Drop target: ${newParentId === undefined ? 'Root level' : `Parent ${newParentId}`} (between siblings)`);
+                                // ---- Dropping BETWEEN siblings - use their parent ----
+                                targetParentEntityId = targetNodeData.parentId ?? undefined;
+                                console.log(`🎯 Drop target: ${targetParentEntityId === undefined ? 'Root level' : `Parent ${targetParentEntityId}`} (between siblings)`);
                             }
                         } else {
-                            // Fallback: assume folder
-                            newParentId = parentEntityId;
-                            console.log(`🎯 Drop target: Folder ${parentEntityId} (fallback)`);
+                            // ---- Fallback: assume folder ----
+                            targetParentEntityId = targetEntityId;
+                            console.log(`🎯 Drop target: Folder ${targetEntityId} (fallback)`);
                         }
                     }
                 }
@@ -108,27 +147,27 @@ export const useTreeHelper = () => {
             // =================================================================
             // STEP 3: VALIDATION - PREVENT INVALID MOVES
             // =================================================================
-            const hasWorkspaceRoot = itemIds.some((id) => id === constants.workspace.rootId);
+            const hasWorkspaceRoot = selectedEntityIds.some((id) => id === constants.workspace.rootId);
             if (hasWorkspaceRoot) {
                 console.warn("⚠️ Cannot move workspace root node");
                 setIsDragging(false);
                 return;
             }
-            if (itemIds.some((id) => id < 0)) {
+            if (selectedEntityIds.some((id) => id < 0)) {
                 console.warn("⚠️ Cannot move items with invalid IDs");
                 setIsDragging(false);
                 return;
             }
 
-            if (newParentId !== undefined && itemIds.includes(newParentId)) {
+            if (targetParentEntityId !== undefined && selectedEntityIds.includes(targetParentEntityId)) {
                 console.warn("⚠️ Cannot move items into one of the selected items");
                 setIsDragging(false);
                 return;
             }
 
-            if (newParentId !== undefined) {
-                const isTargetDescendantOfSelected = itemIds.some((draggedId) => {
-                    return treeMiniHelper.isDescendant(newParentId!, draggedId, treeData);
+            if (targetParentEntityId !== undefined) {
+                const isTargetDescendantOfSelected = selectedEntityIds.some((draggedId) => {
+                    return treeMiniHelper.isDescendant(targetParentEntityId!, draggedId, treeData);
                 });
 
                 if (isTargetDescendantOfSelected) {
@@ -141,10 +180,52 @@ export const useTreeHelper = () => {
             // =================================================================
             // STEP 4: VALIDATE DROP POSITION
             // =================================================================
-            const targetParentNode = newParentId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => t.data.id === newParentId) : null;
+            const targetParentNode = targetParentEntityId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => t.data.id === targetParentEntityId) : null;
 
-            // Filter out workspace root (negative entity IDs)
-            const targetSiblings = targetParentNode ? targetParentNode.children || [] : treeData.filter((t) => t.data.id > 0);
+            // ---- Filter out workspace root and drop zone ----
+            const targetSiblings = targetParentNode ? targetParentNode.children || [] : treeData.filter((t) => t.data.id > 0 && t.data.id !== -1);
+
+            // ---- VALIDATION: Check same parent - different logic for single vs multi-select ----
+            if (selectedEntityIds.length === 1) {
+                // ---- Single select: If parent is target, no move needed ----
+                const draggedItemId = selectedEntityIds[0];
+                const draggedItem = validTreeNodes.find(t => t.data.id === draggedItemId);
+                
+                if (draggedItem) {
+                    const currentParentId = "parentId" in draggedItem.data ? draggedItem.data.parentId : undefined;
+                    const normalizedCurrentParent = currentParentId ?? null;
+                    const normalizedTargetParent = targetParentEntityId ?? null;
+                    
+                    if (normalizedCurrentParent === normalizedTargetParent) {
+                        console.warn("⚠️ Item already has this parent - no move needed");
+                        setIsDragging(false);
+                        return;
+                    }
+                }
+            } else {
+                // ---- Multi-select: Remove items that already have target parent ----
+                const itemsToMove = selectedEntityIds.filter(id => {
+                    const item = validTreeNodes.find(t => t.data.id === id);
+                    if (!item) return false;
+                    
+                    const currentParentId = "parentId" in item.data ? item.data.parentId : undefined;
+                    const normalizedCurrentParent = currentParentId ?? null;
+                    const normalizedTargetParent = targetParentEntityId ?? null;
+                    
+                    // Keep items that don't have target parent
+                    return normalizedCurrentParent !== normalizedTargetParent;
+                });
+                
+                // If all items already have target parent, no move needed
+                if (itemsToMove.length === 0) {
+                    console.warn("⚠️ All items already have target parent - no move needed");
+                    setIsDragging(false);
+                    return;
+                }
+                
+                // Update selectedEntityIds to only include items that need to move
+                selectedEntityIds = itemsToMove;
+            }
 
             if (args.index >= 0 && args.index <= targetSiblings.length) {
                 const itemBefore = args.index > 0 ? targetSiblings[args.index - 1] : null;
@@ -153,14 +234,14 @@ export const useTreeHelper = () => {
                 const itemBeforeId = itemBefore?.data.id ?? null;
                 const itemAfterId = itemAfter?.data.id ?? null;
 
-                const bothInSelection = itemBeforeId && itemIds.includes(itemBeforeId) && itemAfterId && itemIds.includes(itemAfterId);
+                const bothInSelection = itemBeforeId && selectedEntityIds.includes(itemBeforeId) && itemAfterId && selectedEntityIds.includes(itemAfterId);
 
-                const isSameParent = targetSiblings.some((sibling) => {
+                const hasSiblingsInSelection = targetSiblings.some((sibling) => {
                     const siblingEntityId = sibling.data.id;
-                    return itemIds.includes(siblingEntityId);
+                    return selectedEntityIds.includes(siblingEntityId);
                 });
 
-                if (bothInSelection || (isSameParent && ((itemBeforeId && itemIds.includes(itemBeforeId)) || (itemAfterId && itemIds.includes(itemAfterId))))) {
+                if (bothInSelection || (hasSiblingsInSelection && ((itemBeforeId && selectedEntityIds.includes(itemBeforeId)) || (itemAfterId && selectedEntityIds.includes(itemAfterId))))) {
                     console.warn("⚠️ Cannot drop between items in the same selection");
                     setIsDragging(false);
                     return;
@@ -178,11 +259,10 @@ export const useTreeHelper = () => {
 
             const workspaceId = currentTree.workspaceId;
 
-            // Build move request matching backend API format
-            // Only include items that passed validation (filtered itemIds)
+            // ---- Build move request matching backend API format ----
             const moveRequest: MoveItemsRequest = {
-                items: itemIds.map((entityId) => {
-                    const item = allItems.find((t) => t.data.id === entityId);
+                items: selectedEntityIds.map((entityId) => {
+                    const item = allTreeNodes.find((t) => t.data.id === entityId);
                     if (!item) {
                         throw new Error(`Item with entity ID ${entityId} not found in tree`);
                     }
@@ -210,7 +290,7 @@ export const useTreeHelper = () => {
                         id: entityId, // Use entity ID (folder/note/file ID)
                     };
                 }),
-                targetParentId: newParentId ?? null,
+                targetParentId: targetParentEntityId ?? null,
             };
 
             try {
@@ -236,9 +316,9 @@ export const useTreeHelper = () => {
             await loadTree(workspaceId);
 
             // VS Code behavior: Re-select the moved items after move completes
-            setSelectedFolderIds(itemIds);
-            if (itemIds.length > 0) {
-                setLastSelectedFolderId(itemIds[itemIds.length - 1]);
+            setSelectedFolderIds(selectedEntityIds);
+            if (selectedEntityIds.length > 0) {
+                setLastSelectedFolderId(selectedEntityIds[selectedEntityIds.length - 1]);
             }
         } catch (error) {
             console.error("❌ Failed to move item(s):", error);

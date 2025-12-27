@@ -116,10 +116,10 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             onClick={handleMainClick}
             onContextMenu={handleRightClick}
             className={`
-                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
+                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded 
                 transition-all duration-150 ease-in-out
                 ${isDragging ? "opacity-40" : "opacity-100"}
-                ${isSelected ? "bg-editor-hover text-white border-l-2 border-editor-active" : "bg-transparent hover:bg-editor-hover"}
+                ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover"}
                 ${isWorkspaceRoot ? "font-semibold" : ""}
                 ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1" : ""}
                 ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1" : ""}

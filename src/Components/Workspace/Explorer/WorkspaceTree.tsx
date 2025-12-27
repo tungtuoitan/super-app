@@ -22,12 +22,111 @@ export function WorkspaceTree() {
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const manager = useDragDropManager();
+    const [containerHeight, setContainerHeight] = React.useState(800);
+
+    // Track container height to make Tree component responsive
+    useEffect(() => {
+        const updateHeight = () => {
+            if (treeContainerRef.current) {
+                const height = treeContainerRef.current.clientHeight;
+                // Ensure height is always a valid number
+                if (height && typeof height === 'number' && height > 0) {
+                    setContainerHeight(height);
+                    console.log("📏 Container height updated:", height);
+                }
+            }
+        };
+
+        // Initial height with delay to ensure DOM is ready
+        setTimeout(updateHeight, 100);
+
+        // Observe container size changes
+        const resizeObserver = new ResizeObserver(updateHeight);
+        if (treeContainerRef.current) {
+            resizeObserver.observe(treeContainerRef.current);
+        }
+
+        // Also listen to window resize
+        window.addEventListener("resize", updateHeight);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener("resize", updateHeight);
+        };
+    }, []);
+
+    // Add global styles for drop zone indicator
+    useEffect(() => {
+        const styleId = "drop-zone-styles";
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement("style");
+            style.id = styleId;
+            style.textContent = `
+                /* Drop zone indicator - show blue line when dragging over */
+                .drop-zone-root[data-dragging-over="true"] .drop-indicator {
+                    background-color: #007ACC !important;
+                }
+                
+                /* React-arborist may add drop-target class or data attribute */
+                [data-drop-target="true"] .drop-zone-root .drop-indicator,
+                .drop-target .drop-zone-root .drop-indicator {
+                    background-color: #007ACC !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        return () => {
+            const style = document.getElementById(styleId);
+            if (style) {
+                style.remove();
+            }
+        };
+    }, []);
 
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
     const treeData = useMemo(() => {
-        return treeMiniHelper.transformToTreeData(currentTree, searchText);
+        const baseTree = treeMiniHelper.transformToTreeData(currentTree, searchText);
+        
+        // Add invisible drop zone at the end to catch drops to root level
+        if (baseTree.length > 0 && currentTree?.workspaceId) {
+            const dropZoneNode: TreeFolder = {
+                id: `drop-zone-root-${currentTree.workspaceId}`,
+                name: "",
+                data: {
+                    id: -1, // Special ID for drop zone
+                    userId: currentTree.userId,
+                    name: "",
+                    type: constants.workspace.itemTypes.folder,
+                    parentId: null,
+                    accessType: "owner",
+                    isOriginal: true,
+                    level: 0,
+                    depth: 0,
+                    position: 0,
+                    sortOrder: 0,
+                    isExpanded: false,
+                    isSelected: false,
+                    createdAt: new Date().toISOString(),
+                    children: [],
+                },
+                children: [],
+            };
+            return [...baseTree, dropZoneNode];
+        }
+        
+        return baseTree;
     }, [currentTree, searchText]);
+
+    // Calculate drop zone height to fill remaining space
+    const dropZoneHeight = useMemo(() => {
+        const rowHeight = 40;
+        const actualItemsCount = treeData.filter(item => item.data.id !== -1).length;
+        const usedHeight = actualItemsCount * rowHeight;
+        const remaining = containerHeight - usedHeight;
+        return Math.max(remaining, 100); // Minimum 100px
+    }, [treeData, containerHeight]);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
@@ -79,7 +178,7 @@ export function WorkspaceTree() {
                 data-workspace-tree
                 tabIndex={0}
                 onContextMenu={handleContainerContextMenu}
-                className="h-full flex bred flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
+                className="h-full flex flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
                 {/* Loading overlay when dragging */}
                 {isDragging && (
@@ -93,11 +192,10 @@ export function WorkspaceTree() {
                 <Tree<TreeFolder>
                     ref={_treeRef}
                     data={treeData}
-                    openByDefault={true}
                     width="100%"
-                    height={600}
+                    height={containerHeight || 800}
                     indent={24}
-                    rowHeight={40}
+                    rowHeight={32}
                     overscanCount={8}
                     dndManager={manager}
                     onMove={async (args) => {
@@ -111,11 +209,51 @@ export function WorkspaceTree() {
                     {({ node, style, dragHandle }) => {
                         const item = node.data.data;
                         const isWorkspaceRoot = item.id === -12345;
+                        const isDropZone = item.id === -1; // Special drop zone node
 
                         // Render different node types based on item type
                         return (
-                            <div style={style}>
-                                {isWorkspaceRoot ? (
+                            <div style={{
+                                ...style,
+                                // Override height for drop zone to fill remaining space
+                                height: isDropZone ? `${dropZoneHeight}px` : style.height
+                            }}>
+                                {isDropZone ? (
+                                    // Drop zone at bottom - fills remaining space for easy root-level drops
+                                    <div 
+                                        className="drop-zone-root"
+                                        style={{ 
+                                            height: `${dropZoneHeight}px`,
+                                            width: "100%",
+                                            // border: "2px dashed red",
+                                            display: "flex",
+                                            alignItems: "flex-start",
+                                            paddingTop: "2px",
+                                            boxSizing: "border-box",
+                                        }} 
+                                        data-drop-zone="root"
+                                        onDragOver={(e) => {
+                                            e.preventDefault();
+                                            e.currentTarget.setAttribute("data-dragging-over", "true");
+                                        }}
+                                        onDragLeave={(e) => {
+                                            e.currentTarget.removeAttribute("data-dragging-over");
+                                        }}
+                                        onDrop={(e) => {
+                                            e.currentTarget.removeAttribute("data-dragging-over");
+                                        }}
+                                    >
+                                        {/* <div // blue line indicator when dragging over, nhưng bị thừa
+                                            className="drop-indicator"
+                                            style={{
+                                                width: "100%",
+                                                height: "2px",
+                                                backgroundColor: "transparent",
+                                                transition: "background-color 0.15s ease",
+                                            }}
+                                        /> */}
+                                    </div>
+                                ) : isWorkspaceRoot ? (
                                     <RootFolderNode node={node} style={{ height: "100%" }} treeData={treeData} />
                                 ) : isFolder(item) ? (
                                     <FolderNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />

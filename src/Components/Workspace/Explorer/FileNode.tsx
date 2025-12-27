@@ -101,7 +101,7 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
                 flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
                 transition-all duration-150 ease-in-out
                 ${node.state.isDragging ? "opacity-40" : "opacity-100"}
-                ${isSelected ? "bg-editor-hover text-white border-l-2 border-editor-active" : "bg-transparent hover:bg-editor-hover"}
+                ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover"}
             `}
         >
             {/* Spacer for alignment with folder chevrons */}

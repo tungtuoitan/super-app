@@ -46,18 +46,18 @@ export function CustomDragPreview({
 
     return (
         <div className="fixed pointer-events-none z-[10000] left-0 top-0 w-full h-full">
-            {/* Preview */}
+            {/* Preview - offset to the right to avoid blocking tree view */}
             <div
                 style={{
-                    transform: `translate(${offset.x}px, ${offset.y}px)`,
+                    transform: `translate(${offset.x + 50}px, ${offset.y}px)`,
                 }}
                 className={`
-                    absolute bg-editor-bg/95 border border-editor-border rounded-md p-2 px-3
+                    absolute bg-editor-bg/95 border border-editor-border rounded-md p-2 px-3 h-8
                     ${itemCount > 1 ? "min-w-[60px]" : "min-w-[200px]"}
                     max-w-[300px] shadow-lg
                 `}
             >
-                <div className={`flex items-center gap-2 ${itemCount > 1 ? "justify-center" : "justify-start"}`}>
+                <div className={`flex items-center mt-[-4px] gap-2 ${itemCount > 1 ? "justify-center" : "justify-start"}`}>
                     {/* Icon */}
                     <TagIcon className="w-4 h-4 text-primary" />
 
