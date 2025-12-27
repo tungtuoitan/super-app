@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
-import { useTreeOperation } from "@/hooks/workspace/useTreeOperation.helper";
+import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
 import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
 import { TreeFolder } from "@/hooks/workspace/tree.helper";
 import { FolderItem } from "@/types/workspace.types";
@@ -19,7 +19,7 @@ interface RootFolderNodeProps {
  */
 export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
     const { currentTree } = useWorkspaceStore();
-    const { addNewFolder } = useTreeOperation();
+    const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
     const { loadTree } = useWorkspaceOperation();
 

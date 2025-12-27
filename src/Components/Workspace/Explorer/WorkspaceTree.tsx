@@ -3,8 +3,8 @@ import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
-import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
-import { useTreeOperation } from "@/hooks/workspace/useTreeOperation.helper";
+import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
+import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { FolderNode } from "./FolderNode";
@@ -17,8 +17,8 @@ import { constants } from "@/utils/constants";
 
 export function WorkspaceTree() {
     const { searchText, isDragging, currentTree, _treeRef } = useWorkspaceStore();
-    const { handleSelectionChange, handleKeyDown } = useTreeSelection();
-    const { handleMove } = useTreeOperation();
+    const { handleSelectionChange, handleKeyDown } = useTreeSelectionHelper();
+    const { handleMove } = useTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const manager = useDragDropManager();

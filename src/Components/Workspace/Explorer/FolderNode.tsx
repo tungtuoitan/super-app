@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
-import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
+import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { getAllVisibleFolderIds, TreeFolder } from "@/hooks/workspace/tree.helper";
 import { FolderItem, isFolder } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
@@ -11,7 +11,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
     const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isFolderSelected } = useTreeSelection();
+    const { isFolderSelected } = useTreeSelectionHelper();
 
     const folderItem = node.data.data as FolderItem;
     const hasChildren = node.data.children && node.data.children.length > 0;

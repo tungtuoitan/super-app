@@ -10,7 +10,7 @@ import type { NodeApi } from "react-arborist";
 import type { TreeFolder } from "./tree.helper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 
-export const useTreeSelection = () => {
+export const useTreeSelectionHelper = () => {
     const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId } = useWorkspaceStore();
 
     /**

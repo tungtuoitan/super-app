@@ -33,8 +33,8 @@ export * from "./ws/useWsTab.helper";
 // Workspace helpers
 export * from "./workspace/useWorkspaceOperation.helper";
 export * from "./workspace/useFolderDialog.helper";
-export * from "./workspace/useTreeSelection.helper";
-export * from "./workspace/useTreeOperation.helper";
+export * from "./workspace/useTreeSelectionHelper";
+export * from "./workspace/useTreeHelper";
 export * from "./workspace/tree.helper";
 
 // Standard Registry helpers

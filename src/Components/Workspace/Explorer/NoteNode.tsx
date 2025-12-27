@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { FileText } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
-import { useTreeSelection } from "@/hooks/workspace/useTreeSelection.helper";
+import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { TreeFolder } from "@/hooks/workspace/tree.helper";
 import { NoteItem } from "@/types/workspace.types";
@@ -13,7 +13,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
     const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isFolderSelected } = useTreeSelection();
+    const { isFolderSelected } = useTreeSelectionHelper();
     const { openTab } = useEditorTabHelper();
 
     const noteItem = node.data.data as NoteItem;

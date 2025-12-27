@@ -15,7 +15,7 @@ import { Folder } from "@/types/index";
 import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 
-export const useTreeOperation = () => {
+export const useTreeHelper = () => {
     const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentTree, setCurrentTree } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
