@@ -17,6 +17,7 @@ export const NOTE_TYPES: readonly NoteType[] = ["meeting", "brainstorm", "resear
 export interface Note {
     id: number;
     name: string;
+    userId: number; // ID of the user who owns the note
     description?: string;
     hashtags: Folder[]; // Array of Folder objects (note's hashtags)
     tags?: Folder[]; // DEPRECATED: Use hashtags instead. Kept for backward compatibility
@@ -34,6 +35,7 @@ export interface Note {
 export interface NoteDTO {
     id: number; // Backend returns 'id' (from NoteResponse.Id)
     name: string;
+    userId: number; // ID of the user who owns the note
     description?: string;
     tags: Folder[]; // Backend still uses "tags" field name (array of Folder/Tag objects)
     type?: string; // String type to match backend response

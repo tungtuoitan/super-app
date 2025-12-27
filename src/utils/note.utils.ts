@@ -16,6 +16,7 @@ export const transformANote = (dto: NoteDTO): Note => {
     return {
         id: dto.id,
         name: dto.name,
+        userId: dto.userId,
         description: dto.description,
         hashtags: dto.tags || [], // Map 'tags' from backend to 'hashtags' in domain model
         tags: dto.tags, // Keep for backward compatibility

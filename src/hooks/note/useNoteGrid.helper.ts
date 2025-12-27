@@ -36,6 +36,7 @@ export const useNoteGridHelper = () => {
         const newNote: Note = {
             id: tempId,
             name: name,
+            userId: $user.userId || 0,
             description: "",
             hashtags: [],
             statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,

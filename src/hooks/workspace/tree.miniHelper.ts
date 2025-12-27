@@ -131,6 +131,44 @@ export function isDescendant(targetId: number, potentialParentId: number, treeDa
     return $checkSubtree(parentNode, targetId);
 }
 
+/**
+ * Filter selected folder IDs to only include top-level parents
+ * Removes any descendant folders to prevent duplicate processing
+ *
+ * Example:
+ *   Input: [5, 12, 13, 20] where 12→13 are descendants of 5
+ *   Output: [5, 20] (12 and 13 excluded as they're under 5)
+ *
+ * @param selectedIds - Array of selected folder IDs
+ * @param treeData - Tree data structure
+ * @returns Filtered array containing only top-level parent IDs
+ */
+export function filterTopLevelParents(
+    selectedIds: number[],
+    treeData: TreeFolder[]
+): number[] {
+    // If only one or zero selected, return as-is
+    if (selectedIds.length <= 1) {
+        return selectedIds;
+    }
+
+    const topLevel: number[] = [];
+
+    for (const id of selectedIds) {
+        // Check if this ID is a descendant of any other selected ID
+        const isDescendantOfOther = selectedIds
+            .filter(otherId => otherId !== id)
+            .some(parentId => isDescendant(id, parentId, treeData));
+
+        // If not a descendant of any other, it's a top-level parent
+        if (!isDescendantOfOther) {
+            topLevel.push(id);
+        }
+    }
+
+    return topLevel;
+}
+
 // ✅ Updated to support all item types (folder/note/file)
 export interface TreeFolder {
     id: string;

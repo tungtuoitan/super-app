@@ -55,6 +55,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
                 updatedAt: noteItem.updatedAt ? new Date(noteItem.updatedAt) : undefined,
                 createdBy: "You",
                 deletedAt: noteItem.deletedAt ? new Date(noteItem.deletedAt) : null,
+                userId: noteItem.userId,
             };
 
             openTab(note);

@@ -508,3 +508,44 @@ export interface WorkspaceWithTreeResponse {
     /** Hierarchical tree structure */
     items: WorkspaceItem[];
 }
+
+/**
+ * Batch upsert request for workspace items (follows UpsertNoteRequest pattern)
+ * Pattern: 100% follows backend UpsertWorkspaceItemRequest
+ */
+export interface UpsertWorkspaceItemRequest {
+    /** Workspace item ID (0 for create, >0 for update) */
+    id: number;
+
+    /** Workspace ID (set by controller from route) */
+    workspaceId?: number;
+
+    /** User ID (set by controller from JWT) */
+    userId?: number;
+
+    /** Parent folder ID (null for root level items) */
+    parentId?: number | null;
+
+    /** Item type: 2 = folder, 3 = note, 4 = file */
+    itemType: 2 | 3 | 4;
+
+    /** Reference to folder/note/file ID */
+    itemId: number;
+
+    /** Display name (optional) */
+    name?: string;
+
+    /** Copy metadata JSON (optional) */
+    copyInfo?: string | null;
+
+    /** User email (set by controller) */
+    createdBy?: string;
+
+    /**
+     * Deleted timestamp:
+     * - ISO string = soft delete
+     * - null = restore
+     * - undefined = no change
+     */
+    deletedAt?: string | null;
+}

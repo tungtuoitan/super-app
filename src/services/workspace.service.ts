@@ -4,9 +4,10 @@
  */
 
 import { config } from "@/config/app.config";
-import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse } from "@/types/workspace.types";
+import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import _ from "lodash";
+import {ResultOptions} from "../types";
 
 /**
  * Request to create or update a folder in workspace
@@ -305,6 +306,45 @@ const _addItemToWorkspace = async (
     }
 };
 
+/**
+ * Batch upsert workspace items (follows noteService._upsertNotes pattern)
+ * POST /api/workspace/{workspaceId}/items/batch
+ * Pattern: 100% follows noteService._upsertNotes
+ *
+ * @param token - Authentication token
+ * @param workspaceId - The workspace ID
+ * @param requests - Array of workspace item upsert requests
+ * @returns Batch operation result or rejects with response
+ */
+const _upsertWorkspaceItems = async (
+    token: string,
+    workspaceId: number,
+    requests: UpsertWorkspaceItemRequest[]
+): Promise<ResultOptions> => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(requests),
+    };
+
+    const res = await window.fetch(
+        `${config.api.baseURL}/api/workspace/${workspaceId}/items/batch`,
+        options
+    );
+
+    if (res.ok) {
+        const ret = await res.json();
+        return ret;
+    } else {
+        return Promise.reject(res);
+    }
+};
 
 export const workspaceService = {
     _getAllUserWorkspaces,
@@ -315,4 +355,5 @@ export const workspaceService = {
     _deleteWorkspaceItems,
     _upsertFolder,
     _addItemToWorkspace,
+    _upsertWorkspaceItems, // NEW
 }

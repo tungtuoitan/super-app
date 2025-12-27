@@ -33,7 +33,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ---------
         if (!noteData?.id) {
             console.error("❌ Cannot delete note: missing id");
-            alert("Cannot delete note: missing note information");
+            enqueueSnackbar("Cannot delete note: missing note information", { variant: "error" });
             return;
         }
 
@@ -78,7 +78,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ---------
         if (!fileData?.id) {
             console.error("❌ Cannot delete file: missing id");
-            alert("Cannot delete file: missing file information");
+            enqueueSnackbar("Cannot delete file: missing file information", { variant: "error" });
             return;
         }
 
@@ -107,7 +107,7 @@ export const useWorkspaceChildMenuHelper = () => {
                 window.location.reload();
             } else {
                 console.error("❌ Delete failed:", result.message);
-                alert(`Failed to delete file: ${result.message}`);
+                enqueueSnackbar(`Failed to delete file: ${result.message}`, { variant: "error" });
             }
         } catch (error) {
             // ---------

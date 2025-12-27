@@ -68,7 +68,7 @@ export function FolderDialog() {
                         // ✅ Use type guard and id field
                         isFolder(child) &&
                         // When editing, exclude the current folder being edited
-                        (mode === "create" || child.id !== editingFolder?.id),
+                        (mode === "create" || child.id !== editingFolder?.id)
                 );
             }
         }
@@ -79,7 +79,7 @@ export function FolderDialog() {
                 // ✅ Use type guard and id field
                 isFolder(item) &&
                 // When editing, exclude the current folder being edited
-                (mode === "create" || item.id !== editingFolder?.id),
+                (mode === "create" || item.id !== editingFolder?.id)
         );
     };
 
@@ -174,7 +174,7 @@ export function FolderDialog() {
                                         onClick={() => setColor(option.value)}
                                         className={cn(
                                             "flex items-center justify-center gap-2 p-3 rounded-md border-2 transition-all",
-                                            color === option.value ? "border-primary ring-2 ring-primary ring-offset-2" : "border-border hover:border-primary/50",
+                                            color === option.value ? "border-primary ring-2 ring-primary ring-offset-2" : "border-border hover:border-primary/50"
                                         )}
                                     >
                                         <div className="w-5 h-5 rounded border" style={{ backgroundColor: option.value }} />
