@@ -64,7 +64,8 @@ export function GenericFilterPopup() {
 
     // Check if UI filters differ from default filters
     const defaultFilters = filterViewKey ? (constants.filters.defaults[filterViewKey] as ViewFilter) : {};
-    const hasDiff = (() => {
+
+    const hasDiff = React.useMemo(() => {
         if (!filterViewKey) return false;
 
         // Compare each field in uiFilters with defaultFilters
@@ -73,7 +74,15 @@ export function GenericFilterPopup() {
             const defaultValue = (defaultFilters as any)[key];
             return uiValue !== defaultValue;
         });
-    })();
+    },[filterViewKey, uiFilters]);
+
+    useEffect(() => {
+        // When popup opens, load current user filters into UI
+        //* bắt buộc phải update ngay mỗi khi userFilters thay đổi, thì khi vào web ta mới thấy chấm trắng bên cạnh FilterIcon nếu có filter áp dụng
+        if (filterViewKey) {
+            setUIFilters($user.filters?.[filterViewKey] || {});
+        }
+    }, [filterViewKey, $user.filters]);
 
     // Handle popover open/close - reset filters when closing
     const togglePopup = (newOpen: boolean) => {

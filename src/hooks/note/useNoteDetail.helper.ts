@@ -13,36 +13,44 @@ import { transformANote } from "@/utils/note.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
+import { IAutoCompleteOptions } from "@/shared/components";
+import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
-    const { selectedNote } = useNoteGridStore();
     const { originalNoteRef } = useNoteDetailStore();
-    const { setSelectedNote } = useNoteGridStore();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceOperation();
     const { currentTree } = useWorkspaceStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { registries, registriesLoading } = useStandardRegistryStore();
+    const { getActiveTab } = useEditorTabHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
-        setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, hasUnsavedChanges: true } : t)));
-        
-        if (!selectedNote) return;
-        
+        // Get current note from active tab
+        const activeTab = getActiveTab();
+        if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) return;
+
+        const activeNote = activeTab.data as Note;
+
         // Extract value based on field type
         let _value;
-        if (field === 'statusCode') {
+        if (field === "statusCode") {
             // value is synthetic event with structure: { target: { value: { id, label, ... } } }
             _value = value?.target?.value?.id || null;
             // console.log("Changing statusCode to:", _value, "from event:", value);
         } else {
             _value = value;
         }
-        
-        const updated = { ...selectedNote, [field]: _value };
-        setSelectedNote(updated);
+
+        const updated = { ...activeNote, [field]: _value };
+
+        // Update tab data directly
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated, hasUnsavedChanges: true } : t))
+        );
     };
 
     /**
@@ -51,15 +59,19 @@ export const useNoteDetailHelper = () => {
      */
     const upsertNote = useCallback(
         async (tabId?: string): Promise<Note | null> => {
-            if (!selectedNote) {
-                console.warn("⚠️ No selected note to upsert");
+            // Get current note from active tab
+            const activeTab = getActiveTab();
+            if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
+                console.warn("⚠️ No note tab active to upsert");
                 return null;
             }
+
+            const activeNote = activeTab.data as Note;
 
             // ============================================================
             // Step 1.5: Validate name field
             // ============================================================
-            if (!selectedNote.name || selectedNote.name.trim() === "") {
+            if (!activeNote.name || activeNote.name.trim() === "") {
                 enqueueSnackbar("Note name is required", { variant: "error" });
                 return null;
             }
@@ -67,8 +79,8 @@ export const useNoteDetailHelper = () => {
             // ============================================================
             // Step 2: Determine operation mode (create/update/restore)
             // ============================================================
-            const isCreateMode = selectedNote.id <= 0;
-            const isRestoreMode = selectedNote.id > 0 && originalNoteRef.current?.deletedAt && !selectedNote.deletedAt;
+            const isCreateMode = activeNote.id <= 0;
+            const isRestoreMode = activeNote.id > 0 && originalNoteRef.current?.deletedAt && !activeNote.deletedAt;
             const token = $user.userToken;
 
             try {
@@ -76,16 +88,16 @@ export const useNoteDetailHelper = () => {
                 // Step 3: Prepare upsert data with proper tag handling
                 // ============================================================
                 const upsertData: UpsertNoteDTO = {
-                    id: isCreateMode ? 0 : selectedNote.id, // Always use 0 for create
-                    name: selectedNote.name,
-                    description: selectedNote.description,
+                    id: isCreateMode ? 0 : activeNote.id, // Always use 0 for create
+                    name: activeNote.name,
+                    description: activeNote.description,
                     // Send hashtags for workspace notes, or tags for regular notes
                     tags:
-                        selectedNote.hashtags && selectedNote.hashtags.length > 0
-                            ? selectedNote.hashtags.map((h: any) => (typeof h === "number" ? h : h?.id || h?.tagId)) // Extract IDs from hashtags
-                            : selectedNote.tags?.map((tag: any) => tag.tagId), // Otherwise use tags
-                    type: selectedNote.type,
-                    statusCode: selectedNote.statusCode, // Include status code
+                        activeNote.hashtags && activeNote.hashtags.length > 0
+                            ? activeNote.hashtags.map((h: any) => (typeof h === "number" ? h : h?.id || h?.tagId)) // Extract IDs from hashtags
+                            : activeNote.tags?.map((tag: any) => tag.tagId), // Otherwise use tags
+                    type: activeNote.type,
+                    statusCode: activeNote.statusCode, // Include status code
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
                 };
 
@@ -100,8 +112,7 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 6: Extract and validate saved note from response
                 // ============================================================
-                const batchResult = result.object as any;
-                const savedNote = batchResult?.notes?.[0];
+                const savedNote = result?.data?.[0];
 
                 if (!savedNote) {
                     throw new Error("Failed to save note: No data returned from server");
@@ -111,9 +122,9 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 8: If creating from workspace tree, add to workspace_items
                 // ============================================================
-                if (isCreateMode && selectedNote.hashtags && selectedNote.hashtags.length > 0) {
+                if (isCreateMode && activeNote.hashtags && activeNote.hashtags.length > 0) {
                     // Extract folder ID - hashtags can be number[] or Folder[]
-                    const firstHashtag = selectedNote.hashtags[0];
+                    const firstHashtag = activeNote.hashtags[0];
                     const parentFolderId = typeof firstHashtag === "number" ? firstHashtag : (firstHashtag as any)?.id || (firstHashtag as any)?.tagId;
 
                     const workspaceId = currentTree?.workspaceId;
@@ -135,27 +146,29 @@ export const useNoteDetailHelper = () => {
                 }
 
                 // ============================================================
-                // Step 10: Update selected note in store with server response
+                // Step 10: Update tab data with server response
                 // ============================================================
                 enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
-                setSelectedNote(transformedNote);
+                
                 if (tabId) {
                     setOpenTabs((prev) =>
                         prev.map((tab: BaseTab) => {
                             if (tab.id === tabId) {
                                 return {
                                     ...tab,
+                                    data: transformedNote,
                                     noteId: transformedNote.id,
                                     title: transformedNote.name || "Unsaved Note",
                                     note: transformedNote,
+                                    hasUnsavedChanges: false,
                                 };
                             }
                             return tab;
-                        }),
+                        })
                     );
                 }
 
-                originalNoteRef.current = { ...selectedNote };
+                originalNoteRef.current = { ...transformedNote };
                 await loadNotes();
 
                 if (isCreateMode && currentTree?.workspaceId) {
@@ -175,11 +188,51 @@ export const useNoteDetailHelper = () => {
                 return null;
             }
         },
-        [selectedNote, loadNotes, loadTree, currentTree],
+        [loadNotes, loadTree, currentTree, getActiveTab]
     );
+
+    const hashtagOptions = registries
+        .filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
+        .map((item) => ({
+            id: item.code,
+            label: item.code,
+            desc: item.description || item.code,
+            active: item.isActive,
+        }));
+
+    const handleTagsChange = (tagsString: string) => {
+        // Convert comma-separated string of IDs back to hashtags array
+        const tagIds = tagsString
+            ? tagsString
+                  .split(",")
+                  .map((id) => id.trim())
+                  .filter((id) => id)
+            : [];
+
+        // Convert hashtag IDs to Tag objects by finding them in the options
+        const tagObjects = tagIds
+            .map((tagId) => {
+                const foundOption = hashtagOptions.find((option: IAutoCompleteOptions) => option.id === tagId);
+                if (foundOption) {
+                    return {
+                        tagId: parseInt(foundOption.id as string),
+                        name: foundOption.label,
+                        description: foundOption.desc,
+                        isActive: foundOption.active,
+                        createdAt: new Date(),
+                        id: parseInt(foundOption.id as string), // Add alias for backward compatibility
+                    };
+                }
+                return null;
+            })
+            .filter((tag) => tag !== null);
+
+        handleNoteFieldChange("tags", tagObjects);
+    };
 
     return {
         upsertNote,
         handleNoteFieldChange,
+        handleTagsChange,
     };
 };

@@ -3,7 +3,7 @@ import { SnackbarProvider } from "notistack";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { AuthStoreProvider } from "@/store/auth/Auth.store";
+import { AuthStoreProvider, useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceProvider } from "@/store/workspace/Workspace.store";
 import { FolderDialogProvider } from "@/store/workspace/FolderDialog.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
@@ -21,7 +21,10 @@ import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";
 import { AuthGuard } from "@/Components/Auth/AuthGuard";
 import { OrchestratorContextMenuStoreProvider } from "@/store/contextMenu/ContextMenu.store";
-import {GridControlProvider} from "@/store/grid/useGridControl.store";
+import { GridControlProvider } from "@/store/grid/useGridControl.store";
+import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.store";
+
+
 
 /**
  * Main application layout component.
@@ -52,9 +55,10 @@ export function Main() {
                         <SnackbarProvider autoHideDuration={3000}>
                             <DndProvider backend={HTML5Backend}>
                                 <AuthStoreProvider>
-                                    <StandardRegistryProvider>
-                                        <WorkspaceProvider>
-                                            <FolderDialogProvider>
+                                    <NavigationHistoryProvider>
+                                        <StandardRegistryProvider>
+                                            <WorkspaceProvider>
+                                                <FolderDialogProvider>
                                                 <WsProvider>
                                                     <WsDetailProvider>
                                                         <NoteDetailProvider>
@@ -84,8 +88,9 @@ export function Main() {
                                             </FolderDialogProvider>
                                         </WorkspaceProvider>
                                     </StandardRegistryProvider>
-                                </AuthStoreProvider>
-                            </DndProvider>
+                                </NavigationHistoryProvider>
+                            </AuthStoreProvider>
+                        </DndProvider>
                         </SnackbarProvider>
                     </ActivityBarProvider>
                 </AuthCallbackProvider>

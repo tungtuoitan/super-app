@@ -72,7 +72,7 @@ export const useWsGridHelper = () => {
      * - type = 'soft-delete': Set deletedAt timestamp (soft delete)
      * - type = 'restore': Clear deletedAt (restore)
      */
-    const __toggleSelectedWorkspaces = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+    const __deleteRestore_Wses = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(rowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -241,9 +241,9 @@ export const useWsGridHelper = () => {
         showContextMenu(event, "workspace-grid", {
             selectedWorkspaces,
             selectedIds,
-            onSoftDelete: () => __toggleSelectedWorkspaces(selectedIds, "soft-delete"),
+            onSoftDelete: () => __deleteRestore_Wses(selectedIds, "soft-delete"),
             onHardDelete: () => __hardDeleteSelectedWorkspaces(selectedIds),
-            onRestore: () => __toggleSelectedWorkspaces(selectedIds, "restore"),
+            onRestore: () => __deleteRestore_Wses(selectedIds, "restore"),
             onAddWorkspace: __createNewWorkspace,
         });
     };

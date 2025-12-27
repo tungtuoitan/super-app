@@ -25,11 +25,10 @@ export function WsDetailContent() {
     const { wsNameRef, shouldFocusWsName, setShouldFocusWsName, nameError, setNameError } = useWsDetailStore();
     const { selectedWs } = useWsStore();
     const { handleWsFieldChange } = useWsDetailHelper();
-    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
-    const { closeTab, getTabById } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabHelper();
 
     // Get active tab
-    const activeTab = activeTabId ? getTabById(activeTabId) : null;
+    const activeTab = getActiveTab();
 
     const [wsKey, setWsKey] = React.useState(0);
     useEffect(() => {

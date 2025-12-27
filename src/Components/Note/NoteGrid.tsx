@@ -6,8 +6,12 @@ import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
-import { useAuthStore } from "@/store/index";
+import { useAuthStore, useEditorTabsStore } from "@/store/index";
 import { useNoteGridTableHelper } from "@/hooks/note/useNoteGrid.table.helper";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { Note } from "@/types/note.types";
+import { constants } from "@/utils/constants";
+import { BaseTab } from "@/types/editor/tab.types";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
@@ -22,6 +26,8 @@ export function NoteGrid() {
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { $user } = useAuthStore();
     const { table } = useNoteGridTableHelper();
+    const { filterViewKey } = useGridControlStore();
+    const { openTabs, activeTabId } = useEditorTabsStore();
 
     // Update container width on resize
     useEffect(() => {
@@ -38,10 +44,13 @@ export function NoteGrid() {
     }, []);
 
     // Load data when user is ready
+    //TODO: chỗ này bị rerender nhiều lần, do component cha rerender, cần tối ưu lại
     useEffect(() => {
-        if (!$user.userId || !$user.filters) return;
+        if (!$user.userId || !$user.filters || Object.keys($user.filters).length === 0 || !filterViewKey) {
+            return;
+        }
         loadNotes();
-    }, [$user.userId, $user.filters]);
+    }, [$user.userId, $user.filters, filterViewKey]);
 
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
@@ -87,21 +96,30 @@ export function NoteGrid() {
                         ))}
                     </thead>
                     <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr
-                                key={row.id}
-                                data-row
-                                className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${row.original.deletedAt ? "opacity-60" : ""}`}
-                                onClick={() => openTab(row.original)}
-                                onContextMenu={(e) => openNoteContextMenu(e, row)}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className="text-left">
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
+                        {table.getRowModel().rows.map((row) => {
+                            // Get active note from tab to determine selection
+                            const activeTab = openTabs.length > 0 && activeTabId ? openTabs.find((t: BaseTab) => t.id === activeTabId) : null;
+                            const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? activeTab.data as Note : null;
+                            const isSelected = activeNote?.id === row.original.id;
+                            
+                            return (
+                                <tr
+                                    key={row.id}
+                                    data-row
+                                    className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${row.original.deletedAt ? "opacity-60" : ""} ${
+                                        isSelected ? "bg-white/10" : ""
+                                    }`}
+                                    onClick={() => openTab(row.original)}
+                                    onContextMenu={(e) => openNoteContextMenu(e, row)}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td key={cell.id} className="text-left">
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </td>
+                                    ))}
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

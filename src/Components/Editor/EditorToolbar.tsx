@@ -16,29 +16,28 @@ import { constants } from "@/utils/constants";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
 
 export function EditorToolbar() {
-    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
-    const { closeTab, getTabById } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
 
     // Get active tab
-    const activeTab = activeTabId ? getTabById(activeTabId) : null;
+    const activeTab = getActiveTab();
 
     // Get toolbar actions for active tab
-    const { handleUpsert, handleCancel, _statusText, _itemId } = useEditorToolbarHelper();
+    const { commonUpsert, commonCancel, _deleteStatusText, _itemId } = useEditorToolbarHelper();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "s") {
                 e.preventDefault();
                 if (activeTab && activeTab.hasUnsavedChanges && !isSaving) {
-                    handleUpsert();
+                    commonUpsert();
                 }
             }
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [activeTab, isSaving, handleUpsert]);
+    }, [activeTab, isSaving, commonUpsert]);
 
     return (
         <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
@@ -46,7 +45,7 @@ export function EditorToolbar() {
             <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className={`text-xs ${_statusText === "InActive" ? "text-orange-500" : "text-muted-foreground"}`}>{_statusText}</span>
+                        {/* <span className={`text-xs ${_deleteStatusText === "InActive" ? "text-orange-500" : "text-muted-foreground"}`}>{_deleteStatusText}</span> */}
                         <span className={`text-xs ${_itemId && _itemId < 0 ? "text-purple-500" : "text-muted-foreground"}`}>ID: {_itemId || "0"}</span>
                     </div>
                 </div>
@@ -63,7 +62,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={handleUpsert}
+                                        onClick={commonUpsert}
                                         disabled={isSaving}
                                         className="h-8 w-8 text-green-500 hover:bg-green-500/10 disabled:text-white/20"
                                     >
@@ -88,7 +87,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={handleUpsert}
+                                        onClick={commonUpsert}
                                         disabled={!activeTab?.hasUnsavedChanges || isSaving}
                                         className={`h-8 w-8 ${activeTab?.hasUnsavedChanges ? "text-[#4FC3F7] hover:bg-[#4FC3F7]/10" : "text-white/40"} disabled:text-white/20`}
                                     >
@@ -110,7 +109,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={handleCancel}
+                                        onClick={commonCancel}
                                         disabled={!activeTab?.hasUnsavedChanges || !!activeTab?.data.deletedAt}
                                         className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                     >

@@ -27,8 +27,6 @@ export interface NoteGridContextData {
     setNoteGridRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
     noteGridColumnFilters: ColumnFiltersState;
     setNoteGridColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
-    selectedNote: Note | null; 
-    setSelectedNote: Dispatch<SetStateAction<Note | null>>;
     containerRef: RefObject<HTMLDivElement>;
     containerWidth: number;
     setContainerWidth: Dispatch<SetStateAction<number>>;
@@ -42,7 +40,6 @@ export const noteGridContextDefaultValue: NoteGridContextData = {
     noteGridPagination: { pageIndex: 0, pageSize: 50 },
     noteGridRowSelection: {},
     noteGridColumnFilters: [],
-    selectedNote: null,
     containerRef: { current: null },
     containerWidth: 0,
     setNotes: () => {},
@@ -52,7 +49,6 @@ export const noteGridContextDefaultValue: NoteGridContextData = {
     setNoteGridPagination: () => {},
     setNoteGridRowSelection: () => {},
     setNoteGridColumnFilters: () => {},
-    setSelectedNote: () => {},
     setContainerWidth: () => {},
 };
 
@@ -68,7 +64,6 @@ export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const [noteGridPagination, setNoteGridPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
     const [noteGridRowSelection, setNoteGridRowSelection] = useState<RowSelectionState>({});
     const [noteGridColumnFilters, setNoteGridColumnFilters] = useState<ColumnFiltersState>([]);
-    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState<number>(0);
 
@@ -89,8 +84,6 @@ export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 setNoteGridRowSelection,
                 noteGridColumnFilters,
                 setNoteGridColumnFilters,
-                selectedNote,
-                setSelectedNote,
                 containerRef,
                 containerWidth,
                 setContainerWidth,

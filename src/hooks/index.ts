@@ -18,6 +18,8 @@ export * from "./note/useNoteDetail.helper";
 export * from "./note/useNoteGrid.helper";
 export * from "./vsCode/useEditorTab.helper";
 export * from "./vsCode/useEditorToolbar.helper";
+export { useNavigationHistoryHelper, STORAGE_KEY_PREFIX, MAX_PAST_SIZE, getStorageKey } from "./vsCode/useNavigationHistory.helper";
+export type { HistoryStorage } from "./vsCode/useNavigationHistory.helper";
 export * from "./useActivityBar.helper";
 
 // Context menu helpers

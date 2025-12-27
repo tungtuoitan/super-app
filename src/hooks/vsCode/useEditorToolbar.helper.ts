@@ -22,24 +22,19 @@ import { useNoteGridHelper } from "../note/useNoteGrid.helper";
 import { useWsGridHelper } from "../ws/useWsGrid.helper";
 import { useWsDetailHelper } from "../ws/useWsDetail.helper";
 import { Ws, useWsStore } from "@/store/ws/useWs.store";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 
 export const useEditorToolbarHelper = () => {
-    const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { activeTabId } = useEditorTabsStore();
-    const { getTabById } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
 
     // Get active tab
-    const activeTab = activeTabId ? getTabById(activeTabId) : null;
+    const activeTab = getActiveTab();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
 
     // Note-specific
-    const { selectedNote, setSelectedNote } = useNoteGridStore();
     const { originalNoteRef } = useNoteDetailStore();
-
     const { upsertNote } = useNoteDetailHelper();
 
     // Workspace-specific
@@ -49,16 +44,17 @@ export const useEditorToolbarHelper = () => {
     const { loadWorkspaces } = useWsGridHelper();
 
     // Get status text based on tab type and deletion state
-    const _statusText = (() => {
+    const _deleteStatusText = (() => {
         if (!activeTab) return "No Tab";
 
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-            return selectedNote?.deletedAt ? "InActive" : "Active";
+            const noteData = activeTab.data as Note;
+            return noteData?.deletedAt ? "Deleted" : "Existing";
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
-            return selectedWs?.deletedAt ? "InActive" : "Active";
+            return selectedWs?.deletedAt ? "Deleted" : "Existing";
         }
 
-        return "Active";
+        return "Existing";
     })();
 
     // Get item ID based on tab type
@@ -66,7 +62,8 @@ export const useEditorToolbarHelper = () => {
         if (!activeTab) return null;
 
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-            return selectedNote?.id || null;
+            const noteData = activeTab.data as Note;
+            return noteData?.id || null;
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             return selectedWs?.id || null;
         }
@@ -75,7 +72,7 @@ export const useEditorToolbarHelper = () => {
     })();
 
     // Handle Upsert - orchestrator for all entity types (create/update/soft delete/restore)
-    const handleUpsert = useCallback(async () => {
+    const commonUpsert = useCallback(async () => {
         // =====================================
         // STEP 1: Validate Active Tab
         // =====================================
@@ -130,12 +127,15 @@ export const useEditorToolbarHelper = () => {
     }, [activeTab, upsertNote, upsertWorkspace, setIsSaving, enqueueSnackbar]);
 
     // Handle Cancel - routes to appropriate reset logic
-    const handleCancel = useCallback(() => {
+    const commonCancel = useCallback(() => {
         if (!activeTab) return;
 
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
             if (originalNoteRef.current) {
-                setSelectedNote({ ...originalNoteRef.current });
+                // Reset tab data to original
+                setOpenTabs((prev) =>
+                    prev.map((tab) => (tab.id === activeTab.id ? { ...tab, data: originalNoteRef.current as Note, hasUnsavedChanges: false } : tab))
+                );
             }
             enqueueSnackbar("Changes discarded", { variant: "info" });
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
@@ -144,12 +144,12 @@ export const useEditorToolbarHelper = () => {
             }
             enqueueSnackbar("Changes discarded", { variant: "info" });
         }
-    }, [activeTab, originalNoteRef, originalWsRef, setSelectedNote, setSelectedWs, enqueueSnackbar]);
+    }, [activeTab, originalNoteRef, originalWsRef, setOpenTabs, setSelectedWs, enqueueSnackbar]);
 
     return {
-        handleUpsert,
-        handleCancel,
-        _statusText,
+        commonUpsert,
+        commonCancel,
+        _deleteStatusText,
         _itemId,
     };
 };

@@ -7,5 +7,6 @@ export * from "./validators";
 export * from "./locale";
 export * from "./constants";
 export * from "./note.utils";
+export * from "./ws.utils";
 export * from "./temp-id.utils";
 export * from "./api-error.utils";

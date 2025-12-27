@@ -119,9 +119,9 @@ export const noteService = new NoteService();
 const NoteUIContext = createContext<NoteUIValue | null>(null);
 
 export function NoteDetailProvider({ children }) {
-    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+    const [activeNote, setSelectedNote] = useState<Note | null>(null);
     return (
-        <NoteUIContext.Provider value={{ selectedNote, setSelectedNote }}>
+        <NoteUIContext.Provider value={{ activeNote, setSelectedNote }}>
             {children}
         </NoteUIContext.Provider>
     );

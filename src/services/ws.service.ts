@@ -38,6 +38,7 @@ const _getWs = async (
         deletedAt?: string; // "null" or "notNull"
         createdAtFrom?: string; // ISO date string
         createdAtTo?: string; // ISO date string
+        ids?: string; // Comma-separated IDs: "1,2,3"
     },
 ) => {
     const headers = new Headers();
@@ -66,6 +67,9 @@ const _getWs = async (
     }
     if (params?.createdAtTo) {
         queryParams.append("createdAtTo", params.createdAtTo);
+    }
+    if (params?.ids) {
+        queryParams.append("ids", params.ids);
     }
 
     const queryString = queryParams.toString();

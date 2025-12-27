@@ -6,17 +6,19 @@ import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsStore, Ws } from "@/store/ws/useWs.store";
+import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { originalNoteRef } = useNoteDetailStore();
-    const { setNotes, selectedNote, setSelectedNote } = useNoteGridStore();
+    const { setNotes } = useNoteGridStore();
     const { originalWsRef } = useWsDetailStore();
     const { setSelectedWs } = useWsStore();
+    const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
 
     /**
-     * Update active tab ID and sync selectedNote
-     * Mirrors the useEffect pattern: sync selectedNote when active tab changes
+     * Update active tab ID and sync original refs for change tracking
+     * Now without activeNote - data comes directly from tabs
      */
     const updateActiveTabIdAndSelectedNote = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
         const tabsToSearch = tabs || openTabs;
@@ -34,8 +36,6 @@ export const useEditorTabHelper = () => {
                     originalNoteRef.current = { ...noteData };
                 }
 
-                setSelectedNote(noteData);
-
                 // Clear workspace state when switching to note
                 originalWsRef.current = null;
                 setSelectedWs(null);
@@ -51,16 +51,13 @@ export const useEditorTabHelper = () => {
 
                 // Clear note state when switching to workspace
                 originalNoteRef.current = null;
-                setSelectedNote(null);
             } else {
                 originalNoteRef.current = null;
-                setSelectedNote(null);
                 originalWsRef.current = null;
                 setSelectedWs(null);
             }
         } else {
             originalNoteRef.current = null;
-            setSelectedNote(null);
             originalWsRef.current = null;
             setSelectedWs(null);
         }
@@ -190,14 +187,112 @@ export const useEditorTabHelper = () => {
         }
     };
 
-    const getTabById = (tabId: string) => {
-        return openTabs.find((tab: BaseTab) => tab.id === tabId);
+
+    // ================================================================
+    // CONVENIENCE METHODS - Specific tab type openers
+    // ================================================================
+    // const openNoteTab = (note: Note) => {
+    //     openTab(note, constants.vscode.tab.tabTypes.note);
+    // };
+
+    // const openWorkspaceTab = (ws: Ws) => {
+    //     openTab(ws, constants.vscode.tab.tabTypes.workspace);
+    // };
+
+    /**
+     * Get the currently active tab
+     * @returns The active tab or null if no tab is active
+     */
+    const getActiveTab = (): BaseTab | null => {
+        if (!activeTabId) return null;
+        return openTabs.find((tab: BaseTab) => tab.id === activeTabId) || null;
+    };
+
+    /**
+     * Check if two history entries are duplicates (adjacent items that are "same")
+     */
+    const $areEntriesDuplicate = (entry1: HistoryEntry, entry2: HistoryEntry): boolean => {
+        // Same tab and same item
+        return entry1.tabId === entry2.tabId && entry1.itemId === entry2.itemId && entry1.type === entry2.type;
+    };
+
+    /**
+     * Remove duplicate adjacent entries from history array
+     */
+    const removeDuplicateAdjacentEntries = (entries: HistoryEntry[]): HistoryEntry[] => {
+        if (entries.length === 0) return entries;
+
+        const result: HistoryEntry[] = [entries[0]];
+
+        for (let i = 1; i < entries.length; i++) {
+            const prev = result[result.length - 1];
+            const current = entries[i];
+
+            // Only add if not duplicate of previous
+            if (!$areEntriesDuplicate(prev, current)) {
+                result.push(current);
+            }
+        }
+
+        return result;
+    };
+
+    /**
+     * Process tabs and navigation history after deleting notes
+     * - Removes tabs with deleted noteIds
+     * - Cleans navigation history (Past/Future)
+     * - Removes duplicate adjacent entries
+     * - Updates Present and activeTabId
+     *
+     * @param deletedNoteIds - Array of note IDs that were deleted
+     */
+    const processTabAfterDelete = (deletedIds: number[], type: string) => {
+        // 1. Remove tabs with deleted noteIds
+        const newTabs = openTabs.filter((tab) => !(tab.type === type && deletedIds.includes(tab.data.id)));
+        setOpenTabs(newTabs);
+
+        // 2. Clean navigation history - remove entries with deleted noteIds
+        let cleanedPast = past.filter(entry => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
+        let cleanedFuture = future.filter(entry => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
+
+        // 3. Remove duplicate adjacent entries and filter out invalid itemIds (id <= 0)
+        cleanedPast = removeDuplicateAdjacentEntries(cleanedPast).filter(entry => {
+            const itemIdNum = parseInt(entry.itemId);
+            return !isNaN(itemIdNum) && itemIdNum > 0;
+        });
+        cleanedFuture = removeDuplicateAdjacentEntries(cleanedFuture).filter(entry => {
+            const itemIdNum = parseInt(entry.itemId);
+            return !isNaN(itemIdNum) && itemIdNum > 0;
+        });
+
+        setPast(cleanedPast);
+        setFuture(cleanedFuture);
+
+        // 4. If present was deleted, set present to last item of past
+        if (present && present.type === type && deletedIds.includes(parseInt(present.itemId))) {
+            if (cleanedPast.length > 0) {
+                // Set present to last item of past
+                const newPresent = cleanedPast[cleanedPast.length - 1];
+                setPresent(newPresent);
+                setPast(cleanedPast.slice(0, -1)); // Remove last item from past
+
+                // Set activeTabId to the new present's tab
+                setActiveTabId(newPresent.tabId);
+            } else {
+                // No past entries, clear present and active tab
+                setPresent(null);
+                setActiveTabId(null);
+            }
+        }
     };
 
     return {
         openTab,
+        // openNoteTab,
+        // openWorkspaceTab,
         closeTab,
-        getTabById,
+        getActiveTab,
         updateActiveTabIdAndSelectedNote,
+        processTabAfterDelete,
     };
 };

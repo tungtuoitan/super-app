@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { NoteEditorPanel, ConfirmCloseDialog, EditorToolbar } from "@/Components/Editor";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -8,6 +8,10 @@ import { WsEditorPanel } from "@/Components/Workspace";
 import { useEditorTabsStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
+import { OpenTabsSync } from "../../HeadlessComponents/OpenTabsSync";
+import {Track} from "@radix-ui/react-slider";
+import {TrackTabNavigation} from "HeadlessComponents/TrackTabNavigation";
+import {NavigationHistorySync} from "HeadlessComponents/NavigationHistorySync";
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -17,11 +21,11 @@ import { constants } from "@/utils/constants";
  * - Welcome/empty state when no note is selected
  */
 export function VSEditorArea() {
-    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId } = useEditorTabsStore();
-    const { closeTab, getTabById, updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
+    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, isLoadingTabs, editorAreaRef } = useEditorTabsStore();
+    const { closeTab, getActiveTab, updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
 
     // Get active tab
-    const activeTab = activeTabId ? getTabById(activeTabId) : null;
+    const activeTab = getActiveTab()
 
     const handleCloseTab = (event: React.MouseEvent, tabId: string) => {
         event.stopPropagation();
@@ -35,15 +39,22 @@ export function VSEditorArea() {
         }
     };
 
-    const handleCancelClose = () => {
-        setConfirmCloseTabId(null);
-    };
-
     return (
         <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
+            {/* LocalStorage sync components */}
+            <NavigationHistorySync />
+            <TrackTabNavigation />
+            <OpenTabsSync /> 
+
             {/* Tab bar */}
             <div className="min-h-[35px] flex items-start border-b border-editor-border bg-editor-sidebar">
-                {openTabs.length > 0 ? (
+                {isLoadingTabs ? (
+                    <div className="px-4 w-full h-[35px] flex items-center gap-2">
+                        <div className="h-4 w-24 bg-muted/20 animate-pulse rounded"></div>
+                        <div className="h-4 w-32 bg-muted/20 animate-pulse rounded"></div>
+                        <div className="h-4 w-20 bg-muted/20 animate-pulse rounded"></div>
+                    </div>
+                ) : openTabs.length > 0 ? (
                     <div className="flex-1 flex flex-wrap">
                         {openTabs.map((tab: BaseTab) => {
                             const isDeleted = !!tab.data.deletedAt;
@@ -86,7 +97,7 @@ export function VSEditorArea() {
             {activeTab && <EditorToolbar />}
 
             {/* Main content area */}
-            <div className="flex-1 overflow-hidden flex">
+            <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">
                 {activeTab ? (
                     // Render appropriate editor based on tab type
                     <>
@@ -107,9 +118,9 @@ export function VSEditorArea() {
             {/* Confirm close dialog */}
             <ConfirmCloseDialog
                 open={!!confirmCloseTabId}
-                tabTitle={confirmCloseTabId ? getTabById(confirmCloseTabId)?.title || "" : ""}
+                tabTitle={confirmCloseTabId ? activeTab?.title || "" : ""}
                 onConfirm={handleConfirmClose}
-                onCancel={handleCancelClose}
+                onCancel={() => setConfirmCloseTabId(null)}
             />
         </div>
     );

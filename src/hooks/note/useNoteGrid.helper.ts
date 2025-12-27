@@ -9,9 +9,9 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
+import { useEditorTabsStore, useNavigationHistoryStore, useStandardRegistryStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
-import {filterUtils} from "@/utils/filter.utils";
+import { filterUtils } from "@/utils/filter.utils";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
@@ -19,7 +19,7 @@ export const useNoteGridHelper = () => {
     const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection } = useNoteGridStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
-    const { openTab } = useEditorTabHelper();
+    const { openTab, processTabAfterDelete } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setShouldFocusNoteName } = useNoteDetailStore();
@@ -62,7 +62,7 @@ export const useNoteGridHelper = () => {
      * - type = 'soft-delete': Set deletedAt timestamp (soft delete)
      * - type = 'restore': Clear deletedAt (restore)
      */
-    const __toggleSelectedNotes = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+    const __deleteRestore_SelectedNotes = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(noteGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -83,11 +83,10 @@ export const useNoteGridHelper = () => {
                 });
             }
 
+            // Determine deletedAt value based on action
+            const deletedAt = type === "soft-delete" ? new Date().toISOString() : null;
             // Handle persisted notes - call API
             if (persistedNoteIds.length > 0) {
-                // Determine deletedAt value based on action
-                const deletedAt = type === "soft-delete" ? new Date().toISOString() : null;
-
                 // Build batch requests
                 const batchRequests = persistedNoteIds.map((id) => {
                     const note = notes.find((n) => n.id === id);
@@ -102,6 +101,7 @@ export const useNoteGridHelper = () => {
                         tags: note.hashtags?.map((h) => h.id),
                         type: note.type,
                         deletedAt: deletedAt, // Set or clear soft delete timestamp
+                        statusCode: note.statusCode,
                     };
                 });
 
@@ -114,21 +114,10 @@ export const useNoteGridHelper = () => {
 
                 enqueueSnackbar(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedNoteIds.length} note(s)`, { variant: "success" });
 
-                // Update opened tabs
-                const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
-                        const noteData = tab.data as Note;
-                        return {
-                            ...tab,
-                            data: {
-                                ...noteData,
-                                deletedAt: type === "soft-delete" ? new Date() : null,
-                            },
-                        };
-                    }
-                    return tab;
-                });
-                setOpenTabs(updatedTabs);
+                if(type === "soft-delete") {
+                    // Process tabs and navigation history
+                    processTabAfterDelete(persistedNoteIds, "note");
+                }
 
                 // Reload notes from API
                 await loadNotes();
@@ -175,15 +164,7 @@ export const useNoteGridHelper = () => {
                     variant: "success",
                 });
 
-                // Mark opened tabs as hard deleted
-                const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === constants.vscode.tab.tabTypes.note && persistedNoteIds.includes(tab.data.id)) {
-                        const noteData = tab.data as Note;
-                        return { ...tab, data: { ...noteData, deletedAt: new Date(), isHardDeleted: true } };
-                    }
-                    return tab;
-                });
-                setOpenTabs(updatedTabs);
+                processTabAfterDelete(persistedNoteIds, "note");
 
                 // Reload notes from API
                 await loadNotes();
@@ -232,9 +213,9 @@ export const useNoteGridHelper = () => {
         showContextMenu(event, "note-grid", {
             selectedNotes,
             selectedIds,
-            onSoftDelete: () => __toggleSelectedNotes(selectedIds, "soft-delete"),
+            onSoftDelete: () => __deleteRestore_SelectedNotes(selectedIds, "soft-delete"),
             onHardDelete: () => __hardDeleteSelectedNotes(selectedIds),
-            onRestore: () => __toggleSelectedNotes(selectedIds, "restore"),
+            onRestore: () => __deleteRestore_SelectedNotes(selectedIds, "restore"),
             onAddNote: __createNewNote,
         });
     };

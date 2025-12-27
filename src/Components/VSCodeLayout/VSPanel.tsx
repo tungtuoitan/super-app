@@ -1,9 +1,11 @@
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { X, FileText, Settings } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
 import { useActivityBarStore } from "@/store/index";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { constants } from "@/utils/constants";
+import { Note } from "@/types/note.types";
 
 interface VSPanelProps {
     onClose: () => void;
@@ -82,9 +84,11 @@ export function VSPanel({ onClose }: VSPanelProps) {
  * Note Detail Tab - Display selected note details
  */
 function NoteDetailTab() {
-    const { selectedNote } = useNoteGridStore();
+    const { getActiveTab } = useEditorTabHelper();
+    const activeTab = getActiveTab();
+    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 
-    if (!selectedNote) {
+    if (!activeNote) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
                 <p className="text-sm">Select a note to view details</p>
@@ -95,20 +99,20 @@ function NoteDetailTab() {
     return (
         <div>
             {/* <h3 className="text-base font-semibold mb-2 text-editor-fg">
-        {selectedNote.name}
+        {activeNote.name}
       </h3>
 
       <p className="text-sm text-editor-fg/80 mb-2 leading-relaxed">
-        {selectedNote.description || 'No description'}
+        {activeNote.description || 'No description'}
       </p>
 
       <div className="mt-3">
         <span className="block text-xs text-muted-foreground mb-0.5">
-          Created: {new Date(selectedNote.createdAt).toLocaleString()}
+          Created: {new Date(activeNote.createdAt).toLocaleString()}
         </span>
-        {selectedNote.updatedAt && (
+        {activeNote.updatedAt && (
           <span className="block text-xs text-muted-foreground">
-            Updated: {new Date(selectedNote.updatedAt).toLocaleString()}
+            Updated: {new Date(activeNote.updatedAt).toLocaleString()}
           </span>
         )}
       </div> */}
@@ -120,9 +124,11 @@ function NoteDetailTab() {
  * Properties Tab - Display note properties
  */
 function PropertiesTab() {
-    const { selectedNote } = useNoteGridStore();
+    const { getActiveTab } = useEditorTabHelper();
+    const activeTab = getActiveTab();
+    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 
-    if (!selectedNote) {
+    if (!activeNote) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
                 <p className="text-sm">Select a note to view properties</p>
@@ -135,12 +141,12 @@ function PropertiesTab() {
             <p className="text-sm font-semibold mb-2 text-editor-fg">Note Properties</p>
 
             <div className="flex flex-col gap-1">
-                <PropertyRow label="ID" value={selectedNote.id.toString()} />
-                <PropertyRow label="Name" value={selectedNote.name} />
-                <PropertyRow label="Type" value={selectedNote.type || "N/A"} />
-                <PropertyRow label="Deleted" value={selectedNote.deletedAt ? "Yes" : "No"} />
-                <PropertyRow label="Created By" value={selectedNote.createdBy || "Unknown"} />
-                <PropertyRow label="HashTags" value={selectedNote.tags?.join(", ") || "No hashtags"} />
+                <PropertyRow label="ID" value={activeNote.id.toString()} />
+                <PropertyRow label="Name" value={activeNote.name} />
+                <PropertyRow label="Type" value={activeNote.type || "N/A"} />
+                <PropertyRow label="Deleted" value={activeNote.deletedAt ? "Yes" : "No"} />
+                <PropertyRow label="Created By" value={activeNote.createdBy || "Unknown"} />
+                <PropertyRow label="HashTags" value={activeNote.tags?.join(", ") || "No hashtags"} />
             </div>
         </div>
     );

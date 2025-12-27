@@ -6,6 +6,7 @@ import { VSCodeLayout } from "../VSCodeLayout";
 import { AuthCallback } from "@/pages/AuthCallback";
 import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { NavigationKeyboardShortcuts } from "@/Components/VSCodeLayout/NavigationKeyboardShortcuts";
 
 /**
  * Main navigation component.
@@ -39,6 +40,9 @@ export default function MainNav() {
             className="overflow-hidden h-full w-full m-0 p-0"
             onContextMenu={handleGlobalRightClick} // Global right-click handler
         >
+            {/* Global navigation keyboard shortcuts (Alt + Arrow) */}
+            <NavigationKeyboardShortcuts />
+            
             <div
                 className="outline-none"
                 tabIndex={0} // Enable keyboard navigation

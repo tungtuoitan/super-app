@@ -28,3 +28,6 @@ export type { AuthCallbackContextData } from "./authCallback/AuthCallback.store"
 
 export { StandardRegistryStore, StandardRegistryProvider, useStandardRegistryStore } from "./standardRegistry/StandardRegistry.store";
 export type { StandardRegistryContextData } from "./standardRegistry/StandardRegistry.store";
+
+export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "./editor/NavigationHistory.store";
+export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "./editor/NavigationHistory.store";
