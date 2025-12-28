@@ -91,39 +91,61 @@ export function WorkspaceFolderNodeMenu() {
               }
             : undefined;
 
+        // Create temporary note (same as useNoteGrid.helper.ts)
         const newNote: Note = {
             id: tempId,
             name: name,
+            userId: $user.userId || 0,
             description: "",
             hashtags: [],
             statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            tags: [],
+            type: "idea",
             createdAt: new Date(),
-            createdBy: $user.userName,
-            userId: $user.userId ?? 0,
+            updatedAt: new Date(),
+            createdBy: $user.userName || "Unknown",
             deletedAt: null,
         };
 
-        // Create NoteItem for workspace tree
-        const newNoteItem: NoteItem = {
-            id: tempId,
-            type: constants.workspace.itemTypes.note,
-            userId: $user.userId ?? 0,
-            name: name,
+        // Create WorkspaceNoteItem for flat array (WorkspaceItemV2 structure)
+        const newWorkspaceItem: any = {
+            // WorkspaceItem properties (from workspace_items table)
+            id: tempId, // Temporary negative ID (same as note.id)
+            workspaceId: currentWorkspace?.id || 1,
             parentId: parentEntityId || null,
+            entityType: 3, // 3 = note
+            entityId: tempId, // Same as note.id
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            deletedAt: null,
+            copyInfo: null,
+            level: (contextData?.level || 0) + 1,
+            position: 0,
             accessType: "owner",
             isOriginal: true,
-            level: (contextData?.level || 0) + 1,
-            depth: (contextData?.depth || 0) + 1,
-            position: 0,
-            sortOrder: 0,
             isExpanded: false,
             isSelected: false,
-            createdAt: new Date().toISOString(),
-            children: [],
+            
+            // Note entity data (from notes table)
+            data: {
+                id: tempId,
+                userId: $user.userId ?? 0,
+                name: name,
+                description: "",
+                statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                deletedAt: null,
+                copyInfo: null,
+            },
         };
 
-        // Add note to currentWorkspace
+        // Add note to currentWorkspace.flatData
         if (currentWorkspace && contextData) {
+            // Add to flat array at the beginning
+            const newFlatData = [newWorkspaceItem, ...currentWorkspace.flatData];
+            
+            // Also add to tree structure for proper rendering
             const $addNoteToTree = (items: any[]): any[] => {
                 return items.map((item) => {
                     // Check both id and entityId for compatibility
@@ -131,7 +153,7 @@ export function WorkspaceFolderNodeMenu() {
                         // Found parent folder, add note to its children
                         return {
                             ...item,
-                            children: [newNoteItem, ...(item.children || [])],
+                            children: [newWorkspaceItem, ...(item.children || [])],
                         };
                     } else if (item.children && item.children.length > 0) {
                         // Recursively search in children
@@ -143,20 +165,22 @@ export function WorkspaceFolderNodeMenu() {
                     return item;
                 });
             };
-            const newTree = {
+
+            const newWorkspace = {
                 ...currentWorkspace,
-                flatData: $addNoteToTree(currentWorkspace.flatData),
+                flatData: newFlatData, // Use the flat array with new item prepended
                 noteCount: currentWorkspace.noteCount + 1,
             };
-            console.log("New Tree after adding note:", newTree);
+            console.log("✅ New note added to workspace:", { tempId, name, parentEntityId });
 
-            setCurrentWorkspace(newTree);
+            setCurrentWorkspace(newWorkspace);
+
         }
 
-        // Open tab first
+        // Open tab for editing
         openTab(newNote);
 
-        // Focus on note name field
+        // Focus on note name field after tab opens
         setShouldFocusNoteName(true);
     };
 
