@@ -21,6 +21,7 @@ import { isFolder, WorkspaceItemAction } from "@/types/workspace.types";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
+import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -409,6 +410,8 @@ export const useWorkspaceFolderMenuHelper = () => {
         }
     };
 
+    
+
     /**
      * Wrapper fo   r delete with confirmation popover
      */
@@ -436,31 +439,17 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         // STEP 3: Build confirmation message based on delete type and selection
         // ----------------
-        let message: string;
-
-        if (isHardDelete) {
-            // Hard delete warning messages
-            if (isMultipleSelected) {
-                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${selectedCount} selected folders and ALL their contents (notes, files, subfolders).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
-            } else {
-                const childCount = $countChildren(contextData);
-                message =
-                    childCount > 0
-                        ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ${childCount} child folder(s) with ALL their contents.\n\n❌ This action CANNOT be undone.\n❌ All notes, files, and subfolders will be LOST FOREVER.`
-                        : `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ALL its contents.\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
-            }
-        } else {
-            // Soft delete messages
-            if (isMultipleSelected) {
-                message = `Are you sure you want to delete ${selectedCount} selected folders?\n\nThis action cannot be undone.`;
-            } else {
-                const childCount = $countChildren(contextData);
-                message =
-                    childCount > 0
-                        ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child folder(s).`
-                        : `Are you sure you want to delete "${contextData.name}"?`;
-            }
-        }
+        const childCount = isMultipleSelected ? 0 : $countChildren(contextData);
+        const entityName = isMultipleSelected ? undefined : contextData.name;
+        
+        const message = getConfirmMessage({
+            type: isHardDelete ? "hard-delete" : "soft-delete",
+            entityType: "folder",
+            count: selectedCount,
+            isMultiple: isMultipleSelected,
+            entityName,
+            childCount
+        });
 
         // ----------------
         // STEP 4: Show confirmation popover and handle user response

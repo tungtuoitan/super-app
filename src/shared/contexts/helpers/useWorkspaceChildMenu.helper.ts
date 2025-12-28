@@ -13,6 +13,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import {workspaceService} from "@/services/workspace.service";
+import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();
@@ -144,26 +145,17 @@ export const useWorkspaceChildMenuHelper = () => {
         // ---------
         // STEP 3: Prepare confirmation message
         // ---------
-        let message: string;
-        let itemName = contextData.name || "this item";
-
-        if (isNote) {
-            // Note deletion messages
-            if (isHardDelete) {
-                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${itemName}".\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`;
-            } else {
-                message = `Are you sure you want to delete "${itemName}"?\n\nThis action cannot be undone.`;
-            }
-        } else if (isFile) {
-            // File deletion messages
-            if (isHardDelete) {
-                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${itemName}".\n\n❌ This action CANNOT be undone.\n❌ The file will be LOST FOREVER.`;
-            } else {
-                message = `Are you sure you want to delete "${itemName}"?\n\nThis action cannot be undone.`;
-            }
-        } else {
+        if (!isNote && !isFile) {
             return;
         }
+
+        const message = getConfirmMessage({
+            type: isHardDelete ? "hard-delete" : "soft-delete",
+            entityType: isFile ? "file" : "note",
+            count: 1,
+            isMultiple: false,
+            entityName: contextData.name || "this item"
+        });
 
         // ---------
         // STEP 4: Show confirmation dialog

@@ -23,9 +23,6 @@ export function WorkspaceTree() {
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const manager = useDragDropManager();
     const [containerHeight, setContainerHeight] = React.useState(800);
-    console.log("currentTree", currentTree);
-
-
 
     // Track container height to make Tree component responsive
     useEffect(() => {
@@ -33,7 +30,7 @@ export function WorkspaceTree() {
             if (treeContainerRef.current) {
                 const height = treeContainerRef.current.clientHeight;
                 // Ensure height is always a valid number
-                if (height && typeof height === 'number' && height > 0) {
+                if (height && typeof height === "number" && height > 0) {
                     setContainerHeight(height);
                     console.log("📏 Container height updated:", height);
                 }
@@ -78,7 +75,7 @@ export function WorkspaceTree() {
             `;
             document.head.appendChild(style);
         }
-        
+
         return () => {
             const style = document.getElementById(styleId);
             if (style) {
@@ -92,7 +89,7 @@ export function WorkspaceTree() {
     console.log("🔍 Current Tree:", currentTree);
     const treeData = useMemo(() => {
         const baseTree = treeMiniHelper.transformToTreeData(currentTree, searchText);
-        
+
         // Add invisible drop zone at the end to catch drops to root level
         if (baseTree.length > 0 && currentTree?.id) {
             const dropZoneNode: TreeFolder = {
@@ -133,7 +130,7 @@ export function WorkspaceTree() {
             };
             return [...baseTree, dropZoneNode];
         }
-        
+
         return baseTree;
     }, [currentTree, searchText]);
     console.log("🌲 Tree data:", treeData);
@@ -141,7 +138,7 @@ export function WorkspaceTree() {
     // Calculate drop zone height to fill remaining space
     const dropZoneHeight = useMemo(() => {
         const rowHeight = 40;
-        const actualItemsCount = treeData.filter(item => (item.data as any).entityId !== -1).length;
+        const actualItemsCount = treeData.filter((item) => (item.data as any).entityId !== -1).length;
         const usedHeight = actualItemsCount * rowHeight;
         const remaining = containerHeight - usedHeight;
         return Math.max(remaining, 100); // Minimum 100px
@@ -169,8 +166,8 @@ export function WorkspaceTree() {
     const handleContainerContextMenu = (e: React.MouseEvent) => {
         // Check if click is on an actual tree node
         const target = e.target as HTMLElement;
-        const isTreeNode = target.closest('[role="treeitem"]') || target.closest('.tree-node');
-        
+        const isTreeNode = target.closest('[role="treeitem"]') || target.closest(".tree-node");
+
         // If clicked on a tree node, let the node handle it
         if (isTreeNode) {
             return;
@@ -183,9 +180,9 @@ export function WorkspaceTree() {
         // Get root workspace data
         if (treeData && treeData.length > 0) {
             const rootData = treeData[0].data; // Root is first item in treeData
-            showContextMenu(e, constants.workspace.itemTypes.folder, { 
-                ...rootData, 
-                parentId: null
+            showContextMenu(e, constants.workspace.itemTypes.folder, {
+                ...rootData,
+                parentId: null,
             });
         }
     };
@@ -243,11 +240,13 @@ export function WorkspaceTree() {
 
                         // Render different node types based on item type
                         return (
-                            <div style={{
-                                ...style,
-                                // Override height for drop zone to fill remaining space
-                                height: isDropZone ? `${dropZoneHeight}px` : style.height
-                            }}>
+                            <div
+                                style={{
+                                    ...style,
+                                    // Override height for drop zone to fill remaining space
+                                    height: isDropZone ? `${dropZoneHeight}px` : style.height,
+                                }}
+                            >
                                 {isDropZone ? (
                                     // Drop zone at bottom - fills remaining space for easy root-level drops
                                     <div
@@ -271,8 +270,7 @@ export function WorkspaceTree() {
                                         onDrop={(e) => {
                                             e.currentTarget.removeAttribute("data-dragging-over");
                                         }}
-                                    >
-                                    </div>
+                                    ></div>
                                 ) : isWorkspaceRoot ? (
                                     <RootFolderNode node={node} style={{ height: "100%" }} treeData={treeData} />
                                 ) : isFolderV2(item as any) ? (
