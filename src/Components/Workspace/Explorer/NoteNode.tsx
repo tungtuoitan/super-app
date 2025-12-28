@@ -18,7 +18,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
     // Safe cast: WorkspaceTree already filters to only render NoteNode for notes
     const noteItem = node.data.data as unknown as WorkspaceNoteItem;
-    const entityId = noteItem.itemId;
+    const entityId = noteItem.entityId;
     const isSelected = isFolderSelected(entityId);
 
     const handleMainClick = (e: React.MouseEvent) => {
@@ -68,7 +68,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i: any) => i.itemId === entityId);
+        const _currentItem = currentTree?.items.find((i: any) => i.entityId === entityId);
 
         // Open note-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });

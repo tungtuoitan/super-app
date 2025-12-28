@@ -127,24 +127,59 @@ export interface FileData {
 
 /**
  * Base workspace item with common workspace_items table properties
+ *
+ * ID NAMING CONVENTION:
+ * - id          = workspace_items.id (workspace item ID in workspace_items table)
+ * - workspaceId = workspace_items.workspace_id (which workspace this item belongs to)
+ * - parentId    = parent workspace_item ID (parent's workspace_items.id - SELF-REFERENCING)
+ * - entityId    = entity ID (folders.id | notes.id | files.id - the actual entity being referenced)
+ *
+ * RELATIONSHIP:
+ * - workspace_items.id is unique per workspace_items row
+ * - workspace_items.entity_id references the actual entity (folder/note/file)
+ * - workspace_items.parent_id references parent workspace_items.id (SELF-REFERENCING)
+ *
+ * KEY CHANGE FROM V1:
+ * - parent_id NOW references workspace_items.id (NOT entity ID!)
+ * - This enables proper multi-workspace support and prevents circular references
  */
 interface BaseWorkspaceItem {
   // ============ FROM workspace_items TABLE ============
 
-  /** Workspace item ID (workspace_items.id) */
+  /**
+   * Workspace item ID (workspace_items.id)
+   * This is the PRIMARY KEY of workspace_items table
+   * Use for: Update, Move, Delete, Restore actions
+   */
   id: number;
 
-  /** Workspace ID (workspace_items.workspace_id) */
+  /**
+   * Workspace ID (workspace_items.workspace_id)
+   * References workspaces.id - which workspace this item belongs to
+   */
   workspaceId: number;
 
-  /** Parent ID in workspace hierarchy (workspace_items.parent_id) - null for root items */
+  /**
+   * Parent workspace_item ID (workspace_items.parent_id → workspace_items.id)
+   * SELF-REFERENCING foreign key to workspace_items.id
+   * null = root level item (direct child of workspace)
+   * Example: If parent workspace_item.id=118, then parentId=118
+   */
   parentId: number | null;
 
-  /** Item type: 2=folder, 3=note, 4=file (workspace_items.item_type) */
-  itemType: 2 | 3 | 4;
+  /**
+   * Entity type code (workspace_items.entity_type)
+   * 2 = folder, 3 = note, 4 = file
+   */
+  entityType: 2 | 3 | 4;
 
-  /** Entity ID - references folders/notes/files (workspace_items.item_id) */
-  itemId: number;
+  /**
+   * Entity ID (workspace_items.entity_id)
+   * References the actual entity: folders.id | notes.id | files.id
+   * This is the ID of the folder/note/file being referenced
+   * Example: If entityType=2 and entityId=87, this references folders.id=87
+   */
+  entityId: number;
 
   /** Created timestamp (workspace_items.created_at) */
   createdAt: string;
@@ -187,25 +222,25 @@ interface BaseWorkspaceItem {
 
 /** Workspace item containing a folder */
 export interface WorkspaceFolderItem extends BaseWorkspaceItem {
-  itemType: 2;
+  entityType: 2;
   data: FolderData;
 }
 
 /** Workspace item containing a note */
 export interface WorkspaceNoteItem extends BaseWorkspaceItem {
-  itemType: 3;
+  entityType: 3;
   data: NoteData;
 }
 
 /** Workspace item containing a file */
 export interface WorkspaceFileItem extends BaseWorkspaceItem {
-  itemType: 4;
+  entityType: 4;
   data: FileData;
 }
 
 /**
  * Discriminated union of all workspace item types
- * TypeScript will narrow the type based on itemType property
+ * TypeScript will narrow the type based on entityType property
  */
 export type WorkspaceItemV2 = WorkspaceFolderItem | WorkspaceNoteItem | WorkspaceFileItem;
 
@@ -215,22 +250,22 @@ export type WorkspaceItemV2 = WorkspaceFolderItem | WorkspaceNoteItem | Workspac
 
 /** Type guard to check if item is a folder */
 export function isFolder(item: WorkspaceItemV2): item is WorkspaceFolderItem {
-  return item.itemType === 2;
+  return item.entityType === 2;
 }
 
 /** Type guard to check if item is a note */
 export function isNote(item: WorkspaceItemV2): item is WorkspaceNoteItem {
-  return item.itemType === 3;
+  return item.entityType === 3;
 }
 
 /** Type guard to check if item is a file */
 export function isFile(item: WorkspaceItemV2): item is WorkspaceFileItem {
-  return item.itemType === 4;
+  return item.entityType === 4;
 }
 
 /** Type guard to check if item can have children (folders only) */
 export function canHaveChildren(item: WorkspaceItemV2): item is WorkspaceFolderItem {
-  return item.itemType === 2;
+  return item.entityType === 2;
 }
 
 // ============================================

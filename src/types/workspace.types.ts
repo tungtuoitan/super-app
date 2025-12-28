@@ -537,18 +537,19 @@ export enum WorkspaceItemAction {
  * VALIDATION RULES PER ACTION:
  *
  * 1. CREATE (new entity + workspace_item):
- *    Required: action=Create, itemType, entityData
+ *    Required: action=Create, entityType, entityData
  *    Optional: parentId (null = root), workspaceId
- *    Example: { action: 1, itemType: 2, parentId: null, folderData: {...} }
+ *    Example: { action: 1, entityType: 2, parentId: null, folderData: {...} }
  *
  * 2. ADD (existing entity to workspace):
- *    Required: action=Add, itemType, itemId
+ *    Required: action=Add, entityType, entityId
  *    Optional: parentId (null = root), workspaceId
- *    Example: { action: 2, itemType: 3, itemId: 456, parentId: 123 }
+ *    Example: { action: 2, entityType: 3, entityId: 456, parentId: 123 }
  *
  * 3. MOVE (change location):
  *    Required: action=Move, id + (parentId OR workspaceId)
  *    Optional: Both for cross-workspace move
+ *    ParentId = workspace_items.id of new parent (NOT entity ID!)
  *    Example: { action: 3, id: 789, parentId: null } ← move to root
  *
  * 4. UPDATE (entity properties):
@@ -579,14 +580,14 @@ export interface UpsertWorkspaceItemRequest {
     /** User ID (set by controller from JWT) */
     userId?: number;
 
-    /** Parent folder ID - Required for: Move, Optional for: Create, Add */
+    /** Parent workspace_item ID (SELF-REFERENCING) - Required for: Move, Optional for: Create, Add */
     parentId?: number | null;
 
-    /** Item type: 2=folder, 3=note, 4=file - Required for: Create, Add */
-    itemType?: 2 | 3 | 4;
+    /** Entity type: 2=folder, 3=note, 4=file - Required for: Create, Add */
+    entityType?: 2 | 3 | 4;
 
-    /** Entity ID (references existing folder/note/file) - Required for: Add */
-    itemId?: number;
+    /** Entity ID (references existing folder/note/file from entity tables) - Required for: Add */
+    entityId?: number;
 
     /** Copy metadata JSON (optional) */
     copyInfo?: string | null;
@@ -594,13 +595,13 @@ export interface UpsertWorkspaceItemRequest {
     /** User email (set by controller) */
     createdBy?: string;
 
-    /** Folder entity data - Required for: Create (itemType=2), Update (itemType=2) */
+    /** Folder entity data - Required for: Create (entityType=2), Update (entityType=2) */
     folderData?: UpsertFolderData;
 
-    /** Note entity data - Required for: Create (itemType=3), Update (itemType=3) */
+    /** Note entity data - Required for: Create (entityType=3), Update (entityType=3) */
     noteData?: UpsertNoteData;
 
-    /** File entity data - Required for: Create (itemType=4), Update (itemType=4) */
+    /** File entity data - Required for: Create (entityType=4), Update (entityType=4) */
     fileData?: UpsertFileData;
 }
 

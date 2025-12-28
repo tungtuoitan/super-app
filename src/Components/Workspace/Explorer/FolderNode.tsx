@@ -17,7 +17,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const folderItem = node.data.data as unknown as WorkspaceFolderItem;
 
     // Extract data from V2 structure
-    const entityId = folderItem.itemId;
+    const entityId = folderItem.entityId;
     const folderName = folderItem.data.name;
     const folderColor = folderItem.data.color;
     const hasChildren = node.data.children && node.data.children.length > 0;
@@ -100,7 +100,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             return;
         }
 
-        const _currentFolder = currentTree?.items.find((f: any) => f.itemId === entityId);
+        const _currentFolder = currentTree?.items.find((f: any) => f.entityId === entityId);
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };

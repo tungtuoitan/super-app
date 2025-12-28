@@ -181,10 +181,10 @@ export interface TreeFolder {
 
 /**
  * Get all visible folder entity IDs from tree
- * V2: Returns itemId (entity ID from folders/notes/files table)
+ * V2: Returns entityId (entity ID from folders/notes/files table)
  */
 export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
-    return $traverse(treeData).map((node) => (node.data as any).itemId);
+    return $traverse(treeData).map((node) => (node.data as any).entityId);
 }
 
 /**
@@ -239,48 +239,72 @@ export function createWorkspaceRootFolder(
 
 /**
  * Build hierarchical TreeFolder structure from flat V2 list
- * V2 structure: parentId references parent ENTITY ID (item.itemId)
+ *
+ * KEY CONCEPT:
+ * - WorkspaceItemV2.id = workspace_items.id (workspace item ID)
+ * - WorkspaceItemV2.entityId = entity ID (folders.id | notes.id | files.id)
+ * - WorkspaceItemV2.parentId = parent workspace_items.id (SELF-REFERENCING, NOT entity ID!)
+ *
+ * ALGORITHM:
+ * 1. Create map using workspace_items.id as key for O(1) parent lookup
+ * 2. Build parent-child relationships using parentId (which references parent's workspace_items.id)
+ *
+ * @param items - Flat list of workspace items from API
+ * @returns Hierarchical tree structure (roots only - children are nested)
  */
 function buildTreeFromV2Items(items: WorkspaceItemV2[]): TreeFolder[] {
-    // Create map using itemId (entity ID) for lookup
-    const itemMap = new Map<number, TreeFolder>();
-    const treeNodes: TreeFolder[] = [];
+    // -------------------------------------------------------
+    // STEP 1: CREATE MAP FOR O(1) LOOKUP
+    // -------------------------------------------------------
+    // Map key = workspace_items.id
+    // Map value = TreeFolder node
+    // Why workspace_items.id? Because parentId references parent's workspace_items.id (self-referencing)
+    const workspaceItemIdToNodeMap = new Map<number, TreeFolder>();
+    const allTreeNodes: TreeFolder[] = [];
 
-    // First pass: Create TreeFolder nodes for all items
-    items.forEach((item) => {
+    // Create TreeFolder node for each workspace item
+    items.forEach((workspaceItem) => {
         const treeNode: TreeFolder = {
-            id: item.id.toString(), // workspace_items.id as string
-            name: item.data.name,
-            data: item as any, // V2 structure
+            id: workspaceItem.id.toString(), // Use workspace_items.id as string for react-arborist
+            name: workspaceItem.data.name,
+            data: workspaceItem as any, // Store full V2 structure
             children: [],
         };
-        itemMap.set(item.itemId, treeNode); // Map by entity ID
-        treeNodes.push(treeNode);
+        // Map by workspace_items.id for parent lookup
+        workspaceItemIdToNodeMap.set(workspaceItem.id, treeNode);
+        allTreeNodes.push(treeNode);
     });
 
-    // Second pass: Build parent-child relationships
-    const roots: TreeFolder[] = [];
+    // -------------------------------------------------------
+    // STEP 2: BUILD PARENT-CHILD RELATIONSHIPS
+    // -------------------------------------------------------
+    const rootNodes: TreeFolder[] = [];
 
-    items.forEach((item) => {
-        const currentNode = itemMap.get(item.itemId);
+    items.forEach((workspaceItem) => {
+        const currentWorkspaceItemId = workspaceItem.id;
+        const currentNode = workspaceItemIdToNodeMap.get(currentWorkspaceItemId);
         if (!currentNode) return;
 
-        if (item.parentId === null || item.parentId === undefined) {
-            // Root level item
-            roots.push(currentNode);
+        const parentWorkspaceItemId = workspaceItem.parentId;
+
+        if (parentWorkspaceItemId === null || parentWorkspaceItemId === undefined) {
+            // Root level item (no parent)
+            rootNodes.push(currentNode);
         } else {
-            // Child item - find parent by entity ID
-            const parentNode = itemMap.get(item.parentId);
+            // Child item - find parent by workspace_items.id
+            const parentNode = workspaceItemIdToNodeMap.get(parentWorkspaceItemId);
             if (parentNode) {
+                // Add to parent's children
                 parentNode.children!.push(currentNode);
             } else {
-                // Parent not found - treat as root
-                roots.push(currentNode);
+                // Parent not found (orphan) - treat as root
+                console.warn(`⚠️ Parent workspace_item ID ${parentWorkspaceItemId} not found for item ${workspaceItem.id}, treating as root`);
+                rootNodes.push(currentNode);
             }
         }
     });
 
-    return roots;
+    return rootNodes;
 }
 
 /**
@@ -382,8 +406,8 @@ export function transformToTreeData(
                 id: -12345,
                 workspaceId: data.workspaceId,
                 parentId: null,
-                itemType: 2, // folder
-                itemId: -12345,
+                entityType: 2, // folder
+                entityId: -12345,
                 createdAt: data.createdAt,
                 updatedAt: data.updatedAt,
                 deletedAt: null,

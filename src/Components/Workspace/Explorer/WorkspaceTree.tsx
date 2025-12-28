@@ -103,8 +103,8 @@ export function WorkspaceTree() {
                     id: -1,
                     workspaceId: currentTree.workspaceId,
                     parentId: null,
-                    itemType: 2 as const,
-                    itemId: -1,
+                    entityType: 2 as const,
+                    entityId: -1,
                     createdAt: new Date().toISOString(),
                     updatedAt: undefined,
                     deletedAt: null,
@@ -141,7 +141,7 @@ export function WorkspaceTree() {
     // Calculate drop zone height to fill remaining space
     const dropZoneHeight = useMemo(() => {
         const rowHeight = 40;
-        const actualItemsCount = treeData.filter(item => (item.data as any).itemId !== -1).length;
+        const actualItemsCount = treeData.filter(item => (item.data as any).entityId !== -1).length;
         const usedHeight = actualItemsCount * rowHeight;
         const remaining = containerHeight - usedHeight;
         return Math.max(remaining, 100); // Minimum 100px
@@ -226,11 +226,20 @@ export function WorkspaceTree() {
                     renderDragPreview={(props) => <CustomDragPreview {...props} treeData={treeData} />}
                 >
                     {({ node, style, dragHandle }) => {
+                        // -------------------------------------------------------
+                        // V2 WORKSPACE ITEM STRUCTURE
+                        // -------------------------------------------------------
+                        // item = WorkspaceItemV2 with properties:
+                        // - item.id = workspace_items.id (workspace item ID)
+                        // - item.entityId = entity ID (folders.id | notes.id | files.id)
+                        // - item.parentId = parent's ENTITY ID (parent's entityId)
+                        // - item.data = full entity data (FolderData | NoteData | FileData)
                         const item = node.data.data;
 
-                        // Check workspace root and drop zone by itemId (V2 structure)
-                        const isWorkspaceRoot = (item as any).itemId === -12345;
-                        const isDropZone = (item as any).itemId === -1;
+                        // Check workspace root and drop zone by ENTITY ID (entityId)
+                        // Special IDs: -12345 = workspace root, -1 = drop zone
+                        const isWorkspaceRoot = (item as any).entityId === -12345;
+                        const isDropZone = (item as any).entityId === -1;
 
                         // Render different node types based on item type
                         return (

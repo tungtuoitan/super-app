@@ -556,11 +556,16 @@ export const useWorkspaceFolderMenuHelper = () => {
 
             console.log(`📦 Collected ${itemsToUpdate.length} total items (including descendants)`);
 
-            // ===== STEP 7: Build batch requests with action-based API =====
+            // -------------------------------------------------------
+            // STEP 7: BUILD BATCH DELETE/RESTORE REQUESTS
+            // -------------------------------------------------------
+            // For each item (including descendants), create a DELETE or RESTORE action
+            // - action: WorkspaceItemAction.Delete or WorkspaceItemAction.Restore
+            // - id: workspace_items.id (V2: item.id = workspace_items.id)
             const batchRequests: UpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {
                 return {
                     action: type === "soft-delete" ? WorkspaceItemAction.Delete : WorkspaceItemAction.Restore,
-                    id: item.id,
+                    id: item.id, // ✅ workspace_items.id
                 };
             });
 

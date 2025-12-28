@@ -43,7 +43,7 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
     // Safe cast: WorkspaceTree already filters to only render FileNode for files
     const fileItem = node.data.data as unknown as WorkspaceFileItem;
-    const entityId = fileItem.itemId;
+    const entityId = fileItem.entityId;
     const isSelected = isFolderSelected(entityId);
     const FileIcon = getFileIcon(fileItem.data.extension);
 
@@ -79,7 +79,7 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i: any) => i.itemId === entityId);
+        const _currentItem = currentTree?.items.find((i: any) => i.entityId === entityId);
 
         // Open file-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });

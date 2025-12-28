@@ -113,15 +113,15 @@ export const useFolderDialogHelper = () => {
                 }]);
             } else {
                 // CREATE action: create new folder + workspace_item
-                // V2: parentId must be parent's ENTITY ID (itemId), not workspace_items.id
-                const parentEntityId = parentFolder && "itemId" in parentFolder && (parentFolder as any).itemId > 0
-                    ? (parentFolder as any).itemId
+                // V2: parentId must be parent's ENTITY ID (entityId), not workspace_items.id
+                const parentEntityId = parentFolder && "entityId" in parentFolder && (parentFolder as any).entityId > 0
+                    ? (parentFolder as any).entityId
                     : null;
 
                 await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
                     action: WorkspaceItemAction.Create,
-                    itemType: 2, // Folder
-                    parentId: parentEntityId, // ✅ Use parent's entity ID (itemId)
+                    entityType: 2, // Folder
+                    parentId: parentEntityId, // ✅ Use parent's entity ID (entityId)
                     folderData: {
                         name: newFolderName.trim(),
                         description: description.trim() || undefined,

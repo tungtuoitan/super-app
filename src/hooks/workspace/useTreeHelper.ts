@@ -26,20 +26,36 @@ export const useTreeHelper = () => {
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
+     *
+     * KEY CONCEPTS:
+     * - TreeFolder.id = string version of workspace_items.id (for react-arborist)
+     * - TreeFolder.data.id = workspace_items.id (workspace item ID)
+     * - TreeFolder.data.entityId = entity ID (folders.id | notes.id | files.id)
+     * - TreeFolder.data.parentId = parent workspace_items.id (SELF-REFERENCING, NOT entity ID!)
+     *
+     * ALGORITHM:
+     * 1. Extract entity IDs from dragged items (for selection tracking)
+     * 2. Determine drop target (parent workspace_items.id or root)
+     * 3. Validate move (prevent invalid moves)
+     * 4. Build MOVE batch request with workspace_items.id + new parent workspace_items.id
+     * 5. Call API and refresh tree
      */
     const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }, treeData: TreeFolder[]) => {
         try {
             console.log("🚀 handleMove called:", { dragIds: args.dragIds, parentId: args.parentId, index: args.index });
-            
+
             setIsDragging(true);
 
-            // =================================================================
+            // -------------------------------------------------------
             // STEP 1: EXTRACT ENTITY IDS FROM DRAGGED ITEMS
-            // =================================================================
+            // -------------------------------------------------------
             const allTreeNodes = treeMiniHelper.$traverse(treeData);
 
-            // Helper to get entity ID from V2 structure (itemId = folder/note/file ID)
-            const getEntityId = (node: any) => node.data.itemId;
+            /**
+             * Helper: Extract entity ID from tree node
+             * Returns: folders.id | notes.id | files.id (NOT workspace_items.id!)
+             */
+            const getEntityId = (node: any) => node.data.entityId;
 
             // ---- Filter out the drop zone node (drop zone node is a FAKE node with ID -1)----
             const validTreeNodes = allTreeNodes.filter(node => getEntityId(node) !== -1);
@@ -65,28 +81,30 @@ export const useTreeHelper = () => {
                 return;
             }
 
-            // =================================================================
-            // STEP 2: EXTRACT TARGET PARENT ID
-            // =================================================================
-            // IMPORTANT: args.parentId can be:
-            // 1. null (when dropping at root level - bottom of tree)
-            // 2. A folder ID (when dropping INTO a folder)
-            // 3. A note/file ID (when dropping BETWEEN siblings - use their parent instead)
-            // 4. Drop zone ID (special ID -1 for root level drops)
-            let targetParentEntityId: number | undefined = undefined;
-            
+            // -------------------------------------------------------
+            // STEP 2: DETERMINE TARGET PARENT WORKSPACE_ITEMS.ID
+            // -------------------------------------------------------
+            // IMPORTANT: args.parentId (from react-arborist) can be:
+            // 1. null - dropping at root level (bottom of tree)
+            // 2. Folder's tree node ID - dropping INTO a folder
+            // 3. Note/file's tree node ID - dropping BETWEEN siblings (use their parent)
+            // 4. Drop zone ID (special ID -1) - dropping at root level
+            //
+            // OUTPUT: targetParentWorkspaceItemId = parent's workspace_items.id or undefined for root
+            let targetParentWorkspaceItemId: number | undefined = undefined;
+
             if (!args.parentId) {
                 // ---- Case 1: Drop at root level (bottom of tree) ----
-                targetParentEntityId = undefined;
+                targetParentWorkspaceItemId = undefined;
                 console.log("🎯 Drop target: Root level (parentId is null)");
             } else {
                 const targetParentTreeNode = validTreeNodes.find((t) => t.id === args.parentId);
-                
+
                 if (!targetParentTreeNode) {
                     // ---- Check if it's the drop zone node ----
                     const dropZoneNode = allTreeNodes.find((t) => t.id === args.parentId);
                     if (dropZoneNode && getEntityId(dropZoneNode) === -1) {
-                        targetParentEntityId = undefined;
+                        targetParentWorkspaceItemId = undefined;
                         console.log("🎯 Drop target: Root level (drop zone)");
 
                         // ---- VALIDATION: If all items already root-level, prevent drop ----
@@ -101,15 +119,15 @@ export const useTreeHelper = () => {
                         }
                     } else {
                         // ---- Parent node not found - treat as root level drop ----
-                        targetParentEntityId = undefined;
+                        targetParentWorkspaceItemId = undefined;
                         console.log("🎯 Drop target: Root level (parentNode not found)");
                     }
                 } else {
-                    const targetEntityId = getEntityId(targetParentTreeNode);
+                    const targetWorkspaceItemId = targetParentTreeNode.data.id; // workspace_items.id
 
                     // ---- Negative IDs are workspace root nodes or drop zone ----
-                    if (targetEntityId < 0) {
-                        targetParentEntityId = undefined; // Move to workspace root
+                    if (targetWorkspaceItemId < 0) {
+                        targetParentWorkspaceItemId = undefined; // Move to workspace root
                         console.log("🎯 Drop target: Root level (negative entity ID)");
                     } else {
                         const targetNodeData = targetParentTreeNode.data;
@@ -119,34 +137,34 @@ export const useTreeHelper = () => {
                             const item = validTreeNodes.find((t) => getEntityId(t) === id);
                             if (!item) return false;
                             const currentParentId = "parentId" in item.data ? item.data.parentId : undefined;
-                            return currentParentId === targetEntityId;
+                            return currentParentId === targetWorkspaceItemId;
                         });
-                        
+
                         if (allSameParent) {
                             console.warn("⚠️ All items already have this parent - no change needed");
                             setIsDragging(false);
                             return;
                         }
 
-                        // ---- Check if this is a folder (V2: itemType === 2) ----
-                        const isFolder = "itemType" in targetNodeData && targetNodeData.itemType === 2;
+                        // ---- Check if this is a folder (V2: entityType === 2) ----
+                        const isFolder = "entityType" in targetNodeData && targetNodeData.entityType === 2;
 
                         if (isFolder) {
                             // ---- Dropping INTO a folder ----
-                            targetParentEntityId = targetEntityId;
-                            console.log(`🎯 Drop target: Folder ${targetEntityId}`);
+                            targetParentWorkspaceItemId = targetWorkspaceItemId;
+                            console.log(`🎯 Drop target: Folder ${targetWorkspaceItemId}`);
                         } else {
                             // ---- Dropping BETWEEN siblings - use their parent ----
-                            targetParentEntityId = targetNodeData.parentId ?? undefined;
-                            console.log(`🎯 Drop target: ${targetParentEntityId === undefined ? 'Root level' : `Parent ${targetParentEntityId}`} (between siblings)`);
+                            targetParentWorkspaceItemId = targetNodeData.parentId ?? undefined;
+                            console.log(`🎯 Drop target: ${targetParentWorkspaceItemId === undefined ? 'Root level' : `Parent ${targetParentWorkspaceItemId}`} (between siblings)`);
                         }
                     }
                 }
             }
 
-            // =================================================================
+            // -------------------------------------------------------
             // STEP 3: VALIDATION - PREVENT INVALID MOVES
-            // =================================================================
+            // -------------------------------------------------------
             const hasWorkspaceRoot = selectedEntityIds.some((id) => id === constants.workspace.rootId);
             if (hasWorkspaceRoot) {
                 console.warn("⚠️ Cannot move workspace root node");
@@ -159,15 +177,15 @@ export const useTreeHelper = () => {
                 return;
             }
 
-            if (targetParentEntityId !== undefined && selectedEntityIds.includes(targetParentEntityId)) {
+            if (targetParentWorkspaceItemId !== undefined && selectedEntityIds.includes(targetParentWorkspaceItemId)) {
                 console.warn("⚠️ Cannot move items into one of the selected items");
                 setIsDragging(false);
                 return;
             }
 
-            if (targetParentEntityId !== undefined) {
+            if (targetParentWorkspaceItemId !== undefined) {
                 const isTargetDescendantOfSelected = selectedEntityIds.some((draggedId) => {
-                    return treeMiniHelper.isDescendant(targetParentEntityId!, draggedId, treeData);
+                    return treeMiniHelper.isDescendant(targetParentWorkspaceItemId!, draggedId, treeData);
                 });
 
                 if (isTargetDescendantOfSelected) {
@@ -177,10 +195,10 @@ export const useTreeHelper = () => {
                 }
             }
 
-            // =================================================================
+            // -------------------------------------------------------
             // STEP 4: VALIDATE DROP POSITION
-            // =================================================================
-            const targetParentNode = targetParentEntityId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => getEntityId(t) === targetParentEntityId) : null;
+            // -------------------------------------------------------
+            const targetParentNode = targetParentWorkspaceItemId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => t.data.id === targetParentWorkspaceItemId) : null;
 
             // ---- Filter out workspace root and drop zone ----
             const targetSiblings = targetParentNode ? targetParentNode.children || [] : treeData.filter((t) => {
@@ -197,7 +215,7 @@ export const useTreeHelper = () => {
                 if (draggedItem) {
                     const currentParentId = "parentId" in draggedItem.data ? draggedItem.data.parentId : undefined;
                     const normalizedCurrentParent = currentParentId ?? null;
-                    const normalizedTargetParent = targetParentEntityId ?? null;
+                    const normalizedTargetParent = targetParentWorkspaceItemId ?? null;
 
                     if (normalizedCurrentParent === normalizedTargetParent) {
                         console.warn("⚠️ Item already has this parent - no move needed");
@@ -213,7 +231,7 @@ export const useTreeHelper = () => {
 
                     const currentParentId = "parentId" in item.data ? item.data.parentId : undefined;
                     const normalizedCurrentParent = currentParentId ?? null;
-                    const normalizedTargetParent = targetParentEntityId ?? null;
+                    const normalizedTargetParent = targetParentWorkspaceItemId ?? null;
 
                     // Keep items that don't have target parent
                     return normalizedCurrentParent !== normalizedTargetParent;
@@ -251,9 +269,10 @@ export const useTreeHelper = () => {
                 }
             }
 
-    
+
+            // -------------------------------------------------------
             // STEP 5: BUILD MOVE REQUEST & CALL API
-            // =================================================================
+            // -------------------------------------------------------
             if (!currentTree?.workspaceId) {
                 console.error("❌ No workspace ID found");
                 setIsDragging(false);
@@ -262,8 +281,13 @@ export const useTreeHelper = () => {
 
             const workspaceId = currentTree.workspaceId;
 
-            // ---- Build batch request with action-based API ----
+            // ---- Build batch MOVE request ----
+            // For each selected entity, create a MOVE action with:
+            // - action: WorkspaceItemAction.Move (explicit action enum)
+            // - id: workspace_items.id (NOT entity ID!)
+            // - parentId: new parent's workspace_items.id (SELF-REFERENCING) or null for root
             const batchRequests = selectedEntityIds.map((entityId) => {
+                // Find tree node by ENTITY ID (entityId)
                 const item = allTreeNodes.find((t) => getEntityId(t) === entityId);
                 if (!item) {
                     throw new Error(`Item with entity ID ${entityId} not found in tree`);
@@ -271,15 +295,16 @@ export const useTreeHelper = () => {
 
                 const itemData = item.data;
 
-                // V2: itemData.id = workspace_items.id (required for Move action)
+                // Extract workspace_items.id (required for MOVE action)
+                // V2 structure: itemData.id = workspace_items.id
                 if (!("id" in itemData)) {
                     throw new Error(`Item ${entityId} missing workspace_items.id property`);
                 }
 
                 return {
                     action: WorkspaceItemAction.Move,
-                    id: itemData.id, // workspace_items.id
-                    parentId: targetParentEntityId ?? null,
+                    id: itemData.id, // ✅ workspace_items.id (NOT entity ID!)
+                    parentId: targetParentWorkspaceItemId ?? null, // ✅ Parent's workspace_items.id
                 };
             });
 
@@ -300,9 +325,9 @@ export const useTreeHelper = () => {
                 throw error;
             }
 
-            // =================================================================
+            // -------------------------------------------------------
             // STEP 6: REFRESH TREE & RESTORE SELECTION
-            // =================================================================
+            // -------------------------------------------------------
             await loadTree(workspaceId);
 
             // VS Code behavior: Re-select the moved items after move completes

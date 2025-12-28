@@ -348,8 +348,13 @@ const _addItemToWorkspace = async (
  *
  * Supports 6 actions: Create, Add, Move, Update, Delete, Restore
  *
+ * ID NAMING CONVENTION:
+ * - id: workspace_items.id (workspace item ID - used for Update, Move, Delete, Restore)
+ * - parentId: parent's workspace_items.id (SELF-REFERENCING, NOT entity ID!)
+ * - entityId: entity ID (folders.id | notes.id | files.id)
+ *
  * @param token - Authentication token
- * @param workspaceId - The workspace ID
+ * @param workspaceId - The workspace ID (workspaces.id)
  * @param requests - Array of workspace item requests with explicit actions
  * @returns Batch operation result or rejects with response
  *
@@ -358,22 +363,22 @@ const _addItemToWorkspace = async (
  * // CREATE: New folder at root
  * await _upsertWorkspaceItems(token, workspaceId, [{
  *   action: WorkspaceItemAction.Create,
- *   itemType: 2,
- *   parentId: null,
+ *   entityType: 2,
+ *   parentId: null, // ✅ null = root level
  *   folderData: { name: "My Folder", color: "#FF0000" }
  * }]);
  *
- * // MOVE: Move to root (no longer ambiguous!)
+ * // MOVE: Move to different parent
  * await _upsertWorkspaceItems(token, workspaceId, [{
  *   action: WorkspaceItemAction.Move,
- *   id: 789,
- *   parentId: null
+ *   id: 789, // ✅ workspace_items.id
+ *   parentId: 45 // ✅ parent folder's ENTITY ID (entityId)
  * }]);
  *
  * // DELETE: Soft delete
  * await _upsertWorkspaceItems(token, workspaceId, [{
  *   action: WorkspaceItemAction.Delete,
- *   id: 789
+ *   id: 789 // ✅ workspace_items.id
  * }]);
  * ```
  */

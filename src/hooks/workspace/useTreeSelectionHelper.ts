@@ -57,7 +57,7 @@ export const useTreeSelectionHelper = () => {
         // Helper to get entity ID from node (V2 structure)
         const getEntityId = (node: NodeApi<TreeFolder>): number | null => {
             const itemData = node.data.data;
-            return (itemData as any).itemId;
+            return (itemData as any).entityId;
         };
 
         const folderIds = nodes
