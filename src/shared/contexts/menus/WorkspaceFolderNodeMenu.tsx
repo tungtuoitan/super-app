@@ -45,7 +45,9 @@ export function WorkspaceFolderNodeMenu() {
     const { loadTree } = useWorkspaceOperation();
 
     // Calculate derived values
-    const isWorkspaceRoot = contextData && contextData.tagId < 0;
+    // Support both V1 (tagId) and V2 (entityId) structure
+    const entityId = contextData?.entityId ?? contextData?.tagId;
+    const isWorkspaceRoot = contextData && entityId < 0;
     const isMultipleSelected = selectedFolderIds.length > 1;
 
     // Check deleted status (including inherited from parent)
@@ -74,14 +76,17 @@ export function WorkspaceFolderNodeMenu() {
         const tempId = generateTempId(existingIds);
         const name = generateUnsavedName(tempId);
 
+        // Get entity ID (support both V1 and V2 structure)
+        const parentEntityId = contextData?.entityId ?? contextData?.tagId;
+
         // Create folder object from contextData
         const parentFolder: Folder | undefined = contextData
             ? {
-                  id: contextData.tagId,
-                  name: contextData.name,
-                  description: contextData.description,
-                  color: contextData.color,
-                  createdAt: new Date(contextData.createdAt),
+                  id: parentEntityId,
+                  name: contextData.name || contextData.data?.name,
+                  description: contextData.description || contextData.data?.description,
+                  color: contextData.color || contextData.data?.color,
+                  createdAt: new Date(contextData.createdAt || contextData.data?.createdAt),
                   isActive: !contextData.isArchived,
               }
             : undefined;
@@ -104,7 +109,7 @@ export function WorkspaceFolderNodeMenu() {
             type: constants.workspace.itemTypes.note,
             userId: $user.userId ?? 0,
             name: name,
-            parentId: contextData?.tagId || null,
+            parentId: parentEntityId || null,
             accessType: "owner",
             isOriginal: true,
             level: (contextData?.level || 0) + 1,
@@ -119,9 +124,10 @@ export function WorkspaceFolderNodeMenu() {
 
         // Add note to currentWorkspace
         if (currentWorkspace && contextData) {
-            const addNoteToTree = (items: any[]): any[] => {
+            const $addNoteToTree = (items: any[]): any[] => {
                 return items.map((item) => {
-                    if (item.id === contextData.tagId) {
+                    // Check both id and entityId for compatibility
+                    if (item.id === parentEntityId || item.entityId === parentEntityId) {
                         // Found parent folder, add note to its children
                         return {
                             ...item,
@@ -131,7 +137,7 @@ export function WorkspaceFolderNodeMenu() {
                         // Recursively search in children
                         return {
                             ...item,
-                            children: addNoteToTree(item.children),
+                            children: $addNoteToTree(item.children),
                         };
                     }
                     return item;
@@ -139,7 +145,7 @@ export function WorkspaceFolderNodeMenu() {
             };
             const newTree = {
                 ...currentWorkspace,
-                flatData: addNoteToTree(currentWorkspace.flatData),
+                flatData: $addNoteToTree(currentWorkspace.flatData),
                 noteCount: currentWorkspace.noteCount + 1,
             };
             console.log("New Tree after adding note:", newTree);
@@ -181,57 +187,61 @@ export function WorkspaceFolderNodeMenu() {
                 );
             })}
 
-            <MenuDivider />
+            {/* Only show Edit and Delete options for non-root folders */}
+            {!isWorkspaceRoot && (
+                <>
+                    <MenuDivider />
 
-            {/* Edit - disabled if multiple items selected or deleted */}
-            <MenuItem onClick={() => editFolder(contextData)} disabled={isMultipleSelected || isDeleted}>
-                <EditIcon className="w-4 h-4 mr-2" />
-                Edit
-            </MenuItem>
+                    {/* Edit - disabled if multiple items selected or deleted */}
+                    <MenuItem onClick={() => editFolder(contextData)} disabled={isMultipleSelected || isDeleted}>
+                        <EditIcon className="w-4 h-4 mr-2" />
+                        Edit
+                    </MenuItem>
 
-            {/* Delete/Restore - hidden for workspace root */}
-            {!isWorkspaceRoot &&
-                (() => {
-                    // If item is directly deleted (not inherited), show both Hard Delete and Restore
-                    if (isDirectlyDeleted) {
-                        return (
-                            <>
-                                {/* //*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
-                                {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
+                    {/* Delete/Restore options */}
+                    {(() => {
+                        // If item is directly deleted (not inherited), show both Hard Delete and Restore
+                        if (isDirectlyDeleted) {
+                            return (
+                                <>
+                                    {/* //*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
+                                    {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
                                     <HardDeleteIcon className="w-4 h-4 mr-2" />
                                     Hard Delete
                                 </MenuItem> */}
-                                <MenuItem onClick={(e) => dhr_items(e, false)}>
-                                    <RestoreIcon className="w-4 h-4 mr-2" />
-                                    Restore
+                                    <MenuItem onClick={(e) => dhr_items(e, false)}>
+                                        <RestoreIcon className="w-4 h-4 mr-2" />
+                                        Restore
+                                    </MenuItem>
+                                </>
+                            );
+                        }
+                        // If item is deleted but not directly (inherited from parent), only show Hard Delete
+                        // Don't show if multiple selected and any item is still active
+                        //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
+                        // else if (isDeleted && !isDirectlyDeleted && !(isMultipleSelected && hasAnyActiveItem)) {
+                        //     return (
+                        //         <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
+                        //             <HardDeleteIcon className="w-4 h-4 mr-2" />
+                        //             Hard Delete
+                        //         </MenuItem>
+                        //     );
+                        // }
+                        // If item is not deleted, show normal Delete option
+                        // Disable if multiple selected and any item is still active (deletedAt = null)
+                        else if (!isDeleted) {
+                            return (
+                                <MenuItem onClick={(e) => dhr_items(e, false)} disabled={isMultipleSelected && hasAnyActiveItem}>
+                                    <DeleteIcon className="w-4 h-4 mr-2" />
+                                    Delete
                                 </MenuItem>
-                            </>
-                        );
-                    }
-                    // If item is deleted but not directly (inherited from parent), only show Hard Delete
-                    // Don't show if multiple selected and any item is still active
-                    //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
-                    // else if (isDeleted && !isDirectlyDeleted && !(isMultipleSelected && hasAnyActiveItem)) {
-                    //     return (
-                    //         <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
-                    //             <HardDeleteIcon className="w-4 h-4 mr-2" />
-                    //             Hard Delete
-                    //         </MenuItem>
-                    //     );
-                    // }
-                    // If item is not deleted, show normal Delete option
-                    // Disable if multiple selected and any item is still active (deletedAt = null)
-                    else if (!isDeleted) {
-                        return (
-                            <MenuItem onClick={(e) => dhr_items(e, false)} disabled={isMultipleSelected && hasAnyActiveItem}>
-                                <DeleteIcon className="w-4 h-4 mr-2" />
-                                Delete
-                            </MenuItem>
-                        );
-                    }
-                    // Don't show anything if conditions don't match
-                    return null;
-                })()}
+                            );
+                        }
+                        // Don't show anything if conditions don't match
+                        return null;
+                    })()}
+                </>
+            )}
         </>
     );
 }

@@ -89,6 +89,7 @@
         --editor-panel: 0 0% 98%;
         --editor-border: 240 5.9% 90%;
         --editor-hover: 240 4.8% 95.9%;
+        --editor-hover-light: 240 4.8% 98%;
     }
 
     .dark {
@@ -129,6 +130,7 @@
         --editor-activitybar: 0 0% 20%; /* rgb(51,51,51) ≈ #333333 */
         --editor-border: 0 0% 100% / 0.1; /* rgba(255,255,255,0.1) */
         --editor-hover: 0 0% 100% / 0.1;
+        --editor-hover-light: 0 0% 100% / 0.05;
         --editor-active-border: 195 100% 42%; /* #007acc - VS Code blue */
     }
 }

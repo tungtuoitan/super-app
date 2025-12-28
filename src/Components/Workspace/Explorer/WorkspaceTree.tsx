@@ -268,6 +268,18 @@ export function WorkspaceTree() {
                                         onDrop={(e) => {
                                             e.currentTarget.removeAttribute("data-dragging-over");
                                         }}
+                                        onContextMenu={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            // Show root workspace context menu for drop zone
+                                            if (treeData && treeData.length > 0) {
+                                                const rootData = treeData[0].data; // Root is first item
+                                                showContextMenu(e, constants.workspace.itemTypes.folder, {
+                                                    ...rootData,
+                                                    parentId: null,
+                                                });
+                                            }
+                                        }}
                                     ></div>
                                 ) : isWorkspaceRoot ? (
                                     <RootFolderNode node={node} style={{ height: "100%" }} treeData={treeData} />

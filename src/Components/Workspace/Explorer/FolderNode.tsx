@@ -121,8 +121,8 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                 marginLeft: `${node.level * -5}px`, // Reduced from default ~20-24px per level to 12px
             }}
             className={`
-                ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover"}
-                rounded transition-all duration-150 ease-in-out
+                ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
+                rounded
             `}
         >
             <div

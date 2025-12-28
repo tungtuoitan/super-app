@@ -105,9 +105,9 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
             onContextMenu={handleRightClick}
             className={`
                 flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
-                transition-all duration-150 ease-in-out
+                transition-opacity duration-150
                 ${node.state.isDragging ? "opacity-40" : isDeleted ? "opacity-60" : isInactive ? "opacity-70" : "opacity-100"}
-                ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover"}
+                ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
             `}
         >
             {/* Spacer for alignment with folder chevrons */}

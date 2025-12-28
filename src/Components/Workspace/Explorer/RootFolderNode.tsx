@@ -6,6 +6,8 @@ import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
 import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { FolderItem } from "@/types/workspace.types";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { constants } from "@/utils/constants";
 
 interface RootFolderNodeProps {
     node: NodeApi<TreeFolder>;
@@ -22,9 +24,21 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
     const { loadTree } = useWorkspaceOperation();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     const folderItem = node.data.data as FolderItem;
     const hasChildren = node.data.children && node.data.children.length > 0;
+
+    const handleRightClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        // Show root workspace context menu with Add Folder/Note/File options
+        showContextMenu(e, constants.workspace.itemTypes.folder, {
+            ...node.data.data,
+            parentId: null,
+        });
+    };
 
     return (
         <div
@@ -36,7 +50,8 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                     node.toggle();
                 }
             }}
-            className="flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded group hover:bg-editor-hover transition-colors"
+            onContextMenu={handleRightClick}
+            className="flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded group hover:bg-editor-hover-light"
         >
             {/* Expand/Collapse Button */}
             <button

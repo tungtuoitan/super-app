@@ -53,6 +53,7 @@ module.exports = {
                 "editor-activitybar": "hsl(var(--editor-activitybar))",
                 "editor-border": "hsl(var(--editor-border))",
                 "editor-hover": "hsl(var(--editor-hover))",
+                "editor-hover-light": "hsl(var(--editor-hover-light))",
                 "editor-active": "hsl(var(--editor-active-border))",
             },
             borderRadius: {
