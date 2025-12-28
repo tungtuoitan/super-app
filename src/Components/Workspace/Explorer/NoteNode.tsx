@@ -21,8 +21,11 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
     const entityId = noteItem.entityId;
     const isSelected = isFolderSelected(entityId);
 
-    // Check status and deleted state
-    const isDeleted = noteItem.deletedAt !== null && noteItem.deletedAt !== undefined;
+    // Check status and deleted state (including inherited from parent)
+    const deletedStatus = currentWorkspace?.flatData 
+        ? treeMiniHelper.checkDeletedStatus(noteItem, currentWorkspace.flatData)
+        : { isDeleted: false, isDirectlyDeleted: false };
+    const isDeleted = deletedStatus.isDeleted;
     const isInactive = noteItem.data.statusCode === "inactive";
 
     const handleMainClick = (e: React.MouseEvent) => {
@@ -104,7 +107,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
             {/* Note Icon */}
             <div className="mr-2 flex items-center">
-                <FileText className="w-4 h-4 text-blue-400" />
+                <FileText className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-blue-400"}`} />
             </div>
 
             {/* Note Info */}

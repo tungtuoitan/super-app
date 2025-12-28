@@ -181,9 +181,11 @@ export const useFolderDialogHelper = () => {
             setEditingFolder(editData);
 
             // Pre-fill form with existing data (with safe fallbacks)
-            setNewFolderName(folder.name || "");
-            setDescription(folder.description || "");
-            setColor(folder.color || "#1976D2");
+            // Handle WorkspaceItemV2 structure (data property) and legacy Folder structure
+            const folderData = (folder as any).data || folder;
+            setNewFolderName(folderData.name || "");
+            setDescription(folderData.description || "");
+            setColor(folderData.color || "#1976D2");
         }
 
         // Clear any previous errors

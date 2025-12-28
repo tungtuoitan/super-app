@@ -30,8 +30,11 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     // Check if this node is a valid drop target (being dragged over)
     const isDropTarget = node.state.willReceiveDrop;
 
-    // Check if deleted (folders don't have status_code)
-    const isDeleted = folderItem.deletedAt !== null && folderItem.deletedAt !== undefined;
+    // Check if deleted (including inherited from parent)
+    const deletedStatus = currentWorkspace?.flatData 
+        ? treeMiniHelper.checkDeletedStatus(folderItem, currentWorkspace.flatData)
+        : { isDeleted: false, isDirectlyDeleted: false };
+    const isDeleted = deletedStatus.isDeleted;
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -161,13 +164,13 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                     <Layers className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
                 ) : hasChildren ? (
                     node.isOpen ? (
-                        <FolderOpen className="w-4 h-4 text-yellow-500" />
+                        <FolderOpen className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-yellow-500"}`} />
                     ) : (
-                        <FolderIcon className="w-4 h-4 text-yellow-500" />
+                        <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-yellow-500"}`} />
                     )
                 ) : (
                     // <TagIcon className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
-                    <FolderIcon className="w-4 h-4 text-yellow-500" />
+                    <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-yellow-500"}`} />
                 )}
             </div>
 

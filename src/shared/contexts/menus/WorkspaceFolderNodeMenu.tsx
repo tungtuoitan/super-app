@@ -17,11 +17,12 @@ import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/types/note.types";
-import {useAuthStore, useStandardRegistryStore} from "@/store/index";
+import { useAuthStore, useStandardRegistryStore } from "@/store/index";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
 import { Folder } from "@/types/folder.types";
 import { NoteItem } from "@/types/workspace.types";
+import { treeMiniHelper } from "@/hooks/workspace/tree.miniHelper";
 
 /**
  * WorkspaceFolderNodeMenu
@@ -47,20 +48,28 @@ export function WorkspaceFolderNodeMenu() {
     const isWorkspaceRoot = contextData && contextData.tagId < 0;
     const isMultipleSelected = selectedFolderIds.length > 1;
 
+    // Check deleted status (including inherited from parent)
+    const deletedStatus =
+        currentWorkspace?.flatData && contextData ? treeMiniHelper.checkDeletedStatus(contextData, currentWorkspace.flatData) : { isDeleted: false, isDirectlyDeleted: false };
+    const isDeleted = deletedStatus.isDeleted;
+    const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
+
     const createNewNote = () => {
         const existingIds = collectIdsFromTabs(openTabs);
         const tempId = generateTempId(existingIds);
         const name = generateUnsavedName(tempId);
 
         // Create folder object from contextData
-        const parentFolder: Folder | undefined = contextData ? {
-            id: contextData.tagId,
-            name: contextData.name,
-            description: contextData.description,
-            color: contextData.color,
-            createdAt: new Date(contextData.createdAt),
-            isActive: !contextData.isArchived,
-        } : undefined;
+        const parentFolder: Folder | undefined = contextData
+            ? {
+                  id: contextData.tagId,
+                  name: contextData.name,
+                  description: contextData.description,
+                  color: contextData.color,
+                  createdAt: new Date(contextData.createdAt),
+                  isActive: !contextData.isArchived,
+              }
+            : undefined;
 
         const newNote: Note = {
             id: tempId,
@@ -96,18 +105,18 @@ export function WorkspaceFolderNodeMenu() {
         // Add note to currentWorkspace
         if (currentWorkspace && contextData) {
             const addNoteToTree = (items: any[]): any[] => {
-                return items.map(item => {
+                return items.map((item) => {
                     if (item.id === contextData.tagId) {
                         // Found parent folder, add note to its children
                         return {
                             ...item,
-                            children: [newNoteItem, ...(item.children || [])]
+                            children: [newNoteItem, ...(item.children || [])],
                         };
                     } else if (item.children && item.children.length > 0) {
                         // Recursively search in children
                         return {
                             ...item,
-                            children: addNoteToTree(item.children)
+                            children: addNoteToTree(item.children),
                         };
                     }
                     return item;
@@ -116,8 +125,8 @@ export function WorkspaceFolderNodeMenu() {
             const newTree = {
                 ...currentWorkspace,
                 flatData: addNoteToTree(currentWorkspace.flatData),
-                noteCount: currentWorkspace.noteCount + 1
-            }
+                noteCount: currentWorkspace.noteCount + 1,
+            };
             console.log("New Tree after adding note:", newTree);
 
             setCurrentWorkspace(newTree);
@@ -125,14 +134,14 @@ export function WorkspaceFolderNodeMenu() {
 
         // Open tab first
         openTab(newNote);
-        
+
         // Focus on note name field
         setShouldFocusNoteName(true);
     };
 
     const addMenuItems = [
-        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add Folder", disabled: false },
-        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: "Add Note", disabled: false },
+        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add Folder", disabled: isDeleted },
+        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: "Add Note", disabled: isDeleted },
         { type: constants.workspace.itemTypes.file, icon: FileIcon, label: "Add File", disabled: true },
     ];
 
@@ -159,8 +168,8 @@ export function WorkspaceFolderNodeMenu() {
 
             <MenuDivider />
 
-            {/* Edit - disabled if multiple items selected */}
-            <MenuItem onClick={() => editFolder(contextData)} disabled={isMultipleSelected}>
+            {/* Edit - disabled if multiple items selected or deleted */}
+            <MenuItem onClick={() => editFolder(contextData)} disabled={isMultipleSelected || isDeleted}>
                 <EditIcon className="w-4 h-4 mr-2" />
                 Edit
             </MenuItem>
@@ -168,26 +177,40 @@ export function WorkspaceFolderNodeMenu() {
             {/* Delete/Restore - hidden for workspace root */}
             {!isWorkspaceRoot &&
                 (() => {
-                    // Check if folder is deleted
-                    const isDeleted = contextData && contextData.deletedAt !== null && contextData.deletedAt !== undefined;
-
-                    return isDeleted ? (
-                        <>
+                    // If item is directly deleted (not inherited), show both Hard Delete and Restore
+                    if (isDirectlyDeleted) {
+                        return (
+                            <>
+                                {/*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
+                                {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
+                                    <HardDeleteIcon className="w-4 h-4 mr-2" />
+                                    Hard Delete
+                                </MenuItem> */}
+                                <MenuItem onClick={(e) => dhr_items(e, false)}>
+                                    <RestoreIcon className="w-4 h-4 mr-2" />
+                                    Restore
+                                </MenuItem>
+                            </>
+                        );
+                    }
+                    // If item is deleted but not directly (inherited from parent), only show Hard Delete
+                    else if (isDeleted && !isDirectlyDeleted) {
+                        return (
                             <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
                                 <HardDeleteIcon className="w-4 h-4 mr-2" />
                                 Hard Delete
                             </MenuItem>
+                        );
+                    }
+                    // If item is not deleted, show normal Delete option
+                    else {
+                        return (
                             <MenuItem onClick={(e) => dhr_items(e, false)}>
-                                <RestoreIcon className="w-4 h-4 mr-2" />
-                                Restore
+                                <DeleteIcon className="w-4 h-4 mr-2" />
+                                Delete
                             </MenuItem>
-                        </>
-                    ) : (
-                        <MenuItem onClick={(e) => dhr_items(e, false)}>
-                            <DeleteIcon className="w-4 h-4 mr-2" />
-                            Delete
-                        </MenuItem>
-                    );
+                        );
+                    }
                 })()}
         </>
     );
