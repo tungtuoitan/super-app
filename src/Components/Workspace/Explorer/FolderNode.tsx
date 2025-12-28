@@ -109,29 +109,36 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
 
     return (
         <div
-            ref={(el) => {
-                // Make entire node draggable (VS Code style - no special cursor)
-                if (dragHandle && typeof dragHandle === "function" && el) {
-                    try {
-                        dragHandle(el);
-                    } catch (error) {
-                        console.warn("Error setting dragHandle:", error);
-                    }
-                }
+            style={{
+                ...style,
+                marginLeft: `${node.level * -13}px`, // Reduced from default ~20-24px per level to 12px
             }}
-            style={{ ...style, paddingLeft: `${node.level * 8}px` }}
-            onClick={handleMainClick}
-            onContextMenu={handleRightClick}
             className={`
-                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded 
-                transition-all duration-150 ease-in-out
-                ${isDragging ? "opacity-40" : "opacity-100"}
                 ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover"}
-                ${isWorkspaceRoot ? "font-semibold" : ""}
-                ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1" : ""}
-                ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1" : ""}
+                rounded transition-all duration-150 ease-in-out
             `}
         >
+            <div
+                ref={(el) => {
+                    // Make entire node draggable (VS Code style - no special cursor)
+                    if (dragHandle && typeof dragHandle === "function" && el) {
+                        try {
+                            dragHandle(el);
+                        } catch (error) {
+                            console.warn("Error setting dragHandle:", error);
+                        }
+                    }
+                }}
+                onClick={handleMainClick}
+                onContextMenu={handleRightClick}
+                className={`
+                    flex items-center h-full w-full py-1 pr-2 cursor-pointer
+                    ${isDragging ? "opacity-40" : "opacity-100"}
+                    ${isWorkspaceRoot ? "font-semibold" : ""}
+                    ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
+                    ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
+                `}
+            >
             {/* Expand/Collapse Button */}
             <button
                 onClick={(e) => {
@@ -141,7 +148,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                 }}
                 className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
             >
-                {hasChildren ? node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" /> : null}
+                {hasChildren ? node.isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" /> : <div className="w-3 h-3" />}
             </button>
 
             {/* Folder Icon */}
@@ -156,7 +163,8 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                         <FolderIcon className="w-4 h-4 text-yellow-500" />
                     )
                 ) : (
-                    <TagIcon className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
+                    // <TagIcon className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
+                    <FolderIcon className="w-4 h-4 text-yellow-500" />
                 )}
             </div>
 
@@ -174,6 +182,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                         {folderName}
                     </span>
                 </div>
+            </div>
             </div>
         </div>
     );
