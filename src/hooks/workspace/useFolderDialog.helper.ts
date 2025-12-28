@@ -37,14 +37,14 @@ export const useFolderDialogHelper = () => {
     } = useFolderDialogStore();
 
     // Workspace state
-    const { currentTree } = useWorkspaceStore();
+    const { currentWorkspace } = useWorkspaceStore();
 
     // Auth
     const { $user } = useAuthStore();
     const token = $user.userToken;
 
     // Computed value
-    const selectedWorkspaceId = currentTree?.id;
+    const selectedWorkspaceId = currentWorkspace?.id;
 
     /**
      * Reset form to initial state

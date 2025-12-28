@@ -20,7 +20,7 @@ export const useWorkspaceChildMenuHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { enqueueSnackbar } = useSnackbar();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
-    const { setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
+    const { setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
 
     const isNote = contextType === constants.workspace.itemTypes.note;
     const isFile = contextType === constants.workspace.itemTypes.file;
@@ -88,7 +88,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ---------
         try {
             const token = $user.userToken;
-            const workspaceId = currentTree?.id || 1;
+            const workspaceId = currentWorkspace?.id || 1;
 
             const result = await workspaceService._deleteWorkspaceItems(token ?? "", workspaceId, {
                 items: [{ id: fileData.id, type: 4 as const }], // type 4 = file

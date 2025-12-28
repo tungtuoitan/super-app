@@ -6,7 +6,7 @@
  * @returns {Object} Workspace operation functions only (no state)
  * @example
  * // Get state from store
- * const { allWorkspaces, currentTree } = useWorkspaceStore();
+ * const { allWorkspaces, currentWorkspace } = useWorkspaceStore();
  * // Get actions from helper
  * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
  */
@@ -22,7 +22,7 @@ import {WorkspaceDTO} from "@/types/workspace-dto.types";
 export const useWorkspaceOperation = () => {
     const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { allWorkspaces, setAllWorkspaces, currentTree, setCurrentTree, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
+    const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
 
     /**
      * Load all user workspaces
@@ -38,11 +38,11 @@ export const useWorkspaceOperation = () => {
             setAllWorkspaces(data);
 
             // Set default to first workspace if available and no tree loaded
-            if (data.length > 0 && !currentTree) {
+            if (data.length > 0 && !currentWorkspace) {
                 const defaultWorkspaceId = data[0].id;
-
+                setSelectedWorkspaceId(defaultWorkspaceId);
                 // Auto-load tree for default workspace
-                await loadTree(defaultWorkspaceId);
+                // await loadTree(defaultWorkspaceId);
             }
 
             return data;
@@ -83,7 +83,7 @@ export const useWorkspaceOperation = () => {
             console.log("🔧 Loading Workspace V2 API with filters:", params);
             const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, workspaceId, params);
             if(result && result.success){
-                setCurrentTree(result.object as WorkspaceDTO);
+                setCurrentWorkspace(result.object as WorkspaceDTO);
                 return result.object;
             }
 
@@ -98,7 +98,7 @@ export const useWorkspaceOperation = () => {
      * Select a workspace and load its tree
      */
     const selectWorkspace = async (workspaceId: number) => {
-        // Load tree for selected workspace (will set currentTree which contains workspaceId)
+        // Load tree for selected workspace (will set currentWorkspace which contains workspaceId)
         await loadTree(workspaceId);
     };
 

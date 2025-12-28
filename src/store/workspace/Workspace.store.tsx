@@ -12,8 +12,8 @@ export interface WorkspaceContextData {
     // Workspace state
     allWorkspaces: WsResponse[];
     setAllWorkspaces: Dispatch<SetStateAction<WsResponse[]>>;
-    currentTree: WorkspaceDTO | null; // Current workspace tree data (unified WorkspaceDTO)
-    setCurrentTree: Dispatch<SetStateAction<WorkspaceDTO | null>>;
+    currentWorkspace: WorkspaceDTO | null; // Current workspace tree data (unified WorkspaceDTO)
+    setCurrentWorkspace: Dispatch<SetStateAction<WorkspaceDTO | null>>;
     isLoadingWorkspaces: boolean;
     setIsLoadingWorkspaces: Dispatch<SetStateAction<boolean>>;
     isLoadingTree: boolean;
@@ -33,13 +33,15 @@ export interface WorkspaceContextData {
     isDragging: boolean;
     setIsDragging: Dispatch<SetStateAction<boolean>>;
     _treeRef: React.RefObject<any>;
+    selectedWorkspaceId: number | null;
+    setSelectedWorkspaceId: Dispatch<SetStateAction<number | null>>;
 }
 
 export const workspaceContextDefaultValue: WorkspaceContextData = {
     allWorkspaces: [],
     setAllWorkspaces: () => {},
-    currentTree: null,
-    setCurrentTree: () => {},
+    currentWorkspace: null,
+    setCurrentWorkspace: () => {},
     isLoadingWorkspaces: false,
     setIsLoadingWorkspaces: () => {},
     isLoadingTree: false,
@@ -57,6 +59,8 @@ export const workspaceContextDefaultValue: WorkspaceContextData = {
     isDragging: false,
     setIsDragging: () => {},
     _treeRef: { current: null },
+    selectedWorkspaceId: null,
+    setSelectedWorkspaceId: () => {},
 };
 
 export const WorkspaceStore = createContext<WorkspaceContextData>(workspaceContextDefaultValue);
@@ -65,7 +69,7 @@ export const useWorkspaceStore = () => useContext(WorkspaceStore);
 
 export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [allWorkspaces, setAllWorkspaces] = useState<WsResponse[]>([]);
-    const [currentTree, setCurrentTree] = useState<WorkspaceDTO | null>(null);
+    const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceDTO | null>(null);
     const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
 
@@ -77,14 +81,16 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const _treeRef = useRef<any>(null);
+    const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<number | null>(null);
+    
 
     return (
         <WorkspaceStore.Provider
             value={{
                 allWorkspaces,
                 setAllWorkspaces,
-                currentTree,
-                setCurrentTree,
+                currentWorkspace,
+                setCurrentWorkspace,
                 isLoadingWorkspaces,
                 setIsLoadingWorkspaces,
                 isLoadingTree,
@@ -102,6 +108,8 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 isDragging,
                 setIsDragging,
                 _treeRef,
+                selectedWorkspaceId,
+                setSelectedWorkspaceId,
             }}
         >
             {children}

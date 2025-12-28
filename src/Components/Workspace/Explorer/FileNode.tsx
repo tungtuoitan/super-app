@@ -37,7 +37,7 @@ function getFileIcon(extension?: string) {
 }
 
 export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelectionHelper();
 
@@ -83,7 +83,7 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.flatData.find((i: any) => i.entityId === entityId);
+        const _currentItem = currentWorkspace?.flatData.find((i: any) => i.entityId === entityId);
 
         // Open file-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });

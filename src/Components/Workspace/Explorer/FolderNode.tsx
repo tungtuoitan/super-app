@@ -9,7 +9,7 @@ import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
-    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
+    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelectionHelper();
 
@@ -103,7 +103,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             return;
         }
 
-        const _currentFolder = currentTree?.flatData.find((f: any) => f.entityId === entityId);
+        const _currentFolder = currentWorkspace?.flatData.find((f: any) => f.entityId === entityId);
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };

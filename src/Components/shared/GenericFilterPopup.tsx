@@ -18,31 +18,7 @@ import { constants } from "@/utils/constants";
 import { useGenericFilterHelper } from "@/hooks/index";
 import { useAuthStore, useStandardRegistryStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-
-// Helper functions for date range slider
-const getMonthFromIndex = (index: number): string => {
-    const now = new Date();
-    const targetDate = new Date(now.getFullYear(), now.getMonth() - (24 - index), 1);
-    const year = targetDate.getFullYear();
-    const month = String(targetDate.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-};
-
-const getIndexFromMonth = (monthStr: string): number => {
-    if (!monthStr) return 0;
-    const [year, month] = monthStr.split("-").map(Number);
-    const targetDate = new Date(year, month - 1, 1);
-    const now = new Date();
-    const currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    const diffInMonths = (targetDate.getFullYear() - currentDate.getFullYear()) * 12 + (targetDate.getMonth() - currentDate.getMonth());
-    return 24 + diffInMonths; // 24 = offset for 2 years back, can go to 25 (current + 1)
-};
-
-const formatMonthLabel = (monthStr: string): string => {
-    if (!monthStr) return "";
-    const [year, month] = monthStr.split("-").map(Number);
-    return `01/${month}/${year}`;
-};
+import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/utils/formatters";
 
 export function GenericFilterPopup() {
     const {
@@ -61,6 +37,219 @@ export function GenericFilterPopup() {
 
     const fieldErrors = getFieldErrors();
     const applyDisabled = isApplyDisabled();
+
+    // ============================================================
+    // RENDER HELPERS - Extracted for clarity
+    // ============================================================
+
+    /**
+     * Render standard registry field (Status) - Radio or Checkbox
+     * Used for: statusCode in noteGrid, wsGrid, workspace
+     */
+    const renderStandardRegistryField = (group: FilterFieldConfig) => {
+        const options = registriesByType[group.standardRegistryType!] || [];
+        const hasError = !!fieldErrors[group.key];
+
+        return (
+            <div key={group.key} className="space-y-2 pb-2">
+                <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
+                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
+                </div>
+                <div className="space-y-1.5">
+                    {options.map((option) => {
+                        const isChecked = isPendingValueActive(group.key, option.code);
+
+                        return (
+                            <div key={option.code} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`${group.key}-${option.code}`}
+                                    checked={isChecked}
+                                    onCheckedChange={() => handleCheckboxToggle(group.key, option.code)}
+                                />
+                                <label
+                                    htmlFor={`${group.key}-${option.code}`}
+                                    className={`text-sm font-normal cursor-pointer ${isChecked ? "text-foreground" : "text-gray-400"}`}
+                                >
+                                    {option.description || option.code}
+                                </label>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
+
+    /**
+     * Render deletedAt field with RADIO buttons
+     * Used for: noteGrid, wsGrid
+     * User can select ONLY ONE: Existing OR Deleted
+     */
+    const renderDeletedAtRadio = (group: FilterFieldConfig) => {
+        const currentValue = (uiFilters as any)[group.key] || "";
+        const hasError = !!fieldErrors[group.key];
+
+        return (
+            <div key={group.key} className="space-y-2 pb-2">
+                <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
+                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
+                </div>
+                <RadioGroup value={currentValue} onValueChange={(value) => handleRadioChange("deletedAt", value)} className="">
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="null" id="deletedAt-null" />
+                        <label
+                            htmlFor="deletedAt-null"
+                            className={`text-sm font-normal cursor-pointer ${currentValue === "null" ? "text-foreground" : "text-gray-400"}`}
+                        >
+                            Existing
+                        </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="notNull" id="deletedAt-notNull" />
+                        <label
+                            htmlFor="deletedAt-notNull"
+                            className={`text-sm font-normal cursor-pointer ${currentValue === "notNull" ? "text-foreground" : "text-gray-400"}`}
+                        >
+                            Deleted
+                        </label>
+                    </div>
+                </RadioGroup>
+            </div>
+        );
+    };
+
+    /**
+     * Render deletedAt field with CHECKBOXES
+     * Used for: workspace
+     * User can select BOTH: Existing AND/OR Deleted
+     * VALIDATION: Must always include "Existing" (null)
+     */
+    const renderDeletedAtCheckbox = (group: FilterFieldConfig) => {
+        const hasError = !!fieldErrors[group.key];
+
+        return (
+            <div key={group.key} className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
+                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
+                </div>
+                <div className="space-y-1.5 ml-2">
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="deletedAt-null"
+                            checked={isPendingValueActive("deletedAt", "null")}
+                            onCheckedChange={() => handleCheckboxToggle("deletedAt", "null")}
+                        />
+                        <label
+                            htmlFor="deletedAt-null"
+                            className={`text-sm font-normal cursor-pointer ${
+                                isPendingValueActive("deletedAt", "null") ? "text-foreground" : "text-gray-400"
+                            }`}
+                        >
+                            Existing
+                        </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="deletedAt-notNull"
+                            checked={isPendingValueActive("deletedAt", "notNull")}
+                            onCheckedChange={() => handleCheckboxToggle("deletedAt", "notNull")}
+                        />
+                        <label
+                            htmlFor="deletedAt-notNull"
+                            className={`text-sm font-normal cursor-pointer ${
+                                isPendingValueActive("deletedAt", "notNull") ? "text-foreground" : "text-gray-400"
+                            }`}
+                        >
+                            Deleted
+                        </label>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    /**
+     * Render date range slider
+     * Used for: createdAt in noteGrid, wsGrid
+     * Range: 24 months ago to current month + 1
+     */
+    const renderDateRange = (group: FilterFieldConfig) => {
+        const filterValue = (uiFilters as any)[group.key] || "";
+        const [fromMonth, toMonth] = filterValue ? filterValue.split(",") : ["", ""];
+        const hasError = !!fieldErrors[group.key];
+
+        // Default to full range if not set
+        const fromIndex = fromMonth ? getIndexFromMonth(fromMonth) : 0;
+        const toIndex = toMonth ? getIndexFromMonth(toMonth) : 25;
+
+        const displayFrom = fromMonth || getMonthFromIndex(0);
+        const displayTo = toMonth || getMonthFromIndex(25);
+
+        return (
+            <div key={group.key} className="space-y-3 pb-2">
+                <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
+                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
+                </div>
+                <div className="space-y-2">
+                    <Slider
+                        min={0}
+                        max={25}
+                        step={1}
+                        minStepsBetweenThumbs={1}
+                        value={[fromIndex, toIndex]}
+                        onValueChange={(values) => {
+                            let [from, to] = values;
+
+                            // Ensure from is always <= to
+                            if (from > to) {
+                                [from, to] = [to, from];
+                            }
+
+                            const fromMonthStr = getMonthFromIndex(from);
+                            const toMonthStr = getMonthFromIndex(to);
+                            handleDateRangeChange(group.key, fromMonthStr, toMonthStr);
+                        }}
+                        className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{formatMonthLabel(displayFrom)}</span>
+                        <span>{formatMonthLabel(displayTo)}</span>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    /**
+     * Main field router - Decides which render function to use
+     */
+    const renderFieldOrchestrator = (group: FilterFieldConfig) => {
+        // 1. Standard registry fields (Status) - Radio or Checkbox
+        if ((group.type === "checkbox" || group.type === "radio") && group.standardRegistryType) {
+            return renderStandardRegistryField(group);
+        }
+
+        // 2. DeletedAt with Radio (noteGrid, wsGrid)
+        if (group.type === "radio" && group.key === "deletedAt") {
+            return renderDeletedAtRadio(group);
+        }
+
+        // 3. DeletedAt with Checkbox (workspace) - Must include "Existing"
+        if (group.type === "checkbox" && group.key === "deletedAt") {
+            return renderDeletedAtCheckbox(group);
+        }
+
+        // 4. Date range slider (createdAt)
+        if (group.type === "dateRange") {
+            return renderDateRange(group);
+        }
+
+        return null;
+    };
 
     // Check if UI filters differ from default filters
     const defaultFilters = filterViewKey ? (constants.filters.defaults[filterViewKey] as ViewFilter) : {};
@@ -145,177 +334,7 @@ export function GenericFilterPopup() {
 
                     {/* Filter Fields */}
                     <div className="space-y-4 max-h-96 overflow-y-auto overflow-x-hidden">
-                        {groups.map((group) => {
-                            const hasError = !!fieldErrors[group.key];
-
-                            // ==========================================================
-                            if ((group.type === "checkbox" || group.type === "radio") && group.standardRegistryType) {
-                                // ==========================================================
-                                // Checkbox group for standard registry fields (status, etc.)
-                                const options = registriesByType[group.standardRegistryType] || [];
-
-                                return (
-                                    <div key={group.key} className="space-y-2 pb-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                                            {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            {options.map((option) => {
-                                                const isChecked = isPendingValueActive(group.key, option.code);
-
-                                                return (
-                                                    <div key={option.code} className="flex items-center space-x-2">
-                                                        <Checkbox
-                                                            id={`${group.key}-${option.code}`}
-                                                            checked={isChecked}
-                                                            onCheckedChange={() => handleCheckboxToggle(group.key, option.code)}
-                                                        />
-                                                        <label
-                                                            htmlFor={`${group.key}-${option.code}`}
-                                                            className={`text-sm font-normal cursor-pointer ${isChecked ? "text-foreground" : "text-gray-400"}`}
-                                                        >
-                                                            {option.description || option.code}
-                                                        </label>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            }
-                            // ==========================================================
-                            else if (group.type === "radio" && group.key === "deletedAt") {
-                                // ==========================================================
-                                // Special case for deletedAt filter with radio buttons (noteGrid, wsGrid)
-                                const currentValue = (uiFilters as any)[group.key] || "";
-
-                                return (
-                                    <div key={group.key} className="space-y-2 pb-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                                            {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                                        </div>
-                                        <RadioGroup value={currentValue} onValueChange={(value) => handleRadioChange("deletedAt", value)} className="">
-                                            <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="null" id="deletedAt-null" />
-                                                <label
-                                                    htmlFor="deletedAt-null"
-                                                    className={`text-sm font-normal cursor-pointer ${currentValue === "null" ? "text-foreground" : "text-gray-400"}`}
-                                                >
-                                                    Existing
-                                                </label>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="notNull" id="deletedAt-notNull" />
-                                                <label
-                                                    htmlFor="deletedAt-notNull"
-                                                    className={`text-sm font-normal cursor-pointer ${currentValue === "notNull" ? "text-foreground" : "text-gray-400"}`}
-                                                >
-                                                    Deleted
-                                                </label>
-                                            </div>
-                                        </RadioGroup>
-                                    </div>
-                                );
-                            }
-                            // ==========================================================
-                            else if (group.type === "checkbox" && group.key === "deletedAt") {
-                                // ==========================================================
-                                // Special case for deletedAt filter with checkboxes (workspace)
-                                return (
-                                    <div key={group.key} className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                                            {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                                        </div>
-                                        <div className="space-y-1.5 ml-2">
-                                            <div className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id="deletedAt-null"
-                                                    checked={isPendingValueActive("deletedAt", "null")}
-                                                    onCheckedChange={() => handleCheckboxToggle("deletedAt", "null")}
-                                                />
-                                                <label
-                                                    htmlFor="deletedAt-null"
-                                                    className={`text-sm font-normal cursor-pointer ${
-                                                        isPendingValueActive("deletedAt", "null") ? "text-foreground" : "text-gray-400"
-                                                    }`}
-                                                >
-                                                    Existing
-                                                </label>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id="deletedAt-notNull"
-                                                    checked={isPendingValueActive("deletedAt", "notNull")}
-                                                    onCheckedChange={() => handleCheckboxToggle("deletedAt", "notNull")}
-                                                />
-                                                <label
-                                                    htmlFor="deletedAt-notNull"
-                                                    className={`text-sm font-normal cursor-pointer ${
-                                                        isPendingValueActive("deletedAt", "notNull") ? "text-foreground" : "text-gray-400"
-                                                    }`}
-                                                >
-                                                    Deleted
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            }
-                            // ==========================================================
-                            else if (group.type === "dateRange") {
-                                // ==========================================================
-                                // Date range slider (from current month - 24 months to current month + 1 month)
-                                const filterValue = (uiFilters as any)[group.key] || "";
-                                const [fromMonth, toMonth] = filterValue ? filterValue.split(",") : ["", ""];
-
-                                // Default to full range if not set
-                                const fromIndex = fromMonth ? getIndexFromMonth(fromMonth) : 0;
-                                const toIndex = toMonth ? getIndexFromMonth(toMonth) : 25;
-
-                                const displayFrom = fromMonth || getMonthFromIndex(0);
-                                const displayTo = toMonth || getMonthFromIndex(25);
-
-                                return (
-                                    <div key={group.key} className="space-y-3 pb-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                                            {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Slider
-                                                min={0}
-                                                max={25}
-                                                step={1}
-                                                minStepsBetweenThumbs={1}
-                                                value={[fromIndex, toIndex]}
-                                                onValueChange={(values) => {
-                                                    let [from, to] = values;
-
-                                                    // Ensure from is always <= to
-                                                    if (from > to) {
-                                                        [from, to] = [to, from];
-                                                    }
-
-                                                    const fromMonthStr = getMonthFromIndex(from);
-                                                    const toMonthStr = getMonthFromIndex(to);
-                                                    handleDateRangeChange(group.key, fromMonthStr, toMonthStr);
-                                                }}
-                                                className="w-full"
-                                            />
-                                            <div className="flex justify-between text-xs text-muted-foreground">
-                                                <span>{formatMonthLabel(displayFrom)}</span>
-                                                <span>{formatMonthLabel(displayTo)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            }
-
-                            return null;
-                        })}
+                        {groups.map((group) => renderFieldOrchestrator(group))}
                     </div>
                 </div>
             </PopoverContent>

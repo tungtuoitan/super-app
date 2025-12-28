@@ -18,7 +18,7 @@ interface RootFolderNodeProps {
  * Shows workspace name and provides quick actions: Add Folder, Refresh, Collapse All
  */
 export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
-    const { currentTree } = useWorkspaceStore();
+    const { currentWorkspace } = useWorkspaceStore();
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
     const { loadTree } = useWorkspaceOperation();
@@ -77,8 +77,8 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                     title="Refresh"
                     onClick={(e) => {
                         e.stopPropagation();
-                        if (currentTree?.id) {
-                            loadTree(currentTree.id);
+                        if (currentWorkspace?.id) {
+                            loadTree(currentWorkspace.id);
                         }
                     }}
                     className="p-1 text-editor-fg hover:bg-editor-hover rounded"

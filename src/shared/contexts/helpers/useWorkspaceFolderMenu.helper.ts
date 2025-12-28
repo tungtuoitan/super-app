@@ -107,7 +107,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree, setCurrentTree } = useWorkspaceStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
     const { processTabAfterDelete } = useEditorTabHelper();
 
@@ -160,8 +160,8 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 2: Find next item to select after deletion (VS Code behavior)
         // ----------------
         let nextFolderIdToSelect: number | null = null;
-        if (currentTree?.flatData) {
-            const allVisibleFolderIds = $getAllVisibleTagIds(currentTree.flatData);
+        if (currentWorkspace?.flatData) {
+            const allVisibleFolderIds = $getAllVisibleTagIds(currentWorkspace.flatData);
             const currentIndex = allVisibleFolderIds.indexOf(folder.id);
 
             if (currentIndex !== -1) {
@@ -214,7 +214,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 };
             });
 
-            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.id || 1, {
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentWorkspace?.id || 1, {
                 items: deleteItems,
                 isHardDelete,
             });
@@ -224,12 +224,12 @@ export const useWorkspaceFolderMenuHelper = () => {
             // ----------------
             if (result && result.success) {
                 // Remove folders from tree
-                if (currentTree) {
+                if (currentWorkspace) {
                     const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                    const updatedItems = $removeItems(currentTree.flatData, idsToRemove);
+                    const updatedItems = $removeItems(currentWorkspace.flatData, idsToRemove);
 
-                    setCurrentTree({
-                        ...currentTree,
+                    setCurrentWorkspace({
+                        ...currentWorkspace,
                         flatData: updatedItems,
                     });
 
@@ -269,7 +269,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         // STEP 1: Validate tree data
         // ----------------
-        if (!currentTree?.flatData) {
+        if (!currentWorkspace?.flatData) {
             console.error("❌ Cannot delete: no tree data");
             return;
         }
@@ -279,7 +279,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         const selectedFolders: Folder[] = [];
         for (const folderId of selectedIds) {
-            const folder = $findFolderById(currentTree.flatData, folderId);
+            const folder = $findFolderById(currentWorkspace.flatData, folderId);
             if (folder) {
                 // Check if this is a workspace root node (negative ID)
                 if (folder.id < 0) {
@@ -299,7 +299,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 3: Find next item to select after deletion (VS Code behavior)
         // ----------------
         let nextFolderIdToSelect: number | null = null;
-        const allVisibleFolderIds = $getAllVisibleTagIds(currentTree.flatData);
+        const allVisibleFolderIds = $getAllVisibleTagIds(currentWorkspace.flatData);
 
         // Find the highest index among selected folders
         const selectedIndices = selectedIds
@@ -363,7 +363,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 };
             });
 
-            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.id || 1, {
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentWorkspace?.id || 1, {
                 items: deleteItems,
                 isHardDelete,
             });
@@ -373,12 +373,12 @@ export const useWorkspaceFolderMenuHelper = () => {
             // ----------------
             if (result && result.message === "Items deleted successfully") {
                 // Remove folders from tree
-                if (currentTree) {
+                if (currentWorkspace) {
                     const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                    const updatedItems = $removeItems(currentTree.flatData, idsToRemove);
+                    const updatedItems = $removeItems(currentWorkspace.flatData, idsToRemove);
 
-                    setCurrentTree({
-                        ...currentTree,
+                    setCurrentWorkspace({
+                        ...currentWorkspace,
                         flatData: updatedItems,
                     });
 
@@ -498,7 +498,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         }
 
         // ===== STEP 2: Validate tree data =====
-        if (!currentTree?.flatData) {
+        if (!currentWorkspace?.flatData) {
             console.error("❌ Cannot delete: no tree data");
             return;
         }
@@ -507,7 +507,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             const token = $user.userToken;
 
             // ===== STEP 3: Filter to top-level parents only =====
-            const treeData = buildTreeFromV2Items(currentTree.flatData);
+            const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
             const topLevelIds = filterTopLevelParents(selectedIds, treeData);
 
             console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
@@ -520,7 +520,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             // ===== STEP 4: Find items and skip workspace root =====
             const selectedItems: WorkspaceItemV2[] = [];
             for (const itemId of topLevelIds) {
-                const item = $findItemById(currentTree.flatData, itemId);
+                const item = $findItemById(currentWorkspace.flatData, itemId);
                 if (item && item.id > 0) {
                     // Skip workspace root (negative ID)
                     selectedItems.push(item);
@@ -562,7 +562,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             });
 
             // ===== STEP 8: Call batch upsert API (giống __deleteRestore_SelectedNotes) =====
-            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentTree.id, batchRequests);
+            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentWorkspace.id, batchRequests);
 
             if (!result.success) {
                 throw new Error(result.message || "Batch update failed");
@@ -589,9 +589,9 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
 
             // Reload workspace tree (giống __deleteRestore_SelectedNotes: await loadNotes())
-            const res = await workspaceService._getWorkspaceTreeV2(token ?? "", currentTree.id);
+            const res = await workspaceService._getWorkspaceTreeV2(token ?? "", currentWorkspace.id);
             if(res && res.success){
-                setCurrentTree(res.object as WorkspaceDTO);
+                setCurrentWorkspace(res.object as WorkspaceDTO);
                 // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
                 setSelectedFolderIds([]);
                 setLastSelectedFolderId(null);
@@ -623,7 +623,7 @@ export const useWorkspaceFolderMenuHelper = () => {
 
         // With V2 flat structure, find all descendants by traversing parentId relationships
         const findDescendants = (parentId: number) => {
-            const children = currentTree?.flatData.filter(i => i.parentId === parentId) || [];
+            const children = currentWorkspace?.flatData.filter(i => i.parentId === parentId) || [];
             for (const child of children) {
                 descendants.push(child);
                 // Recursively find descendants of this child

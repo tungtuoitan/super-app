@@ -20,32 +20,31 @@ import {useGridControlStore} from "@/store/grid/useGridControl.store";
  */
 export function WorkspaceView() {
     const { $user } = useAuthStore();
-    const { allWorkspaces, currentTree, isLoadingWorkspaces, isLoadingTree } = useWorkspaceStore();
+    const { allWorkspaces, currentWorkspace, isLoadingWorkspaces, isLoadingTree, selectedWorkspaceId,setSelectedWorkspaceId } = useWorkspaceStore();
     const { loadAllWorkspaces, selectWorkspace, loadTree } = useWorkspaceOperation();
     const { setModuleName, setFilterViewKey } = useGridControlStore();
-    const [selectedOption, setSelectedOption] = useState<IAutoCompleteOptions | null>(null);
 
 
     // Load workspaces on mount
     useEffect(() => {
-        if(!$user.userId || !$user.filters) return;
+        if(!$user.userId ) return;
         loadAllWorkspaces();
-    }, [$user.userId, $user.filters]);
+    }, [$user.userId]);
 
-    // Sync selected option with currentTree.id from store
     useEffect(() => {
-        if (currentTree?.id && allWorkspaces.length > 0) {
-            const workspace = allWorkspaces.find((ws) => ws.id === currentTree.id);
+        if(!$user.userId || !$user.filters || selectedWorkspaceId === null) return;
+            loadTree(selectedWorkspaceId)
+    }, [$user.userId, $user.filters, selectedWorkspaceId]);
+
+    // Sync selected option with currentWorkspace.id from store
+    useEffect(() => {
+        if (currentWorkspace?.id && allWorkspaces.length > 0) {
+            const workspace = allWorkspaces.find((ws) => ws.id === currentWorkspace.id);
             if (workspace) {
-                setSelectedOption({
-                    id: workspace.id.toString(),
-                    label: workspace.name,
-                    desc: workspace.description || workspace.name,
-                    active: true,
-                });
+                setSelectedWorkspaceId(workspace.id);
             }
         }
-    }, [currentTree?.id, allWorkspaces]);
+    }, [currentWorkspace?.id, allWorkspaces]);
 
     // Convert workspaces to autocomplete options
     const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => ({
@@ -57,8 +56,7 @@ export function WorkspaceView() {
 
     // Handle workspace selection change
     const handleWorkspaceChange = (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
-        setSelectedOption(newValue);
-
+        setSelectedWorkspaceId(newValue?.id ? parseInt(newValue.id.toString()) : null);
         if (newValue?.id) {
             const workspaceId = parseInt(newValue.id.toString());
             selectWorkspace(workspaceId);
@@ -73,7 +71,7 @@ export function WorkspaceView() {
             <div className="px-3 py-2">
                 <GenericAutoComplete
                     allOptions={workspaceOptions}
-                    value={selectedOption}
+                    value={workspaceOptions.find(option => option.id === selectedWorkspaceId?.toString()) || null}
                     onChange={handleWorkspaceChange}
                     inputProps={{
                         name: "workspace",

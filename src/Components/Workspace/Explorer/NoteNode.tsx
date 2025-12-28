@@ -11,7 +11,7 @@ import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentTree } = useWorkspaceStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelectionHelper();
     const { openTab } = useEditorTabHelper();
@@ -72,7 +72,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.flatData.find((i: any) => i.entityId === entityId);
+        const _currentItem = currentWorkspace?.flatData.find((i: any) => i.entityId === entityId);
 
         // Open note-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });

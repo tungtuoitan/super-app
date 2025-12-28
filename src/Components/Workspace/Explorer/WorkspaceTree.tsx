@@ -16,7 +16,7 @@ import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "
 import { constants } from "@/utils/constants";
 
 export function WorkspaceTree() {
-    const { searchText, isDragging, currentTree, _treeRef } = useWorkspaceStore();
+    const { searchText, isDragging, currentWorkspace, _treeRef } = useWorkspaceStore();
     const { handleSelectionChange, handleKeyDown } = useTreeSelectionHelper();
     const { handleMove } = useTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -87,17 +87,17 @@ export function WorkspaceTree() {
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
         const treeData = useMemo(() => {
-        const baseTree = treeMiniHelper.transformToTreeData(currentTree, searchText);
+        const baseTree = treeMiniHelper.transformToTreeData(currentWorkspace, searchText);
 
         // Add invisible drop zone at the end to catch drops to root level
-        if (baseTree.length > 0 && currentTree?.id) {
+        if (baseTree.length > 0 && currentWorkspace?.id) {
             const dropZoneNode: TreeFolder = {
-                id: `drop-zone-root-${currentTree.id}`,
+                id: `drop-zone-root-${currentWorkspace.id}`,
                 name: "",
                 data: {
                     // V2 structure
                     id: -1,
-                    workspaceId: currentTree.id,
+                    workspaceId: currentWorkspace.id,
                     parentId: null,
                     entityType: 2 as const,
                     entityId: -1,
@@ -111,7 +111,7 @@ export function WorkspaceTree() {
                     isOriginal: true,
                     data: {
                         id: -1,
-                        userId: currentTree.userId,
+                        userId: currentWorkspace.userId,
                         name: "",
                         description: undefined,
                         color: undefined,
@@ -131,7 +131,7 @@ export function WorkspaceTree() {
         }
 
         return baseTree;
-    }, [currentTree, searchText]);
+    }, [currentWorkspace, searchText]);
 
     // Calculate drop zone height to fill remaining space
     const dropZoneHeight = useMemo(() => {

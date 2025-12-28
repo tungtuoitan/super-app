@@ -454,7 +454,7 @@ where workspace_id = 53
     ]
 }
 
-# biến currentTree
+# biến currentWorkspace
 {
     "workspaceId": 53,
     "userId": 5,

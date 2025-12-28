@@ -22,7 +22,7 @@ export const useNoteDetailHelper = () => {
     const { originalNoteRef } = useNoteDetailStore();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceOperation();
-    const { currentTree } = useWorkspaceStore();
+    const { currentWorkspace } = useWorkspaceStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
     const { registries, registriesLoading } = useStandardRegistryStore();
@@ -127,7 +127,7 @@ export const useNoteDetailHelper = () => {
                     const firstHashtag = activeNote.hashtags[0];
                     const parentFolderId = typeof firstHashtag === "number" ? firstHashtag : (firstHashtag as any)?.id || (firstHashtag as any)?.tagId;
 
-                    const workspaceId = currentTree?.id;
+                    const workspaceId = currentWorkspace?.id;
 
                     if (workspaceId && parentFolderId) {
                         try {
@@ -171,8 +171,8 @@ export const useNoteDetailHelper = () => {
                 originalNoteRef.current = { ...transformedNote };
                 await loadNotes();
 
-                if (isCreateMode && currentTree?.id) {
-                    await loadTree(currentTree.id);
+                if (isCreateMode && currentWorkspace?.id) {
+                    await loadTree(currentWorkspace.id);
                 }
 
                 return transformedNote;
@@ -188,7 +188,7 @@ export const useNoteDetailHelper = () => {
                 return null;
             }
         },
-        [loadNotes, loadTree, currentTree, getActiveTab]
+        [loadNotes, loadTree, currentWorkspace, getActiveTab]
     );
 
     const hashtagOptions = registries

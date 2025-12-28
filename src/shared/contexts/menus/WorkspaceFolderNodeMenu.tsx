@@ -34,7 +34,7 @@ import { NoteItem } from "@/types/workspace.types";
  */
 export function WorkspaceFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
-    const { selectedFolderIds, currentTree, setCurrentTree } = useWorkspaceStore();
+    const { selectedFolderIds, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { createFolder, editFolder, dhr_items } = useWorkspaceFolderMenuHelper();
     const { openTabs } = useEditorTabsStore();
     const { openTab } = useEditorTabHelper();
@@ -93,8 +93,8 @@ export function WorkspaceFolderNodeMenu() {
             children: [],
         };
 
-        // Add note to currentTree
-        if (currentTree && contextData) {
+        // Add note to currentWorkspace
+        if (currentWorkspace && contextData) {
             const addNoteToTree = (items: any[]): any[] => {
                 return items.map(item => {
                     if (item.id === contextData.tagId) {
@@ -114,13 +114,13 @@ export function WorkspaceFolderNodeMenu() {
                 });
             };
             const newTree = {
-                ...currentTree,
-                flatData: addNoteToTree(currentTree.flatData),
-                noteCount: currentTree.noteCount + 1
+                ...currentWorkspace,
+                flatData: addNoteToTree(currentWorkspace.flatData),
+                noteCount: currentWorkspace.noteCount + 1
             }
             console.log("New Tree after adding note:", newTree);
 
-            setCurrentTree(newTree);
+            setCurrentWorkspace(newTree);
         }
 
         // Open tab first

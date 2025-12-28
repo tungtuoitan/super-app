@@ -23,7 +23,7 @@ import { constants } from "@/utils/constants";
 
 export function FolderDialog() {
     // Get state from ExplorerStore
-    const { currentTree } = useWorkspaceStore();
+    const { currentWorkspace } = useWorkspaceStore();
 
     // Get form state from FolderDialogStore (unified approach)
     const { isFolderDialogOpen, mode, itemType, editingFolder, parentFolder, newFolderName, setNewFolderName, description, setDescription, color, setColor, errors, isSubmitting } =
@@ -37,21 +37,21 @@ export function FolderDialog() {
 
     // Find parent folder info for display (VS Code-like)
     const parentFolderInfo = React.useMemo(() => {
-        if (!parentFolderId || !currentTree?.flatData || currentTree.flatData.length === 0) return null;
+        if (!parentFolderId || !currentWorkspace?.flatData || currentWorkspace.flatData.length === 0) return null;
 
         // Search for parent folder in the flat list
-        const found = currentTree.flatData.find(item => isFolder(item) && item.entityId === parentFolderId);
+        const found = currentWorkspace.flatData.find(item => isFolder(item) && item.entityId === parentFolderId);
         return found || null;
-    }, [parentFolderId, currentTree]);
+    }, [parentFolderId, currentWorkspace]);
 
     // Get sibling folders to check for duplicate names
     const siblingFolders = () => {
-        if (!currentTree?.flatData || currentTree.flatData.length === 0) return [];
+        if (!currentWorkspace?.flatData || currentWorkspace.flatData.length === 0) return [];
 
         // Find all items with the same parentId (siblings)
         // For folders at root level, parentId should match the parent folder's id
         // For creating at root, parentId would be null or the workspace root id
-        return currentTree.flatData.filter(
+        return currentWorkspace.flatData.filter(
             (item: WorkspaceItemV2) =>
                 // ✅ Use type guard and entityId field
                 isFolder(item) &&

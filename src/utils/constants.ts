@@ -109,6 +109,7 @@ export const constants = {
     modules: {
         note: "Note",
         workspace: "Workspace",
+        ws: "Ws",
         task: "Task",
     } as const,
     filters: {

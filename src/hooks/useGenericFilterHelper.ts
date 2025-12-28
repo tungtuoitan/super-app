@@ -48,8 +48,10 @@ export function useGenericFilterHelper() {
             if (!token) {
                 throw new Error("User not authenticated");
             }
-            const newUserFilters: UserFilters = $user.filters || {};
-            newUserFilters[filterViewKey as keyof UserFilters] = usingDefaultFilter ? constants.filters.defaults[filterViewKey] || {} : uiFilters;
+            const newUserFilters: UserFilters = $user.filters || (constants.filters.defaults as UserFilters);
+            newUserFilters[filterViewKey as keyof UserFilters] = usingDefaultFilter
+                ? (constants.filters.defaults[filterViewKey] as ViewFilter) || (constants.filters.defaults as ViewFilter)
+                : uiFilters;
 
             // Update backend - will upsert profile if not exists
             const result = await userProfileService._upsertUserProfile(token, {
@@ -66,7 +68,7 @@ export function useGenericFilterHelper() {
                 filters: newFilters ? JSON.parse(newFilters) : undefined,
             };
             set$User(updatedUser);
-            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || constants.filters.defaults[filterViewKey] as ViewFilter);
+            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || (constants.filters.defaults[filterViewKey] as ViewFilter));
 
             // In dev environment, update localStorage with new filters
             if (envConfig.NODE_ENV === constants.environments.development) {
@@ -155,6 +157,14 @@ export function useGenericFilterHelper() {
             // Check if field exists in pending filters but is empty
             if (filterValue !== undefined && (!filterValue || filterValue.trim() === "")) {
                 errors[fieldConfig.key] = "Required";
+            }
+
+            // Special validation for workspace deletedAt (checkbox type)
+            // Must always include "null" (Existing)
+            if (filterViewKey === "workspace" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
+                if (!filterUtils._hasValue(filterValue, "null")) {
+                    errors[fieldConfig.key] = "Must include Existing";
+                }
             }
         });
 

@@ -17,7 +17,7 @@ import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 
 export const useTreeHelper = () => {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentTree, setCurrentTree } = useWorkspaceStore();
+    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceOperation();
@@ -277,13 +277,13 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // STEP 5: BUILD MOVE REQUEST & CALL API
             // -------------------------------------------------------
-            if (!currentTree?.id) {
+            if (!currentWorkspace?.id) {
                 console.error("❌ No workspace ID found");
                 setIsDragging(false);
                 return;
             }
 
-            const workspaceId = currentTree.id;
+            const workspaceId = currentWorkspace.id;
 
             // ---- Build batch MOVE request ----
             // For each selected entity, create a MOVE action with:

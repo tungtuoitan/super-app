@@ -25,11 +25,11 @@ export const useGridAutoRegisterHelper = () => {
             case "/workspace":
                 return {
                     name: constants.modules.workspace,
-                    filterViewKey: constants.filters.views.wsGrid as keyof import("@/types/common.types").UserFilters,
+                    filterViewKey: constants.filters.views.workspace as keyof import("@/types/common.types").UserFilters,
                 };
             case "/ws":
                 return {
-                    name: constants.modules.workspace,
+                    name: constants.modules.ws,
                     filterViewKey: constants.filters.views.wsGrid as keyof import("@/types/common.types").UserFilters,
                 };
             case "/notes":
