@@ -476,8 +476,9 @@ export const useWorkspaceFolderMenuHelper = () => {
                     const isCurrentlyDeleted = contextData.deletedAt !== null && contextData.deletedAt !== undefined;
                     const operationType: "soft-delete" | "restore" = isCurrentlyDeleted ? "restore" : "soft-delete";
 
-                    // Call new batch API
-                    __deleteRestore_SelectedItems(undefined, operationType);
+                    // For single item, pass the specific item ID; for multiple, use selected IDs
+                    const idsToProcess = isMultipleSelected ? selectedFolderIds : [contextData.id];
+                    __deleteRestore_SelectedItems(idsToProcess, operationType);
                 }
             },
         });

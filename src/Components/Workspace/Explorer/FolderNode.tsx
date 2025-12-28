@@ -30,6 +30,9 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     // Check if this node is a valid drop target (being dragged over)
     const isDropTarget = node.state.willReceiveDrop;
 
+    // Check if deleted (folders don't have status_code)
+    const isDeleted = folderItem.deletedAt !== null && folderItem.deletedAt !== undefined;
+
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault(); // Prevent tree activation that causes scrolling
@@ -133,7 +136,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                 onContextMenu={handleRightClick}
                 className={`
                     flex items-center h-full w-full py-1 pr-2 cursor-pointer
-                    ${isDragging ? "opacity-40" : "opacity-100"}
+                    ${isDragging ? "opacity-40" : isDeleted ? "opacity-60" : "opacity-100"}
                     ${isWorkspaceRoot ? "font-semibold" : ""}
                     ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
                     ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
@@ -176,6 +179,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                             text-sm truncate
                             ${hasChildren ? "font-semibold" : "font-normal"}
                             ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
+                            ${isDeleted ? "line-through" : ""}
                             text-editor-fg
                         `}
                     >

@@ -158,9 +158,9 @@ export function useAuthHelper() {
                 throw new Error(response.error || "Google login failed");
             }
 
-            // Parse filters if they exist
-            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : undefined;
 
+            // Parse filters if they exist
+            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : constants.filters.defaults;
             // Prepare user profile object
             const userProfile = {
                 userId: response.user.id,
@@ -243,6 +243,9 @@ export function useAuthHelper() {
             if (token && userProfile) {
                 // Restore full auth state from stored token and profile
                 const _userProfile = userProfile as User;
+                if(!_userProfile.filters) {
+                    _userProfile.filters = constants.filters.defaults;
+                }
                 set$User(_userProfile);
                 setIsAuthenticated(true);
                 return true;
@@ -251,6 +254,7 @@ export function useAuthHelper() {
                 set$User((prev) => ({
                     ...prev,
                     userToken: token,
+                    filters: constants.filters.defaults,
                 }));
                 setIsAuthenticated(true);
                 return true;
@@ -292,7 +296,7 @@ export function useAuthHelper() {
             // Update local state
             const updatedUser: typeof $user = {
                 ...$user,
-                filters: newFilters ? JSON.parse(newFilters) : undefined,
+                filters: newFilters ? JSON.parse(newFilters) : constants.filters.defaults,
             };
             set$User(updatedUser);
 

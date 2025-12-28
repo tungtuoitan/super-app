@@ -10,7 +10,10 @@ import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.h
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "../Workspace/Explorer/FolderDialog/FolderDialog";
-import {useAuthStore} from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { GenericFilterPopup } from "@/Components/shared/GenericFilterPopup";
+import { constants } from "@/utils/constants";
+import {useGridControlStore} from "@/store/grid/useGridControl.store";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection
@@ -18,8 +21,10 @@ import {useAuthStore} from "@/store/auth/Auth.store";
 export function WorkspaceView() {
     const { $user } = useAuthStore();
     const { allWorkspaces, currentTree, isLoadingWorkspaces, isLoadingTree } = useWorkspaceStore();
-    const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
+    const { loadAllWorkspaces, selectWorkspace, loadTree } = useWorkspaceOperation();
+    const { setModuleName, setFilterViewKey } = useGridControlStore();
     const [selectedOption, setSelectedOption] = useState<IAutoCompleteOptions | null>(null);
+
 
     // Load workspaces on mount
     useEffect(() => {
@@ -60,6 +65,8 @@ export function WorkspaceView() {
         }
     };
 
+
+
     return (
         <div className="h-full overflow-auto flex flex-col">
             {/* Workspace Selector */}
@@ -76,6 +83,9 @@ export function WorkspaceView() {
                     disabled={isLoadingWorkspaces || workspaceOptions.length === 0}
                     size="small"
                 />
+
+                {/* Filter Popup */}
+                {/* <GenericFilterPopup /> */}
             </div>
 
             {/* Workspace Tree */}

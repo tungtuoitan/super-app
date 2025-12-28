@@ -80,7 +80,7 @@ export function GenericFilterPopup() {
         // When popup opens, load current user filters into UI
         //* bắt buộc phải update ngay mỗi khi userFilters thay đổi, thì khi vào web ta mới thấy chấm trắng bên cạnh FilterIcon nếu có filter áp dụng
         if (filterViewKey) {
-            setUIFilters($user.filters?.[filterViewKey] || {});
+            setUIFilters($user.filters?.[filterViewKey] || constants.filters.defaults[filterViewKey] as ViewFilter);
         }
     }, [filterViewKey, $user.filters]);
 
@@ -90,7 +90,7 @@ export function GenericFilterPopup() {
 
         // When opening, load current user filters into UI
         if (newOpen && filterViewKey) {
-            setUIFilters($user.filters?.[filterViewKey] || {});
+            setUIFilters($user.filters?.[filterViewKey] || constants.filters.defaults[filterViewKey] as ViewFilter);
         }
     };
 

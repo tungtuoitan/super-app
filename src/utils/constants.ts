@@ -184,7 +184,7 @@ export const constants = {
                     key: "statusCode",
                     label: "Status",
                     type: "radio",
-                    standardRegistryType: "workspaceStatus",
+                    standardRegistryType: "noteStatus", // Reuse noteStatus registry (notes/files have status, folders don't)
                     defaultValue: "active",
                 },
                 {
@@ -192,12 +192,6 @@ export const constants = {
                     label: "Deleted Status",
                     type: "checkbox",
                     defaultValue: "null",
-                },
-                {
-                    key: "createdAt",
-                    label: "Created Date",
-                    type: "dateRange",
-                    defaultValue: "",
                 },
             ],
         } as const,

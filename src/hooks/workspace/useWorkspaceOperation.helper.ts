@@ -59,6 +59,7 @@ export const useWorkspaceOperation = () => {
      * Sets as current tree
      *
      * Uses V2 API structure with full entity data
+     * Applies user filters from profile (status code and deleted status)
      */
     const loadTree = async (workspaceId: number) => {
         try {
@@ -66,9 +67,21 @@ export const useWorkspaceOperation = () => {
 
             const token = $user.userToken;
 
-            // Fetch workspace tree with V2 structure
-            console.log("🔧 Loading Workspace V2 API");
-            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, workspaceId);
+            // Get current filters from user profile
+            const filters = $user.filters?.workspace || {
+                statusCode: "active",
+                deletedAt: "null"
+            };
+
+            // Build filter params
+            const params = {
+                statusCode: filters.statusCode,
+                deletedAt: filters.deletedAt
+            };
+
+            // Fetch workspace tree with V2 structure and filters
+            console.log("🔧 Loading Workspace V2 API with filters:", params);
+            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, workspaceId, params);
             if(result && result.success){
                 setCurrentTree(result.object as WorkspaceDTO);
                 return result.object;

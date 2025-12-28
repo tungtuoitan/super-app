@@ -66,7 +66,7 @@ export function useGenericFilterHelper() {
                 filters: newFilters ? JSON.parse(newFilters) : undefined,
             };
             set$User(updatedUser);
-            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || {});
+            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || constants.filters.defaults[filterViewKey] as ViewFilter);
 
             // In dev environment, update localStorage with new filters
             if (envConfig.NODE_ENV === constants.environments.development) {

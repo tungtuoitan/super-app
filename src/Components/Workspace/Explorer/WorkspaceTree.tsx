@@ -32,7 +32,7 @@ export function WorkspaceTree() {
                 // Ensure height is always a valid number
                 if (height && typeof height === "number" && height > 0) {
                     setContainerHeight(height);
-                    console.log("📏 Container height updated:", height);
+                    // console.log("📏 Container height updated:", height);
                 }
             }
         };
@@ -86,8 +86,7 @@ export function WorkspaceTree() {
 
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
-    console.log("🔍 Current Tree:", currentTree);
-    const treeData = useMemo(() => {
+        const treeData = useMemo(() => {
         const baseTree = treeMiniHelper.transformToTreeData(currentTree, searchText);
 
         // Add invisible drop zone at the end to catch drops to root level
@@ -133,7 +132,6 @@ export function WorkspaceTree() {
 
         return baseTree;
     }, [currentTree, searchText]);
-    console.log("🌲 Tree data:", treeData);
 
     // Calculate drop zone height to fill remaining space
     const dropZoneHeight = useMemo(() => {

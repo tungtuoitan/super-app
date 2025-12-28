@@ -47,6 +47,10 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
     const isSelected = isFolderSelected(entityId);
     const FileIcon = getFileIcon(fileItem.data.extension);
 
+    // Check status and deleted state
+    const isDeleted = fileItem.deletedAt !== null && fileItem.deletedAt !== undefined;
+    const isInactive = fileItem.data.statusCode === "inactive";
+
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
@@ -102,7 +106,7 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
             className={`
                 flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
                 transition-all duration-150 ease-in-out
-                ${node.state.isDragging ? "opacity-40" : "opacity-100"}
+                ${node.state.isDragging ? "opacity-40" : isDeleted ? "opacity-60" : isInactive ? "opacity-70" : "opacity-100"}
                 ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover"}
             `}
         >
@@ -116,7 +120,9 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
             {/* File Info */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className="text-sm truncate text-editor-fg">{fileItem.data.name}</span>
+                <span className={`text-sm truncate text-editor-fg ${isDeleted ? "line-through" : ""}`}>
+                    {fileItem.data.name}
+                </span>
                 {fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
             </div>
         </div>

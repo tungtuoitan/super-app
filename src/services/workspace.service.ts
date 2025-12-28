@@ -84,28 +84,56 @@ const _getWorkspaceTree = async (token: string, workspaceId: number): Promise<Wo
 };
 
 /**
+ * Filter parameters for workspace tree
+ */
+export interface WorkspaceTreeParams {
+    statusCode?: string;
+    deletedAt?: string;
+}
+
+/**
  * Get workspace tree with V2 structure (full entity data embedded)
  * GET /api/workspace/{workspaceId}/tree/v2
  *
  * Returns unified WorkspaceDTO with workspace data + flatData
+ * Supports filtering by status code (for notes/files) and deleted status
  *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
+ * @param params - Optional filter parameters (statusCode, deletedAt)
  * @returns Unified WorkspaceDTO with workspace properties and flatData array
  */
-const _getWorkspaceTreeV2 = async (token: string, workspaceId: number): Promise<ResultOptions<WorkspaceDTO>> => {
+const _getWorkspaceTreeV2 = async (
+    token: string,
+    workspaceId: number,
+    params?: WorkspaceTreeParams
+): Promise<ResultOptions<WorkspaceDTO>> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
     headers.append("Authorization", bearer);
     headers.append("Content-Type", "application/json");
 
+    // Build query string from params
+    const queryParams = new URLSearchParams();
+    if (params?.statusCode) {
+        queryParams.append("statusCode", params.statusCode);
+    }
+    if (params?.deletedAt) {
+        queryParams.append("deletedAt", params.deletedAt);
+    }
+
+    const queryString = queryParams.toString();
+    const url = `${config.api.baseURL}/api/workspace/${workspaceId}/tree/v2${
+        queryString ? `?${queryString}` : ""
+    }`;
+
     const options = {
         method: "GET",
         headers: headers,
     };
 
-    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/tree/v2`, options);
+    const res = await window.fetch(url, options);
 
     if (res.ok) {
         const result = (await res.json()) as ResultOptions<WorkspaceDTO>;
