@@ -26,6 +26,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         ? treeMiniHelper.checkDeletedStatus(noteItem, currentWorkspace.flatData)
         : { isDeleted: false, isDirectlyDeleted: false };
     const isDeleted = deletedStatus.isDeleted;
+    const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
     const isInactive = noteItem.data.statusCode === "inactive";
 
     const handleMainClick = (e: React.MouseEvent) => {
@@ -112,7 +113,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
             {/* Note Info */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className={`text-sm truncate text-editor-fg ${isDeleted ? "line-through" : ""}`}>
+                <span className={`text-sm truncate text-editor-fg ${isDirectlyDeleted ? "line-through" : ""}`}>
                     {noteItem.data.name + "-" + entityId}
                 </span>
                 {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}

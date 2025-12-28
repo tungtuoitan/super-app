@@ -532,12 +532,10 @@ export const useWorkspaceFolderMenuHelper = () => {
                 return;
             }
 
-            // ===== STEP 5: Collect all descendants (giống __deleteRestore_SelectedNotes) =====
-            const allItemsToUpdate: WorkspaceItemV2[] = [];
-            for (const item of selectedItems) {
-                const descendants = $collectAllDescendants_WorkspaceItems(item);
-                allItemsToUpdate.push(...descendants);
-            }
+            // ===== STEP 5: Only process selected items, no descendants =====
+            // Both DELETE and RESTORE: Only selected items, no cascade
+            // Backend will handle cascade delete if needed via database constraints
+            const allItemsToUpdate: WorkspaceItemV2[] = [...selectedItems];
 
             // Remove duplicates
             const uniqueItemsMap = new Map<number, WorkspaceItemV2>();
@@ -546,12 +544,12 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
             const itemsToUpdate = Array.from(uniqueItemsMap.values());
 
-            console.log(`📦 Collected ${itemsToUpdate.length} total items (including descendants)`);
+            console.log(`📦 Collected ${itemsToUpdate.length} selected items (type: ${type})`);
 
             // -------------------------------------------------------
             // STEP 7: BUILD BATCH DELETE/RESTORE REQUESTS
             // -------------------------------------------------------
-            // For each item (including descendants), create a DELETE or RESTORE action
+            // For each selected item, create a DELETE or RESTORE action
             // - action: WorkspaceItemAction.Delete or WorkspaceItemAction.Restore
             // - id: workspace_items.id (V2: item.id = workspace_items.id)
             const batchRequests: UpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {

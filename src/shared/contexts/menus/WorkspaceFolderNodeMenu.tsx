@@ -54,6 +54,21 @@ export function WorkspaceFolderNodeMenu() {
     const isDeleted = deletedStatus.isDeleted;
     const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
 
+    // When multiple selected, check if any item has deletedAt = null (not deleted)
+    const hasAnyActiveItem = React.useMemo(() => {
+        if (!isMultipleSelected || !currentWorkspace?.flatData) return false;
+        
+        return selectedFolderIds.some(entityId => {
+            // selectedFolderIds contains entityId, need to find by entityId
+            const item = currentWorkspace.flatData.find((i: any) => i.entityId === entityId);
+            if (!item) return false;
+            
+            // Check if this item or any ancestor is deleted
+            const status = treeMiniHelper.checkDeletedStatus(item, currentWorkspace.flatData);
+            return !status.isDeleted; // Return true if item is NOT deleted
+        });
+    }, [isMultipleSelected, selectedFolderIds, currentWorkspace?.flatData]);
+
     const createNewNote = () => {
         const existingIds = collectIdsFromTabs(openTabs);
         const tempId = generateTempId(existingIds);
@@ -140,8 +155,8 @@ export function WorkspaceFolderNodeMenu() {
     };
 
     const addMenuItems = [
-        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add Folder", disabled: isDeleted },
-        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: "Add Note", disabled: isDeleted },
+        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add Folder", disabled: isDeleted || isMultipleSelected },
+        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: "Add Note", disabled: isDeleted || isMultipleSelected },
         { type: constants.workspace.itemTypes.file, icon: FileIcon, label: "Add File", disabled: true },
     ];
 
@@ -181,7 +196,7 @@ export function WorkspaceFolderNodeMenu() {
                     if (isDirectlyDeleted) {
                         return (
                             <>
-                                {/*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
+                                {/* //*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
                                 {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
                                     <HardDeleteIcon className="w-4 h-4 mr-2" />
                                     Hard Delete
@@ -194,23 +209,28 @@ export function WorkspaceFolderNodeMenu() {
                         );
                     }
                     // If item is deleted but not directly (inherited from parent), only show Hard Delete
-                    else if (isDeleted && !isDirectlyDeleted) {
-                        return (
-                            <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
-                                <HardDeleteIcon className="w-4 h-4 mr-2" />
-                                Hard Delete
-                            </MenuItem>
-                        );
-                    }
+                    // Don't show if multiple selected and any item is still active
+                    //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
+                    // else if (isDeleted && !isDirectlyDeleted && !(isMultipleSelected && hasAnyActiveItem)) {
+                    //     return (
+                    //         <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
+                    //             <HardDeleteIcon className="w-4 h-4 mr-2" />
+                    //             Hard Delete
+                    //         </MenuItem>
+                    //     );
+                    // }
                     // If item is not deleted, show normal Delete option
-                    else {
+                    // Disable if multiple selected and any item is still active (deletedAt = null)
+                    else if (!isDeleted) {
                         return (
-                            <MenuItem onClick={(e) => dhr_items(e, false)}>
+                            <MenuItem onClick={(e) => dhr_items(e, false)} disabled={isMultipleSelected && hasAnyActiveItem}>
                                 <DeleteIcon className="w-4 h-4 mr-2" />
                                 Delete
                             </MenuItem>
                         );
                     }
+                    // Don't show anything if conditions don't match
+                    return null;
                 })()}
         </>
     );

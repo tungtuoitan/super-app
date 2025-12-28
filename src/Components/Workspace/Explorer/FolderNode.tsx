@@ -35,6 +35,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
         ? treeMiniHelper.checkDeletedStatus(folderItem, currentWorkspace.flatData)
         : { isDeleted: false, isDirectlyDeleted: false };
     const isDeleted = deletedStatus.isDeleted;
+    const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -182,7 +183,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                             text-sm truncate
                             ${hasChildren ? "font-semibold" : "font-normal"}
                             ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
-                            ${isDeleted ? "line-through" : ""}
+                            ${isDirectlyDeleted ? "line-through" : ""}
                             text-editor-fg
                         `}
                     >
