@@ -17,8 +17,8 @@ import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { filterTopLevelParents, transformItemsToTreeData } from "@/hooks/workspace/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
-import { isFolder } from "@/types/workspace.types";
-import {useEditorTabHelper} from "@/hooks/vsCode/useEditorTab.helper";
+import { isFolder, WorkspaceItemAction } from "@/types/workspace.types";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -149,7 +149,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         if (!folder.id) {
             console.error("❌ Cannot remove folder: missing folder ID");
-            alert("Cannot remove folder: missing folder information");
+            enqueueSnackbar("Cannot remove folder: missing folder information", { variant: "error" });
             return;
         }
 
@@ -241,8 +241,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                     }
                 }
 
-                const action = isHardDelete ? "permanently deleted" : "deleted";
-                alert(`✅ Folder ${action} successfully`);
+                enqueueSnackbar(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`, { variant: "success" });
             } else {
                 throw new Error("Failed to delete folders");
             }
@@ -390,8 +389,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                     }
                 }
 
-                const action = isHardDelete ? "permanently deleted" : "deleted";
-                alert(`✅ ${foldersToDelete.length} folders ${action} successfully`);
+                enqueueSnackbar(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`, { variant: "success" });
             } else {
                 throw new Error("Failed to bulk delete folders");
             }
@@ -499,10 +497,7 @@ export const useWorkspaceFolderMenuHelper = () => {
      * Follows __deleteRestore_SelectedNotes pattern from useNoteGrid.helper.ts
      * Pattern: 100% follows NotesController batch pattern
      */
-    const __deleteRestore_SelectedItems = async (
-        ids?: number[],
-        type: "soft-delete" | "restore" = "soft-delete"
-    ) => {
+    const __deleteRestore_SelectedItems = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         // ===== STEP 1: Get selected items (giống __deleteRestore_SelectedNotes) =====
         const selectedIds = ids ?? selectedFolderIds;
         if (selectedIds.length === 0) {
@@ -534,7 +529,8 @@ export const useWorkspaceFolderMenuHelper = () => {
             const selectedItems: WorkspaceItem[] = [];
             for (const itemId of topLevelIds) {
                 const item = $findItemById(currentTree.items, itemId);
-                if (item && item.id > 0) {  // Skip workspace root (negative ID)
+                if (item && item.id > 0) {
+                    // Skip workspace root (negative ID)
                     selectedItems.push(item);
                 }
             }
@@ -560,37 +556,16 @@ export const useWorkspaceFolderMenuHelper = () => {
 
             console.log(`📦 Collected ${itemsToUpdate.length} total items (including descendants)`);
 
-            // ===== STEP 6: Determine deletedAt value (giống __deleteRestore_SelectedNotes) =====
-            const deletedAt = type === "soft-delete" ? new Date().toISOString() : null;
-
-            // ===== STEP 7: Build batch requests (giống __deleteRestore_SelectedNotes) =====
+            // ===== STEP 7: Build batch requests with action-based API =====
             const batchRequests: UpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {
-                let itemType: 2 | 3 | 4 = 2; // Default to folder
-
-                if (item.type === constants.workspace.itemTypes.folder) {
-                    itemType = 2;
-                } else if (item.type === constants.workspace.itemTypes.note) {
-                    itemType = 3;
-                } else if (item.type === constants.workspace.itemTypes.file) {
-                    itemType = 4;
-                }
-
                 return {
+                    action: type === "soft-delete" ? WorkspaceItemAction.Delete : WorkspaceItemAction.Restore,
                     id: item.id,
-                    parentId: item.parentId,
-                    itemType: itemType,
-                    itemId: item.id, // Reference to actual folder/note/file
-                    name: item.name,
-                    deletedAt: deletedAt, // ⭐ KEY: Set timestamp for delete, null for restore
                 };
             });
 
             // ===== STEP 8: Call batch upsert API (giống __deleteRestore_SelectedNotes) =====
-            const result = await workspaceService._upsertWorkspaceItems(
-                token ?? "",
-                currentTree.workspaceId,
-                batchRequests
-            );
+            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentTree.workspaceId, batchRequests);
 
             if (!result.success) {
                 throw new Error(result.message || "Batch update failed");
@@ -600,15 +575,9 @@ export const useWorkspaceFolderMenuHelper = () => {
 
             if (type === "soft-delete") {
                 // Clean up open tabs (giống __deleteRestore_SelectedNotes)
-                const folderIds = itemsToUpdate
-                    .filter(item => item.type === constants.workspace.itemTypes.folder)
-                    .map(item => item.id);
-                const noteIds = itemsToUpdate
-                    .filter(item => item.type === constants.workspace.itemTypes.note)
-                    .map(item => item.id);
-                const fileIds = itemsToUpdate
-                    .filter(item => item.type === constants.workspace.itemTypes.file)
-                    .map(item => item.id);
+                const folderIds = itemsToUpdate.filter((item) => item.type === constants.workspace.itemTypes.folder).map((item) => item.id);
+                const noteIds = itemsToUpdate.filter((item) => item.type === constants.workspace.itemTypes.note).map((item) => item.id);
+                const fileIds = itemsToUpdate.filter((item) => item.type === constants.workspace.itemTypes.file).map((item) => item.id);
 
                 if (folderIds.length > 0) {
                     processTabAfterDelete(folderIds, "folder");
@@ -622,10 +591,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
 
             // Reload workspace tree (giống __deleteRestore_SelectedNotes: await loadNotes())
-            const updatedTree = await workspaceService._getWorkspaceTree(
-                token ?? "",
-                currentTree.workspaceId
-            );
+            const updatedTree = await workspaceService._getWorkspaceTree(token ?? "", currentTree.workspaceId);
             setCurrentTree(updatedTree);
 
             // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
@@ -633,12 +599,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             setLastSelectedFolderId(null);
 
             // Show success message
-            const action = type === "soft-delete" ? "deleted" : "restored";
-            enqueueSnackbar(
-                `Successfully ${action} ${itemsToUpdate.length} item(s)`,
-                { variant: "success" }
-            );
-
+            enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
         } catch (error) {
             console.error("❌ Failed to update items:", error);
             const errorMessage = await parseApiError(error);

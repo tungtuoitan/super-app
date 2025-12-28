@@ -5,7 +5,7 @@ import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
-import { NoteItem } from "@/types/workspace.types";
+import { WorkspaceNoteItem } from "@/types/workspace-v2.types";
 import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -16,8 +16,10 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
     const { isFolderSelected } = useTreeSelectionHelper();
     const { openTab } = useEditorTabHelper();
 
-    const noteItem = node.data.data as NoteItem;
-    const isSelected = isFolderSelected(noteItem.id);
+    // Safe cast: WorkspaceTree already filters to only render NoteNode for notes
+    const noteItem = node.data.data as unknown as WorkspaceNoteItem;
+    const entityId = noteItem.itemId;
+    const isSelected = isFolderSelected(entityId);
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -30,32 +32,32 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection
             if (isSelected) {
-                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== noteItem.id));
+                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== entityId));
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev: number[]) => [...prev, noteItem.id]);
+                setSelectedFolderIds((prev: number[]) => [...prev, entityId]);
                 node.selectMulti();
             }
-            setLastSelectedFolderId(noteItem.id);
+            setLastSelectedFolderId(entityId);
         } else {
             // Regular click: Single selection + open tab
-            setSelectedFolderIds([noteItem.id]);
-            setLastSelectedFolderId(noteItem.id);
+            setSelectedFolderIds([entityId]);
+            setLastSelectedFolderId(entityId);
             node.select();
 
-            // ✅ Open note in editor tab (convert NoteItem to Note)
+            // ✅ Open note in editor tab (convert WorkspaceNoteItem to Note)
             const note: Note = {
-                id: noteItem.id,
-                name: noteItem.name,
-                description: noteItem.metadata?.description || "",
+                id: noteItem.data.id,
+                name: noteItem.data.name,
+                description: noteItem.data.description || "",
                 hashtags: [],
                 tags: [],
                 type: "idea",
-                createdAt: new Date(noteItem.createdAt),
-                updatedAt: noteItem.updatedAt ? new Date(noteItem.updatedAt) : undefined,
+                createdAt: new Date(noteItem.data.createdAt),
+                updatedAt: noteItem.data.updatedAt ? new Date(noteItem.data.updatedAt) : undefined,
                 createdBy: "You",
-                deletedAt: noteItem.deletedAt ? new Date(noteItem.deletedAt) : null,
-                userId: noteItem.userId,
+                deletedAt: noteItem.data.deletedAt ? new Date(noteItem.data.deletedAt) : null,
+                userId: noteItem.data.userId,
             };
 
             openTab(note);
@@ -66,9 +68,9 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i: any) => i.id === noteItem.id);
+        const _currentItem = currentTree?.items.find((i: any) => i.itemId === entityId);
 
-        // Open note-specific context menu
+        // Open note-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });
     };
 
@@ -103,8 +105,8 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
             {/* Note Info */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className="text-sm truncate text-editor-fg">{noteItem.name + "-" + noteItem.id}</span>
-                {noteItem.metadata?.isPinned && <span className="text-xs text-yellow-500">📌</span>}
+                <span className="text-sm truncate text-editor-fg">{noteItem.data.name + "-" + entityId}</span>
+                {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
             </div>
         </div>
     );

@@ -4,7 +4,7 @@ import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react"
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
-import { FileItem } from "@/types/workspace.types";
+import { WorkspaceFileItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
@@ -41,9 +41,11 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelectionHelper();
 
-    const fileItem = node.data.data as FileItem;
-    const isSelected = isFolderSelected(fileItem.id);
-    const FileIcon = getFileIcon(fileItem.metadata?.extension);
+    // Safe cast: WorkspaceTree already filters to only render FileNode for files
+    const fileItem = node.data.data as unknown as WorkspaceFileItem;
+    const entityId = fileItem.itemId;
+    const isSelected = isFolderSelected(entityId);
+    const FileIcon = getFileIcon(fileItem.data.extension);
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -56,17 +58,17 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection
             if (isSelected) {
-                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== fileItem.id));
+                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== entityId));
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev: number[]) => [...prev, fileItem.id]);
+                setSelectedFolderIds((prev: number[]) => [...prev, entityId]);
                 node.selectMulti();
             }
-            setLastSelectedFolderId(fileItem.id);
+            setLastSelectedFolderId(entityId);
         } else {
             // Regular click: Single selection
-            setSelectedFolderIds([fileItem.id]);
-            setLastSelectedFolderId(fileItem.id);
+            setSelectedFolderIds([entityId]);
+            setLastSelectedFolderId(entityId);
             node.select();
 
             // TODO: Open file preview or download
@@ -77,9 +79,9 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i: any) => i.id === fileItem.id);
+        const _currentItem = currentTree?.items.find((i: any) => i.itemId === entityId);
 
-        // Open file-specific context menu
+        // Open file-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });
     };
 
@@ -114,8 +116,8 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
             {/* File Info */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className="text-sm truncate text-editor-fg">{fileItem.name}</span>
-                {fileItem.metadata?.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.metadata.fileSizeFormatted}</span>}
+                <span className="text-sm truncate text-editor-fg">{fileItem.data.name}</span>
+                {fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
             </div>
         </div>
     );

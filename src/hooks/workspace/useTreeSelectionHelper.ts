@@ -51,10 +51,19 @@ export const useTreeSelectionHelper = () => {
 
     /**
      * Handle selection change from react-arborist tree
+     * Maps node.id (TreeFolder ID) to entity ID (folder/note/file ID)
      */
     const handleSelectionChange = (nodes: NodeApi<TreeFolder>[]) => {
-        const selectedIds = nodes.map((node) => node.id);
-        const folderIds = selectedIds.map((id) => parseInt(id)).filter((id) => id > 0); // Filter out workspace nodes
+        // Helper to get entity ID from node (V2 structure)
+        const getEntityId = (node: NodeApi<TreeFolder>): number | null => {
+            const itemData = node.data.data;
+            return (itemData as any).itemId;
+        };
+
+        const folderIds = nodes
+            .map(getEntityId)
+            .filter((id): id is number => id !== null && id > 0); // Filter out workspace nodes and null
+
         setSelectedFolderIds(folderIds);
         if (folderIds.length > 0) {
             setLastSelectedFolderId(folderIds[folderIds.length - 1]);

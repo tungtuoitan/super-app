@@ -55,15 +55,24 @@ export const useWorkspaceOperation = () => {
     /**
      * Load tree data for a specific workspace
      * Sets as current tree
+     *
+     * Uses V2 API structure with full entity data
      */
     const loadTree = async (workspaceId: number) => {
         try {
             setIsLoadingTree(true);
 
             const token = $user.userToken;
-            const treeData = await workspaceService._getWorkspaceTree(token, workspaceId);
 
-            treeData.items = treeData.items.filter((item) => item.deletedAt === null);
+            // Fetch workspace tree with V2 structure
+            console.log("🔧 Loading Workspace V2 API");
+            const treeData = await workspaceService._getWorkspaceTreeV2(token, workspaceId);
+            console.log("📦 V2 Response items:", treeData.items.length);
+
+            // Filter out deleted items
+            treeData.items = treeData.items.filter((item: any) => !item.deletedAt);
+            console.log("🔍 After filter (non-deleted):", treeData.items.length);
+
             // Set as current tree
             setCurrentTree(treeData);
 

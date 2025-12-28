@@ -510,30 +510,83 @@ export interface WorkspaceWithTreeResponse {
 }
 
 /**
- * Batch upsert request for workspace items (follows UpsertNoteRequest pattern)
+ * Workspace item action enum
+ * Eliminates ambiguity in API requests (e.g., move to root with parentId=null vs restore)
+ * Follows Microsoft Graph API pattern for batch operations
+ */
+export enum WorkspaceItemAction {
+    /** CREATE new entity + workspace_item */
+    Create = 1,
+    /** ADD existing entity to workspace */
+    Add = 2,
+    /** MOVE workspace_item to new location */
+    Move = 3,
+    /** UPDATE entity data (folder/note/file properties) */
+    Update = 4,
+    /** SOFT DELETE workspace_item */
+    Delete = 5,
+    /** RESTORE deleted workspace_item */
+    Restore = 6,
+}
+
+/**
+ * Action-based request for workspace item batch operations
+ * Eliminates ambiguity by using explicit Action enum (follows Microsoft Graph API pattern)
  * Pattern: 100% follows backend UpsertWorkspaceItemRequest
+ *
+ * VALIDATION RULES PER ACTION:
+ *
+ * 1. CREATE (new entity + workspace_item):
+ *    Required: action=Create, itemType, entityData
+ *    Optional: parentId (null = root), workspaceId
+ *    Example: { action: 1, itemType: 2, parentId: null, folderData: {...} }
+ *
+ * 2. ADD (existing entity to workspace):
+ *    Required: action=Add, itemType, itemId
+ *    Optional: parentId (null = root), workspaceId
+ *    Example: { action: 2, itemType: 3, itemId: 456, parentId: 123 }
+ *
+ * 3. MOVE (change location):
+ *    Required: action=Move, id + (parentId OR workspaceId)
+ *    Optional: Both for cross-workspace move
+ *    Example: { action: 3, id: 789, parentId: null } ← move to root
+ *
+ * 4. UPDATE (entity properties):
+ *    Required: action=Update, id, entityData
+ *    Optional: None
+ *    Example: { action: 4, id: 789, folderData: { name: "New Name" } }
+ *
+ * 5. DELETE (soft delete):
+ *    Required: action=Delete, id
+ *    Optional: None
+ *    Example: { action: 5, id: 789 }
+ *
+ * 6. RESTORE (un-delete):
+ *    Required: action=Restore, id
+ *    Optional: None
+ *    Example: { action: 6, id: 789 }
  */
 export interface UpsertWorkspaceItemRequest {
-    /** Workspace item ID (0 for create, >0 for update) */
-    id: number;
+    /** Explicit action to perform on workspace item */
+    action: WorkspaceItemAction;
+
+    /** Workspace item ID - Required for: Move, Update, Delete, Restore */
+    id?: number | null;
 
     /** Workspace ID (set by controller from route) */
-    workspaceId?: number;
+    workspaceId?: number | null;
 
     /** User ID (set by controller from JWT) */
     userId?: number;
 
-    /** Parent folder ID (null for root level items) */
+    /** Parent folder ID - Required for: Move, Optional for: Create, Add */
     parentId?: number | null;
 
-    /** Item type: 2 = folder, 3 = note, 4 = file */
-    itemType: 2 | 3 | 4;
+    /** Item type: 2=folder, 3=note, 4=file - Required for: Create, Add */
+    itemType?: 2 | 3 | 4;
 
-    /** Reference to folder/note/file ID */
-    itemId: number;
-
-    /** Display name (optional) */
-    name?: string;
+    /** Entity ID (references existing folder/note/file) - Required for: Add */
+    itemId?: number;
 
     /** Copy metadata JSON (optional) */
     copyInfo?: string | null;
@@ -541,11 +594,47 @@ export interface UpsertWorkspaceItemRequest {
     /** User email (set by controller) */
     createdBy?: string;
 
-    /**
-     * Deleted timestamp:
-     * - ISO string = soft delete
-     * - null = restore
-     * - undefined = no change
-     */
+    /** Folder entity data - Required for: Create (itemType=2), Update (itemType=2) */
+    folderData?: UpsertFolderData;
+
+    /** Note entity data - Required for: Create (itemType=3), Update (itemType=3) */
+    noteData?: UpsertNoteData;
+
+    /** File entity data - Required for: Create (itemType=4), Update (itemType=4) */
+    fileData?: UpsertFileData;
+}
+
+/** Folder entity data for batch upsert */
+export interface UpsertFolderData {
+    id?: number;
+    userId?: number;
+    name: string;
+    description?: string | null;
+    color?: string | null;
+    icon?: string | null;
+    deletedAt?: string | null;
+}
+
+/** Note entity data for batch upsert */
+export interface UpsertNoteData {
+    id?: number;
+    userId?: number;
+    name: string;
+    description?: string | null;
+    statusCode?: string | null;
+    tagIds?: number[];
+    deletedAt?: string | null;
+}
+
+/** File entity data for batch upsert */
+export interface UpsertFileData {
+    id?: number;
+    userId?: number;
+    name: string;
+    url?: string | null;
+    fileSize?: number | null;
+    mimeType?: string | null;
+    extension?: string | null;
+    statusCode?: string | null;
     deletedAt?: string | null;
 }

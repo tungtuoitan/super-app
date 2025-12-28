@@ -12,7 +12,7 @@ import { RootFolderNode } from "./RootFolderNode";
 import { NoteNode } from "./NoteNode";
 import { FileNode } from "./FileNode";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
-import { isFolder, isNote, isFile } from "@/types/workspace.types";
+import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 
 export function WorkspaceTree() {
@@ -23,6 +23,9 @@ export function WorkspaceTree() {
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const manager = useDragDropManager();
     const [containerHeight, setContainerHeight] = React.useState(800);
+    console.log("currentTree", currentTree);
+
+
 
     // Track container height to make Tree component responsive
     useEffect(() => {
@@ -86,6 +89,7 @@ export function WorkspaceTree() {
 
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
+    console.log("🔍 Current Tree:", currentTree);
     const treeData = useMemo(() => {
         const baseTree = treeMiniHelper.transformToTreeData(currentTree, searchText);
         
@@ -95,22 +99,36 @@ export function WorkspaceTree() {
                 id: `drop-zone-root-${currentTree.workspaceId}`,
                 name: "",
                 data: {
-                    id: -1, // Special ID for drop zone
-                    userId: currentTree.userId,
-                    name: "",
-                    type: constants.workspace.itemTypes.folder,
+                    // V2 structure
+                    id: -1,
+                    workspaceId: currentTree.workspaceId,
                     parentId: null,
-                    accessType: "owner",
-                    isOriginal: true,
+                    itemType: 2 as const,
+                    itemId: -1,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: undefined,
+                    deletedAt: null,
+                    copyInfo: null,
                     level: 0,
-                    depth: 0,
                     position: 0,
-                    sortOrder: 0,
+                    accessType: "owner" as const,
+                    isOriginal: true,
+                    data: {
+                        id: -1,
+                        userId: currentTree.userId,
+                        name: "",
+                        description: undefined,
+                        color: undefined,
+                        icon: undefined,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: undefined,
+                        deletedAt: null,
+                        copyInfo: null,
+                        slug: undefined,
+                    },
                     isExpanded: false,
                     isSelected: false,
-                    createdAt: new Date().toISOString(),
-                    children: [],
-                },
+                } as any,
                 children: [],
             };
             return [...baseTree, dropZoneNode];
@@ -118,11 +136,12 @@ export function WorkspaceTree() {
         
         return baseTree;
     }, [currentTree, searchText]);
+    console.log("🌲 Tree data:", treeData);
 
     // Calculate drop zone height to fill remaining space
     const dropZoneHeight = useMemo(() => {
         const rowHeight = 40;
-        const actualItemsCount = treeData.filter(item => item.data.id !== -1).length;
+        const actualItemsCount = treeData.filter(item => (item.data as any).itemId !== -1).length;
         const usedHeight = actualItemsCount * rowHeight;
         const remaining = containerHeight - usedHeight;
         return Math.max(remaining, 100); // Minimum 100px
@@ -208,8 +227,10 @@ export function WorkspaceTree() {
                 >
                     {({ node, style, dragHandle }) => {
                         const item = node.data.data;
-                        const isWorkspaceRoot = item.id === -12345;
-                        const isDropZone = item.id === -1; // Special drop zone node
+
+                        // Check workspace root and drop zone by itemId (V2 structure)
+                        const isWorkspaceRoot = (item as any).itemId === -12345;
+                        const isDropZone = (item as any).itemId === -1;
 
                         // Render different node types based on item type
                         return (
@@ -220,17 +241,16 @@ export function WorkspaceTree() {
                             }}>
                                 {isDropZone ? (
                                     // Drop zone at bottom - fills remaining space for easy root-level drops
-                                    <div 
+                                    <div
                                         className="drop-zone-root"
-                                        style={{ 
+                                        style={{
                                             height: `${dropZoneHeight}px`,
                                             width: "100%",
-                                            // border: "2px dashed red",
                                             display: "flex",
                                             alignItems: "flex-start",
                                             paddingTop: "2px",
                                             boxSizing: "border-box",
-                                        }} 
+                                        }}
                                         data-drop-zone="root"
                                         onDragOver={(e) => {
                                             e.preventDefault();
@@ -243,23 +263,14 @@ export function WorkspaceTree() {
                                             e.currentTarget.removeAttribute("data-dragging-over");
                                         }}
                                     >
-                                        {/* <div // blue line indicator when dragging over, nhưng bị thừa
-                                            className="drop-indicator"
-                                            style={{
-                                                width: "100%",
-                                                height: "2px",
-                                                backgroundColor: "transparent",
-                                                transition: "background-color 0.15s ease",
-                                            }}
-                                        /> */}
                                     </div>
                                 ) : isWorkspaceRoot ? (
                                     <RootFolderNode node={node} style={{ height: "100%" }} treeData={treeData} />
-                                ) : isFolder(item) ? (
+                                ) : isFolderV2(item as any) ? (
                                     <FolderNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
-                                ) : isNote(item) ? (
+                                ) : isNoteV2(item as any) ? (
                                     <NoteNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} />
-                                ) : isFile(item) ? (
+                                ) : isFileV2(item as any) ? (
                                     <FileNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} />
                                 ) : null}
                             </div>

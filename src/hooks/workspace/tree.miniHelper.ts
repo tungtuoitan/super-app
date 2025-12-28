@@ -1,7 +1,9 @@
 import { WorkspaceItem, FolderItem, NoteItem, FileItem, isFolder, canHaveChildren } from "@/types/workspace.types";
+import { WorkspaceItemV2, WorkspaceFolderItem, isFolder as isFolderV2, canHaveChildren as canHaveChildrenV2 } from "@/types/workspace-v2.types";
 import { Folder } from "../../types";
 import { transformBackendItems, BackendWorkspaceItem } from "@/utils/workspace-mapper";
 import { constants } from "@/utils/constants";
+import {featureFlags} from "@/config/features.config";
 
 // ============================================
 // RECURSIVE HELPER FUNCTIONS (prefix with $)
@@ -177,8 +179,12 @@ export interface TreeFolder {
     data: WorkspaceItem; // Can be FolderItem | NoteItem | FileItem
 }
 
+/**
+ * Get all visible folder entity IDs from tree
+ * V2: Returns itemId (entity ID from folders/notes/files table)
+ */
 export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
-    return $traverse(treeData).map((node) => node.data.id);
+    return $traverse(treeData).map((node) => (node.data as any).itemId);
 }
 
 /**
@@ -229,6 +235,52 @@ export function createWorkspaceRootFolder(
         children: children,
         isExpanded: true,
     };
+}
+
+/**
+ * Build hierarchical TreeFolder structure from flat V2 list
+ * V2 structure: parentId references parent ENTITY ID (item.itemId)
+ */
+function buildTreeFromV2Items(items: WorkspaceItemV2[]): TreeFolder[] {
+    // Create map using itemId (entity ID) for lookup
+    const itemMap = new Map<number, TreeFolder>();
+    const treeNodes: TreeFolder[] = [];
+
+    // First pass: Create TreeFolder nodes for all items
+    items.forEach((item) => {
+        const treeNode: TreeFolder = {
+            id: item.id.toString(), // workspace_items.id as string
+            name: item.data.name,
+            data: item as any, // V2 structure
+            children: [],
+        };
+        itemMap.set(item.itemId, treeNode); // Map by entity ID
+        treeNodes.push(treeNode);
+    });
+
+    // Second pass: Build parent-child relationships
+    const roots: TreeFolder[] = [];
+
+    items.forEach((item) => {
+        const currentNode = itemMap.get(item.itemId);
+        if (!currentNode) return;
+
+        if (item.parentId === null || item.parentId === undefined) {
+            // Root level item
+            roots.push(currentNode);
+        } else {
+            // Child item - find parent by entity ID
+            const parentNode = itemMap.get(item.parentId);
+            if (parentNode) {
+                parentNode.children!.push(currentNode);
+            } else {
+                // Parent not found - treat as root
+                roots.push(currentNode);
+            }
+        }
+    });
+
+    return roots;
 }
 
 /**
@@ -310,72 +362,58 @@ export function transformToTreeData(
         | undefined,
     searchText: string,
 ): TreeFolder[] {
-    // ================================================================
-    // STEP 1: Validate input data
-    // ================================================================
+    // Validate input data
     if (!data || !("items" in data)) {
         return [];
     }
 
-    // ================================================================
-    // STEP 2: Transform backend response to frontend types
-    // Backend: {id, type: 'folder'/'note'/'file'}
-    // Frontend: {id, type: 'folder'/'note'/'file'}
-    // ================================================================
+    // V2: data.items are WorkspaceItemV2[]
+    const v2Items = data.items as WorkspaceItemV2[];
 
-    const frontendItems = transformBackendItems(data.items as BackendWorkspaceItem[]);
+    // Build tree structure from flat V2 list
+    const treeRoots = buildTreeFromV2Items(v2Items);
 
-    // ================================================================
-    // STEP 3: Build hierarchical structure from flat list
-    // ✅ API returns FLAT array with parentId relationships
-    // We build the tree structure here in frontend for flexibility & caching benefits
-    // ================================================================
-    const hierarchicalItems = buildHierarchy(frontendItems);
-
-    // ================================================================
-    // STEP 4: Apply search filter (if needed)
-    // TODO: Implement search filter for all item types (not just folders)
-    // ================================================================
-    const filteredItems = hierarchicalItems; // For now, no filtering
-
-    // ================================================================
-    // STEP 5: Create workspace root node (workspace mode only)
-    // Wrap all items under a virtual workspace root for display
-    // ================================================================
-    let itemsToTransform: WorkspaceItem[];
-
+    // Create workspace root node
     if (data && "workspaceId" in data) {
-        // Create workspace root as a FolderItem
-        const workspaceRoot: FolderItem = {
-            id: -12345, // Virtual ID for workspace root, -12345 is used to avoid conflicts
-            type: constants.workspace.itemTypes.folder,
-            userId: data.userId,
+        const workspaceRootV2: TreeFolder = {
+            id: `-12345`,
             name: data.name,
-            color: data.color,
-            icon: data.icon,
-            accessType: "owner",
-            isOriginal: true,
-            level: 0,
-            depth: 0,
-            position: 0,
-            sortOrder: 0,
-            isExpanded: true,
-            isSelected: false,
-            createdAt: data.createdAt,
-            updatedAt: data.updatedAt,
-            children: filteredItems,
+            data: {
+                id: -12345,
+                workspaceId: data.workspaceId,
+                parentId: null,
+                itemType: 2, // folder
+                itemId: -12345,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt,
+                deletedAt: null,
+                copyInfo: null,
+                level: 0,
+                position: 0,
+                accessType: "owner" as const,
+                isOriginal: true,
+                data: {
+                    id: -12345,
+                    userId: data.userId,
+                    name: data.name,
+                    description: data.description,
+                    color: data.color,
+                    icon: data.icon,
+                    createdAt: data.createdAt,
+                    updatedAt: data.updatedAt,
+                    deletedAt: null,
+                    copyInfo: null,
+                    slug: undefined,
+                },
+                isExpanded: true,
+                isSelected: false,
+            } as any, // WorkspaceFolderItem
+            children: treeRoots,
         };
-        itemsToTransform = [workspaceRoot];
-    } else {
-        itemsToTransform = filteredItems;
+        return [workspaceRootV2];
     }
 
-    // ================================================================
-    // STEP 6: Convert to TreeFolder format for react-arborist
-    // ✅ Transform WorkspaceItem hierarchy (folders, notes, files) to TreeFolder
-    // ================================================================
-    const result = transformItemsToTreeData(itemsToTransform);
-    return result;
+    return treeRoots;
 };
 
 export const treeMiniHelper = {

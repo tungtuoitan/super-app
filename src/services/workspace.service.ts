@@ -5,6 +5,7 @@
 
 import { config } from "@/config/app.config";
 import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
+import { WorkspaceItemAction } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import _ from "lodash";
 import {ResultOptions} from "../types";
@@ -72,6 +73,40 @@ const _getWorkspaceTree = async (token: string, workspaceId: number): Promise<Wo
     };
 
     const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/tree`, options);
+
+    if (res.ok) {
+        const ret = await res.json();
+        return ret;
+    } else {
+        return Promise.reject(res);
+    }
+};
+
+/**
+ * Get workspace tree with V2 structure (full entity data embedded)
+ * GET /api/workspace/{workspaceId}/tree/v2
+ *
+ * V2 structure provides clear separation:
+ * - Root level: workspace_items table properties
+ * - data property: Full entity data (FolderData | NoteData | FileData)
+ *
+ * @param token - Authentication token
+ * @param workspaceId - The workspace ID
+ * @returns Workspace tree V2 with full entity data or rejects with response
+ */
+const _getWorkspaceTreeV2 = async (token: string, workspaceId: number) => {
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "GET",
+        headers: headers,
+    };
+
+    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/tree/v2`, options);
 
     if (res.ok) {
         const ret = await res.json();
@@ -307,14 +342,40 @@ const _addItemToWorkspace = async (
 };
 
 /**
- * Batch upsert workspace items (follows noteService._upsertNotes pattern)
+ * Batch upsert workspace items with action-based operations
  * POST /api/workspace/{workspaceId}/items/batch
- * Pattern: 100% follows noteService._upsertNotes
+ * Pattern: Action-based API (Microsoft Graph style)
+ *
+ * Supports 6 actions: Create, Add, Move, Update, Delete, Restore
  *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
- * @param requests - Array of workspace item upsert requests
+ * @param requests - Array of workspace item requests with explicit actions
  * @returns Batch operation result or rejects with response
+ *
+ * @example
+ * ```typescript
+ * // CREATE: New folder at root
+ * await _upsertWorkspaceItems(token, workspaceId, [{
+ *   action: WorkspaceItemAction.Create,
+ *   itemType: 2,
+ *   parentId: null,
+ *   folderData: { name: "My Folder", color: "#FF0000" }
+ * }]);
+ *
+ * // MOVE: Move to root (no longer ambiguous!)
+ * await _upsertWorkspaceItems(token, workspaceId, [{
+ *   action: WorkspaceItemAction.Move,
+ *   id: 789,
+ *   parentId: null
+ * }]);
+ *
+ * // DELETE: Soft delete
+ * await _upsertWorkspaceItems(token, workspaceId, [{
+ *   action: WorkspaceItemAction.Delete,
+ *   id: 789
+ * }]);
+ * ```
  */
 const _upsertWorkspaceItems = async (
     token: string,
@@ -349,6 +410,7 @@ const _upsertWorkspaceItems = async (
 export const workspaceService = {
     _getAllUserWorkspaces,
     _getWorkspaceTree,
+    _getWorkspaceTreeV2, // V2 with full entity data
     _getWorkspaceItem,
     _upsertWorkspaceItem,
     _moveWorkspaceItems,

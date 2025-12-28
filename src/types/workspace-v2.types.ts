@@ -1,0 +1,307 @@
+/**
+ * Workspace V2 Types
+ *
+ * New structure with clear separation:
+ * - Root level: workspace_items table properties
+ * - data property: Full entity data (FolderData | NoteData | FileData)
+ *
+ * This makes it clear which properties come from workspace_items table
+ * and which come from the entity tables (folders/notes/files)
+ */
+
+// ============================================
+// ENTITY DATA INTERFACES
+// ============================================
+
+/** Folder entity data (from folders table) */
+export interface FolderData {
+  /** Folder ID (folders.id) */
+  id: number;
+
+  /** User ID who owns the folder (folders.user_id) */
+  userId: number;
+
+  /** Folder name (folders.name) */
+  name: string;
+
+  /** Folder description (folders.description) */
+  description?: string;
+
+  /** URL slug (folders.slug) */
+  slug?: string;
+
+  /** Hex color code (folders.color) */
+  color?: string;
+
+  /** Icon emoji or class (folders.icon) */
+  icon?: string;
+
+  /** Created timestamp (folders.created_at) */
+  createdAt: string;
+
+  /** Updated timestamp (folders.updated_at) */
+  updatedAt?: string;
+
+  /** Soft delete timestamp (folders.deleted_at) */
+  deletedAt?: string | null;
+
+  /** Copy metadata JSON (folders.copy_info) */
+  copyInfo?: string | null;
+}
+
+/** Note entity data (from notes table) */
+export interface NoteData {
+  /** Note ID (notes.id) */
+  id: number;
+
+  /** User ID who owns the note (notes.user_id) */
+  userId: number;
+
+  /** Note name/title (notes.name) */
+  name: string;
+
+  /** Note description/content (notes.description) */
+  description?: string;
+
+  /** Status code (notes.status_code) */
+  statusCode?: string;
+
+  /** Created timestamp (notes.created_at) */
+  createdAt: string;
+
+  /** Updated timestamp (notes.updated_at) */
+  updatedAt?: string;
+
+  /** Soft delete timestamp (notes.deleted_at) */
+  deletedAt?: string | null;
+
+  /** Copy metadata JSON (notes.copy_info) */
+  copyInfo?: string | null;
+}
+
+/** File entity data (from files table) */
+export interface FileData {
+  /** File ID (files.id) */
+  id: number;
+
+  /** User ID who owns the file (files.user_id) */
+  userId: number;
+
+  /** File name (files.name) */
+  name: string;
+
+  /** File URL (files.url) */
+  url?: string;
+
+  /** File size in bytes (files.file_size) */
+  fileSize?: number;
+
+  /** MIME type (files.mime_type) */
+  mimeType?: string;
+
+  /** File extension (files.extension) */
+  extension?: string;
+
+  /** Status code (files.status_code) */
+  statusCode?: string;
+
+  /** Created timestamp (files.created_at) */
+  createdAt: string;
+
+  /** Updated timestamp (files.updated_at) */
+  updatedAt?: string;
+
+  /** Soft delete timestamp (files.deleted_at) */
+  deletedAt?: string | null;
+
+  /** Copy metadata JSON (files.copy_info) */
+  copyInfo?: string | null;
+
+  /** Human-readable file size */
+  fileSizeFormatted?: string;
+}
+
+// ============================================
+// BASE WORKSPACE ITEM
+// ============================================
+
+/**
+ * Base workspace item with common workspace_items table properties
+ */
+interface BaseWorkspaceItem {
+  // ============ FROM workspace_items TABLE ============
+
+  /** Workspace item ID (workspace_items.id) */
+  id: number;
+
+  /** Workspace ID (workspace_items.workspace_id) */
+  workspaceId: number;
+
+  /** Parent ID in workspace hierarchy (workspace_items.parent_id) - null for root items */
+  parentId: number | null;
+
+  /** Item type: 2=folder, 3=note, 4=file (workspace_items.item_type) */
+  itemType: 2 | 3 | 4;
+
+  /** Entity ID - references folders/notes/files (workspace_items.item_id) */
+  itemId: number;
+
+  /** Created timestamp (workspace_items.created_at) */
+  createdAt: string;
+
+  /** Updated timestamp (workspace_items.updated_at) */
+  updatedAt?: string;
+
+  /** Soft delete timestamp (workspace_items.deleted_at) */
+  deletedAt?: string | null;
+
+  /** Copy metadata JSON (workspace_items.copy_info) */
+  copyInfo?: string | null;
+
+  // ============ COMPUTED PROPERTIES ============
+
+  /** Tree depth level (0 = root) */
+  level: number;
+
+  /** Position in current level for sorting */
+  position: number;
+
+  /** Access type: "owner" or "shared" */
+  accessType: "owner" | "shared";
+
+  /** True if original, false if copied */
+  isOriginal: boolean;
+
+  // ============ UI STATE ============
+
+  /** UI state: expanded/collapsed */
+  isExpanded?: boolean;
+
+  /** UI state: selected */
+  isSelected?: boolean;
+}
+
+// ============================================
+// DISCRIMINATED UNION TYPES
+// ============================================
+
+/** Workspace item containing a folder */
+export interface WorkspaceFolderItem extends BaseWorkspaceItem {
+  itemType: 2;
+  data: FolderData;
+}
+
+/** Workspace item containing a note */
+export interface WorkspaceNoteItem extends BaseWorkspaceItem {
+  itemType: 3;
+  data: NoteData;
+}
+
+/** Workspace item containing a file */
+export interface WorkspaceFileItem extends BaseWorkspaceItem {
+  itemType: 4;
+  data: FileData;
+}
+
+/**
+ * Discriminated union of all workspace item types
+ * TypeScript will narrow the type based on itemType property
+ */
+export type WorkspaceItemV2 = WorkspaceFolderItem | WorkspaceNoteItem | WorkspaceFileItem;
+
+// ============================================
+// TYPE GUARDS
+// ============================================
+
+/** Type guard to check if item is a folder */
+export function isFolder(item: WorkspaceItemV2): item is WorkspaceFolderItem {
+  return item.itemType === 2;
+}
+
+/** Type guard to check if item is a note */
+export function isNote(item: WorkspaceItemV2): item is WorkspaceNoteItem {
+  return item.itemType === 3;
+}
+
+/** Type guard to check if item is a file */
+export function isFile(item: WorkspaceItemV2): item is WorkspaceFileItem {
+  return item.itemType === 4;
+}
+
+/** Type guard to check if item can have children (folders only) */
+export function canHaveChildren(item: WorkspaceItemV2): item is WorkspaceFolderItem {
+  return item.itemType === 2;
+}
+
+// ============================================
+// WORKSPACE TREE RESPONSE
+// ============================================
+
+/**
+ * Workspace with tree response V2
+ * Contains workspace metadata and flat list of items
+ */
+export interface WorkspaceWithTreeResponseV2 {
+  /** Workspace ID */
+  workspaceId: number;
+
+  /** User ID who owns the workspace */
+  userId: number;
+
+  /** Workspace name */
+  name: string;
+
+  /** Workspace description */
+  description?: string;
+
+  /** Hex color code */
+  color?: string;
+
+  /** Icon name or class */
+  icon?: string;
+
+  /** Workspace organization type */
+  type?: string;
+
+  /** Maximum depth allowed */
+  maxDepth?: number;
+
+  /** Whether this is the default workspace */
+  isDefault: boolean;
+
+  /** Whether publicly accessible */
+  isPublic: boolean;
+
+  /** Whether this is a template */
+  isTemplate: boolean;
+
+  /** Whether archived */
+  isArchived: boolean;
+
+  /** Total number of tags/folders */
+  tagCount: number;
+
+  /** Total number of notes */
+  noteCount: number;
+
+  /** Total number of files */
+  fileCount: number;
+
+  /** Number of members */
+  memberCount: number;
+
+  /** Additional settings as JSON */
+  settings?: string;
+
+  /** When created */
+  createdAt: string;
+
+  /** When last updated */
+  updatedAt?: string;
+
+  /**
+   * FLAT list of workspace items with full entity data
+   * Frontend builds hierarchy using parentId
+   */
+  items: WorkspaceItemV2[];
+}

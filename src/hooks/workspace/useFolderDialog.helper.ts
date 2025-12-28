@@ -8,6 +8,7 @@ import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.stor
 import type { Folder } from "@/types/folder.types";
 import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
 import { constants } from "@/utils/constants";
+import { WorkspaceItemAction } from "@/types/workspace.types";
 
 export const useFolderDialogHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
@@ -98,25 +99,36 @@ export const useFolderDialogHelper = () => {
 
         setIsSubmitting(true);
         try {
-            // Prepare folder data based on mode
-            const folderData =
-                mode === "edit"
-                    ? {
-                          id: editingFolder!.id, // Include folderId for update
-                          name: newFolderName.trim(),
-                          description: description.trim() || undefined,
-                          color,
-                          parentId: editingFolder!.parentId ?? null, // Preserve existing parentId (use ?? to handle 0)
-                      }
-                    : {
-                          name: newFolderName.trim(),
-                          description: description.trim() || undefined,
-                          color,
-                          parentId: parentFolder?.id > 0 ? parentFolder.id : null, //* khi parent là root thì để null
-                      };
+            // Prepare batch request with action-based API
+            if (mode === "edit") {
+                // UPDATE action: update existing folder
+                await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
+                    action: WorkspaceItemAction.Update,
+                    id: editingFolder!.id,
+                    folderData: {
+                        name: newFolderName.trim(),
+                        description: description.trim() || undefined,
+                        color,
+                    }
+                }]);
+            } else {
+                // CREATE action: create new folder + workspace_item
+                // V2: parentId must be parent's ENTITY ID (itemId), not workspace_items.id
+                const parentEntityId = parentFolder && "itemId" in parentFolder && (parentFolder as any).itemId > 0
+                    ? (parentFolder as any).itemId
+                    : null;
 
-            // Call upsertFolder endpoint
-            await workspaceService._upsertFolder(token, selectedWorkspaceId, folderData);
+                await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
+                    action: WorkspaceItemAction.Create,
+                    itemType: 2, // Folder
+                    parentId: parentEntityId, // ✅ Use parent's entity ID (itemId)
+                    folderData: {
+                        name: newFolderName.trim(),
+                        description: description.trim() || undefined,
+                        color,
+                    }
+                }]);
+            }
 
             // Success message based on mode
             const successMessage = mode === "edit" ? `Folder "${newFolderName}" updated successfully!` : `Folder "${newFolderName}" created successfully!`;

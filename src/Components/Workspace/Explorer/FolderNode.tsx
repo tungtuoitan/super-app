@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as Folder
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
-import { FolderItem, isFolder } from "@/types/workspace.types";
+import { WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
@@ -13,10 +13,16 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelectionHelper();
 
-    const folderItem = node.data.data as FolderItem;
+    // Safe cast: WorkspaceTree already filters to only render FolderNode for folders
+    const folderItem = node.data.data as unknown as WorkspaceFolderItem;
+
+    // Extract data from V2 structure
+    const entityId = folderItem.itemId;
+    const folderName = folderItem.data.name;
+    const folderColor = folderItem.data.color;
     const hasChildren = node.data.children && node.data.children.length > 0;
-    const isSelected = isFolderSelected(folderItem.id);
-    const isWorkspaceRoot = folderItem.id < 0; // Workspace root node has negative ID
+    const isSelected = isFolderSelected(entityId);
+    const isWorkspaceRoot = entityId < 0; // Workspace root node has negative ID
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -44,20 +50,20 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== folderItem.id));
+                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== entityId));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev: number[]) => [...prev, folderItem.id]);
+                setSelectedFolderIds((prev: number[]) => [...prev, entityId]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
-            setLastSelectedFolderId(folderItem.id);
+            setLastSelectedFolderId(entityId);
         } else if (e.shiftKey && lastSelectedFolderId) {
             // Shift+Click: Range selection (like VS Code)
             const allVisibleFolders = treeMiniHelper.getAllVisibleFolderIds(treeData);
             const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
-            const currentIndex = allVisibleFolders.indexOf(folderItem.id);
+            const currentIndex = allVisibleFolders.indexOf(entityId);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
@@ -67,14 +73,14 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                 // Sync with react-arborist (select range ending at this node)
                 node.selectMulti();
             } else {
-                setSelectedFolderIds([folderItem.id]);
+                setSelectedFolderIds([entityId]);
                 node.select();
             }
-            setLastSelectedFolderId(folderItem.id);
+            setLastSelectedFolderId(entityId);
         } else {
             // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
-            setSelectedFolderIds([folderItem.id]);
-            setLastSelectedFolderId(folderItem.id);
+            setSelectedFolderIds([entityId]);
+            setLastSelectedFolderId(entityId);
             // Sync with react-arborist (single select - clears others)
             node.select();
 
@@ -94,10 +100,11 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             return;
         }
 
-        const _currentFolder = currentTree?.items.find((f: any) => f.id === folderItem.id);
+        const _currentFolder = currentTree?.items.find((f: any) => f.itemId === entityId);
 
-        // Open folder-specific context menu with folder data
-        showContextMenu(e, constants.workspace.itemTypes.folder, { ...folderItem, parentId: _currentFolder?.parentId ?? null });
+        // Open folder-specific context menu with folder data (V2 structure)
+        const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };
+        showContextMenu(e, constants.workspace.itemTypes.folder, contextData);
     };
 
     return (
@@ -140,8 +147,8 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             {/* Folder Icon */}
             <div className="mr-2 flex items-center">
                 {/* Workspace root node */}
-                {folderItem.id < 0 ? (
-                    <Layers className="w-4 h-4" style={{ color: folderItem.color || "#75beff" }} />
+                {isWorkspaceRoot ? (
+                    <Layers className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
                 ) : hasChildren ? (
                     node.isOpen ? (
                         <FolderOpen className="w-4 h-4 text-yellow-500" />
@@ -149,7 +156,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                         <FolderIcon className="w-4 h-4 text-yellow-500" />
                     )
                 ) : (
-                    <TagIcon className="w-4 h-4" style={{ color: folderItem.color || "#75beff" }} />
+                    <TagIcon className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
                 )}
             </div>
 
@@ -164,7 +171,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                             text-editor-fg
                         `}
                     >
-                        {folderItem.name + "-" + folderItem.id}
+                        {folderName}
                     </span>
                 </div>
             </div>
