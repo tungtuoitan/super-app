@@ -57,7 +57,7 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
             <div className="w-full">
                 {(label || helperText) && (
                     <div className="flex justify-between items-center mb-2 h-3">
-                        <Label htmlFor={inputId} className={cn("text-left", size === "tiny" && "text-xs", error && "text-destructive")}>
+                        <Label htmlFor={inputId} className={cn("text-left", size === "tiny" && "text-xs")}>
                             {label}
                             {required && <span className="text-destructive ml-1">*</span>}
                         </Label>

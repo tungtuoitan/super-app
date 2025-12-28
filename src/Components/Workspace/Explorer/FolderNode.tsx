@@ -31,9 +31,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const isDropTarget = node.state.willReceiveDrop;
 
     // Check if deleted (including inherited from parent)
-    const deletedStatus = currentWorkspace?.flatData 
-        ? treeMiniHelper.checkDeletedStatus(folderItem, currentWorkspace.flatData)
-        : { isDeleted: false, isDirectlyDeleted: false };
+    const deletedStatus = currentWorkspace?.flatData ? treeMiniHelper.checkDeletedStatus(folderItem, currentWorkspace.flatData) : { isDeleted: false, isDirectlyDeleted: false };
     const isDeleted = deletedStatus.isDeleted;
     const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
 
@@ -146,51 +144,50 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                     ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
                 `}
             >
-            {/* Expand/Collapse Button */}
-            <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    node.toggle();
-                }}
-                className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
-            >
-                {hasChildren ? node.isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" /> : <div className="w-3 h-3" />}
-            </button>
+                {/* Expand/Collapse Button */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        node.toggle();
+                    }}
+                    className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
+                >
+                    {hasChildren ? node.isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" /> : <div className="w-3 h-3" />}
+                </button>
 
-            {/* Folder Icon */}
-            <div className="mr-2 flex items-center">
-                {/* Workspace root node */}
-                {isWorkspaceRoot ? (
-                    <Layers className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
-                ) : hasChildren ? (
-                    node.isOpen ? (
-                        <FolderOpen className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-yellow-500"}`} />
+                {/* Folder Icon */}
+                <div className="mr-2 flex items-center">
+                    {/* Workspace root node */}
+                    {isWorkspaceRoot ? (
+                        <Layers className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
+                    ) : hasChildren ? (
+                        node.isOpen ? (
+                            <FolderOpen className={`w-4 h-4 ${isDeleted ? "text-gray-500" : ""}`} style={!isDeleted ? { color: folderColor || "#75beff" } : {}} />
+                        ) : (
+                            <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : ""}`} style={!isDeleted ? { color: folderColor || "#75beff" } : {}} />
+                        )
                     ) : (
-                        <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-yellow-500"}`} />
-                    )
-                ) : (
-                    // <TagIcon className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
-                    <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-yellow-500"}`} />
-                )}
-            </div>
+                        <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : ""}`} style={!isDeleted ? { color: folderColor || "#75beff" } : {}} />
+                    )}
+                </div>
 
-            {/* Folder Info */}
-            <div className="flex-1 min-w-0 flex items-center gap-2">
-                <div className="w-full min-w-0 flex items-center gap-2">
-                    <span
-                        className={`
+                {/* Folder Info */}
+                <div className="flex-1 min-w-0 flex items-center gap-2">
+                    <div className="w-full min-w-0 flex items-center gap-2">
+                        <span
+                            className={`
                             text-sm truncate
                             ${hasChildren ? "font-semibold" : "font-normal"}
                             ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
                             ${isDirectlyDeleted ? "line-through" : ""}
                             text-editor-fg
                         `}
-                    >
-                        {folderName}
-                    </span>
+                        >
+                            {folderName}
+                        </span>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     );

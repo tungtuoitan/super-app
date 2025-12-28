@@ -9,9 +9,9 @@ import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
-import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import { Textarea } from "@/Components/ui/textarea";
+import { GenericTextField } from "@/shared/components";
 import { cn } from "@/lib/utils";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { isFolder } from "@/types/workspace-v2.types";
@@ -26,7 +26,7 @@ export function FolderDialog() {
     const { currentWorkspace } = useWorkspaceStore();
 
     // Get form state from FolderDialogStore (unified approach)
-    const { isFolderDialogOpen, mode, itemType, editingFolder, parentFolder, newFolderName, setNewFolderName, description, setDescription, color, setColor, errors, isSubmitting } =
+    const { isFolderDialogOpen, mode, itemType, editingFolder, parentFolder, newFolderName, setNewFolderName, description, setDescription, color, setColor, errors, setErrors, isSubmitting } =
         useFolderDialogStore();
 
     // Get business logic and dialog actions from helper
@@ -128,22 +128,33 @@ export function FolderDialog() {
 
                 <div className="space-y-6">
                     <div className="space-y-2">
-                        <Label htmlFor="new-folder-name">{itemLabel} Name *</Label>
-                        <Input
+                        <GenericTextField
                             id="new-folder-name"
+                            name="new-folder-name"
+                            label={`${itemLabel} Name *`}
                             value={newFolderName}
-                            onChange={(e) => setNewFolderName(e.target.value)}
+                            onChange={(e) => {
+                                const newValue = e.target.value;
+                                setNewFolderName(newValue);
+                                // Clear error when user types
+                                if (newValue && newValue.trim() !== "") {
+                                    setErrors({ ...errors, name: "" });
+                                } else {
+                                    setErrors({ ...errors, name: `${itemLabel} Name is required` });
+                                }
+                            }}
                             placeholder={`Enter ${itemLabel.toLowerCase()} name`}
                             autoFocus
-                            className={isDuplicateName ? "border-destructive" : ""}
+                            size="small"
+                            error={!!errors.name || isDuplicateName}
+                            helperText={errors.name || (isDuplicateName ? `A ${itemLabel.toLowerCase()} with this name already exists in this location` : "")}
+                            maxLength={30}
                         />
-                        {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-                        {isDuplicateName && !errors.name && <p className="text-sm text-destructive">A {itemLabel.toLowerCase()} with this name already exists in this location</p>}
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="description">Description</Label>
-                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" rows={3} />
+                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" rows={3} maxLength={50} />
                     </div>
 
                     {/* Only show color picker for folders */}
