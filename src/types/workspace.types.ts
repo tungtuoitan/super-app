@@ -516,17 +516,17 @@ export interface WorkspaceWithTreeResponse {
  */
 export enum WorkspaceItemAction {
     /** CREATE new entity + workspace_item */
-    Create = 1,
+    Create = "CREATE",
     /** ADD existing entity to workspace */
-    Add = 2,
+    Add = "ADD",
     /** MOVE workspace_item to new location */
-    Move = 3,
+    Move = "MOVE",
     /** UPDATE entity data (folder/note/file properties) */
-    Update = 4,
+    Update = "UPDATE",
     /** SOFT DELETE workspace_item */
-    Delete = 5,
+    Delete = "DELETE",
     /** RESTORE deleted workspace_item */
-    Restore = 6,
+    Restore = "RESTORE",
 }
 
 /**
@@ -539,33 +539,33 @@ export enum WorkspaceItemAction {
  * 1. CREATE (new entity + workspace_item):
  *    Required: action=Create, entityType, entityData
  *    Optional: parentId (null = root), workspaceId
- *    Example: { action: 1, entityType: 2, parentId: null, folderData: {...} }
+ *    Example: { action: "CREATE", entityType: 2, parentId: null, folderData: {...} }
  *
  * 2. ADD (existing entity to workspace):
  *    Required: action=Add, entityType, entityId
  *    Optional: parentId (null = root), workspaceId
- *    Example: { action: 2, entityType: 3, entityId: 456, parentId: 123 }
+ *    Example: { action: "ADD", entityType: 3, entityId: 456, parentId: 123 }
  *
  * 3. MOVE (change location):
  *    Required: action=Move, id + (parentId OR workspaceId)
  *    Optional: Both for cross-workspace move
  *    ParentId = workspace_items.id of new parent (NOT entity ID!)
- *    Example: { action: 3, id: 789, parentId: null } ← move to root
+ *    Example: { action: "MOVE", id: 789, parentId: null } ← move to root
  *
  * 4. UPDATE (entity properties):
  *    Required: action=Update, id, entityData
  *    Optional: None
- *    Example: { action: 4, id: 789, folderData: { name: "New Name" } }
+ *    Example: { action: "UPDATE", id: 789, folderData: { name: "New Name" } }
  *
  * 5. DELETE (soft delete):
  *    Required: action=Delete, id
  *    Optional: None
- *    Example: { action: 5, id: 789 }
+ *    Example: { action: "DELETE", id: 789 }
  *
  * 6. RESTORE (un-delete):
  *    Required: action=Restore, id
  *    Optional: None
- *    Example: { action: 6, id: 789 }
+ *    Example: { action: "RESTORE", id: 789 }
  */
 export interface UpsertWorkspaceItemRequest {
     /** Explicit action to perform on workspace item */

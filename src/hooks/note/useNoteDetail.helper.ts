@@ -127,7 +127,7 @@ export const useNoteDetailHelper = () => {
                     const firstHashtag = activeNote.hashtags[0];
                     const parentFolderId = typeof firstHashtag === "number" ? firstHashtag : (firstHashtag as any)?.id || (firstHashtag as any)?.tagId;
 
-                    const workspaceId = currentTree?.workspaceId;
+                    const workspaceId = currentTree?.id;
 
                     if (workspaceId && parentFolderId) {
                         try {
@@ -171,8 +171,8 @@ export const useNoteDetailHelper = () => {
                 originalNoteRef.current = { ...transformedNote };
                 await loadNotes();
 
-                if (isCreateMode && currentTree?.workspaceId) {
-                    await loadTree(currentTree.workspaceId);
+                if (isCreateMode && currentTree?.id) {
+                    await loadTree(currentTree.id);
                 }
 
                 return transformedNote;

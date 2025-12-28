@@ -12,9 +12,9 @@ import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import { Textarea } from "@/Components/ui/textarea";
-import { isFolder } from "@/types/workspace.types";
 import { cn } from "@/lib/utils";
-import type { WorkspaceItem } from "@/types/workspace.types";
+import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { isFolder } from "@/types/workspace-v2.types";
 import { useKeyboardShortcut } from "@/shared/hooks";
 import { useWorkspaceStore } from "@/store/index";
 import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
@@ -37,49 +37,28 @@ export function FolderDialog() {
 
     // Find parent folder info for display (VS Code-like)
     const parentFolderInfo = React.useMemo(() => {
-        if (!parentFolderId || !currentTree?.items || currentTree.items.length === 0) return null;
+        if (!parentFolderId || !currentTree?.flatData || currentTree.flatData.length === 0) return null;
 
-        // Search for parent folder in the tree
-        function findFolder(items: WorkspaceItem[], targetId: number): WorkspaceItem | null {
-            for (const item of items) {
-                // ✅ Use type guard and id field
-                if (isFolder(item) && item.id === targetId) return item;
-                if (item.children && item.children.length > 0) {
-                    const found = findFolder(item.children, targetId);
-                    if (found) return found;
-                }
-            }
-            return null;
-        }
-
-        return findFolder(currentTree.items, parentFolderId);
+        // Search for parent folder in the flat list
+        const found = currentTree.flatData.find(item => isFolder(item) && item.entityId === parentFolderId);
+        return found || null;
     }, [parentFolderId, currentTree]);
 
     // Get sibling folders to check for duplicate names
     const siblingFolders = () => {
-        if (!currentTree?.items || currentTree.items.length === 0) return [];
+        if (!currentTree?.flatData || currentTree.flatData.length === 0) return [];
 
-        // If we have a parent folder, get its children
-        if (parentFolderId) {
-            const parent = parentFolderInfo;
-            if (parent && parent.children) {
-                return parent.children.filter(
-                    (child: WorkspaceItem) =>
-                        // ✅ Use type guard and id field
-                        isFolder(child) &&
-                        // When editing, exclude the current folder being edited
-                        (mode === "create" || child.id !== editingFolder?.id)
-                );
-            }
-        }
-
-        // If no parent, get root level folders
-        return currentTree.items.filter(
-            (item: any) =>
-                // ✅ Use type guard and id field
+        // Find all items with the same parentId (siblings)
+        // For folders at root level, parentId should match the parent folder's id
+        // For creating at root, parentId would be null or the workspace root id
+        return currentTree.flatData.filter(
+            (item: WorkspaceItemV2) =>
+                // ✅ Use type guard and entityId field
                 isFolder(item) &&
+                // Same parent (siblings)
+                item.parentId === parentFolderId &&
                 // When editing, exclude the current folder being edited
-                (mode === "create" || item.id !== editingFolder?.id)
+                (mode === "create" || item.entityId !== editingFolder?.id)
         );
     };
 
@@ -87,7 +66,12 @@ export function FolderDialog() {
     const isDuplicateName = React.useMemo(() => {
         if (!newFolderName.trim()) return false;
 
-        return siblingFolders().some((folder: WorkspaceItem) => folder.name.toLowerCase() === newFolderName.trim().toLowerCase());
+        return siblingFolders().some((folder: WorkspaceItemV2) => {
+            if (isFolder(folder)) {
+                return folder.data.name.toLowerCase() === newFolderName.trim().toLowerCase();
+            }
+            return false;
+        });
     }, [newFolderName]);
 
     // Handle dialog close

@@ -44,7 +44,7 @@ export const useFolderDialogHelper = () => {
     const token = $user.userToken;
 
     // Computed value
-    const selectedWorkspaceId = currentTree?.workspaceId;
+    const selectedWorkspaceId = currentTree?.id;
 
     /**
      * Reset form to initial state
@@ -113,15 +113,16 @@ export const useFolderDialogHelper = () => {
                 }]);
             } else {
                 // CREATE action: create new folder + workspace_item
-                // V2: parentId must be parent's ENTITY ID (entityId), not workspace_items.id
-                const parentEntityId = parentFolder && "entityId" in parentFolder && (parentFolder as any).entityId > 0
-                    ? (parentFolder as any).entityId
+                // IMPORTANT: parentId = parent's workspace_items.id (NOT entityId!)
+                // workspace_items.parent_id is a SELF-REFERENCING FK to workspace_items.id
+                const parentWorkspaceItemId = parentFolder && "id" in parentFolder && (parentFolder as any).id > 0
+                    ? (parentFolder as any).id
                     : null;
 
                 await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
                     action: WorkspaceItemAction.Create,
                     entityType: 2, // Folder
-                    parentId: parentEntityId, // ✅ Use parent's entity ID (entityId)
+                    parentId: parentWorkspaceItemId, // ✅ Use parent's workspace_items.id (NOT entityId!)
                     folderData: {
                         name: newFolderName.trim(),
                         description: description.trim() || undefined,

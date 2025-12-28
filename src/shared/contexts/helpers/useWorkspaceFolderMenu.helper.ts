@@ -15,10 +15,12 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import { filterTopLevelParents, transformItemsToTreeData } from "@/hooks/workspace/tree.miniHelper";
+import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items } from "@/hooks/workspace/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "@/types/workspace.types";
+import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import {WorkspaceDTO} from "@/types/workspace-dto.types";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -157,8 +159,8 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 2: Find next item to select after deletion (VS Code behavior)
         // ----------------
         let nextFolderIdToSelect: number | null = null;
-        if (currentTree?.items) {
-            const allVisibleFolderIds = $getAllVisibleTagIds(currentTree.items);
+        if (currentTree?.flatData) {
+            const allVisibleFolderIds = $getAllVisibleTagIds(currentTree.flatData);
             const currentIndex = allVisibleFolderIds.indexOf(folder.id);
 
             if (currentIndex !== -1) {
@@ -211,7 +213,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 };
             });
 
-            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.workspaceId || 1, {
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.id || 1, {
                 items: deleteItems,
                 isHardDelete,
             });
@@ -223,11 +225,11 @@ export const useWorkspaceFolderMenuHelper = () => {
                 // Remove folders from tree
                 if (currentTree) {
                     const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                    const updatedItems = $removeItems(currentTree.items, idsToRemove);
+                    const updatedItems = $removeItems(currentTree.flatData, idsToRemove);
 
                     setCurrentTree({
                         ...currentTree,
-                        items: updatedItems,
+                        flatData: updatedItems,
                     });
 
                     // VS Code behavior: Select next item after deletion
@@ -266,7 +268,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         // STEP 1: Validate tree data
         // ----------------
-        if (!currentTree?.items) {
+        if (!currentTree?.flatData) {
             console.error("❌ Cannot delete: no tree data");
             return;
         }
@@ -276,7 +278,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         const selectedFolders: Folder[] = [];
         for (const folderId of selectedIds) {
-            const folder = $findFolderById(currentTree.items, folderId);
+            const folder = $findFolderById(currentTree.flatData, folderId);
             if (folder) {
                 // Check if this is a workspace root node (negative ID)
                 if (folder.id < 0) {
@@ -296,7 +298,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 3: Find next item to select after deletion (VS Code behavior)
         // ----------------
         let nextFolderIdToSelect: number | null = null;
-        const allVisibleFolderIds = $getAllVisibleTagIds(currentTree.items);
+        const allVisibleFolderIds = $getAllVisibleTagIds(currentTree.flatData);
 
         // Find the highest index among selected folders
         const selectedIndices = selectedIds
@@ -360,7 +362,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 };
             });
 
-            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.workspaceId || 1, {
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentTree?.id || 1, {
                 items: deleteItems,
                 isHardDelete,
             });
@@ -372,11 +374,11 @@ export const useWorkspaceFolderMenuHelper = () => {
                 // Remove folders from tree
                 if (currentTree) {
                     const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                    const updatedItems = $removeItems(currentTree.items, idsToRemove);
+                    const updatedItems = $removeItems(currentTree.flatData, idsToRemove);
 
                     setCurrentTree({
                         ...currentTree,
-                        items: updatedItems,
+                        flatData: updatedItems,
                     });
 
                     // VS Code behavior: Select next item after deletion
@@ -506,7 +508,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         }
 
         // ===== STEP 2: Validate tree data =====
-        if (!currentTree?.items) {
+        if (!currentTree?.flatData) {
             console.error("❌ Cannot delete: no tree data");
             return;
         }
@@ -515,7 +517,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             const token = $user.userToken;
 
             // ===== STEP 3: Filter to top-level parents only =====
-            const treeData = transformItemsToTreeData(currentTree.items);
+            const treeData = buildTreeFromV2Items(currentTree.flatData);
             const topLevelIds = filterTopLevelParents(selectedIds, treeData);
 
             console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
@@ -526,9 +528,9 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
 
             // ===== STEP 4: Find items and skip workspace root =====
-            const selectedItems: WorkspaceItem[] = [];
+            const selectedItems: WorkspaceItemV2[] = [];
             for (const itemId of topLevelIds) {
-                const item = $findItemById(currentTree.items, itemId);
+                const item = $findItemById(currentTree.flatData, itemId);
                 if (item && item.id > 0) {
                     // Skip workspace root (negative ID)
                     selectedItems.push(item);
@@ -541,14 +543,14 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
 
             // ===== STEP 5: Collect all descendants (giống __deleteRestore_SelectedNotes) =====
-            const allItemsToUpdate: WorkspaceItem[] = [];
+            const allItemsToUpdate: WorkspaceItemV2[] = [];
             for (const item of selectedItems) {
                 const descendants = $collectAllDescendants_WorkspaceItems(item);
                 allItemsToUpdate.push(...descendants);
             }
 
             // Remove duplicates
-            const uniqueItemsMap = new Map<number, WorkspaceItem>();
+            const uniqueItemsMap = new Map<number, WorkspaceItemV2>();
             for (const item of allItemsToUpdate) {
                 uniqueItemsMap.set(item.id, item);
             }
@@ -570,7 +572,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             });
 
             // ===== STEP 8: Call batch upsert API (giống __deleteRestore_SelectedNotes) =====
-            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentTree.workspaceId, batchRequests);
+            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentTree.id, batchRequests);
 
             if (!result.success) {
                 throw new Error(result.message || "Batch update failed");
@@ -580,9 +582,10 @@ export const useWorkspaceFolderMenuHelper = () => {
 
             if (type === "soft-delete") {
                 // Clean up open tabs (giống __deleteRestore_SelectedNotes)
-                const folderIds = itemsToUpdate.filter((item) => item.type === constants.workspace.itemTypes.folder).map((item) => item.id);
-                const noteIds = itemsToUpdate.filter((item) => item.type === constants.workspace.itemTypes.note).map((item) => item.id);
-                const fileIds = itemsToUpdate.filter((item) => item.type === constants.workspace.itemTypes.file).map((item) => item.id);
+                // In V2: entityType is numeric: 2=folder, 3=note, 4=file
+                const folderIds = itemsToUpdate.filter((item) => item.entityType === 2).map((item) => item.id);
+                const noteIds = itemsToUpdate.filter((item) => item.entityType === 3).map((item) => item.id);
+                const fileIds = itemsToUpdate.filter((item) => item.entityType === 4).map((item) => item.id);
 
                 if (folderIds.length > 0) {
                     processTabAfterDelete(folderIds, "folder");
@@ -596,15 +599,20 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
 
             // Reload workspace tree (giống __deleteRestore_SelectedNotes: await loadNotes())
-            const updatedTree = await workspaceService._getWorkspaceTree(token ?? "", currentTree.workspaceId);
-            setCurrentTree(updatedTree);
+            const res = await workspaceService._getWorkspaceTreeV2(token ?? "", currentTree.id);
+            if(res && res.success){
+                setCurrentTree(res.object as WorkspaceDTO);
+                // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
+                setSelectedFolderIds([]);
+                setLastSelectedFolderId(null);
+    
+                // Show success message
+                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
+            }
+            else {
+                throw new Error("Failed to reload workspace tree");
+            }
 
-            // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
-            setSelectedFolderIds([]);
-            setLastSelectedFolderId(null);
-
-            // Show success message
-            enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
         } catch (error) {
             console.error("❌ Failed to update items:", error);
             const errorMessage = await parseApiError(error);
@@ -620,28 +628,29 @@ export const useWorkspaceFolderMenuHelper = () => {
     /**
      * Helper: Recursively collect all descendants for workspace items
      */
-    const $collectAllDescendants_WorkspaceItems = (item: WorkspaceItem): WorkspaceItem[] => {
-        const descendants: WorkspaceItem[] = [item];
-        if (isFolder(item) && item.children?.length > 0) {
-            for (const child of item.children) {
-                descendants.push(...$collectAllDescendants_WorkspaceItems(child));
+    const $collectAllDescendants_WorkspaceItems = (item: WorkspaceItemV2): WorkspaceItemV2[] => {
+        const descendants: WorkspaceItemV2[] = [item];
+
+        // With V2 flat structure, find all descendants by traversing parentId relationships
+        const findDescendants = (parentId: number) => {
+            const children = currentTree?.flatData.filter(i => i.parentId === parentId) || [];
+            for (const child of children) {
+                descendants.push(child);
+                // Recursively find descendants of this child
+                findDescendants(child.id);
             }
-        }
+        };
+
+        findDescendants(item.id);
         return descendants;
     };
 
     /**
      * Helper: Find item by ID recursively in workspace tree
      */
-    const $findItemById = (items: WorkspaceItem[], targetId: number): WorkspaceItem | null => {
-        for (const item of items) {
-            if (item.id === targetId) return item;
-            if (isFolder(item) && item.children?.length > 0) {
-                const found = $findItemById(item.children, targetId);
-                if (found) return found;
-            }
-        }
-        return null;
+    const $findItemById = (items: WorkspaceItemV2[], targetId: number): WorkspaceItemV2 | null => {
+        // With V2 flat structure, we can just find directly
+        return items.find(item => item.id === targetId) || null;
     };
 
     return {

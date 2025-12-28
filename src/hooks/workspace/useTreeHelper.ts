@@ -58,7 +58,7 @@ export const useTreeHelper = () => {
             const getEntityId = (node: any) => node.data.entityId;
 
             // ---- Filter out the drop zone node (drop zone node is a FAKE node with ID -1)----
-            const validTreeNodes = allTreeNodes.filter(node => getEntityId(node) !== -1);
+            const validTreeNodes = allTreeNodes.filter((node) => getEntityId(node) !== -1);
 
             let selectedEntityIds = args.dragIds
                 .map((dragId) => {
@@ -108,8 +108,8 @@ export const useTreeHelper = () => {
                         console.log("🎯 Drop target: Root level (drop zone)");
 
                         // ---- VALIDATION: If all items already root-level, prevent drop ----
-                        const allAlreadyRoot = selectedEntityIds.every(id => {
-                            const item = validTreeNodes.find(t => getEntityId(t) === id);
+                        const allAlreadyRoot = selectedEntityIds.every((id) => {
+                            const item = validTreeNodes.find((t) => getEntityId(t) === id);
                             return !item?.data.parentId || item.data.parentId === null;
                         });
                         if (allAlreadyRoot) {
@@ -156,7 +156,7 @@ export const useTreeHelper = () => {
                         } else {
                             // ---- Dropping BETWEEN siblings - use their parent ----
                             targetParentWorkspaceItemId = targetNodeData.parentId ?? undefined;
-                            console.log(`🎯 Drop target: ${targetParentWorkspaceItemId === undefined ? 'Root level' : `Parent ${targetParentWorkspaceItemId}`} (between siblings)`);
+                            console.log(`🎯 Drop target: ${targetParentWorkspaceItemId === undefined ? "Root level" : `Parent ${targetParentWorkspaceItemId}`} (between siblings)`);
                         }
                     }
                 }
@@ -201,16 +201,18 @@ export const useTreeHelper = () => {
             const targetParentNode = targetParentWorkspaceItemId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => t.data.id === targetParentWorkspaceItemId) : null;
 
             // ---- Filter out workspace root and drop zone ----
-            const targetSiblings = targetParentNode ? targetParentNode.children || [] : treeData.filter((t) => {
-                const entityId = getEntityId(t);
-                return entityId > 0 && entityId !== -1;
-            });
+            const targetSiblings = targetParentNode
+                ? targetParentNode.children || []
+                : treeData.filter((t) => {
+                      const entityId = getEntityId(t);
+                      return entityId > 0 && entityId !== -1;
+                  });
 
             // ---- VALIDATION: Check same parent - different logic for single vs multi-select ----
             if (selectedEntityIds.length === 1) {
                 // ---- Single select: If parent is target, no move needed ----
                 const draggedItemId = selectedEntityIds[0];
-                const draggedItem = validTreeNodes.find(t => getEntityId(t) === draggedItemId);
+                const draggedItem = validTreeNodes.find((t) => getEntityId(t) === draggedItemId);
 
                 if (draggedItem) {
                     const currentParentId = "parentId" in draggedItem.data ? draggedItem.data.parentId : undefined;
@@ -225,8 +227,8 @@ export const useTreeHelper = () => {
                 }
             } else {
                 // ---- Multi-select: Remove items that already have target parent ----
-                const itemsToMove = selectedEntityIds.filter(id => {
-                    const item = validTreeNodes.find(t => getEntityId(t) === id);
+                const itemsToMove = selectedEntityIds.filter((id) => {
+                    const item = validTreeNodes.find((t) => getEntityId(t) === id);
                     if (!item) return false;
 
                     const currentParentId = "parentId" in item.data ? item.data.parentId : undefined;
@@ -262,24 +264,26 @@ export const useTreeHelper = () => {
                     return selectedEntityIds.includes(siblingEntityId);
                 });
 
-                if (bothInSelection || (hasSiblingsInSelection && ((itemBeforeId && selectedEntityIds.includes(itemBeforeId)) || (itemAfterId && selectedEntityIds.includes(itemAfterId))))) {
+                if (
+                    bothInSelection ||
+                    (hasSiblingsInSelection && ((itemBeforeId && selectedEntityIds.includes(itemBeforeId)) || (itemAfterId && selectedEntityIds.includes(itemAfterId))))
+                ) {
                     console.warn("⚠️ Cannot drop between items in the same selection");
                     setIsDragging(false);
                     return;
                 }
             }
 
-
             // -------------------------------------------------------
             // STEP 5: BUILD MOVE REQUEST & CALL API
             // -------------------------------------------------------
-            if (!currentTree?.workspaceId) {
+            if (!currentTree?.id) {
                 console.error("❌ No workspace ID found");
                 setIsDragging(false);
                 return;
             }
 
-            const workspaceId = currentTree.workspaceId;
+            const workspaceId = currentTree.id;
 
             // ---- Build batch MOVE request ----
             // For each selected entity, create a MOVE action with:

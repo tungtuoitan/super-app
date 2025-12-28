@@ -9,6 +9,7 @@ import { WorkspaceItemAction } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import _ from "lodash";
 import {ResultOptions} from "../types";
+import type { WorkspaceDTO } from "@/types/workspace-dto.types";
 
 /**
  * Request to create or update a folder in workspace
@@ -86,15 +87,13 @@ const _getWorkspaceTree = async (token: string, workspaceId: number): Promise<Wo
  * Get workspace tree with V2 structure (full entity data embedded)
  * GET /api/workspace/{workspaceId}/tree/v2
  *
- * V2 structure provides clear separation:
- * - Root level: workspace_items table properties
- * - data property: Full entity data (FolderData | NoteData | FileData)
+ * Returns unified WorkspaceDTO with workspace data + flatData
  *
  * @param token - Authentication token
  * @param workspaceId - The workspace ID
- * @returns Workspace tree V2 with full entity data or rejects with response
+ * @returns Unified WorkspaceDTO with workspace properties and flatData array
  */
-const _getWorkspaceTreeV2 = async (token: string, workspaceId: number) => {
+const _getWorkspaceTreeV2 = async (token: string, workspaceId: number): Promise<ResultOptions<WorkspaceDTO>> => {
     const headers = new Headers();
     const bearer = `Bearer ${token}`;
 
@@ -109,8 +108,10 @@ const _getWorkspaceTreeV2 = async (token: string, workspaceId: number) => {
     const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/tree/v2`, options);
 
     if (res.ok) {
-        const ret = await res.json();
-        return ret;
+        const result = (await res.json()) as ResultOptions<WorkspaceDTO>;
+        // Backend returns ResultOptions { success, message, status, object }
+        // Extract the WorkspaceDTO from 'object' property
+        return result;
     } else {
         return Promise.reject(res);
     }

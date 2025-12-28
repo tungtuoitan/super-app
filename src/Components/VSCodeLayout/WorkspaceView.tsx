@@ -27,10 +27,10 @@ export function WorkspaceView() {
         loadAllWorkspaces();
     }, [$user.userId, $user.filters]);
 
-    // Sync selected option with currentTree.workspaceId from store
+    // Sync selected option with currentTree.id from store
     useEffect(() => {
-        if (currentTree?.workspaceId && allWorkspaces.length > 0) {
-            const workspace = allWorkspaces.find((ws) => ws.id === currentTree.workspaceId);
+        if (currentTree?.id && allWorkspaces.length > 0) {
+            const workspace = allWorkspaces.find((ws) => ws.id === currentTree.id);
             if (workspace) {
                 setSelectedOption({
                     id: workspace.id.toString(),
@@ -40,7 +40,7 @@ export function WorkspaceView() {
                 });
             }
         }
-    }, [currentTree?.workspaceId, allWorkspaces]);
+    }, [currentTree?.id, allWorkspaces]);
 
     // Convert workspaces to autocomplete options
     const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => ({

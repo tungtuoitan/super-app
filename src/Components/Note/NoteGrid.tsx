@@ -86,7 +86,7 @@ export function NoteGrid() {
                     <thead className="bg-muted/50 sticky top-0 z-10">
                         {/* Column Headers */}
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className="border-b">
+                            <tr key={headerGroup.id} className="border-b bg-[rgb(37,37,38)]">
                                 {headerGroup.headers.map((header) => (
                                     <th key={header.id} className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground" style={{ width: header.getSize() }}>
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}

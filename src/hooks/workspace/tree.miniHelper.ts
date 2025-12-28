@@ -4,6 +4,7 @@ import { Folder } from "../../types";
 import { transformBackendItems, BackendWorkspaceItem } from "@/utils/workspace-mapper";
 import { constants } from "@/utils/constants";
 import {featureFlags} from "@/config/features.config";
+import type { WorkspaceDTO } from "@/types/workspace-dto.types";
 
 // ============================================
 // RECURSIVE HELPER FUNCTIONS (prefix with $)
@@ -252,7 +253,7 @@ export function createWorkspaceRootFolder(
  * @param items - Flat list of workspace items from API
  * @returns Hierarchical tree structure (roots only - children are nested)
  */
-function buildTreeFromV2Items(items: WorkspaceItemV2[]): TreeFolder[] {
+export function buildTreeFromV2Items(items: WorkspaceItemV2[]): TreeFolder[] {
     // -------------------------------------------------------
     // STEP 1: CREATE MAP FOR O(1) LOOKUP
     // -------------------------------------------------------
@@ -313,46 +314,46 @@ function buildTreeFromV2Items(items: WorkspaceItemV2[]): TreeFolder[] {
  * Backend returns flat array with parentId, we build hierarchy here
  * Benefits: smaller payload, better caching, easier updates
  */
-function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
-    // Create a map for O(1) lookup - include ALL item types
-    const itemMap = new Map<number, WorkspaceItem>();
+// function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
+//     // Create a map for O(1) lookup - include ALL item types
+//     const itemMap = new Map<number, WorkspaceItem>();
 
-    items.forEach((item) => {
-        // Only folders can have children
-        const itemWithChildren: WorkspaceItem = isFolder(item) ? { ...item, children: [] } : { ...item, children: [] as any }; // Notes/files will keep empty children
+//     items.forEach((item) => {
+//         // Only folders can have children
+//         const itemWithChildren: WorkspaceItem = isFolder(item) ? { ...item, children: [] } : { ...item, children: [] as any }; // Notes/files will keep empty children
 
-        itemMap.set(item.id, itemWithChildren);
-    });
+//         itemMap.set(item.id, itemWithChildren);
+//     });
 
-    // Build parent-child relationships
-    const roots: WorkspaceItem[] = [];
+//     // Build parent-child relationships
+//     const roots: WorkspaceItem[] = [];
 
-    items.forEach((item) => {
-        const currentItem = itemMap.get(item.id);
-        if (!currentItem) return;
+//     items.forEach((item) => {
+//         const currentItem = itemMap.get(item.id);
+//         if (!currentItem) return;
 
-        if (item.parentId === null || item.parentId === undefined) {
-            // Root level item (no parent)
-            roots.push(currentItem);
-        } else {
-            // Child item - add to parent's children array
-            const parent = itemMap.get(item.parentId);
-            if (parent) {
-                // Only add to parent if parent is a folder
-                if (isFolder(parent)) {
-                    parent.children.push(currentItem);
-                } else {
-                    roots.push(currentItem);
-                }
-            } else {
-                // Orphan (parent not found) - treat as root
-                roots.push(currentItem);
-            }
-        }
-    });
+//         if (item.parentId === null || item.parentId === undefined) {
+//             // Root level item (no parent)
+//             roots.push(currentItem);
+//         } else {
+//             // Child item - add to parent's children array
+//             const parent = itemMap.get(item.parentId);
+//             if (parent) {
+//                 // Only add to parent if parent is a folder
+//                 if (isFolder(parent)) {
+//                     parent.children.push(currentItem);
+//                 } else {
+//                     roots.push(currentItem);
+//                 }
+//             } else {
+//                 // Orphan (parent not found) - treat as root
+//                 roots.push(currentItem);
+//             }
+//         }
+//     });
 
-    return roots;
-}
+//     return roots;
+// }
 
 
 /**
@@ -364,80 +365,62 @@ function buildHierarchy(items: WorkspaceItem[]): WorkspaceItem[] {
  * 4. Wrap in workspace root (if workspace mode)
  * 5. Convert to TreeFolder format
  *
- * @param data - Workspace data with tree items (or null/undefined)
+ * @param data - WorkspaceDTO with workspace data + flatData (or null/undefined)
  * @param searchText - Search filter text
  * @returns TreeFolder array ready for react-arborist
  */
 export function transformToTreeData(
-    data:
-        | {
-              workspaceId: number;
-              name: string;
-              description?: string;
-              color?: string;
-              createdAt: string;
-              isArchived: boolean;
-              items: any[];
-              userId: number;
-              updatedAt?: string;
-              icon?: string;
-          }
-        | null
-        | undefined,
+    data: WorkspaceDTO | null | undefined,
     searchText: string,
 ): TreeFolder[] {
     // Validate input data
-    if (!data || !("items" in data)) {
+    if (!data || !data.flatData) {
         return [];
     }
 
-    // V2: data.items are WorkspaceItemV2[]
-    const v2Items = data.items as WorkspaceItemV2[];
+    // Get flat list of workspace items
+    const v2Items = data.flatData;
 
     // Build tree structure from flat V2 list
     const treeRoots = buildTreeFromV2Items(v2Items);
 
-    // Create workspace root node
-    if (data && "workspaceId" in data) {
-        const workspaceRootV2: TreeFolder = {
-            id: `-12345`,
-            name: data.name,
+    // Create workspace root node from WorkspaceDTO
+    const workspaceRootV2: TreeFolder = {
+        id: `-12345`,
+        name: data.name,
+        data: {
+            id: -12345,
+            workspaceId: data.id,
+            parentId: null,
+            entityType: 2, // folder
+            entityId: -12345,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+            deletedAt: null,
+            copyInfo: null,
+            level: 0,
+            position: 0,
+            accessType: "owner" as const,
+            isOriginal: true,
             data: {
                 id: -12345,
-                workspaceId: data.workspaceId,
-                parentId: null,
-                entityType: 2, // folder
-                entityId: -12345,
+                userId: data.userId,
+                name: data.name,
+                description: data.description,
+                color: data.color,
+                icon: data.icon,
                 createdAt: data.createdAt,
                 updatedAt: data.updatedAt,
                 deletedAt: null,
                 copyInfo: null,
-                level: 0,
-                position: 0,
-                accessType: "owner" as const,
-                isOriginal: true,
-                data: {
-                    id: -12345,
-                    userId: data.userId,
-                    name: data.name,
-                    description: data.description,
-                    color: data.color,
-                    icon: data.icon,
-                    createdAt: data.createdAt,
-                    updatedAt: data.updatedAt,
-                    deletedAt: null,
-                    copyInfo: null,
-                    slug: undefined,
-                },
-                isExpanded: true,
-                isSelected: false,
-            } as any, // WorkspaceFolderItem
-            children: treeRoots,
-        };
-        return [workspaceRootV2];
-    }
-
-    return treeRoots;
+                slug: undefined,
+            },
+            isExpanded: true,
+            isSelected: false,
+        } as any, // WorkspaceFolderItem
+        children: treeRoots,
+    };
+    return [workspaceRootV2];
 };
 
 export const treeMiniHelper = {

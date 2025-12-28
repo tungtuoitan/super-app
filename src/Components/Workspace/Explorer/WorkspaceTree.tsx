@@ -94,14 +94,14 @@ export function WorkspaceTree() {
         const baseTree = treeMiniHelper.transformToTreeData(currentTree, searchText);
         
         // Add invisible drop zone at the end to catch drops to root level
-        if (baseTree.length > 0 && currentTree?.workspaceId) {
+        if (baseTree.length > 0 && currentTree?.id) {
             const dropZoneNode: TreeFolder = {
-                id: `drop-zone-root-${currentTree.workspaceId}`,
+                id: `drop-zone-root-${currentTree.id}`,
                 name: "",
                 data: {
                     // V2 structure
                     id: -1,
-                    workspaceId: currentTree.workspaceId,
+                    workspaceId: currentTree.id,
                     parentId: null,
                     entityType: 2 as const,
                     entityId: -1,

@@ -107,7 +107,7 @@ export function NoteDetailContent() {
                         }}
                         onFocus={() => trackNavigation("description")}
                         placeholder="Enter note description..."
-                        className="min-h-[400px] resize-none font-mono text-sm"
+                        className="min-h-[400px] resize-none font-mono text-sm overscroll-behavior-y-contain"
                         disabled={isDeleted || isHardDeleted}
                     />
                 </CardContent>

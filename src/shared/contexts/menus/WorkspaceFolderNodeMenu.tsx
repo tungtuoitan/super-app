@@ -115,7 +115,7 @@ export function WorkspaceFolderNodeMenu() {
             };
             const newTree = {
                 ...currentTree,
-                items: addNoteToTree(currentTree.items),
+                flatData: addNoteToTree(currentTree.flatData),
                 noteCount: currentTree.noteCount + 1
             }
             console.log("New Tree after adding note:", newTree);

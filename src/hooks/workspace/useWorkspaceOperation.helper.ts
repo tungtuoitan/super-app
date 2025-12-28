@@ -16,6 +16,8 @@ import { workspaceService } from "@/services/workspace.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
+import {ResultOptions} from "@/types/common.types";
+import {WorkspaceDTO} from "@/types/workspace-dto.types";
 
 export const useWorkspaceOperation = () => {
     const { $user } = useAuthStore();
@@ -66,17 +68,12 @@ export const useWorkspaceOperation = () => {
 
             // Fetch workspace tree with V2 structure
             console.log("🔧 Loading Workspace V2 API");
-            const treeData = await workspaceService._getWorkspaceTreeV2(token, workspaceId);
-            console.log("📦 V2 Response items:", treeData.items.length);
+            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, workspaceId);
+            if(result && result.success){
+                setCurrentTree(result.object as WorkspaceDTO);
+                return result.object;
+            }
 
-            // Filter out deleted items
-            treeData.items = treeData.items.filter((item: any) => !item.deletedAt);
-            console.log("🔍 After filter (non-deleted):", treeData.items.length);
-
-            // Set as current tree
-            setCurrentTree(treeData);
-
-            return treeData;
         } catch (error) {
             throw error;
         } finally {

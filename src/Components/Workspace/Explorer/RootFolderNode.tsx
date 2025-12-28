@@ -77,8 +77,8 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                     title="Refresh"
                     onClick={(e) => {
                         e.stopPropagation();
-                        if (currentTree?.workspaceId) {
-                            loadTree(currentTree.workspaceId);
+                        if (currentTree?.id) {
+                            loadTree(currentTree.id);
                         }
                     }}
                     className="p-1 text-editor-fg hover:bg-editor-hover rounded"

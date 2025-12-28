@@ -79,7 +79,7 @@ export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i: any) => i.entityId === entityId);
+        const _currentItem = currentTree?.flatData.find((i: any) => i.entityId === entityId);
 
         // Open file-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });

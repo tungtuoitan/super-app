@@ -100,7 +100,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
             return;
         }
 
-        const _currentFolder = currentTree?.items.find((f: any) => f.entityId === entityId);
+        const _currentFolder = currentTree?.flatData.find((f: any) => f.entityId === entityId);
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };

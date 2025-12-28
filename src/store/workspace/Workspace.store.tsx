@@ -5,14 +5,15 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
-import type { WsResponse, WorkspaceWithTreeResponse } from "@/types/workspace.types";
+import type { WsResponse } from "@/types/workspace.types";
+import type { WorkspaceDTO } from "@/types/workspace-dto.types";
 
 export interface WorkspaceContextData {
     // Workspace state
     allWorkspaces: WsResponse[];
     setAllWorkspaces: Dispatch<SetStateAction<WsResponse[]>>;
-    currentTree: WorkspaceWithTreeResponse | null; // Current workspace tree data (contains workspaceId)
-    setCurrentTree: Dispatch<SetStateAction<WorkspaceWithTreeResponse | null>>;
+    currentTree: WorkspaceDTO | null; // Current workspace tree data (unified WorkspaceDTO)
+    setCurrentTree: Dispatch<SetStateAction<WorkspaceDTO | null>>;
     isLoadingWorkspaces: boolean;
     setIsLoadingWorkspaces: Dispatch<SetStateAction<boolean>>;
     isLoadingTree: boolean;
@@ -64,7 +65,7 @@ export const useWorkspaceStore = () => useContext(WorkspaceStore);
 
 export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [allWorkspaces, setAllWorkspaces] = useState<WsResponse[]>([]);
-    const [currentTree, setCurrentTree] = useState<WorkspaceWithTreeResponse | null>(null);
+    const [currentTree, setCurrentTree] = useState<WorkspaceDTO | null>(null);
     const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState<boolean>(false);
     const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
 

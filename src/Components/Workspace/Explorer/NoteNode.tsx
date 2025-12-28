@@ -68,7 +68,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         e.stopPropagation();
         e.preventDefault();
 
-        const _currentItem = currentTree?.items.find((i: any) => i.entityId === entityId);
+        const _currentItem = currentTree?.flatData.find((i: any) => i.entityId === entityId);
 
         // Open note-specific context menu (V2 structure)
         showContextMenu(e, constants.workspace.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });

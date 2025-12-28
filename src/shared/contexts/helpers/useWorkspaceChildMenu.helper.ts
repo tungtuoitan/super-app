@@ -87,7 +87,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ---------
         try {
             const token = $user.userToken;
-            const workspaceId = currentTree?.workspaceId || 1;
+            const workspaceId = currentTree?.id || 1;
 
             const result = await workspaceService._deleteWorkspaceItems(token ?? "", workspaceId, {
                 items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
