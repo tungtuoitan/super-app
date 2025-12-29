@@ -17,15 +17,14 @@ import { BaseTab } from "@/types/editor/tab.types";
  * NoteGrid - A flexible layout panel for displaying notes in a data table
  * VSCode-style dark theme table for notes
  *
- * @param onNoteClick - Callback when a note is clicked
- * @param sidebarMode - If true, shows only name column for compact sidebar view
+ * @param disabledRowIds - Set of note IDs to disable (for selection mode in popup)
  */
-export function NoteGrid() {
-    const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef } = useNoteGridStore();
+export function NoteGrid({ disabledRowIds }: { disabledRowIds?: Set<number> } = {}) {
+    const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef, noteGridPagination, totalCount } = useNoteGridStore();
     const { openTab } = useEditorTabHelper();
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { $user } = useAuthStore();
-    const { table } = useNoteGridTableHelper();
+    const { table } = useNoteGridTableHelper(disabledRowIds);
     const { filterViewKey } = useGridControlStore();
     const { openTabs, activeTabId } = useEditorTabsStore();
 
@@ -49,8 +48,9 @@ export function NoteGrid() {
         if (!$user.userId || !$user.filters || Object.keys($user.filters).length === 0 || !filterViewKey) {
             return;
         }
+        // Load with current pagination state from store
         loadNotes();
-    }, [$user.userId, $user.filters, filterViewKey]);
+    }, [$user.userId, $user.filters, filterViewKey, noteGridPagination.pageIndex, noteGridPagination.pageSize]);
 
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
@@ -127,7 +127,7 @@ export function NoteGrid() {
             {/* Pagination */}
             <div className="flex items-center justify-between px-4 py-1 bg-background">
                 <div className="flex-1 text-sm text-left text-muted-foreground">
-                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({notes.length} total)
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} total)
                 </div>
 
                 <div className="flex items-center gap-2">

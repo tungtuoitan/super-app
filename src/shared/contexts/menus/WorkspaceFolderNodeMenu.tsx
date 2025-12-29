@@ -27,7 +27,7 @@ import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 export function WorkspaceFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
     const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
-    const { createFolder, editFolder, dhr_items, createNewNote } = useWorkspaceFolderMenuHelper();
+    const { createFolder, editFolder, dhr_items, createNewNote, openAddExistingNotePopup } = useWorkspaceFolderMenuHelper();
     const _TREESTATUS = useTreeStatusHelper();
 
     // Calculate derived values
@@ -68,6 +68,14 @@ export function WorkspaceFolderNodeMenu() {
             {/* Only show Edit and Delete options for non-root folders */}
             {!isWorkspaceRoot && (
                 <>
+                    <MenuDivider />
+
+                    {/* Add Existing Note */}
+                    <MenuItem onClick={() => openAddExistingNotePopup(contextData)} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple}>
+                        <NoteIcon className="w-4 h-4 mr-2" />
+                        Add Existing Note
+                    </MenuItem>
+
                     <MenuDivider />
 
                     {/* Edit - disabled if multiple items selected or deleted */}

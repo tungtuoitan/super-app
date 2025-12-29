@@ -6,6 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { AuthStoreProvider, useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceProvider } from "@/store/workspace/Workspace.store";
 import { FolderDialogProvider } from "@/store/workspace/FolderDialog.store";
+import { NoteGridPopupProvider } from "@/store/workspace/NoteGridPopup.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
@@ -59,7 +60,8 @@ export function Main() {
                                         <StandardRegistryProvider>
                                             <WorkspaceProvider>
                                                 <FolderDialogProvider>
-                                                <WsProvider>
+                                                    <NoteGridPopupProvider>
+                                                        <WsProvider>
                                                     <WsDetailProvider>
                                                         <NoteDetailProvider>
                                                             <NoteGridProvider>
@@ -84,9 +86,10 @@ export function Main() {
                                                             </NoteGridProvider>
                                                         </NoteDetailProvider>
                                                     </WsDetailProvider>
-                                                </WsProvider>
-                                            </FolderDialogProvider>
-                                        </WorkspaceProvider>
+                                                        </WsProvider>
+                                                    </NoteGridPopupProvider>
+                                                </FolderDialogProvider>
+                                            </WorkspaceProvider>
                                     </StandardRegistryProvider>
                                 </NavigationHistoryProvider>
                             </AuthStoreProvider>

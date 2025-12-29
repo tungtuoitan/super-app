@@ -21,7 +21,7 @@ import { useStandardRegistryStore } from "@/store/index";
  * @param onNoteClick - Callback when a note is clicked
  * @param sidebarMode - If true, shows only name column for compact sidebar view
  */
-export function useNoteGridTableHelper() {
+export function useNoteGridTableHelper(disabledRowIds?: Set<number>) {
     // State từ centralized store
     const {
         notes,
@@ -63,16 +63,20 @@ export function useNoteGridTableHelper() {
                         <Checkbox checked={table.getIsAllPageRowsSelected()} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" />
                     </div>
                 ),
-                cell: ({ row }) => (
-                    <div className="flex items-center justify-center">
-                        <Checkbox
-                            checked={row.getIsSelected()}
-                            onCheckedChange={(value) => row.toggleSelected(!!value)}
-                            aria-label="Select row"
-                            onClick={(e) => e.stopPropagation()} // Prevent row click
-                        />
-                    </div>
-                ),
+                cell: ({ row }) => {
+                    const isDisabled = disabledRowIds?.has(row.original.id) || false;
+                    return (
+                        <div className={`flex items-center justify-center ${isDisabled ? "opacity-30 cursor-pointer" : ""}`}>
+                            <Checkbox
+                                checked={row.getIsSelected()}
+                                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                                aria-label="Select row"
+                                onClick={(e) => e.stopPropagation()} // Prevent row click
+                                disabled={isDisabled}
+                            />
+                        </div>
+                    );
+                },
                 size: 36,
                 minSize: 36,
                 maxSize: 36,

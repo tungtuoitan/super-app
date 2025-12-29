@@ -145,6 +145,7 @@ export interface ResultOptions<T = any> {
     message?: string;
     object?: T; // Single object result
     data?: T[]; // Array result
+    totalCount?: number; // Total count for pagination
     status?: number;
     reference?: string;
     reference2?: string;

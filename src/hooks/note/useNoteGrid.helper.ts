@@ -16,7 +16,7 @@ import { filterUtils } from "@/utils/filter.utils";
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
 
-    const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection } = useNoteGridStore();
+    const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection, noteGridPagination, setNoteGridPagination, setTotalCount } = useNoteGridStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     const { openTab, processTabAfterDelete } = useEditorTabHelper();
@@ -239,6 +239,8 @@ export const useNoteGridHelper = () => {
                 deletedAt: noteGridFilters?.deletedAt,
                 createdAtFrom: createdAtRange.from,
                 createdAtTo: createdAtRange.to,
+                page: noteGridPagination.pageIndex + 1,
+                pageSize: noteGridPagination.pageSize,
             };
 
             const result = await noteService._getNotes(token, filterParams);
@@ -251,6 +253,7 @@ export const useNoteGridHelper = () => {
             // Transform dates from API strings to Date objects
             const transformedData = transformNotes(result.data || []);
             setNotes(transformedData);
+            setTotalCount(result.totalCount || transformedData.length);
             setNoteGridError(null);
         } catch (err) {
             const errorMessage = await parseApiError(err);

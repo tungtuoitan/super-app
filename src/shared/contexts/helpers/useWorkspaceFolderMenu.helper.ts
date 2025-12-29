@@ -29,6 +29,7 @@ import { useStandardRegistryStore } from "@/store/index";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/types/note.types";
+import { useNoteGridPopupHelper } from "@/hooks/workspace/useNoteGridPopup.helper";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -120,6 +121,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { openTabs } = useEditorTabsStore();
     const { registries } = useStandardRegistryStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
+    const { openNoteGridPopup } = useNoteGridPopupHelper();
 
     const selectedCount = selectedItemIds.length;
     const isMultipleSelected = selectedCount > 1;
@@ -757,11 +759,37 @@ export const useWorkspaceFolderMenuHelper = () => {
         // With V2 flat structure, we can just find directly
         return items.find(item => item.id === targetId) || null;
     };
+/**
+     * Open popup to add existing notes to folder
+     */
+    const openAddExistingNotePopup = (folderData: any) => {
+        // Close context menu
+        setIsContextMenuOpen(false);
+
+        // Determine folder info
+        const folderId = folderData?.id; // workspace_items.id
+        const folderName = folderData?.name || folderData?.data?.name || "workspace root";
+        const folderEntityId = folderData?.entityId; // folder entity ID
+
+        if (!folderId) {
+            console.error("❌ Cannot open popup: missing folder ID");
+            enqueueSnackbar("Cannot open popup: missing folder information", { variant: "error" });
+            return;
+        }
+
+        // Open popup
+        openNoteGridPopup({
+            id: folderId,
+            name: folderName,
+            entityId: folderEntityId,
+        });
+    };
 
     return {
         createFolder,
         editFolder,
         dhr_items,
         createNewNote,
+        openAddExistingNotePopup,
     };
 };

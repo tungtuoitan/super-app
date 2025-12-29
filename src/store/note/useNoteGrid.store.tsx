@@ -15,6 +15,8 @@ export interface PaginationState {
 export interface NoteGridContextData {
     notes: Note[];
     setNotes: Dispatch<SetStateAction<Note[]>>;
+    totalCount: number;
+    setTotalCount: Dispatch<SetStateAction<number>>;
     noteGridIsLoading: boolean;
     setNoteGridIsLoading: Dispatch<SetStateAction<boolean>>;
     noteGridError: Error | null;
@@ -34,6 +36,7 @@ export interface NoteGridContextData {
 
 export const noteGridContextDefaultValue: NoteGridContextData = {
     notes: [],
+    totalCount: 0,
     noteGridIsLoading: true,
     noteGridError: null,
     noteGridSorting: [],
@@ -43,6 +46,7 @@ export const noteGridContextDefaultValue: NoteGridContextData = {
     containerRef: { current: null },
     containerWidth: 0,
     setNotes: () => {},
+    setTotalCount: () => {},
     setNoteGridIsLoading: () => {},
     setNoteGridError: () => {},
     setNoteGridSorting: () => {},
@@ -58,6 +62,7 @@ export const useNoteGridStore = () => useContext(NoteGridStore);
 
 export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [notes, setNotes] = useState<Note[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0);
     const [noteGridIsLoading, setNoteGridIsLoading] = useState<boolean>(true);
     const [noteGridError, setNoteGridError] = useState<Error | null>(null);
     const [noteGridSorting, setNoteGridSorting] = useState<SortingState>([]);
@@ -72,6 +77,8 @@ export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
             value={{
                 notes,
                 setNotes,
+                totalCount,
+                setTotalCount,
                 noteGridIsLoading,
                 setNoteGridIsLoading,
                 noteGridError,
