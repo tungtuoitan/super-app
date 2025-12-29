@@ -135,16 +135,49 @@ export function WorkspaceTree() {
         return baseTree;
     }, [currentWorkspace, searchText]);
 
-    console.log("treeData", treeData)
+    // Keep original treeData for tree structure (including root)
+    // Root will be hidden via CSS, not by removing from data
 
-    // Calculate drop zone height to fill remaining space
-    const dropZoneHeight = useMemo(() => {
-        const rowHeight = 40;
-        const actualItemsCount = treeData.filter((item) => (item.data as any).entityId !== constants.workspace.dropZone.entityId).length;
-        const usedHeight = actualItemsCount * rowHeight;
-        const remaining = containerHeight - usedHeight;
-        return Math.max(remaining, 100); // Minimum 100px
-    }, [treeData, containerHeight]);
+    // Calculate drop zone height = remaining space in container
+    const [dropZoneHeight, setDropZoneHeight] = React.useState(0);
+
+    useEffect(() => {
+        const calculateDropZoneHeight = () => {
+            const ROW_HEIGHT = 32;
+            const tree = _treeRef.current;
+
+            if (!tree) {
+                setDropZoneHeight(0);
+                return;
+            }
+
+            // Count visible nodes (excluding workspace root and drop zone)
+            let visibleCount = 0;
+            for (let i = 0; i < tree.visibleNodes.length; i++) {
+                const node = tree.visibleNodes[i];
+                const entityId = (node.data.data as any)?.entityId;
+
+                if (entityId !== constants.workspace.root.entityId && entityId !== constants.workspace.dropZone.entityId) {
+                    visibleCount++;
+                }
+            }
+
+            const actualTreeHeight = visibleCount * ROW_HEIGHT;
+            const remaining = containerHeight - actualTreeHeight;
+
+            console.log("Drop zone height calculation:", {
+                containerHeight,
+                visibleCount,
+                actualTreeHeight,
+                remaining,
+            });
+
+            setDropZoneHeight(Math.max(remaining, 0));
+        };
+
+        // Recalculate when tree data changes or container resizes
+        calculateDropZoneHeight();
+    }, [treeData, containerHeight, _treeRef]);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
