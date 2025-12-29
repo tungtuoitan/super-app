@@ -172,7 +172,7 @@ export const useNoteDetailHelper = () => {
                 await loadNotes();
 
                 if (isCreateMode && currentWorkspace?.id) {
-                    await loadTree(currentWorkspace.id);
+                    await loadTree();
                 }
 
                 return transformedNote;

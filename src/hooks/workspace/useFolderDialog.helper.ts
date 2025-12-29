@@ -137,7 +137,7 @@ export const useFolderDialogHelper = () => {
             enqueueSnackbar(successMessage, { variant: "success" });
 
             // Reload workspace tree
-            loadTree(selectedWorkspaceId);
+            loadTree();
 
             // Close dialog
             closeFolderDialog();

@@ -13,41 +13,42 @@ import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 
 export const useTreeHelper2 = () => {
-    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId } = useWorkspaceStore();
 
     /**
      * Clear all selections
      */
     const clearSelection = () => {
-        setSelectedFolderIds([]);
-        setLastSelectedFolderId(null);
+        setSelectedItemIds([]);
+        setLastSelectedItemId(null);
     };
 
     /**
-     * Check if a folder is selected
+     * Check if an item is selected (folder/note/file)
+     * @param workspaceItemId - workspace_items.id (unique ID for this workspace item)
      */
-    const isFolderSelected = (folderId: number) => {
-        return selectedFolderIds.includes(folderId);
+    const isFolderSelected = (workspaceItemId: number) => {
+        return selectedItemIds.includes(workspaceItemId);
     };
 
     /**
      * Handle selection change from react-arborist tree
-     * Maps node.id (TreeFolder ID) to entity ID (folder/note/file ID)
+     * Maps node.id to workspace_items.id
      */
     const handleSelectionChange = (nodes: NodeApi<TreeFolder>[]) => {
-        // Helper to get entity ID from node (V2 structure)
-        const getEntityId = (node: NodeApi<TreeFolder>): number | null => {
+        // Helper to get workspace_items.id from node (V2 structure)
+        const getWorkspaceItemId = (node: NodeApi<TreeFolder>): number | null => {
             const itemData = node.data.data;
-            return (itemData as any).entityId;
+            return (itemData as any).id; // workspace_items.id
         };
 
-        const folderIds = nodes
-            .map(getEntityId)
+        const workspaceItemIds = nodes
+            .map(getWorkspaceItemId)
             .filter((id): id is number => id !== null && id > 0); // Filter out workspace nodes and null
 
-        setSelectedFolderIds(folderIds);
-        if (folderIds.length > 0) {
-            setLastSelectedFolderId(folderIds[folderIds.length - 1]);
+        setSelectedItemIds(workspaceItemIds);
+        if (workspaceItemIds.length > 0) {
+            setLastSelectedItemId(workspaceItemIds[workspaceItemIds.length - 1]);
         }
     };
 
@@ -62,7 +63,7 @@ export const useTreeHelper2 = () => {
             return; // Only handle when tree is focused
         }
 
-        const currentSelection = selectedFolderIds;
+        const currentSelection = selectedItemIds;
         const lastSelected = currentSelection.length > 0 ? currentSelection[currentSelection.length - 1] : null;
         const currentIndex = lastSelected ? allVisibleFolderIds.indexOf(lastSelected) : -1;
 
@@ -78,11 +79,11 @@ export const useTreeHelper2 = () => {
                         const startIndex = Math.min(firstIndex, currentIndex - 1);
                         const endIndex = Math.max(firstIndex, currentIndex - 1);
                         const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
-                        setSelectedFolderIds(rangeSelection);
+                        setSelectedItemIds(rangeSelection);
                     } else {
-                        setSelectedFolderIds([newFolderId]);
+                        setSelectedItemIds([newFolderId]);
                     }
-                    setLastSelectedFolderId(newFolderId);
+                    setLastSelectedItemId(newFolderId);
                 }
                 break;
 
@@ -97,11 +98,11 @@ export const useTreeHelper2 = () => {
                         const startIndex = Math.min(firstIndex, currentIndex + 1);
                         const endIndex = Math.max(firstIndex, currentIndex + 1);
                         const rangeSelection = allVisibleFolderIds.slice(startIndex, endIndex + 1);
-                        setSelectedFolderIds(rangeSelection);
+                        setSelectedItemIds(rangeSelection);
                     } else {
-                        setSelectedFolderIds([newFolderId]);
+                        setSelectedItemIds([newFolderId]);
                     }
-                    setLastSelectedFolderId(newFolderId);
+                    setLastSelectedItemId(newFolderId);
                 }
                 break;
 
@@ -109,18 +110,18 @@ export const useTreeHelper2 = () => {
                 if (e.ctrlKey || e.metaKey) {
                     e.preventDefault();
                     // Ctrl+A: Select all
-                    setSelectedFolderIds(allVisibleFolderIds);
-                    setLastSelectedFolderId(allVisibleFolderIds[allVisibleFolderIds.length - 1]);
+                    setSelectedItemIds(allVisibleFolderIds);
+                    setLastSelectedItemId(allVisibleFolderIds[allVisibleFolderIds.length - 1]);
                 }
                 break;
 
             case "Escape":
                 // Clear selection
                 clearSelection();
-                setLastSelectedFolderId(null);
+                setLastSelectedItemId(null);
                 break;
         }
-    }, [selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId]);
+    }, [selectedItemIds, setSelectedItemIds, setLastSelectedItemId]);
 
     return {
         isFolderSelected,

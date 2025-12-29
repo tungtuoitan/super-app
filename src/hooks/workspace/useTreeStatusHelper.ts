@@ -9,9 +9,9 @@ import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useCallback, useMemo } from "react";
 
 export const useTreeStatusHelper = () => {
-    const { selectedFolderIds, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
 
-    const selectedCount = selectedFolderIds.length;
+    const selectedCount = selectedItemIds.length;
 
     /**
      * Check if item or any of its ancestors is deleted
@@ -73,8 +73,8 @@ export const useTreeStatusHelper = () => {
         const hasAnyActiveItem = (() => {
             if (!isMultiple || !currentWorkspace?.flatData) return false;
 
-            return selectedFolderIds.some((entityId) => {
-                const item = currentWorkspace.flatData.find((i: any) => i.entityId === entityId);
+            return selectedItemIds.some((workspaceItemId) => {
+                const item = currentWorkspace.flatData.find((i: any) => i.id === workspaceItemId);
                 if (!item) return false;
 
                 const status = getItemStatus(item);
@@ -86,7 +86,7 @@ export const useTreeStatusHelper = () => {
             isMultiple,
             hasAnyActiveItem,
         };
-    }, [selectedCount, selectedFolderIds, currentWorkspace?.flatData, getItemStatus]);
+    }, [selectedCount, selectedItemIds, currentWorkspace?.flatData, getItemStatus]);
 
     return {
         selectedItemStatuses,

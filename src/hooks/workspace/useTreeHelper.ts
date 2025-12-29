@@ -17,7 +17,7 @@ import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 
 export const useTreeHelper = () => {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceLoader();
@@ -338,12 +338,12 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // STEP 6: REFRESH TREE & RESTORE SELECTION
             // -------------------------------------------------------
-            await loadTree(workspaceId);
+            await loadTree();
 
             // VS Code behavior: Re-select the moved items after move completes
-            setSelectedFolderIds(selectedEntityIds);
+            setSelectedItemIds(selectedEntityIds);
             if (selectedEntityIds.length > 0) {
-                setLastSelectedFolderId(selectedEntityIds[selectedEntityIds.length - 1]);
+                setLastSelectedItemId(selectedEntityIds[selectedEntityIds.length - 1]);
             }
         } catch (error) {
             console.error("❌ Failed to move item(s):", error);
@@ -360,7 +360,7 @@ export const useTreeHelper = () => {
      * Opens create dialog with selected folder as parent
      */
     const addNewFolder = (treeData: TreeFolder[]) => {
-        const parentId = selectedFolderIds.length > 0 ? selectedFolderIds[0] : undefined;
+        const parentId = selectedItemIds.length > 0 ? selectedItemIds[0] : undefined;
 
         // Extract folders from treeData
         const folders = treeMiniHelper.$traverse(treeData).map((t) => t.data);

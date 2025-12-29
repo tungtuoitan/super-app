@@ -114,14 +114,14 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
     const { processTabAfterDelete, openTab } = useEditorTabHelper();
     const { openTabs } = useEditorTabsStore();
     const { registries } = useStandardRegistryStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 
-    const selectedCount = selectedFolderIds.length;
+    const selectedCount = selectedItemIds.length;
     const isMultipleSelected = selectedCount > 1;
 
 
@@ -353,12 +353,12 @@ export const useWorkspaceFolderMenuHelper = () => {
 
                     // VS Code behavior: Select next item after deletion
                     if (nextFolderIdToSelect !== null) {
-                        setSelectedFolderIds([nextFolderIdToSelect]);
-                        setLastSelectedFolderId(nextFolderIdToSelect);
+                        setSelectedItemIds([nextFolderIdToSelect]);
+                        setLastSelectedItemId(nextFolderIdToSelect);
                     } else {
                         // Clear selection if no next item
-                        setSelectedFolderIds([]);
-                        setLastSelectedFolderId(null);
+                        setSelectedItemIds([]);
+                        setLastSelectedItemId(null);
                     }
                 }
 
@@ -502,11 +502,11 @@ export const useWorkspaceFolderMenuHelper = () => {
 
                     // VS Code behavior: Select next item after deletion
                     if (nextFolderIdToSelect !== null) {
-                        setSelectedFolderIds([nextFolderIdToSelect]);
-                        setLastSelectedFolderId(nextFolderIdToSelect);
+                        setSelectedItemIds([nextFolderIdToSelect]);
+                        setLastSelectedItemId(nextFolderIdToSelect);
                     } else {
-                        setSelectedFolderIds([]);
-                        setLastSelectedFolderId(null);
+                        setSelectedItemIds([]);
+                        setLastSelectedItemId(null);
                     }
                 }
 
@@ -584,7 +584,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 if (isHardDelete) {
                     // Hard delete - use old API (TODO: implement batch hard delete later)
                     if (isMultipleSelected) {
-                        __bulkDeleteFolders(selectedFolderIds, isHardDelete);
+                        __bulkDeleteFolders(selectedItemIds, isHardDelete);
                     } else {
                         __deleteItems(contextData, isHardDelete);
                     }
@@ -595,7 +595,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                     const operationType: "soft-delete" | "restore" = isCurrentlyDeleted ? "restore" : "soft-delete";
 
                     // For single item, pass the specific item ID; for multiple, use selected IDs
-                    const idsToProcess = isMultipleSelected ? selectedFolderIds : [contextData.id];
+                    const idsToProcess = isMultipleSelected ? selectedItemIds : [contextData.id];
                     __deleteRestore_SelectedItems(idsToProcess, operationType);
                 }
             },
@@ -609,7 +609,7 @@ export const useWorkspaceFolderMenuHelper = () => {
      */
     const __deleteRestore_SelectedItems = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         // ===== STEP 1: Get selected items (giống __deleteRestore_SelectedNotes) =====
-        const selectedIds = ids ?? selectedFolderIds;
+        const selectedIds = ids ?? selectedItemIds;
         if (selectedIds.length === 0) {
             console.warn("⚠️ No items selected");
             return;
@@ -709,8 +709,8 @@ export const useWorkspaceFolderMenuHelper = () => {
             if(res && res.success){
                 setCurrentWorkspace(res.object as WorkspaceDTO);
                 // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
-                setSelectedFolderIds([]);
-                setLastSelectedFolderId(null);
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
     
                 // Show success message
                 enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });

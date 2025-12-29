@@ -10,7 +10,7 @@ import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
-    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();
@@ -19,11 +19,12 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const folderItem = node.data.data as unknown as WorkspaceFolderItem;
 
     // Extract data from V2 structure
-    const entityId = folderItem.entityId;
+    const workspaceItemId = folderItem.id; // workspace_items.id (unique)
+    const entityId = folderItem.entityId; // folders.id (for API calls, context menu)
     const folderName = folderItem.data.name;
     const folderColor = folderItem.data.color;
     const hasChildren = node.data.children && node.data.children.length > 0;
-    const isSelected = isFolderSelected(entityId);
+    const isSelected = isFolderSelected(workspaceItemId); // Use workspace_items.id for selection
     const isWorkspaceRoot = entityId < 0; // Workspace root node has negative ID
 
     // Check if this node is being dragged
@@ -55,37 +56,37 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== entityId));
+                setSelectedItemIds((prev: number[]) => prev.filter((id) => id !== workspaceItemId));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev: number[]) => [...prev, entityId]);
+                setSelectedItemIds((prev: number[]) => [...prev, workspaceItemId]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
-            setLastSelectedFolderId(entityId);
-        } else if (e.shiftKey && lastSelectedFolderId) {
+            setLastSelectedItemId(workspaceItemId);
+        } else if (e.shiftKey && lastSelectedItemId) {
             // Shift+Click: Range selection (like VS Code)
             const allVisibleFolders = treeMiniHelper.getAllVisibleFolderIds(treeData);
-            const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
-            const currentIndex = allVisibleFolders.indexOf(entityId);
+            const lastIndex = allVisibleFolders.indexOf(lastSelectedItemId);
+            const currentIndex = allVisibleFolders.indexOf(workspaceItemId);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
                 const endIndex = Math.max(lastIndex, currentIndex);
                 const rangeSelection = allVisibleFolders.slice(startIndex, endIndex + 1);
-                setSelectedFolderIds(rangeSelection);
+                setSelectedItemIds(rangeSelection);
                 // Sync with react-arborist (select range ending at this node)
                 node.selectMulti();
             } else {
-                setSelectedFolderIds([entityId]);
+                setSelectedItemIds([workspaceItemId]);
                 node.select();
             }
-            setLastSelectedFolderId(entityId);
+            setLastSelectedItemId(workspaceItemId);
         } else {
             // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
-            setSelectedFolderIds([entityId]);
-            setLastSelectedFolderId(entityId);
+            setSelectedItemIds([workspaceItemId]);
+            setLastSelectedItemId(workspaceItemId);
             // Sync with react-arborist (single select - clears others)
             node.select();
 

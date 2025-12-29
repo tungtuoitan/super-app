@@ -19,13 +19,25 @@ export function WorkspaceChildNodeMenu() {
     const { currentWorkspace } = useWorkspaceStore();
     const _TREESTATUS = useTreeStatusHelper();
 
-    const { deleteItems } = useWorkspaceChildMenuHelper();
+    const { deleteItems, editNote } = useWorkspaceChildMenuHelper();
 
     // Check deleted status (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
+    const isNote = contextType === "note";
 
     return (
         <>
+            {/* CHILD K CẦN OPTION EDIT */}
+            {/* {isNote && (
+                <>
+                    <MenuDivider />
+                    <MenuItem onClick={() => editNote(contextData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
+                        <EditIcon className="w-4 h-4 mr-2" />
+                        Edit
+                    </MenuItem>
+                </>
+            )} */}
+
             <MenuDivider />
 
             {/* Delete/Restore - Shared */}
@@ -34,10 +46,11 @@ export function WorkspaceChildNodeMenu() {
                 if (_ITEMSTATUS.isDirectlyDeleted) {
                     return (
                         <>
-                            <MenuItem onClick={(e) => deleteItems(e, true)} className="text-red-600 hover:bg-red-50">
+                            {/* //*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
+                            {/* <MenuItem onClick={(e) => deleteItems(e, true)} className="text-red-600 hover:bg-red-50">
                                 <HardDeleteIcon className="w-4 h-4 mr-2" />
                                 Hard Delete
-                            </MenuItem>
+                            </MenuItem> */}
                             <MenuItem onClick={(e) => deleteItems(e, false)}>
                                 <RestoreIcon className="w-4 h-4 mr-2" />
                                 Restore
@@ -46,23 +59,28 @@ export function WorkspaceChildNodeMenu() {
                     );
                 }
                 // If item is deleted but not directly (inherited from parent), only show Hard Delete
-                else if (_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
-                    return (
-                        <MenuItem onClick={(e) => deleteItems(e, true)} className="text-red-600 hover:bg-red-50">
-                            <HardDeleteIcon className="w-4 h-4 mr-2" />
-                            Hard Delete
-                        </MenuItem>
-                    );
-                }
+                // Don't show if multiple selected and any item is still active
+                //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
+                // else if (_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted && !(_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasAnyActiveItem)) {
+                //     return (
+                //         <MenuItem onClick={(e) => deleteItems(e, true)} className="text-red-600 hover:bg-red-50">
+                //             <HardDeleteIcon className="w-4 h-4 mr-2" />
+                //             Hard Delete
+                //         </MenuItem>
+                //     );
+                // }
                 // If item is not deleted, show normal Delete option
-                else {
+                // Disable if multiple selected and any item is still active (deletedAt = null)
+                else if (!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
                     return (
-                        <MenuItem onClick={(e) => deleteItems(e, false)}>
+                        <MenuItem onClick={(e) => deleteItems(e, false)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasAnyActiveItem}>
                             <DeleteIcon className="w-4 h-4 mr-2" />
                             Delete
                         </MenuItem>
                     );
                 }
+                // Don't show anything if conditions don't match
+                return null;
             })()}
         </>
     );

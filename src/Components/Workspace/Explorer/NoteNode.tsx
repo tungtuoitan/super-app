@@ -12,7 +12,7 @@ import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
-    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeHelper2();
     const { openTab } = useEditorTabHelper();
@@ -20,8 +20,9 @@ export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<
 
     // Safe cast: WorkspaceTree already filters to only render NoteNode for notes
     const noteItem = node.data.data as unknown as WorkspaceNoteItem;
-    const entityId = noteItem.entityId;
-    const isSelected = isFolderSelected(entityId);
+    const workspaceItemId = noteItem.id; // workspace_items.id (unique)
+    const entityId = noteItem.entityId; // notes.id (for API calls, context menu)
+    const isSelected = isFolderSelected(workspaceItemId); // Use workspace_items.id for selection
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -44,35 +45,35 @@ export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== entityId));
+                setSelectedItemIds((prev: number[]) => prev.filter((id) => id !== workspaceItemId));
                 node.deselect();
             } else {
-                setSelectedFolderIds((prev: number[]) => [...prev, entityId]);
+                setSelectedItemIds((prev: number[]) => [...prev, workspaceItemId]);
                 node.selectMulti();
             }
-            setLastSelectedFolderId(entityId);
-        } else if (e.shiftKey && lastSelectedFolderId) {
+            setLastSelectedItemId(workspaceItemId);
+        } else if (e.shiftKey && lastSelectedItemId) {
             // Shift+Click: Range selection (like VS Code)
             const allVisibleFolders = treeMiniHelper.getAllVisibleFolderIds(treeData);
-            const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
-            const currentIndex = allVisibleFolders.indexOf(entityId);
+            const lastIndex = allVisibleFolders.indexOf(lastSelectedItemId);
+            const currentIndex = allVisibleFolders.indexOf(workspaceItemId);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
                 const endIndex = Math.max(lastIndex, currentIndex);
                 const rangeSelection = allVisibleFolders.slice(startIndex, endIndex + 1);
-                setSelectedFolderIds(rangeSelection);
+                setSelectedItemIds(rangeSelection);
                 // Sync with react-arborist (select range ending at this node)
                 node.selectMulti();
             } else {
-                setSelectedFolderIds([entityId]);
+                setSelectedItemIds([workspaceItemId]);
                 node.select();
             }
-            setLastSelectedFolderId(entityId);
+            setLastSelectedItemId(workspaceItemId);
         } else {
             // Regular click: Single selection + open tab
-            setSelectedFolderIds([entityId]);
-            setLastSelectedFolderId(entityId);
+            setSelectedItemIds([workspaceItemId]);
+            setLastSelectedItemId(workspaceItemId);
             node.select();
 
             // ✅ Open note in editor tab (convert WorkspaceNoteItem to Note)

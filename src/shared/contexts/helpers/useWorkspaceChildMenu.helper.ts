@@ -14,26 +14,37 @@ import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import {workspaceService} from "@/services/workspace.service";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
+import { useWorkspaceLoader } from "@/hooks/index";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { enqueueSnackbar } = useSnackbar();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
-    const { setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
+    const { loadTree } = useWorkspaceLoader()
 
     const isNote = contextType === constants.workspace.itemTypes.note;
     const isFile = contextType === constants.workspace.itemTypes.file;
 
+    // Multi-select check
+    const selectedCount = selectedItemIds.length;
+    const isMultipleSelected = selectedCount > 1;
+
     /**
      * Handle delete note
+     * IMPORTANT: noteData is WorkspaceNoteItem structure:
+     * - noteData.id = workspace_items.id (workspace item ID)
+     * - noteData.entityId = notes.id (entity ID - use this for note service!)
+     * - noteData.data.id = notes.id (same as entityId)
      */
     const __deleteNote = async (noteData: any, isHardDelete: boolean = false) => {
         // ---------
         // STEP 1: Validate input data
         // ---------
-        if (!noteData?.id) {
-            console.error("❌ Cannot delete note: missing id");
+        const noteEntityId = noteData?.entityId ?? noteData?.data?.id;
+        if (!noteEntityId) {
+            console.error("❌ Cannot delete note: missing entityId");
             enqueueSnackbar("Cannot delete note: missing note information", { variant: "error" });
             return;
         }
@@ -44,18 +55,18 @@ export const useWorkspaceChildMenuHelper = () => {
         try {
             const token = $user.userToken;
 
-            const result = await noteService._deleteNote(token ?? "", noteData.id.toString());
+            // ✅ Use entityId (notes.id) for note service
+            const result = await noteService._deleteNote(token ?? "", noteEntityId.toString());
             // ---------
             // STEP 3: Handle success response
             // ---------
             if (result.success) {
                 // Clear selection
-                setSelectedFolderIds([]);
-                setLastSelectedFolderId(null);
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
             }
 
-            // Reload page to refresh data
-            window.location.reload();
+            loadTree()
         } catch (error) {
             // ---------
             // STEP 4: Handle error
@@ -72,13 +83,17 @@ export const useWorkspaceChildMenuHelper = () => {
 
     /**
      * Handle delete file
+     * IMPORTANT: fileData is WorkspaceFileItem structure:
+     * - fileData.id = workspace_items.id (workspace item ID - use this for workspace service!)
+     * - fileData.entityId = files.id (entity ID)
      */
     const __deleteFile = async (fileData: any, isHardDelete: boolean = false) => {
         // ---------
         // STEP 1: Validate input data
         // ---------
-        if (!fileData?.id) {
-            console.error("❌ Cannot delete file: missing id");
+        const workspaceItemId = fileData?.id;
+        if (!workspaceItemId) {
+            console.error("❌ Cannot delete file: missing workspace item id");
             enqueueSnackbar("Cannot delete file: missing file information", { variant: "error" });
             return;
         }
@@ -90,8 +105,9 @@ export const useWorkspaceChildMenuHelper = () => {
             const token = $user.userToken;
             const workspaceId = currentWorkspace?.id || 1;
 
+            // ✅ Use workspace_items.id for workspace service
             const result = await workspaceService._deleteWorkspaceItems(token ?? "", workspaceId, {
-                items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
+                items: [{ id: workspaceItemId, type: 4 as const }], // type 4 = file
                 cascade: true,
                 isHardDelete: isHardDelete,
             });
@@ -101,8 +117,8 @@ export const useWorkspaceChildMenuHelper = () => {
             // ---------
             if (result.success || result.message === "Items deleted successfully") {
                 // Clear selection
-                setSelectedFolderIds([]);
-                setLastSelectedFolderId(null);
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
 
                 // Reload page to refresh data
                 window.location.reload();
@@ -125,7 +141,7 @@ export const useWorkspaceChildMenuHelper = () => {
     };
 
     /**
-     * Handle delete with confirmation
+     * Handle delete with confirmation - SUPPORTS MULTI-SELECT
      */
     const deleteItems = (event: any, isHardDelete: boolean = false) => {
         // ---------
@@ -149,12 +165,13 @@ export const useWorkspaceChildMenuHelper = () => {
             return;
         }
 
+        const entityName = isMultipleSelected ? undefined : (contextData.data?.name || contextData.name || "this item");
         const message = getConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
             entityType: isFile ? "file" : "note",
-            count: 1,
-            isMultiple: false,
-            entityName: contextData.name || "this item"
+            count: selectedCount,
+            isMultiple: isMultipleSelected,
+            entityName
         });
 
         // ---------
@@ -169,6 +186,7 @@ export const useWorkspaceChildMenuHelper = () => {
             buttonVariant: "default",
             zIndex: 20000,
             onConfirm: () => {
+                // TODO: Support multi-select delete for notes (need batch API or Promise.all)
                 if (isNote) {
                     __deleteNote(contextData, isHardDelete);
                 } else if (isFile) {
@@ -178,7 +196,20 @@ export const useWorkspaceChildMenuHelper = () => {
         });
     };
 
+    /**
+     * Handle edit note (rename)
+     */
+    const editNote = (noteData: any) => {
+        if (!noteData) return;
+
+        // TODO: Implement rename dialog for note
+        // Similar to editFolder in useWorkspaceFolderMenu.helper.ts
+        console.log("Edit note:", noteData);
+        alert("Edit note feature coming soon!");
+    };
+
     return {
         deleteItems,
+        editNote,
     };
 };

@@ -22,7 +22,7 @@ import {WorkspaceDTO} from "@/types/workspace-dto.types";
 export const useWorkspaceLoader = () => {
     const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
-    const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
+    const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
 
     /**
      * Load all user workspaces
@@ -61,7 +61,12 @@ export const useWorkspaceLoader = () => {
      * Uses V2 API structure with full entity data
      * Applies user filters from profile (status code and deleted status)
      */
-    const loadTree = async (workspaceId: number) => {
+    const loadTree = async () => {
+        if(selectedWorkspaceId == null){
+            console.warn("selectedWorkspaceId is null, cant load tree")
+            return
+        }
+
         try {
             setIsLoadingTree(true);
 
@@ -81,7 +86,7 @@ export const useWorkspaceLoader = () => {
 
             // Fetch workspace tree with V2 structure and filters
             console.log("🔧 Loading Workspace V2 API with filters:", params);
-            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, workspaceId, params);
+            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, selectedWorkspaceId, params);
             if(result && result.success){
                 setCurrentWorkspace(result.object as WorkspaceDTO);
                 return result.object;

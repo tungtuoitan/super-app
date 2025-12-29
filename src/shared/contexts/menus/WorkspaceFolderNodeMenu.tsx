@@ -26,7 +26,7 @@ import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
  */
 export function WorkspaceFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
-    const { selectedFolderIds, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
     const { createFolder, editFolder, dhr_items, createNewNote } = useWorkspaceFolderMenuHelper();
     const _TREESTATUS = useTreeStatusHelper();
 

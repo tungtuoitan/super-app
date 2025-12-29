@@ -26,10 +26,14 @@ export interface WorkspaceContextData {
     setExpandedNodes: Dispatch<SetStateAction<Set<number>>>;
     searchText: string;
     setSearchText: Dispatch<SetStateAction<string>>;
-    selectedFolderIds: number[];
-    setSelectedFolderIds: Dispatch<SetStateAction<number[]>>;
-    lastSelectedFolderId: number | null;
-    setLastSelectedFolderId: Dispatch<SetStateAction<number | null>>;
+
+    // Tree item selection (folders, notes, files)
+    // IMPORTANT: Stores workspace_items.id (NOT entity IDs!)
+    // workspace_items.id is unique across all types, no collision possible
+    selectedItemIds: number[]; // workspace_items.id[]
+    setSelectedItemIds: Dispatch<SetStateAction<number[]>>;
+    lastSelectedItemId: number | null; // workspace_items.id
+    setLastSelectedItemId: Dispatch<SetStateAction<number | null>>;
     isDragging: boolean;
     setIsDragging: Dispatch<SetStateAction<boolean>>;
     _treeRef: React.RefObject<any>;
@@ -52,10 +56,10 @@ export const workspaceContextDefaultValue: WorkspaceContextData = {
     setExpandedNodes: () => {},
     searchText: "",
     setSearchText: () => {},
-    selectedFolderIds: [],
-    setSelectedFolderIds: () => {},
-    lastSelectedFolderId: null,
-    setLastSelectedFolderId: () => {},
+    selectedItemIds: [],
+    setSelectedItemIds: () => {},
+    lastSelectedItemId: null,
+    setLastSelectedItemId: () => {},
     isDragging: false,
     setIsDragging: () => {},
     _treeRef: { current: null },
@@ -77,8 +81,10 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
     const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
     const [searchText, setSearchText] = useState<string>("");
-    const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
-    const [lastSelectedFolderId, setLastSelectedFolderId] = useState<number | null>(null);
+
+    // Tree item selection (stores entity IDs: folders.id | notes.id | files.id)
+    const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
+    const [lastSelectedItemId, setLastSelectedItemId] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const _treeRef = useRef<any>(null);
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<number | null>(null);
@@ -101,10 +107,10 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 setExpandedNodes,
                 searchText,
                 setSearchText,
-                selectedFolderIds,
-                setSelectedFolderIds,
-                lastSelectedFolderId,
-                setLastSelectedFolderId,
+                selectedItemIds,
+                setSelectedItemIds,
+                lastSelectedItemId,
+                setLastSelectedItemId,
                 isDragging,
                 setIsDragging,
                 _treeRef,
