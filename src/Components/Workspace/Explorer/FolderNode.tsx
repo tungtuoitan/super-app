@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as Folder
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -12,6 +13,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelectionHelper();
+    const _TREESTATUS = useTreeStatusHelper();
 
     // Safe cast: WorkspaceTree already filters to only render FolderNode for folders
     const folderItem = node.data.data as unknown as WorkspaceFolderItem;
@@ -31,9 +33,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const isDropTarget = node.state.willReceiveDrop;
 
     // Check if deleted (including inherited from parent)
-    const deletedStatus = currentWorkspace?.flatData ? treeMiniHelper.checkDeletedStatus(folderItem, currentWorkspace.flatData) : { isDeleted: false, isDirectlyDeleted: false };
-    const isDeleted = deletedStatus.isDeleted;
-    const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(folderItem);
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -138,7 +138,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                 onContextMenu={handleRightClick}
                 className={`
                     flex items-center h-full w-full py-1 pr-2 cursor-pointer
-                    ${isDragging ? "opacity-40" : isDeleted ? "opacity-60" : "opacity-100"}
+                    ${isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
                     ${isWorkspaceRoot ? "font-semibold" : ""}
                     ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
                     ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
@@ -163,12 +163,21 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                         <Layers className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
                     ) : hasChildren ? (
                         node.isOpen ? (
-                            <FolderOpen className={`w-4 h-4 ${isDeleted ? "text-gray-500" : ""}`} style={!isDeleted ? { color: folderColor || "#75beff" } : {}} />
+                            <FolderOpen
+                                className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                                style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: folderColor || "#75beff" } : {}}
+                            />
                         ) : (
-                            <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : ""}`} style={!isDeleted ? { color: folderColor || "#75beff" } : {}} />
+                            <FolderIcon
+                                className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                                style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: folderColor || "#75beff" } : {}}
+                            />
                         )
                     ) : (
-                        <FolderIcon className={`w-4 h-4 ${isDeleted ? "text-gray-500" : ""}`} style={!isDeleted ? { color: folderColor || "#75beff" } : {}} />
+                        <FolderIcon
+                            className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                            style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: folderColor || "#75beff" } : {}}
+                        />
                     )}
                 </div>
 
@@ -180,7 +189,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                             text-sm truncate
                             ${hasChildren ? "font-semibold" : "font-normal"}
                             ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
-                            ${isDirectlyDeleted ? "line-through" : ""}
+                            ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}
                             text-editor-fg
                         `}
                         >

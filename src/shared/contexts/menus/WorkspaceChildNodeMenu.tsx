@@ -4,7 +4,7 @@ import { Edit as EditIcon, Trash2 as DeleteIcon, Info as InfoIcon, File as FileI
 import { useWorkspaceChildMenuHelper } from "@/shared/contexts/helpers/useWorkspaceChildMenu.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { treeMiniHelper } from "@/hooks/workspace/tree.miniHelper";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 
 /**
  * WorkspaceChildNodeMenu
@@ -17,15 +17,12 @@ import { treeMiniHelper } from "@/hooks/workspace/tree.miniHelper";
 export function WorkspaceChildNodeMenu() {
     const { contextType, contextData } = useOrchestratorContextMenuStore();
     const { currentWorkspace } = useWorkspaceStore();
+    const _TREESTATUS = useTreeStatusHelper();
 
     const { deleteItems } = useWorkspaceChildMenuHelper();
 
     // Check deleted status (including inherited from parent)
-    const deletedStatus = currentWorkspace?.flatData && contextData
-        ? treeMiniHelper.checkDeletedStatus(contextData, currentWorkspace.flatData)
-        : { isDeleted: false, isDirectlyDeleted: false };
-    const isDeleted = deletedStatus.isDeleted;
-    const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
 
     return (
         <>
@@ -34,7 +31,7 @@ export function WorkspaceChildNodeMenu() {
             {/* Delete/Restore - Shared */}
             {(() => {
                 // If item is directly deleted (not inherited), show both Hard Delete and Restore
-                if (isDirectlyDeleted) {
+                if (_ITEMSTATUS.isDirectlyDeleted) {
                     return (
                         <>
                             <MenuItem onClick={(e) => deleteItems(e, true)} className="text-red-600 hover:bg-red-50">
@@ -49,7 +46,7 @@ export function WorkspaceChildNodeMenu() {
                     );
                 }
                 // If item is deleted but not directly (inherited from parent), only show Hard Delete
-                else if (isDeleted && !isDirectlyDeleted) {
+                else if (_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
                     return (
                         <MenuItem onClick={(e) => deleteItems(e, true)} className="text-red-600 hover:bg-red-50">
                             <HardDeleteIcon className="w-4 h-4 mr-2" />

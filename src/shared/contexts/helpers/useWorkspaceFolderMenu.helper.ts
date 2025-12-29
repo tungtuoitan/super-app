@@ -4,9 +4,11 @@
  * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
  */
 
+import React from "react";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useFolderDialogHelper } from "@/hooks/workspace/useFolderDialog.helper";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
 import type { ItemType } from "@/store/workspace/FolderDialog.store";
 import { Folder } from "@/types/folder.types";
@@ -15,13 +17,18 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items } from "@/hooks/workspace/tree.miniHelper";
+import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "@/hooks/workspace/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "@/types/workspace.types";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
+import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { useStandardRegistryStore } from "@/store/index";
+import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
+import { Note } from "@/types/note.types";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -109,10 +116,107 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
-    const { processTabAfterDelete } = useEditorTabHelper();
+    const { processTabAfterDelete, openTab } = useEditorTabHelper();
+    const { openTabs } = useEditorTabsStore();
+    const { registries } = useStandardRegistryStore();
+    const { setShouldFocusNoteName } = useNoteDetailStore();
 
     const selectedCount = selectedFolderIds.length;
     const isMultipleSelected = selectedCount > 1;
+
+
+    /**
+     * Create new note in workspace
+     * Moved from WorkspaceFolderNodeMenu component
+     */
+    const createNewNote = (contextData: any) => {
+        const existingIds = collectIdsFromTabs(openTabs);
+        const tempId = generateTempId(existingIds);
+        const name = generateUnsavedName(tempId);
+
+        // Get entity ID (support both V1 and V2 structure)
+        const parentEntityId = contextData?.entityId ?? contextData?.tagId;
+
+        // Create folder object from contextData
+        const parentFolder: Folder | undefined = contextData
+            ? {
+                  id: parentEntityId,
+                  name: contextData.name || contextData.data?.name,
+                  description: contextData.description || contextData.data?.description,
+                  color: contextData.color || contextData.data?.color,
+                  createdAt: new Date(contextData.createdAt || contextData.data?.createdAt),
+                  isActive: !contextData.isArchived,
+              }
+            : undefined;
+
+        // Create temporary note
+        const newNote: Note = {
+            id: tempId,
+            name: name,
+            userId: $user.userId || 0,
+            description: "",
+            hashtags: [],
+            statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            tags: [],
+            type: "idea",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: $user.userName || "Unknown",
+            deletedAt: null,
+        };
+
+        // Create WorkspaceNoteItem for flat array (WorkspaceItemV2 structure)
+        const newWorkspaceItem: any = {
+            id: tempId,
+            workspaceId: currentWorkspace?.id || 1,
+            parentId: parentEntityId || null,
+            entityType: 3, // 3 = note
+            entityId: tempId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            deletedAt: null,
+            copyInfo: null,
+            level: (contextData?.level || 0) + 1,
+            position: 0,
+            accessType: "owner",
+            isOriginal: true,
+            isExpanded: false,
+            isSelected: false,
+
+            // Note entity data
+            data: {
+                id: tempId,
+                userId: $user.userId ?? 0,
+                name: name,
+                description: "",
+                statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                deletedAt: null,
+                copyInfo: null,
+            },
+        };
+
+        // Add note to currentWorkspace.flatData
+        if (currentWorkspace && contextData) {
+            const newFlatData = [newWorkspaceItem, ...currentWorkspace.flatData];
+
+            const newWorkspace = {
+                ...currentWorkspace,
+                flatData: newFlatData,
+                noteCount: currentWorkspace.noteCount + 1,
+            };
+            console.log("✅ New note added to workspace:", { tempId, name, parentEntityId });
+
+            setCurrentWorkspace(newWorkspace);
+        }
+
+        // Open tab for editing
+        openTab(newNote);
+
+        // Focus on note name field after tab opens
+        setShouldFocusNoteName(true);
+    };
 
     /**
      * Handle create item action (folder/note/file)
@@ -645,5 +749,6 @@ export const useWorkspaceFolderMenuHelper = () => {
         createFolder,
         editFolder,
         dhr_items,
+        createNewNote,
     };
 };

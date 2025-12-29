@@ -5,6 +5,7 @@ import { useWorkspaceStore } from "@/store/index";
 import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { WorkspaceNoteItem } from "@/types/workspace-v2.types";
 import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
@@ -15,6 +16,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeSelectionHelper();
     const { openTab } = useEditorTabHelper();
+    const _TREESTATUS = useTreeStatusHelper();
 
     // Safe cast: WorkspaceTree already filters to only render NoteNode for notes
     const noteItem = node.data.data as unknown as WorkspaceNoteItem;
@@ -22,11 +24,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
     const isSelected = isFolderSelected(entityId);
 
     // Check status and deleted state (including inherited from parent)
-    const deletedStatus = currentWorkspace?.flatData 
-        ? treeMiniHelper.checkDeletedStatus(noteItem, currentWorkspace.flatData)
-        : { isDeleted: false, isDirectlyDeleted: false };
-    const isDeleted = deletedStatus.isDeleted;
-    const isDirectlyDeleted = deletedStatus.isDirectlyDeleted;
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(noteItem);
     const isInactive = noteItem.data.statusCode === "inactive";
 
     const handleMainClick = (e: React.MouseEvent) => {
@@ -99,7 +97,7 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
             className={`
                 flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
                 transition-opacity duration-150
-                ${node.state.isDragging ? "opacity-40" : isDeleted ? "opacity-60" : isInactive ? "opacity-70" : "opacity-100"}
+                ${node.state.isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "opacity-60" : isInactive ? "opacity-70" : "opacity-100"}
                 ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
             `}
         >
@@ -108,12 +106,12 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
             {/* Note Icon */}
             <div className="mr-2 flex items-center">
-                <FileText className={`w-4 h-4 ${isDeleted ? "text-gray-500" : "text-blue-400"}`} />
+                <FileText className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-blue-400"}`} />
             </div>
 
             {/* Note Info */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className={`text-sm truncate text-editor-fg ${isDirectlyDeleted ? "line-through" : ""}`}>
+                <span className={`text-sm truncate text-editor-fg ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
                     {noteItem.data.name + "-" + entityId}
                 </span>
                 {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}

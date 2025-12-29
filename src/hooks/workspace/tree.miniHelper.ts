@@ -188,38 +188,6 @@ export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
     return $traverse(treeData).map((node) => (node.data as any).entityId);
 }
 
-/**
- * Check if item or any of its ancestors is deleted
- * Returns: { isDeleted: boolean, isDirectlyDeleted: boolean }
- * - isDeleted: true if this item OR any ancestor is deleted
- * - isDirectlyDeleted: true if THIS item is deleted (not inherited from parent)
- */
-export function checkDeletedStatus(item: WorkspaceItemV2, allItems: WorkspaceItemV2[]): { isDeleted: boolean; isDirectlyDeleted: boolean } {
-    // Check if this item is directly deleted
-    const isDirectlyDeleted = item.deletedAt !== null && item.deletedAt !== undefined;
-    
-    // If directly deleted, return early
-    if (isDirectlyDeleted) {
-        return { isDeleted: true, isDirectlyDeleted: true };
-    }
-    
-    // Check if any ancestor is deleted by traversing up the parent chain
-    let currentParentId = item.parentId;
-    while (currentParentId !== null) {
-        const parent = allItems.find(i => i.id === currentParentId);
-        if (!parent) break; // Parent not found, stop traversal
-        
-        if (parent.deletedAt !== null && parent.deletedAt !== undefined) {
-            // Ancestor is deleted
-            return { isDeleted: true, isDirectlyDeleted: false };
-        }
-        
-        currentParentId = parent.parentId;
-    }
-    
-    // Neither this item nor any ancestor is deleted
-    return { isDeleted: false, isDirectlyDeleted: false };
-}
 
 /**
  * Flatten tree data for lookup
@@ -467,5 +435,4 @@ export const treeMiniHelper = {
     transformItemsToTreeData,
     createWorkspaceRootFolder,
     transformToTreeData,
-    checkDeletedStatus,
 };
