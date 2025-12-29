@@ -11,7 +11,7 @@ import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
-    const { updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
+    const { updateActiveTab } = useEditorTabHelper();
 
     /**
      * Open workspace in editor tab
@@ -23,7 +23,7 @@ export const useWsTabHelper = () => {
 
         if (existingTab) {
             // Tab already exists, just activate it
-            updateActiveTabIdAndSelectedNote(existingTab.id);
+            updateActiveTab(existingTab.id);
         } else {
             // Create new workspace tab
             const newTab: BaseTab = {
@@ -36,7 +36,7 @@ export const useWsTabHelper = () => {
 
             const newTabs = [...openTabs, newTab];
             setOpenTabs(newTabs);
-            updateActiveTabIdAndSelectedNote(newTab.id, newTabs);
+            updateActiveTab(newTab.id, newTabs);
         }
     };
 

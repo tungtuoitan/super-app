@@ -13,9 +13,10 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { formatNoteDate } from "@/utils/note.utils";
 import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
-import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
+import { useEditorTabsStore, useStandardRegistryStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
+import {useTreeStatusHelper} from "@/hooks/workspace/useTreeStatusHelper";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -25,7 +26,10 @@ export function NoteDetailContent() {
     const [noteKey, setNoteKey] = React.useState(0);
     const activeTab = getActiveTab();
     const { trackNavigation } = useNavigationHistoryHelper();
-
+    const {getItemStatus} = useTreeStatusHelper()
+    const { currentWorkspace} = useWorkspaceStore();
+    const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find(i => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
+    console.log('_itemStatus', _itemStatus);
     // Get note data from active tab instead of activeNote
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 
@@ -34,7 +38,9 @@ export function NoteDetailContent() {
 
         // Check if note is deleted (soft deleted)
     let isDeleted = activeNote?.deletedAt !== null;
-    let isHardDeleted = activeNote?.isHardDeleted;    
+    let isHardDeleted = activeNote?.isHardDeleted;   
+    const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
+
 
     const hashtagOptions = registries
         .filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
@@ -108,7 +114,7 @@ export function NoteDetailContent() {
                         onFocus={() => trackNavigation("description")}
                         placeholder="Enter note description..."
                         className="min-h-[400px] resize-none font-mono text-sm overscroll-behavior-y-contain"
-                        disabled={isDeleted || isHardDeleted}
+                        disabled={isDisabled}
                     />
                 </CardContent>
             </div>
@@ -131,7 +137,7 @@ export function NoteDetailContent() {
                                 else setNameError("Note Name is required");
                             }}
                             size="small"
-                            disabled={isDeleted || isHardDeleted}
+                            disabled={isDisabled}
                             error={!!nameError}
                             helperText={nameError}
                         />
@@ -147,7 +153,7 @@ export function NoteDetailContent() {
                                     label: "Status",
                                 }}
                                 size="small"
-                                disabled={isDeleted || isHardDeleted || registriesLoading}
+                                disabled={isDisabled || registriesLoading}
                             />
                         </div>
 

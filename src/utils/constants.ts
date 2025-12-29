@@ -4,7 +4,6 @@
  */
 
 export const constants = {
-    note: {},
     environments: {
         development: "development",
         production: "production",

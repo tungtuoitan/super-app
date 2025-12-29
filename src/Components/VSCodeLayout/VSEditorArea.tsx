@@ -22,7 +22,7 @@ import {NavigationHistorySync} from "HeadlessComponents/NavigationHistorySync";
  */
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, isLoadingTabs, editorAreaRef } = useEditorTabsStore();
-    const { closeTab, getActiveTab, updateActiveTabIdAndSelectedNote } = useEditorTabHelper();
+    const { closeTab, getActiveTab, updateActiveTab } = useEditorTabHelper();
 
     // Get active tab
     const activeTab = getActiveTab()
@@ -62,7 +62,7 @@ export function VSEditorArea() {
                             return (
                                 <button
                                     key={tab.id}
-                                    onClick={() => updateActiveTabIdAndSelectedNote(tab.id)}
+                                    onClick={() => updateActiveTab(tab.id)}
                                     className={`
                     h-[35px] px-3 flex items-center gap-2
                     border-r border-b border-editor-border

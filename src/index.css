@@ -191,15 +191,15 @@
 }
 
 /* Hide scrollbar for react-arborist tree inner div */
-[role="tree"] > div {
+/* [role="tree"] > div {
     overflow: hidden !important;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
 }
 
 [role="tree"] > div::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
+    display: none; 
+} */
 
 /* Debug border utilities - outside of @layer to ensure they apply */
 .bred {

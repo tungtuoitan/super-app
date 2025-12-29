@@ -7,6 +7,7 @@ import { constants } from "@/utils/constants";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsStore, Ws } from "@/store/ws/useWs.store";
 import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
+import { useWorkspaceStore } from "@/store/index";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -15,12 +16,39 @@ export const useEditorTabHelper = () => {
     const { originalWsRef } = useWsDetailStore();
     const { setSelectedWs } = useWsStore();
     const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
+    const { currentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
+
+    /**
+     * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
+     * @param entityType - 2 (folder), 3 (note), 4 (file)
+     * @param entityId - ID của entity (note.id, workspace.id, file.id)
+     * @returns workspace_items.id hoặc null nếu không tìm thấy
+     */
+    const findWorkspaceItemId = (entityType: 2 | 3 | 4, entityId: number): number | null => {
+        if (!currentWorkspace?.flatData) {
+            console.log("⚠️ findWorkspaceItemId: No currentWorkspace or flatData");
+            return null;
+        }
+
+        // Tìm trong flatData dựa trên entityType và entityId
+        const item = currentWorkspace.flatData.find(
+            (item) => item.entityType === entityType && item.entityId === entityId
+        );
+
+        if (item) {
+            console.log(`✅ Found workspace item: entityType=${entityType}, entityId=${entityId}, workspaceItemId=${item.id}`);
+        } else {
+            console.log(`❌ Not found in workspace: entityType=${entityType}, entityId=${entityId}`);
+        }
+
+        return item?.id || null; // workspace_items.id
+    };
 
     /**
      * Update active tab ID and sync original refs for change tracking
      * Now without activeNote - data comes directly from tabs
      */
-    const updateActiveTabIdAndSelectedNote = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
+    const updateActiveTab = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
         const tabsToSearch = tabs || openTabs;
 
         setActiveTabId(newActiveTabId);
@@ -39,6 +67,42 @@ export const useEditorTabHelper = () => {
                 // Clear workspace state when switching to note
                 originalWsRef.current = null;
                 setSelectedWs(null);
+
+                // ⭐ Select item trong workspace tree nếu note này có trong workspace
+                const workspaceItemId = findWorkspaceItemId(3, noteData.id); // 3 = note entity type
+                if (workspaceItemId) {
+                    console.log(`🎯 Selecting note in tree: workspaceItemId=${workspaceItemId}, noteId=${noteData.id}`);
+                    setSelectedItemIds([workspaceItemId]);
+                    // Scroll to item trong tree
+                    if (_treeRef.current) {
+                        // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
+                        console.log("🔓 Opening parents first using TreeApi...");
+                        _treeRef.current.openParents(workspaceItemId.toString());
+                        
+                        // Scroll to node để đảm bảo nó visible
+                        console.log("📦 Scrolling to node...");
+                        _treeRef.current.scrollTo(workspaceItemId.toString());
+                        
+                        // Bây giờ get node sau khi parents đã expand
+                        const node = _treeRef.current.get(workspaceItemId.toString());
+                        if (node) {
+                            console.log("📜 Node found:", {
+                                id: node.id,
+                                isOpen: node.isOpen,
+                                level: node.level,
+                                parent: node.parent?.id,
+                                isInternal: node.isInternal
+                            });
+                            console.log("✅ Now focusing...");
+                            // Use focus() to scroll the node into view (react-arborist API)
+                            node.focus();
+                        } else {
+                            console.log("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                        }
+                    } else {
+                        console.log("⚠️ Tree ref not available");
+                    }
+                }
             } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
                 const wsData = activeTab.data as Ws;
 
@@ -51,6 +115,42 @@ export const useEditorTabHelper = () => {
 
                 // Clear note state when switching to workspace
                 originalNoteRef.current = null;
+
+                // ⭐ Select workspace folder item trong tree (workspace type = folder type 2)
+                const workspaceItemId = findWorkspaceItemId(2, wsData.id); // 2 = folder entity type
+                if (workspaceItemId) {
+                    console.log(`🎯 Selecting workspace in tree: workspaceItemId=${workspaceItemId}, wsId=${wsData.id}`);
+                    setSelectedItemIds([workspaceItemId]);
+                    // Scroll to item trong tree
+                    if (_treeRef.current) {
+                        // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
+                        console.log("🔓 Opening parents first using TreeApi...");
+                        _treeRef.current.openParents(workspaceItemId.toString());
+                        
+                        // Scroll to node để đảm bảo nó visible
+                        console.log("📦 Scrolling to node...");
+                        _treeRef.current.scrollTo(workspaceItemId.toString());
+                        
+                        // Bây giờ get node sau khi parents đã expand
+                        const node = _treeRef.current.get(workspaceItemId.toString());
+                        if (node) {
+                            console.log("📜 Node found:", {
+                                id: node.id,
+                                isOpen: node.isOpen,
+                                level: node.level,
+                                parent: node.parent?.id,
+                                isInternal: node.isInternal
+                            });
+                            console.log("✅ Now focusing...");
+                            // Use focus() to scroll the node into view (react-arborist API)
+                            node.focus();
+                        } else {
+                            console.log("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                        }
+                    } else {
+                        console.log("⚠️ Tree ref not available");
+                    }
+                }
             } else {
                 originalNoteRef.current = null;
                 originalWsRef.current = null;
@@ -87,7 +187,7 @@ export const useEditorTabHelper = () => {
         // ===================================
         if (existingTab) {
             // Tab already exists, just activate it
-            updateActiveTabIdAndSelectedNote(existingTab.id);
+            updateActiveTab(existingTab.id);
         } else {
             // ===================================
             // 3. Create new tab based on type
@@ -128,7 +228,7 @@ export const useEditorTabHelper = () => {
             // ===================================
             const newTabs = [...openTabs, newTab];
             setOpenTabs(newTabs);
-            updateActiveTabIdAndSelectedNote(newTab.id, newTabs);
+            updateActiveTab(newTab.id, newTabs);
         }
     };
 
@@ -179,10 +279,10 @@ export const useEditorTabHelper = () => {
         if (activeTabId === tabId) {
             if (newTabs.length > 0) {
                 // Switch to the last tab
-                updateActiveTabIdAndSelectedNote(newTabs[newTabs.length - 1].id, newTabs);
+                updateActiveTab(newTabs[newTabs.length - 1].id, newTabs);
             } else {
                 // No tabs left
-                updateActiveTabIdAndSelectedNote(null, newTabs);
+                updateActiveTab(null, newTabs);
             }
         }
     };
@@ -292,7 +392,7 @@ export const useEditorTabHelper = () => {
         // openWorkspaceTab,
         closeTab,
         getActiveTab,
-        updateActiveTabIdAndSelectedNote,
+        updateActiveTab,
         processTabAfterDelete,
     };
 };

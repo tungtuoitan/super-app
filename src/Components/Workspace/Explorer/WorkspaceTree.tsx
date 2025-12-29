@@ -195,7 +195,7 @@ export function WorkspaceTree() {
                 data-workspace-tree
                 tabIndex={0}
                 onContextMenu={handleContainerContextMenu}
-                className="h-full flex flex-col p-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
+                className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
                 {/* Loading overlay when dragging */}
                 {isDragging && (
