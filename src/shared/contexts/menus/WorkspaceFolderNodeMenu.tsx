@@ -36,6 +36,7 @@ export function WorkspaceFolderNodeMenu() {
 
     // Check deleted status (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
+    console.log("_ITEMSTATUS",_ITEMSTATUS)
     
     const addMenuItems = [
         { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },

@@ -79,6 +79,13 @@ export const generateUnsavedName = (tempId: number, prefix: string = "Unsaved"):
     return `${prefix}-${sequence}`;
 };
 
+export const SPECIAL_IDS = [
+    constants.workspace.root.workspaceItemId,
+    constants.workspace.root.entityId,
+    constants.workspace.dropZone.workspaceItemId,
+    constants.workspace.dropZone.entityId,
+] as number[];
+
 /**
  * Collect all IDs from workspace tree (flatData)
  * Returns separate arrays for workspace items, notes, and files
@@ -109,12 +116,7 @@ export const collectIdsFromTree = (flatData: WorkspaceItemV2[]): {
 
     // Special IDs to skip (root, dropZone)
     // These IDs are reserved for virtual nodes and should never be used for temp IDs
-    const SPECIAL_IDS = [
-        constants.workspace.root.workspaceItemId,
-        constants.workspace.root.entityId,
-        constants.workspace.dropZone.workspaceItemId,
-        constants.workspace.dropZone.entityId,
-    ] as number[];
+
 
     flatData.forEach((item) => {
         // Skip special IDs (root, dropZone) to prevent conflicts

@@ -11,6 +11,7 @@ import type { NodeApi } from "react-arborist";
 import type { TreeFolder } from "./tree.miniHelper";
 import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 
 export const useTreeHelper2 = () => {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId } = useWorkspaceStore();
@@ -44,7 +45,7 @@ export const useTreeHelper2 = () => {
 
         const workspaceItemIds = nodes
             .map(getWorkspaceItemId)
-            .filter((id): id is number => id !== null && id > 0); // Filter out workspace nodes and null
+            .filter((id): id is number => id !== null && !SPECIAL_IDS.includes(id)); // Filter out workspace nodes, dragZone
 
         setSelectedItemIds(workspaceItemIds);
         if (workspaceItemIds.length > 0) {

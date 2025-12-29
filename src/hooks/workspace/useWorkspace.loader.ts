@@ -18,6 +18,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import {ResultOptions} from "@/types/common.types";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
+import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 
 export const useWorkspaceLoader = () => {
     const { $user } = useAuthStore();
@@ -88,7 +89,13 @@ export const useWorkspaceLoader = () => {
             console.log("🔧 Loading Workspace V2 API with filters:", params);
             const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, selectedWorkspaceId, params);
             if(result && result.success){
-                setCurrentWorkspace(result.object as WorkspaceDTO);
+                const newWorkspace = {
+                    ...result.object, 
+                    flatData: [
+                        ...result.object?.flatData ?? [], 
+                        ...(currentWorkspace?.flatData ?? [])?.filter((item: WorkspaceItemV2) => item?.id<0) ] // KEEP CURRENT NEW FILE/NOTE,...
+                } as WorkspaceDTO
+                setCurrentWorkspace(newWorkspace);
                 return result.object;
             }
 
