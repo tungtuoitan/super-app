@@ -144,19 +144,19 @@ export const useWorkspaceFolderMenuHelper = () => {
         const parentWorkspaceItemId = contextData?.id ?? null;
 
         // Get entity ID (support both V1 and V2 structure)
-        const parentEntityId = contextData?.entityId ?? contextData?.tagId;
+        // const parentEntityId = contextData?.entityId
 
         // Create folder object from contextData
-        const parentFolder: Folder | undefined = contextData
-            ? {
-                  id: parentEntityId,
-                  name: contextData.name || contextData.data?.name,
-                  description: contextData.description || contextData.data?.description,
-                  color: contextData.color || contextData.data?.color,
-                  createdAt: new Date(contextData.createdAt || contextData.data?.createdAt),
-                  isActive: !contextData.isArchived,
-              }
-            : undefined;
+        // const parentFolder: Folder | undefined = contextData
+        //     ? {
+        //           id: parentEntityId,
+        //           name: contextData.name || contextData.data?.name,
+        //           description: contextData.description || contextData.data?.description,
+        //           color: contextData.color || contextData.data?.color,
+        //           createdAt: new Date(contextData.createdAt || contextData.data?.createdAt),
+        //           isActive: !contextData.isArchived,
+        //       }
+        //     : undefined;
 
         // Create temporary note (uses note entity ID)
         const newNote: Note = {

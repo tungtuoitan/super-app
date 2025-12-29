@@ -5,8 +5,14 @@
 
 export * from "./common.types";
 
-// Export folder types (new)
+// Export folder types
 export * from "./folder.types";
+
+// Export file types
+export * from "./file.types";
+
+// Export workspace V2 types (includes entity types)
+export * from "./workspace-v2.types";
 
 
 /**

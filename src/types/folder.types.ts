@@ -3,6 +3,8 @@
  * Domain models and DTOs for the folder feature (workspace navigation)
  */
 
+import type { FolderEntity } from "@/types/workspace-v2.types";
+
 // API Response DTO (from backend FolderResponse)
 // Backend returns: Id, Name, Description, Color, CreatedAt, IsActive, Depth
 export interface FolderDTO {
@@ -32,18 +34,25 @@ export interface FolderTreeResponseDTO {
     isSelected: boolean;
 }
 
-// Domain model (what we use in app)
-export interface Folder {
-    id: number; // Primary key (maps to backend folderId)
-    name: string;
-    description?: string;
-    color?: string;
+/**
+ * Folder domain model (extends FolderEntity with UI state & business logic)
+ * Use this for in-app state management and UI components
+ */
+export interface Folder extends Omit<FolderEntity, 'userId' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+    // Override userId to optional (not always available when transforming from WorkspaceItem)
+    userId?: number;
+
+    // Override date types from ISO string to Date for domain model
     createdAt: Date;
+    updatedAt?: Date;
+    deletedAt?: Date | null;
+
+    // Business logic fields (not in entity)
     isActive: boolean;
     depth?: number; // Depth in hierarchy from backend (0 = root, 1 = child, etc.)
     parentId?: number | null; // Parent folder ID (null for root level)
 
-    // Frontend-only properties for tree UI and backward compatibility
+    // UI state fields (frontend-only)
     children?: Folder[]; // Child folders for tree structure
     isExpanded?: boolean; // For tree UI state
     isArchived?: boolean; // Computed from isActive (!isActive)

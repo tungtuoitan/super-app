@@ -10,11 +10,15 @@
  */
 
 // ============================================
-// ENTITY DATA INTERFACES
+// BASE ENTITY TYPES (Pure database entities)
 // ============================================
 
-/** Folder entity data (from folders table) */
-export interface FolderData {
+/**
+ * Base Folder entity from database (folders table)
+ * Pure entity data with ISO string dates
+ * Use this for API responses and workspace tree data
+ */
+export interface FolderEntity {
   /** Folder ID (folders.id) */
   id: number;
 
@@ -36,21 +40,25 @@ export interface FolderData {
   /** Icon emoji or class (folders.icon) */
   icon?: string;
 
-  /** Created timestamp (folders.created_at) */
+  /** Created timestamp (folders.created_at) - ISO string from API */
   createdAt: string;
 
-  /** Updated timestamp (folders.updated_at) */
+  /** Updated timestamp (folders.updated_at) - ISO string from API */
   updatedAt?: string;
 
-  /** Soft delete timestamp (folders.deleted_at) */
+  /** Soft delete timestamp (folders.deleted_at) - ISO string from API */
   deletedAt?: string | null;
 
   /** Copy metadata JSON (folders.copy_info) */
   copyInfo?: string | null;
 }
 
-/** Note entity data (from notes table) */
-export interface NoteData {
+/**
+ * Base Note entity from database (notes table)
+ * Pure entity data with ISO string dates
+ * Use this for API responses and workspace tree data
+ */
+export interface NoteEntity {
   /** Note ID (notes.id) */
   id: number;
 
@@ -66,21 +74,25 @@ export interface NoteData {
   /** Status code (notes.status_code) */
   statusCode?: string;
 
-  /** Created timestamp (notes.created_at) */
+  /** Created timestamp (notes.created_at) - ISO string from API */
   createdAt: string;
 
-  /** Updated timestamp (notes.updated_at) */
+  /** Updated timestamp (notes.updated_at) - ISO string from API */
   updatedAt?: string;
 
-  /** Soft delete timestamp (notes.deleted_at) */
+  /** Soft delete timestamp (notes.deleted_at) - ISO string from API */
   deletedAt?: string | null;
 
   /** Copy metadata JSON (notes.copy_info) */
   copyInfo?: string | null;
 }
 
-/** File entity data (from files table) */
-export interface FileData {
+/**
+ * Base File entity from database (files table)
+ * Pure entity data with ISO string dates
+ * Use this for API responses and workspace tree data
+ */
+export interface FileEntity {
   /** File ID (files.id) */
   id: number;
 
@@ -105,21 +117,34 @@ export interface FileData {
   /** Status code (files.status_code) */
   statusCode?: string;
 
-  /** Created timestamp (files.created_at) */
+  /** Created timestamp (files.created_at) - ISO string from API */
   createdAt: string;
 
-  /** Updated timestamp (files.updated_at) */
+  /** Updated timestamp (files.updated_at) - ISO string from API */
   updatedAt?: string;
 
-  /** Soft delete timestamp (files.deleted_at) */
+  /** Soft delete timestamp (files.deleted_at) - ISO string from API */
   deletedAt?: string | null;
 
   /** Copy metadata JSON (files.copy_info) */
   copyInfo?: string | null;
 
-  /** Human-readable file size */
+  /** Human-readable file size (computed) */
   fileSizeFormatted?: string;
 }
+
+// ============================================
+// DEPRECATED ALIASES (Backward compatibility)
+// ============================================
+
+/** @deprecated Use FolderEntity instead - will be removed in future version */
+export type FolderData = FolderEntity;
+
+/** @deprecated Use NoteEntity instead - will be removed in future version */
+export type NoteData = NoteEntity;
+
+/** @deprecated Use FileEntity instead - will be removed in future version */
+export type FileData = FileEntity;
 
 // ============================================
 // BASE WORKSPACE ITEM
@@ -223,19 +248,19 @@ interface BaseWorkspaceItem {
 /** Workspace item containing a folder */
 export interface WorkspaceFolderItem extends BaseWorkspaceItem {
   entityType: 2;
-  data: FolderData;
+  data: FolderEntity;
 }
 
 /** Workspace item containing a note */
 export interface WorkspaceNoteItem extends BaseWorkspaceItem {
   entityType: 3;
-  data: NoteData;
+  data: NoteEntity;
 }
 
 /** Workspace item containing a file */
 export interface WorkspaceFileItem extends BaseWorkspaceItem {
   entityType: 4;
-  data: FileData;
+  data: FileEntity;
 }
 
 /**
