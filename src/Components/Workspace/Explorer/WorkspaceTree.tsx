@@ -3,7 +3,7 @@ import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
-import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
+import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { CustomDragPreview } from "./CustomDragPreview";
@@ -17,7 +17,7 @@ import { constants } from "@/utils/constants";
 
 export function WorkspaceTree() {
     const { searchText, isDragging, currentWorkspace, _treeRef } = useWorkspaceStore();
-    const { handleSelectionChange, handleKeyDown } = useTreeSelectionHelper();
+    const { handleSelectionChange, handleKeyDown } = useTreeHelper2();
     const { handleMove } = useTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
@@ -154,10 +154,9 @@ export function WorkspaceTree() {
         };
 
         document.addEventListener("keydown", handleKeyDownWrapper);
-        return () =>
-            document.removeEventListener("keydown", (e: KeyboardEvent) => {
-                handleKeyDown(e, allVisibleFolderIds);
-            });
+        return () => {
+            document.removeEventListener("keydown", handleKeyDownWrapper);
+        };
     }, [handleKeyDown, allVisibleFolderIds]);
 
     // Handle context menu on empty space (treat as root workspace)

@@ -31,9 +31,9 @@ export * from "./ws/useWsDetail.helper";
 export * from "./ws/useWsTab.helper";
 
 // Workspace helpers
-export * from "./workspace/useWorkspaceOperation.helper";
+export * from "./workspace/useWorkspace.loader";
 export * from "./workspace/useFolderDialog.helper";
-export * from "./workspace/useTreeSelectionHelper";
+export * from "./workspace/useTreeHelper2";
 export * from "./workspace/useTreeHelper";
 export * from "./workspace/tree.miniHelper";
 

@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
-import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
+import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { WorkspaceFileItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
@@ -39,7 +39,7 @@ function getFileIcon(extension?: string) {
 export function FileNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
     const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isFolderSelected } = useTreeSelectionHelper();
+    const { isFolderSelected } = useTreeHelper2();
 
     // Safe cast: WorkspaceTree already filters to only render FileNode for files
     const fileItem = node.data.data as unknown as WorkspaceFileItem;

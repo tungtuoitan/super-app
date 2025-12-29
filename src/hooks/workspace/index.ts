@@ -4,9 +4,9 @@
  */
 
 // Sub-hooks (use directly for specific operations)
-export { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
+export { useWorkspaceLoader } from "./useWorkspace.loader";
 export { useFolderDialogHelper } from "./useFolderDialog.helper";
-export { useTreeSelectionHelper } from "./useTreeSelectionHelper";
+export { useTreeHelper2 } from "./useTreeHelper2";
 export { useTreeHelper } from "./useTreeHelper";
 
 // Tree helper utilities (pure functions)

@@ -6,13 +6,13 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { workspaceService } from "@/services/workspace.service";
 import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.store";
 import type { Folder } from "@/types/folder.types";
-import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
+import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { constants } from "@/utils/constants";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 
 export const useFolderDialogHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
-    const { loadTree } = useWorkspaceOperation();
+    const { loadTree } = useWorkspaceLoader();
 
     // Form state from FolderDialogStore
     const {

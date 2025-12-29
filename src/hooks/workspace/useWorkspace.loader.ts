@@ -8,7 +8,7 @@
  * // Get state from store
  * const { allWorkspaces, currentWorkspace } = useWorkspaceStore();
  * // Get actions from helper
- * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceOperation();
+ * const { loadAllWorkspaces, selectWorkspace } = useWorkspaceLoader();
  */
 
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
@@ -19,7 +19,7 @@ import { useSnackbar } from "notistack";
 import {ResultOptions} from "@/types/common.types";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 
-export const useWorkspaceOperation = () => {
+export const useWorkspaceLoader = () => {
     const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
@@ -94,18 +94,11 @@ export const useWorkspaceOperation = () => {
         }
     };
 
-    /**
-     * Select a workspace and load its tree
-     */
-    const selectWorkspace = async (workspaceId: number) => {
-        // Load tree for selected workspace (will set currentWorkspace which contains workspaceId)
-        await loadTree(workspaceId);
-    };
+
 
     return {
         // Actions only - get state directly from useWorkspaceStore()
         loadAllWorkspaces,
         loadTree,
-        selectWorkspace,
     };
 };

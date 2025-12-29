@@ -6,7 +6,7 @@
 import { useState, useEffect } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { WorkspaceTree } from "../Workspace/Explorer/WorkspaceTree";
-import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
+import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "../Workspace/Explorer/FolderDialog/FolderDialog";
@@ -21,7 +21,7 @@ import {useGridControlStore} from "@/store/grid/useGridControl.store";
 export function WorkspaceView() {
     const { $user } = useAuthStore();
     const { allWorkspaces, currentWorkspace, isLoadingWorkspaces, isLoadingTree, selectedWorkspaceId,setSelectedWorkspaceId } = useWorkspaceStore();
-    const { loadAllWorkspaces, selectWorkspace, loadTree } = useWorkspaceOperation();
+    const { loadAllWorkspaces, loadTree } = useWorkspaceLoader();
     const { setModuleName, setFilterViewKey } = useGridControlStore();
 
 
@@ -57,10 +57,6 @@ export function WorkspaceView() {
     // Handle workspace selection change
     const handleWorkspaceChange = (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
         setSelectedWorkspaceId(newValue?.id ? parseInt(newValue.id.toString()) : null);
-        if (newValue?.id) {
-            const workspaceId = parseInt(newValue.id.toString());
-            selectWorkspace(workspaceId);
-        }
     };
 
 

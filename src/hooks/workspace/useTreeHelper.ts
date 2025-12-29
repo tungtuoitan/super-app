@@ -7,7 +7,7 @@ import type { TreeFolder } from "./tree.miniHelper";
 import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useFolderDialogHelper } from "./useFolderDialog.helper";
-import { useWorkspaceOperation } from "./useWorkspaceOperation.helper";
+import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { constants } from "@/utils/constants";
 import { workspaceService } from "@/services/workspace.service";
 import type { MoveItemsRequest } from "@/types/workspace.types";
@@ -20,7 +20,7 @@ export const useTreeHelper = () => {
     const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
-    const { loadTree } = useWorkspaceOperation();
+    const { loadTree } = useWorkspaceLoader();
     const { enqueueSnackbar } = useSnackbar();
     const { $user } = useAuthStore();
 

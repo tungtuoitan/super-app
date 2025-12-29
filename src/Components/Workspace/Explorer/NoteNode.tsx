@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { FileText } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
-import { useTreeSelectionHelper } from "@/hooks/workspace/useTreeSelectionHelper";
+import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
@@ -14,7 +14,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
     const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isFolderSelected } = useTreeSelectionHelper();
+    const { isFolderSelected } = useTreeHelper2();
     const { openTab } = useEditorTabHelper();
     const _TREESTATUS = useTreeStatusHelper();
 

@@ -3,7 +3,7 @@ import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
-import { useWorkspaceOperation } from "@/hooks/workspace/useWorkspaceOperation.helper";
+import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { FolderItem } from "@/types/workspace.types";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -23,7 +23,7 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
     const { currentWorkspace } = useWorkspaceStore();
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
-    const { loadTree } = useWorkspaceOperation();
+    const { loadTree } = useWorkspaceLoader();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     const folderItem = node.data.data as FolderItem;

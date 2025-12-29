@@ -7,7 +7,7 @@ import { noteService } from "@/services/note.service";
 import { workspaceService } from "@/services/workspace.service";
 import { constants } from "@/utils/constants";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
-import { useWorkspaceOperation } from "../workspace/useWorkspaceOperation.helper";
+import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { transformANote } from "@/utils/note.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
@@ -21,7 +21,7 @@ export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
     const { originalNoteRef } = useNoteDetailStore();
     const { loadNotes } = useNoteGridHelper();
-    const { loadTree } = useWorkspaceOperation();
+    const { loadTree } = useWorkspaceLoader();
     const { currentWorkspace } = useWorkspaceStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();

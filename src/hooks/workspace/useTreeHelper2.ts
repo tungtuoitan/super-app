@@ -6,33 +6,14 @@
  * @returns {Object} Selection action functions only (no state)
  */
 
+import { useCallback } from "react";
 import type { NodeApi } from "react-arborist";
 import type { TreeFolder } from "./tree.miniHelper";
 import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 
-export const useTreeSelectionHelper = () => {
+export const useTreeHelper2 = () => {
     const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId } = useWorkspaceStore();
-
-    /**
-     * Toggle selection for a single folder
-     */
-    const toggleFolderSelection = (folderId: number) => {
-        setSelectedFolderIds((prev) => {
-            if (prev.includes(folderId)) {
-                return prev.filter((id) => id !== folderId);
-            } else {
-                return [...prev, folderId];
-            }
-        });
-    };
-
-    /**
-     * Select all folders
-     */
-    const selectAllFolders = (folderIds: number[]) => {
-        setSelectedFolderIds(folderIds);
-    };
 
     /**
      * Clear all selections
@@ -73,8 +54,10 @@ export const useTreeSelectionHelper = () => {
     /**
      * Handle keyboard navigation (VS Code-like)
      * Supports: Arrow Up/Down, Shift+Arrow for range selection, Ctrl+A, Escape
+     * 
+     * ⚡ Performance optimized with useCallback
      */
-    const handleKeyDown = (e: KeyboardEvent, allVisibleFolderIds: number[]) => {
+    const handleKeyDown = useCallback((e: KeyboardEvent, allVisibleFolderIds: number[]) => {
         if (e.target !== document.body && !(e.target as Element).closest("[data-workspace-tree]")) {
             return; // Only handle when tree is focused
         }
@@ -137,12 +120,9 @@ export const useTreeSelectionHelper = () => {
                 setLastSelectedFolderId(null);
                 break;
         }
-    };
+    }, [selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId]);
 
     return {
-        toggleFolderSelection,
-        selectAllFolders,
-        clearSelection,
         isFolderSelected,
         handleSelectionChange,
         handleKeyDown,
