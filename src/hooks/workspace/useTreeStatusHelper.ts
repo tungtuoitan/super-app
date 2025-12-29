@@ -69,12 +69,12 @@ export const useTreeStatusHelper = () => {
         // 1.isMultiple: Kiểm tra xem có nhiều hơn 1 item được chọn không
         const isMultiple = selectedCount > 1;
 
-        // 2.hasAnyActiveItem: Kiểm tra xem có item nào được chọn mà không bị xóa (deleted) không
-        const hasAnyActiveItem = (() => {
+        // 2.hasAnyNormalItem: tức deletedAt = null
+        const hasAnyNormalItem = (() => {
             if (!isMultiple || !currentWorkspace?.flatData) return false;
 
-            return selectedItemIds.some((workspaceItemId) => {
-                const item = currentWorkspace.flatData.find((i: any) => i.id === workspaceItemId);
+            return selectedItemIds.some((itemId) => {
+                const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
                 if (!item) return false;
 
                 const status = getItemStatus(item);
@@ -82,9 +82,39 @@ export const useTreeStatusHelper = () => {
             });
         })();
 
+        // 3.hasAnyDeletedItem: Kiểm tra xem có item nào bị deleted (directly deleted hoặc ancestor deleted)
+        const hasAnyDeletedItem = (() => {
+            if (!currentWorkspace?.flatData) return false;
+
+            return selectedItemIds.some((itemId) => {
+                const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
+                if (!item) return false;
+
+                const status = getItemStatus(item);
+                // Item is deleted if: directly deleted OR has deleted ancestor
+                return status.isDirectlyDeleted || status.hasDeletedAncestor;
+            });
+        })();
+
+        // 4.hasDeletedAncestor: Kiểm tra xem có item nào có ancestor bị deleted không
+        const hasDeletedAncestor = (() => {
+            if (!currentWorkspace?.flatData) return false;
+
+            return selectedItemIds.some((itemId) => {
+                const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
+                if (!item) return false;
+
+                const status = getItemStatus(item);
+                // Only check if item has deleted ancestor (không check bản thân item)
+                return status.hasDeletedAncestor;
+            });
+        })();
+
         return {
             isMultiple,
-            hasAnyActiveItem,
+            hasAnyNormalItem,
+            hasAnyDeletedItem,
+            hasDeletedAncestor,
         };
     }, [selectedCount, selectedItemIds, currentWorkspace?.flatData, getItemStatus]);
 

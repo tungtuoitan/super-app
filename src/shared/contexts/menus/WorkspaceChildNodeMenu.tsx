@@ -61,7 +61,7 @@ export function WorkspaceChildNodeMenu() {
                 // If item is deleted but not directly (inherited from parent), only show Hard Delete
                 // Don't show if multiple selected and any item is still active
                 //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
-                // else if (_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted && !(_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasAnyActiveItem)) {
+                // else if (_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted && !(_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasAnyNormalItem)) {
                 //     return (
                 //         <MenuItem onClick={(e) => deleteItems(e, true)} className="text-red-600 hover:bg-red-50">
                 //             <HardDeleteIcon className="w-4 h-4 mr-2" />
@@ -73,7 +73,7 @@ export function WorkspaceChildNodeMenu() {
                 // Disable if multiple selected and any item is still active (deletedAt = null)
                 else if (!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
                     return (
-                        <MenuItem onClick={(e) => deleteItems(e, false)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasAnyActiveItem}>
+                        <MenuItem onClick={(e) => deleteItems(e, false)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasDeletedAncestor}>
                             <DeleteIcon className="w-4 h-4 mr-2" />
                             Delete
                         </MenuItem>

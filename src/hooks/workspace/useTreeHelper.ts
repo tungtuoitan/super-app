@@ -16,6 +16,7 @@ import { Folder } from "@/types/index";
 import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import {SPECIAL_IDS} from "@/utils/temp-id.utils";
 
 export const useTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
@@ -125,8 +126,8 @@ export const useTreeHelper = () => {
                 } else {
                     const targetItemId = targetNode.data.id; // workspace_items.id
 
-                    // ---- Negative IDs are workspace root nodes or drop zone ----
-                    if (targetItemId < 0) {
+                    // ---- workspace root nodes, drop zone ----
+                    if (SPECIAL_IDS.includes(targetItemId)) {
                         newParentId = undefined; // Move to workspace root
                         console.log("🎯 Drop target: Root level (negative entity ID)");
                     } else {
@@ -295,17 +296,17 @@ export const useTreeHelper = () => {
             // STEP 6: SPLIT INTO 2 FLOWS: REAL IDS (API) & VIRTUAL IDS (STATE ONLY)
             // -------------------------------------------------------
             // Split itemsNeedUpdate into:
-            // - realWorkspaceItemIds (>0): Real items in database → Call API
-            // - virtualWorkspaceItemIds (<0): Virtual items (workspace root, drop zone) → Update state only
-            const realWorkspaceItemIds = itemsNeedUpdate.filter((id) => id > 0);
-            const virtualWorkspaceItemIds = itemsNeedUpdate.filter((id) => id < 0);
+            // - realItemsNeedUpdate (>0): Real items in database → Call API
+            // - virtualItemsNeedUpdate (<0): Virtual items (workspace root, drop zone) → Update state only
+            const realItemsNeedUpdate = itemsNeedUpdate.filter((id) => id > 0);
+            const virtualItemsNeedUpdate = itemsNeedUpdate.filter((id) => id < 0);
 
-            console.log("📊 Split IDs:", { realWorkspaceItemIds, virtualWorkspaceItemIds });
+            console.log("📊 Split IDs:", { realItemsNeedUpdate, virtualItemsNeedUpdate });
 
             // -------------------------------------------------------
             // FLOW 1: UPDATE REAL ITEMS VIA API (ID > 0)
             // -------------------------------------------------------
-            if (realWorkspaceItemIds.length > 0) {
+            if (realItemsNeedUpdate.length > 0) {
                 if (!currentWorkspace?.id) {
                     console.error("❌ No workspace ID found");
                     setIsDragging(false);
@@ -320,7 +321,7 @@ export const useTreeHelper = () => {
                 // - id: workspace_items.id (already have it!)
                 // - parentId: new parent's workspace_items.id (SELF-REFERENCING) or null for root
                 // Note: Descendants already filtered out in STEP 5
-                const batchRequests = realWorkspaceItemIds.map((workspaceItemId) => {
+                const batchRequests = realItemsNeedUpdate.map((workspaceItemId) => {
                     return {
                         action: WorkspaceItemAction.Move,
                         id: workspaceItemId, // ✅ workspace_items.id (primary key)
@@ -348,10 +349,11 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // FLOW 2: UPDATE VIRTUAL ITEMS IN STATE ONLY (ID < 0)
             // -------------------------------------------------------
-            let newVirtualItems: WorkspaceItemV2[] = [];
-            if (virtualWorkspaceItemIds.length > 0) {
-                console.log(`🔄 Updating ${virtualWorkspaceItemIds.length} virtual item(s) in state only (no API call)`);
-                newVirtualItems = virtualWorkspaceItemIds
+            let updatedVirtualItems: WorkspaceItemV2[] = [];
+            let allNewVirtualItems: WorkspaceItemV2[] = [];
+            if (virtualItemsNeedUpdate.length > 0) {
+                console.log(`🔄 Updating ${virtualItemsNeedUpdate.length} virtual item(s) in state only (no API call)`);
+                updatedVirtualItems = virtualItemsNeedUpdate
                     .map((workspaceItemId) => {
                         const item = allNodes.find((t) => t.data.id === workspaceItemId);
                         if (!item) return null;
@@ -365,15 +367,20 @@ export const useTreeHelper = () => {
 
                         return updatedData;
                     })
-                    .filter((item): item is WorkspaceItemV2 => item !== null) as WorkspaceItemV2[];
+                    .filter((item): item is WorkspaceItemV2 => item !== null);
 
-                console.log(`✅ Prepared ${newVirtualItems.length} virtual item(s) for state update`);
+                // Virtual descendants - keep as-is (parentId unchanged because they follow their parent)
+                const otherVirtualItems = allNodes.filter((n) => n.data.id < 0 && !SPECIAL_IDS.includes(n.data.id) && !virtualItemsNeedUpdate.includes(n.data.id)).map((node) => node.data as any as WorkspaceItemV2);
+
+                // Combine both
+                allNewVirtualItems = [...updatedVirtualItems, ...otherVirtualItems];
+
             }
 
             // -------------------------------------------------------
             // SUCCESS: Show toast for all moved items
             // -------------------------------------------------------
-            const totalMoved = realWorkspaceItemIds.length + virtualWorkspaceItemIds.length;
+            const totalMoved = realItemsNeedUpdate.length + virtualItemsNeedUpdate.length;
             if (totalMoved > 0) {
                 enqueueSnackbar(`Successfully moved ${totalMoved} item(s)`, { variant: "success" });
             }
@@ -382,7 +389,7 @@ export const useTreeHelper = () => {
             // STEP 7: REFRESH TREE & RESTORE SELECTION
             // -------------------------------------------------------
             // Pass virtual items to preserve them in state during reload
-            await loadTree(newVirtualItems.length > 0 ? newVirtualItems : undefined);
+            await loadTree(allNewVirtualItems.length > 0 ? allNewVirtualItems : undefined);
 
             // VS Code behavior: Re-select the moved items after move completes
             // Use itemsNeedUpdate (top-level items) instead of selectedEntityIds (includes descendants)

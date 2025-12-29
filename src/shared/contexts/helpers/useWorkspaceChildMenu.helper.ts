@@ -21,7 +21,7 @@ export const useWorkspaceChildMenuHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { enqueueSnackbar } = useSnackbar();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
-    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader()
 
     const isNote = contextType === constants.workspace.itemTypes.note;
@@ -142,6 +142,11 @@ export const useWorkspaceChildMenuHelper = () => {
 
     /**
      * Handle delete with confirmation - SUPPORTS MULTI-SELECT
+     * Logic:
+     * 1. Split selected items into NEW items (ID < 0) and EXISTING items (ID > 0)
+     * 2. Remove new items from workspace state immediately (no API call)
+     * 3. Only call API delete if there are existing items
+     * 4. No notification for new items deletion (silent state update)
      */
     const deleteItems = (event: any, isHardDelete: boolean = false) => {
         // ---------
@@ -159,23 +164,74 @@ export const useWorkspaceChildMenuHelper = () => {
         const anchorElement = nativeEvent?.target as HTMLElement;
 
         // ---------
-        // STEP 3: Prepare confirmation message
+        // STEP 3: Split selected items into NEW and EXISTING
         // ---------
         if (!isNote && !isFile) {
             return;
         }
 
-        const entityName = isMultipleSelected ? undefined : (contextData.data?.name || contextData.name || "this item");
+        // Get all selected workspace item IDs (using contextData.id for single, or selectedItemIds for multi)
+        const itemsToDelete = isMultipleSelected 
+            ? selectedItemIds 
+            : [contextData.id];
+
+        // Split into new items (ID < 0, virtual) and existing items (ID > 0, in database)
+        const newItemIds = itemsToDelete.filter(id => id < 0);
+        const existingItemIds = itemsToDelete.filter(id => id > 0);
+
+        console.log("🗑️ Delete items split:", { 
+            total: itemsToDelete.length,
+            newItems: newItemIds.length, 
+            existingItems: existingItemIds.length 
+        });
+
+        // ---------
+        // STEP 4: Handle NEW items deletion (state only, no API)
+        // ---------
+        if (newItemIds.length > 0 && currentWorkspace) {
+            // Remove new items from workspace flatData
+            const updatedFlatData = currentWorkspace.flatData?.filter(
+                item => !newItemIds.includes(item.id)
+            ) || [];
+
+            // Update workspace state
+            setCurrentWorkspace({
+                ...currentWorkspace,
+                flatData: updatedFlatData
+            });
+
+            // Clear selection for deleted new items
+            setSelectedItemIds(prev => prev.filter(id => !newItemIds.includes(id)));
+            setLastSelectedItemId(null);
+
+            console.log(`✅ Removed ${newItemIds.length} new item(s) from state (no API call)`);
+        }
+
+        // ---------
+        // STEP 5: If no existing items, done (silent delete)
+        // ---------
+        if (existingItemIds.length === 0) {
+            console.log("✅ All items were new items - deleted from state only");
+            return;
+        }
+
+        // ---------
+        // STEP 6: Prepare confirmation message for EXISTING items only
+        // ---------
+        const existingCount = existingItemIds.length;
+        const isMultipleExisting = existingCount > 1;
+        const entityName = isMultipleExisting ? undefined : (contextData.data?.name || contextData.name || "this item");
+        
         const message = getConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
             entityType: isFile ? "file" : "note",
-            count: selectedCount,
-            isMultiple: isMultipleSelected,
+            count: existingCount,
+            isMultiple: isMultipleExisting,
             entityName
         });
 
         // ---------
-        // STEP 4: Show confirmation dialog
+        // STEP 7: Show confirmation dialog for EXISTING items
         // ---------
         showConfirmation({
             anchorEl: anchorElement,
@@ -186,7 +242,8 @@ export const useWorkspaceChildMenuHelper = () => {
             buttonVariant: "default",
             zIndex: 20000,
             onConfirm: () => {
-                // TODO: Support multi-select delete for notes (need batch API or Promise.all)
+                // Only delete existing items via API
+                // TODO: Support batch delete for multiple existing items
                 if (isNote) {
                     __deleteNote(contextData, isHardDelete);
                 } else if (isFile) {
