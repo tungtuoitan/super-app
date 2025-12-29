@@ -15,6 +15,7 @@ import { WorkspaceItemAction } from "@/types/workspace.types";
 import { Folder } from "@/types/index";
 import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
+import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 
 export const useTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
@@ -47,42 +48,35 @@ export const useTreeHelper = () => {
             setIsDragging(true);
 
             // -------------------------------------------------------
-            // STEP 1: EXTRACT ENTITY IDS FROM DRAGGED ITEMS
+            // STEP 1: EXTRACT WORKSPACE_ITEMS.ID FROM DRAGGED ITEMS
             // -------------------------------------------------------
-            const allTreeNodes = treeMiniHelper.$traverse(treeData);
-
-            /**
-             * Helper: Extract entity ID from tree node
-             * Returns: folders.id | notes.id | files.id (NOT workspace_items.id!)
-             */
-            const getEntityId = (node: any) => node.data.entityId;
+            const allNodes = treeMiniHelper.$traverse(treeData);
 
             // ---- Filter out the drop zone node and root node (virtual nodes with special IDs) ----
-            const validTreeNodes = allTreeNodes.filter((node) => {
-                const entityId = getEntityId(node);
-                return entityId !== constants.workspace.dropZone.entityId && entityId !== constants.workspace.root.entityId;
+            const validNodes = allNodes.filter((node) => {
+                return node.data.id !== constants.workspace.dropZone.workspaceItemId && node.data.id !== constants.workspace.root.workspaceItemId;
             });
 
-            let selectedEntityIds = args.dragIds
+            let selectedItemIds = args.dragIds
                 .map((dragId) => {
-                    const item = validTreeNodes.find((t) => t.id === dragId);
-                    return item ? getEntityId(item) : undefined;
+                    const item = validNodes.find((t) => t.id === dragId);
+                    return item ? item.data.id : undefined;
                 })
                 .filter((id): id is number => {
                     // Filter out undefined, drop zone ID, and root ID
-                    return id !== undefined && id !== constants.workspace.dropZone.entityId && id !== constants.workspace.root.entityId;
+                    return id !== undefined && id !== constants.workspace.dropZone.workspaceItemId && id !== constants.workspace.root.workspaceItemId;
                 });
 
             // ---- VS CODE BEHAVIOR: Filter out descendants of selected nodes ----
-            selectedEntityIds = selectedEntityIds.filter((entityId) => {
-                const isDescendantOfOtherSelected = selectedEntityIds.some((otherEntityId) => {
-                    if (otherEntityId === entityId) return false;
-                    return treeMiniHelper.isDescendant(entityId, otherEntityId, treeData);
+            selectedItemIds = selectedItemIds.filter((itemId) => {
+                const isDescendantOfOtherSelected = selectedItemIds.some((otherItemId) => {
+                    if (otherItemId === itemId) return false;
+                    return treeMiniHelper.isDescendant(itemId, otherItemId, treeData);
                 });
                 return !isDescendantOfOtherSelected;
             });
 
-            if (selectedEntityIds.length === 0) {
+            if (selectedItemIds.length === 0) {
                 setIsDragging(false);
                 return;
             }
@@ -96,26 +90,26 @@ export const useTreeHelper = () => {
             // 3. Note/file's tree node ID - dropping BETWEEN siblings (use their parent)
             // 4. Drop zone ID (special ID -1) - dropping at root level
             //
-            // OUTPUT: targetParentWorkspaceItemId = parent's workspace_items.id or undefined for root
-            let targetParentWorkspaceItemId: number | undefined = undefined;
+            // OUTPUT: newParentId = parent's workspace_items.id or undefined for root
+            let newParentId: number | undefined = undefined;
 
             if (!args.parentId) {
                 // ---- Case 1: Drop at root level (bottom of tree) ----
-                targetParentWorkspaceItemId = undefined;
+                newParentId = undefined;
                 console.log("🎯 Drop target: Root level (parentId is null)");
             } else {
-                const targetParentTreeNode = validTreeNodes.find((t) => t.id === args.parentId);
+                const targetNode = validNodes.find((t) => t.id === args.parentId);
 
-                if (!targetParentTreeNode) {
+                if (!targetNode) {
                     // ---- Check if it's the drop zone node ----
-                    const dropZoneNode = allTreeNodes.find((t) => t.id === args.parentId);
-                    if (dropZoneNode && getEntityId(dropZoneNode) === constants.workspace.dropZone.entityId) {
-                        targetParentWorkspaceItemId = undefined;
+                    const dropZoneNode = allNodes.find((t) => t.id === args.parentId);
+                    if (dropZoneNode && dropZoneNode.data.id === constants.workspace.dropZone.workspaceItemId) {
+                        newParentId = undefined;
                         console.log("🎯 Drop target: Root level (drop zone)");
 
                         // ---- VALIDATION: If all items already root-level, prevent drop ----
-                        const allAlreadyRoot = selectedEntityIds.every((id) => {
-                            const item = validTreeNodes.find((t) => getEntityId(t) === id);
+                        const allAlreadyRoot = selectedItemIds.every((id) => {
+                            const item = validNodes.find((t) => t.data.id === id);
                             return !item?.data.parentId || item.data.parentId === null;
                         });
                         if (allAlreadyRoot) {
@@ -125,25 +119,25 @@ export const useTreeHelper = () => {
                         }
                     } else {
                         // ---- Parent node not found - treat as root level drop ----
-                        targetParentWorkspaceItemId = undefined;
+                        newParentId = undefined;
                         console.log("🎯 Drop target: Root level (parentNode not found)");
                     }
                 } else {
-                    const targetWorkspaceItemId = targetParentTreeNode.data.id; // workspace_items.id
+                    const targetItemId = targetNode.data.id; // workspace_items.id
 
                     // ---- Negative IDs are workspace root nodes or drop zone ----
-                    if (targetWorkspaceItemId < 0) {
-                        targetParentWorkspaceItemId = undefined; // Move to workspace root
+                    if (targetItemId < 0) {
+                        newParentId = undefined; // Move to workspace root
                         console.log("🎯 Drop target: Root level (negative entity ID)");
                     } else {
-                        const targetNodeData = targetParentTreeNode.data;
+                        const targetNodeData = targetNode.data;
 
                         // ---- VALIDATION: Check if all items already have this parent ----
-                        const allSameParent = selectedEntityIds.every((id: number) => {
-                            const item = validTreeNodes.find((t) => getEntityId(t) === id);
+                        const allSameParent = selectedItemIds.every((id: number) => {
+                            const item = validNodes.find((t) => t.data.id === id);
                             if (!item) return false;
                             const currentParentId = "parentId" in item.data ? item.data.parentId : undefined;
-                            return currentParentId === targetWorkspaceItemId;
+                            return currentParentId === targetItemId;
                         });
 
                         if (allSameParent) {
@@ -157,12 +151,12 @@ export const useTreeHelper = () => {
 
                         if (isFolder) {
                             // ---- Dropping INTO a folder ----
-                            targetParentWorkspaceItemId = targetWorkspaceItemId;
-                            console.log(`🎯 Drop target: Folder ${targetWorkspaceItemId}`);
+                            newParentId = targetItemId;
+                            console.log(`🎯 Drop target: Folder ${targetItemId}`);
                         } else {
                             // ---- Dropping BETWEEN siblings - use their parent ----
-                            targetParentWorkspaceItemId = targetNodeData.parentId ?? undefined;
-                            console.log(`🎯 Drop target: ${targetParentWorkspaceItemId === undefined ? "Root level" : `Parent ${targetParentWorkspaceItemId}`} (between siblings)`);
+                            newParentId = targetNodeData.parentId ?? undefined;
+                            console.log(`🎯 Drop target: ${newParentId === undefined ? "Root level" : `Parent ${newParentId}`} (between siblings)`);
                         }
                     }
                 }
@@ -171,27 +165,22 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // STEP 3: VALIDATION - PREVENT INVALID MOVES
             // -------------------------------------------------------
-            const hasWorkspaceRoot = selectedEntityIds.some((id) => id === constants.workspace.root.entityId);
+            const hasWorkspaceRoot = selectedItemIds.some((id) => id === constants.workspace.root.workspaceItemId);
             if (hasWorkspaceRoot) {
                 console.warn("⚠️ Cannot move workspace root node");
                 setIsDragging(false);
                 return;
             }
-            if (selectedEntityIds.some((id) => id < 0)) {
-                console.warn("⚠️ Cannot move items with invalid IDs");
-                setIsDragging(false);
-                return;
-            }
 
-            if (targetParentWorkspaceItemId !== undefined && selectedEntityIds.includes(targetParentWorkspaceItemId)) {
+            if (newParentId !== undefined && selectedItemIds.includes(newParentId)) {
                 console.warn("⚠️ Cannot move items into one of the selected items");
                 setIsDragging(false);
                 return;
             }
 
-            if (targetParentWorkspaceItemId !== undefined) {
-                const isTargetDescendantOfSelected = selectedEntityIds.some((draggedId) => {
-                    return treeMiniHelper.isDescendant(targetParentWorkspaceItemId!, draggedId, treeData);
+            if (newParentId !== undefined) {
+                const isTargetDescendantOfSelected = selectedItemIds.some((draggedId) => {
+                    return treeMiniHelper.isDescendant(newParentId!, draggedId, treeData);
                 });
 
                 if (isTargetDescendantOfSelected) {
@@ -204,26 +193,26 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // STEP 4: VALIDATE DROP POSITION
             // -------------------------------------------------------
-            const targetParentNode = targetParentWorkspaceItemId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => t.data.id === targetParentWorkspaceItemId) : null;
+            const targetNode = newParentId !== undefined ? treeMiniHelper.$traverse(treeData).find((t) => t.data.id === newParentId) : null;
 
             // ---- Filter out workspace root and drop zone ----
-            const targetSiblings = targetParentNode
-                ? targetParentNode.children || []
+            const targetSiblings = targetNode
+                ? targetNode.children || []
                 : treeData.filter((t) => {
-                      const entityId = getEntityId(t);
-                      return entityId > 0 && entityId !== constants.workspace.dropZone.entityId;
+                      const workspaceItemId = t.data.id;
+                      return workspaceItemId > 0 && workspaceItemId !== constants.workspace.dropZone.workspaceItemId;
                   });
 
             // ---- VALIDATION: Check same parent - different logic for single vs multi-select ----
-            if (selectedEntityIds.length === 1) {
+            if (selectedItemIds.length === 1) {
                 // ---- Single select: If parent is target, no move needed ----
-                const draggedItemId = selectedEntityIds[0];
-                const draggedItem = validTreeNodes.find((t) => getEntityId(t) === draggedItemId);
+                const draggedItemId = selectedItemIds[0];
+                const draggedItem = validNodes.find((t) => t.data.id === draggedItemId);
 
                 if (draggedItem) {
                     const currentParentId = "parentId" in draggedItem.data ? draggedItem.data.parentId : undefined;
                     const normalizedCurrentParent = currentParentId ?? null;
-                    const normalizedTargetParent = targetParentWorkspaceItemId ?? null;
+                    const normalizedTargetParent = newParentId ?? null;
 
                     if (normalizedCurrentParent === normalizedTargetParent) {
                         console.warn("⚠️ Item already has this parent - no move needed");
@@ -233,13 +222,13 @@ export const useTreeHelper = () => {
                 }
             } else {
                 // ---- Multi-select: Remove items that already have target parent ----
-                const itemsToMove = selectedEntityIds.filter((id) => {
-                    const item = validTreeNodes.find((t) => getEntityId(t) === id);
+                const itemsToMove = selectedItemIds.filter((id) => {
+                    const item = validNodes.find((t) => t.data.id === id);
                     if (!item) return false;
 
                     const currentParentId = "parentId" in item.data ? item.data.parentId : undefined;
                     const normalizedCurrentParent = currentParentId ?? null;
-                    const normalizedTargetParent = targetParentWorkspaceItemId ?? null;
+                    const normalizedTargetParent = newParentId ?? null;
 
                     // Keep items that don't have target parent
                     return normalizedCurrentParent !== normalizedTargetParent;
@@ -252,27 +241,27 @@ export const useTreeHelper = () => {
                     return;
                 }
 
-                // Update selectedEntityIds to only include items that need to move
-                selectedEntityIds = itemsToMove;
+                // Update selectedItemIds to only include items that need to move
+                selectedItemIds = itemsToMove;
             }
 
             if (args.index >= 0 && args.index <= targetSiblings.length) {
                 const itemBefore = args.index > 0 ? targetSiblings[args.index - 1] : null;
                 const itemAfter = args.index < targetSiblings.length ? targetSiblings[args.index] : null;
 
-                const itemBeforeId = itemBefore ? getEntityId(itemBefore) : null;
-                const itemAfterId = itemAfter ? getEntityId(itemAfter) : null;
+                const itemBeforeId = itemBefore ? itemBefore.data.id : null;
+                const itemAfterId = itemAfter ? itemAfter.data.id : null;
 
-                const bothInSelection = itemBeforeId && selectedEntityIds.includes(itemBeforeId) && itemAfterId && selectedEntityIds.includes(itemAfterId);
+                const bothInSelection = itemBeforeId && selectedItemIds.includes(itemBeforeId) && itemAfterId && selectedItemIds.includes(itemAfterId);
 
                 const hasSiblingsInSelection = targetSiblings.some((sibling) => {
-                    const siblingEntityId = getEntityId(sibling);
-                    return selectedEntityIds.includes(siblingEntityId);
+                    const siblingWorkspaceItemId = sibling.data.id;
+                    return selectedItemIds.includes(siblingWorkspaceItemId);
                 });
 
                 if (
                     bothInSelection ||
-                    (hasSiblingsInSelection && ((itemBeforeId && selectedEntityIds.includes(itemBeforeId)) || (itemAfterId && selectedEntityIds.includes(itemAfterId))))
+                    (hasSiblingsInSelection && ((itemBeforeId && selectedItemIds.includes(itemBeforeId)) || (itemAfterId && selectedItemIds.includes(itemAfterId))))
                 ) {
                     console.warn("⚠️ Cannot drop between items in the same selection");
                     setIsDragging(false);
@@ -281,69 +270,125 @@ export const useTreeHelper = () => {
             }
 
             // -------------------------------------------------------
-            // STEP 5: BUILD MOVE REQUEST & CALL API
+            // STEP 5: FILTER TOP-LEVEL ITEMS (EXCLUDE DESCENDANTS)
             // -------------------------------------------------------
-            if (!currentWorkspace?.id) {
-                console.error("❌ No workspace ID found");
-                setIsDragging(false);
-                return;
-            }
-
-            const workspaceId = currentWorkspace.id;
-
-            // ---- Build batch MOVE request ----
-            // For each selected entity, create a MOVE action with:
-            // - action: WorkspaceItemAction.Move (explicit action enum)
-            // - id: workspace_items.id (NOT entity ID!)
-            // - parentId: new parent's workspace_items.id (SELF-REFERENCING) or null for root
-            const batchRequests = selectedEntityIds.map((entityId) => {
-                // Find tree node by ENTITY ID (entityId)
-                const item = allTreeNodes.find((t) => getEntityId(t) === entityId);
-                if (!item) {
-                    throw new Error(`Item with entity ID ${entityId} not found in tree`);
-                }
-
-                const itemData = item.data;
-
-                // Extract workspace_items.id (required for MOVE action)
-                // V2 structure: itemData.id = workspace_items.id
-                if (!("id" in itemData)) {
-                    throw new Error(`Item ${entityId} missing workspace_items.id property`);
-                }
-
-                return {
-                    action: WorkspaceItemAction.Move,
-                    id: itemData.id, // ✅ workspace_items.id (NOT entity ID!)
-                    parentId: targetParentWorkspaceItemId ?? null, // ✅ Parent's workspace_items.id
-                };
+            // VS CODE BEHAVIOR: When moving b > c into d, only move b (c follows as child of b)
+            // This preserves parent-child relationships within the selection
+            // IMPORTANT: Do this BEFORE splitting real/virtual, because:
+            // - Real item can be child of virtual item
+            // - Virtual item can be child of real item
+            const itemsNeedUpdate = selectedItemIds.filter((workspaceItemId) => {
+                const isDescendantOfOtherSelected = selectedItemIds.some((otherItemId) => {
+                    if (otherItemId === workspaceItemId) return false;
+                    return treeMiniHelper.isDescendant(workspaceItemId, otherItemId, treeData);
+                });
+                return !isDescendantOfOtherSelected;
             });
 
-            try {
-                const result = await workspaceService._upsertWorkspaceItems($user.userToken, workspaceId, batchRequests);
-                if (!result.success) {
-                    throw new Error("Move API returned unsuccessful response");
+            console.log("🎯 Items after filtering descendants:", {
+                all: selectedItemIds,
+                topLevel: itemsNeedUpdate,
+                filtered: selectedItemIds.length - itemsNeedUpdate.length,
+            });
+
+            // -------------------------------------------------------
+            // STEP 6: SPLIT INTO 2 FLOWS: REAL IDS (API) & VIRTUAL IDS (STATE ONLY)
+            // -------------------------------------------------------
+            // Split itemsNeedUpdate into:
+            // - realWorkspaceItemIds (>0): Real items in database → Call API
+            // - virtualWorkspaceItemIds (<0): Virtual items (workspace root, drop zone) → Update state only
+            const realWorkspaceItemIds = itemsNeedUpdate.filter((id) => id > 0);
+            const virtualWorkspaceItemIds = itemsNeedUpdate.filter((id) => id < 0);
+
+            console.log("📊 Split IDs:", { realWorkspaceItemIds, virtualWorkspaceItemIds });
+
+            // -------------------------------------------------------
+            // FLOW 1: UPDATE REAL ITEMS VIA API (ID > 0)
+            // -------------------------------------------------------
+            if (realWorkspaceItemIds.length > 0) {
+                if (!currentWorkspace?.id) {
+                    console.error("❌ No workspace ID found");
+                    setIsDragging(false);
+                    return;
                 }
 
-                // Show success toast
-                enqueueSnackbar(`Successfully moved ${batchRequests.length} item(s)`, { variant: "success" });
-            } catch (error) {
-                console.error(`❌ Failed to move items:`, error);
+                const workspaceId = currentWorkspace.id;
 
-                // Show error toast with user-friendly message
-                enqueueSnackbar("Failed to move items. Please try again.", { variant: "error" });
+                // ---- Build batch MOVE request for real items ----
+                // For each real workspace item, create a MOVE action with:
+                // - action: WorkspaceItemAction.Move (explicit action enum)
+                // - id: workspace_items.id (already have it!)
+                // - parentId: new parent's workspace_items.id (SELF-REFERENCING) or null for root
+                // Note: Descendants already filtered out in STEP 5
+                const batchRequests = realWorkspaceItemIds.map((workspaceItemId) => {
+                    return {
+                        action: WorkspaceItemAction.Move,
+                        id: workspaceItemId, // ✅ workspace_items.id (primary key)
+                        parentId: newParentId ?? null, // ✅ Parent's workspace_items.id
+                    };
+                });
 
-                throw error;
+                try {
+                    const result = await workspaceService._upsertWorkspaceItems($user.userToken, workspaceId, batchRequests);
+                    if (!result.success) {
+                        throw new Error("Move API returned unsuccessful response");
+                    }
+
+                    console.log(`✅ Successfully moved ${batchRequests.length} real item(s) via API`);
+                } catch (error) {
+                    console.error(`❌ Failed to move real items:`, error);
+
+                    // Show error toast with user-friendly message
+                    enqueueSnackbar("Failed to move items. Please try again.", { variant: "error" });
+
+                    throw error;
+                }
             }
 
             // -------------------------------------------------------
-            // STEP 6: REFRESH TREE & RESTORE SELECTION
+            // FLOW 2: UPDATE VIRTUAL ITEMS IN STATE ONLY (ID < 0)
             // -------------------------------------------------------
-            await loadTree();
+            let newVirtualItems: WorkspaceItemV2[] = [];
+            if (virtualWorkspaceItemIds.length > 0) {
+                console.log(`🔄 Updating ${virtualWorkspaceItemIds.length} virtual item(s) in state only (no API call)`);
+                newVirtualItems = virtualWorkspaceItemIds
+                    .map((workspaceItemId) => {
+                        const item = allNodes.find((t) => t.data.id === workspaceItemId);
+                        if (!item) return null;
+
+                        // Update parentId in virtual item
+                        // Cast to WorkspaceItemV2 since TreeFolder.data is WorkspaceItemV2
+                        const updatedData: WorkspaceItemV2 = {
+                            ...(item.data as any),
+                            parentId: newParentId ?? null,
+                        };
+
+                        return updatedData;
+                    })
+                    .filter((item): item is WorkspaceItemV2 => item !== null) as WorkspaceItemV2[];
+
+                console.log(`✅ Prepared ${newVirtualItems.length} virtual item(s) for state update`);
+            }
+
+            // -------------------------------------------------------
+            // SUCCESS: Show toast for all moved items
+            // -------------------------------------------------------
+            const totalMoved = realWorkspaceItemIds.length + virtualWorkspaceItemIds.length;
+            if (totalMoved > 0) {
+                enqueueSnackbar(`Successfully moved ${totalMoved} item(s)`, { variant: "success" });
+            }
+
+            // -------------------------------------------------------
+            // STEP 7: REFRESH TREE & RESTORE SELECTION
+            // -------------------------------------------------------
+            // Pass virtual items to preserve them in state during reload
+            await loadTree(newVirtualItems.length > 0 ? newVirtualItems : undefined);
 
             // VS Code behavior: Re-select the moved items after move completes
-            setSelectedItemIds(selectedEntityIds);
-            if (selectedEntityIds.length > 0) {
-                setLastSelectedItemId(selectedEntityIds[selectedEntityIds.length - 1]);
+            // Use itemsNeedUpdate (top-level items) instead of selectedEntityIds (includes descendants)
+            setSelectedItemIds(itemsNeedUpdate);
+            if (itemsNeedUpdate.length > 0) {
+                setLastSelectedItemId(itemsNeedUpdate[itemsNeedUpdate.length - 1]);
             }
         } catch (error) {
             console.error("❌ Failed to move item(s):", error);

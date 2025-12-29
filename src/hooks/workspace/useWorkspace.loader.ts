@@ -61,8 +61,10 @@ export const useWorkspaceLoader = () => {
      *
      * Uses V2 API structure with full entity data
      * Applies user filters from profile (status code and deleted status)
+     * 
+     * @param virtualItems - Optional array of virtual items (ID < 0) to preserve in state
      */
-    const loadTree = async () => {
+    const loadTree = async (virtualItems?: WorkspaceItemV2[]) => {
         if(selectedWorkspaceId == null){
             console.warn("selectedWorkspaceId is null, cant load tree")
             return
@@ -89,12 +91,26 @@ export const useWorkspaceLoader = () => {
             console.log("🔧 Loading Workspace V2 API with filters:", params);
             const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, selectedWorkspaceId, params);
             if(result && result.success){
+                // Merge data: API data + existing virtual items (ID < 0) + new virtual items
+                const existingVirtualItems = (currentWorkspace?.flatData ?? []).filter((item: WorkspaceItemV2) => item?.id < 0);
+                const mergedVirtualItems = virtualItems && virtualItems.length > 0 
+                    ? virtualItems // Use provided virtual items (updated)
+                    : existingVirtualItems; // Keep existing virtual items
+                
                 const newWorkspace = {
                     ...result.object, 
                     flatData: [
                         ...result.object?.flatData ?? [], 
-                        ...(currentWorkspace?.flatData ?? [])?.filter((item: WorkspaceItemV2) => item?.id<0) ] // KEEP CURRENT NEW FILE/NOTE,...
-                } as WorkspaceDTO
+                        ...mergedVirtualItems // KEEP VIRTUAL ITEMS (NEW FILE/NOTE/FOLDER,...)
+                    ]
+                } as WorkspaceDTO;
+                
+                console.log("📦 Merged workspace data:", {
+                    apiItems: result.object?.flatData?.length ?? 0,
+                    virtualItems: mergedVirtualItems.length,
+                    total: newWorkspace.flatData?.length ?? 0
+                });
+                
                 setCurrentWorkspace(newWorkspace);
                 return result.object;
             }
