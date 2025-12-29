@@ -23,11 +23,17 @@ import { useWsGridHelper } from "../ws/useWsGrid.helper";
 import { useWsDetailHelper } from "../ws/useWsDetail.helper";
 import { Ws, useWsStore } from "@/store/ws/useWs.store";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
+import {useTreeEditorHelper} from "./useTreeEditorHelper";
 
 export const useEditorToolbarHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
+    const { $user } = useAuthStore();
+    const  _treeEditor = useTreeEditorHelper();
 
     // Get active tab
     const activeTab = getActiveTab();
@@ -42,6 +48,11 @@ export const useEditorToolbarHelper = () => {
     const { originalWsRef } = useWsDetailStore();
     const { upsertWorkspace } = useWsDetailHelper();
     const { loadWorkspaces } = useWsGridHelper();
+
+    // WorkspaceTree-specific
+    const { moduleName } = useGridControlStore();
+    const { currentWorkspace } = useWorkspaceStore();
+    const { loadTree } = useWorkspaceLoader();
 
     // Get status text based on tab type and deletion state
     const _deleteStatusText = (() => {
@@ -73,43 +84,48 @@ export const useEditorToolbarHelper = () => {
 
     // Handle Upsert - orchestrator for all entity types (create/update/soft delete/restore)
     const commonUpsert = useCallback(async () => {
-        // =====================================
+
         // STEP 1: Validate Active Tab
-        // =====================================
         if (!activeTab) return;
 
-        // =====================================
         // STEP 2: Set Saving State
-        // =====================================
         setIsSaving(true);
 
         try {
-            // =====================================
-            // STEP 3: Route to Appropriate Handler Based on Tab Type
-            // =====================================
-            switch (activeTab.type) {
-                case constants.vscode.tab.tabTypes.note:
-                    // =====================================
-                    // NOTE HANDLER: Delegate to Note Upsert Logic
-                    // =====================================
-                    await upsertNote(activeTab.id);
-                    break;
+            // STEP 3: Route to Appropriate Handler Based on Module + Tab Type
 
-                case constants.vscode.tab.tabTypes.workspace:
-                    // =====================================
-                    // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
-                    // =====================================
-                    await upsertWorkspace(activeTab.id);
-                    break;
+            // Check if this is a Note opened from WorkspaceTree
+            if (moduleName === constants.modules.workspace) {
+                if (activeTab.type === constants.vscode.tab.tabTypes.note) {
+                    await _treeEditor.upsertNoteFromTree();
+                } else {
+                    console.warn(`Unsupported tab type in workspace module: ${activeTab.type}`);
+                }
 
-                default:
-                    console.warn(`Unsupported tab type: ${activeTab.type}`);
-                    break;
+
+
+            } else if (moduleName === constants.modules.note) {
+                // REGULAR HANDLERS (Note from NoteGrid, Workspace, etc.)
+                switch (activeTab.type) {
+                    case constants.vscode.tab.tabTypes.note:
+                        // NOTE HANDLER: Delegate to Note Upsert Logic
+                        await upsertNote(activeTab.id);
+                        break;
+
+                    case constants.vscode.tab.tabTypes.workspace:
+                        // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
+                        await upsertWorkspace(activeTab.id);
+                        break;
+
+                    default:
+                        console.warn(`Unsupported tab type: ${activeTab.type}`);
+                        break;
+                }
+            } else {
+                console.warn(`Unsupported module: ${moduleName}`);
             }
         } catch (error) {
-            // =====================================
             // STEP 4: Handle Errors
-            // =====================================
             console.error("Failed to save:", error);
             const errorMessage = await parseApiError(error);
 
@@ -119,12 +135,10 @@ export const useEditorToolbarHelper = () => {
                 enqueueSnackbar(`Failed to save ${activeTab.type}: ${errorMessage}`, { variant: "error" });
             }
         } finally {
-            // =====================================
             // STEP 5: Reset Saving State
-            // =====================================
             setIsSaving(false);
         }
-    }, [activeTab, upsertNote, upsertWorkspace, setIsSaving, enqueueSnackbar]);
+    }, [activeTab, moduleName, currentWorkspace, upsertNote, upsertWorkspace, loadTree, $user, setIsSaving, enqueueSnackbar]);
 
     // Handle Cancel - routes to appropriate reset logic
     const commonCancel = useCallback(() => {
@@ -133,9 +147,7 @@ export const useEditorToolbarHelper = () => {
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
             if (originalNoteRef.current) {
                 // Reset tab data to original
-                setOpenTabs((prev) =>
-                    prev.map((tab) => (tab.id === activeTab.id ? { ...tab, data: originalNoteRef.current as Note, hasUnsavedChanges: false } : tab))
-                );
+                setOpenTabs((prev) => prev.map((tab) => (tab.id === activeTab.id ? { ...tab, data: originalNoteRef.current as Note, hasUnsavedChanges: false } : tab)));
             }
             enqueueSnackbar("Changes discarded", { variant: "info" });
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {

@@ -16,6 +16,7 @@ import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
@@ -27,6 +28,7 @@ export const useNoteDetailHelper = () => {
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
     const { registries, registriesLoading } = useStandardRegistryStore();
     const { getActiveTab } = useEditorTabHelper();
+    const { moduleName } = useGridControlStore();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
         // Get current note from active tab
@@ -48,9 +50,7 @@ export const useNoteDetailHelper = () => {
         const updated = { ...activeNote, [field]: _value };
 
         // Update tab data directly
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated, hasUnsavedChanges: true } : t))
-        );
+        setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated, hasUnsavedChanges: true } : t)));
     };
 
     /**
@@ -144,7 +144,7 @@ export const useNoteDetailHelper = () => {
                 // Step 10: Update tab data with server response
                 // ============================================================
                 enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
-                
+
                 if (tabId) {
                     setOpenTabs((prev) =>
                         prev.map((tab: BaseTab) => {
@@ -164,11 +164,10 @@ export const useNoteDetailHelper = () => {
                 }
 
                 originalNoteRef.current = { ...transformedNote };
-                await loadNotes();
 
-                if (isCreateMode && currentWorkspace?.id) {
-                    await loadTree();
-                }
+                // reload
+                if (moduleName === constants.modules.note) loadNotes();
+                else if (moduleName === constants.modules.workspace) loadTree();
 
                 return transformedNote;
             } catch (error) {

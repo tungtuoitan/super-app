@@ -333,42 +333,42 @@ const _upsertFolder = async (token: string, workspaceId: number, data: UpsertFol
  * @param data - Item data (childType, childId, etc.)
  * @returns Operation result or rejects with response
  */
-const _addItemToWorkspace = async (
-    token: string,
-    workspaceId: number,
-    data: {
-        parentTagId?: number | null;
-        childType: typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder
-        childId?: number;
-        folderName?: string;
-        label?: string;
-        notes?: string;
-        color?: string;
-        icon?: string;
-        sortOrder?: number;
-    },
-): Promise<WorkspaceOperationResult> => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
+// const _addItemToWorkspace = async (
+//     token: string,
+//     workspaceId: number,
+//     data: {
+//         parentTagId?: number | null;
+//         childType: typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder
+//         childId?: number;
+//         folderName?: string;
+//         label?: string;
+//         notes?: string;
+//         color?: string;
+//         icon?: string;
+//         sortOrder?: number;
+//     },
+// ): Promise<WorkspaceOperationResult> => {
+//     const headers = new Headers();
+//     const bearer = `Bearer ${token}`;
 
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
+//     headers.append("Authorization", bearer);
+//     headers.append("Content-Type", "application/json");
 
-    const options = {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(data),
-    };
+//     const options = {
+//         method: "POST",
+//         headers: headers,
+//         body: JSON.stringify(data),
+//     };
 
-    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items`, options);
+//     const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items`, options);
 
-    if (res.ok) {
-        const ret = await res.json();
-        return ret;
-    } else {
-        return Promise.reject(res);
-    }
-};
+//     if (res.ok) {
+//         const ret = await res.json();
+//         return ret;
+//     } else {
+//         return Promise.reject(res);
+//     }
+// };
 
 /**
  * Batch upsert workspace items with action-based operations
@@ -450,6 +450,6 @@ export const workspaceService = {
     _moveWorkspaceItems,
     _deleteWorkspaceItems,
     _upsertFolder,
-    _addItemToWorkspace,
+    // _addItemToWorkspace,
     _upsertWorkspaceItems, // NEW
 }

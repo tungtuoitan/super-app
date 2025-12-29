@@ -62,9 +62,9 @@ export const useWorkspaceLoader = () => {
      * Uses V2 API structure with full entity data
      * Applies user filters from profile (status code and deleted status)
      * 
-     * @param virtualItems - Optional array of virtual items (ID < 0) to preserve in state
+     * @param calculatedVirtualItems - Optional array of virtual items (ID < 0) to preserve in state
      */
-    const loadTree = async (virtualItems?: WorkspaceItemV2[]) => {
+    const loadTree = async (calculatedVirtualItems?: WorkspaceItemV2[]) => {
         if(selectedWorkspaceId == null){
             console.warn("selectedWorkspaceId is null, cant load tree")
             return
@@ -93,8 +93,8 @@ export const useWorkspaceLoader = () => {
             if(result && result.success){
                 // Merge data: API data + existing virtual items (ID < 0) + new virtual items
                 const existingVirtualItems = (currentWorkspace?.flatData ?? []).filter((item: WorkspaceItemV2) => item?.id < 0);
-                const mergedVirtualItems = virtualItems && virtualItems.length > 0 
-                    ? virtualItems // Use provided virtual items (updated)
+                const mergedVirtualItems = calculatedVirtualItems 
+                    ? calculatedVirtualItems // Use provided virtual items (updated)
                     : existingVirtualItems; // Keep existing virtual items
                 
                 const newWorkspace = {
@@ -107,7 +107,7 @@ export const useWorkspaceLoader = () => {
                 
                 console.log("📦 Merged workspace data:", {
                     apiItems: result.object?.flatData?.length ?? 0,
-                    virtualItems: mergedVirtualItems.length,
+                    calculatedirtualItems: mergedVirtualItems.length,
                     total: newWorkspace.flatData?.length ?? 0
                 });
                 
