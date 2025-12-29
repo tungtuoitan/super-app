@@ -57,7 +57,18 @@ export const constants = {
             folder: "folder",
             tag: "tag",
         } as const,
-        rootId: -12345, // Virtual ID for workspace root node
+
+        // Virtual node IDs for workspace root
+        root: {
+            workspaceItemId: -12345, // workspace_items.id for root node
+            entityId: -12345,        // folders.id for root node (same value for simplicity)
+        },
+
+        // Virtual node IDs for drop zone
+        dropZone: {
+            workspaceItemId: -23456, // workspace_items.id for drop zone
+            entityId: -23456,        // folders.id for drop zone (same value for simplicity)
+        },
     },
 
     contextMenu: {

@@ -83,10 +83,11 @@ export function WorkspaceTree() {
             }
         };
     }, []);
+    console.log("flatData: ", currentWorkspace?.flatData)
 
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
-        const treeData = useMemo(() => {
+    const treeData = useMemo(() => {
         const baseTree = treeMiniHelper.transformToTreeData(currentWorkspace, searchText);
 
         // Add invisible drop zone at the end to catch drops to root level
@@ -95,12 +96,12 @@ export function WorkspaceTree() {
                 id: `drop-zone-root-${currentWorkspace.id}`,
                 name: "",
                 data: {
-                    // V2 structure
-                    id: -1,
+                    // V2 structure - WorkspaceItemV2
+                    id: constants.workspace.dropZone.workspaceItemId, // workspace_items.id
                     workspaceId: currentWorkspace.id,
                     parentId: null,
                     entityType: 2 as const,
-                    entityId: -1,
+                    entityId: constants.workspace.dropZone.entityId, // folders.id (entity ID)
                     createdAt: new Date().toISOString(),
                     updatedAt: undefined,
                     deletedAt: null,
@@ -110,7 +111,8 @@ export function WorkspaceTree() {
                     accessType: "owner" as const,
                     isOriginal: true,
                     data: {
-                        id: -1,
+                        // FolderData - entity data
+                        id: constants.workspace.dropZone.entityId, // folders.id (entity ID)
                         userId: currentWorkspace.userId,
                         name: "",
                         description: undefined,
@@ -133,10 +135,12 @@ export function WorkspaceTree() {
         return baseTree;
     }, [currentWorkspace, searchText]);
 
+    console.log("treeData", treeData)
+
     // Calculate drop zone height to fill remaining space
     const dropZoneHeight = useMemo(() => {
         const rowHeight = 40;
-        const actualItemsCount = treeData.filter((item) => (item.data as any).entityId !== -1).length;
+        const actualItemsCount = treeData.filter((item) => (item.data as any).entityId !== constants.workspace.dropZone.entityId).length;
         const usedHeight = actualItemsCount * rowHeight;
         const remaining = containerHeight - usedHeight;
         return Math.max(remaining, 100); // Minimum 100px
@@ -231,9 +235,9 @@ export function WorkspaceTree() {
                         const item = node.data.data;
 
                         // Check workspace root and drop zone by ENTITY ID (entityId)
-                        // Special IDs: -12345 = workspace root, -1 = drop zone
-                        const isWorkspaceRoot = (item as any).entityId === -12345;
-                        const isDropZone = (item as any).entityId === -1;
+                        // Special IDs: constants.workspace.root.entityId = workspace root, constants.workspace.dropZone.entityId = drop zone
+                        const isWorkspaceRoot = (item as any).entityId === constants.workspace.root.entityId;
+                        const isDropZone = (item as any).entityId === constants.workspace.dropZone.entityId;
 
                         // Render different node types based on item type
                         return (
@@ -285,9 +289,9 @@ export function WorkspaceTree() {
                                 ) : isFolderV2(item as any) ? (
                                     <FolderNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
                                 ) : isNoteV2(item as any) ? (
-                                    <NoteNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} />
+                                    <NoteNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
                                 ) : isFileV2(item as any) ? (
-                                    <FileNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} />
+                                    <FileNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
                                 ) : null}
                             </div>
                         );

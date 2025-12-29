@@ -387,14 +387,15 @@ export function transformToTreeData(
 
     // Create workspace root node from WorkspaceDTO
     const workspaceRootV2: TreeFolder = {
-        id: `-12345`,
+        id: `${constants.workspace.root.workspaceItemId}`,
         name: data.name,
         data: {
-            id: -12345,
+            // WorkspaceItemV2 structure
+            id: constants.workspace.root.workspaceItemId, // workspace_items.id
             workspaceId: data.id,
             parentId: null,
             entityType: 2, // folder
-            entityId: -12345,
+            entityId: constants.workspace.root.entityId, // folders.id (entity ID)
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             deletedAt: null,
@@ -404,7 +405,8 @@ export function transformToTreeData(
             accessType: "owner" as const,
             isOriginal: true,
             data: {
-                id: -12345,
+                // FolderData - entity data
+                id: constants.workspace.root.entityId, // folders.id (entity ID)
                 userId: data.userId,
                 name: data.name,
                 description: data.description,

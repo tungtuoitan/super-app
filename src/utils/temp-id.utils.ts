@@ -10,6 +10,7 @@ import type { BaseTab } from "@/types/editor/tab.types";
 import type { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
 import type { Ws } from "@/store/ws/useWs.store";
+import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 
 /**
  * Collect all IDs from open tabs
@@ -76,4 +77,72 @@ export const generateTempId = (existingIds: number[]): number => {
 export const generateUnsavedName = (tempId: number, prefix: string = "Unsaved"): string => {
     const sequence = Math.abs(tempId);
     return `${prefix}-${sequence}`;
+};
+
+/**
+ * Collect all IDs from workspace tree (flatData)
+ * Returns separate arrays for workspace items, notes, and files
+ * IMPORTANT: Filters out special IDs (root, dropZone) to prevent conflicts with temp IDs
+ *
+ * @param flatData - Flat array of workspace items (WorkspaceItemV2[])
+ * @returns Object containing:
+ *   - workspaceItemIds: All workspace_items.id (workspace item IDs)
+ *   - noteEntityIds: All notes.id (entity IDs for notes)
+ *   - fileEntityIds: All files.id (entity IDs for files)
+ *   - folderEntityIds: All folders.id (entity IDs for folders)
+ *
+ * @example
+ * const { workspaceItemIds, noteEntityIds, fileEntityIds } = collectIdsFromTree(flatData);
+ * const tempWorkspaceItemId = generateTempId(workspaceItemIds);
+ * const tempNoteId = generateTempId(noteEntityIds);
+ */
+export const collectIdsFromTree = (flatData: WorkspaceItemV2[]): {
+    workspaceItemIds: number[];
+    noteEntityIds: number[];
+    fileEntityIds: number[];
+    folderEntityIds: number[];
+} => {
+    const workspaceItemIds: number[] = [];
+    const noteEntityIds: number[] = [];
+    const fileEntityIds: number[] = [];
+    const folderEntityIds: number[] = [];
+
+    // Special IDs to skip (root, dropZone)
+    // These IDs are reserved for virtual nodes and should never be used for temp IDs
+    const SPECIAL_IDS = [
+        constants.workspace.root.workspaceItemId,
+        constants.workspace.root.entityId,
+        constants.workspace.dropZone.workspaceItemId,
+        constants.workspace.dropZone.entityId,
+    ] as number[];
+
+    flatData.forEach((item) => {
+        // Skip special IDs (root, dropZone) to prevent conflicts
+        const isSpecialId = SPECIAL_IDS.includes(item.id) || SPECIAL_IDS.includes(item.entityId);
+        if (isSpecialId) {
+            return;
+        }
+
+        // Collect workspace_items.id (always present)
+        workspaceItemIds.push(item.id);
+
+        // Collect entity IDs based on entity type
+        if (item.entityType === 2) {
+            // Folder
+            folderEntityIds.push(item.entityId);
+        } else if (item.entityType === 3) {
+            // Note
+            noteEntityIds.push(item.entityId);
+        } else if (item.entityType === 4) {
+            // File
+            fileEntityIds.push(item.entityId);
+        }
+    });
+
+    return {
+        workspaceItemIds,
+        noteEntityIds,
+        fileEntityIds,
+        folderEntityIds,
+    };
 };

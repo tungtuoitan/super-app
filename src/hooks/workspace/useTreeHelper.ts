@@ -103,7 +103,7 @@ export const useTreeHelper = () => {
                 if (!targetParentTreeNode) {
                     // ---- Check if it's the drop zone node ----
                     const dropZoneNode = allTreeNodes.find((t) => t.id === args.parentId);
-                    if (dropZoneNode && getEntityId(dropZoneNode) === -1) {
+                    if (dropZoneNode && getEntityId(dropZoneNode) === constants.workspace.dropZone.entityId) {
                         targetParentWorkspaceItemId = undefined;
                         console.log("🎯 Drop target: Root level (drop zone)");
 
@@ -165,7 +165,7 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // STEP 3: VALIDATION - PREVENT INVALID MOVES
             // -------------------------------------------------------
-            const hasWorkspaceRoot = selectedEntityIds.some((id) => id === constants.workspace.rootId);
+            const hasWorkspaceRoot = selectedEntityIds.some((id) => id === constants.workspace.root.entityId);
             if (hasWorkspaceRoot) {
                 console.warn("⚠️ Cannot move workspace root node");
                 setIsDragging(false);
@@ -205,7 +205,7 @@ export const useTreeHelper = () => {
                 ? targetParentNode.children || []
                 : treeData.filter((t) => {
                       const entityId = getEntityId(t);
-                      return entityId > 0 && entityId !== -1;
+                      return entityId > 0 && entityId !== constants.workspace.dropZone.entityId;
                   });
 
             // ---- VALIDATION: Check same parent - different logic for single vs multi-select ----

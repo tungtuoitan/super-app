@@ -11,8 +11,8 @@ import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
-export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any }) {
-    const { selectedFolderIds, setSelectedFolderIds, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
+export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
+    const { selectedFolderIds, setSelectedFolderIds, lastSelectedFolderId, setLastSelectedFolderId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeHelper2();
     const { openTab } = useEditorTabHelper();
@@ -22,6 +22,12 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
     const noteItem = node.data.data as unknown as WorkspaceNoteItem;
     const entityId = noteItem.entityId;
     const isSelected = isFolderSelected(entityId);
+
+    // Check if this node is being dragged
+    const isDragging = node.state.isDragging;
+
+    // Check if this node is a valid drop target (being dragged over)
+    const isDropTarget = node.state.willReceiveDrop;
 
     // Check status and deleted state (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(noteItem);
@@ -36,13 +42,31 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
         treeContainer?.focus();
 
         if (e.ctrlKey || e.metaKey) {
-            // Ctrl+Click: Toggle selection
+            // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
                 setSelectedFolderIds((prev: number[]) => prev.filter((id) => id !== entityId));
                 node.deselect();
             } else {
                 setSelectedFolderIds((prev: number[]) => [...prev, entityId]);
                 node.selectMulti();
+            }
+            setLastSelectedFolderId(entityId);
+        } else if (e.shiftKey && lastSelectedFolderId) {
+            // Shift+Click: Range selection (like VS Code)
+            const allVisibleFolders = treeMiniHelper.getAllVisibleFolderIds(treeData);
+            const lastIndex = allVisibleFolders.indexOf(lastSelectedFolderId);
+            const currentIndex = allVisibleFolders.indexOf(entityId);
+
+            if (lastIndex !== -1 && currentIndex !== -1) {
+                const startIndex = Math.min(lastIndex, currentIndex);
+                const endIndex = Math.max(lastIndex, currentIndex);
+                const rangeSelection = allVisibleFolders.slice(startIndex, endIndex + 1);
+                setSelectedFolderIds(rangeSelection);
+                // Sync with react-arborist (select range ending at this node)
+                node.selectMulti();
+            } else {
+                setSelectedFolderIds([entityId]);
+                node.select();
             }
             setLastSelectedFolderId(entityId);
         } else {
@@ -82,39 +106,50 @@ export function NoteNode({ node, style, dragHandle }: { node: NodeApi<TreeFolder
 
     return (
         <div
-            ref={(el) => {
-                if (dragHandle && typeof dragHandle === "function" && el) {
-                    try {
-                        dragHandle(el);
-                    } catch (error) {
-                        console.warn("Error setting dragHandle:", error);
-                    }
-                }
+            style={{
+                ...style,
+                marginLeft: `${node.level * -5}px`, // Reduced from default ~20-24px per level to 12px
             }}
-            style={{ ...style, paddingLeft: `${node.level * 8}px` }}
-            onClick={handleMainClick}
-            onContextMenu={handleRightClick}
             className={`
-                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded
-                transition-opacity duration-150
-                ${node.state.isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "opacity-60" : isInactive ? "opacity-70" : "opacity-100"}
                 ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
+                rounded
             `}
         >
-            {/* Spacer for alignment with folder chevrons */}
-            <div className="w-5" />
+            <div
+                ref={(el) => {
+                    // Make entire node draggable (VS Code style - no special cursor)
+                    if (dragHandle && typeof dragHandle === "function" && el) {
+                        try {
+                            dragHandle(el);
+                        } catch (error) {
+                            console.warn("Error setting dragHandle:", error);
+                        }
+                    }
+                }}
+                onClick={handleMainClick}
+                onContextMenu={handleRightClick}
+                className={`
+                    flex items-center h-full w-full py-1 pr-2 cursor-pointer
+                    ${isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
+                    ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
+                    ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
+                `}
+            >
+                {/* Spacer for alignment with folder chevrons */}
+                <div className="w-4" />
 
-            {/* Note Icon */}
-            <div className="mr-2 flex items-center">
-                <FileText className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-blue-400"}`} />
-            </div>
+                {/* Note Icon */}
+                <div className="mr-2 flex items-center">
+                    <FileText className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-blue-400"}`} />
+                </div>
 
-            {/* Note Info */}
-            <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className={`text-sm truncate text-editor-fg ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
-                    {noteItem.data.name + "-" + entityId}
-                </span>
-                {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
+                {/* Note Info */}
+                <div className="flex-1 min-w-0 flex items-center gap-2">
+                    <span className={`text-sm truncate text-editor-fg ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
+                        {noteItem.data.name + "-" + entityId}
+                    </span>
+                    {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
+                </div>
             </div>
         </div>
     );

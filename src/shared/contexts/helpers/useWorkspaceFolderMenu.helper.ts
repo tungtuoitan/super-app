@@ -27,7 +27,7 @@ import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useStandardRegistryStore } from "@/store/index";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
+import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/types/note.types";
 
 // --------------------------------
@@ -130,9 +130,18 @@ export const useWorkspaceFolderMenuHelper = () => {
      * Moved from WorkspaceFolderNodeMenu component
      */
     const createNewNote = (contextData: any) => {
-        const existingIds = collectIdsFromTabs(openTabs);
-        const tempId = generateTempId(existingIds);
-        const name = generateUnsavedName(tempId);
+        // Collect IDs from workspace tree (flatData)
+        const { workspaceItemIds, noteEntityIds } = collectIdsFromTree(currentWorkspace?.flatData || []);
+
+        // Generate unique temp IDs for workspace item and note entity
+        const tempWorkspaceItemId = generateTempId(workspaceItemIds);
+        const tempNoteEntityId = generateTempId(noteEntityIds);
+        const name = generateUnsavedName(tempNoteEntityId);
+
+        // CRITICAL: parentId must be workspace_items.id (contextData.id), NOT entityId!
+        // contextData.id = workspace_items.id of parent folder
+        // contextData.entityId = folders.id (entity ID, NOT used for parentId!)
+        const parentWorkspaceItemId = contextData?.id ?? null;
 
         // Get entity ID (support both V1 and V2 structure)
         const parentEntityId = contextData?.entityId ?? contextData?.tagId;
@@ -149,9 +158,9 @@ export const useWorkspaceFolderMenuHelper = () => {
               }
             : undefined;
 
-        // Create temporary note
+        // Create temporary note (uses note entity ID)
         const newNote: Note = {
-            id: tempId,
+            id: tempNoteEntityId,
             name: name,
             userId: $user.userId || 0,
             description: "",
@@ -167,11 +176,11 @@ export const useWorkspaceFolderMenuHelper = () => {
 
         // Create WorkspaceNoteItem for flat array (WorkspaceItemV2 structure)
         const newWorkspaceItem: any = {
-            id: tempId,
+            id: tempWorkspaceItemId, // workspace_items.id (unique for workspace item)
             workspaceId: currentWorkspace?.id || 1,
-            parentId: parentEntityId || null,
+            parentId: parentWorkspaceItemId, // ✅ FIXED: Use workspace_items.id of parent, not entityId!
             entityType: 3, // 3 = note
-            entityId: tempId,
+            entityId: tempNoteEntityId, // notes.id (entity ID)
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             deletedAt: null,
@@ -185,7 +194,7 @@ export const useWorkspaceFolderMenuHelper = () => {
 
             // Note entity data
             data: {
-                id: tempId,
+                id: tempNoteEntityId, // notes.id (same as entityId)
                 userId: $user.userId ?? 0,
                 name: name,
                 description: "",
@@ -206,7 +215,12 @@ export const useWorkspaceFolderMenuHelper = () => {
                 flatData: newFlatData,
                 noteCount: currentWorkspace.noteCount + 1,
             };
-            console.log("✅ New note added to workspace:", { tempId, name, parentEntityId });
+            console.log("✅ New note added to workspace:", {
+                workspaceItemId: tempWorkspaceItemId,
+                noteEntityId: tempNoteEntityId,
+                name,
+                parentWorkspaceItemId
+            });
 
             setCurrentWorkspace(newWorkspace);
         }
