@@ -33,7 +33,7 @@ export function WorkspaceView() {
 
     useEffect(() => {
         if(!$user.userId || !$user.filters || selectedWorkspaceId === null) return;
-            loadTree(selectedWorkspaceId)
+            loadTree()
     }, [$user.userId, $user.filters, selectedWorkspaceId]);
 
     // Sync selected option with currentWorkspace.id from store

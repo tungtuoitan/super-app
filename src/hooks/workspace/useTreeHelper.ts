@@ -57,15 +57,21 @@ export const useTreeHelper = () => {
              */
             const getEntityId = (node: any) => node.data.entityId;
 
-            // ---- Filter out the drop zone node (drop zone node is a FAKE node with ID -1)----
-            const validTreeNodes = allTreeNodes.filter((node) => getEntityId(node) !== -1);
+            // ---- Filter out the drop zone node and root node (virtual nodes with special IDs) ----
+            const validTreeNodes = allTreeNodes.filter((node) => {
+                const entityId = getEntityId(node);
+                return entityId !== constants.workspace.dropZone.entityId && entityId !== constants.workspace.root.entityId;
+            });
 
             let selectedEntityIds = args.dragIds
                 .map((dragId) => {
                     const item = validTreeNodes.find((t) => t.id === dragId);
                     return item ? getEntityId(item) : undefined;
                 })
-                .filter((id): id is number => id !== undefined && id !== -1); // Filter out drop zone ID
+                .filter((id): id is number => {
+                    // Filter out undefined, drop zone ID, and root ID
+                    return id !== undefined && id !== constants.workspace.dropZone.entityId && id !== constants.workspace.root.entityId;
+                });
 
             // ---- VS CODE BEHAVIOR: Filter out descendants of selected nodes ----
             selectedEntityIds = selectedEntityIds.filter((entityId) => {
