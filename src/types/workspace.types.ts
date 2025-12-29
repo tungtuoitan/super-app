@@ -1,7 +1,6 @@
 /**
  * Workspace Types - Types for workspace folder tree operations
  * Aligns with backend AddItemToWorkspaceRequest and WorkspaceItem
- * Note: Backend still uses "tag" terminology in API
  */
 
 import { constants } from "@/utils/constants";
@@ -9,7 +8,7 @@ import { constants } from "@/utils/constants";
 /**
  * Type aliases for backend API compatibility
  */
-export type ChildType = typeof constants.workspace.itemTypes.tag | typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder;
+export type ChildType = typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder;
 
 /**
  * Request to add an item (folder or note) to a workspace
@@ -21,7 +20,7 @@ export interface AddItemToWorkspaceRequest {
     parentFolderId?: number | null; // Frontend alias
 
     /** Type of child entity - 'folder' for workspace folders, 'note' for notes */
-    childType: ChildType; // Backend accepts 'tag', frontend uses 'folder'
+    childType: ChildType; // Backend accepts 'folder', frontend uses 'folder'
 
     /** ID of the child entity (optional if creating new folder) */
     childId?: number;
@@ -484,8 +483,8 @@ export interface WorkspaceWithTreeResponse {
     /** Whether archived */
     isArchived: boolean;
 
-    /** Total number of tags */
-    tagCount: number;
+    /** Total number of folders */
+    folderCount: number;
 
     /** Total number of notes */
     noteCount: number;

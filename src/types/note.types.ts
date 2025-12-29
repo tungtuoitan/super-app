@@ -19,8 +19,7 @@ export interface Note {
     name: string;
     userId: number; // ID of the user who owns the note
     description?: string;
-    hashtags: Folder[]; // Array of Folder objects (note's hashtags)
-    tags?: Folder[]; // DEPRECATED: Use hashtags instead. Kept for backward compatibility
+    hashtags: string; // Array of Folder objects (note's hashtags)
     type?: string; // Changed from NoteType to string to match backend
     statusCode?: string; // Note status (foreign key to standard_registries.code)
     createdAt: Date;
@@ -37,7 +36,7 @@ export interface NoteDTO {
     name: string;
     userId: number; // ID of the user who owns the note
     description?: string;
-    tags: Folder[]; // Backend still uses "tags" field name (array of Folder/Tag objects)
+    hashtags: string; // Array of Folder objects (note's hashtags)
     type?: string; // String type to match backend response
     statusCode?: string; // Note status (foreign key to standard_registries.code)
     createdAt: string; // ISO string
@@ -52,7 +51,6 @@ export interface CreateNoteDTO {
     name: string;
     description?: string;
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
-    hashtagIds?: number[]; // Frontend alias for tags
     type?: string;
     statusCode?: string; // Note status
 }
@@ -62,7 +60,6 @@ export interface UpdateNoteDTO {
     name?: string;
     description?: string;
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
-    hashtagIds?: number[]; // Frontend alias for tags
     type?: string;
     statusCode?: string; // Note status
     isArchived?: boolean;

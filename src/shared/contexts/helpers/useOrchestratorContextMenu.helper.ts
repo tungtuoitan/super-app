@@ -69,7 +69,7 @@ export const useOrchestratorContextMenuHelper = () => {
 
     /**
      * Recursively collect all descendant tags (children, grandchildren, etc.)
-     * Returns array of all tags in the subtree including the root tag
+     * Returns array of all tags in the subtree including the root folder
      */
     const collectAllDescendants = (folder: Folder): Folder[] => {
         const descendants: Folder[] = [folder];

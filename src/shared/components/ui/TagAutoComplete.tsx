@@ -9,7 +9,6 @@ import { Label } from "@/Components/ui/label";
 import { IAutoCompleteOptions } from "./GenericAutoComplete";
 
 export interface GenericTagAutoCompleteProps {
-    /** Array of available tag options */
     options: IAutoCompleteOptions[];
     /** Currently selected tags as comma-separated string */
     value?: string | null;

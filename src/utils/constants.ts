@@ -55,7 +55,6 @@ export const constants = {
             workspace: "workspace",
             file: "file",
             folder: "folder",
-            tag: "tag",
         } as const,
 
         // Virtual node IDs for workspace root
@@ -74,7 +73,6 @@ export const constants = {
     contextMenu: {
         contextMenuTypes: {
             default: "default",
-            tag: "tag",
             note: "note",
             file: "file",
             folder: "folder",

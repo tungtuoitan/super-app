@@ -13,7 +13,6 @@ export type ItemType =
     | typeof constants.workspace.itemTypes.folder
     | typeof constants.workspace.itemTypes.note
     | typeof constants.workspace.itemTypes.file
-    | typeof constants.workspace.itemTypes.tag;
 
 export interface FolderDialogContextData {
     // Dialog state

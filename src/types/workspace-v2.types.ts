@@ -313,8 +313,8 @@ export interface WorkspaceWithTreeResponseV2 {
   /** Whether archived */
   isArchived: boolean;
 
-  /** Total number of tags/folders */
-  tagCount: number;
+  /** Total number of folders */
+  folderCount: number;
 
   /** Total number of notes */
   noteCount: number;

@@ -38,9 +38,8 @@ export const useNoteGridHelper = () => {
             name: name,
             userId: $user.userId || 0,
             description: "",
-            hashtags: [],
+            hashtags: "",
             statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
-            tags: [],
             type: "idea",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -99,7 +98,6 @@ export const useNoteGridHelper = () => {
                         id: note.id,
                         name: note.name,
                         description: note.description,
-                        tags: note.hashtags?.map((h) => h.id),
                         type: note.type,
                         deletedAt: deletedAt, // Set or clear soft delete timestamp
                         statusCode: note.statusCode,

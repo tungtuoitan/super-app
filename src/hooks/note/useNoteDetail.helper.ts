@@ -85,17 +85,12 @@ export const useNoteDetailHelper = () => {
 
             try {
                 // ============================================================
-                // Step 3: Prepare upsert data with proper tag handling
+                // Step 3: Prepare upsert data with proper hashtag handling
                 // ============================================================
                 const upsertData: UpsertNoteDTO = {
                     id: isCreateMode ? 0 : activeNote.id, // Always use 0 for create
                     name: activeNote.name,
                     description: activeNote.description,
-                    // Send hashtags for workspace notes, or tags for regular notes
-                    tags:
-                        activeNote.hashtags && activeNote.hashtags.length > 0
-                            ? activeNote.hashtags.map((h: any) => (typeof h === "number" ? h : h?.id || h?.tagId)) // Extract IDs from hashtags
-                            : activeNote.tags?.map((tag: any) => tag.tagId), // Otherwise use tags
                     type: activeNote.type,
                     statusCode: activeNote.statusCode, // Include status code
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
@@ -122,28 +117,28 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 8: If creating from workspace tree, add to workspace_items
                 // ============================================================
-                if (isCreateMode && activeNote.hashtags && activeNote.hashtags.length > 0) {
-                    // Extract folder ID - hashtags can be number[] or Folder[]
-                    const firstHashtag = activeNote.hashtags[0];
-                    const parentFolderId = typeof firstHashtag === "number" ? firstHashtag : (firstHashtag as any)?.id || (firstHashtag as any)?.tagId;
+                // if (isCreateMode && activeNote.hashtags && activeNote.hashtags.length > 0) {
+                //     // Extract folder ID - hashtags can be number[] or Folder[]
+                //     const firstHashtag = activeNote.hashtags[0];
+                //     const parentFolderId = typeof firstHashtag === "number" ? firstHashtag : (firstHashtag as any)?.id;
 
-                    const workspaceId = currentWorkspace?.id;
+                //     const workspaceId = currentWorkspace?.id;
 
-                    if (workspaceId && parentFolderId) {
-                        try {
-                            await workspaceService._addItemToWorkspace(token, workspaceId, {
-                                parentTagId: parentFolderId,
-                                childType: constants.workspace.itemTypes.note,
-                                childId: transformedNote.id,
-                            });
-                        } catch (error) {
-                            console.error("❌ Failed to add note to workspace:", error);
-                            // Don't fail the whole save if this fails - note is still created
-                        }
-                    } else {
-                        console.warn("⚠️ No workspace ID or parent folder ID found, skipping workspace_items insert");
-                    }
-                }
+                //     if (workspaceId && parentFolderId) {
+                //         try {
+                //             await workspaceService._addItemToWorkspace(token, workspaceId, {
+                //                 parentTagId: parentFolderId,
+                //                 childType: constants.workspace.itemTypes.note,
+                //                 childId: transformedNote.id,
+                //             });
+                //         } catch (error) {
+                //             console.error("❌ Failed to add note to workspace:", error);
+                //             // Don't fail the whole save if this fails - note is still created
+                //         }
+                //     } else {
+                //         console.warn("⚠️ No workspace ID or parent folder ID found, skipping workspace_items insert");
+                //     }
+                // }
 
                 // ============================================================
                 // Step 10: Update tab data with server response
@@ -200,39 +195,38 @@ export const useNoteDetailHelper = () => {
             active: item.isActive,
         }));
 
-    const handleTagsChange = (tagsString: string) => {
+    const handleHashTagsChange = (hashtagsString: string) => {
         // Convert comma-separated string of IDs back to hashtags array
-        const tagIds = tagsString
-            ? tagsString
+        const hashtagIds = hashtagsString
+            ? hashtagsString
                   .split(",")
                   .map((id) => id.trim())
                   .filter((id) => id)
             : [];
 
-        // Convert hashtag IDs to Tag objects by finding them in the options
-        const tagObjects = tagIds
-            .map((tagId) => {
-                const foundOption = hashtagOptions.find((option: IAutoCompleteOptions) => option.id === tagId);
+        // Convert hashtag IDs to Hashtag objects by finding them in the options
+        const hashtagObjects = hashtagIds
+            .map((hashtagId) => {
+                const foundOption = hashtagOptions.find((option: IAutoCompleteOptions) => option.id === hashtagId);
                 if (foundOption) {
                     return {
-                        tagId: parseInt(foundOption.id as string),
+                        id: parseInt(foundOption.id as string),
                         name: foundOption.label,
                         description: foundOption.desc,
                         isActive: foundOption.active,
                         createdAt: new Date(),
-                        id: parseInt(foundOption.id as string), // Add alias for backward compatibility
                     };
                 }
                 return null;
             })
-            .filter((tag) => tag !== null);
+            .filter((hashtag) => hashtag !== null);
 
-        handleNoteFieldChange("tags", tagObjects);
+        handleNoteFieldChange("hashtags", hashtagObjects);
     };
 
     return {
         upsertNote,
         handleNoteFieldChange,
-        handleTagsChange,
+        handleHashTagsChange,
     };
 };

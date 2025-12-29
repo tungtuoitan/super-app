@@ -19,7 +19,7 @@ import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
-    const { handleNoteFieldChange, handleTagsChange } = useNoteDetailHelper();
+    const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
     const [noteKey, setNoteKey] = React.useState(0);
@@ -79,12 +79,12 @@ export function NoteDetailContent() {
 
     // Convert hashtags array to comma-separated string of IDs for TagAutoComplete
     // Map selected hashtags to match the format expected by the component (comma-separated string of IDs)
-    const currentTagsValue = activeNote?.tags
-        ? activeNote.tags
-              .map((tag: any) => tag.tagId.toString())
-              .filter(Boolean)
-              .join(",")
-        : "";
+    // const currentHashTagsValue = activeNote?.hashtags
+    //     ? activeNote.hashtags
+    //           .map((hashtag: any) => hashtag.id.toString())
+    //           .filter(Boolean)
+    //           .join(",")
+    //     : "";
 
     if (!activeNote) {
         return null;
@@ -152,18 +152,18 @@ export function NoteDetailContent() {
                         </div>
 
                         {/* HashTags */}
-                        <div className="space-y-2">
+                        {/* <div className="space-y-2">
                             <GenericTagAutoComplete
                                 options={hashtagOptions as unknown as IAutoCompleteOptions[]}
-                                value={currentTagsValue}
-                                onChange={handleTagsChange}
+                                value={currentHashTagsValue}
+                                onChange={handleHashTagsChange}
                                 label="HashTags"
                                 placeholder={registriesLoading ? "Loading hashtags..." : "+ Add HashTag"}
                                 size="small"
                                 data-testid="note-tags"
                                 disabled={isDeleted || isHardDeleted || registriesLoading}
                             />
-                        </div>
+                        </div> */}
                     </CardContent>
                 </div>
 

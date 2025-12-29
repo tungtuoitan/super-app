@@ -192,7 +192,7 @@ const _upsertWorkspaceItem = async (
     workspaceId: number,
     data: {
         parentTagId?: number | null;
-        childType?: typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder | typeof constants.workspace.itemTypes.tag;
+        childType?: typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder;
         childId?: number;
         label?: string;
         notes?: string;
@@ -338,7 +338,7 @@ const _addItemToWorkspace = async (
     workspaceId: number,
     data: {
         parentTagId?: number | null;
-        childType: typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder | typeof constants.workspace.itemTypes.tag;
+        childType: typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder
         childId?: number;
         folderName?: string;
         label?: string;

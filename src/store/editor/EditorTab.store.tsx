@@ -1,7 +1,7 @@
 /**
  * Editor Tab Context
  * Centralized state management for all editor tabs
- * Supports multiple tab types: Note, Tag, etc.
+ * Supports multiple tab types: Note, etc.
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback, RefObject, useRef } from "react";

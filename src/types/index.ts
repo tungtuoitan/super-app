@@ -8,7 +8,6 @@ export * from "./common.types";
 // Export folder types (new)
 export * from "./folder.types";
 
-// Export tag types (backward compatibility - re-exports from folder.types)
 
 /**
  * API Client Types
@@ -83,7 +82,7 @@ export interface NoteCreateUpdateResponse {
         noteId: number;
         name: string;
         description?: string;
-        tags: any[];
+        hashtags: any[]; // Note hashtags (not folder tags)
         type?: string;
         createdAt: string;
         updatedAt?: string;

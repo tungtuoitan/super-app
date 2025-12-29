@@ -146,7 +146,6 @@ function PropertiesTab() {
                 <PropertyRow label="Type" value={activeNote.type || "N/A"} />
                 <PropertyRow label="Deleted" value={activeNote.deletedAt ? "Yes" : "No"} />
                 <PropertyRow label="Created By" value={activeNote.createdBy || "Unknown"} />
-                <PropertyRow label="HashTags" value={activeNote.tags?.join(", ") || "No hashtags"} />
             </div>
         </div>
     );

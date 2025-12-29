@@ -35,9 +35,9 @@ import { Note } from "@/types/note.types";
 // --------------------------------
 
 /**
- * Traverse tree and collect all visible tag IDs in order (for VS Code-like navigation)
+ * Traverse tree and collect all visible folder IDs in order (for VS Code-like navigation)
  */
-const $getAllVisibleTagIds = (items: any[]): number[] => {
+const $getAllVisibleFolderIds = (items: any[]): number[] => {
     const result: number[] = [];
 
     function $traverse(nodes: any[]) {
@@ -58,7 +58,7 @@ const $getAllVisibleTagIds = (items: any[]): number[] => {
 
 /**
  * Recursively collect all descendant tags (children, grandchildren, etc.)
- * Returns array of all tags in the subtree including the root tag
+ * Returns array of all tags in the subtree including the root 
  */
 const $collectAllDescendants = (folder: Folder): Folder[] => {
     const descendants: Folder[] = [folder];
@@ -92,11 +92,11 @@ const $findFolderById = (items: any[], folderId: number): Folder | null => {
 /**
  * Count total children recursively
  */
-const $countChildren = (tag: any): number => {
-    if (!tag.children || tag.children.length === 0) return 0;
-    return tag.children.length + tag.children.reduce((sum: number, child: any) => sum + $countChildren(child), 0);
+const $countChildren = (folder: any): number => {
+    if (!folder.children || folder.children.length === 0) return 0;
+    return folder.children.length + folder.children.reduce((sum: number, child: any) => sum + $countChildren(child), 0);
 };
-
+    
 /**
  * Recursively remove items by IDs from tree
  */
@@ -164,9 +164,8 @@ export const useWorkspaceFolderMenuHelper = () => {
             name: name,
             userId: $user.userId || 0,
             description: "",
-            hashtags: [],
+            hashtags: "",
             statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
-            tags: [],
             type: "idea",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -279,7 +278,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         let nextFolderIdToSelect: number | null = null;
         if (currentWorkspace?.flatData) {
-            const allVisibleFolderIds = $getAllVisibleTagIds(currentWorkspace.flatData);
+            const allVisibleFolderIds = $getAllVisibleFolderIds(currentWorkspace.flatData);
             const currentIndex = allVisibleFolderIds.indexOf(folder.id);
 
             if (currentIndex !== -1) {
@@ -318,7 +317,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 const itemType = (f as any).type;
                 let type: 2 | 3 | 4 = 2; // Default to folder
 
-                if (itemType === constants.workspace.itemTypes.folder || itemType === constants.workspace.itemTypes.tag) {
+                if (itemType === constants.workspace.itemTypes.folder) {
                     type = 2;
                 } else if (itemType === constants.workspace.itemTypes.note) {
                     type = 3;
@@ -417,7 +416,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 3: Find next item to select after deletion (VS Code behavior)
         // ----------------
         let nextFolderIdToSelect: number | null = null;
-        const allVisibleFolderIds = $getAllVisibleTagIds(currentWorkspace.flatData);
+        const allVisibleFolderIds = $getAllVisibleFolderIds(currentWorkspace.flatData);
 
         // Find the highest index among selected folders
         const selectedIndices = selectedIds
@@ -467,7 +466,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 const itemType = (f as any).type;
                 let type: 2 | 3 | 4 = 2;
 
-                if (itemType === constants.workspace.itemTypes.folder || itemType === constants.workspace.itemTypes.tag) {
+                if (itemType === constants.workspace.itemTypes.folder) {
                     type = 2;
                 } else if (itemType === constants.workspace.itemTypes.note) {
                     type = 3;

@@ -12,7 +12,6 @@ import { constants } from "@/utils/constants";
  * Type aliases for backend API types
  */
 export type BackendItemType =
-    | typeof constants.workspace.itemTypes.tag
     | typeof constants.workspace.itemTypes.note
     | typeof constants.workspace.itemTypes.file
     | typeof constants.workspace.itemTypes.folder;
@@ -165,7 +164,7 @@ export function transformBackendItems(items: BackendWorkspaceItem[]): WorkspaceI
  */
 export function transformToBackendItem(item: WorkspaceItem): Partial<BackendWorkspaceItem> {
     return {
-        type: item.type === constants.workspace.itemTypes.folder ? "tag" : item.type,
+        type: item.type === constants.workspace.itemTypes.folder ? "folder" : item.type,
         id: item.id,
         childId: item.id, // Legacy field for backward compatibility
         userId: item.userId,
