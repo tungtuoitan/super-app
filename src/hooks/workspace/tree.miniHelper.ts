@@ -210,6 +210,15 @@ export function transformItemsToTreeData(items: WorkspaceItem[]): TreeFolder[] {
         }));
 }
 
+function $sortChildrenRecursively(nodes: TreeFolder[]) {
+    nodes.forEach(node => {
+        if (node.children && node.children.length > 0) {
+            sortTreeNodes(node.children);
+            $sortChildrenRecursively(node.children);
+        }
+    });
+}
+
 /**
  * Create workspace root folder node
  * Wraps folders under a workspace root for display
@@ -240,6 +249,31 @@ export function createWorkspaceRootFolder(
 }
 
 /**
+ * Sort tree nodes: folders first, then other items (notes, files)
+ * When same type, sort alphabetically by name (A-Z, 1-9)
+ * entityType: 2 = folder, 3 = note, 4 = file
+ */
+function sortTreeNodes(nodes: TreeFolder[]): TreeFolder[] {
+    return nodes.sort((a, b) => {
+        const aItem = a.data as any;
+        const bItem = b.data as any;
+        
+        // Get entity types (2 = folder, 3 = note, 4 = file)
+        const aType = aItem.entityType || 0;
+        const bType = bItem.entityType || 0;
+        
+        // Folders (type 2) come first
+        if (aType === 2 && bType !== 2) return -1;
+        if (aType !== 2 && bType === 2) return 1;
+        
+        // If same type, sort alphabetically by name (A-Z, 1-9)
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        return aName.localeCompare(bName, undefined, { numeric: true });
+    });
+}
+
+/**
  * Build hierarchical TreeFolder structure from flat V2 list
  *
  * KEY CONCEPT:
@@ -250,6 +284,7 @@ export function createWorkspaceRootFolder(
  * ALGORITHM:
  * 1. Create map using workspace_items.id as key for O(1) parent lookup
  * 2. Build parent-child relationships using parentId (which references parent's workspace_items.id)
+ * 3. Sort children: folders first, then other items
  *
  * @param items - Flat list of workspace items from API
  * @returns Hierarchical tree structure (roots only - children are nested)
@@ -305,6 +340,15 @@ export function buildTreeFromV2Items(items: WorkspaceItemV2[]): TreeFolder[] {
             }
         }
     });
+
+    // -------------------------------------------------------
+    // STEP 3: SORT ALL LEVELS (folders first, then others)
+    // -------------------------------------------------------
+    // Sort root level
+    sortTreeNodes(rootNodes);
+    
+    // Sort all children recursively
+    $sortChildrenRecursively(rootNodes);
 
     return rootNodes;
 }

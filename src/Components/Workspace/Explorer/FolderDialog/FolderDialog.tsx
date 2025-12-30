@@ -135,9 +135,11 @@ export function FolderDialog() {
                             value={newFolderName}
                             onChange={(e) => {
                                 const newValue = e.target.value;
-                                setNewFolderName(newValue);
+                                // Auto capitalize first letter for folder name
+                                const capitalizedValue = newValue.charAt(0).toUpperCase() + newValue.slice(1);
+                                setNewFolderName(capitalizedValue);
                                 // Clear error when user types
-                                if (newValue && newValue.trim() !== "") {
+                                if (capitalizedValue && capitalizedValue.trim() !== "") {
                                     setErrors({ ...errors, name: "" });
                                 } else {
                                     setErrors({ ...errors, name: `${itemLabel} Name is required` });

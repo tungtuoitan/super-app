@@ -6,7 +6,7 @@ import { useActivityBarStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { Note } from "@/types/note.types";
-import { MovingTab } from "./MovingTab";
+import { MovingTab } from "../VSPanel/MovingTab";
 
 interface VSPanelProps {
     onClose: () => void;

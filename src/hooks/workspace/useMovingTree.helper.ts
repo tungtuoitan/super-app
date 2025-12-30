@@ -1,3 +1,4 @@
+import React from "react";
 import { useSnackbar } from "notistack";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
@@ -7,6 +8,10 @@ import { workspaceService } from "@/services/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
+import { useDragDropManager } from "react-dnd";
+import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { constants } from "@/utils/constants";
+import {SPECIAL_IDS} from "@/utils/temp-id.utils";
 
 export const useMovingTreeHelper = () => {
     const {
@@ -14,8 +19,8 @@ export const useMovingTreeHelper = () => {
         setTargetWorkspaceId,
         targetFolderId,
         setTargetFolderId,
-        duplicateEntityIds,
-        setDuplicateEntityIds,
+        highlightedDuplicateIds,
+        setHighlightedDuplicateIds,
         isLoadingTargetTree,
         setIsLoadingTargetTree,
         targetWorkspace,
@@ -29,6 +34,10 @@ export const useMovingTreeHelper = () => {
     const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { loadTree } = useWorkspaceLoader();
+    const manager = useDragDropManager();
+
+    // Track highlight timeout to clear previous ones
+    const highlightTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
     // Filter workspaces (exclude current workspace)
     const getAvailableWorkspaces = (): IAutoCompleteOptions[] => {
@@ -48,7 +57,7 @@ export const useMovingTreeHelper = () => {
         if (newWorkspaceId) {
             setTargetWorkspaceId(newWorkspaceId);
             setTargetFolderId(null);
-            setDuplicateEntityIds(new Set());
+            setHighlightedDuplicateIds(new Set()); // Clear highlights when switching workspace
         } else {
             setTargetWorkspaceId(null);
             setTargetFolderId(null);
@@ -80,11 +89,84 @@ export const useMovingTreeHelper = () => {
         }
     };
 
-    // Handle cross-tree drop from WorkspaceTree
-    const dropToMovingTree = async (draggedItem: any, targetFolder: number | null = null) => {
-        console.log("🎯 Cross-tree drop:", draggedItem);
-        console.log("📂 Target folder:", targetFolder);
+    // Check if dragging items contain duplicates and return details
+    const checkDraggingItemsAreDuplicate = (
+        draggedItem: any
+    ): {
+        isDuplicate: boolean;
+        duplicateCount: number;
+        duplicateItems: Array<{ sourceItem: any; targetItem: any }>;
+    } => {
+        if (!currentWorkspace || !targetWorkspace) {
+            return { isDuplicate: false, duplicateCount: 0, duplicateItems: [] };
+        }
 
+        // Extract workspace_items.id from dragged items
+        const draggedNodeIds = draggedItem.dragIds || [draggedItem.id];
+        const itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
+
+        // Build map of target workspace entityIds for fast lookup
+        const targetEntityMap = new Map<number, any>();
+        targetWorkspace.flatData.forEach((item) => {
+            targetEntityMap.set(item.entityId, item);
+        });
+
+        // Check each dragging item for duplicates
+        const duplicateItems: Array<{ sourceItem: any; targetItem: any }> = [];
+        itemIds.forEach((itemId: number) => {
+            const sourceItem = currentWorkspace.flatData.find((i) => i.id === itemId);
+            if (sourceItem) {
+                const targetItem = targetEntityMap.get(sourceItem.entityId);
+                if (targetItem) {
+                    duplicateItems.push({ sourceItem, targetItem });
+                }
+            }
+        });
+
+        return {
+            isDuplicate: duplicateItems.length > 0,
+            duplicateCount: duplicateItems.length,
+            duplicateItems,
+        };
+    };
+
+    // Handle cross-tree drop from WorkspaceTree
+    const dropToMovingTree = async (args: any) => {
+        // STEP 1: Extract dragged item from DnD monitor (for cross-tree drops, args.dragIds is empty)
+        const monitor = manager.getMonitor();
+        const dragItem = monitor.getItem();
+
+        if (!dragItem) {
+            console.warn("⚠️ No drag item found in monitor");
+            return;
+        }
+
+        // STEP 2: Determine the correct parent folder id (workspace_items.id)
+        let targetId: number | null = null;
+
+        if (args.parentNode) {
+            const parentNodeData = args.parentNode.data.data as any;
+
+            // Check if dropped on drop zone → treat as root
+            if (SPECIAL_IDS.includes(parentNodeData.entityId)) {
+                targetId = null;
+            }
+            // Check if parent node is a folder
+            else if (isFolderV2(parentNodeData as unknown as WorkspaceItemV2)) {
+                // Drop into folder → use folder's entityId
+                targetId = parentNodeData.id;
+            } else {
+                // Drop into note/file → use their parent folder entityId
+                targetId = parentNodeData.parentId ?? null;
+            }
+        } else {
+            // No parent node → drop to root
+            targetId = null;
+        }
+
+        console.log("📂 Drop target folder entityId:", targetId);
+
+        // STEP 3: Validate workspace selection
         if (!currentWorkspace?.id || !targetWorkspaceId) {
             enqueueSnackbar("No target workspace selected", { variant: "error" });
             return;
@@ -95,11 +177,42 @@ export const useMovingTreeHelper = () => {
             return;
         }
 
+        // STEP 4: Check if dragging items are duplicates BEFORE calling API
+        const { isDuplicate, duplicateCount, duplicateItems } = checkDraggingItemsAreDuplicate(dragItem);
+        if (isDuplicate) {
+            // Get target workspace name
+            const targetWorkspaceName = allWorkspaces.find((ws) => ws.id === targetWorkspaceId)?.name || "target workspace";
+
+            // Show detailed message for each duplicate
+            duplicateItems.forEach(({ sourceItem, targetItem }) => {
+                const itemTypeName = sourceItem.entityType === 1 ? "Note" : sourceItem.entityType === 2 ? "Folder" : "File";
+                const itemName = sourceItem.data.name;
+                enqueueSnackbar(`${itemTypeName}: ${targetWorkspaceName} is already have ${itemTypeName}: ${itemName}`, { variant: "warning" });
+            });
+
+            // Highlight duplicates temporarily (5 seconds)
+            const duplicateEntityIds = duplicateItems.map((d) => d.targetItem.entityId);
+            setHighlightedDuplicateIds(new Set(duplicateEntityIds));
+
+            // Clear previous timeout if exists
+            if (highlightTimeoutRef.current) {
+                clearTimeout(highlightTimeoutRef.current);
+            }
+
+            // Clear highlights after 5 seconds
+            highlightTimeoutRef.current = setTimeout(() => {
+                setHighlightedDuplicateIds(new Set());
+                highlightTimeoutRef.current = null;
+            }, 10000);
+
+            return; // Prevent drop
+        }
+
         try {
-            // Extract workspace_items.id from dragged items
+            // STEP 5: Extract workspace_items.id from dragged items
             // draggedItem from react-arborist has format: {id: '17', dragIds: ['17', '18', ...]}
             // dragIds contains all selected node ids (strings)
-            const draggedNodeIds = draggedItem.dragIds || [draggedItem.id];
+            const draggedNodeIds = dragItem.dragIds || [dragItem.id];
 
             // Convert string ids to numbers (TreeFolder.id is string version of workspace_items.id)
             const itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
@@ -109,52 +222,26 @@ export const useMovingTreeHelper = () => {
                 return;
             }
 
-            // Check for duplicates
-            const sourceEntityIds = new Set<number>();
-            for (const itemId of itemIds) {
-                const item = currentWorkspace.flatData.find((i) => i.id === itemId);
-                if (item) {
-                    sourceEntityIds.add(item.entityId);
-                }
-            }
-
-            const duplicates = new Set<number>();
-            if (targetWorkspace) {
-                for (const targetItem of targetWorkspace.flatData) {
-                    if (sourceEntityIds.has(targetItem.entityId)) {
-                        duplicates.add(targetItem.entityId);
-                    }
-                }
-            }
-
-            if (duplicates.size > 0) {
-                enqueueSnackbar(`Cannot move: ${duplicates.size} item(s) already exist in target workspace`, { variant: "error" });
-                return;
-            }
-
-            // Build batch requests for MOVECROSS action
-            // Use targetFolder parameter (from drop position) instead of state
+            // STEP 6: Build batch requests for MOVECROSS action
+            // Use targetId (from drop position) instead of state
             const requests: UpsertWorkspaceItemRequest[] = itemIds.map((itemId: number) => ({
                 action: WorkspaceItemAction.MoveCross,
                 id: itemId,
                 workspaceId: targetWorkspaceId,
-                parentId: targetFolder, // null = root, number = specific folder
+                parentId: targetId, // null = root, number = specific folder
             }));
 
-            // Call batch API
+            // STEP 7: Call batch API
             const result = await workspaceService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
 
             if (result.success) {
                 enqueueSnackbar(`Moved ${itemIds.length} item(s) to target workspace`, { variant: "success" });
 
-                // Reload current workspace tree
+                // STEP 8: Reload current workspace tree
                 await loadTree();
 
-                // Reload target workspace tree
-                const targetResult = await workspaceService._getWorkspaceTreeV2($user.userToken, targetWorkspaceId);
-                if (targetResult.success && targetResult.object) {
-                    setTargetWorkspace(targetResult.object as WorkspaceDTO);
-                }
+                // STEP 9: Reload target workspace tree and re-detect duplicates
+                await loadTargetWorkspaceTree();
             } else {
                 enqueueSnackbar(result.message || "Failed to move items", { variant: "error" });
             }
@@ -200,5 +287,6 @@ export const useMovingTreeHelper = () => {
         loadTargetWorkspaceTree,
         dropToMovingTree,
         initializeContainerHeightTracking,
+        checkDraggingItemsAreDuplicate,
     };
 };

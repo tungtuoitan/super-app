@@ -19,9 +19,9 @@ export interface MovingTreeContextData {
     targetFolderId: number | null;
     setTargetFolderId: Dispatch<SetStateAction<number | null>>;
 
-    // Duplicate items (entityIds that already exist in target workspace)
-    duplicateEntityIds: Set<number>;
-    setDuplicateEntityIds: Dispatch<SetStateAction<Set<number>>>;
+    // Temporarily highlighted duplicate items (will be cleared after 5s)
+    highlightedDuplicateIds: Set<number>;
+    setHighlightedDuplicateIds: Dispatch<SetStateAction<Set<number>>>;
 
     // Loading state
     isLoadingTargetTree: boolean;
@@ -50,9 +50,9 @@ const movingTreeContextDefaultValue: MovingTreeContextData = {
     targetFolderId: null,
     setTargetFolderId: () => {},
 
-    // Duplicate items
-    duplicateEntityIds: new Set(),
-    setDuplicateEntityIds: () => {},
+    // Temporarily highlighted duplicates
+    highlightedDuplicateIds: new Set(),
+    setHighlightedDuplicateIds: () => {},
 
     // Loading state
     isLoadingTargetTree: false,
@@ -93,8 +93,8 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     // Target folder info
     const [targetFolderId, setTargetFolderId] = useState<number | null>(null);
 
-    // Duplicate items
-    const [duplicateEntityIds, setDuplicateEntityIds] = useState<Set<number>>(new Set());
+    // Temporarily highlighted duplicates (cleared after 5s)
+    const [highlightedDuplicateIds, setHighlightedDuplicateIds] = useState<Set<number>>(new Set());
 
     // Loading state
     const [isLoadingTargetTree, setIsLoadingTargetTree] = useState<boolean>(false);
@@ -117,9 +117,9 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 targetFolderId,
                 setTargetFolderId,
 
-                // Duplicate items
-                duplicateEntityIds,
-                setDuplicateEntityIds,
+                // Temporarily highlighted duplicates
+                highlightedDuplicateIds,
+                setHighlightedDuplicateIds,
 
                 // Loading state
                 isLoadingTargetTree,

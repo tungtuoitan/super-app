@@ -97,7 +97,7 @@ export function NoteGridPopup() {
 
     return (
         <Dialog open={isNoteGridPopupOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
-            <DialogContent className="sm:max-w-[1000px] sm:max-w-[1000px] h-[70vh] rounded-xl flex flex-col p-0_">
+            <DialogContent className="sm:max-w-[1000px] sm:max-w-[1000px] h-[70vh] rounded-xl flex flex-col p-0_ border-gray-600">
                 <DialogHeader className="mx-6 pt-6 pb-4 border-b">
                     <div className="flex items-center justify-between">
                         <DialogTitle className="text-xl font-semibold flex items-center gap-2 ">

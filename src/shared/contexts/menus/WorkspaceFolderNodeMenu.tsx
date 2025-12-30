@@ -39,9 +39,9 @@ export function WorkspaceFolderNodeMenu() {
     console.log("_ITEMSTATUS",_ITEMSTATUS)
     
     const addMenuItems = [
-        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
-        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: "Add New Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
-        { type: constants.workspace.itemTypes.file, icon: FileIcon, label: "Add New File", disabled: true },
+        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: constants.workspace.itemTypes.note, icon: AddIcon, label: "New Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: constants.workspace.itemTypes.file, icon: AddIcon, label: "New File", disabled: true },
     ];
 
     return (
@@ -72,8 +72,8 @@ export function WorkspaceFolderNodeMenu() {
 
                     {/* Add Existing Note */}
                     <MenuItem onClick={() => openAddExistingNotePopup(contextData)} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple}>
-                        <NoteIcon className="w-4 h-4 mr-2" />
-                        Add Existing Note
+                        <AddIcon className="w-4 h-4 mr-2" />
+                        Existing Note
                     </MenuItem>
 
                     <MenuDivider />

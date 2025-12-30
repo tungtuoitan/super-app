@@ -47,6 +47,11 @@ export const useNoteDetailHelper = () => {
             _value = value;
         }
 
+        // Auto capitalize first letter for note name
+        if (field === "name" && typeof _value === "string") {
+            _value = _value.charAt(0).toUpperCase() + _value.slice(1);
+        }
+
         const updated = { ...activeNote, [field]: _value };
 
         // Update tab data directly
