@@ -7,6 +7,7 @@ import { AuthStoreProvider, useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceProvider } from "@/store/workspace/Workspace.store";
 import { FolderDialogProvider } from "@/store/workspace/FolderDialog.store";
 import { NoteGridPopupProvider } from "@/store/workspace/NoteGridPopup.store";
+import { MoveToWorkspacePopupProvider } from "@/store/workspace/MoveToWorkspacePopup.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
@@ -24,8 +25,6 @@ import { AuthGuard } from "@/Components/Auth/AuthGuard";
 import { OrchestratorContextMenuStoreProvider } from "@/store/contextMenu/ContextMenu.store";
 import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.store";
-
-
 
 /**
  * Main application layout component.
@@ -61,39 +60,41 @@ export function Main() {
                                             <WorkspaceProvider>
                                                 <FolderDialogProvider>
                                                     <NoteGridPopupProvider>
-                                                        <WsProvider>
-                                                    <WsDetailProvider>
-                                                        <NoteDetailProvider>
-                                                            <NoteGridProvider>
-                                                                <EditorTabProvider>
-                                                                    <EditorToolbarProvider>
-                                                                        <DialogProvider>
-                                                                            <OrchestratorContextMenuStoreProvider>
-                                                                                <ConfirmationPopoverProvider>
-                                                                                    <OrchestratorContextMenu>
-                                                                                        <AuthGuard>
-                                                                                            <GridControlProvider>
-                                                                                                <MainNav />
-                                                                                            </GridControlProvider>
-                                                                                        </AuthGuard>
-                                                                                    </OrchestratorContextMenu>
-                                                                                    <ConfirmationPopoverContainer />
-                                                                                </ConfirmationPopoverProvider>
-                                                                            </OrchestratorContextMenuStoreProvider>
-                                                                        </DialogProvider>
-                                                                    </EditorToolbarProvider>
-                                                                </EditorTabProvider>
-                                                            </NoteGridProvider>
-                                                        </NoteDetailProvider>
-                                                    </WsDetailProvider>
-                                                        </WsProvider>
+                                                        <MoveToWorkspacePopupProvider>
+                                                            <WsProvider>
+                                                                <WsDetailProvider>
+                                                                    <NoteDetailProvider>
+                                                                        <NoteGridProvider>
+                                                                            <EditorTabProvider>
+                                                                                <EditorToolbarProvider>
+                                                                                    <DialogProvider>
+                                                                                        <OrchestratorContextMenuStoreProvider>
+                                                                                            <ConfirmationPopoverProvider>
+                                                                                                <OrchestratorContextMenu>
+                                                                                                    <AuthGuard>
+                                                                                                        <GridControlProvider>
+                                                                                                            <MainNav />
+                                                                                                        </GridControlProvider>
+                                                                                                    </AuthGuard>
+                                                                                                </OrchestratorContextMenu>
+                                                                                                <ConfirmationPopoverContainer />
+                                                                                            </ConfirmationPopoverProvider>
+                                                                                        </OrchestratorContextMenuStoreProvider>
+                                                                                    </DialogProvider>
+                                                                                </EditorToolbarProvider>
+                                                                            </EditorTabProvider>
+                                                                        </NoteGridProvider>
+                                                                    </NoteDetailProvider>
+                                                                </WsDetailProvider>
+                                                            </WsProvider>
+                                                        </MoveToWorkspacePopupProvider>
                                                     </NoteGridPopupProvider>
                                                 </FolderDialogProvider>
                                             </WorkspaceProvider>
-                                    </StandardRegistryProvider>
-                                </NavigationHistoryProvider>
-                            </AuthStoreProvider>
-                        </DndProvider>
+                                        </StandardRegistryProvider>
+                                    </NavigationHistoryProvider>
+                                </AuthStoreProvider>
+                            </DndProvider>
                         </SnackbarProvider>
                     </ActivityBarProvider>
                 </AuthCallbackProvider>

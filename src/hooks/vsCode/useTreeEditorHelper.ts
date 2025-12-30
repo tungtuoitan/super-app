@@ -99,6 +99,7 @@ export const useTreeEditorHelper = () => {
                             return {
                                 ...tab,
                                 data: updatedNote,
+                                title: updatedNote.name,
                                 hasUnsavedChanges: false,
                             };
                         }

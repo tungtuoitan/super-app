@@ -1,10 +1,19 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
-import { Edit as EditIcon, Trash2 as DeleteIcon, Info as InfoIcon, File as FileIcon, AlertTriangle as HardDeleteIcon, RotateCcw as RestoreIcon } from "lucide-react";
+import {
+    Edit as EditIcon,
+    Trash2 as DeleteIcon,
+    Info as InfoIcon,
+    File as FileIcon,
+    AlertTriangle as HardDeleteIcon,
+    RotateCcw as RestoreIcon,
+    ArrowRightLeft as MoveIcon,
+} from "lucide-react";
 import { useWorkspaceChildMenuHelper } from "@/shared/contexts/helpers/useWorkspaceChildMenu.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { useMoveToWorkspacePopupHelper } from "@/hooks/workspace/useMoveToWorkspacePopup.helper";
 
 /**
  * WorkspaceChildNodeMenu
@@ -20,6 +29,7 @@ export function WorkspaceChildNodeMenu() {
     const _TREESTATUS = useTreeStatusHelper();
 
     const { deleteItems, editNote } = useWorkspaceChildMenuHelper();
+    const { openMoveToWorkspacePopup } = useMoveToWorkspacePopupHelper();
 
     // Check deleted status (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
@@ -37,6 +47,14 @@ export function WorkspaceChildNodeMenu() {
                     </MenuItem>
                 </>
             )} */}
+
+            <MenuDivider />
+
+            {/* Move to Another Workspace */}
+            <MenuItem onClick={() => openMoveToWorkspacePopup()} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
+                <MoveIcon className="w-4 h-4 mr-2" />
+                Move to Another Workspace
+            </MenuItem>
 
             <MenuDivider />
 

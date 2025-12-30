@@ -1,6 +1,6 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
-import { FileText } from "lucide-react";
+import { FileText, ArrowUpRight } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -138,9 +138,10 @@ export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<
                 {/* Spacer for alignment with folder chevrons */}
                 <div className="w-4" />
 
-                {/* Note Icon */}
-                <div className="mr-2 flex items-center">
+                {/* Note Icon with Shortcut Indicator */}
+                <div className="mr-2 flex items-center relative">
                     <FileText className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-blue-400"}`} />
+                    {/* <ArrowUpRight className={`w-2 h-2 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-gray-400"} absolute -bottom-0 -left-2`} /> */}
                 </div>
 
                 {/* Note Info */}

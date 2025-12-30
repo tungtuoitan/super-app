@@ -15,6 +15,12 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
 import {workspaceService} from "@/services/workspace.service";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useWorkspaceLoader } from "@/hooks/index";
+import { filterTopLevelParents, buildTreeFromV2Items } from "@/hooks/workspace/tree.miniHelper";
+import type { UpsertWorkspaceItemRequest } from "@/types/workspace.types";
+import { WorkspaceItemAction } from "@/types/workspace.types";
+import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import type { WorkspaceDTO } from "@/types/workspace-dto.types";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();
@@ -22,7 +28,8 @@ export const useWorkspaceChildMenuHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
-    const { loadTree } = useWorkspaceLoader()
+    const { loadTree } = useWorkspaceLoader();
+    const { processTabAfterDelete } = useEditorTabHelper();
 
     const isNote = contextType === constants.workspace.itemTypes.note;
     const isFile = contextType === constants.workspace.itemTypes.file;
@@ -30,6 +37,14 @@ export const useWorkspaceChildMenuHelper = () => {
     // Multi-select check
     const selectedCount = selectedItemIds.length;
     const isMultipleSelected = selectedCount > 1;
+
+    /**
+     * Helper: Find item by ID in workspace flat data
+     */
+    const $findItemById = (items: WorkspaceItemV2[], targetId: number): WorkspaceItemV2 | null => {
+        // With V2 flat structure, we can just find directly
+        return items.find(item => item.id === targetId) || null;
+    };
 
     /**
      * Handle delete note
@@ -141,98 +156,165 @@ export const useWorkspaceChildMenuHelper = () => {
     };
 
     /**
-     * Handle delete with confirmation - SUPPORTS MULTI-SELECT
-     * Logic:
-     * 1. Split selected items into NEW items (ID < 0) and EXISTING items (ID > 0)
-     * 2. Remove new items from workspace state immediately (no API call)
-     * 3. Only call API delete if there are existing items
-     * 4. No notification for new items deletion (silent state update)
+     * Delete/Restore selected workspace items using batch upsert API
+     * Follows __deleteRestore_SelectedItems pattern from useWorkspaceFolderMenu.helper.ts
+     * Pattern: 100% follows folder helper batch pattern
+     */
+    const __deleteRestore_SelectedItems = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+        // ===== STEP 1: Get selected items =====
+        const selectedIds = ids ?? selectedItemIds;
+        if (selectedIds.length === 0) {
+            console.warn("⚠️ No items selected");
+            return;
+        }
+
+        // ===== STEP 2: Validate tree data =====
+        if (!currentWorkspace?.flatData) {
+            console.error("❌ Cannot delete: no tree data");
+            return;
+        }
+
+        try {
+            const token = $user.userToken;
+
+            // ===== STEP 3: Filter to top-level parents only =====
+            const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
+            const topLevelIds = filterTopLevelParents(selectedIds, treeData);
+
+            console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
+
+            if (topLevelIds.length === 0) {
+                console.warn("⚠️ No valid items after filtering");
+                return;
+            }
+
+            // ===== STEP 4: Find items and skip workspace root =====
+            const selectedItems: WorkspaceItemV2[] = [];
+            for (const itemId of topLevelIds) {
+                const item = $findItemById(currentWorkspace.flatData, itemId);
+                if (item && item.id > 0) {
+                    // Skip workspace root (negative ID)
+                    selectedItems.push(item);
+                }
+            }
+
+            if (selectedItems.length === 0) {
+                console.warn("⚠️ No valid items to process");
+                return;
+            }
+
+            // ===== STEP 5: Only process selected items, no descendants =====
+            // Both DELETE and RESTORE: Only selected items, no cascade
+            // Backend will handle cascade delete if needed via database constraints
+            const allItemsToUpdate: WorkspaceItemV2[] = [...selectedItems];
+
+            // Remove duplicates
+            const uniqueItemsMap = new Map<number, WorkspaceItemV2>();
+            for (const item of allItemsToUpdate) {
+                uniqueItemsMap.set(item.id, item);
+            }
+            const itemsToUpdate = Array.from(uniqueItemsMap.values());
+
+            console.log(`📦 Collected ${itemsToUpdate.length} selected items (type: ${type})`);
+
+            // -------------------------------------------------------
+            // STEP 6: BUILD BATCH DELETE/RESTORE REQUESTS
+            // -------------------------------------------------------
+            // For each selected item, create a DELETE or RESTORE action
+            // - action: WorkspaceItemAction.Delete or WorkspaceItemAction.Restore
+            // - id: workspace_items.id (V2: item.id = workspace_items.id)
+            const batchRequests: UpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {
+                return {
+                    action: type === "soft-delete" ? WorkspaceItemAction.Delete : WorkspaceItemAction.Restore,
+                    id: item.id, // ✅ workspace_items.id
+                };
+            });
+
+            // ===== STEP 7: Call batch upsert API =====
+            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentWorkspace.id, batchRequests);
+
+            if (!result.success) {
+                throw new Error(result.message || "Batch update failed");
+            }
+
+            // ===== STEP 8: Post-processing =====
+
+            if (type === "soft-delete") {
+                // Clean up open tabs
+                // In V2: entityType is numeric: 2=folder, 3=note, 4=file
+                const noteIds = itemsToUpdate.filter((item) => item.entityType === 3).map((item) => item.entityId);
+                const fileIds = itemsToUpdate.filter((item) => item.entityType === 4).map((item) => item.entityId);
+
+                if (noteIds.length > 0) {
+                    processTabAfterDelete(noteIds, "note");
+                }
+                if (fileIds.length > 0) {
+                    processTabAfterDelete(fileIds, "file");
+                }
+            }
+
+            // Reload workspace tree
+            const res = await workspaceService._getWorkspaceTreeV2(token ?? "", currentWorkspace.id);
+            if(res && res.success){
+                setCurrentWorkspace(res.object as WorkspaceDTO);
+                // ===== STEP 9: Clear selection =====
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
+
+                // Show success message
+                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
+            }
+            else {
+                throw new Error("Failed to reload workspace tree");
+            }
+
+        } catch (error) {
+            console.error("❌ Failed to update items:", error);
+            const errorMessage = await parseApiError(error);
+
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+            } else {
+                enqueueSnackbar(`Failed to update items: ${errorMessage}`, { variant: "error" });
+            }
+        }
+    };
+
+    /**
+     * Wrapper for delete/restore with confirmation popover
+     * Similar to dhr_items in folder helper
      */
     const deleteItems = (event: any, isHardDelete: boolean = false) => {
-        // ---------
+        // ----------------
         // STEP 1: Validate context data
-        // ---------
+        // ----------------
         if (!contextData) return;
 
-        // ---------
-        // STEP 2: Close context menu
-        // ---------
+        // Close context menu
         setIsContextMenuOpen(false);
 
-        // Extract anchor element from menu event
+        // ----------------
+        // STEP 2: Extract anchor element for popover positioning
+        // ----------------
         const nativeEvent = event.syntheticEvent || event;
         const anchorElement = nativeEvent?.target as HTMLElement;
 
-        // ---------
-        // STEP 3: Split selected items into NEW and EXISTING
-        // ---------
-        if (!isNote && !isFile) {
-            return;
-        }
+        // ----------------
+        // STEP 3: Build confirmation message based on delete type and selection
+        // ----------------
+        const entityName = isMultipleSelected ? undefined : (contextData.data?.name || contextData.name || "this item");
 
-        // Get all selected workspace item IDs (using contextData.id for single, or selectedItemIds for multi)
-        const itemsToDelete = isMultipleSelected 
-            ? selectedItemIds 
-            : [contextData.id];
-
-        // Split into new items (ID < 0, virtual) and existing items (ID > 0, in database)
-        const newItemIds = itemsToDelete.filter(id => id < 0);
-        const existingItemIds = itemsToDelete.filter(id => id > 0);
-
-        console.log("🗑️ Delete items split:", { 
-            total: itemsToDelete.length,
-            newItems: newItemIds.length, 
-            existingItems: existingItemIds.length 
-        });
-
-        // ---------
-        // STEP 4: Handle NEW items deletion (state only, no API)
-        // ---------
-        if (newItemIds.length > 0 && currentWorkspace) {
-            // Remove new items from workspace flatData
-            const updatedFlatData = currentWorkspace.flatData?.filter(
-                item => !newItemIds.includes(item.id)
-            ) || [];
-
-            // Update workspace state
-            setCurrentWorkspace({
-                ...currentWorkspace,
-                flatData: updatedFlatData
-            });
-
-            // Clear selection for deleted new items
-            setSelectedItemIds(prev => prev.filter(id => !newItemIds.includes(id)));
-            setLastSelectedItemId(null);
-
-            console.log(`✅ Removed ${newItemIds.length} new item(s) from state (no API call)`);
-        }
-
-        // ---------
-        // STEP 5: If no existing items, done (silent delete)
-        // ---------
-        if (existingItemIds.length === 0) {
-            console.log("✅ All items were new items - deleted from state only");
-            return;
-        }
-
-        // ---------
-        // STEP 6: Prepare confirmation message for EXISTING items only
-        // ---------
-        const existingCount = existingItemIds.length;
-        const isMultipleExisting = existingCount > 1;
-        const entityName = isMultipleExisting ? undefined : (contextData.data?.name || contextData.name || "this item");
-        
         const message = getConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
             entityType: isFile ? "file" : "note",
-            count: existingCount,
-            isMultiple: isMultipleExisting,
+            count: selectedCount,
+            isMultiple: isMultipleSelected,
             entityName
         });
 
-        // ---------
-        // STEP 7: Show confirmation dialog for EXISTING items
-        // ---------
+        // ----------------
+        // STEP 4: Show confirmation popover and handle user response
+        // ----------------
         showConfirmation({
             anchorEl: anchorElement,
             message,
@@ -242,12 +324,23 @@ export const useWorkspaceChildMenuHelper = () => {
             buttonVariant: "default",
             zIndex: 20000,
             onConfirm: () => {
-                // Only delete existing items via API
-                // TODO: Support batch delete for multiple existing items
-                if (isNote) {
-                    __deleteNote(contextData, isHardDelete);
-                } else if (isFile) {
-                    __deleteFile(contextData, isHardDelete);
+                if (isHardDelete) {
+                    // Hard delete - use old API (TODO: implement batch hard delete later)
+                    // NOTE: For now, hard delete still uses old API that deletes the note entity
+                    if (isNote) {
+                        __deleteNote(contextData, isHardDelete);
+                    } else if (isFile) {
+                        __deleteFile(contextData, isHardDelete);
+                    }
+                } else {
+                    // Soft delete/restore - use NEW batch API
+                    // Determine operation type based on current deletedAt status
+                    const isCurrentlyDeleted = contextData.deletedAt !== null && contextData.deletedAt !== undefined;
+                    const operationType: "soft-delete" | "restore" = isCurrentlyDeleted ? "restore" : "soft-delete";
+
+                    // For single item, pass the specific item ID; for multiple, use selected IDs
+                    const idsToProcess = isMultipleSelected ? selectedItemIds : [contextData.id];
+                    __deleteRestore_SelectedItems(idsToProcess, operationType);
                 }
             },
         });

@@ -518,8 +518,10 @@ export enum WorkspaceItemAction {
     Create = "CREATE",
     /** ADD existing entity to workspace */
     Add = "ADD",
-    /** MOVE workspace_item to new location */
+    /** MOVE workspace_item to new location (within same workspace) */
     Move = "MOVE",
+    /** MOVE CROSS workspace_item to another workspace (updates workspaceId + parentId + all descendants) */
+    MoveCross = "MOVECROSS",
     /** UPDATE entity data (folder/note/file properties) */
     Update = "UPDATE",
     /** SOFT DELETE workspace_item */
@@ -545,23 +547,30 @@ export enum WorkspaceItemAction {
  *    Optional: parentId (null = root), workspaceId
  *    Example: { action: "ADD", entityType: 3, entityId: 456, parentId: 123 }
  *
- * 3. MOVE (change location):
- *    Required: action=Move, id + (parentId OR workspaceId)
- *    Optional: Both for cross-workspace move
+ * 3. MOVE (change location within same workspace):
+ *    Required: action=Move, id, parentId
+ *    Optional: None
  *    ParentId = workspace_items.id of new parent (NOT entity ID!)
  *    Example: { action: "MOVE", id: 789, parentId: null } ← move to root
  *
- * 4. UPDATE (entity properties):
+ * 4. MOVE_CROSS (move to another workspace):
+ *    Required: action=MoveCross, id, workspaceId (target workspace)
+ *    Optional: parentId (target parent in new workspace, null = root)
+ *    Updates workspace_id for item and ALL descendants recursively
+ *    Example: { action: "MOVE_CROSS", id: 789, workspaceId: 5, parentId: 123 }
+ *    Example: { action: "MOVE_CROSS", id: 789, workspaceId: 5, parentId: null } ← to root of workspace 5
+ *
+ * 5. UPDATE (entity properties):
  *    Required: action=Update, id, entityData
  *    Optional: None
  *    Example: { action: "UPDATE", id: 789, folderData: { name: "New Name" } }
  *
- * 5. DELETE (soft delete):
+ * 6. DELETE (soft delete):
  *    Required: action=Delete, id
  *    Optional: None
  *    Example: { action: "DELETE", id: 789 }
  *
- * 6. RESTORE (un-delete):
+ * 7. RESTORE (un-delete):
  *    Required: action=Restore, id
  *    Optional: None
  *    Example: { action: "RESTORE", id: 789 }
@@ -570,16 +579,16 @@ export interface UpsertWorkspaceItemRequest {
     /** Explicit action to perform on workspace item */
     action: WorkspaceItemAction;
 
-    /** Workspace item ID - Required for: Move, Update, Delete, Restore */
+    /** Workspace item ID - Required for: Move, MoveCross, Update, Delete, Restore */
     id?: number | null;
 
-    /** Workspace ID (set by controller from route) */
+    /** Workspace ID (target workspace for MoveCross, set by controller from route for other actions) */
     workspaceId?: number | null;
 
     /** User ID (set by controller from JWT) */
     userId?: number;
 
-    /** Parent workspace_item ID (SELF-REFERENCING) - Required for: Move, Optional for: Create, Add */
+    /** Parent workspace_item ID (SELF-REFERENCING) - Required for: Move, Optional for: MoveCross, Create, Add */
     parentId?: number | null;
 
     /** Entity type: 2=folder, 3=note, 4=file - Required for: Create, Add */

@@ -8,12 +8,14 @@ import {
     FileText as NoteIcon,
     AlertTriangle as HardDeleteIcon,
     RotateCcw as RestoreIcon,
+    ArrowRightLeft as MoveIcon,
 } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useWorkspaceFolderMenuHelper } from "@/shared/contexts/helpers/useWorkspaceFolderMenu.helper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { useMoveToWorkspacePopupHelper } from "@/hooks/workspace/useMoveToWorkspacePopup.helper";
 
 /**
  * WorkspaceFolderNodeMenu
@@ -28,6 +30,7 @@ export function WorkspaceFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
     const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
     const { createFolder, editFolder, dhr_items, createNewNote, openAddExistingNotePopup } = useWorkspaceFolderMenuHelper();
+    const { openMoveToWorkspacePopup } = useMoveToWorkspacePopupHelper();
     const _TREESTATUS = useTreeStatusHelper();
 
     // Calculate derived values
@@ -39,9 +42,9 @@ export function WorkspaceFolderNodeMenu() {
     console.log("_ITEMSTATUS",_ITEMSTATUS)
     
     const addMenuItems = [
-        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
-        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: "Add Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
-        { type: constants.workspace.itemTypes.file, icon: FileIcon, label: "Add File", disabled: true },
+        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "Add New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: constants.workspace.itemTypes.note, icon: NoteIcon, label: "Add New Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: constants.workspace.itemTypes.file, icon: FileIcon, label: "Add New File", disabled: true },
     ];
 
     return (
@@ -74,6 +77,12 @@ export function WorkspaceFolderNodeMenu() {
                     <MenuItem onClick={() => openAddExistingNotePopup(contextData)} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple}>
                         <NoteIcon className="w-4 h-4 mr-2" />
                         Add Existing Note
+                    </MenuItem>
+
+                    {/* Move to Another Workspace */}
+                    <MenuItem onClick={() => openMoveToWorkspacePopup()} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
+                        <MoveIcon className="w-4 h-4 mr-2" />
+                        Move to Another Workspace
                     </MenuItem>
 
                     <MenuDivider />
