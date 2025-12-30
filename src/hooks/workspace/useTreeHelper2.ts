@@ -15,7 +15,6 @@ import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 
 export const useTreeHelper2 = () => {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentWorkspace } = useWorkspaceStore();
-
     /**
      * Clear all selections
      */
@@ -202,7 +201,7 @@ export const useTreeHelper2 = () => {
         }
     }, [selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace]);
 
-    return {
+        return {
         isFolderSelected,
         handleSelectionChange,
         handleKeyDown,

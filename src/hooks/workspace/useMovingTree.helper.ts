@@ -18,8 +18,6 @@ export const useMovingTreeHelper = () => {
     const {
         targetWorkspaceId,
         setTargetWorkspaceId,
-        targetFolderId,
-        setTargetFolderId,
         highlightedDuplicateIds,
         setHighlightedDuplicateIds,
         isLoadingTargetTree,
@@ -40,28 +38,14 @@ export const useMovingTreeHelper = () => {
     // Track highlight timeout to clear previous ones
     const highlightTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-    // Filter workspaces (exclude current workspace)
-    const getAvailableWorkspaces = (): IAutoCompleteOptions[] => {
-        return allWorkspaces
-            .filter((ws) => ws.id !== currentWorkspace?.id)
-            .map((ws) => ({
-                id: ws.id.toString(),
-                label: ws.name,
-                desc: ws.description || ws.name,
-                active: true,
-            }));
-    };
-
     // Handle workspace selection
     const handleWorkspaceChange = (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
         const newWorkspaceId = newValue?.id ? parseInt(newValue.id.toString()) : null;
         if (newWorkspaceId) {
             setTargetWorkspaceId(newWorkspaceId);
-            setTargetFolderId(null);
             setHighlightedDuplicateIds(new Set()); // Clear highlights when switching workspace
         } else {
             setTargetWorkspaceId(null);
-            setTargetFolderId(null);
         }
     };
 
@@ -231,14 +215,28 @@ export const useMovingTreeHelper = () => {
                 return;
             }
 
-            // STEP 5.0: Prevent dragging root node
+            // STEP 5.0: Check for unsaved notes (id < 0)
+            const unsavedItems = itemIds
+                .filter((id) => id < 0)
+                .map((id) => {
+                    const item = currentWorkspace?.flatData.find((i) => i.id === id);
+                    return item?.data?.name || "Untitled";
+                });
+
+            if (unsavedItems.length > 0) {
+                const itemNames = unsavedItems.join(", ");
+                enqueueSnackbar(`Please save "${itemNames}" before move`, { variant: "error" });
+                return;
+            }
+
+            // STEP 5.1: Prevent dragging root node
             const hasRootNode = itemIds.includes(constants.workspace.root.workspaceItemId);
             if (hasRootNode) {
                 enqueueSnackbar("Cannot move workspace root node", { variant: "error" });
                 return;
             }
 
-            // STEP 5.1: Filter to only top-level parents (prevent moving both parent and child)
+            // STEP 5.2: Filter to only top-level parents (prevent moving both parent and child)
             // Example: If selecting folder A and its subfolder B, only move A (B will follow automatically)
 
             // Build tree data from current workspace for hierarchy checking
@@ -312,7 +310,6 @@ export const useMovingTreeHelper = () => {
     };
 
     return {
-        getAvailableWorkspaces,
         handleWorkspaceChange,
         loadTargetWorkspaceTree,
         dropToMovingTree,

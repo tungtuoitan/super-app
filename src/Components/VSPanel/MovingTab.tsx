@@ -15,14 +15,21 @@ import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useDragDropManager, useDrop } from "react-dnd";
 import { useMovingTreeHelper } from "@/hooks/workspace/useMovingTree.helper";
-import {MovingTree} from "./MovingTree";
+import { MovingTree } from "./MovingTree";
 
 export function MovingTab() {
-    const { targetWorkspaceId, targetFolderId, isLoadingTargetTree, targetWorkspace, treeContainerRef, containerHeight } = useMovingTreeStore();
-    const { allWorkspaces, currentWorkspace } = useWorkspaceStore();
+    const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useMovingTreeStore();
+    const { allWorkspaces, currentWorkspace, selectedWorkspaceId } = useWorkspaceStore();
     const manager = useDragDropManager();
-    const { getAvailableWorkspaces, handleWorkspaceChange, loadTargetWorkspaceTree, initializeContainerHeightTracking, checkDraggingItemsAreDuplicate } =
-        useMovingTreeHelper();
+    const { handleWorkspaceChange, loadTargetWorkspaceTree, initializeContainerHeightTracking, checkDraggingItemsAreDuplicate } = useMovingTreeHelper();
+
+    // Ensure targetWorkspaceId is not the same as selectedWorkspaceId
+    useEffect(() => {
+        if (selectedWorkspaceId === targetWorkspaceId) {
+            setTargetWorkspaceId(allWorkspaces.length > 0 ? (allWorkspaces.find((w) => w.id !== selectedWorkspaceId)?.id as number) : null);
+            setHighlightedDuplicateIds(new Set()); // Clear highlights when switching workspace
+        }
+    }, [selectedWorkspaceId]);
 
     // Load target workspace tree when workspace is selected
     useEffect(() => {
@@ -36,9 +43,14 @@ export function MovingTab() {
     }, []);
 
     // Filter workspaces (exclude current workspace)
-    const availableWorkspaces: IAutoCompleteOptions[] = useMemo(() => {
-        return getAvailableWorkspaces();
-    }, [allWorkspaces, currentWorkspace]);
+    const availableWorkspaces: IAutoCompleteOptions[] = allWorkspaces
+        .filter((ws) => ws.id !== currentWorkspace?.id)
+        .map((ws) => ({
+            id: ws.id.toString(),
+            label: ws.name,
+            desc: ws.description || ws.name,
+            active: true,
+        }));
 
     // useDrop hook for visual feedback only (actual drop handled by Tree's onMove)
     const [{ isOver, canDrop }, drop] = useDrop({

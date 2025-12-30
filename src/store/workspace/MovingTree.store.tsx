@@ -15,10 +15,6 @@ export interface MovingTreeContextData {
     targetWorkspaceId: number | null;
     setTargetWorkspaceId: Dispatch<SetStateAction<number | null>>;
 
-    // Target folder info (workspace_items.id of folder in target workspace, null = root)
-    targetFolderId: number | null;
-    setTargetFolderId: Dispatch<SetStateAction<number | null>>;
-
     // Temporarily highlighted duplicate items (will be cleared after 5s)
     highlightedDuplicateIds: Set<number>;
     setHighlightedDuplicateIds: Dispatch<SetStateAction<Set<number>>>;
@@ -45,10 +41,6 @@ const movingTreeContextDefaultValue: MovingTreeContextData = {
     // Target workspace info
     targetWorkspaceId: null,
     setTargetWorkspaceId: () => {},
-
-    // Target folder info
-    targetFolderId: null,
-    setTargetFolderId: () => {},
 
     // Temporarily highlighted duplicates
     highlightedDuplicateIds: new Set(),
@@ -90,9 +82,6 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     // Target workspace info
     const [targetWorkspaceId, setTargetWorkspaceId] = useState<number | null>(null);
 
-    // Target folder info
-    const [targetFolderId, setTargetFolderId] = useState<number | null>(null);
-
     // Temporarily highlighted duplicates (cleared after 5s)
     const [highlightedDuplicateIds, setHighlightedDuplicateIds] = useState<Set<number>>(new Set());
 
@@ -112,10 +101,6 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 // Target workspace info
                 targetWorkspaceId,
                 setTargetWorkspaceId,
-
-                // Target folder info
-                targetFolderId,
-                setTargetFolderId,
 
                 // Temporarily highlighted duplicates
                 highlightedDuplicateIds,
