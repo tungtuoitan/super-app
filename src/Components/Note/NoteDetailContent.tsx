@@ -29,7 +29,6 @@ export function NoteDetailContent() {
     const {getItemStatus} = useTreeStatusHelper()
     const { currentWorkspace} = useWorkspaceStore();
     const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find(i => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
-    console.log('_itemStatus', _itemStatus);
     // Get note data from active tab instead of activeNote
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 

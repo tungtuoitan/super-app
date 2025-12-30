@@ -7,7 +7,7 @@ import { AuthStoreProvider, useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceProvider } from "@/store/workspace/Workspace.store";
 import { FolderDialogProvider } from "@/store/workspace/FolderDialog.store";
 import { NoteGridPopupProvider } from "@/store/workspace/NoteGridPopup.store";
-import { MoveToWorkspacePopupProvider } from "@/store/workspace/MoveToWorkspacePopup.store";
+import { MovingTreeProvider } from "@/store/workspace/MovingTree.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
@@ -60,7 +60,7 @@ export function Main() {
                                             <WorkspaceProvider>
                                                 <FolderDialogProvider>
                                                     <NoteGridPopupProvider>
-                                                        <MoveToWorkspacePopupProvider>
+                                                        <MovingTreeProvider>
                                                             <WsProvider>
                                                                 <WsDetailProvider>
                                                                     <NoteDetailProvider>
@@ -87,7 +87,7 @@ export function Main() {
                                                                     </NoteDetailProvider>
                                                                 </WsDetailProvider>
                                                             </WsProvider>
-                                                        </MoveToWorkspacePopupProvider>
+                                                        </MovingTreeProvider>
                                                     </NoteGridPopupProvider>
                                                 </FolderDialogProvider>
                                             </WorkspaceProvider>

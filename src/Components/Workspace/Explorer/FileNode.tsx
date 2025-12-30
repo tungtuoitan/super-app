@@ -37,7 +37,15 @@ function getFileIcon(extension?: string) {
     return File;
 }
 
-export function FileNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
+interface FileNodeProps {
+    node: NodeApi<TreeFolder>;
+    style: React.CSSProperties;
+    dragHandle?: any;
+    treeData: TreeFolder[];
+    treeType?: "workspaceTree" | "targetTree";
+}
+
+export function FileNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FileNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeHelper2();
@@ -67,6 +75,9 @@ export function FileNode({ node, style, dragHandle, treeData }: { node: NodeApi<
         // Focus the tree container for keyboard navigation
         const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
         treeContainer?.focus();
+
+        // Disable selection in targetTree
+        if (treeType === "targetTree") return;
 
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
@@ -109,6 +120,9 @@ export function FileNode({ node, style, dragHandle, treeData }: { node: NodeApi<
     const handleRightClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
+
+        // Disable context menu in targetTree
+        if (treeType === "targetTree") return;
 
         const _currentItem = currentWorkspace?.flatData.find((i: any) => i.entityId === entityId);
 

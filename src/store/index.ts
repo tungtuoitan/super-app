@@ -23,6 +23,9 @@ export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from "
 export { NoteGridPopupProvider, useNoteGridPopupStore } from "./workspace/NoteGridPopup.store";
 export type { NoteGridPopupContextData } from "./workspace/NoteGridPopup.store";
 
+export { MovingTreeProvider, useMovingTreeStore } from "./workspace/MovingTree.store";
+export type { MovingTreeContextData } from "./workspace/MovingTree.store";
+
 export { ActivityBarProvider, useActivityBarStore } from "./activityBar/ActivityBar.store";
 export type { ActivityBarContextData } from "./activityBar/ActivityBar.store";
 

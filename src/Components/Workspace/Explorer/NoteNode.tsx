@@ -11,7 +11,15 @@ import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
-export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
+interface NoteNodeProps {
+    node: NodeApi<TreeFolder>;
+    style: React.CSSProperties;
+    dragHandle?: any;
+    treeData: TreeFolder[];
+    treeType?: "workspaceTree" | "targetTree";
+}
+
+export function NoteNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: NoteNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeHelper2();
@@ -38,9 +46,11 @@ export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<
         e.stopPropagation();
         e.preventDefault();
 
+
         // Focus the tree container for keyboard navigation
         const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
         treeContainer?.focus();
+        if(treeType === "targetTree") return; // Disable opening tab in targetTree
 
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
@@ -76,6 +86,8 @@ export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<
             setLastSelectedItemId(workspaceItemId);
             node.select();
 
+            
+
             // ✅ Open note in editor tab (convert WorkspaceNoteItem to Note)
             const note: Note = {
                 id: noteItem.data.id,
@@ -97,6 +109,7 @@ export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<
     const handleRightClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
+        if(treeType === "targetTree") return; // Disable context menu in targetTree
 
         const _currentItem = currentWorkspace?.flatData.find((i: any) => i.entityId === entityId);
 
@@ -147,7 +160,7 @@ export function NoteNode({ node, style, dragHandle, treeData }: { node: NodeApi<
                 {/* Note Info */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                     <span className={`text-sm truncate text-editor-fg ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
-                        {noteItem.data.name + "-" + entityId}
+                        {noteItem.data.name} - {noteItem.id} - {entityId}
                     </span>
                     {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
                 </div>

@@ -32,7 +32,6 @@ export function WorkspaceTree() {
                 // Ensure height is always a valid number
                 if (height && typeof height === "number" && height > 0) {
                     setContainerHeight(height);
-                    // console.log("📏 Container height updated:", height);
                 }
             }
         };
@@ -83,7 +82,6 @@ export function WorkspaceTree() {
             }
         };
     }, []);
-    console.log("flatData: ", currentWorkspace?.flatData)
 
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
@@ -164,13 +162,6 @@ export function WorkspaceTree() {
 
             const actualTreeHeight = visibleCount * ROW_HEIGHT;
             const remaining = containerHeight - actualTreeHeight;
-
-            console.log("Drop zone height calculation:", {
-                containerHeight,
-                visibleCount,
-                actualTreeHeight,
-                remaining,
-            });
 
             setDropZoneHeight(Math.max(remaining, 0));
         };
@@ -322,7 +313,9 @@ export function WorkspaceTree() {
                                 ) : isFolderV2(item as any) ? (
                                     <FolderNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
                                 ) : isNoteV2(item as any) ? (
-                                    <NoteNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
+                                    <>
+                                    <NoteNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} treeType="workspaceTree" />
+                                    </>
                                 ) : isFileV2(item as any) ? (
                                     <FileNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
                                 ) : null}

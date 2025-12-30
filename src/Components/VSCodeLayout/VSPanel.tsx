@@ -1,17 +1,18 @@
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { X, FileText, Settings } from "lucide-react";
+import { X, FileText, Settings, ArrowRightLeft } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
 import { useActivityBarStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { Note } from "@/types/note.types";
+import { MovingTab } from "./MovingTab";
 
 interface VSPanelProps {
     onClose: () => void;
 }
 
-type PanelTab = "noteDetail" | "properties";
+type PanelTab = "noteDetail" | "properties" | "moving";
 
 /**
  * VSPanel - Bottom panel for content details
@@ -62,6 +63,15 @@ export function VSPanel({ onClose }: VSPanelProps) {
                                 <Settings className="w-4 h-4" />
                                 <span>Properties</span>
                             </button>
+                            <button
+                                onClick={() => setActiveTab("moving")}
+                                className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
+                                    activeTab === "moving" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
+                                }`}
+                            >
+                                <ArrowRightLeft className="w-4 h-4" />
+                                <span>Moving</span>
+                            </button>
                         </div>
 
                         <button onClick={onClose} className="p-1 mr-2 text-muted-foreground hover:text-editor-fg hover:bg-editor-hover rounded transition-colors">
@@ -70,9 +80,10 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     </div>
 
                     {/* Panel Content */}
-                    <div className="flex-1 overflow-auto p-3">
+                    <div className={`flex-1 overflow-auto ${activeTab === "moving" ? "" : "p-3"}`}>
                         {activeTab === "noteDetail" && <NoteDetailTab />}
                         {activeTab === "properties" && <PropertiesTab />}
+                        {activeTab === "moving" && <MovingTab />}
                     </div>
                 </div>
             )}

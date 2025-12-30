@@ -9,7 +9,15 @@ import { WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
-export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeApi<TreeFolder>; style: React.CSSProperties; dragHandle?: any; treeData: TreeFolder[] }) {
+interface FolderNodeProps {
+    node: NodeApi<TreeFolder>;
+    style: React.CSSProperties;
+    dragHandle?: any;
+    treeData: TreeFolder[];
+    treeType?: "workspaceTree" | "targetTree";
+}
+
+export function FolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FolderNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected } = useTreeHelper2();
@@ -39,6 +47,14 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault(); // Prevent tree activation that causes scrolling
+
+        // For targetTree, only allow expand/collapse (no selection)
+        if (treeType === "targetTree") {
+            if (hasChildren) {
+                node.toggle();
+            }
+            return;
+        }
 
         // Don't allow selection of workspace root node
         if (isWorkspaceRoot) {
@@ -100,6 +116,11 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
     const handleRightClick = (e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent bubbling to parent
         e.preventDefault(); // Prevent default context menu
+
+        // Don't show context menu for targetTree
+        if (treeType === "targetTree") {
+            return;
+        }
 
         // Don't show context menu for workspace root
         if (isWorkspaceRoot) {
@@ -194,7 +215,7 @@ export function FolderNode({ node, style, dragHandle, treeData }: { node: NodeAp
                             text-editor-fg
                         `}
                         >
-                            {folderName}
+                            {folderName} - {workspaceItemId} - {entityId}
                         </span>
                     </div>
                 </div>
