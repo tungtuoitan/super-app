@@ -13,13 +13,14 @@ interface RootFolderNodeProps {
     node: NodeApi<TreeFolder>;
     style: React.CSSProperties;
     treeData: TreeFolder[];
+    treeType?: "workspaceTree" | "targetTree";
 }
 
 /**
  * Root Folder Node - Special node for workspace root with action buttons
  * Shows workspace name and provides quick actions: Add Folder, Refresh, Collapse All
  */
-export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
+export function RootFolderNode({ node, style, treeData, treeType = "workspaceTree" }: RootFolderNodeProps) {
     const { currentWorkspace } = useWorkspaceStore();
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
@@ -75,41 +76,43 @@ export function RootFolderNode({ node, style, treeData }: RootFolderNodeProps) {
                 <span className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate">{folderItem.name}</span>
             </div>
 
-            {/* Action Buttons - Hidden by default, shown on hover */}
-            <div className="flex gap-0.5 opacity-0 group-hover:opacity-70 hover:opacity-100 transition-opacity">
-                <button
-                    title="Add Folder"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        addNewFolder(treeData);
-                    }}
-                    className="p-1 text-editor-fg hover:bg-editor-hover rounded"
-                >
-                    <Plus className="w-4 h-4" />
-                </button>
+            {/* Action Buttons - Hidden by default, shown on hover - Only for workspaceTree */}
+            {treeType === "workspaceTree" && (
+                <div className="flex gap-0.5 opacity-0 group-hover:opacity-70 hover:opacity-100 transition-opacity">
+                    <button
+                        title="Add Folder"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            addNewFolder(treeData);
+                        }}
+                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
 
-                <button
-                    title="Refresh"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        loadTree();
-                    }}
-                    className="p-1 text-editor-fg hover:bg-editor-hover rounded"
-                >
-                    <RefreshCw className="w-4 h-4" />
-                </button>
+                    <button
+                        title="Refresh"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            loadTree();
+                        }}
+                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
 
-                <button
-                    title="Collapse All"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        _treeRef?.current?.closeAll();
-                    }}
-                    className="p-1 text-editor-fg hover:bg-editor-hover rounded"
-                >
-                    <ChevronsUp className="w-4 h-4" />
-                </button>
-            </div>
+                    {/* <button
+                        title="Collapse All"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            _treeRef?.current?.closeAll();
+                        }}
+                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                    >
+                        <ChevronsUp className="w-4 h-4" />
+                    </button> */}
+                </div>
+            )}
         </div>
     );
 }

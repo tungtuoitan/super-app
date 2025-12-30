@@ -309,12 +309,12 @@ export function WorkspaceTree() {
                                         }}
                                     ></div>
                                 ) : isWorkspaceRoot ? (
-                                    <RootFolderNode node={node} style={{ height: "100%" }} treeData={treeData} />
+                                    <RootFolderNode node={node} style={{ height: "100%" }} treeData={treeData} treeType="workspaceTree" />
                                 ) : isFolderV2(item as any) ? (
                                     <FolderNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
                                 ) : isNoteV2(item as any) ? (
                                     <>
-                                    <NoteNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} treeType="workspaceTree" />
+                                        <NoteNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} treeType="workspaceTree" />
                                     </>
                                 ) : isFileV2(item as any) ? (
                                     <FileNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
