@@ -45,7 +45,7 @@ export function MovingTab() {
     // Auto-detect and highlight duplicates when targetWorkspace loads or selectedItemIds change
     useEffect(() => {
         checkAndHighlightDuplicates();
-    }, [targetWorkspace]);
+    }, [targetWorkspaceId, selectedWorkspaceId, targetWorkspace, currentWorkspace]);
 
     // Filter workspaces (exclude current workspace)
     const availableWorkspaces: IAutoCompleteOptions[] = allWorkspaces

@@ -110,7 +110,7 @@ export function MovingTree() {
 
             visibleCount = countVisibleNodes(targetTreeData);
 
-            const actualTreeHeight = visibleCount * ROW_HEIGHT;
+            const actualTreeHeight = (visibleCount + 1) * ROW_HEIGHT; // +1 for Root Node
             const remaining = containerHeight - actualTreeHeight;
 
             setDropZoneHeight(Math.max(remaining, 0));

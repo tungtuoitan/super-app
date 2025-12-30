@@ -160,7 +160,7 @@ export function WorkspaceTree() {
                 }
             }
 
-            const actualTreeHeight = visibleCount * ROW_HEIGHT;
+            const actualTreeHeight = (visibleCount + 1) * ROW_HEIGHT;
             const remaining = containerHeight - actualTreeHeight;
 
             setDropZoneHeight(Math.max(remaining, 0));

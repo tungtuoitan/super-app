@@ -19,11 +19,13 @@ import { useSnackbar } from "notistack";
 import {ResultOptions} from "@/types/common.types";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import {useMovingTreeStore} from "@/store/workspace/MovingTree.store";
 
 export const useWorkspaceLoader = () => {
     const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
+    const { setTargetWorkspaceId } = useMovingTreeStore();
 
     /**
      * Load all user workspaces
@@ -37,11 +39,14 @@ export const useWorkspaceLoader = () => {
             const data = await workspaceService._getAllUserWorkspaces(token);
 
             setAllWorkspaces(data);
-
+            
             // Set default to first workspace if available and no tree loaded
             if (data.length > 0 && !currentWorkspace) {
                 const defaultWorkspaceId = data[0].id;
                 setSelectedWorkspaceId(defaultWorkspaceId);
+                if(data.length > 1){
+                    setTargetWorkspaceId(data.length > 0 ? data[1].id : null); //* set 1 workspace bất kì miễn khác selectedWorkspaceId
+                }
                 // Auto-load tree for default workspace
                 // await loadTree(defaultWorkspaceId);
             }
