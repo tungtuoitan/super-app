@@ -12,6 +12,7 @@ import { constants } from "@/utils/constants";
 interface RootFolderNodeProps {
     node: NodeApi<TreeFolder>;
     style: React.CSSProperties;
+    dragHandle?: any;
     treeData: TreeFolder[];
     treeType?: "workspaceTree" | "targetTree";
 }
@@ -20,7 +21,7 @@ interface RootFolderNodeProps {
  * Root Folder Node - Special node for workspace root with action buttons
  * Shows workspace name and provides quick actions: Add Folder, Refresh, Collapse All
  */
-export function RootFolderNode({ node, style, treeData, treeType = "workspaceTree" }: RootFolderNodeProps) {
+export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: RootFolderNodeProps) {
     const { currentWorkspace } = useWorkspaceStore();
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
@@ -29,6 +30,9 @@ export function RootFolderNode({ node, style, treeData, treeType = "workspaceTre
 
     const folderItem = node.data.data as FolderItem;
     const hasChildren = node.data.children && node.data.children.length > 0;
+
+    // Check if this node is a valid drop target (being dragged over)
+    const isDropTarget = node.state.willReceiveDrop;
 
     const handleRightClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -43,6 +47,16 @@ export function RootFolderNode({ node, style, treeData, treeType = "workspaceTre
 
     return (
         <div
+            ref={(el) => {
+                // Make entire root node droppable (for dropping items to root level)
+                if (dragHandle && typeof dragHandle === "function" && el) {
+                    try {
+                        dragHandle(el);
+                    } catch (error) {
+                        console.warn("Error setting dragHandle:", error);
+                    }
+                }
+            }}
             style={{ ...style, paddingLeft: `${node.level * 8}px` }}
             onClick={(e) => {
                 e.stopPropagation();
@@ -52,7 +66,10 @@ export function RootFolderNode({ node, style, treeData, treeType = "workspaceTre
                 }
             }}
             onContextMenu={handleRightClick}
-            className="flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded group hover:bg-editor-hover-light"
+            className={`
+                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded group hover:bg-editor-hover-light
+                ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
+            `}
         >
             {/* Expand/Collapse Button */}
             <button

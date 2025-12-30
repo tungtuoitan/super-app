@@ -201,6 +201,13 @@
     display: none; 
 } */
 
+ /* Ensure tree inner div has stable scrollbar gutter */
+div[role="tree"] > div {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+
 /* Debug border utilities - outside of @layer to ensure they apply */
 .bred {
     border: 1px solid red !important;

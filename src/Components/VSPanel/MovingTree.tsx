@@ -133,6 +133,7 @@ export function MovingTree() {
                 disableDrag={true}
                 disableDrop={false}
                 disableMultiSelection={true}
+                renderDragPreview={() => null}
                 onMove={async (args) => {
                     // Call API directly here (Tree consumes the drop event, so useDrop won't fire)
                     await dropToMovingTree(args);
@@ -184,7 +185,7 @@ export function MovingTree() {
                     const nodeContent = (() => {
                         if (isFolderV2(node.data.data as unknown as WorkspaceItemV2)) {
                             if (node.level === 0) {
-                                return <RootFolderNode node={node} treeData={targetTreeData} style={style} treeType="targetTree" />;
+                                return <RootFolderNode node={node} treeData={targetTreeData} style={style} dragHandle={dragHandle} treeType="targetTree" />;
                             }
                             return <FolderNode node={node} style={style} dragHandle={dragHandle} treeData={targetTreeData} treeType="targetTree" />;
                         } else if (isNoteV2(node.data.data as unknown as WorkspaceItemV2)) {

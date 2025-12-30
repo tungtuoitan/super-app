@@ -11,6 +11,8 @@ import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "@/types/workspa
 import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
+import { SPECIAL_IDS } from "@/utils/temp-id.utils";
+import { isNumber } from "lodash";
 
 export const useTreeEditorHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
@@ -52,7 +54,7 @@ export const useTreeEditorHelper = () => {
             const request: UpsertWorkspaceItemRequest = {
                 action: WorkspaceItemAction.Create,
                 entityType: 3, // Note
-                parentId: workspaceItem.parentId, // Parent workspace_items.id
+                parentId: isNumber(workspaceItem.parentId) && SPECIAL_IDS.includes(workspaceItem.parentId) ? null : workspaceItem.parentId ?? null, // Parent workspace_items.id
                 noteData: {
                     userId: noteData.userId,
                     name: noteData.name,
@@ -79,9 +81,7 @@ export const useTreeEditorHelper = () => {
             // API returns Data: List<WorkspaceItemEntity> with entityId = real note ID
             if (result.data && result.data.length > 0) {
                 const _createdItem = result.data[0];
-                const _workspaceItemFromDB: WorkspaceItemV2 | undefined = newWorkspace?.flatData.find(
-                    (item) => item.entityType === 3 && item.entityId === _createdItem.entityId
-                );
+                const _workspaceItemFromDB: WorkspaceItemV2 | undefined = newWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === _createdItem.entityId);
                 if (!_workspaceItemFromDB) {
                     throw new Error("Failed to find created workspace item in reloaded data");
                 }
