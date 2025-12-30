@@ -31,6 +31,10 @@ export interface MovingTreeContextData {
     treeContainerRef: React.RefObject<HTMLDivElement>;
     containerHeight: number;
     setContainerHeight: Dispatch<SetStateAction<number>>;
+
+    // Force tree re-render after drop operations
+    treeRenderKey: number;
+    setTreeRenderKey: Dispatch<SetStateAction<number>>;
 }
 
 // ========================================
@@ -58,6 +62,10 @@ const movingTreeContextDefaultValue: MovingTreeContextData = {
     treeContainerRef: { current: null },
     containerHeight: 500,
     setContainerHeight: () => {},
+
+    // Force tree re-render
+    treeRenderKey: 0,
+    setTreeRenderKey: () => {},
 };
 
 const MovingTreeStore = createContext<MovingTreeContextData>(movingTreeContextDefaultValue);
@@ -95,6 +103,9 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = useState<number>(500);
 
+    // Force tree re-render
+    const [treeRenderKey, setTreeRenderKey] = useState<number>(0);
+
     return (
         <MovingTreeStore.Provider
             value={{
@@ -118,6 +129,10 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 treeContainerRef,
                 containerHeight,
                 setContainerHeight,
+
+                // Force tree re-render
+                treeRenderKey,
+                setTreeRenderKey,
             }}
         >
             {children}

@@ -9,6 +9,7 @@ import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { WorkspaceFileItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { StatusDot } from "./StatusDot";
 
 function getFileIcon(extension?: string) {
     if (!extension) return File;
@@ -48,7 +49,7 @@ interface FileNodeProps {
 
 export function FileNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FileNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
-    const { highlightedDuplicateIds } = useMovingTreeStore();
+    const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();
@@ -75,8 +76,6 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
     const compositeKey = `${fileItem.entityType}-${entityId}`;
     // Only show duplicate dot in targetTree (not in workspaceTree)
     const isDuplicate = highlightedDuplicateIds.has(compositeKey);
-    const showDot = isUnsaved || isDuplicate;
-    const dotColor = isUnsaved ? "bg-green-700" : isDuplicate ? "bg-red-500" : "";
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -205,7 +204,13 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                         {fileItem.data.name}
                     </span>
                     {fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
-                    {showDot && <div className={`w-1.5 h-1.5 rounded-full ${dotColor} ml-auto mr-1`} title={isUnsaved ? "Unsaved" : "Duplicate"} />}
+                    <StatusDot
+                        isUnsaved={isUnsaved}
+                        isDuplicate={isDuplicate}
+                        itemType="File"
+                        itemName={fileItem.data.name}
+                        targetWorkspaceName={targetWorkspace?.name}
+                    />
                 </div>
             </div>
         </div>

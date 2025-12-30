@@ -17,7 +17,7 @@ import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useMovingTreeHelper } from "@/hooks/workspace/useMovingTree.helper";
 
 export function MovingTree() {
-    const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds } = useMovingTreeStore();
+    const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey } = useMovingTreeStore();
     const { dropToMovingTree } = useMovingTreeHelper();
     const manager = useDragDropManager();
 
@@ -122,6 +122,7 @@ export function MovingTree() {
     return (
         <div ref={treeContainerRef} className="h-full pl-4 py-2">
             <Tree
+                key={treeRenderKey}
                 data={targetTreeData}
                 openByDefault={true}
                 width="100%"

@@ -2,7 +2,7 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { X, FileText, Settings, ArrowRightLeft } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { useActivityBarStore } from "@/store/index";
+import { useActivityBarStore, useMovingTreeStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { Note } from "@/types/note.types";
@@ -28,6 +28,13 @@ type PanelTab = "noteDetail" | "properties" | "moving";
 export function VSPanel({ onClose }: VSPanelProps) {
     const [activeTab, setActiveTab] = useState<PanelTab>("noteDetail");
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
+    const { setTargetWorkspace } = useMovingTreeStore();
+    
+    const changeTab = (tab: PanelTab) => {
+        if(tab !== "moving")
+            setTargetWorkspace(null);
+        setActiveTab(tab);
+    };
 
     return (
         <Panel
@@ -46,7 +53,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     <div className="flex items-center justify-between border-b border-editor-border h-[35px]">
                         <div className="flex h-full">
                             <button
-                                onClick={() => setActiveTab("noteDetail")}
+                                onClick={() => changeTab("noteDetail")}
                                 className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
                                     activeTab === "noteDetail" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
                                 }`}
@@ -55,7 +62,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                                 <span>Note Detail</span>
                             </button>
                             <button
-                                onClick={() => setActiveTab("properties")}
+                                onClick={() => changeTab("properties")}
                                 className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
                                     activeTab === "properties" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
                                 }`}
@@ -64,7 +71,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                                 <span>Properties</span>
                             </button>
                             <button
-                                onClick={() => setActiveTab("moving")}
+                                onClick={() => changeTab("moving")}
                                 className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
                                     activeTab === "moving" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
                                 }`}
