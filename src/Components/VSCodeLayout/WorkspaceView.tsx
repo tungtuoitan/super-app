@@ -38,14 +38,14 @@ export function WorkspaceView() {
     }, [$user.userId, $user.filters, selectedWorkspaceId]);
 
     // Sync selected option with currentWorkspace.id from store
-    useEffect(() => {
-        if (currentWorkspace?.id && allWorkspaces.length > 0) {
-            const workspace = allWorkspaces.find((ws) => ws.id === currentWorkspace.id);
-            if (workspace) {
-                setSelectedWorkspaceId(workspace.id);
-            }
-        }
-    }, [currentWorkspace?.id, allWorkspaces]);
+    // useEffect(() => {
+    //     if (currentWorkspace?.id && allWorkspaces.length > 0) {
+    //         const workspace = allWorkspaces.find((ws) => ws.id === currentWorkspace.id);
+    //         if (workspace) {
+    //             setSelectedWorkspaceId(workspace.id);
+    //         }
+    //     }
+    // }, [currentWorkspace?.id, allWorkspaces]);
 
     // Convert workspaces to autocomplete options
     const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => ({

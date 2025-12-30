@@ -127,6 +127,7 @@ export const useTreeHelper2 = () => {
                 break;
 
             case "a":
+            case "A":
                 if (e.ctrlKey || e.metaKey) {
                     e.preventDefault();
 

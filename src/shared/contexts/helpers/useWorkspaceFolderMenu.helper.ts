@@ -532,7 +532,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     
 
     /**
-     * Wrapper fo   r delete with confirmation popover
+     * DELETE / HARD DELETE / RESTORE
      */
     const dhr_items = (event: any, isHardDelete: boolean = false) => {
         // ----------------
