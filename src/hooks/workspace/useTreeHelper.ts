@@ -68,14 +68,8 @@ export const useTreeHelper = () => {
                     return id !== undefined && id !== constants.workspace.dropZone.workspaceItemId && id !== constants.workspace.root.workspaceItemId;
                 });
 
-            // ---- VS CODE BEHAVIOR: Filter out descendants of selected nodes ----
-            selectedItemIds = selectedItemIds.filter((itemId) => {
-                const isDescendantOfOtherSelected = selectedItemIds.some((otherItemId) => {
-                    if (otherItemId === itemId) return false;
-                    return treeMiniHelper.isDescendant(itemId, otherItemId, treeData);
-                });
-                return !isDescendantOfOtherSelected;
-            });
+            // ---- get only top-level parents from selected items ----
+            selectedItemIds = treeMiniHelper.filterTopLevelParents(selectedItemIds, treeData);
 
             if (selectedItemIds.length === 0) {
                 setIsDragging(false);

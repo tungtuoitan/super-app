@@ -14,7 +14,7 @@ import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 
 export const useTreeHelper2 = () => {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef } = useWorkspaceStore();
 
     /**
      * Clear all selections
@@ -54,9 +54,28 @@ export const useTreeHelper2 = () => {
     };
 
     /**
+     * Get all visible node IDs from tree (ONLY actually visible/expanded nodes)
+     * Uses react-arborist tree ref to get accurate visible nodes
+     * Returns workspace_items.id in display order
+     */
+    const getVisibleNodeIds = (): number[] => {
+        const tree = _treeRef?.current;
+        if (!tree || !tree.visibleNodes) {
+            return [];
+        }
+
+        return tree.visibleNodes
+            .map((node: any) => {
+                const itemData = node.data.data;
+                return (itemData as any).id; // workspace_items.id
+            })
+            .filter((id: number) => id !== null && id !== undefined && !SPECIAL_IDS.includes(id));
+    };
+
+    /**
      * Handle keyboard navigation (VS Code-like)
      * Supports: Arrow Up/Down, Shift+Arrow for range selection, Ctrl+A, Escape
-     * 
+     *
      * ⚡ Performance optimized with useCallback
      */
     const handleKeyDown = useCallback((e: KeyboardEvent, allVisibleFolderIds: number[]) => {
@@ -128,5 +147,6 @@ export const useTreeHelper2 = () => {
         isFolderSelected,
         handleSelectionChange,
         handleKeyDown,
+        getVisibleNodeIds,
     };
 };

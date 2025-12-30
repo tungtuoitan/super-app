@@ -44,12 +44,21 @@ export function CustomDragPreview({
 
     const displayText = getDisplayText();
 
+    // Calculate preview width and position offset for centering
+    const previewWidth = itemCount > 1 ? 60 : 200; // Approximate widths
+    const centerOffset = previewWidth / 2;
+    const rightOffset = 10; // Small offset to the right as requested
+
+    // Use mouse position for accurate centering
+    const mouseX = mouse?.x ?? offset?.x ?? 0;
+    const mouseY = mouse?.y ?? offset?.y ?? 0;
+
     return (
         <div className="fixed pointer-events-none z-[10000] left-0 top-0 w-full h-full">
-            {/* Preview - offset to the right to avoid blocking tree view */}
+            {/* Preview - centered on mouse with small right offset */}
             <div
                 style={{
-                    transform: `translate(${offset.x + 50}px, ${offset.y}px)`,
+                    transform: `translate(${mouseX - centerOffset + rightOffset}px, ${mouseY + 10}px)`,
                 }}
                 className={`
                     absolute bg-editor-bg/95 border border-editor-border rounded-md p-2 px-3 h-8

@@ -181,11 +181,12 @@ export interface TreeFolder {
 }
 
 /**
- * Get all visible folder entity IDs from tree
- * V2: Returns entityId (entity ID from folders/notes/files table)
+ * Get all visible item IDs from tree (in display order)
+ * Returns workspace_items.id (NOT entityId) for proper selection
+ * Does depth-first traversal to match UI display order
  */
 export function getAllVisibleFolderIds(treeData: TreeFolder[]): number[] {
-    return $traverse(treeData).map((node) => (node.data as any).entityId);
+    return $traverse(treeData).map((node) => (node.data as any).id);
 }
 
 
@@ -481,4 +482,5 @@ export const treeMiniHelper = {
     transformItemsToTreeData,
     createWorkspaceRootFolder,
     transformToTreeData,
+    filterTopLevelParents
 };

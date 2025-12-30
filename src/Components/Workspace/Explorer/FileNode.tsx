@@ -46,9 +46,9 @@ interface FileNodeProps {
 }
 
 export function FileNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FileNodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isFolderSelected } = useTreeHelper2();
+    const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();
 
     // Safe cast: WorkspaceTree already filters to only render FileNode for files
@@ -90,23 +90,43 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
             }
             setLastSelectedItemId(workspaceItemId);
         } else if (e.shiftKey && lastSelectedItemId) {
-            // Shift+Click: Range selection (like VS Code)
-            const allVisibleFolders = treeMiniHelper.getAllVisibleFolderIds(treeData);
-            const lastIndex = allVisibleFolders.indexOf(lastSelectedItemId);
-            const currentIndex = allVisibleFolders.indexOf(workspaceItemId);
+            // Shift+Click: Range selection (like VS Code) - only visible nodes
+            const tree = _treeRef?.current;
+            if (!tree) {
+                // Fallback if tree ref not available
+                setSelectedItemIds([workspaceItemId]);
+                setLastSelectedItemId(workspaceItemId);
+                node.select();
+                return;
+            }
+
+            const allVisibleNodeIds = getVisibleNodeIds();
+            const lastIndex = allVisibleNodeIds.indexOf(lastSelectedItemId);
+            const currentIndex = allVisibleNodeIds.indexOf(workspaceItemId);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
                 const endIndex = Math.max(lastIndex, currentIndex);
-                const rangeSelection = allVisibleFolders.slice(startIndex, endIndex + 1);
-                setSelectedItemIds(rangeSelection);
-                // Sync with react-arborist (select range ending at this node)
-                node.selectMulti();
+                const rangeSelection = allVisibleNodeIds.slice(startIndex, endIndex + 1);
+
+                // Deselect all first
+                tree.deselectAll();
+
+                // Select all nodes in range using tree API
+                tree.visibleNodes.forEach((visibleNode: any) => {
+                    const nodeItemId = (visibleNode.data.data as any).id;
+                    if (rangeSelection.includes(nodeItemId)) {
+                        visibleNode.selectMulti();
+                    }
+                });
+
+                // Store will be updated by tree's onSelect handler
+                setLastSelectedItemId(workspaceItemId);
             } else {
                 setSelectedItemIds([workspaceItemId]);
+                setLastSelectedItemId(workspaceItemId);
                 node.select();
             }
-            setLastSelectedItemId(workspaceItemId);
         } else {
             // Regular click: Single selection
             setSelectedItemIds([workspaceItemId]);
@@ -137,7 +157,7 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                 marginLeft: `${node.level * -5}px`, // Reduced from default ~20-24px per level to 12px
             }}
             className={`
-                ${isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
+                ${ treeType === "workspaceTree" && isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
                 rounded
             `}
         >
@@ -171,7 +191,7 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
 
                 {/* File Info */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
-                    <span className={`text-sm truncate text-editor-fg ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
+                    <span className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
                         {fileItem.data.name}
                     </span>
                     {fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}

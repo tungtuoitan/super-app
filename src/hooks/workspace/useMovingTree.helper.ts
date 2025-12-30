@@ -11,7 +11,8 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/compone
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
-import {SPECIAL_IDS} from "@/utils/temp-id.utils";
+import { SPECIAL_IDS } from "@/utils/temp-id.utils";
+import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 
 export const useMovingTreeHelper = () => {
     const {
@@ -222,9 +223,30 @@ export const useMovingTreeHelper = () => {
                 return;
             }
 
+            // STEP 5.0: Prevent dragging root node
+            const hasRootNode = itemIds.includes(constants.workspace.root.workspaceItemId);
+            if (hasRootNode) {
+                enqueueSnackbar("Cannot move workspace root node", { variant: "error" });
+                return;
+            }
+
+            // STEP 5.1: Filter to only top-level parents (prevent moving both parent and child)
+            // Example: If selecting folder A and its subfolder B, only move A (B will follow automatically)
+
+            // Build tree data from current workspace for hierarchy checking
+            const currentTreeData = currentWorkspace ? treeMiniHelper.transformToTreeData(currentWorkspace, "") : [];
+
+            // Filter to get only top-level parent IDs
+            const topLevelItemIds = treeMiniHelper.filterTopLevelParents(itemIds, currentTreeData);
+            if (topLevelItemIds.length === 0) {
+                enqueueSnackbar("No valid items to move", { variant: "error" });
+                return;
+            }
+
             // STEP 6: Build batch requests for MOVECROSS action
             // Use targetId (from drop position) instead of state
-            const requests: UpsertWorkspaceItemRequest[] = itemIds.map((itemId: number) => ({
+            // Only move top-level parents - children will follow automatically
+            const requests: UpsertWorkspaceItemRequest[] = topLevelItemIds.map((itemId: number) => ({
                 action: WorkspaceItemAction.MoveCross,
                 id: itemId,
                 workspaceId: targetWorkspaceId,
