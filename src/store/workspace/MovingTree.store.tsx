@@ -16,8 +16,8 @@ export interface MovingTreeContextData {
     setTargetWorkspaceId: Dispatch<SetStateAction<number | null>>;
 
     // Temporarily highlighted duplicate items (will be cleared after 5s)
-    highlightedDuplicateIds: Set<number>;
-    setHighlightedDuplicateIds: Dispatch<SetStateAction<Set<number>>>;
+    highlightedDuplicateIds: Set<string>;
+    setHighlightedDuplicateIds: Dispatch<SetStateAction<Set<string>>>;
 
     // Loading state
     isLoadingTargetTree: boolean;
@@ -83,7 +83,7 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const [targetWorkspaceId, setTargetWorkspaceId] = useState<number | null>(null);
 
     // Temporarily highlighted duplicates (cleared after 5s)
-    const [highlightedDuplicateIds, setHighlightedDuplicateIds] = useState<Set<number>>(new Set());
+    const [highlightedDuplicateIds, setHighlightedDuplicateIds] = useState<Set<string>>(new Set());
 
     // Loading state
     const [isLoadingTargetTree, setIsLoadingTargetTree] = useState<boolean>(false);

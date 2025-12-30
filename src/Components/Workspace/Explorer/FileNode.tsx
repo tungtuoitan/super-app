@@ -2,6 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
+import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
@@ -47,6 +48,7 @@ interface FileNodeProps {
 
 export function FileNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FileNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { highlightedDuplicateIds } = useMovingTreeStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();
@@ -67,6 +69,14 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
     // Check status and deleted state (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(fileItem);
     const isInactive = fileItem.data.statusCode === "inactive";
+
+    // Determine dot status
+    const isUnsaved = workspaceItemId < 0;
+    const compositeKey = `${fileItem.entityType}-${entityId}`;
+    // Only show duplicate dot in targetTree (not in workspaceTree)
+    const isDuplicate = highlightedDuplicateIds.has(compositeKey);
+    const showDot = isUnsaved || isDuplicate;
+    const dotColor = isUnsaved ? "bg-green-700" : isDuplicate ? "bg-red-500" : "";
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -195,6 +205,7 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                         {fileItem.data.name}
                     </span>
                     {fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
+                    {showDot && <div className={`w-1.5 h-1.5 rounded-full ${dotColor} ml-auto mr-1`} title={isUnsaved ? "Unsaved" : "Duplicate"} />}
                 </div>
             </div>
         </div>

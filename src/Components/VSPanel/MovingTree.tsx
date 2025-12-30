@@ -197,14 +197,14 @@ export function MovingTree() {
                     })();
 
                     // Highlight duplicates with yellow background (temporarily for 10s)
-                    if (isDuplicate) {
-                        return (
-                            <div className="relative" title="⚠️ Item already exists in target workspace">
-                                <div className="absolute inset-0 bg-yellow-100 dark:bg-yellow-900/30 opacity-50 pointer-events-none rounded" />
-                                {nodeContent}
-                            </div>
-                        );
-                    }
+                    // if (isDuplicate) {
+                    //     return (
+                    //         <div className="relative" title="⚠️ Item already exists in target workspace">
+                    //             <div className="absolute inset-0 bg-yellow-100 dark:bg-yellow-900/30 opacity-50 pointer-events-none rounded" />
+                    //             {nodeContent}
+                    //         </div>
+                    //     );
+                    // }
 
                     return nodeContent;
                 }}

@@ -2,6 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { FileText, ArrowUpRight } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
+import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
@@ -21,6 +22,7 @@ interface NoteNodeProps {
 
 export function NoteNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: NoteNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { highlightedDuplicateIds } = useMovingTreeStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const { openTab } = useEditorTabHelper();
@@ -41,6 +43,14 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     // Check status and deleted state (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(noteItem);
     const isInactive = noteItem.data.statusCode === "inactive";
+
+    // Determine dot status
+    const isUnsaved = workspaceItemId < 0;
+    const compositeKey = `${noteItem.entityType}-${entityId}`;
+    // Only show duplicate dot in targetTree (not in workspaceTree)
+    const isDuplicate = highlightedDuplicateIds.has(compositeKey);
+    const showDot = isUnsaved || isDuplicate;
+    const dotColor = isUnsaved ? "bg-green-700" : isDuplicate ? "dark:bg-yellow-900" : "";
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -183,6 +193,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                         {noteItem.data.name} - {noteItem.id} - {entityId}
                     </span>
                     {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
+                    {showDot && <div className={`w-1.5 h-1.5 rounded-full ${dotColor} ml-auto mr-1`} title={isUnsaved ? "Unsaved" : "Duplicate"} />}
                 </div>
             </div>
         </div>

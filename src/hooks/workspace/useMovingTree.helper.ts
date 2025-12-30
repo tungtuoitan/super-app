@@ -74,6 +74,35 @@ export const useMovingTreeHelper = () => {
         }
     };
 
+    // Check all items for duplicates and update highlights
+    // Logic: Find items in currentWorkspace that also exist in targetWorkspace
+    // Result: Highlight those duplicate items in targetTree (not in workspaceTree)
+    const checkAndHighlightDuplicates = () => {
+        if (!currentWorkspace || !targetWorkspace) {
+            setHighlightedDuplicateIds(new Set());
+            return;
+        }
+
+        // Build map of target workspace items with composite key (entityType-entityId)
+        const targetEntityMap = new Map<string, any>();
+        targetWorkspace.flatData.forEach((item) => {
+            const compositeKey = `${item.entityType}-${item.entityId}`;
+            targetEntityMap.set(compositeKey, item);
+        });
+
+        // Check all items in current workspace for duplicates
+        const duplicateCompositeKeys: string[] = [];
+        currentWorkspace.flatData.forEach((sourceItem) => {
+            const compositeKey = `${sourceItem.entityType}-${sourceItem.entityId}`;
+            const targetItem = targetEntityMap.get(compositeKey);
+            if (targetItem) {
+                duplicateCompositeKeys.push(compositeKey);
+            }
+        });
+
+        setHighlightedDuplicateIds(new Set(duplicateCompositeKeys));
+    };
+
     // Check if dragging items contain duplicates and return details
     const checkDraggingItemsAreDuplicate = (
         draggedItem: any
@@ -90,10 +119,11 @@ export const useMovingTreeHelper = () => {
         const draggedNodeIds = draggedItem.dragIds || [draggedItem.id];
         const itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
 
-        // Build map of target workspace entityIds for fast lookup
-        const targetEntityMap = new Map<number, any>();
+        // Build map of target workspace items with composite key (entityType-entityId)
+        const targetEntityMap = new Map<string, any>();
         targetWorkspace.flatData.forEach((item) => {
-            targetEntityMap.set(item.entityId, item);
+            const compositeKey = `${item.entityType}-${item.entityId}`;
+            targetEntityMap.set(compositeKey, item);
         });
 
         // Check each dragging item for duplicates
@@ -101,7 +131,8 @@ export const useMovingTreeHelper = () => {
         itemIds.forEach((itemId: number) => {
             const sourceItem = currentWorkspace.flatData.find((i) => i.id === itemId);
             if (sourceItem) {
-                const targetItem = targetEntityMap.get(sourceItem.entityId);
+                const compositeKey = `${sourceItem.entityType}-${sourceItem.entityId}`;
+                const targetItem = targetEntityMap.get(compositeKey);
                 if (targetItem) {
                     duplicateItems.push({ sourceItem, targetItem });
                 }
@@ -176,8 +207,8 @@ export const useMovingTreeHelper = () => {
             });
 
             // Highlight duplicates temporarily (5 seconds)
-            const duplicateEntityIds = duplicateItems.map((d) => d.targetItem.entityId);
-            setHighlightedDuplicateIds(new Set(duplicateEntityIds));
+            const duplicateCompositeKeys = duplicateItems.map((d) => `${d.targetItem.entityType}-${d.targetItem.entityId}`);
+            setHighlightedDuplicateIds(new Set(duplicateCompositeKeys));
 
             // Clear previous timeout if exists
             if (highlightTimeoutRef.current) {
@@ -315,5 +346,6 @@ export const useMovingTreeHelper = () => {
         dropToMovingTree,
         initializeContainerHeightTracking,
         checkDraggingItemsAreDuplicate,
+        checkAndHighlightDuplicates,
     };
 };

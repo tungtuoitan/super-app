@@ -19,9 +19,9 @@ import { MovingTree } from "./MovingTree";
 
 export function MovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useMovingTreeStore();
-    const { allWorkspaces, currentWorkspace, selectedWorkspaceId } = useWorkspaceStore();
+    const { allWorkspaces, currentWorkspace, selectedWorkspaceId, selectedItemIds } = useWorkspaceStore();
     const manager = useDragDropManager();
-    const { handleWorkspaceChange, loadTargetWorkspaceTree, initializeContainerHeightTracking, checkDraggingItemsAreDuplicate } = useMovingTreeHelper();
+    const { handleWorkspaceChange, loadTargetWorkspaceTree, initializeContainerHeightTracking, checkDraggingItemsAreDuplicate, checkAndHighlightDuplicates } = useMovingTreeHelper();
 
     // Ensure targetWorkspaceId is not the same as selectedWorkspaceId
     useEffect(() => {
@@ -41,6 +41,11 @@ export function MovingTab() {
         const cleanup = initializeContainerHeightTracking();
         return cleanup;
     }, []);
+
+    // Auto-detect and highlight duplicates when targetWorkspace loads or selectedItemIds change
+    useEffect(() => {
+        checkAndHighlightDuplicates();
+    }, [targetWorkspace]);
 
     // Filter workspaces (exclude current workspace)
     const availableWorkspaces: IAutoCompleteOptions[] = allWorkspaces
