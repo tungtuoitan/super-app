@@ -31,7 +31,7 @@ export const useMovingTreeHelper = () => {
         setContainerHeight,
     } = useMovingTreeStore();
 
-    const { allWorkspaces, currentWorkspace } = useWorkspaceStore();
+    const { allWorkspaces, currentWorkspace,selectedItemIds } = useWorkspaceStore();
     const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const { loadTree } = useWorkspaceLoader();
@@ -211,12 +211,20 @@ export const useMovingTreeHelper = () => {
 
         try {
             // STEP 5: Extract workspace_items.id from dragged items
-            // draggedItem from react-arborist has format: {id: '17', dragIds: ['17', '18', ...]}
-            // dragIds contains all selected node ids (strings)
-            const draggedNodeIds = dragItem.dragIds || [dragItem.id];
+            // For cross-tree drops, dragItem.dragIds may be incomplete or undefined
+            // Solution: Use selectedItemIds from store (always has full selection)
+            let itemIds: number[];
 
-            // Convert string ids to numbers (TreeFolder.id is string version of workspace_items.id)
-            const itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
+            if (selectedItemIds && selectedItemIds.length > 0) {
+                // Use store's selectedItemIds (most reliable for cross-tree drops)
+                itemIds = selectedItemIds;
+                console.log("✅ Using selectedItemIds from store:", itemIds);
+            } else {
+                // Fallback: Try to get from dragItem (for backward compatibility)
+                const draggedNodeIds = dragItem.dragIds || [dragItem.id];
+                itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
+                console.log("⚠️ Fallback to dragItem.dragIds:", itemIds);
+            }
 
             if (itemIds.length === 0) {
                 enqueueSnackbar("No valid items to move", { variant: "error" });

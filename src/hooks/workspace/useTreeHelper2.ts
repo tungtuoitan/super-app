@@ -14,7 +14,7 @@ import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 
 export const useTreeHelper2 = () => {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentWorkspace } = useWorkspaceStore();
 
     /**
      * Clear all selections
@@ -129,9 +129,67 @@ export const useTreeHelper2 = () => {
             case "a":
                 if (e.ctrlKey || e.metaKey) {
                     e.preventDefault();
-                    // Ctrl+A: Select all
-                    setSelectedItemIds(allVisibleFolderIds);
-                    setLastSelectedItemId(allVisibleFolderIds[allVisibleFolderIds.length - 1]);
+
+                    // Ctrl+A behavior:
+                    // 1. If has selected items → select all siblings of selected items
+                    // 2. If no selected items → select all items in tree
+
+                    const tree = _treeRef?.current;
+                    if (!tree) {
+                        console.warn("⚠️ Tree ref not available for Ctrl+A");
+                        return;
+                    }
+
+                    let itemsToSelect: number[] = [];
+
+                    if (selectedItemIds.length > 0 && currentWorkspace) {
+                        // Get first selected item's parentId
+                        const firstSelectedId = selectedItemIds[0];
+                        const firstSelectedItem = currentWorkspace.flatData.find((item: any) => item.id === firstSelectedId);
+
+                        if (firstSelectedItem) {
+                            const targetParentId = firstSelectedItem.parentId ?? null;
+
+                            // Find all visible siblings (items with same parentId)
+                            const siblings = allVisibleFolderIds.filter((itemId: number) => {
+                                const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
+                                return item && (item.parentId ?? null) === targetParentId;
+                            });
+
+                            if (siblings.length > 0) {
+                                itemsToSelect = siblings;
+                                console.log(`✅ Ctrl+A: Selecting ${siblings.length} siblings`);
+                            } else {
+                                // Fallback: select all if no siblings found
+                                itemsToSelect = allVisibleFolderIds;
+                            }
+                        } else {
+                            // Fallback: select all if item not found
+                            itemsToSelect = allVisibleFolderIds;
+                        }
+                    } else {
+                        // No selection → select all visible items
+                        itemsToSelect = allVisibleFolderIds;
+                        console.log(`✅ Ctrl+A: Selecting all ${allVisibleFolderIds.length} items`);
+                    }
+
+                    // Sync with react-arborist tree (critical for dragIds to work!)
+                    tree.deselectAll();
+
+                    // Select all nodes in itemsToSelect using tree API
+                    tree.visibleNodes.forEach((visibleNode: any) => {
+                        const nodeItemId = (visibleNode.data.data as any).id;
+                        if (itemsToSelect.includes(nodeItemId)) {
+                            visibleNode.selectMulti();
+                        }
+                    });
+
+                    // Update last selected for keyboard navigation
+                    if (itemsToSelect.length > 0) {
+                        setLastSelectedItemId(itemsToSelect[itemsToSelect.length - 1]);
+                    }
+
+                    // Store will be updated by tree's onSelect handler automatically
                 }
                 break;
 
@@ -141,7 +199,7 @@ export const useTreeHelper2 = () => {
                 setLastSelectedItemId(null);
                 break;
         }
-    }, [selectedItemIds, setSelectedItemIds, setLastSelectedItemId]);
+    }, [selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace]);
 
     return {
         isFolderSelected,
