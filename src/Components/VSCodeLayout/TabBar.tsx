@@ -1,5 +1,5 @@
 import React from "react";
-import { X, FileText, Folder } from "lucide-react";
+import { X, FileText, Folder, Box } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -19,7 +19,7 @@ function getTabIcon(type: string) {
         case constants.vscode.tab.tabTypes.note:
             return FileText;
         case constants.vscode.tab.tabTypes.workspace:
-            return Folder;
+            return Box; // Workspace icon (Box for ws.workspaces)
         default:
             return FileText;
     }
@@ -139,13 +139,19 @@ export function TabBar() {
                   `}
                             >
                                 <TabIcon
-                                    className={`w-4 h-4 ${isDeleted ? "text-gray-500" : tab.type === constants.vscode.tab.tabTypes.note ? "text-blue-400" : "text-gray-400"} ${
-                                        activeTabId === tab.id ? "opacity-100" : "opacity-50"
-                                    }`}
+                                    className={`w-4 h-4 ${
+                                        isDeleted
+                                            ? "text-gray-500"
+                                            : tab.type === constants.vscode.tab.tabTypes.note
+                                            ? "text-blue-400"
+                                            : tab.type === constants.vscode.tab.tabTypes.workspace
+                                            ? "text-purple-400"
+                                            : "text-gray-400"
+                                    } ${activeTabId === tab.id ? "opacity-100" : "opacity-50"}`}
                                 />
                                 {/* ${activeTabId === tab.id ? 'font-medium' : 'font-normal'} */}
                                 <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>
-                                    {tab.title.length > 40 ? tab.title.slice(0, 17) + "..." : tab.title}
+                                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
                                     
                                     {isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""}
                                 </span>

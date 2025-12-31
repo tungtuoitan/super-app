@@ -164,8 +164,10 @@ export const useEditorTabHelper = () => {
     // ================================================================
     // OPEN TAB - Generic handler for multiple tab types
     // ================================================================
-    const openTab = (data: Note | Ws, tabType?: string) => {
-        const type = tabType || ("workspaceId" in data ? constants.vscode.tab.tabTypes.workspace : constants.vscode.tab.tabTypes.note);
+    const openTab = (data: Note | Ws, tabType: string) => {
+        // Auto-detect type based on data structure
+        // Note has 'type' field (meeting, brainstorm, etc.), Workspace doesn't
+        const type = tabType;
 
         // ===================================
         // 1. Check for existing tab

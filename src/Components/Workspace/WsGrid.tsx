@@ -14,18 +14,33 @@ import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";
 import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
-import {useAuthStore} from "@/store/index";
+import { useAuthStore } from "@/store/index";
 
 /**
  * WsGrid - ws grid with table display
  */
 export function WsGrid() {
     // State from centralized store
-    const { workspaces, isLoading, error, sorting, setSorting, pagination, setPagination, rowSelection, setRowSelection, columnFilters, setColumnFilters } = useWsStore();
+    const {
+        workspaces,
+        totalCount,
+        wsGridIsLoading,
+        wsGridError,
+        wsGridSorting,
+        setWsGridSorting,
+        wsGridPagination,
+        setWsGridPagination,
+        wsGridRowSelection,
+        setWsGridRowSelection,
+        wsGridColumnFilters,
+        setWsGridColumnFilters,
+        containerRef,
+        setContainerWidth,
+    } = useWsStore();
 
     const { loadWorkspaces, openWsContextMenu } = useWsGridHelper();
     const { openWorkspaceTab } = useWsTabHelper();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery,filterViewKey } = useGridControlStore();
     const { $user } = useAuthStore();
 
     // Define columns for the data table
@@ -125,41 +140,57 @@ export function WsGrid() {
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onSortingChange: setSorting,
-        onPaginationChange: setPagination,
-        onRowSelectionChange: setRowSelection,
-        onColumnFiltersChange: setColumnFilters,
+        onSortingChange: setWsGridSorting,
+        onPaginationChange: setWsGridPagination,
+        onRowSelectionChange: setWsGridRowSelection,
+        onColumnFiltersChange: setWsGridColumnFilters,
         state: {
-            sorting,
-            pagination,
-            rowSelection,
-            columnFilters,
+            sorting: wsGridSorting,
+            pagination: wsGridPagination,
+            rowSelection: wsGridRowSelection,
+            columnFilters: wsGridColumnFilters,
         },
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
     });
 
-    // Load data when user is ready
+    // Update container width on resize
     useEffect(() => {
-        // this will run every time user login, or $user.filters change
-        if(!$user.userId || !$user.filters) return;
-        loadWorkspaces();
-    }, [$user.userId, $user.filters]);
+        if (!containerRef.current) return;
 
-    // Update GridControl when columnFilters change - no longer needed for backend filtering
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                setContainerWidth(entry.contentRect.width);
+            }
+        });
+
+        resizeObserver.observe(containerRef.current);
+        return () => resizeObserver.disconnect();
+    }, []);
+
+    // Load data when user is ready or pagination changes
+    useEffect(() => {
+        // this will run every time user login, or $user.filters change, or pagination changes
+        if (!$user.userId || !$user.filters) return;
+        loadWorkspaces();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [$user.userId, $user.filters?.wsGrid, wsGridPagination.pageIndex, wsGridPagination.pageSize]);
+
+
+    // Update GridControl when wsGridColumnFilters change - no longer needed for backend filtering
     // Filters are now stored in userProfile and applied on backend
 
     return (
-        <div className="w-full h-full bg-background flex flex-col relative">
+        <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
             {/* Loading Overlay */}
-            {isLoading && (
+            {wsGridIsLoading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
             )}
 
             {/* Error Overlay */}
-            {error && (
+            {wsGridError && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Alert variant="destructive" className="max-w-md">
                         <AlertDescription>Failed to load workspaces</AlertDescription>
@@ -216,7 +247,7 @@ export function WsGrid() {
             {/* Pagination */}
             <div className="flex items-center justify-between px-4 py-1 bg-background">
                 <div className="flex-1 text-sm text-left text-muted-foreground">
-                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({workspaces.length} total)
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} total)
                 </div>
 
                 <div className="flex items-center gap-2">

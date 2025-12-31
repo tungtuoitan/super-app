@@ -31,7 +31,7 @@ const transformWsData = (dtos: WsDTO[]): Ws[] => {
 export const useWsGridHelper = () => {
     const { $user } = useAuthStore();
 
-    const { workspaces, setWorkspaces, setIsLoading, setError, rowSelection, setRowSelection } = useWsStore();
+    const { workspaces, setWorkspaces, setWsGridIsLoading, setWsGridError, wsGridRowSelection, setWsGridRowSelection, wsGridPagination, setTotalCount } = useWsStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     const { openTab } = useEditorTabHelper();
@@ -51,6 +51,7 @@ export const useWsGridHelper = () => {
             id: tempId,
             name: name,
             description: "",
+            statusCode: constants.standardRegistryFE.activeStatus.active, // Default to active status
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
@@ -61,7 +62,7 @@ export const useWsGridHelper = () => {
         setWorkspaces([newWorkspace, ...workspaces]);
 
         // Open workspace tab for editing
-        openTab(newWorkspace);
+        openTab(newWorkspace, constants.vscode.tab.tabTypes.workspace);
 
         // Focus vào Workspace Name field sau khi tab mở
         setShouldFocusWsName(true);
@@ -74,7 +75,7 @@ export const useWsGridHelper = () => {
      */
     const __deleteRestore_Wses = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         // Use provided ids or fall back to current selection
-        const selectedIds = ids ?? Object.keys(rowSelection).map((id) => parseInt(id));
+        const selectedIds = ids ?? Object.keys(wsGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
         // Separate temporary workspaces (negative IDs) from persisted workspaces (positive IDs)
@@ -144,7 +145,7 @@ export const useWsGridHelper = () => {
             }
 
             // Clear selection
-            setRowSelection({});
+            setWsGridRowSelection({});
         } catch (error) {
             console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} workspaces:`, error);
             const errorMessage = await parseApiError(error);
@@ -163,7 +164,7 @@ export const useWsGridHelper = () => {
      */
     const __hardDeleteSelectedWorkspaces = async (ids?: number[]) => {
         // Use provided ids or fall back to current selection
-        const selectedIds = ids ?? Object.keys(rowSelection).map((id) => parseInt(id));
+        const selectedIds = ids ?? Object.keys(wsGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
         // Only hard delete persisted workspaces (positive IDs)
@@ -199,7 +200,7 @@ export const useWsGridHelper = () => {
             }
 
             // Clear selection
-            setRowSelection({});
+            setWsGridRowSelection({});
         } catch (error) {
             console.error("Failed to hard delete workspaces:", error);
             const errorMessage = await parseApiError(error);
@@ -225,12 +226,12 @@ export const useWsGridHelper = () => {
             // If row is not selected, add it to current selection
             if (!row.getIsSelected()) {
                 // Add this row to existing selection
-                setRowSelection({ ...rowSelection, [row.id]: true });
+                setWsGridRowSelection({ ...wsGridRowSelection, [row.id]: true });
                 // Include this row in selectedIds along with existing selection
-                selectedIds = [...Object.keys(rowSelection).map((id) => parseInt(id)), parseInt(row.id)];
+                selectedIds = [...Object.keys(wsGridRowSelection).map((id) => parseInt(id)), parseInt(row.id)];
             } else {
                 // Row already selected, use current selection
-                selectedIds = Object.keys(rowSelection).map((id) => parseInt(id));
+                selectedIds = Object.keys(wsGridRowSelection).map((id) => parseInt(id));
             }
 
             selectedWorkspaces = [...workspaces].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).filter((ws) => selectedIds.includes(ws.id));
@@ -253,7 +254,7 @@ export const useWsGridHelper = () => {
     // Load workspaces with filters from user state
     const loadWorkspaces = async () => {
         try {
-            setIsLoading(true);
+            setWsGridIsLoading(true);
             const token = $user.userToken;
 
             // Get filters from user state
@@ -262,12 +263,15 @@ export const useWsGridHelper = () => {
             // Parse date range filters
             const createdAtRange = filterUtils._parseDateRange(wsGridFilters?.createdAt);
 
-            // Build filter params for API
+            // Build filter params for API (matching NoteGrid pattern)
             const filterParams = {
+                searchQuery: undefined, // Can be added from GridControlStore if needed
                 statusCode: wsGridFilters?.statusCode,
                 deletedAt: wsGridFilters?.deletedAt,
                 createdAtFrom: createdAtRange.from,
                 createdAtTo: createdAtRange.to,
+                page: wsGridPagination.pageIndex + 1,
+                pageSize: wsGridPagination.pageSize,
             };
 
             const result = await wsService._getWs(token, filterParams);
@@ -280,17 +284,18 @@ export const useWsGridHelper = () => {
             // Transform dates from API strings to Date objects
             const transformedData = transformWsData(result.data || []);
             setWorkspaces(transformedData);
-            setError(null);
+            setTotalCount(result.totalCount || transformedData.length);
+            setWsGridError(null);
         } catch (err) {
             const errorMessage = await parseApiError(err);
-            setError(new Error(errorMessage));
+            setWsGridError(new Error(errorMessage));
 
             // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
                 enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             }
         } finally {
-            setIsLoading(false);
+            setWsGridIsLoading(false);
         }
     };
 

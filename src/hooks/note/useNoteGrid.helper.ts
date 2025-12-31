@@ -41,7 +41,7 @@ export const useNoteGridHelper = () => {
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            statusCode: constants.standardRegistryFE.activeStatus.active, // Default to active status
             type: "idea",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -53,7 +53,7 @@ export const useNoteGridHelper = () => {
         setNotes([newNote, ...notes]);
 
         // Open note tab for editing
-        openTab(newNote);
+        openTab(newNote, constants.vscode.tab.tabTypes.note);
 
         // Focus vào Note Name field sau khi tab mở
         setShouldFocusNoteName(true);

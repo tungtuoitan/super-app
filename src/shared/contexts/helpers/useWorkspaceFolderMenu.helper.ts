@@ -227,7 +227,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         }
 
         // Open tab for editing
-        openTab(newNote);
+        openTab(newNote, constants.vscode.tab.tabTypes.note);
 
         // Focus on note name field after tab opens
         setShouldFocusNoteName(true);

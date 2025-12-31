@@ -162,7 +162,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                 userId: noteItem.data.userId,
             };
 
-            openTab(note);
+            openTab(note, constants.vscode.tab.tabTypes.note);
         }
     };
 

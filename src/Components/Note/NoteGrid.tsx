@@ -105,7 +105,7 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
                             // Handle row click based on source
                             const handleRowClick = () => {
                                 if (source === constants.modules.note) {
-                                    openTab(row.original);
+                                    openTab(row.original, constants.vscode.tab.tabTypes.note);
                                 } else if (source === constants.modules.workspace && !disabledRowIds?.has(row.original.id)) {
                                     row.toggleSelected();
                                 }

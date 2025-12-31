@@ -11,7 +11,7 @@ import { useEditorTabsStore } from "@/store/index";
 
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();
-    const { selectedWs } = useWsStore();
+    const { selectedWs, setWsGridPagination } = useWsStore();
     const { originalWsRef } = useWsDetailStore();
     const { setSelectedWs } = useWsStore();
     const { loadWorkspaces } = useWsGridHelper();
@@ -60,6 +60,8 @@ export const useWsDetailHelper = () => {
                     id: isCreateMode ? 0 : selectedWs.id, // Always use 0 for create
                     name: selectedWs.name,
                     description: selectedWs.description,
+                    statusCode: selectedWs.statusCode, // Include statusCode
+                    tags: undefined, // Workspace tags support (not implemented yet)
                     userId: selectedWs.userId,
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
                 };
@@ -87,6 +89,8 @@ export const useWsDetailHelper = () => {
                     id: savedWs.id,
                     name: savedWs.name,
                     description: savedWs.description,
+                    statusCode: savedWs.statusCode,
+                    hashtags: savedWs.hashtags,
                     createdAt: new Date(savedWs.createdAt),
                     updatedAt: savedWs.updatedAt ? new Date(savedWs.updatedAt) : null,
                     deletedAt: savedWs.deletedAt ? new Date(savedWs.deletedAt) : null,
@@ -114,6 +118,8 @@ export const useWsDetailHelper = () => {
                 }
 
                 originalWsRef.current = { ...selectedWs };
+
+                // Reload workspaces immediately to show the newly saved workspace
                 await loadWorkspaces();
 
                 return transformedWs;
