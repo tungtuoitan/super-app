@@ -14,10 +14,11 @@ import { FileNode } from "./FileNode";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
-import {CalculateWorkspaceTreeContainerHeight} from "@/HeadlessComponents/CalculateWorkspaceTreeContainerHeight";
+import { CalculateWorkspaceTreeContainerHeight } from "@/HeadlessComponents/CalculateWorkspaceTreeContainerHeight";
+import { CalculateWorkspaceTreeDropZoneHeight } from "@/HeadlessComponents/CalculateWorkspaceTreeDropZoneHeight";
 
 export function WorkspaceTree() {
-    const { searchText, isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef } = useWorkspaceStore();
+    const { searchText, isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight } = useWorkspaceStore();
     const { handleSelectionChange, handleKeyDown } = useTreeHelper2();
     const { handleMove } = useTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -76,40 +77,6 @@ export function WorkspaceTree() {
     // Keep original treeData for tree structure (including root)
     // Root will be hidden via CSS, not by removing from data
 
-    // Calculate drop zone height = remaining space in container
-    const [dropZoneHeight, setDropZoneHeight] = React.useState(0);
-
-    useEffect(() => {
-        const calculateDropZoneHeight = () => {
-            const ROW_HEIGHT = 32;
-            const tree = _treeRef.current;
-
-            if (!tree) {
-                setDropZoneHeight(0);
-                return;
-            }
-
-            // Count visible nodes (excluding workspace root and drop zone)
-            let visibleCount = 0;
-            for (let i = 0; i < tree.visibleNodes.length; i++) {
-                const node = tree.visibleNodes[i];
-                const entityId = (node.data.data as any)?.entityId;
-
-                if (entityId !== constants.workspace.root.entityId && entityId !== constants.workspace.dropZone.entityId) {
-                    visibleCount++;
-                }
-            }
-
-            const actualTreeHeight = (visibleCount + 1) * ROW_HEIGHT;
-            const remaining = containerHeight - actualTreeHeight;
-
-            setDropZoneHeight(Math.max(remaining, 0));
-        };
-
-        // Recalculate when tree data changes or container resizes
-        calculateDropZoneHeight();
-    }, [treeData, containerHeight, _treeRef]);
-
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
         return treeMiniHelper.getAllVisibleFolderIds(treeData);
@@ -162,6 +129,12 @@ export function WorkspaceTree() {
                 className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
                 <CalculateWorkspaceTreeContainerHeight />
+                <CalculateWorkspaceTreeDropZoneHeight
+                    treeData={treeData}
+                    containerHeight={containerHeight}
+                    treeRef={_treeRef}
+                    setDropZoneHeight={setDropZoneHeight}
+                />
                 {/* Loading overlay when dragging */}
                 {isDragging && (
                     <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
