@@ -3,7 +3,7 @@
  * Extracted from VSSideBar for better separation of concerns
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { WorkspaceTree } from "../Workspace/Explorer/WorkspaceTree";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
@@ -15,17 +15,19 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { GenericFilterPopup } from "@/Components/shared/GenericFilterPopup";
 import { constants } from "@/utils/constants";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
+import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { UnsavedTabsTooltip } from "./UnsavedTabsTooltip";
+import {hasNewTabsInCurrentWorkspace} from "@/hooks/vsCode/useNewTabs.helper";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection
  */
 export function WorkspaceView() {
     const { $user } = useAuthStore();
-    const { allWorkspaces, currentWorkspace, isLoadingWorkspaces, isLoadingTree, selectedWorkspaceId,setSelectedWorkspaceId } = useWorkspaceStore();
+    const { allWorkspaces, isLoadingWorkspaces, isLoadingTree, selectedWorkspaceId,setSelectedWorkspaceId } = useWorkspaceStore();
     const { loadAllWorkspaces, loadTree } = useWorkspaceLoader();
-    const { setModuleName, setFilterViewKey } = useGridControlStore();
-
-
+    const { openTabs } = useEditorTabsStore();
+    const { moduleName } = useGridControlStore();
     // Load workspaces on mount
     useEffect(() => {
         if(!$user.userId ) return;
@@ -37,16 +39,6 @@ export function WorkspaceView() {
             loadTree()
     }, [$user.userId, $user.filters, selectedWorkspaceId]);
 
-    // Sync selected option with currentWorkspace.id from store
-    // useEffect(() => {
-    //     if (currentWorkspace?.id && allWorkspaces.length > 0) {
-    //         const workspace = allWorkspaces.find((ws) => ws.id === currentWorkspace.id);
-    //         if (workspace) {
-    //             setSelectedWorkspaceId(workspace.id);
-    //         }
-    //     }
-    // }, [currentWorkspace?.id, allWorkspaces]);
-
     // Convert workspaces to autocomplete options
     const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => ({
         id: ws.id.toString(),
@@ -57,7 +49,14 @@ export function WorkspaceView() {
 
     // Handle workspace selection change
     const handleWorkspaceChange = (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
-        setSelectedWorkspaceId(newValue?.id ? parseInt(newValue.id.toString()) : null);
+        const newWorkspaceId = newValue?.id ? parseInt(newValue.id.toString()) : null;
+        
+        // Block change if same workspace
+        if (newWorkspaceId === selectedWorkspaceId) {
+            return;
+        }
+        
+        setSelectedWorkspaceId(newWorkspaceId);
     };
 
 
@@ -66,18 +65,22 @@ export function WorkspaceView() {
         <div className="h-full overflow-auto flex flex-col">
             {/* Workspace Selector */}
             <div className="px-3 py-2">
-                <GenericAutoComplete
-                    allOptions={workspaceOptions}
-                    value={workspaceOptions.find(option => option.id === selectedWorkspaceId?.toString()) || null}
-                    onChange={handleWorkspaceChange}
-                    inputProps={{
-                        name: "workspace",
-                        label: "",
-                        required: false,
-                    }}
-                    disabled={isLoadingWorkspaces || workspaceOptions.length === 0}
-                    size="small"
-                />
+                <UnsavedTabsTooltip side="bottom" actionText="Cannot switch workspace">
+                    <div>
+                        <GenericAutoComplete
+                            allOptions={workspaceOptions}
+                            value={workspaceOptions.find(option => option.id === selectedWorkspaceId?.toString()) || null}
+                            onChange={handleWorkspaceChange}
+                            inputProps={{
+                                name: "workspace",
+                                label: "",
+                                required: false,
+                            }}
+                            disabled={isLoadingWorkspaces || workspaceOptions.length === 0 || hasNewTabsInCurrentWorkspace(openTabs, moduleName)}
+                            size="small"
+                        />
+                    </div>
+                </UnsavedTabsTooltip>
 
                 {/* Filter Popup */}
                 {/* <GenericFilterPopup /> */}

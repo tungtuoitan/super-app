@@ -33,7 +33,6 @@ export const useActivityBarHelper = (): UseActivityBarHelperReturn => {
 
     return {
         handleActivityClick,
-
         toggleSideBar,
     };
 };
