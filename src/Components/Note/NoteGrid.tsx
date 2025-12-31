@@ -119,7 +119,10 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
                                         isSelected ? "bg-white/10" : ""
                                     }`}
                                     onClick={handleRowClick}
-                                    onContextMenu={(e) => openNoteContextMenu(e, row)}
+                                    onContextMenu={(e) => {
+                                        e.stopPropagation();
+                                        openNoteContextMenu(e, row);
+                                    }}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <td key={cell.id} className="text-left">

@@ -231,7 +231,10 @@ export function WsGrid() {
                                 onClick={() => {
                                     openWorkspaceTab(row.original);
                                 }}
-                                onContextMenu={(e) => openWsContextMenu(e, row)}
+                                onContextMenu={(e) => {
+                                    e.stopPropagation();
+                                    openWsContextMenu(e, row);
+                                }}
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <td key={cell.id} className="text-left">

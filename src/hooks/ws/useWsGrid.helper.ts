@@ -218,27 +218,18 @@ export const useWsGridHelper = () => {
         event.preventDefault();
         event.stopPropagation();
 
-        let selectedIds: number[];
-        let selectedWorkspaces: Ws[] = [];
-
-        // If row provided (clicked on a row)
-        if (row) {
-            // If row is not selected, add it to current selection
-            if (!row.getIsSelected()) {
-                // Add this row to existing selection
-                setWsGridRowSelection({ ...wsGridRowSelection, [row.id]: true });
-                // Include this row in selectedIds along with existing selection
-                selectedIds = [...Object.keys(wsGridRowSelection).map((id) => parseInt(id)), parseInt(row.id)];
-            } else {
-                // Row already selected, use current selection
-                selectedIds = Object.keys(wsGridRowSelection).map((id) => parseInt(id));
-            }
-
-            selectedWorkspaces = [...workspaces].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).filter((ws) => selectedIds.includes(ws.id));
-        } else {
-            // Clicked on empty area
-            selectedIds = [];
+        // Use current selection from store, or use hovered row if no selection
+        let selectedIds = Object.keys(wsGridRowSelection).map((id) => parseInt(id));
+        
+        // If no selection and row provided, use the hovered row
+        if (selectedIds.length === 0 && row) {
+            selectedIds = [parseInt(row.id)];
         }
+
+        const selectedWorkspaces = [...workspaces]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .filter((ws) => selectedIds.includes(ws.id));
+
         showContextMenu(event, "workspace-grid", {
             selectedWorkspaces,
             selectedIds,
