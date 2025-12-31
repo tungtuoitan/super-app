@@ -25,6 +25,7 @@ export const transformANote = (dto: NoteDTO): Note => {
         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
         createdBy: dto.createdBy,
         statusCode: dto.statusCode,
+        workspaceLinks: dto.workspaceLinks,
     };
 };
 

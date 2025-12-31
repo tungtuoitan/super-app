@@ -17,9 +17,11 @@ import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "
 import { constants } from "@/utils/constants";
 import { CalculateWorkspaceTreeContainerHeight } from "@/HeadlessComponents/CalculateWorkspaceTreeContainerHeight";
 import { CalculateWorkspaceTreeDropZoneHeight } from "@/HeadlessComponents/CalculateWorkspaceTreeDropZoneHeight";
+import { ScrollToHighlightItem } from "@/HeadlessComponents/ScrollToHighlightItem";
 
 export function WorkspaceTree() {
-    const { isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight } = useWorkspaceStore();
+    const { isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } =
+        useWorkspaceStore();
     const { searchQuery } = useGridControlStore();
     const { handleSelectionChange, handleKeyDown } = useTreeHelper2();
     const { handleMove } = useTreeHelper();
@@ -131,12 +133,8 @@ export function WorkspaceTree() {
                 className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
                 <CalculateWorkspaceTreeContainerHeight />
-                <CalculateWorkspaceTreeDropZoneHeight
-                    treeData={treeData}
-                    containerHeight={containerHeight}
-                    treeRef={_treeRef}
-                    setDropZoneHeight={setDropZoneHeight}
-                />
+                <CalculateWorkspaceTreeDropZoneHeight treeData={treeData} containerHeight={containerHeight} treeRef={_treeRef} setDropZoneHeight={setDropZoneHeight} />
+                <ScrollToHighlightItem />
                 {/* Loading overlay when dragging */}
                 {isDragging && (
                     <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">

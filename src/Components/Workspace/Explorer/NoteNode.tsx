@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { NodeApi } from "react-arborist";
 import { FileText, ArrowUpRight } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
@@ -24,13 +25,16 @@ interface NoteNodeProps {
 }
 
 export function NoteNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: NoteNodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef, setSelectedWorkspaceId, setScrollToItem, scrollToItem } =
+        useWorkspaceStore();
     const { searchQuery } = useGridControlStore();
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
+    const { isFolderSelected, getVisibleNodeIds, selectItem } = useTreeHelper2();
     const { openTab } = useEditorTabHelper();
     const _TREESTATUS = useTreeStatusHelper();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     // Safe cast: WorkspaceTree already filters to only render NoteNode for notes
     const noteItem = node.data.data as unknown as WorkspaceNoteItem;
@@ -53,6 +57,32 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     const compositeKey = `${noteItem.entityType}-${entityId}`;
     // Only show duplicate dot in targetTree (not in workspaceTree)
     const isDuplicate = highlightedDuplicateIds.has(compositeKey);
+
+    // Extract workspace links from note data
+    const workspaceLinks = noteItem.data.workspaceLinks || [];
+
+    // Handle workspace navigation with highlight
+    const handleWorkspaceNavigation = useCallback(
+        (workspaceId: number, workspaceItemId: number) => {
+            if (workspaceItemId === null) {
+                console.log("WorkspaceItemId is null, cannot navigate.");
+                return;
+            }
+
+            // Set workspace (will trigger load/expand)
+            setSelectedWorkspaceId(workspaceId);
+
+            // Set target item to scroll to (will be selected when tree renders)
+            setSelectedItemIds([workspaceItemId]);
+            setScrollToItem(true);
+
+            // Navigate if not already at /workspace
+            if (!location.pathname.includes("/workspace")) {
+                navigate("/workspace");
+            }
+        },
+        [location.pathname, navigate, setSelectedWorkspaceId, setSelectedItemIds, setScrollToItem]
+    );
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -190,13 +220,21 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                     <HighlightText
                         text={noteItem.data.name}
-                        highlight={ treeType === "workspaceTree" ? searchQuery : ""}
+                        highlight={treeType === "workspaceTree" ? searchQuery : ""}
                         className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${
                             _ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""
                         }`}
                     />
                     {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
-                    <StatusDot isUnsaved={isUnsaved} isDuplicate={isDuplicate} itemType="Note" itemName={noteItem.data.name} targetWorkspaceName={targetWorkspace?.name} />
+                    <StatusDot
+                        isUnsaved={isUnsaved}
+                        isDuplicate={isDuplicate}
+                        itemType="Note"
+                        itemName={noteItem.data.name}
+                        targetWorkspaceName={targetWorkspace?.name}
+                        workspaceLinks={workspaceLinks}
+                        onWorkspaceClick={handleWorkspaceNavigation}
+                    />
                 </div>
             </div>
         </div>

@@ -20,7 +20,7 @@ interface FolderNodeProps {
 }
 
 export function FolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FolderNodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef,setScrollToItem } = useWorkspaceStore();
     const { searchQuery } = useGridControlStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
@@ -50,6 +50,7 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault(); // Prevent tree activation that causes scrolling
+        setScrollToItem(false); // Clear any existing highlight
 
         // For targetTree, only allow expand/collapse (no selection)
         if (treeType === "targetTree") {

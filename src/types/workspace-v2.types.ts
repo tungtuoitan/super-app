@@ -85,6 +85,13 @@ export interface NoteEntity {
 
   /** Copy metadata JSON (notes.copy_info) */
   copyInfo?: string | null;
+
+  /** List of workspaces that link to this note (populated from workspace_items) */
+  workspaceLinks?: Array<{
+    workspaceId: number;
+    workspaceName: string;
+    workspaceItemId: number;
+  }>;
 }
 
 /**

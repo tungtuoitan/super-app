@@ -49,6 +49,10 @@ export interface WorkspaceContextData {
     setDropZoneHeight: Dispatch<SetStateAction<number>>;
     treeData: TreeFolder[];
     setTreeData: Dispatch<SetStateAction<TreeFolder[]>>;
+
+    // Highlight state (for navigation from other views)
+    scrollToItem: boolean; // workspace_items.id to highlight
+    setScrollToItem: Dispatch<SetStateAction<boolean>>;
 }
 
 export const workspaceContextDefaultValue: WorkspaceContextData = {
@@ -84,6 +88,10 @@ export const workspaceContextDefaultValue: WorkspaceContextData = {
     setDropZoneHeight: () => {},
     treeData: [],
     setTreeData: () => {},
+
+    // Highlight state defaults
+    scrollToItem: false,
+    setScrollToItem: () => {},
 };
 
 export const WorkspaceStore = createContext<WorkspaceContextData>(workspaceContextDefaultValue);
@@ -113,7 +121,9 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [containerHeight, setContainerHeight] = useState<number>(800);
     const [dropZoneHeight, setDropZoneHeight] = useState<number>(0);
     const [treeData, setTreeData] = useState<TreeFolder[]>([]);
-    
+
+    // Highlight state
+    const [scrollToItem, setScrollToItem] = useState<boolean>(false);
 
     return (
         <WorkspaceStore.Provider
@@ -150,6 +160,10 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 setDropZoneHeight,
                 treeData,
                 setTreeData,
+
+                // Highlight state
+                scrollToItem,
+                setScrollToItem,
             }}
         >
             {children}

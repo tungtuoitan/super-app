@@ -6,6 +6,15 @@
 import type { Folder } from "@/types/folder.types";
 import type { NoteEntity } from "@/types/workspace-v2.types";
 
+/**
+ * Workspace link - represents a workspace that references this note
+ * Used to show which workspaces contain a reference to this note
+ */
+export interface WorkspaceLink {
+    workspaceId: number;
+    workspaceName: string;
+    workspaceItemId: number; // workspace_items.id
+}
 
 // Note types
 export type NoteType = "meeting" | "brainstorm" | "research" | "bug" | "task" | "idea";
@@ -18,7 +27,7 @@ export const NOTE_TYPES: readonly NoteType[] = ["meeting", "brainstorm", "resear
  * Use this for in-app state management and UI components
  * Backend returns: Id, Name, Description, Tags, Type, StatusCode, CreatedAt, UpdatedAt, DeletedAt
  */
-export interface Note extends Omit<NoteEntity, 'userId' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+export interface Note extends Omit<NoteEntity, 'userId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'workspaceLinks'> {
     // Override userId to optional (not always available when transforming from WorkspaceItem)
     userId?: number;
 
@@ -32,6 +41,7 @@ export interface Note extends Omit<NoteEntity, 'userId' | 'createdAt' | 'updated
     type?: string; // Note type (meeting, brainstorm, etc.)
     isHardDeleted?: boolean; // Track if note is permanently deleted (hard delete)
     createdBy?: string; // Optional - may be removed from backend response for security
+    workspaceLinks?: WorkspaceLink[]; // List of workspaces that link to this note
 }
 
 // API DTOs (what backend sends/receives)
@@ -48,6 +58,7 @@ export interface NoteDTO {
     updatedAt?: string; // ISO string
     deletedAt?: string; // ISO string (nullable DateTime from backend)
     createdBy?: string; // Optional - may be removed from backend response for security
+    workspaceLinks?: WorkspaceLink[]; // List of workspaces that link to this note
 }
 
 // Request DTOs

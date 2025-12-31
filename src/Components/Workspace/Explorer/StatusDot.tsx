@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import type { WorkspaceLink } from "@/types/note.types";
+import {useWorkspaceStore} from "@/store/index";
 
 interface StatusDotProps {
     isUnsaved: boolean;
@@ -6,41 +8,70 @@ interface StatusDotProps {
     itemType: "Note" | "File" | "Folder";
     itemName: string;
     targetWorkspaceName?: string;
+    workspaceLinks?: WorkspaceLink[]; // List of workspaces that link to this item
+    onWorkspaceClick?: (workspaceId: number, workspaceItemId: number) => void; // Callback when workspace is clicked
 }
 
-// TODO: TẠM THỜI DÙNG targetWorkspaceName ĐỂ HIỂN THỊ TOOLTIP CHO DUPLICATE, SAU NÀY TA SẼ LẤY LÊN TẤT CẢ WORKSPACE LINK ĐẾN ITEM NÀY
-export function StatusDot({ isUnsaved, isDuplicate, itemType, itemName, targetWorkspaceName }: StatusDotProps) {
+export function StatusDot({ isUnsaved, isDuplicate, itemType, itemName, targetWorkspaceName, workspaceLinks, onWorkspaceClick }: StatusDotProps) {
     const [showTooltip, setShowTooltip] = useState(false);
+    const {selectedWorkspaceId} = useWorkspaceStore();
 
-    if (!isUnsaved && !isDuplicate) {
+    // Calculate total workspace links (excluding current workspace if in workspace tree)
+    const workspaceLinkCount = workspaceLinks?.length || 0;
+    // Only show badge when there are MORE than 1 workspace (>1, not >=1)
+    const hasMultipleWorkspaces = workspaceLinkCount > 1;
+
+    if (!isUnsaved && !isDuplicate && !hasMultipleWorkspaces) {
         return null;
     }
 
-    const dotColor = isUnsaved ? "bg-green-900" : " dark:bg-yellow-900";
-    
+    // Badge color
+    const badgeColor = isUnsaved ? "bg-green-900 text-white" : hasMultipleWorkspaces ? "bg-yellow-900 text-white" : "dark:bg-yellow-900 text-white";
+
     // Build tooltip message
-    let tooltipMessage = "";
+    let tooltipContent: React.ReactNode;
     if (isUnsaved) {
-        tooltipMessage = `New ${itemType}`;
+        tooltipContent = `New ${itemType}`;
+    } else if (hasMultipleWorkspaces && workspaceLinks) {
+        // Sort workspace links alphabetically by workspace name
+        const sortedWorkspaceLinks = [...workspaceLinks].sort((a, b) => a.workspaceName.localeCompare(b.workspaceName));
+        tooltipContent = (
+            <div className="flex flex-col gap-1">
+                <div className="font-semibold mb-1 text-left">
+                    Another locations:
+                </div>
+                {sortedWorkspaceLinks.map((link) => (
+                    <div
+                        key={link.workspaceItemId}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if(link.workspaceId !== selectedWorkspaceId) 
+                                onWorkspaceClick?.(link.workspaceId, link.workspaceItemId);
+                        }}
+                        className={` text-left py-0.5 ${link.workspaceId === selectedWorkspaceId ? "font-bold text-gray-600" : "cursor-pointer hover:text-blue-400 hover:underline"}`}
+                    >
+                        • {link.workspaceName.length > 30 ? link.workspaceName.slice(0, 27) + "..." : link.workspaceName}
+                    </div>
+                ))}
+            </div>
+        );
     } else if (isDuplicate && targetWorkspaceName) {
-        tooltipMessage = `This ${itemType.toLowerCase()} is existing in workspace "${targetWorkspaceName}" also`;
+        tooltipContent = `This ${itemType.toLowerCase()} is existing in workspace "${targetWorkspaceName}" also`;
     }
 
     return (
-        <div 
-            className="relative flex items-center justify-center w-4 h-4 ml-auto mr-1 cursor-help"
+        <div
+            className="relative flex items-center justify-center w-5 h-5 ml-auto mr-1 cursor-help"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
         >
-            {/* Dot */}
-            <div className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-            
+            {/* Badge */}
+            <div className={`w-1.5 h-1.5 rounded-full ${badgeColor}`} />
+
             {/* Tooltip */}
-            {showTooltip && (
-                <div className="absolute bottom-full mb-2 right-0 z-50 pointer-events-none">
-                    <div className="bg-gray-900 text-white text-xs py-1.5 px-3 rounded whitespace-nowrap shadow-lg">
-                        {tooltipMessage}
-                    </div>
+            {showTooltip && tooltipContent && (
+                <div className="absolute bottom-full mb-2 right-5 top-[-20px] z-50 pointer-events-auto w-40">
+                    <div className="bg-gray-900 text-white text-xs py-2 px-3 rounded shadow-lg">{tooltipContent}</div>
                     {/* Arrow */}
                     <div className="absolute top-full right-2 -mt-[1px]">
                         <div className="border-4 border-transparent border-t-gray-900" />
