@@ -16,12 +16,13 @@ import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useDragDropManager, useDrop } from "react-dnd";
 import { useMovingTreeHelper } from "@/hooks/workspace/useMovingTree.helper";
 import { MovingTree } from "./MovingTree";
+import {CalculateMovingTreeContainerHeight} from "@/HeadlessComponents/CalculateMovingTreeContainerHeight";
 
 export function MovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useMovingTreeStore();
     const { allWorkspaces, currentWorkspace, selectedWorkspaceId, selectedItemIds } = useWorkspaceStore();
     const manager = useDragDropManager();
-    const { handleWorkspaceChange, loadTargetWorkspaceTree, initializeContainerHeightTracking, checkDraggingItemsAreDuplicate, checkAndHighlightDuplicates } = useMovingTreeHelper();
+    const { handleWorkspaceChange, loadTargetWorkspaceTree, checkDraggingItemsAreDuplicate, checkAndHighlightDuplicates } = useMovingTreeHelper();
 
     // Ensure targetWorkspaceId is not the same as selectedWorkspaceId
     useEffect(() => {
@@ -35,12 +36,6 @@ export function MovingTab() {
     useEffect(() => {
         loadTargetWorkspaceTree();
     }, [targetWorkspaceId]);
-
-    // Initialize container height tracking
-    useEffect(() => {
-        const cleanup = initializeContainerHeightTracking();
-        return cleanup;
-    }, []);
 
     // Auto-detect and highlight duplicates when targetWorkspace loads or selectedItemIds change
     useEffect(() => {
@@ -67,12 +62,11 @@ export function MovingTab() {
     });
 
     return (
-        <div className="h-full flex overflow-hidden">
+        <div className="h-full flex overflow-hidden bred" ref={treeContainerRef} data-workspace-tree="true">
+            <CalculateMovingTreeContainerHeight />
             {/* Left Panel - Workspace Selector & Status */}
             <div className="w-1/2 flex flex-col border-r border-editor-border">
-                {/* Workspace Selector */}
                 <div className="px-4 py-3">
-                    {/* <label className="text-xs font-medium mb-1.5 block text-editor-fg">Target Workspace</label> */}
                     <GenericAutoComplete
                         allOptions={availableWorkspaces}
                         value={availableWorkspaces.find((option) => option.id === targetWorkspaceId?.toString()) || null}
@@ -88,7 +82,6 @@ export function MovingTab() {
                     <p className="text-xs text-muted-foreground mt-1.5">Drag items from workspace tree and drop into folders on the right</p>
                 </div>
 
-                {/* Status Messages */}
                 <div className="flex-1 flex flex-col justify-start px-4">
                     {targetWorkspaceId && !isLoadingTargetTree ? (
                         <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg flex items-start gap-3">
@@ -103,7 +96,7 @@ export function MovingTab() {
             </div>
 
             {/* Right Panel - Tree View */}
-            <div ref={drop} className={`w-5/6 flex flex-col overflow-hidden relative pb-4`}>
+            <div ref={drop} className={`w-5/6 flex flex-col overflow-hidden relative bblue`}>
                 {isLoadingTargetTree ? (
                     <div className="h-full flex items-center justify-center">
                         <Loader2 className="w-6 h-6 text-primary animate-spin" />

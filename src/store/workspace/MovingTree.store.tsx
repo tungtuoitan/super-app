@@ -1,5 +1,7 @@
 import React, { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import type { WorkspaceDTO } from "@/types/workspace-dto.types";
+import type { TreeApi } from "react-arborist";
+import type { TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 
 /**
  * MoveToWorkspacePopup Store - Manages state for "Moving" tab in VSPanel
@@ -31,6 +33,9 @@ export interface MovingTreeContextData {
     treeContainerRef: React.RefObject<HTMLDivElement>;
     containerHeight: number;
     setContainerHeight: Dispatch<SetStateAction<number>>;
+
+    // Tree instance ref (react-arborist TreeApi)
+    _treeRef: React.RefObject<TreeApi<TreeFolder>>;
 
     // Force tree re-render after drop operations
     treeRenderKey: number;
@@ -65,6 +70,9 @@ const movingTreeContextDefaultValue: MovingTreeContextData = {
     treeContainerRef: { current: null },
     containerHeight: 500,
     setContainerHeight: () => {},
+
+    // Tree instance ref
+    _treeRef: { current: null },
 
     // Force tree re-render
     treeRenderKey: 0,
@@ -108,6 +116,9 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = useState<number>(500);
 
+    // Tree instance ref
+    const _treeRef = React.useRef<TreeApi<TreeFolder>>(null);
+
     // Force tree re-render
     const [treeRenderKey, setTreeRenderKey] = useState<number>(0);
     const [dropZoneHeight, setDropZoneHeight] = React.useState(0);
@@ -135,6 +146,9 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 treeContainerRef,
                 containerHeight,
                 setContainerHeight,
+
+                // Tree instance ref
+                _treeRef,
 
                 // Force tree re-render
                 treeRenderKey,

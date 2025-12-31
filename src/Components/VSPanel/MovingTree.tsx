@@ -15,10 +15,10 @@ import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2, Workspa
 import { constants } from "@/utils/constants";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useMovingTreeHelper } from "@/hooks/workspace/useMovingTree.helper";
-import {CalculateMovingTreeDropZoneHeight} from "HeadlessComponents/CalculateMovingTreeDropZoneHeight";
+import { CalculateMovingTreeDropZoneHeight } from "@/HeadlessComponents/CalculateMovingTreeDropZoneHeight";
 
 export function MovingTree() {
-    const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight } = useMovingTreeStore();
+    const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight, setDropZoneHeight, _treeRef } = useMovingTreeStore();
     const { dropToMovingTree } = useMovingTreeHelper();
     const manager = useDragDropManager();
 
@@ -73,9 +73,15 @@ export function MovingTree() {
     }, [targetWorkspace]);
 
     return (
-        <div ref={treeContainerRef} className="h-full pl-4 py-2">
-            <CalculateMovingTreeDropZoneHeight targetTreeData={targetTreeData} />
+        <div ref={treeContainerRef} className="h-full pl-4 py-2 bgreen">
+            <CalculateMovingTreeDropZoneHeight
+                treeData={targetTreeData}
+                containerHeight={containerHeight}
+                treeRef={_treeRef}
+                setDropZoneHeight={setDropZoneHeight}
+            />
             <Tree
+                ref={_treeRef}
                 key={treeRenderKey}
                 data={targetTreeData}
                 openByDefault={true}
@@ -103,7 +109,7 @@ export function MovingTree() {
 
                     // Render drop zone differently
                     if (isDropZone) {
-                        return (
+                        return ( 
                             <div
                                 style={{
                                     ...style,
