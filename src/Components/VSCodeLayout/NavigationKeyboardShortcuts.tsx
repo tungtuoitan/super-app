@@ -6,25 +6,55 @@
 
 import { useEffect } from "react";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
+import {useEditorTabsStore} from "@/store/index";
 
 export const NavigationKeyboardShortcuts = () => {
     const { handleGoBack, handleGoForward, canGoBack, canGoForward } = useNavigationHistoryHelper();
+    const { openTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            //* HISTORICAL NAVIGATION - DISABLED FOR NOW
             // Alt + Left Arrow - Navigate Back
+            // if (e.altKey && e.key === "ArrowLeft") {
+            //     e.preventDefault();
+            //     if (canGoBack()) {
+            //         handleGoBack();
+            //     }
+            // }
+
+            // // Alt + Right Arrow - Navigate Forward
+            // if (e.altKey && e.key === "ArrowRight") {
+            //     e.preventDefault();
+            //     if (canGoForward()) {
+            //         handleGoForward();
+            //     }
+            // }
             if (e.altKey && e.key === "ArrowLeft") {
                 e.preventDefault();
-                if (canGoBack()) {
-                    handleGoBack();
+                if (openTabs.length > 0 && activeTabId) {
+                    const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
+                    if (currentIndex > 0) {
+                        setActiveTabId(openTabs[currentIndex - 1].id);
+                    }
+                    else {
+                        setActiveTabId(openTabs[openTabs.length - 1].id);
+                    }
+                
                 }
             }
 
-            // Alt + Right Arrow - Navigate Forward
+            // Alt + Right Arrow - Next Tab
             if (e.altKey && e.key === "ArrowRight") {
                 e.preventDefault();
-                if (canGoForward()) {
-                    handleGoForward();
+                if (openTabs.length > 0 && activeTabId) {
+                    const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
+                    if (currentIndex < openTabs.length - 1) {
+                        setActiveTabId(openTabs[currentIndex + 1].id);
+                    }
+                    else {
+                        setActiveTabId(openTabs[0].id);
+                    }
                 }
             }
         };
