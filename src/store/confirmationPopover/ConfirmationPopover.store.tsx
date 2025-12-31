@@ -16,7 +16,7 @@ export interface ConfirmationPopoverOptions {
     width?: string;
     zIndex?: number;
     anchorEl?: HTMLElement | null;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
 }
 
 export interface ConfirmationPopoverStoreData {

@@ -522,8 +522,8 @@ export enum WorkspaceItemAction {
     Move = "MOVE",
     /** MOVE CROSS workspace_item to another workspace (updates workspaceId + parentId + all descendants) */
     MoveCross = "MOVECROSS",
-    /** UPDATE entity data (folder/note/file properties) */
-    Update = "UPDATE",
+    /** UPDATE FOLDER data (FOLDER ONLY - name, description, color, icon, etc.) */
+    UpdateFolder = "UPDATEFOLDER", // Note: Only for folders. Notes/Files use their own entity-specific APIs.
     /** SOFT DELETE workspace_item */
     Delete = "DELETE",
     /** RESTORE deleted workspace_item */
@@ -560,10 +560,11 @@ export enum WorkspaceItemAction {
  *    Example: { action: "MOVE_CROSS", id: 789, workspaceId: 5, parentId: 123 }
  *    Example: { action: "MOVE_CROSS", id: 789, workspaceId: 5, parentId: null } ← to root of workspace 5
  *
- * 5. UPDATE (entity properties):
- *    Required: action=Update, id, entityData
+ * 5. UPDATE_FOLDER (update folder properties - FOLDER ONLY):
+ *    Required: action=UpdateFolder, id, folderData
  *    Optional: None
- *    Example: { action: "UPDATE", id: 789, folderData: { name: "New Name" } }
+ *    Note: Only for folders. Notes/Files use their own entity-specific APIs.
+ *    Example: { action: "UPDATEFOLDER", id: 789, folderData: { name: "New Name", color: "#FF5733" } }
  *
  * 6. DELETE (soft delete):
  *    Required: action=Delete, id

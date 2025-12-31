@@ -258,6 +258,24 @@ export const useEditorTabHelper = () => {
                         };
                     });
                 }
+            } else if (moduleName === constants.modules.workspace) {
+                // For existing notes (positive ID) in workspace module,
+                // remove the workspace item if closing without saving
+                // This handles the case where user clicks "Don't Save" on the confirmation
+                const workspaceItem = currentWorkspace?.flatData?.find(
+                    item => item.entityType === 3 && item.entityId === noteData.id
+                );
+                
+                // Only remove if the item itself is new (negative workspace_items.id)
+                if (workspaceItem && workspaceItem.id < 0) {
+                    setCurrentWorkspace((prevWs) => {
+                        if (!prevWs || !prevWs.flatData) return prevWs;
+                        return {
+                            ...prevWs,
+                            flatData: prevWs.flatData.filter((item) => item.id !== workspaceItem.id),
+                        };
+                    });
+                }
             }
 
             // Additional note-specific cleanup can go here...

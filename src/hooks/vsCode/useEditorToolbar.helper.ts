@@ -14,26 +14,24 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
-import { storageService } from "@/services/storage.service";
-import { wsService } from "@/services/ws.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useNoteGridHelper } from "../note/useNoteGrid.helper";
 import { useWsGridHelper } from "../ws/useWsGrid.helper";
 import { useWsDetailHelper } from "../ws/useWsDetail.helper";
 import { Ws, useWsStore } from "@/store/ws/useWs.store";
-import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
-import {useTreeEditorHelper} from "./useTreeEditorHelper";
+import { useTreeEditorHelper } from "./useTreeEditorHelper";
+import { WorkspaceItemAction } from "@/types/workspace.types";
+import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
+import { useWorkspaceLoader } from "../workspace";
 
 export const useEditorToolbarHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
     const { $user } = useAuthStore();
-    const  _treeEditor = useTreeEditorHelper();
+    const _treeEditor = useTreeEditorHelper();
 
     // Get active tab
     const activeTab = getActiveTab();
@@ -83,8 +81,7 @@ export const useEditorToolbarHelper = () => {
     })();
 
     // Handle Upsert - orchestrator for all entity types (create/update/soft delete/restore)
-    const commonUpsert = useCallback(async () => {
-
+    const upsertOrchestraitor = useCallback(async () => {
         // STEP 1: Validate Active Tab
         if (!activeTab) return;
 
@@ -93,36 +90,37 @@ export const useEditorToolbarHelper = () => {
 
         try {
             // STEP 3: Route to Appropriate Handler Based on Module + Tab Type
+            // REGULAR HANDLERS (Note from NoteGrid, Workspace, etc.)
+            switch (activeTab.type) {
+                case constants.vscode.tab.tabTypes.workspace:
+                    // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
+                    await upsertWorkspace(activeTab.id);
+                    break;
+                case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
+                    const data = activeTab.data as Note;
+                    const workspaceItem = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === data.id);
 
-            // Check if this is a Note opened from WorkspaceTree
-            if (moduleName === constants.modules.workspace) {
-                if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-                    await _treeEditor.upsertNoteFromTree();
-                } else {
-                    console.warn(`Unsupported tab type in workspace module: ${activeTab.type}`);
-                }
-
-
-
-            } else if (moduleName === constants.modules.note) {
-                // REGULAR HANDLERS (Note from NoteGrid, Workspace, etc.)
-                switch (activeTab.type) {
-                    case constants.vscode.tab.tabTypes.note:
-                        // NOTE HANDLER: Delegate to Note Upsert Logic
-                        await upsertNote(activeTab.id);
-                        break;
-
-                    case constants.vscode.tab.tabTypes.workspace:
-                        // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
-                        await upsertWorkspace(activeTab.id);
-                        break;
-
-                    default:
-                        console.warn(`Unsupported tab type: ${activeTab.type}`);
-                        break;
-                }
-            } else {
-                console.warn(`Unsupported module: ${moduleName}`);
+                    // UPDATE entity data - use entity-specific API (upsertNote)
+                    if (!workspaceItem || workspaceItem.id > 0) {
+                        if(activeTab.type === constants.vscode.tab.tabTypes.note) {
+                            const savedNote = await upsertNote(activeTab.id);
+                            if (!savedNote) {
+                                throw new Error("Failed to update note");
+                            }
+                        }
+                        //* thêm các entity type khác ở đây
+                    }
+                    // CREATE new entity + workspace_item - use workspace API
+                    else if (workspaceItem.id < 0 && activeTab.data.id < 0) {
+                        await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
+                    }
+                    else {
+                        console.error("⚠️ Unexpected case in upsertOrchestraitor");
+                    }
+                    break;
+                default:
+                    console.error("This case doesnt happen");
+                    return;
             }
         } catch (error) {
             // STEP 4: Handle Errors
@@ -138,7 +136,7 @@ export const useEditorToolbarHelper = () => {
             // STEP 5: Reset Saving State
             setIsSaving(false);
         }
-    }, [activeTab, moduleName, currentWorkspace, upsertNote, upsertWorkspace, loadTree, $user, setIsSaving, enqueueSnackbar]);
+    }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, _treeEditor, $user, setIsSaving, enqueueSnackbar]);
 
     // Handle Cancel - routes to appropriate reset logic
     const commonCancel = useCallback(() => {
@@ -159,7 +157,7 @@ export const useEditorToolbarHelper = () => {
     }, [activeTab, originalNoteRef, originalWsRef, setOpenTabs, setSelectedWs, enqueueSnackbar]);
 
     return {
-        commonUpsert,
+        upsertOrchestraitor,
         commonCancel,
         _deleteStatusText,
         _itemId,

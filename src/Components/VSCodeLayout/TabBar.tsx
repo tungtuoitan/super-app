@@ -7,6 +7,9 @@ import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useWsStore } from "@/store/ws/useWs.store";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { useTreeEditorHelper } from "@/hooks/vsCode/useTreeEditorHelper";
+import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
 
 /**
  * Get icon component based on tab type
@@ -32,6 +35,8 @@ export function TabBar() {
     const { moduleName } = useGridControlStore();
     const { notes } = useNoteGridStore();
     const { workspaces } = useWsStore();
+    const { showConfirmation } = useConfirmationPopoverHelper();
+    const { upsertOrchestraitor } = useEditorToolbarHelper();
 
     /**
      * Check if tab exists in current module's data source
@@ -43,21 +48,21 @@ export function TabBar() {
             // NoteGrid view - check if note exists in notes array
             if (tab.type === constants.vscode.tab.tabTypes.note) {
                 const note = tab.data;
-                return notes.some(n => n.id === note.id);
+                return notes.some((n) => n.id === note.id);
             }
         } else if (moduleName === constants.modules.ws) {
             // WsGrid view - check if workspace exists in workspaces array
             if (tab.type === constants.vscode.tab.tabTypes.workspace) {
                 const ws = tab.data;
-                return workspaces.some(w => w.id === ws.id);
+                return workspaces.some((w) => w.id === ws.id);
             }
         } else if (moduleName === constants.modules.workspace) {
             // Workspace tree view - check if note/workspace exists in currentWorkspace.flatData
             if (!currentWorkspace?.flatData) return false;
-            
+
             if (tab.type === constants.vscode.tab.tabTypes.note) {
                 const note = tab.data;
-                return currentWorkspace.flatData.some(item => item.entityType === 3 && item.entityId === note.id);
+                return currentWorkspace.flatData.some((item) => item.entityType === 3 && item.entityId === note.id);
             } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
                 const ws = tab.data;
                 return ws.id === currentWorkspace.id;
@@ -67,9 +72,35 @@ export function TabBar() {
         return false;
     };
 
-    const handleCloseTab = (event: React.MouseEvent, tabId: string) => {
+    const handleCloseTab = async (event: React.MouseEvent, tabId: string) => {
         event.stopPropagation();
-        closeTab(tabId);
+
+        const tab = openTabs.find((t) => t.id === tabId);
+        if (!tab) return;
+
+        // If has unsaved changes and in workspace tree, show confirmation
+        if (tab.hasUnsavedChanges) {
+            showConfirmation({
+                message: `Do you want to save the changes you made to ${tab.title}?\n\nYour changes will be lost if you don't save them.`,
+                confirmText: "Save",
+                cancelText: "Don't Save",
+                confirmColor: "default",
+                cancelColor: "destructive",
+                anchorEl: event.currentTarget as HTMLElement,
+                onConfirm: async () => {
+                    try {
+                        await upsertOrchestraitor();
+                        closeTab(tabId);
+                    } catch (error) {
+                        console.error("Failed to save:", error);
+                        // Không đóng tab nếu save thất bại
+                    }
+                },
+            });
+        } else {
+            // No unsaved changes or not in workspace, close directly
+            closeTab(tabId);
+        }
     };
 
     return (
@@ -101,7 +132,9 @@ export function TabBar() {
                   `}
                             >
                                 <TabIcon
-                                    className={`w-4 h-4 ${isDeleted ? "text-gray-500" : tab.type === constants.vscode.tab.tabTypes.note ? "text-blue-400" : "text-gray-400"} ${activeTabId === tab.id ? "opacity-100" : "opacity-50"}`}
+                                    className={`w-4 h-4 ${isDeleted ? "text-gray-500" : tab.type === constants.vscode.tab.tabTypes.note ? "text-blue-400" : "text-gray-400"} ${
+                                        activeTabId === tab.id ? "opacity-100" : "opacity-50"
+                                    }`}
                                 />
                                 {/* ${activeTabId === tab.id ? 'font-medium' : 'font-normal'} */}
                                 <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>

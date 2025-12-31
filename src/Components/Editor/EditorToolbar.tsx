@@ -23,21 +23,21 @@ export function EditorToolbar() {
     const activeTab = getActiveTab();
 
     // Get toolbar actions for active tab
-    const { commonUpsert, commonCancel, _deleteStatusText, _itemId } = useEditorToolbarHelper();
+    const { upsertOrchestraitor, commonCancel, _deleteStatusText, _itemId } = useEditorToolbarHelper();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "s") {
                 e.preventDefault();
                 if (activeTab && activeTab.hasUnsavedChanges && !isSaving) {
-                    commonUpsert();
+                    upsertOrchestraitor();
                 }
             }
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [activeTab, isSaving, commonUpsert]);
+    }, [activeTab, isSaving, upsertOrchestraitor]);
 
     return (
         <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
@@ -62,7 +62,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={commonUpsert}
+                                        onClick={upsertOrchestraitor}
                                         disabled={isSaving}
                                         className="h-8 w-8 text-green-500 hover:bg-green-500/10 disabled:text-white/20"
                                     >
@@ -87,7 +87,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={commonUpsert}
+                                        onClick={upsertOrchestraitor}
                                         disabled={!activeTab?.hasUnsavedChanges || isSaving}
                                         className={`h-8 w-8 ${activeTab?.hasUnsavedChanges ? "text-[#4FC3F7] hover:bg-[#4FC3F7]/10" : "text-white/40"} disabled:text-white/20`}
                                     >

@@ -103,7 +103,7 @@ export const useFolderDialogHelper = () => {
             if (mode === "edit") {
                 // UPDATE action: update existing folder
                 await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
-                    action: WorkspaceItemAction.Update,
+                    action: WorkspaceItemAction.UpdateFolder,
                     id: editingFolder!.id,
                     folderData: {
                         name: newFolderName.trim(),

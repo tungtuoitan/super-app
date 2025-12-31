@@ -34,7 +34,7 @@ export interface ConfirmationPopoverProps {
     /** Z-index for the popover */
     zIndex?: number;
     /** Callback when confirm button is clicked */
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
     /** Callback when cancel button is clicked */
     onCancel: () => void;
     /** Callback when popover is closed */
@@ -59,6 +59,7 @@ export function ConfirmationPopover({
     const { theme } = useTheme();
     const popoverRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = React.useState({ top: 0, left: 0 });
+    const [isConfirming, setIsConfirming] = React.useState(false);
 
     // Calculate position - center screen
     useEffect(() => {
@@ -92,12 +93,19 @@ export function ConfirmationPopover({
         onCancel();
     };
 
-    const handleConfirm = () => {
-        onConfirm();
+    const handleConfirm = async () => {
+        setIsConfirming(true);
+        try {
+            await onConfirm();
+        } finally {
+            setIsConfirming(false);
+        }
     };
 
     const handleCancel = () => {
-        onCancel();
+        if (!isConfirming) {
+            onCancel();
+        }
     };
 
     if (!open) return null;
@@ -125,10 +133,22 @@ export function ConfirmationPopover({
                 <p className="text-sm mb-3 whitespace-pre-line">{message}</p>
                 <hr className={cn("mb-3", theme === "dark" ? "border-gray-700" : "border-gray-200")} />
                 <div className="flex justify-end gap-2">
-                    <Button size="sm" variant={buttonVariant || confirmColor} onClick={handleConfirm} className="normal-case">
-                        {confirmText}
+                    <Button 
+                        size="sm" 
+                        variant={buttonVariant || confirmColor} 
+                        onClick={handleConfirm} 
+                        disabled={isConfirming}
+                        className="normal-case"
+                    >
+                        {isConfirming ? "Saving..." : confirmText}
                     </Button>
-                    <Button size="sm" variant={cancelColor} onClick={handleCancel} className="normal-case">
+                    <Button 
+                        size="sm" 
+                        variant={cancelColor} 
+                        onClick={handleCancel} 
+                        disabled={isConfirming}
+                        className="normal-case"
+                    >
                         {cancelText}
                     </Button>
                 </div>

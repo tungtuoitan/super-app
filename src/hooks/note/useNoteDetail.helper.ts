@@ -120,32 +120,6 @@ export const useNoteDetailHelper = () => {
                 const transformedNote = transformANote(savedNote);
 
                 // ============================================================
-                // Step 8: If creating from workspace tree, add to workspace_items
-                // ============================================================
-                // if (isCreateMode && activeNote.hashtags && activeNote.hashtags.length > 0) {
-                //     // Extract folder ID - hashtags can be number[] or Folder[]
-                //     const firstHashtag = activeNote.hashtags[0];
-                //     const parentFolderId = typeof firstHashtag === "number" ? firstHashtag : (firstHashtag as any)?.id;
-
-                //     const workspaceId = currentWorkspace?.id;
-
-                //     if (workspaceId && parentFolderId) {
-                //         try {
-                //             await workspaceService._addItemToWorkspace(token, workspaceId, {
-                //                 parentTagId: parentFolderId,
-                //                 childType: constants.workspace.itemTypes.note,
-                //                 childId: transformedNote.id,
-                //             });
-                //         } catch (error) {
-                //             console.error("❌ Failed to add note to workspace:", error);
-                //             // Don't fail the whole save if this fails - note is still created
-                //         }
-                //     } else {
-                //         console.warn("⚠️ No workspace ID or parent folder ID found, skipping workspace_items insert");
-                //     }
-                // }
-
-                // ============================================================
                 // Step 10: Update tab data with server response
                 // ============================================================
                 enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
@@ -171,8 +145,12 @@ export const useNoteDetailHelper = () => {
                 originalNoteRef.current = { ...transformedNote };
 
                 // reload
-                if (moduleName === constants.modules.note) loadNotes();
-                else if (moduleName === constants.modules.workspace) loadTree();
+                //TODO: chỉ reload khi thay đổi tên/status hoặc khi insert, ta sẽ triển khai sau khi đổi sang dùng
+                if (moduleName === constants.modules.note) {
+                    loadNotes();
+                } else if (moduleName === constants.modules.workspace) {
+                    loadTree();
+                }
 
                 return transformedNote;
             } catch (error) {

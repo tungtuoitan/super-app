@@ -21,7 +21,7 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
     const {selectedWorkspaceId} = useWorkspaceStore();
 
     if (count === 0 || !links || links.length === 0) {
-        return <span className="text-sm text-muted-foreground">—</span>;
+        return <span className="text-sm text-muted-foreground"></span>;
     }
 
     const isTop = tooltipPosition === "top";

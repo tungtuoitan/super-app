@@ -32,9 +32,9 @@ export const useConfirmationPopoverHelper = () => {
     /**
      * Handle confirm action
      */
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         if (options?.onConfirm) {
-            options.onConfirm();
+            await options.onConfirm();
         }
         hide();
     };
