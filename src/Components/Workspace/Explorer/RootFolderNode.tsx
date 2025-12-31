@@ -83,7 +83,7 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
                 }}
                 className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
             >
-                {hasChildren ? node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" /> : null}
+                {hasChildren ? node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" /> : <div className="w-4 h-4"/>}
             </button>
 
             {/* Workspace Icon */}

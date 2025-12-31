@@ -24,7 +24,7 @@ import {useTreeHelper2} from "../workspace";
  * @param onNoteClick - Callback when a note is clicked
  * @param sidebarMode - If true, shows only name column for compact sidebar view
  */
-export function useNoteGridTableHelper(disabledRowIds?: Set<number>) {
+export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<number>) {
     // State từ centralized store
     const {
         notes,
@@ -84,11 +84,36 @@ export function useNoteGridTableHelper(disabledRowIds?: Set<number>) {
         const baseColumns: ColumnDef<Note>[] = [
             {
                 id: "select",
-                header: ({ table }) => (
-                    <div className="flex items-center justify-center">
-                        <Checkbox checked={table.getIsAllPageRowsSelected()} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" />
-                    </div>
-                ),
+                header: ({ table }) => {
+                    // Calculate if all selectable rows are selected
+                    const selectableRows = table.getRowModel().rows.filter(row => !disabledRowIds?.has(row.original.id));
+                    const selectedSelectableRows = selectableRows.filter(row => row.getIsSelected());
+                    const isAllSelectableSelected = selectableRows.length > 0 && selectedSelectableRows.length === selectableRows.length;
+                    const isSomeSelectableSelected = selectedSelectableRows.length > 0 && selectedSelectableRows.length < selectableRows.length;
+
+                    // Determine checked state: true, false, or 'indeterminate'
+                    let checkedState: boolean | 'indeterminate' = false;
+                    if (isAllSelectableSelected) {
+                        checkedState = true;
+                    } else if (isSomeSelectableSelected) {
+                        checkedState = 'indeterminate';
+                    }
+
+                    return (
+                        <div className="flex items-center justify-center">
+                            <Checkbox
+                                checked={checkedState}
+                                onCheckedChange={(value) => {
+                                    // Toggle only selectable rows
+                                    selectableRows.forEach(row => {
+                                        row.toggleSelected(!!value);
+                                    });
+                                }}
+                                aria-label="Select all"
+                            />
+                        </div>
+                    );
+                },
                 cell: ({ row }) => {
                     const isDisabled = disabledRowIds?.has(row.original.id) || false;
                     return (
@@ -150,6 +175,7 @@ export function useNoteGridTableHelper(disabledRowIds?: Set<number>) {
                             count={count}
                             links={links}
                             onWorkspaceClick={handleWorkspaceNavigation}
+                            source={source}
                             tooltipPosition={isFirstRows ? "bottom" : "top"}
                         />
                     );

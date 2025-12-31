@@ -94,7 +94,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
 function NotesView() {
     return (
         <div className="h-full flex flex-col overflow-hidden">
-            <NoteGrid />
+            <NoteGrid source={constants.modules.note} />
         </div>
     );
 }

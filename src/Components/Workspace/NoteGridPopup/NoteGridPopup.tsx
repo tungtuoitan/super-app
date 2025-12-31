@@ -110,7 +110,7 @@ export function NoteGridPopup() {
 
                 {/* Reuse NoteGrid component - with visible pagination */}
                 <div className="flex-1 overflow-hidden px-6 flex flex-col">
-                    <NoteGrid disabledRowIds={disabledRowIds} />
+                    <NoteGrid source={constants.modules.workspace} disabledRowIds={disabledRowIds} />
                 </div>
 
                 <DialogFooter className="mx-6 py-4 gap-2 flex-row items-center">

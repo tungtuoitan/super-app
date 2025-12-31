@@ -19,12 +19,12 @@ import { BaseTab } from "@/types/editor/tab.types";
  *
  * @param disabledRowIds - Set of note IDs to disable (for selection mode in popup)
  */
-export function NoteGrid({ disabledRowIds }: { disabledRowIds?: Set<number> } = {}) {
+export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { source?: string; disabledRowIds?: Set<number> } = {}) {
     const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef, noteGridPagination, totalCount } = useNoteGridStore();
     const { openTab } = useEditorTabHelper();
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { $user } = useAuthStore();
-    const { table } = useNoteGridTableHelper(disabledRowIds);
+    const { table } = useNoteGridTableHelper(source, disabledRowIds);
     const { filterViewKey, searchQuery } = useGridControlStore();
     const { openTabs, activeTabId } = useEditorTabsStore();
 
@@ -77,7 +77,7 @@ export function NoteGrid({ disabledRowIds }: { disabledRowIds?: Set<number> } = 
                     // Only show context menu if clicking on empty area (not on a row)
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest("tr[data-row]");
-                    if (!isClickedOnRow) {
+                    if (!isClickedOnRow && source === constants.modules.note) {
                         openNoteContextMenu(e);
                     }
                 }}
@@ -99,9 +99,18 @@ export function NoteGrid({ disabledRowIds }: { disabledRowIds?: Set<number> } = 
                         {table.getRowModel().rows.map((row) => {
                             // Get active note from tab to determine selection
                             const activeTab = openTabs.length > 0 && activeTabId ? openTabs.find((t: BaseTab) => t.id === activeTabId) : null;
-                            const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? activeTab.data as Note : null;
-                            const isSelected = activeNote?.id === row.original.id;
-                            
+                            const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+                            const isSelected = activeNote?.id === row.original.id && source === constants.modules.note;
+
+                            // Handle row click based on source
+                            const handleRowClick = () => {
+                                if (source === constants.modules.note) {
+                                    openTab(row.original);
+                                } else if (source === constants.modules.workspace && !disabledRowIds?.has(row.original.id)) {
+                                    row.toggleSelected();
+                                }
+                            };
+
                             return (
                                 <tr
                                     key={row.id}
@@ -109,7 +118,7 @@ export function NoteGrid({ disabledRowIds }: { disabledRowIds?: Set<number> } = 
                                     className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${row.original.deletedAt ? "opacity-60" : ""} ${
                                         isSelected ? "bg-white/10" : ""
                                     }`}
-                                    onClick={() => openTab(row.original)}
+                                    onClick={handleRowClick}
                                     onContextMenu={(e) => openNoteContextMenu(e, row)}
                                 >
                                     {row.getVisibleCells().map((cell) => (

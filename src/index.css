@@ -202,7 +202,7 @@
 } */
 
  /* Ensure tree inner div has stable scrollbar gutter */
-div[role="tree"] > div {
+div[role="tree"] > div, div[id="noteEditorContent"] {
   overflow-y: auto;
   scrollbar-gutter: stable;
 }

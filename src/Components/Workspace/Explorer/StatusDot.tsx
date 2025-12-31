@@ -48,9 +48,9 @@ export function StatusDot({ isUnsaved, isDuplicate, itemType, itemName, targetWo
                             if(link.workspaceId !== selectedWorkspaceId) 
                                 onWorkspaceClick?.(link.workspaceId, link.workspaceItemId);
                         }}
-                        className={` text-left py-0.5 ${link.workspaceId === selectedWorkspaceId ? "font-bold text-gray-600" : "cursor-pointer hover:text-blue-400 hover:underline"}`}
+                        className={` text-left py-0.5 text-gray-400 ${link.workspaceId === selectedWorkspaceId ? "" : "cursor-pointer hover:text-blue-400 hover:underline"}`}
                     >
-                        • {link.workspaceName.length > 30 ? link.workspaceName.slice(0, 27) + "..." : link.workspaceName}
+                        • {link.workspaceName.length > 30 ? link.workspaceName.slice(0, 27) + "..." : link.workspaceName} {link.workspaceId === selectedWorkspaceId ? "(current)" : ""}
                     </div>
                 ))}
             </div>
@@ -61,7 +61,7 @@ export function StatusDot({ isUnsaved, isDuplicate, itemType, itemName, targetWo
 
     return (
         <div
-            className="relative flex items-center justify-center w-5 h-5 ml-auto mr-1 cursor-help"
+            className="relative flex items-center justify-center w-5 h-5 ml-auto mr-1 cursor-pointer"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
         >
@@ -70,8 +70,8 @@ export function StatusDot({ isUnsaved, isDuplicate, itemType, itemName, targetWo
 
             {/* Tooltip */}
             {showTooltip && tooltipContent && (
-                <div className="absolute bottom-full mb-2 right-5 top-[-20px] z-50 pointer-events-auto w-40">
-                    <div className="bg-gray-900 text-white text-xs py-2 px-3 rounded shadow-lg">{tooltipContent}</div>
+                <div className="absolute bottom-full mb-2 right-5 top-[-20px] z-50 pointer-events-auto w-40" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-gray-900 text-white text-xs py-4 px-5 rounded shadow-lg ">{tooltipContent}</div>
                     {/* Arrow */}
                     <div className="absolute top-full right-2 -mt-[1px]">
                         <div className="border-4 border-transparent border-t-gray-900" />

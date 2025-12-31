@@ -64,9 +64,13 @@ export const useWorkspaceLoader = () => {
      * Load tree data for a specific workspace
      * Sets as current tree
      *
-     * Uses V2 API structure with full entity data
-     * Applies user filters from profile (status code and deleted status)
-     * 
+     * ⚠️ PERFORMANCE NOTE - FILTERING MOVED TO FRONTEND:
+     * Uses V2 API structure with full entity data (ALL items, no server filtering).
+     * Frontend will filter by deletedAt, statusCode, and search text.
+     *
+     * User filter preferences are stored in $user.filters.workspace but NOT sent to backend.
+     * Filtering happens in transformToTreeData() in tree.miniHelper.ts
+     *
      * @param calculatedVirtualItems - Optional array of virtual items (ID < 0) to preserve in state
      */
     const loadTree = async (calculatedVirtualItems?: WorkspaceItemV2[]) => {
@@ -80,21 +84,17 @@ export const useWorkspaceLoader = () => {
 
             const token = $user.userToken;
 
-            // Get current filters from user profile
-            const filters = $user.filters?.workspace || {
-                statusCode: "active",
-                deletedAt: "null"
-            };
+            // ⚠️ CHANGED: No longer pass filter params to backend
+            // Backend returns ALL items, frontend will filter them
+            // User filter preferences stored in $user.filters.workspace for future frontend filtering
+            // const filters = $user.filters?.workspace || {
+            //     statusCode: "active",
+            //     deletedAt: "null"
+            // };
 
-            // Build filter params
-            const params = {
-                statusCode: filters.statusCode,
-                deletedAt: filters.deletedAt
-            };
-
-            // Fetch workspace tree with V2 structure and filters
-            console.log("🔧 Loading Workspace V2 API with filters:", params);
-            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, selectedWorkspaceId, params);
+            // Fetch workspace tree with V2 structure (ALL items, no filtering)
+            console.log("🔧 Loading Workspace V2 API (NO SERVER FILTERING - all items returned)");
+            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, selectedWorkspaceId);
             if(result && result.success){
                 // Merge data: API data + existing virtual items (ID < 0) + new virtual items
                 const existingVirtualItems = (currentWorkspace?.flatData ?? []).filter((item: WorkspaceItemV2) => item?.id < 0);

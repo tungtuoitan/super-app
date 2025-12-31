@@ -474,8 +474,17 @@ export function buildTreeFromV2Items(items: WorkspaceItemV2[]): TreeFolder[] {
  * 4. Wrap in workspace root (if workspace mode)
  * 5. Convert to TreeFolder format
  *
+ * ⚠️ PERFORMANCE NOTE - FRONTEND FILTERING:
+ * Backend returns ALL workspace items (no server filtering).
+ * This function currently filters by search text only.
+ *
+ * TODO (Future enhancement): Add optional filters for:
+ * - deletedAt (show/hide deleted items)
+ * - statusCode (filter notes/files by draft/published)
+ * User preferences can be passed as additional parameters and stored in user profile.
+ *
  * @param data - WorkspaceDTO with workspace data + flatData (or null/undefined)
- * @param searchText - Search filter text
+ * @param searchText - Search filter text (filters by name)
  * @returns TreeFolder array ready for react-arborist
  */
 export function transformToTreeData(
