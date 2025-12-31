@@ -81,11 +81,14 @@ export function TabBar() {
         // If has unsaved changes and in workspace tree, show confirmation
         if (tab.hasUnsavedChanges) {
             showConfirmation({
-                message: `Do you want to save the changes you made to ${tab.title}?\n\nYour changes will be lost if you don't save them.`,
+                title: tab.title,
+                subtitle: "Your changes will be lost if you don't save them.",
                 confirmText: "Save",
-                cancelText: "Don't Save",
+                thirdButtonText: "Don't Save",
+                cancelText: "Cancel",
                 confirmColor: "default",
-                cancelColor: "destructive",
+                thirdButtonColor: "destructive",
+                cancelColor: "outline",
                 anchorEl: event.currentTarget as HTMLElement,
                 onConfirm: async () => {
                     try {
@@ -95,6 +98,10 @@ export function TabBar() {
                         console.error("Failed to save:", error);
                         // Không đóng tab nếu save thất bại
                     }
+                },
+                onThirdButton: () => {
+                    // Don't Save - close tab without saving
+                    closeTab(tabId);
                 },
             });
         } else {
@@ -122,7 +129,7 @@ export function TabBar() {
                                 key={tab.id}
                                 onClick={() => updateActiveTab(tab.id)}
                                 className={`
-                    group h-[35px] px-3 flex items-center gap-2
+                    group h-[35px] pl-3 pr-1.5 flex items-center gap-2
                     border-r border-b
                     ${
                         activeTabId === tab.id
@@ -139,14 +146,23 @@ export function TabBar() {
                                 {/* ${activeTabId === tab.id ? 'font-medium' : 'font-normal'} */}
                                 <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>
                                     {tab.title.length > 40 ? tab.title.slice(0, 17) + "..." : tab.title}
-                                    {tab.hasUnsavedChanges && " ●"}
+                                    
                                     {isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""}
                                 </span>
                                 <button
                                     onClick={(e) => handleCloseTab(e, tab.id)}
-                                    className="p-0.5 hover:bg-editor-hover rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                                    className={`relative pl-0.5 py-0.5 hover:bg-gray-500/20 rounded transition-opacity duration-150 group/close w-5 h-5 ${
+                                        tab.hasUnsavedChanges ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                    }`}
                                 >
-                                    <X className="w-4 h-4" />
+                                    {tab.hasUnsavedChanges ? (
+                                        <>
+                                            <div className="w-1.5 h-1.5 ml-1 rounded-full bg-white group-hover/close:hidden" />
+                                            <X className="w-4 h-4 hidden group-hover/close:block absolute inset-0 m-auto" />
+                                        </>
+                                    ) : (
+                                        <X className="w-4 h-4" />
+                                    )}
                                 </button>
                             </button>
                         );

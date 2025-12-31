@@ -15,22 +15,26 @@ import { useConfirmationPopoverStore } from "@/store/confirmationPopover/Confirm
  */
 export function ConfirmationPopoverContainer() {
     const { isOpen, options } = useConfirmationPopoverStore();
-    const { handleConfirm, handleCancel } = useConfirmationPopoverHelper();
+    const { handleConfirm, handleThirdButton, handleCancel } = useConfirmationPopoverHelper();
 
     return (
         <ConfirmationPopover
             open={isOpen}
             anchorEl={options?.anchorEl || null}
-            message={options?.message || ""}
+            title={options?.title || ""}
+            subtitle={options?.subtitle}
             confirmText={options?.confirmText}
             cancelText={options?.cancelText}
+            thirdButtonText={options?.thirdButtonText}
             confirmColor={options?.confirmColor}
             cancelColor={options?.cancelColor}
+            thirdButtonColor={options?.thirdButtonColor}
             buttonVariant={options?.buttonVariant}
             width={options?.width}
             zIndex={options?.zIndex || 20000}
             onConfirm={handleConfirm}
             onCancel={handleCancel}
+            onThirdButton={handleThirdButton}
         />
     );
 }

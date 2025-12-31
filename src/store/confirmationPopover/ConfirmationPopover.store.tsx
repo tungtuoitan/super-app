@@ -7,16 +7,20 @@
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
 export interface ConfirmationPopoverOptions {
-    message: string;
+    title: string;
+    subtitle?: string;
     confirmText?: string;
     cancelText?: string;
+    thirdButtonText?: string;
     confirmColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     cancelColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    thirdButtonColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     width?: string;
     zIndex?: number;
     anchorEl?: HTMLElement | null;
     onConfirm: () => void | Promise<void>;
+    onThirdButton?: () => void | Promise<void>;
 }
 
 export interface ConfirmationPopoverStoreData {

@@ -15,13 +15,18 @@ interface GetConfirmMessageParams {
     childCount?: number;
 }
 
+interface ConfirmMessage {
+    title: string;
+    subtitle?: string;
+}
+
 /**
  * Generate confirmation message based on entity type and delete type
  * 
  * @param params - Configuration for confirmation message
- * @returns Formatted confirmation message string
+ * @returns Object with title and optional subtitle
  */
-export const getConfirmMessage = (params: GetConfirmMessageParams): string => {
+export const getConfirmMessage = (params: GetConfirmMessageParams): ConfirmMessage => {
     const { type, entityType, count, isMultiple, entityName, childCount = 0 } = params;
 
     if (type === "soft-delete") {
@@ -30,31 +35,54 @@ export const getConfirmMessage = (params: GetConfirmMessageParams): string => {
             // Note and file share the same messages
             if (isMultiple) {
                 const label = entityType === "file" ? "files" : "notes";
-                return `Are you sure you want to delete ${count} selected ${label}?`;
+                return {
+                    title: `Delete ${count} ${label}?`,
+                    subtitle: `Are you sure you want to delete ${count} selected ${label}?`
+                };
             } else {
                 if (entityName) {
-                    return `Are you sure you want to delete "${entityName}"?`;
+                    const label = entityType === "file" ? "file" : "note";
+                    return {
+                        title: `Delete "${entityName}"?`,
+                        subtitle: `This ${label} will be moved to trash.`
+                    };
                 } else {
                     const label = entityType === "file" ? "file" : "note";
-                    return `Are you sure you want to delete this ${label}?`;
+                    return {
+                        title: `Delete this ${label}?`,
+                        subtitle: `Are you sure you want to delete this ${label}?`
+                    };
                 }
             }
         } else if (entityType === "workspace") {
             return isMultiple
-                ? `Are you sure you want to delete ${count} selected workspaces?\n\n⚠️ This will also delete ALL folders, notes, and files in these workspaces.\n\n`
-                : `Are you sure you want to delete this workspace?\n\n⚠️ This will also delete ALL folders, notes, and files in this workspace.\n\n`;
+                ? {
+                    title: `Delete ${count} workspaces?`,
+                    subtitle: `This will also delete ALL folders, notes, and files in these workspaces.`
+                }
+                : {
+                    title: "Delete this workspace?",
+                    subtitle: "This will also delete ALL folders, notes, and files in this workspace."
+                };
         } else {
             // folder
             if (isMultiple) {
-                return `Are you sure you want to delete ${count} selected folders?`;
+                return {
+                    title: `Delete ${count} folders?`,
+                    subtitle: `Are you sure you want to delete ${count} selected folders?`
+                };
             } else {
                 // Single folder with optional name and child count
-                if (entityName && childCount > 0) {
-                    return `Are you sure you want to delete "${entityName}"?`;
-                } else if (entityName) {
-                    return `Are you sure you want to delete "${entityName}"?`;
+                if (entityName) {
+                    return {
+                        title: `Delete "${entityName}"?`,
+                        subtitle: childCount > 0 ? `This folder contains ${childCount} child folder(s).` : `This folder will be moved to trash.`
+                    };
                 } else {
-                    return `Are you sure you want to delete this folder?`;
+                    return {
+                        title: "Delete this folder?",
+                        subtitle: undefined
+                    };
                 }
             }
         }
@@ -65,32 +93,60 @@ export const getConfirmMessage = (params: GetConfirmMessageParams): string => {
             if (isMultiple) {
                 const label = entityType === "file" ? "files" : "notes";
                 const content = entityType === "file" ? "files" : "note content";
-                return `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${count} selected ${label}.\n\n❌ This action CANNOT be undone.\n❌ All ${content} will be LOST FOREVER.`;
+                return {
+                    title: `⚠️ Permanently delete ${count} ${label}?`,
+                    subtitle: `This action CANNOT be undone. All ${content} will be LOST FOREVER.`
+                };
             } else {
                 const content = entityType === "file" ? "file" : "note content";
                 if (entityName) {
-                    return `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${entityName}".\n\n❌ This action CANNOT be undone.\n❌ The ${content} will be LOST FOREVER.`;
+                    const label = entityType === "file" ? "file" : "note";
+                    return {
+                        title: `⚠️ Permanently delete "${entityName}"?`,
+                        subtitle: `This action CANNOT be undone. The ${content} will be LOST FOREVER.`
+                    };
                 } else {
                     const label = entityType === "file" ? "file" : "note";
-                    return `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete this ${label}.\n\n❌ This action CANNOT be undone.\n❌ All ${content} will be LOST FOREVER.`;
+                    return {
+                        title: `⚠️ Permanently delete this ${label}?`,
+                        subtitle: `This action CANNOT be undone. All ${content} will be LOST FOREVER.`
+                    };
                 }
             }
         } else if (entityType === "workspace") {
             return isMultiple
-                ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${count} selected workspaces and ALL their contents (folders, notes, files).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`
-                : `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete this workspace and ALL its contents (folders, notes, files).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+                ? {
+                    title: `⚠️ Permanently delete ${count} workspaces?`,
+                    subtitle: "This will PERMANENTLY delete ALL contents (folders, notes, files). This action CANNOT be undone."
+                }
+                : {
+                    title: "⚠️ Permanently delete this workspace?",
+                    subtitle: "This will PERMANENTLY delete ALL contents (folders, notes, files). This action CANNOT be undone."
+                };
         } else {
             // folder
             if (isMultiple) {
-                return `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${count} selected folders and ALL their contents (notes, files, subfolders).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+                return {
+                    title: `⚠️ Permanently delete ${count} folders?`,
+                    subtitle: "This will PERMANENTLY delete ALL their contents (notes, files, subfolders). This action CANNOT be undone."
+                };
             } else {
                 // Single folder with optional name and child count
                 if (entityName && childCount > 0) {
-                    return `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${entityName}" and ${childCount} child folder(s) with ALL their contents.\n\n❌ This action CANNOT be undone.\n❌ All notes, files, and subfolders will be LOST FOREVER.`;
+                    return {
+                        title: `⚠️ Permanently delete "${entityName}"?`,
+                        subtitle: `This will PERMANENTLY delete this folder and ${childCount} child folder(s) with ALL their contents. This action CANNOT be undone.`
+                    };
                 } else if (entityName) {
-                    return `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${entityName}" and ALL its contents.\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
+                    return {
+                        title: `⚠️ Permanently delete "${entityName}"?`,
+                        subtitle: "This will PERMANENTLY delete ALL contents. This action CANNOT be undone."
+                    };
                 } else {
-                    return `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete this folder.\n\n❌ This action CANNOT be undone.\n❌ All folder content will be LOST FOREVER.`;
+                    return {
+                        title: "⚠️ Permanently delete this folder?",
+                        subtitle: "This action CANNOT be undone. All folder content will be LOST FOREVER."
+                    };
                 }
             }
         }

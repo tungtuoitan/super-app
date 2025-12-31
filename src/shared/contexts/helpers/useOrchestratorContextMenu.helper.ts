@@ -43,12 +43,13 @@ export const useOrchestratorContextMenuHelper = () => {
         const anchorElement = nativeEvent?.target as HTMLElement;
 
         const isMultiple = count > 1;
-        const message = getConfirmMessage({ type, entityType, count, isMultiple });
+        const confirmMsg = getConfirmMessage({ type, entityType, count, isMultiple });
         const confirmText = type === "hard-delete" ? "Delete Permanently" : "Delete";
 
         showConfirmation({
             anchorEl: anchorElement,
-            message,
+            title: confirmMsg.title,
+            subtitle: confirmMsg.subtitle,
             confirmText,
             cancelText: "Cancel",
             confirmColor: "destructive",

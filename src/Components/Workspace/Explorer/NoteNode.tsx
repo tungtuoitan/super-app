@@ -154,6 +154,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                 description: noteItem.data.description || "",
                 hashtags: "",
                 type: "idea",
+                statusCode: noteItem.data.statusCode,
                 createdAt: new Date(noteItem.data.createdAt),
                 updatedAt: noteItem.data.updatedAt ? new Date(noteItem.data.updatedAt) : undefined,
                 createdBy: "You",

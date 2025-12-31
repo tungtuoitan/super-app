@@ -8,7 +8,8 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import { ConfirmationPopover } from "@/shared/components/feedback/ConfirmationPopover";
 
 interface ConfirmationOptions {
-    message: string;
+    title: string;
+    subtitle?: string;
     confirmText?: string;
     cancelText?: string;
     confirmColor?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -54,7 +55,8 @@ export function ConfirmationProvider({ children }: { children: React.ReactNode }
             <ConfirmationPopover
                 open={isOpen}
                 anchorEl={options?.anchorEl || null}
-                message={options?.message || ""}
+                title={options?.title || ""}
+                subtitle={options?.subtitle}
                 confirmText={options?.confirmText}
                 cancelText={options?.cancelText}
                 confirmColor={options?.confirmColor}

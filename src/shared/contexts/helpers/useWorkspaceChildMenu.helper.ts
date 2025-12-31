@@ -304,7 +304,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ----------------
         const entityName = isMultipleSelected ? undefined : (contextData.data?.name || contextData.name || "this item");
 
-        const message = getConfirmMessage({
+        const confirmMsg = getConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
             entityType: isFile ? "file" : "note",
             count: selectedCount,
@@ -317,7 +317,8 @@ export const useWorkspaceChildMenuHelper = () => {
         // ----------------
         showConfirmation({
             anchorEl: anchorElement,
-            message,
+            title: confirmMsg.title,
+            subtitle: confirmMsg.subtitle,
             confirmText: isHardDelete ? "Delete Permanently" : "Delete",
             cancelText: "Cancel",
             confirmColor: "destructive",

@@ -40,6 +40,16 @@ export const useConfirmationPopoverHelper = () => {
     };
 
     /**
+     * Handle third button action
+     */
+    const handleThirdButton = async () => {
+        if (options?.onThirdButton) {
+            await options.onThirdButton();
+        }
+        hide();
+    };
+
+    /**
      * Handle cancel action
      */
     const handleCancel = () => {
@@ -51,6 +61,7 @@ export const useConfirmationPopoverHelper = () => {
         showConfirmation,
         hide,
         handleConfirm,
+        handleThirdButton,
         handleCancel,
     };
 };

@@ -561,7 +561,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         const childCount = isMultipleSelected ? 0 : $countChildren(contextData);
         const entityName = isMultipleSelected ? undefined : contextData.name;
         
-        const message = getConfirmMessage({
+        const confirmMsg = getConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
             entityType: "folder",
             count: selectedCount,
@@ -575,7 +575,8 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         showConfirmation({
             anchorEl: anchorElement,
-            message,
+            title: confirmMsg.title,
+            subtitle: confirmMsg.subtitle,
             confirmText: isHardDelete ? "Delete Permanently" : "Delete",
             cancelText: "Cancel",
             confirmColor: "destructive",
