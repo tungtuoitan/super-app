@@ -1,35 +1,26 @@
 /**
  * Note Editor Panel
- * Reuses NoteDetailDialogContent for editor area tabs
+ * Reuses NoteDetailContent for editor area tabs
  * Toolbar is now shared in VSEditorArea
  */
 
-import React, {useEffect} from 'react';
-import {NoteDetailDialogContent} from '@/Components/notes_temp/dialogs/NoteDetailDialogContent';
-import {useEditorActionsHelper} from '@/hooks/useEditorActions.helper';
-import {useEditorTabsStore} from '@/store/index';
-import {useNoteUIStore} from '@/store/note/useNoteUI.store';
-import {BaseTab} from '@/types/editor/tab.types';
+import React, { useEffect } from "react";
+import { useEditorTabsStore } from "@/store/index";
+import { BaseTab } from "@/types/editor/tab.types";
+import { NoteDetailContent } from "../Note/NoteDetailContent";
 
 interface NoteEditorPanelProps {
     tab: BaseTab;
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { syncTabChangeState } = useEditorActionsHelper();
-    const { noteHasChanges } = useNoteUIStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
-    
-    const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Sync noteHasChanges with tab state
-    useEffect(() => {
-        syncTabChangeState(tab.id);
-    }, [noteHasChanges, tab.id]);
+    const contentRef = React.useRef<HTMLDivElement>(null);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {
-        const viewState = openTabs.find((t: BaseTab) => t.id === tab.id)?.viewState
+        const viewState = openTabs.find((t: BaseTab) => t.id === tab.id)?.viewState;
         if (contentRef.current && viewState?.scrollTop !== undefined) {
             contentRef.current.scrollTop = viewState.scrollTop;
         }
@@ -38,22 +29,14 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     // Save scroll position when scrolling
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const scrollTop = e.currentTarget.scrollTop;
-        setOpenTabs((prev: BaseTab[]) => prev.map(t => 
-            t.id === tab.id 
-                ? { ...t, viewState: { ...t.viewState, scrollTop } }
-                : t
-        ));
-    }
+        setOpenTabs((prev: BaseTab[]) => prev.map((t) => (t.id === tab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t)));
+    };
 
     return (
         <div className="w-full h-full flex flex-col overflow-hidden bg-[#f6f6f6]">
             {/* Content */}
-            <div 
-                ref={contentRef}
-                onScroll={handleScroll}
-                className="flex-1 overflow-auto bg-background"
-            >
-                <NoteDetailDialogContent />
+            <div ref={contentRef} onScroll={handleScroll} id="noteEditorContent" className="flex-1 overflow-auto bg-background">
+                <NoteDetailContent />
             </div>
         </div>
     );

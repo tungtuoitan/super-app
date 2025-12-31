@@ -14,4 +14,4 @@ export const zIndex = {
     popover: 1500,
     tooltip: 1600,
     notification: 1700,
-} as const
+} as const;

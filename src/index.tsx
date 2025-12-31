@@ -1,10 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { App } from './App';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { applyShadcnTheme } from './lib/theme/shadcn';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { App } from "./App";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { applyShadcnTheme } from "./lib/theme/shadcn";
 
-import './index.css';
+import "./index.css";
+import { validateEnvironmentConfig } from "./config";
+
+// Validate environment configuration on app startup
+validateEnvironmentConfig();
 
 /**
  * Application entry point.
@@ -20,7 +24,7 @@ import './index.css';
  */
 
 // Get the root DOM element and create React root
-const rootElement = document.getElementById('root') as HTMLElement;
+const rootElement = document.getElementById("root") as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
 
 // Initialize shadcn CSS variables
@@ -32,5 +36,5 @@ root.render(
         <ThemeProvider>
             <App />
         </ThemeProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
 );

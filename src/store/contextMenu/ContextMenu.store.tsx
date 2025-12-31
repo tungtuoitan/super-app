@@ -4,24 +4,24 @@
  * Pattern: Separate store from business logic (similar to EditorTabStore)
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import { constants } from '@/utils/constants';
+import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import { constants } from "@/utils/constants";
 
 export interface ContextMenuPosition {
     x: number;
     y: number;
 }
 
-export type ContextMenuType = typeof constants.contextMenuTypes[keyof typeof constants.contextMenuTypes];
+export type OrchestratorContextMenuType = (typeof constants.contextMenu.contextMenuTypes)[keyof typeof constants.contextMenu.contextMenuTypes];
 
-export interface ContextMenuStoreData {
+export interface OrchestratorContextMenuStoreData {
     // Menu state
     isContextMenuOpen: boolean;
     setIsContextMenuOpen: Dispatch<SetStateAction<boolean>>;
     anchorPoint: ContextMenuPosition;
     setAnchorPoint: Dispatch<SetStateAction<ContextMenuPosition>>;
-    contextType: ContextMenuType;
-    setContextType: Dispatch<SetStateAction<ContextMenuType>>;
+    contextType: OrchestratorContextMenuType;
+    setContextType: Dispatch<SetStateAction<OrchestratorContextMenuType>>;
     contextData: any | null;
     setContextData: Dispatch<SetStateAction<any | null>>;
 
@@ -38,12 +38,12 @@ export interface ContextMenuStoreData {
     setNoteDialogParentFolder: Dispatch<SetStateAction<any | null>>;
 }
 
-export const contextMenuStoreDefaultValue: ContextMenuStoreData = {
+export const contextMenuStoreDefaultValue: OrchestratorContextMenuStoreData = {
     isContextMenuOpen: false,
     setIsContextMenuOpen: () => {},
     anchorPoint: { x: 0, y: 0 },
     setAnchorPoint: () => {},
-    contextType: 'default',
+    contextType: "default",
     setContextType: () => {},
     contextData: null,
     setContextData: () => {},
@@ -57,14 +57,14 @@ export const contextMenuStoreDefaultValue: ContextMenuStoreData = {
     setNoteDialogParentFolder: () => {},
 };
 
-export const ContextMenuStore = createContext<ContextMenuStoreData>(contextMenuStoreDefaultValue);
+export const OrchestratorContextMenuStore = createContext<OrchestratorContextMenuStoreData>(contextMenuStoreDefaultValue);
 
-export const useContextMenuStore = () => useContext(ContextMenuStore);
+export const useOrchestratorContextMenuStore = () => useContext(OrchestratorContextMenuStore);
 
-export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const OrchestratorContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
     const [anchorPoint, setAnchorPoint] = useState<ContextMenuPosition>({ x: 0, y: 0 });
-    const [contextType, setContextType] = useState<ContextMenuType>(constants.contextMenuTypes.default);
+    const [contextType, setContextType] = useState<OrchestratorContextMenuType>(constants.contextMenu.contextMenuTypes.default);
     const [contextData, setContextData] = useState<any | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
     const [editItemData, setEditItemData] = useState<any | null>(null);
@@ -72,7 +72,7 @@ export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>
     const [noteDialogParentFolder, setNoteDialogParentFolder] = useState<any | null>(null);
 
     return (
-        <ContextMenuStore.Provider
+        <OrchestratorContextMenuStore.Provider
             value={{
                 isContextMenuOpen,
                 setIsContextMenuOpen,
@@ -93,6 +93,6 @@ export const ContextMenuStoreProvider: React.FC<React.PropsWithChildren<unknown>
             }}
         >
             {children}
-        </ContextMenuStore.Provider>
+        </OrchestratorContextMenuStore.Provider>
     );
 };

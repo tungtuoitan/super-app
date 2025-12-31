@@ -1,15 +1,10 @@
-import React, { MouseEventHandler, useEffect } from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/ui/tooltip';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { CSSProperties } from 'react';
+import React, { MouseEventHandler, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
+import { Button } from "@/Components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { CSSProperties } from "react";
 
 /**
  * Props interface for dialog content customization.
@@ -38,7 +33,7 @@ export interface IDialogContainerProps {
     /** Whether dialog should be full screen */
     fullScreen?: boolean;
     /** Maximum width for dialog */
-    maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+    maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | false;
     /** Whether dialog should take full width */
     fullWidth?: boolean;
     /** Dialog content configuration */
@@ -77,7 +72,7 @@ export function DialogContainer({
     title,
     showCloseButton = true,
     fullScreen: forceFullScreen,
-    maxWidth = 'md',
+    maxWidth = "md",
     fullWidth = true,
     dialogContentProps,
     toolbarContent,
@@ -94,8 +89,8 @@ export function DialogContainer({
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
         checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
     const fullScreen = forceFullScreen || isMobile;
@@ -113,29 +108,26 @@ export function DialogContainer({
 
     // Map maxWidth to Tailwind classes
     const getMaxWidthClass = () => {
-        if (maxWidth === false) return 'max-w-none';
+        if (maxWidth === false) return "max-w-none";
         const widthMap = {
-            xs: 'max-w-xs',
-            sm: 'max-w-sm',
-            md: 'max-w-md',
-            lg: 'max-w-lg',
-            xl: 'max-w-xl',
+            xs: "max-w-xs",
+            sm: "max-w-sm",
+            md: "max-w-md",
+            lg: "max-w-lg",
+            xl: "max-w-xl",
         };
-        return widthMap[maxWidth] || 'max-w-md';
+        return widthMap[maxWidth] || "max-w-md";
     };
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={handleOpenChange}
-        >
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
                 className={cn(
-                    'flex flex-col overflow-hidden p-0',
-                    fullScreen && 'w-screen h-screen max-w-none m-0 rounded-none',
+                    "flex flex-col overflow-hidden p-0",
+                    fullScreen && "w-screen h-screen max-w-none m-0 rounded-none",
                     !fullScreen && getMaxWidthClass(),
-                    fullWidth && !fullScreen && 'w-full',
-                    className
+                    fullWidth && !fullScreen && "w-full",
+                    className,
                 )}
                 style={style}
                 onEscapeKeyDown={(e) => {
@@ -154,16 +146,10 @@ export function DialogContainer({
                 {(title || showCloseButton || toolbarContent) && (
                     <div className="flex items-center justify-between border-b bg-background px-4 py-3 min-h-[56px]">
                         {/* Title section */}
-                        <h2 className="text-lg font-medium flex-grow">
-                            {title}
-                        </h2>
+                        <h2 className="text-lg font-medium flex-grow">{title}</h2>
 
                         {/* Custom toolbar content */}
-                        {toolbarContent && (
-                            <div className="flex items-center mr-2">
-                                {toolbarContent}
-                            </div>
-                        )}
+                        {toolbarContent && <div className="flex items-center mr-2">{toolbarContent}</div>}
 
                         {/* Close button */}
                         {showCloseButton && onClose && (
@@ -190,13 +176,7 @@ export function DialogContainer({
                 )}
 
                 {/* Dialog content */}
-                <div
-                    className={cn(
-                        'flex-1 overflow-auto p-6 min-h-[200px] flex flex-col',
-                        dialogContentProps?.className
-                    )}
-                    style={dialogContentProps?.style}
-                >
+                <div className={cn("flex-1 overflow-auto p-6 min-h-[200px] flex flex-col", dialogContentProps?.className)} style={dialogContentProps?.style}>
                     {dialogContentProps?.children || children}
                 </div>
             </DialogContent>

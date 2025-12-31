@@ -3,31 +3,37 @@
  * Central export point for all application stores
  */
 
-export { AuthStore, AuthStoreProvider, useAuthStore } from './auth/Auth.store';
-export type { AuthStoreData, User } from './auth/Auth.store';
+export { AuthStore, AuthStoreProvider, useAuthStore } from "./auth/Auth.store";
+export type { AuthStoreData, User } from "./auth/Auth.store";
 
-export { DialogStore, DialogProvider, useDialogStore } from './dialog/Dialog.store';
-export type { DialogContextData } from './dialog/Dialog.store';
+export { DialogStore, DialogProvider, useDialogStore } from "./dialog/Dialog.store";
+export type { DialogContextData } from "./dialog/Dialog.store";
 
-export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from './editor/EditorTab.store';
+export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "./editor/EditorTab.store";
 
-export { NoteTabStore, NoteTabProvider, useNoteTabStore } from './note/useNoteTab.store';
-export type { NoteTabContextData } from './note/useNoteTab.store';
+export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./hashtagUI/HashtagUI.store";
+export type { HashtagUIStoreData } from "./hashtagUI/HashtagUI.store";
 
-export { ContextMenuStore, ContextMenuStoreProvider, useContextMenuStore } from './contextMenu/ContextMenu.store';
-export type { ContextMenuStoreData, ContextMenuPosition, ContextMenuType } from './contextMenu/ContextMenu.store';
+export { WorkspaceStore, WorkspaceProvider, useWorkspaceStore } from "./workspace/Workspace.store";
+export type { WorkspaceContextData } from "./workspace/Workspace.store";
 
-export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from './hashtagUI/HashtagUI.store';
-export type { HashtagUIStoreData } from './hashtagUI/HashtagUI.store';
+export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from "./workspace/FolderDialog.store";
+export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from "./workspace/FolderDialog.store";
 
-export { ExplorerStore, ExplorerProvider, useExplorerStore } from './explorer/Explorer.store';
-export type { ExplorerContextData } from './explorer/Explorer.store';
+export { NoteGridPopupProvider, useNoteGridPopupStore } from "./workspace/NoteGridPopup.store";
+export type { NoteGridPopupContextData } from "./workspace/NoteGridPopup.store";
 
-export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from './explorer/FolderDialog.store';
-export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from './explorer/FolderDialog.store';
+export { MovingTreeProvider, useMovingTreeStore } from "./workspace/MovingTree.store";
+export type { MovingTreeContextData } from "./workspace/MovingTree.store";
 
-export { ActivityBarProvider, useActivityBarStore } from './activityBar/ActivityBar.store';
-export type { ActivityBarContextData } from './activityBar/ActivityBar.store';
+export { ActivityBarProvider, useActivityBarStore } from "./activityBar/ActivityBar.store";
+export type { ActivityBarContextData } from "./activityBar/ActivityBar.store";
 
-export { AuthCallbackProvider, useAuthCallbackStore } from './authCallback/AuthCallback.store';
-export type { AuthCallbackContextData } from './authCallback/AuthCallback.store';
+export { AuthCallbackProvider, useAuthCallbackStore } from "./authCallback/AuthCallback.store";
+export type { AuthCallbackContextData } from "./authCallback/AuthCallback.store";
+
+export { StandardRegistryStore, StandardRegistryProvider, useStandardRegistryStore } from "./standardRegistry/StandardRegistry.store";
+export type { StandardRegistryContextData } from "./standardRegistry/StandardRegistry.store";
+
+export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "./editor/NavigationHistory.store";
+export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "./editor/NavigationHistory.store";

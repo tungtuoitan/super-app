@@ -1,16 +1,13 @@
 /* dont touch these css anymore */
 body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
 }
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-        monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 .App {
     text-align: center;
@@ -47,7 +44,6 @@ code {
     }
 }
 
-
 /* 1------default settings here------- */
 *,
 *::before,
@@ -65,7 +61,6 @@ code {
     outline: none !important;
 }
 
-
 /* 2------TLContainer------ */
 /* make timelinebar scrolls horizontally */
 .infinite-scroll-component {
@@ -82,7 +77,6 @@ code {
 display: none ; 
 } */
 
-
 .figma-button:hover {
     background-color: #1a1a1a;
 }
@@ -95,7 +89,6 @@ display: none ;
     text-decoration: underline;
     color: rgb(0, 80, 184);
 }
-
 
 .opening-pr-row {
     background-color: lightblue;

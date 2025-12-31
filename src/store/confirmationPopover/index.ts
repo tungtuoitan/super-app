@@ -3,9 +3,4 @@
  * Public API exports
  */
 
-export { 
-    ConfirmationPopoverProvider,
-    useConfirmationPopoverStore,
-    type ConfirmationPopoverOptions,
-    type ConfirmationPopoverStoreData 
-} from './ConfirmationPopover.store';
+export { ConfirmationPopoverProvider, useConfirmationPopoverStore, type ConfirmationPopoverOptions, type ConfirmationPopoverStoreData } from "./ConfirmationPopover.store";

@@ -1,9 +1,9 @@
-import { useAuthHelper } from '@/hooks/useAuth.helpers';
-import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import {useAuthStore} from '@/store/index';
+import { useAuthHelper } from "@/hooks/useAuth.helpers";
+import { Button } from "@/Components/ui/button";
+import { Input } from "@/Components/ui/input";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { useAuthStore } from "@/store/auth/Auth.store";
 
 /**
  * Authentication container component.
@@ -20,7 +20,7 @@ import {useAuthStore} from '@/store/index';
  * @returns The authentication container with login form
  */
 export function AuthContainer() {
-    const { auth, setAuth, loading, error } = useAuthStore();
+    const { $user, set$User, loading, error } = useAuthStore();
     const { login } = useAuthHelper();
 
     /**
@@ -28,11 +28,11 @@ export function AuthContainer() {
      * Updates the authentication state with new field values.
      */
     const handleUsernameChange = (value: string) => {
-        setAuth({ ...auth, userName: value });
+        set$User({ ...$user, userName: value });
     };
 
     const handlePasswordChange = (value: string) => {
-        setAuth({ ...auth, password: value });
+        set$User({ ...$user, password: value });
     };
 
     /**
@@ -41,10 +41,10 @@ export function AuthContainer() {
      */
     const handleLogin = async () => {
         try {
-            await login(auth.userName, auth.password??'');
+            await login($user.userName, $user.password ?? "");
             // The useAuth hook handles setting the auth context and localStorage
         } catch (err) {
-            console.error('Login failed:', err);
+            console.error("Login failed:", err);
         }
     };
 
@@ -55,25 +55,14 @@ export function AuthContainer() {
                     <label htmlFor="userName" className="text-sm font-medium text-foreground">
                         User Name
                     </label>
-                    <Input
-                        id="userName"
-                        value={auth.userName}
-                        onChange={(e) => handleUsernameChange(e.target.value)}
-                        className="h-[50px] text-base"
-                    />
+                    <Input id="userName" value={$user.userName} onChange={(e) => handleUsernameChange(e.target.value)} className="h-[50px] text-base" />
                 </div>
 
                 <div className="w-full space-y-2">
                     <label htmlFor="password" className="text-sm font-medium text-foreground">
                         Password
                     </label>
-                    <Input
-                        id="password"
-                        type="password"
-                        value={auth.password}
-                        onChange={(e) => handlePasswordChange(e.target.value)}
-                        className="h-[50px] text-base"
-                    />
+                    <Input id="password" type="password" value={$user.password} onChange={(e) => handlePasswordChange(e.target.value)} className="h-[50px] text-base" />
                 </div>
 
                 {error && (
@@ -83,12 +72,8 @@ export function AuthContainer() {
                     </Alert>
                 )}
 
-                <Button
-                    disabled={loading}
-                    onClick={handleLogin}
-                    className="w-full bg-primary hover:bg-primary/90"
-                >
-                    {loading ? 'Logging in...' : 'Login'}
+                <Button disabled={loading} onClick={handleLogin} className="w-full bg-primary hover:bg-primary/90">
+                    {loading ? "Logging in..." : "Login"}
                 </Button>
             </div>
         </div>

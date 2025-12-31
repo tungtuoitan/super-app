@@ -9,25 +9,27 @@
  * - Prevent unauthorized access to the app
  */
 
-import { useEffect } from 'react';
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { useAuthHelper } from '@/hooks/useAuth.helpers';
-import { useActivityBarStore } from '@/store/activityBar/ActivityBar.store';
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthHelper } from "@/hooks/useAuth.helpers";
+import { useActivityBarStore } from "@/store/activityBar/ActivityBar.store";
+import { useStandardRegistryHelper } from "@/hooks/index";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated } = useAuthStore();
     const { initAuthFromStorageToken, logout } = useAuthHelper();
     const { setAccountsOpen } = useActivityBarStore();
+    const { loadStandardRegistries } = useStandardRegistryHelper();
 
     // Initialize auth on mount
-    // useEffect(() => {
-    //     const hasToken = initAuthFromStorageToken();
+    useEffect(() => {
+        const hasToken = initAuthFromStorageToken();
 
-    //     // If no token, show login dialog
-    //     if (!hasToken) {
-    //         setAccountsOpen(true);
-    //     }
-    // }, []);
+        // If no token, show login dialog
+        if (!hasToken) {
+            setAccountsOpen(true);
+        }
+    }, []);
 
     // Listen for 401 unauthorized events from API
     // useEffect(() => {
@@ -48,11 +50,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!isAuthenticated) {
             setAccountsOpen(true);
-        }
-        else {
+        } else {
             setAccountsOpen(false);
         }
-    
+    }, [isAuthenticated]);
+
+    // Load standard registries when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            loadStandardRegistries();
+        }
     }, [isAuthenticated]);
 
     return <>{children}</>;

@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **`.github/copilot-instructions.md`** - Architecture, patterns, conventions
 
 Please refer to that file for:
+
 - Project architecture and folder structure
 - State management patterns (React Query + Context)
 - Component patterns and conventions
@@ -25,6 +26,7 @@ Please refer to that file for:
 **`SHADCN_STYLEGUIDE.md`** - shadcn/ui + Tailwind CSS style guide
 
 Use this for:
+
 - shadcn/ui component usage
 - Tailwind CSS patterns
 - Theme colors (Zinc theme)

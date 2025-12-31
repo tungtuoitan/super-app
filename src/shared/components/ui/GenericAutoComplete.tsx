@@ -1,30 +1,20 @@
-import { CSSProperties, useEffect, useState } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/Components/ui/button';
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-} from '@/Components/ui/command';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/Components/ui/popover';
-import { Label } from '@/Components/ui/label';
+import { CSSProperties, useEffect, useState } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/Components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/Components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
+import { Label } from "@/Components/ui/label";
 
 /**
  * Utility function to check if a value is empty.
- * 
+ *
  * @param value - Value to check for emptiness
  * @returns True if value is empty, false otherwise
  */
 export function isEmpty(value: unknown): boolean {
     const type = typeof value;
-    if ((value !== null && type === 'object') || type === 'function') {
+    if ((value !== null && type === "object") || type === "function") {
         const properties = Object.keys(value as object);
         if (properties.length === 0) {
             return true;
@@ -68,7 +58,7 @@ export interface GenericAutoCompleteProps {
     /** Whether the component should be hidden */
     hidden?: boolean;
     /** Size variant for the component (default: 'small') */
-    size?: 'small' | 'tiny';
+    size?: "small" | "tiny";
     /** Currently selected value */
     value: IAutoCompleteOptions | null | undefined;
     /** Additional CSS classes */
@@ -100,7 +90,7 @@ export interface GenericAutoCompleteProps {
 
 /**
  * Generic autocomplete component for consistent option selection.
- * 
+ *
  * This component provides a reusable autocomplete interface with:
  * - Configurable option data structure
  * - Support for single selection
@@ -108,39 +98,26 @@ export interface GenericAutoCompleteProps {
  * - Customizable styling and behavior
  * - Built-in error states and validation
  * - Accessible design with proper ARIA attributes
- * 
+ *
  * Size variants:
  * - 'small': Standard size similar to TagAutoComplete (default)
  * - 'tiny': Compact size with 12px font for dense layouts
- * 
+ *
  * The component automatically handles option filtering and selection
  * state management based on the provided options and value.
- * 
+ *
  * @param props - Component props for autocomplete configuration
  * @returns Configured autocomplete component
  */
 export function GenericAutoComplete(props: GenericAutoCompleteProps) {
-    const { 
-        id, 
-        allOptions, 
-        size = 'small', 
-        onChange, 
-        inputProps, 
-        value, 
-        className,
-        style, 
-        disabled, 
-        disableClearable, 
-        hidden, 
-        getOptionDisabled 
-    } = props;
+    const { id, allOptions, size = "small", onChange, inputProps, value, className, style, disabled, disableClearable, hidden, getOptionDisabled } = props;
 
     const [open, setOpen] = useState(false);
     const [selectedValue, setSelectedValue] = useState<IAutoCompleteOptions>({} as IAutoCompleteOptions);
 
     useEffect(() => {
         if (!isEmpty(value) && !isEmpty(allOptions)) {
-            const filteredOption = allOptions.filter(x => x.id === value?.id);
+            const filteredOption = allOptions.filter((x) => x.id === value?.id);
             if (value?.id === 0) {
                 setSelectedValue({} as IAutoCompleteOptions);
             }
@@ -156,8 +133,8 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
         if (onChange) {
             // Create a synthetic event for compatibility
             const syntheticEvent = {
-                type: 'change',
-                target: { value: option }
+                type: "change",
+                target: { value: option },
             } as unknown as React.SyntheticEvent;
             onChange(syntheticEvent, option);
         }
@@ -167,8 +144,8 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
         setSelectedValue({} as IAutoCompleteOptions);
         if (onChange) {
             const syntheticEvent = {
-                type: 'change',
-                target: { value: null }
+                type: "change",
+                target: { value: null },
             } as unknown as React.SyntheticEvent;
             onChange(syntheticEvent, null);
         }
@@ -176,24 +153,24 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
 
     // Size-based styles
     const getSizeClasses = () => {
-        if (size === 'tiny') {
+        if (size === "tiny") {
             return {
-                button: 'h-8 text-xs',
-                popover: 'w-[200px] p-0',
-                command: 'text-xs',
-                item: 'text-xs py-1'
+                button: "h-8 text-xs",
+                popover: "w-[200px] p-0",
+                command: "text-xs",
+                item: "text-xs py-1",
             };
         }
         return {
-            button: 'h-10',
-            popover: 'w-[300px] p-0',
-            command: '',
-            item: ''
+            button: "h-10",
+            popover: "w-[300px] p-0",
+            command: "",
+            item: "",
         };
     };
 
     const sizeClasses = getSizeClasses();
-    const displayValue = selectedValue?.label || selectedValue?.desc || '';
+    const displayValue = selectedValue?.label || selectedValue?.desc || "";
 
     if (hidden) {
         return null;
@@ -202,19 +179,12 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
     return (
         <div className={cn("w-full", className)} style={style}>
             {inputProps.label && (
-                <Label 
-                    htmlFor={id} 
-                    className={cn(
-                        "block text-left mb-2",
-                        size === 'tiny' ? 'text-xs' : 'text-sm',
-                        inputProps.error && 'text-destructive'
-                    )}
-                >
+                <Label htmlFor={id} className={cn("block text-left mb-2", size === "tiny" ? "text-xs" : "text-sm", inputProps.error && "text-destructive")}>
                     {inputProps.label}
                     {inputProps.required && <span className="text-destructive ml-1">*</span>}
                 </Label>
             )}
-            
+
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
@@ -227,7 +197,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                             "w-full justify-between",
                             sizeClasses.button,
                             !displayValue && "text-muted-foreground",
-                            inputProps.error && "border-destructive focus-visible:ring-destructive"
+                            inputProps.error && "border-destructive focus-visible:ring-destructive",
                         )}
                     >
                         <span className="truncate">{displayValue || "Select option..."}</span>
@@ -253,11 +223,9 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                         <CommandEmpty>No option found.</CommandEmpty>
                         <CommandGroup>
                             {allOptions.map((option) => {
-                                const isDisabled = getOptionDisabled?.(option) || 
-                                    option.active === false || 
-                                    option.isActive === false;
+                                const isDisabled = getOptionDisabled?.(option) || option.active === false || option.isActive === false;
                                 const isSelected = selectedValue?.id === option.id;
-                                const label = option.label || option.desc || '';
+                                const label = option.label || option.desc || "";
 
                                 return (
                                     <CommandItem
@@ -269,24 +237,12 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                                             }
                                         }}
                                         disabled={isDisabled}
-                                        className={cn(
-                                            sizeClasses.item,
-                                            isDisabled && "opacity-50 cursor-not-allowed"
-                                        )}
+                                        className={cn(sizeClasses.item, isDisabled && "opacity-50 cursor-not-allowed")}
                                     >
-                                        <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                isSelected ? "opacity-100" : "opacity-0"
-                                            )}
-                                        />
+                                        <Check className={cn("mr-2 h-4 w-4", isSelected ? "opacity-100" : "opacity-0")} />
                                         <div className="flex items-center justify-between w-full">
                                             <span>{label}</span>
-                                            {option.longDesc && (
-                                                <span className="text-xs text-muted-foreground ml-2">
-                                                    {option.longDesc}
-                                                </span>
-                                            )}
+                                            {option.longDesc && <span className="text-xs text-muted-foreground ml-2">{option.longDesc}</span>}
                                         </div>
                                     </CommandItem>
                                 );
@@ -295,15 +251,8 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                     </Command>
                 </PopoverContent>
             </Popover>
-            
-            {inputProps.error && (
-                <p className={cn(
-                    "mt-1 text-destructive",
-                    size === 'tiny' ? 'text-xs' : 'text-sm'
-                )}>
-                    This field is required
-                </p>
-            )}
+
+            {inputProps.error && <p className={cn("mt-1 text-destructive", size === "tiny" ? "text-xs" : "text-sm")}>This field is required</p>}
         </div>
     );
 }

@@ -28,19 +28,20 @@
 ## 🏗️ Architecture
 
 ### Layer Flow
+
 ```
 Component → React Query → Service → API Client → Backend
 ```
 
 ### State Decision Matrix
 
-| State Type | Solution | Example |
-|------------|----------|---------|
-| **Server** | React Query | API data, cache |
-| **Global UI** | Context (Main.tsx) | Auth, theme |
+| State Type     | Solution           | Example          |
+| -------------- | ------------------ | ---------------- |
+| **Server**     | React Query        | API data, cache  |
+| **Global UI**  | Context (Main.tsx) | Auth, theme      |
 | **Feature UI** | Context (Main.tsx) | Filters, dialogs |
-| **Local** | useState | Inputs, toggles |
-| **URL** | Router params | Shareable state |
+| **Local**      | useState           | Inputs, toggles  |
+| **URL**        | Router params      | Shareable state  |
 
 ### Folder Structure
 
@@ -67,11 +68,12 @@ src/
 ## 🔄 Common Patterns
 
 ### 1. Data Fetching
+
 ```typescript
 // features/notes/hooks/useNotes.ts
 export function useNotes() {
     return useQuery({
-        queryKey: ['notes'],
+        queryKey: ["notes"],
         queryFn: noteService.getNotes,
         staleTime: 5 * 60 * 1000,
     });
@@ -82,25 +84,27 @@ const { data: notes, isLoading, error } = useNotes();
 ```
 
 ### 2. Data Mutation
+
 ```typescript
 export function useCreateNote() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: noteService.createNote,
-        onSuccess: () => queryClient.invalidateQueries(['notes']),
+        onSuccess: () => queryClient.invalidateQueries(["notes"]),
     });
 }
 ```
 
 ### 3. Service Pattern
+
 ```typescript
 class NoteService {
-    private basePath = '/api/notes';
-    
+    private basePath = "/api/notes";
+
     async getNotes(): Promise<Note[]> {
         return apiClient.get<Note[]>(this.basePath);
     }
-    
+
     async createNote(data: CreateNoteDTO): Promise<Note> {
         return apiClient.post<Note>(this.basePath, data);
     }
@@ -109,35 +113,37 @@ export const noteService = new NoteService();
 ```
 
 ### 4. Context Pattern
+
 ```typescript
 // features/notes/store/NoteUIContext.tsx
 const NoteUIContext = createContext<NoteUIValue | null>(null);
 
-export function NoteUIProvider({ children }) {
-    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+export function NoteDetailProvider({ children }) {
+    const [activeNote, setSelectedNote] = useState<Note | null>(null);
     return (
-        <NoteUIContext.Provider value={{ selectedNote, setSelectedNote }}>
+        <NoteUIContext.Provider value={{ activeNote, setSelectedNote }}>
             {children}
         </NoteUIContext.Provider>
     );
 }
 
-export function useNoteUIStore() {
+export function useNoteDetailStore() {
     const ctx = useContext(NoteUIContext);
-    if (!ctx) throw new Error('useNoteUIStore requires NoteUIProvider');
+    if (!ctx) throw new Error('useNoteDetailStore requires NoteDetailProvider');
     return ctx;
 }
 ```
 
 ### 5. Centralized Providers (Main.tsx)
+
 ```typescript
 function Main() {
     return (
         <QueryClientProvider>
             <AuthProvider>
-                <NoteUIProvider>
+                <NoteDetailProvider>
                     <App />
-                </NoteUIProvider>
+                </NoteDetailProvider>
             </AuthProvider>
         </QueryClientProvider>
     );
@@ -150,29 +156,31 @@ function Main() {
 
 ### Naming
 
-| Type | Convention | Example |
-|------|-----------|---------|
-| Components | PascalCase | `NoteCard` |
-| Hooks | use + camelCase | `useNotes` |
-| Functions | camelCase | `createNote` |
-| Types | PascalCase | `Note`, `CreateNoteDTO` |
-| Constants | UPPER_SNAKE | `API_BASE_URL` |
-| Files | Match export | `NoteCard.tsx` |
+| Type       | Convention      | Example                 |
+| ---------- | --------------- | ----------------------- |
+| Components | PascalCase      | `NoteCard`              |
+| Hooks      | use + camelCase | `useNotes`              |
+| Functions  | camelCase       | `createNote`            |
+| Types      | PascalCase      | `Note`, `CreateNoteDTO` |
+| Constants  | UPPER_SNAKE     | `API_BASE_URL`          |
+| Files      | Match export    | `NoteCard.tsx`          |
 
 ### Import Order
+
 1. React
 2. External libs
 3. Internal (@/ aliases - MANDATORY)
 4. Relative (same dir only)
 
 ### Import Rules
+
 ```typescript
 // ❌ Never relative for shared/features
-import { Button } from '../../../shared/ui/Button'
+import { Button } from "../../../shared/ui/Button";
 
 // ✅ Always @ aliases
-import { Button } from '@/shared/components/ui/Button'
-import { useNotes } from '@/features/notes/hooks/useNotes'
+import { Button } from "@/shared/components/ui/Button";
+import { useNotes } from "@/features/notes/hooks/useNotes";
 ```
 
 ---
@@ -221,14 +229,14 @@ Add provider to Main.tsx (nếu cần context)
 
 ## 📖 When to Read Docs
 
-| Need | Doc |
-|------|-----|
-| System design | ARCHITECTURE.md |
+| Need             | Doc                 |
+| ---------------- | ------------------- |
+| System design    | ARCHITECTURE.md     |
 | State management | STATE_MANAGEMENT.md |
-| TypeScript | TYPE_SAFETY.md |
-| Errors | ERROR_HANDLING.md |
-| Data transform | DATA_TYPES.md |
-| Examples | COMMON_PATTERNS.md |
+| TypeScript       | TYPE_SAFETY.md      |
+| Errors           | ERROR_HANDLING.md   |
+| Data transform   | DATA_TYPES.md       |
+| Examples         | COMMON_PATTERNS.md  |
 
 ---
 

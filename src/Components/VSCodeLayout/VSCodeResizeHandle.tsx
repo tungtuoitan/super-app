@@ -1,13 +1,13 @@
-import { PanelResizeHandle } from 'react-resizable-panels'
+import { PanelResizeHandle } from "react-resizable-panels";
 
 interface VSCodeResizeHandleProps {
-    direction: 'horizontal' | 'vertical'
-    id?: string
+    direction: "horizontal" | "vertical";
+    id?: string;
 }
 
 /**
  * VSCodeResizeHandle - VS Code style resize handle for panels
- * 
+ *
  * Features:
  * - Blue highlight on hover/active
  * - Larger hit area for easier grabbing
@@ -16,8 +16,8 @@ interface VSCodeResizeHandleProps {
  * - Always visible even when panel is collapsed (allows re-expanding)
  */
 export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
-    const isHorizontal = direction === 'horizontal'
-    
+    const isHorizontal = direction === "horizontal";
+
     return (
         <PanelResizeHandle id={id}>
             {/*
@@ -27,23 +27,20 @@ export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
             */}
             <div
                 role="separator"
-                aria-orientation={isHorizontal ? 'vertical' : 'horizontal'}
+                aria-orientation={isHorizontal ? "vertical" : "horizontal"}
                 // outer acts as hit area (transparent); inner is the visible 1px line
-                className={
-                    `${isHorizontal ? ' h-full cursor-col-resize' : 'w-full cursor-row-resize'}` +
-                    ' group relative z-[10001] pointer-events-auto bg-transparent'
-                }
+                className={`${isHorizontal ? " h-full cursor-col-resize" : "w-full cursor-row-resize"}` + " group relative z-[10001] pointer-events-auto bg-transparent"}
             >
                 {/* Inner element used as the visible 1px line (absolute overlay to cover panel borders) */}
                 <div
                     className={
-                        `${isHorizontal ? 'absolute inset-y-0 left-1/2 -translate-x-1/2 w-px' : 'absolute inset-x-0 top-1/2 -translate-y-1/2 h-px'}` +
-                        ' bg-[hsl(var(--editor-border))] transition-colors duration-100 group-hover:bg-[#007acc] data-[resize-handle-active]:bg-[#007acc]'
+                        `${isHorizontal ? "absolute inset-y-0 left-1/2 -translate-x-1/2 w-px" : "absolute inset-x-0 top-1/2 -translate-y-1/2 h-px"}` +
+                        " bg-[hsl(var(--editor-border))] transition-colors duration-100 group-hover:bg-[#007acc] data-[resize-handle-active]:bg-[#007acc]"
                     }
                 />
             </div>
         </PanelResizeHandle>
-    )
+    );
 }
 
 /**

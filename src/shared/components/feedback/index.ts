@@ -3,5 +3,5 @@
  * Exports all feedback components
  */
 
-export { ErrorBoundary } from './ErrorBoundary';
-export { ConfirmationPopover } from './ConfirmationPopover';
+export { ErrorBoundary } from "./ErrorBoundary";
+export { ConfirmationPopover } from "./ConfirmationPopover";

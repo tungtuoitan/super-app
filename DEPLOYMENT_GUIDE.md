@@ -19,16 +19,19 @@ Nginx (Port 80)
 ## 2. Frontend (FE)
 
 ### Công nghệ
+
 - **React (CRA – Create React App)**
 - Node.js + npm
 - Build ra static files (`build/`)
 
 ### Environment Variables
+
 - Chỉ các biến có prefix `REACT_APP_` mới được sử dụng
 - Dùng file:
-  - `.env.production` (production build)
+    - `.env.production` (production build)
 
 Ví dụ:
+
 ```env
 REACT_APP_API_BASE_URL=
 GENERATE_SOURCEMAP=false
@@ -37,14 +40,17 @@ GENERATE_SOURCEMAP=false
 > Lưu ý: CRA **inject biến env tại build-time**, không phải runtime
 
 ### Build Frontend
+
 ```bash
 npm ci
 npm run build
 ```
 
 ### Deploy FE
+
 - Copy nội dung `build/` vào thư mục serve của nginx
 - Ví dụ:
+
 ```bash
 /var/www/SuperApp/frontend/build
 ```
@@ -54,19 +60,23 @@ npm run build
 ## 3. Backend (BE)
 
 ### Công nghệ
+
 - **ASP.NET Core Web API**
 - Chạy bằng **Kestrel**
 - Không expose trực tiếp ra internet
 
 ### Build Backend
+
 ```bash
 dotnet restore
 dotnet publish -c Release -o publish
 ```
 
 ### Run Backend
+
 - Chạy bằng `systemd service`
 - Listen tại:
+
 ```
 127.0.0.1:5000
 ```
@@ -78,15 +88,18 @@ dotnet publish -c Release -o publish
 ## 4. Reverse Proxy – Nginx
 
 ### Vai trò
+
 - Serve static React files
 - Proxy API requests sang .NET
 - Là cổng duy nhất public ra ngoài (port 80)
 
 ### Routing logic
+
 - `/` → React SPA
 - `/api/*` → `http://127.0.0.1:5000`
 
 ### Ví dụ config (rút gọn)
+
 ```nginx
 server {
     listen 80;
@@ -111,10 +124,12 @@ server {
 ## 5. Process Management
 
 ### Backend
+
 - Quản lý bằng **systemd**
 - Auto start khi reboot
 
 ### Frontend
+
 - Static files → không cần process manager
 
 ---
@@ -141,13 +156,12 @@ server {
 
 ## 8. Tổng kết
 
-| Layer | Công nghệ |
-|-----|----------|
-| Frontend | React (CRA) |
-| Backend | ASP.NET Core |
-| Web Server | Nginx |
-| Process | systemd |
-| OS | Ubuntu Linux |
+| Layer      | Công nghệ    |
+| ---------- | ------------ |
+| Frontend   | React (CRA)  |
+| Backend    | ASP.NET Core |
+| Web Server | Nginx        |
+| Process    | systemd      |
+| OS         | Ubuntu Linux |
 
 ➡️ Kiến trúc đơn giản, ổn định, dễ scale, đúng chuẩn production cho SPA + API.
-

@@ -1,11 +1,11 @@
 /**
  * Editor Tab Context
  * Centralized state management for all editor tabs
- * Supports multiple tab types: Note, Tag, etc.
+ * Supports multiple tab types: Note, etc.
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback } from 'react';
-import type { BaseTab, TabViewState } from '../../types/editor/tab.types';
+import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback, RefObject, useRef } from "react";
+import type { BaseTab, TabViewState } from "../../types/editor/tab.types";
 
 export interface EditorTabContextData {
     openTabs: BaseTab[];
@@ -14,6 +14,9 @@ export interface EditorTabContextData {
     setActiveTabId: Dispatch<SetStateAction<string | null>>;
     confirmCloseTabId: string | null;
     setConfirmCloseTabId: Dispatch<SetStateAction<string | null>>;
+    isLoadingTabs: boolean;
+    setIsLoadingTabs: Dispatch<SetStateAction<boolean>>;
+    editorAreaRef?: RefObject<HTMLDivElement>;
 }
 
 export const editorTabContextDefaultValue: EditorTabContextData = {
@@ -23,6 +26,9 @@ export const editorTabContextDefaultValue: EditorTabContextData = {
     setActiveTabId: () => {},
     confirmCloseTabId: null,
     setConfirmCloseTabId: () => {},
+    isLoadingTabs: false,
+    setIsLoadingTabs: () => {},
+    editorAreaRef: undefined,
 };
 
 export const EditorTabStore = createContext<EditorTabContextData>(editorTabContextDefaultValue);
@@ -33,6 +39,8 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [openTabs, setOpenTabs] = useState<BaseTab[]>([]);
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
     const [confirmCloseTabId, setConfirmCloseTabId] = useState<string | null>(null);
+    const [isLoadingTabs, setIsLoadingTabs] = useState<boolean>(false);
+    const editorAreaRef = useRef<HTMLDivElement>(null);
 
     return (
         <EditorTabStore.Provider
@@ -43,9 +51,12 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 setActiveTabId,
                 confirmCloseTabId,
                 setConfirmCloseTabId,
+                isLoadingTabs,
+                setIsLoadingTabs,
+                editorAreaRef,
             }}
         >
             {children}
         </EditorTabStore.Provider>
     );
-}
+};

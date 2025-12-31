@@ -3,9 +3,9 @@
  * Loading spinner with consistent styling
  */
 
-import React from 'react';
-import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SpinnerProps {
     size?: number;
@@ -18,25 +18,13 @@ export function Spinner({ size = 40, fullPage = false, message, className }: Spi
     const content = (
         <>
             <Loader2 className={cn("animate-spin text-primary", className)} size={size} />
-            {message && (
-                <div className="mt-2 text-center text-muted-foreground">
-                    {message}
-                </div>
-            )}
+            {message && <div className="mt-2 text-center text-muted-foreground">{message}</div>}
         </>
     );
 
     if (fullPage) {
-        return (
-            <div className="flex flex-col justify-center items-center h-screen w-full">
-                {content}
-            </div>
-        );
+        return <div className="flex flex-col justify-center items-center h-screen w-full">{content}</div>;
     }
 
-    return (
-        <div className="flex flex-col justify-center items-center p-5">
-            {content}
-        </div>
-    );
+    return <div className="flex flex-col justify-center items-center p-5">{content}</div>;
 }

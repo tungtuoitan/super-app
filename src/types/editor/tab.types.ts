@@ -3,12 +3,11 @@
  * Supports multiple tab types: Note, Folder, etc.
  */
 
-import {Note} from "@/types/note.types";
-import {Ws} from "@/store/ws/useWsList.store";
-import { constants } from '@/utils/constants';
+import { Note } from "@/types/note.types";
+import { Ws } from "@/store/ws/useWs.store";
+import { constants } from "@/utils/constants";
 
-
-export type TabType = typeof constants.tabTypes.note | typeof constants.tabTypes.workspace | 'tag' | 'settings';
+export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | "folder" | "settings";
 
 /**
  * Tab-specific view state for preserving UI state across tab switches
@@ -17,7 +16,7 @@ export type TabType = typeof constants.tabTypes.note | typeof constants.tabTypes
 export interface TabViewState {
     /** Scroll position in the editor content */
     scrollTop?: number;
-    
+
     // Future extensions:
     // cursorPosition?: { line: number; column: number };
     // expandedSections?: string[];
@@ -32,10 +31,9 @@ export interface BaseTab {
     title: string;
     hasUnsavedChanges?: boolean;
     viewState?: TabViewState;
-    isDeleted?: boolean;  // Flag to indicate note has been deleted
 }
 
-    export interface EditorState {
+export interface EditorState {
     openTabs: BaseTab[];
     activeTabId: string | null;
 }

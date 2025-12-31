@@ -2,12 +2,12 @@
  * Hashtag UI Store
  * React Context store for managing hashtag UI state in notes
  * Pattern: Separate store from business logic (similar to EditorTabStore)
- * 
- * NOTE: This is different from ExplorerStore which manages workspace folder tree
+ *
+ * NOTE: This is different from WorkspaceStore which manages workspace folder tree
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
-import type { Folder as Hashtag } from '@/types/folder.types';
+import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import type { Folder as Hashtag } from "@/types/folder.types";
 
 export interface HashtagUIStoreData {
     // Selected hashtag state (for dialogs, editing)
@@ -15,17 +15,17 @@ export interface HashtagUIStoreData {
     setSelectedHashtag: Dispatch<SetStateAction<Hashtag | null>>;
     isDialogOpen: boolean;
     setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-    
+
     // Create dialog state
     isCreateDialogOpen: boolean;
     setIsCreateDialogOpen: Dispatch<SetStateAction<boolean>>;
-    
+
     // Filter/search state (for hashtag picker in note editor)
     searchText: string;
     setSearchText: Dispatch<SetStateAction<string>>;
     showArchived: boolean;
     setShowArchived: Dispatch<SetStateAction<boolean>>;
-    
+
     // Selection state for hashtag picker (multi-select in note editor)
     selectedHashtagIds: number[];
     setSelectedHashtagIds: Dispatch<SetStateAction<number[]>>;
@@ -38,7 +38,7 @@ export const hashtagUIStoreDefaultValue: HashtagUIStoreData = {
     setIsDialogOpen: () => {},
     isCreateDialogOpen: false,
     setIsCreateDialogOpen: () => {},
-    searchText: '',
+    searchText: "",
     setSearchText: () => {},
     showArchived: false,
     setShowArchived: () => {},
@@ -54,14 +54,14 @@ export const HashtagUIStoreProvider: React.FC<React.PropsWithChildren<unknown>> 
     // Dialog state
     const [selectedHashtag, setSelectedHashtag] = useState<Hashtag | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-    
+
     // Create dialog state
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
-    
+
     // Filter state
-    const [searchText, setSearchText] = useState<string>('');
+    const [searchText, setSearchText] = useState<string>("");
     const [showArchived, setShowArchived] = useState<boolean>(false);
-    
+
     // Selection state
     const [selectedHashtagIds, setSelectedHashtagIds] = useState<number[]>([]);
 

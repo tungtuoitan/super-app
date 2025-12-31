@@ -1,64 +1,56 @@
 /**
- * WsGrid - Workspace List Grid Component
+ * WsGrid - ws Grid Component
  * VSCode-style dark theme table for workspaces
  */
 
-import React, { useEffect, useMemo } from 'react';
-import {
-    useReactTable,
-    getCoreRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    getFilteredRowModel,
-    ColumnDef,
-    flexRender,
-} from '@tanstack/react-table';
-import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { Button } from '@/Components/ui/button';
-import { Checkbox } from '@/Components/ui/checkbox';
-import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { useWsListStore, Ws } from '@/store/ws/useWsList.store';
-import { useWsListHelper } from '@/hooks/useWsList.helper';
-import { useWsTabHelper } from '@/hooks/useWsTab.helper';
-import { useGridControlHelper } from '@/hooks/useGridControl.helper';
-import { useGridControlStore } from '@/store/grid/useGridControl.store';
+import React, { useEffect, useMemo } from "react";
+import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
+import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Button } from "@/Components/ui/button";
+import { Checkbox } from "@/Components/ui/checkbox";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { useWsStore, Ws } from "@/store/ws/useWs.store";
+import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";
+import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { constants } from "@/utils/constants";
+import { useAuthStore } from "@/store/index";
 
 /**
- * WsGrid - Workspace list grid with table display
+ * WsGrid - ws grid with table display
  */
 export function WsGrid() {
     // State from centralized store
     const {
         workspaces,
-        isLoading,
-        error,
-        sorting,
-        setSorting,
-        pagination,
-        setPagination,
-        rowSelection,
-        setRowSelection,
-        columnFilters,
-        setColumnFilters
-    } = useWsListStore();
+        totalCount,
+        wsGridIsLoading,
+        wsGridError,
+        wsGridSorting,
+        setWsGridSorting,
+        wsGridPagination,
+        setWsGridPagination,
+        wsGridRowSelection,
+        setWsGridRowSelection,
+        wsGridColumnFilters,
+        setWsGridColumnFilters,
+        containerRef,
+        setContainerWidth,
+    } = useWsStore();
 
-    const { loadWorkspaces, openContextMenu, formatDateTime } = useWsListHelper();
+    const { loadWorkspaces, openWsContextMenu } = useWsGridHelper();
     const { openWorkspaceTab } = useWsTabHelper();
-    const { registerGrid, unregisterGrid } = useGridControlHelper();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery,filterViewKey } = useGridControlStore();
+    const { $user } = useAuthStore();
 
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Ws>[]>(() => {
         return [
             {
-                id: 'select',
+                id: "select",
                 header: ({ table }) => (
                     <div className="flex items-center justify-center">
-                        <Checkbox
-                            checked={table.getIsAllPageRowsSelected()}
-                            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                            aria-label="Select all"
-                        />
+                        <Checkbox checked={table.getIsAllPageRowsSelected()} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" />
                     </div>
                 ),
                 cell: ({ row }) => (
@@ -76,28 +68,16 @@ export function WsGrid() {
                 enableHiding: false,
             },
             {
-                accessorKey: 'id',
-                header: () => (
-                    <div className="text-left text-sm">ID</div>
-                ),
+                accessorKey: "id",
+                header: () => <div className="text-left text-sm">ID</div>,
                 size: 20,
-                cell: ({ getValue }) => (
-                    <div className="text-left text-sm">
-                        {getValue() as number}
-                    </div>
-                ),
+                cell: ({ getValue }) => <div className="text-left text-sm">{getValue() as number}</div>,
             },
             {
-                accessorKey: 'name',
-                header: () => (
-                    <div className="text-left text-sm">Workspace Name</div>
-                ),
+                accessorKey: "name",
+                header: () => <div className="text-left text-sm">Workspace Name</div>,
                 size: 200,
-                cell: ({ getValue }) => (
-                    <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80 px-2">
-                        {(getValue() as string) || '—'}
-                    </div>
-                ),
+                cell: ({ getValue }) => <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80 px-2">{(getValue() as string) || "—"}</div>,
             },
             // {
             //     accessorKey: 'description',
@@ -112,36 +92,34 @@ export function WsGrid() {
             //     ),
             // },
             {
-                accessorKey: 'deletedAt',
-                header: () => (
-                    <div className="text-left text-sm">Status</div>
-                ),
+                accessorKey: "deletedAt",
+                header: () => <div className="text-left text-sm">Status</div>,
                 size: 60,
                 enableSorting: true,
                 filterFn: (row, columnId, filterValue) => {
                     const deletedAt = row.original.deletedAt;
-                    if (filterValue === 'null') {
+                    if (filterValue === "null") {
                         return deletedAt === null || deletedAt === undefined;
                     }
-                    if (filterValue === 'notNull') {
+                    if (filterValue === "notNull") {
                         return deletedAt !== null && deletedAt !== undefined;
                     }
                     return true; // 'all' - show everything
                 },
                 cell: ({ getValue }) => {
                     const deletedAt = getValue() as Date | null | undefined;
-                    
+
                     if (!deletedAt) {
                         return null;
                     }
-                    
+
                     return (
                         <div className="flex items-center justify-start pl-2" title="Deleted">
                             <div className="w-2 h-2 rounded-full bg-destructive"></div>
                         </div>
                     );
-                }
-            }
+                },
+            },
         ];
     }, []);
 
@@ -151,72 +129,68 @@ export function WsGrid() {
             return workspaces;
         }
         const query = searchQuery.toLowerCase();
-        return workspaces.filter((ws) =>
-            ws.name?.toLowerCase().includes(query) ||
-            ws.description?.toLowerCase().includes(query) ||
-            String(ws.id).includes(query)
-        );
+        return workspaces.filter((ws) => ws.name?.toLowerCase().includes(query) || ws.description?.toLowerCase().includes(query) || String(ws.id).includes(query));
     }, [workspaces, searchQuery]);
 
     // Create table instance
     const table = useReactTable({
-        data: filteredData.sort((a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        ),
+        data: filteredData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onSortingChange: setSorting,
-        onPaginationChange: setPagination,
-        onRowSelectionChange: setRowSelection,
-        onColumnFiltersChange: setColumnFilters,
+        onSortingChange: setWsGridSorting,
+        onPaginationChange: setWsGridPagination,
+        onRowSelectionChange: setWsGridRowSelection,
+        onColumnFiltersChange: setWsGridColumnFilters,
         state: {
-            sorting,
-            pagination,
-            rowSelection,
-            columnFilters,
+            sorting: wsGridSorting,
+            pagination: wsGridPagination,
+            rowSelection: wsGridRowSelection,
+            columnFilters: wsGridColumnFilters,
         },
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
     });
 
-    // Register grid with GridControl and load data
+    // Update container width on resize
     useEffect(() => {
-        loadWorkspaces();
+        if (!containerRef.current) return;
 
-        // Set default filter to Active Only
-        const deletedAtColumn = table.getColumn('deletedAt');
-        if (deletedAtColumn && !columnFilters.length) {
-            deletedAtColumn.setFilterValue('null');
-        }
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                setContainerWidth(entry.contentRect.width);
+            }
+        });
 
-        // Register this grid with GridControl
-        registerGrid(table, columnFilters, setColumnFilters, 'Workspaces');
-
-        // Cleanup on unmount
-        return () => {
-            unregisterGrid();
-        };
+        resizeObserver.observe(containerRef.current);
+        return () => resizeObserver.disconnect();
     }, []);
 
-    // Update GridControl when columnFilters change
+    // Load data when user is ready or pagination changes
     useEffect(() => {
-        registerGrid(table, columnFilters, setColumnFilters, 'Workspaces');
-    }, [columnFilters, table]);
+        // this will run every time user login, or $user.filters change, or pagination changes
+        if (!$user.userId || !$user.filters) return;
+        loadWorkspaces();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [$user.userId, $user.filters?.wsGrid, wsGridPagination.pageIndex, wsGridPagination.pageSize]);
+
+
+    // Update GridControl when wsGridColumnFilters change - no longer needed for backend filtering
+    // Filters are now stored in userProfile and applied on backend
 
     return (
-        <div className="w-full h-full bg-background flex flex-col relative">
+        <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
             {/* Loading Overlay */}
-            {isLoading && (
+            {wsGridIsLoading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
             )}
 
             {/* Error Overlay */}
-            {error && (
+            {wsGridError && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Alert variant="destructive" className="max-w-md">
                         <AlertDescription>Failed to load workspaces</AlertDescription>
@@ -225,58 +199,46 @@ export function WsGrid() {
             )}
 
             {/* Table */}
-            <div 
+            <div
                 className="flex-1 overflow-auto rounded-md border"
                 onContextMenu={(e) => {
                     const target = e.target as HTMLElement;
-                    const isClickedOnRow = target.closest('tr[data-row]');
+                    const isClickedOnRow = target.closest("tr[data-row]");
                     if (!isClickedOnRow) {
-                        openContextMenu(e);
+                        openWsContextMenu(e);
                     }
                 }}
             >
                 <table className="w-full">
                     <thead className="bg-muted/50 sticky top-0 z-10">
                         {/* Column Headers */}
-                        {table.getHeaderGroups().map(headerGroup => (
+                        {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className="border-b">
-                                {headerGroup.headers.map(header => (
-                                    <th
-                                        key={header.id}
-                                        className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground"
-                                        style={{ width: header.getSize() }}
-                                    >
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
+                                {headerGroup.headers.map((header) => (
+                                    <th key={header.id} className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground" style={{ width: header.getSize() }}>
+                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                     </th>
                                 ))}
                             </tr>
                         ))}
                     </thead>
                     <tbody>
-                        {table.getRowModel().rows.map(row => (
+                        {table.getRowModel().rows.map((row) => (
                             <tr
                                 key={row.id}
                                 data-row
-                                className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${
-                                    row.original.deletedAt ? 'opacity-60' : ''
-                                }`}
+                                className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${row.original.deletedAt ? "opacity-60" : ""}`}
                                 onClick={() => {
-                                    console.log('🏢 Workspace clicked, opening tab:', row.original);
                                     openWorkspaceTab(row.original);
                                 }}
-                                onContextMenu={(e) => openContextMenu(e, row)}
+                                onContextMenu={(e) => {
+                                    e.stopPropagation();
+                                    openWsContextMenu(e, row);
+                                }}
                             >
-                                {row.getVisibleCells().map(cell => (
+                                {row.getVisibleCells().map((cell) => (
                                     <td key={cell.id} className="text-left">
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 ))}
                             </tr>
@@ -288,49 +250,23 @@ export function WsGrid() {
             {/* Pagination */}
             <div className="flex items-center justify-between px-4 py-1 bg-background">
                 <div className="flex-1 text-sm text-left text-muted-foreground">
-                    Page {table.getState().pagination.pageIndex + 1} of{' '}
-                    {table.getPageCount()} ({workspaces.length} total)
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} total)
                 </div>
-                
+
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => table.setPageIndex(0)}
-                        disabled={!table.getCanPreviousPage()}
-                        className="h-8 w-8"
-                        title="First page"
-                    >
+                    <Button variant="outline" size="icon" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()} className="h-8 w-8" title="First page">
                         <ChevronsLeft className="h-4 w-4" />
                     </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                        className="h-8 w-8"
-                        title="Previous page"
-                    >
+                    <Button variant="outline" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-8 w-8" title="Previous page">
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    
+
                     <div className="flex items-center gap-1 px-2">
-                        <span className="text-sm font-medium">
-                            {table.getState().pagination.pageIndex + 1}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                            / {table.getPageCount()}
-                        </span>
+                        <span className="text-sm font-medium">{table.getState().pagination.pageIndex + 1}</span>
+                        <span className="text-sm text-muted-foreground">/ {table.getPageCount()}</span>
                     </div>
-                    
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                        className="h-8 w-8"
-                        title="Next page"
-                    >
+
+                    <Button variant="outline" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-8 w-8" title="Next page">
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                     <Button

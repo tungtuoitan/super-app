@@ -1,14 +1,46 @@
 /**
  * Navigation Context
- * Global navigation state management for sidebar navigation, body wrapper, 
+ * Global navigation state management for sidebar navigation, body wrapper,
  * routing, and selected menu items across the application
  */
 
-import { createContext, useContext, useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import type { PropsWithChildren } from 'react';
-import { ROUTE_TO_VIEW, VIEW_TO_ROUTE, type ActivityBarView } from '@/config/routes';
-import { constants } from '@/utils/constants';
+import { createContext, useContext, useState, useRef, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { PropsWithChildren } from "react";
+import { constants, ActivityBarView } from "@/utils/constants";
+
+/**
+ * Helper function to get view from route path
+ */
+const getViewFromRoute = (pathname: string): ActivityBarView | null => {
+    switch (pathname) {
+        case "/":
+        case "/workspace":
+            return constants.navigation.views.workspace;
+        case "/ws":
+            return constants.navigation.views.ws;
+        case "/notes":
+            return constants.navigation.views.note;
+        default:
+            return null;
+    }
+};
+
+/**
+ * Helper function to get route from view
+ */
+const getRouteFromView = (view: ActivityBarView): string => {
+    switch (view) {
+        case constants.navigation.views.workspace:
+            return "/workspace";
+        case constants.navigation.views.ws:
+            return "/ws";
+        case constants.navigation.views.note:
+            return "/notes";
+        default:
+            return "/workspace";
+    }
+};
 
 /**
  * Navigation context interface defining the shape of navigation state and actions
@@ -33,13 +65,11 @@ export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
     toggleNavigation: () => {},
     selectedItemId: null,
     setSelectedItemId: () => {},
-    activeView: constants.viewTypes.workspace,
+    activeView: constants.navigation.views.workspace,
     navigateToView: () => {},
 };
 
-const NavigationContext = createContext<NavigationContextValue>(
-    NAVIGATION_CONTEXT_DEFAULT_VALUE
-);
+const NavigationContext = createContext<NavigationContextValue>(NAVIGATION_CONTEXT_DEFAULT_VALUE);
 
 /**
  * Custom hook to access navigation context
@@ -49,7 +79,7 @@ const NavigationContext = createContext<NavigationContextValue>(
 export const useNavigationStore = () => {
     const context = useContext(NavigationContext);
     if (!context) {
-        throw new Error('useNavigationStore must be used within NavProvider');
+        throw new Error("useNavigationStore must be used within NavProvider");
     }
     return context;
 };
@@ -64,14 +94,14 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const bodyWrapperRef = useRef<HTMLDivElement>(null);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-    const [activeView, setActiveView] = useState<ActivityBarView>(constants.viewTypes.workspace);
-    
+    const [activeView, setActiveView] = useState<ActivityBarView>(constants.navigation.views.workspace);
+
     const location = useLocation();
     const navigate = useNavigate();
 
     // Sync activeView with current route
     useEffect(() => {
-        const view = ROUTE_TO_VIEW[location.pathname];
+        const view = getViewFromRoute(location.pathname);
         if (view && view !== activeView) {
             setActiveView(view);
         }
@@ -82,7 +112,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     };
 
     const navigateToView = (view: ActivityBarView) => {
-        const route = VIEW_TO_ROUTE[view];
+        const route = getRouteFromView(view);
         if (route && location.pathname !== route) {
             navigate(route);
         }

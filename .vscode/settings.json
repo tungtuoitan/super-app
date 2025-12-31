@@ -3,23 +3,24 @@
     // "editor.insertSpaces": true, // Đảm bảo sử dụng spaces thay vì tab thực sự
     "editor.formatOnSave": false,
 
-    // { 
-        "workbench.colorTheme": "Evondev Dracula Darker Contrast",
-        "workbench.iconTheme": "material-icon-theme",
-        "files.autoSave": "afterDelay",
-        "scm.showHistoryGraph": false,
-        "scm.showIncomingChanges": "never",
-        "diffEditor.ignoreTrimWhitespace": false,
-        "gitlens.views.commitDetails.files.layout": "list",
-        "github.copilot.advanced": {
-            "authProvider": "github"
-        },
-        "typescript.updateImportsOnFileMove.enabled": "always",
-        "javascript.updateImportsOnFileMove.enabled": "always",
-        "workbench.editor.wrapTabs": true,
-        "extension.easyLogSign": ":",
-        "editor.insertSpaces": true,
-        "editor.detectIndentation": false,
-        "editor.unicodeHighlight.ambiguousCharacters": false
+    // {
+    "workbench.colorTheme": "Evondev Dracula Darker Contrast",
+    "workbench.iconTheme": "material-icon-theme",
+    "files.autoSave": "afterDelay",
+    "scm.showHistoryGraph": false,
+    "scm.showIncomingChanges": "never",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "gitlens.views.commitDetails.files.layout": "list",
+    "github.copilot.advanced": {
+        "authProvider": "github"
+    },
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "workbench.editor.wrapTabs": true,
+    "extension.easyLogSign": ":",
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "claudeCodeChat.permissions.yoloMode": true
     // }
 }

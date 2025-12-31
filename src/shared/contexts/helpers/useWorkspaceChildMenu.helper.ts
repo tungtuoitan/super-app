@@ -1,215 +1,366 @@
 /**
  * Workspace Child Menu Helper Hook
  * Business logic for note and file context menu operations
- * Shared helper for both note and file nodes in explorer tree
+ * Shared helper for both note and file nodes in workspace tree
  */
 
-import { useContextMenuStore, ContextMenuType } from '@/store/contextMenu/ContextMenu.store';
-import { useExplorerStore } from '@/store/explorer/Explorer.store';
-import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
-import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
-import { constants } from '@/utils/constants';
-import { _deleteNote } from '@/services/note.service';
-import { _deleteWorkspaceItems } from '@/services/workspace.service';
-import { storageService } from '@/services/storage.service';
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import { useSnackbar } from 'notistack';
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { constants } from "@/utils/constants";
+import { noteService } from "@/services/note.service";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { useSnackbar } from "notistack";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import {workspaceService} from "@/services/workspace.service";
+import { getConfirmMessage } from "@/utils/confirmation-message.utils";
+import { useWorkspaceLoader } from "@/hooks/index";
+import { filterTopLevelParents, buildTreeFromV2Items } from "@/hooks/workspace/tree.miniHelper";
+import type { UpsertWorkspaceItemRequest } from "@/types/workspace.types";
+import { WorkspaceItemAction } from "@/types/workspace.types";
+import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import type { WorkspaceDTO } from "@/types/workspace-dto.types";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 
 export const useWorkspaceChildMenuHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
+    const { showConfirmation } = useConfirmationPopoverHelper();
     const { enqueueSnackbar } = useSnackbar();
-    const {
-        contextType,
-        contextData,
-        setIsContextMenuOpen,
-    } = useContextMenuStore();
+    const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
+    const { loadTree } = useWorkspaceLoader();
+    const { processTabAfterDelete } = useEditorTabHelper();
 
-    const {
-        setSelectedFolderIds,
-        setLastSelectedFolderId,
-        currentTree,
-    } = useExplorerStore();
+    const isNote = contextType === constants.workspace.itemTypes.note;
+    const isFile = contextType === constants.workspace.itemTypes.file;
 
-    const { openFolderDialog } = useFolderDialogHelper();
-
-    const isNote = contextType === constants.itemTypes.note;
-    const isFile = contextType === constants.itemTypes.file;
+    // Multi-select check
+    const selectedCount = selectedItemIds.length;
+    const isMultipleSelected = selectedCount > 1;
 
     /**
-     * Handle edit item (note only)
+     * Helper: Find item by ID in workspace flat data
      */
-    const handleEditItem = () => {
-        if (!isNote || !contextData) return;
-
-        console.log('✏️ Child Menu: Edit note clicked', contextData);
-        setIsContextMenuOpen(false);
-        openFolderDialog('edit', constants.itemTypes.note, contextData, null);
-    };
-
-    /**
-     * Handle view info
-     */
-    const handleViewInfo = () => {
-        console.log('ℹ️ Child Menu: View info clicked', contextData);
-        setIsContextMenuOpen(false);
-        // TODO: Implement view info functionality
+    const $findItemById = (items: WorkspaceItemV2[], targetId: number): WorkspaceItemV2 | null => {
+        // With V2 flat structure, we can just find directly
+        return items.find(item => item.id === targetId) || null;
     };
 
     /**
      * Handle delete note
+     * IMPORTANT: noteData is WorkspaceNoteItem structure:
+     * - noteData.id = workspace_items.id (workspace item ID)
+     * - noteData.entityId = notes.id (entity ID - use this for note service!)
+     * - noteData.data.id = notes.id (same as entityId)
      */
-    const handleDeleteNote = async (noteData: any, isHardDelete: boolean = false) => {
-        console.log('🗑️ Deleting note:', noteData, 'isHardDelete:', isHardDelete);
-
-        if (!noteData?.id) {
-            console.error('❌ Cannot delete note: missing id');
-            alert('Cannot delete note: missing note information');
+    const __deleteNote = async (noteData: any, isHardDelete: boolean = false) => {
+        // ---------
+        // STEP 1: Validate input data
+        // ---------
+        const noteEntityId = noteData?.entityId ?? noteData?.data?.id;
+        if (!noteEntityId) {
+            console.error("❌ Cannot delete note: missing entityId");
+            enqueueSnackbar("Cannot delete note: missing note information", { variant: "error" });
             return;
         }
 
+        // ---------
+        // STEP 2: Delete note via service
+        // ---------
         try {
-            const token = auth.userToken;
+            const token = $user.userToken;
 
-            console.log(`🗑️ Deleting note ID: ${noteData.id}`, noteData.name);
-
-            const result = await _deleteNote(token ?? '', noteData.id.toString());
-            
-            // Check API response success
-            if (!result.success) {
-                throw new Error(result.message || 'Failed to delete note');
+            // ✅ Use entityId (notes.id) for note service
+            const result = await noteService._deleteNote(token ?? "", noteEntityId.toString());
+            // ---------
+            // STEP 3: Handle success response
+            // ---------
+            if (result.success) {
+                // Clear selection
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
             }
 
-            console.log('✅ Successfully deleted note');
-
-            // Clear selection
-            setSelectedFolderIds([]);
-            setLastSelectedFolderId(null);
-
-            // Reload page to refresh data
-            window.location.reload();
+            loadTree()
         } catch (error) {
-            console.error('❌ Failed to delete note:', error);
+            // ---------
+            // STEP 4: Handle error
+            // ---------
+            console.error("❌ Failed to delete note:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             } else {
-                enqueueSnackbar(`Error deleting note: ${errorMessage}`, { variant: 'error' });
+                enqueueSnackbar(`Error deleting note: ${errorMessage}`, { variant: "error" });
             }
         }
     };
 
     /**
      * Handle delete file
+     * IMPORTANT: fileData is WorkspaceFileItem structure:
+     * - fileData.id = workspace_items.id (workspace item ID - use this for workspace service!)
+     * - fileData.entityId = files.id (entity ID)
      */
-    const handleDeleteFile = async (fileData: any, isHardDelete: boolean = false) => {
-        console.log('🗑️ Deleting file:', fileData, 'isHardDelete:', isHardDelete);
-
-        if (!fileData?.id) {
-            console.error('❌ Cannot delete file: missing id');
-            alert('Cannot delete file: missing file information');
+    const __deleteFile = async (fileData: any, isHardDelete: boolean = false) => {
+        // ---------
+        // STEP 1: Validate input data
+        // ---------
+        const workspaceItemId = fileData?.id;
+        if (!workspaceItemId) {
+            console.error("❌ Cannot delete file: missing workspace item id");
+            enqueueSnackbar("Cannot delete file: missing file information", { variant: "error" });
             return;
         }
 
+        // ---------
+        // STEP 2: Delete file via service
+        // ---------
         try {
-            const token = auth.userToken;
-            const workspaceId = currentTree?.workspaceId || 1;
+            const token = $user.userToken;
+            const workspaceId = currentWorkspace?.id || 1;
 
-            console.log(`🗑️ Deleting file ID: ${fileData.id}`, fileData.name);
-
-            const result = await _deleteWorkspaceItems(token ?? '', workspaceId, {
-                items: [{ id: fileData.id, type: 4 as const }], // type 4 = file
+            // ✅ Use workspace_items.id for workspace service
+            const result = await workspaceService._deleteWorkspaceItems(token ?? "", workspaceId, {
+                items: [{ id: workspaceItemId, type: 4 as const }], // type 4 = file
                 cascade: true,
                 isHardDelete: isHardDelete,
             });
 
-            console.log('✅ API response:', result);
-
-            if (result.success || result.message === 'Items deleted successfully') {
-                console.log('✅ Successfully deleted file');
-
+            // ---------
+            // STEP 3: Handle success response
+            // ---------
+            if (result.success || result.message === "Items deleted successfully") {
                 // Clear selection
-                setSelectedFolderIds([]);
-                setLastSelectedFolderId(null);
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
 
                 // Reload page to refresh data
                 window.location.reload();
             } else {
-                console.error('❌ Delete failed:', result.message);
-                alert(`Failed to delete file: ${result.message}`);
+                console.error("❌ Delete failed:", result.message);
+                enqueueSnackbar(`Failed to delete file: ${result.message}`, { variant: "error" });
             }
         } catch (error) {
-            console.error('❌ Failed to delete file:', error);
+            // ---------
+            // STEP 4: Handle error
+            // ---------
+            console.error("❌ Failed to delete file:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             } else {
-                enqueueSnackbar(`Error deleting file: ${errorMessage}`, { variant: 'error' });
+                enqueueSnackbar(`Error deleting file: ${errorMessage}`, { variant: "error" });
             }
         }
     };
 
     /**
-     * Confirmation popover for delete actions
+     * Delete/Restore selected workspace items using batch upsert API
+     * Follows __deleteRestore_SelectedItems pattern from useWorkspaceFolderMenu.helper.ts
+     * Pattern: 100% follows folder helper batch pattern
      */
-    const deleteConfirmation = useConfirmationPopover({
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-        confirmColor: 'destructive',
-        buttonVariant: 'default',
-        zIndex: 20000,
-    });
-
-    /**
-     * Handle delete with confirmation
-     */
-    const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
-        if (!contextData) return;
-
-        setIsContextMenuOpen(false);
-
-        // Extract anchor element from menu event
-        const nativeEvent = event.syntheticEvent || event;
-        const anchorElement = nativeEvent?.target as HTMLElement;
-
-        let message: string;
-        let itemName = contextData.name || 'this item';
-
-        if (isNote) {
-            // Note deletion messages
-            if (isHardDelete) {
-                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${itemName}".\n\n❌ This action CANNOT be undone.\n❌ All note content will be LOST FOREVER.`;
-            } else {
-                message = `Are you sure you want to delete "${itemName}"?\n\nThis action cannot be undone.`;
-            }
-        } else if (isFile) {
-            // File deletion messages
-            if (isHardDelete) {
-                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${itemName}".\n\n❌ This action CANNOT be undone.\n❌ The file will be LOST FOREVER.`;
-            } else {
-                message = `Are you sure you want to delete "${itemName}"?\n\nThis action cannot be undone.`;
-            }
-        } else {
+    const __deleteRestore_SelectedItems = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+        // ===== STEP 1: Get selected items =====
+        const selectedIds = ids ?? selectedItemIds;
+        if (selectedIds.length === 0) {
+            console.warn("⚠️ No items selected");
             return;
         }
 
-        deleteConfirmation.show({
+        // ===== STEP 2: Validate tree data =====
+        if (!currentWorkspace?.flatData) {
+            console.error("❌ Cannot delete: no tree data");
+            return;
+        }
+
+        try {
+            const token = $user.userToken;
+
+            // ===== STEP 3: Filter to top-level parents only =====
+            const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
+            const topLevelIds = filterTopLevelParents(selectedIds, treeData);
+
+            console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
+
+            if (topLevelIds.length === 0) {
+                console.warn("⚠️ No valid items after filtering");
+                return;
+            }
+
+            // ===== STEP 4: Find items and skip workspace root =====
+            const selectedItems: WorkspaceItemV2[] = [];
+            for (const itemId of topLevelIds) {
+                const item = $findItemById(currentWorkspace.flatData, itemId);
+                if (item && item.id > 0) {
+                    // Skip workspace root (negative ID)
+                    selectedItems.push(item);
+                }
+            }
+
+            if (selectedItems.length === 0) {
+                console.warn("⚠️ No valid items to process");
+                return;
+            }
+
+            // ===== STEP 5: Only process selected items, no descendants =====
+            // Both DELETE and RESTORE: Only selected items, no cascade
+            // Backend will handle cascade delete if needed via database constraints
+            const allItemsToUpdate: WorkspaceItemV2[] = [...selectedItems];
+
+            // Remove duplicates
+            const uniqueItemsMap = new Map<number, WorkspaceItemV2>();
+            for (const item of allItemsToUpdate) {
+                uniqueItemsMap.set(item.id, item);
+            }
+            const itemsToUpdate = Array.from(uniqueItemsMap.values());
+
+            console.log(`📦 Collected ${itemsToUpdate.length} selected items (type: ${type})`);
+
+            // -------------------------------------------------------
+            // STEP 6: BUILD BATCH DELETE/RESTORE REQUESTS
+            // -------------------------------------------------------
+            // For each selected item, create a DELETE or RESTORE action
+            // - action: WorkspaceItemAction.Delete or WorkspaceItemAction.Restore
+            // - id: workspace_items.id (V2: item.id = workspace_items.id)
+            const batchRequests: UpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {
+                return {
+                    action: type === "soft-delete" ? WorkspaceItemAction.Delete : WorkspaceItemAction.Restore,
+                    id: item.id, // ✅ workspace_items.id
+                };
+            });
+
+            // ===== STEP 7: Call batch upsert API =====
+            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentWorkspace.id, batchRequests);
+
+            if (!result.success) {
+                throw new Error(result.message || "Batch update failed");
+            }
+
+            // ===== STEP 8: Post-processing =====
+
+            if (type === "soft-delete") {
+                // Clean up open tabs
+                // In V2: entityType is numeric: 2=folder, 3=note, 4=file
+                const noteIds = itemsToUpdate.filter((item) => item.entityType === 3).map((item) => item.entityId);
+                const fileIds = itemsToUpdate.filter((item) => item.entityType === 4).map((item) => item.entityId);
+
+                if (noteIds.length > 0) {
+                    processTabAfterDelete(noteIds, "note");
+                }
+                if (fileIds.length > 0) {
+                    processTabAfterDelete(fileIds, "file");
+                }
+            }
+
+            // Reload workspace tree
+            const res = await workspaceService._getWorkspaceTreeV2(token ?? "", currentWorkspace.id);
+            if(res && res.success){
+                setCurrentWorkspace(res.object as WorkspaceDTO);
+                // ===== STEP 9: Clear selection =====
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
+
+                // Show success message
+                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
+            }
+            else {
+                throw new Error("Failed to reload workspace tree");
+            }
+
+        } catch (error) {
+            console.error("❌ Failed to update items:", error);
+            const errorMessage = await parseApiError(error);
+
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+            } else {
+                enqueueSnackbar(`Failed to update items: ${errorMessage}`, { variant: "error" });
+            }
+        }
+    };
+
+    /**
+     * Wrapper for delete/restore with confirmation popover
+     * Similar to dhr_items in folder helper
+     */
+    const deleteItems = (event: any, isHardDelete: boolean = false) => {
+        // ----------------
+        // STEP 1: Validate context data
+        // ----------------
+        if (!contextData) return;
+
+        // Close context menu
+        setIsContextMenuOpen(false);
+
+        // ----------------
+        // STEP 2: Extract anchor element for popover positioning
+        // ----------------
+        const nativeEvent = event.syntheticEvent || event;
+        const anchorElement = nativeEvent?.target as HTMLElement;
+
+        // ----------------
+        // STEP 3: Build confirmation message based on delete type and selection
+        // ----------------
+        const entityName = isMultipleSelected ? undefined : (contextData.data?.name || contextData.name || "this item");
+
+        const confirmMsg = getConfirmMessage({
+            type: isHardDelete ? "hard-delete" : "soft-delete",
+            entityType: isFile ? "file" : "note",
+            count: selectedCount,
+            isMultiple: isMultipleSelected,
+            entityName
+        });
+
+        // ----------------
+        // STEP 4: Show confirmation popover and handle user response
+        // ----------------
+        showConfirmation({
             anchorEl: anchorElement,
-            message,
+            title: confirmMsg.title,
+            subtitle: confirmMsg.subtitle,
+            confirmText: isHardDelete ? "Delete Permanently" : "Delete",
+            cancelText: "Cancel",
+            confirmColor: "destructive",
+            buttonVariant: "default",
+            zIndex: 20000,
             onConfirm: () => {
-                if (isNote) {
-                    handleDeleteNote(contextData, isHardDelete);
-                } else if (isFile) {
-                    handleDeleteFile(contextData, isHardDelete);
+                if (isHardDelete) {
+                    // Hard delete - use old API (TODO: implement batch hard delete later)
+                    // NOTE: For now, hard delete still uses old API that deletes the note entity
+                    if (isNote) {
+                        __deleteNote(contextData, isHardDelete);
+                    } else if (isFile) {
+                        __deleteFile(contextData, isHardDelete);
+                    }
+                } else {
+                    // Soft delete/restore - use NEW batch API
+                    // Determine operation type based on current deletedAt status
+                    const isCurrentlyDeleted = contextData.deletedAt !== null && contextData.deletedAt !== undefined;
+                    const operationType: "soft-delete" | "restore" = isCurrentlyDeleted ? "restore" : "soft-delete";
+
+                    // For single item, pass the specific item ID; for multiple, use selected IDs
+                    const idsToProcess = isMultipleSelected ? selectedItemIds : [contextData.id];
+                    __deleteRestore_SelectedItems(idsToProcess, operationType);
                 }
             },
         });
     };
 
+    /**
+     * Handle edit note (rename)
+     */
+    const editNote = (noteData: any) => {
+        if (!noteData) return;
+
+        // TODO: Implement rename dialog for note
+        // Similar to editFolder in useWorkspaceFolderMenu.helper.ts
+        console.log("Edit note:", noteData);
+        alert("Edit note feature coming soon!");
+    };
+
     return {
-        handleEditItem,
-        handleViewInfo,
-        onDeleteItemClick,
-        deleteConfirmation,
+        deleteItems,
+        editNote,
     };
 };

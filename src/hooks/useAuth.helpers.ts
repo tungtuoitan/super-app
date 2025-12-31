@@ -4,37 +4,35 @@
  * Pattern: Separate business logic from store (similar to useTagUIHelper)
  */
 
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { storageService, STORAGE_KEYS } from '@/services/storage.service';
-import { authApi } from '@/services/auth.service';
-import type { LoginRequest, ExchangeTokenResponse } from '@/types/index';
-import { useNavigate } from 'react-router-dom';
-import { extractAuthCodeFromUrl, extractOAuthError } from '@/utils/googleOAuth';
-import { useAuthCallbackStore } from '@/store/authCallback/AuthCallback.store';
-import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import { useSnackbar } from 'notistack';
+import { useAuthStore, User } from "@/store/auth/Auth.store";
+import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { authApi } from "@/services/auth.service";
+import { userProfileService } from "@/services/userProfile.service";
+import { envConfig } from "@/config/env.config";
+import { constants } from "@/utils/constants";
+import type { LoginRequest, ExchangeTokenResponse } from "@/types/index";
+import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
+import { useLocation, useNavigate } from "react-router-dom";
+import { extractAuthCodeFromUrl, extractOAuthError } from "@/utils/googleOAuth";
+import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { useSnackbar } from "notistack";
+import {useGridControlStore} from "@/store/grid/useGridControl.store";
+import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
 
 /**
  * Auth helper hook for authentication operations
  * NO PARAMETERS - Access state via useAuthStore
  * NO useEffect - Components handle timing
  * ONLY function definitions - Return callable functions
- * 
+ *
  * @returns Object containing auth helper functions
  */
 export function useAuthHelper() {
     const { enqueueSnackbar } = useSnackbar();
     // Get state setters from AuthStore
-    const { 
-        setAuth, 
-        setIsAuthenticated,
-        setLoginLoading, 
-        setLoginError,
-        setTokenExchangeLoading,
-        setTokenExchangeError,
-        setError 
-    } = useAuthStore();
-
+    const { $user, set$User, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
+    const { uiFilters, setUIFilters, filterViewKey } = useGridControlStore();
     // Navigation and callback store for OAuth flows
     const navigate = useNavigate();
     const { setCallbackError, setIsProcessing } = useAuthCallbackStore();
@@ -55,13 +53,13 @@ export function useAuthHelper() {
             // storageService.setString(STORAGE_KEYS.USER_TOKEN, response.token);
 
             // Update auth store (never store passwords)
-            setAuth({
+            set$User({
                 userId: response.userId || null,
                 userName: response.username || username,
-                email: '', // Email not provided in login response
-                password: '', // Never store actual passwords
+                email: "", // Email not provided in login response
+                password: "", // Never store actual passwords
                 userToken: response.token,
-                authType: 'local',
+                authType: "local",
             });
 
             setIsAuthenticated(true);
@@ -72,7 +70,7 @@ export function useAuthHelper() {
 
             // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
-                enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
             }
 
             throw err;
@@ -86,15 +84,16 @@ export function useAuthHelper() {
      */
     const logout = (): void => {
         // Clear auth store state
-        setAuth({
+        set$User({
             userId: null,
-            userName: '',
-            email: '',
-            firstName: '',
-            lastName: '',
-            picture: '',
+            userName: "",
+            email: "",
+            firstName: "",
+            lastName: "",
+            picture: "",
             authType: undefined,
-            userToken: '',
+            userToken: "",
+            filters: undefined,
         });
         setIsAuthenticated(false);
 
@@ -103,8 +102,9 @@ export function useAuthHelper() {
         setLoginError(null);
         setTokenExchangeError(null);
 
-        // Remove token from storage
+        // Remove token and profile from storage
         storageService.remove(STORAGE_KEYS.USER_TOKEN);
+        storageService.remove(STORAGE_KEYS.USER_PROFILE);
     };
 
     /**
@@ -123,7 +123,7 @@ export function useAuthHelper() {
                 // storageService.setString(STORAGE_KEYS.USER_TOKEN, response.access_token);
 
                 // Update auth store
-                setAuth(prev => ({
+                set$User((prev) => ({
                     ...prev,
                     userToken: response.access_token,
                 }));
@@ -133,7 +133,7 @@ export function useAuthHelper() {
 
             return response;
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Token exchange failed';
+            const errorMessage = err instanceof Error ? err.message : "Token exchange failed";
             setTokenExchangeError(errorMessage);
             setError(errorMessage);
             throw err;
@@ -155,27 +155,37 @@ export function useAuthHelper() {
             const response = await authApi.googleLogin(code);
 
             if (!response.success || !response.user) {
-                throw new Error(response.error || 'Google login failed');
+                throw new Error(response.error || "Google login failed");
             }
 
-            // Save token to localStorage
-            storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
 
-            // Update auth store with full user info
-            setAuth({
+            // Parse filters if they exist
+            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : constants.filters.defaults;
+            // Prepare user profile object
+            const userProfile = {
                 userId: response.user.id,
-                userName: response.user.email || '',
-                email: response.user.email || '',
+                userName: response.user.email || "",
+                email: response.user.email || "",
                 firstName: response.user.firstName,
                 lastName: response.user.lastName,
                 picture: response.user.picture,
                 authType: response.user.authType,
                 userToken: response.user.token,
-            });
+                filters: parsedFilters,
+            };
+
+            // In dev environment, save to localStorage
+            if (envConfig.NODE_ENV === constants.environments.development) {
+                storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
+                storageService.set(STORAGE_KEYS.USER_PROFILE, userProfile);
+            }
+
+            // Update auth store with full user info including filters
+            set$User(userProfile as User);
 
             setIsAuthenticated(true);
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Google login failed';
+            const errorMessage = err instanceof Error ? err.message : "Google login failed";
             setLoginError(errorMessage);
             setError(errorMessage);
             throw err;
@@ -201,7 +211,7 @@ export function useAuthHelper() {
             const code = extractAuthCodeFromUrl(window.location.search);
 
             if (!code) {
-                setCallbackError('No authorization code received from Google');
+                setCallbackError("No authorization code received from Google");
                 setIsProcessing(false);
                 return;
             }
@@ -210,9 +220,9 @@ export function useAuthHelper() {
             await loginWithGoogleCode(code);
 
             // Navigate to home page on success
-            navigate('/', { replace: true });
+            navigate("/", { replace: true });
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+            const errorMessage = err instanceof Error ? err.message : "Authentication failed";
             setCallbackError(errorMessage);
             setIsProcessing(false);
         }
@@ -222,27 +232,83 @@ export function useAuthHelper() {
      * Navigate to home page
      */
     const navigateToHome = (): void => {
-        navigate('/', { replace: true });
+        navigate("/", { replace: true });
     };
 
-    /**
-     * Initialize auth state from localStorage
-     * Called on app startup to restore user session
-     */
     const initAuthFromStorageToken = (): boolean => {
-        const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
+        if (envConfig.NODE_ENV === constants.environments.development) {
+            const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
+            const userProfile = storageService.get(STORAGE_KEYS.USER_PROFILE);
 
-        if (token) {
-            // Restore auth state from stored token
-            setAuth(prev => ({
-                ...prev,
-                userToken: token,
-            }));
-            setIsAuthenticated(true);
-            return true;
+            if (token && userProfile) {
+                // Restore full auth state from stored token and profile
+                const _userProfile = userProfile as User;
+                if(!_userProfile.filters) {
+                    _userProfile.filters = constants.filters.defaults;
+                }
+                set$User(_userProfile);
+                setIsAuthenticated(true);
+                return true;
+            } else if (token) {
+                // Fallback: if only token exists (old behavior)
+                set$User((prev) => ({
+                    ...prev,
+                    userToken: token,
+                    filters: constants.filters.defaults,
+                }));
+                setIsAuthenticated(true);
+                return true;
+            }
         }
 
         return false;
+    };
+
+    /**
+     * Update user filter preferences
+     * Syncs filter changes to backend and updates local state
+     * Uses UpsertUserProfile endpoint with only filters field populated
+     */
+    const upsertUserFilters = async (): Promise<void> => {
+        try {
+            // Get token from user state
+            const token = $user.userToken;
+            if (!token) {
+                throw new Error("User not authenticated");
+            }
+            const newUserFilters: UserFilters = $user.filters || {};
+            newUserFilters[filterViewKey as keyof UserFilters] = uiFilters;
+
+            // Merge existing filters with new filters
+
+            // Prepare payload: only filters field, other fields are undefined (won't be updated)
+            const payload: UpdateUserProfileRequest = {
+                filters: JSON.stringify(newUserFilters), // Convert UserFilters object to JSON string
+            };
+
+            // Update backend - will upsert profile if not exists
+            const result = await userProfileService._upsertUserProfile(token, payload);
+            const newFilters = result.object?.filters;
+            if (!result.success) {
+                throw new Error(result.message || "Failed to update user filters");
+            }
+
+            // Update local state
+            const updatedUser: typeof $user = {
+                ...$user,
+                filters: newFilters ? JSON.parse(newFilters) : constants.filters.defaults,
+            };
+            set$User(updatedUser);
+
+            // In dev environment, update localStorage with new filters
+            if (envConfig.NODE_ENV === constants.environments.development) {
+                storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
+            }
+        } catch (err) {
+            const errorMessage = await parseApiError(err);
+            enqueueSnackbar(`Failed to update filters: ${errorMessage}`, { variant: "error" });
+            throw err;
+        }
     };
 
     return {
@@ -253,5 +319,6 @@ export function useAuthHelper() {
         handleOAuthCallback,
         navigateToHome,
         initAuthFromStorageToken,
+        upsertUserFilters,
     };
 }

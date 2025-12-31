@@ -1,7 +1,7 @@
 # 🏗️ ARCHITECTURE - System Design & Structure
 
 > **Philosophy**: Feature-first, domain-driven architecture with clear boundaries.
-> 
+
 ## High-Level Overview
 
 ```
@@ -37,7 +37,6 @@
                       Backend API
 ```
 
-
 ## 📐 System Architecture
 
 ### High-Level Overview
@@ -47,6 +46,7 @@ Presentation Layer (Components, Pages, Layouts) → State Management Layer (Reac
 ## 📁 Complete Folder Structure
 
 src/
+
 - features/ (feature modules: auth, notes, v.v. với components, hooks, services, store, types, index.ts)
 - shared/ (components/ui, data-display, feedback; hooks; services; types; utils)
 - lib/ (react-query.ts, api-client.ts, theme.ts, router.ts)
@@ -58,6 +58,7 @@ src/
 ## 🎯 Feature Module Structure
 
 features/[name]/
+
 - components/ (NoteGrid/ với .tsx, .hooks.ts, .utils.ts, .types.ts, index.ts; hoặc file đơn giản như NoteCard.tsx)
 - hooks/ (useNotes.ts, useNote.ts, useCreateNote.ts, v.v.)
 - services/ (noteService.ts)
@@ -80,39 +81,43 @@ features/[name]/
 ### API Client Setup (lib/api-client.ts)
 
 **Axios-based Implementation:**
+
 - Instance config: baseURL từ env, timeout, headers JSON
 - Request interceptors: Thêm token từ storage, log trong DEV mode
 - Response interceptors: Log trong DEV, xử lý lỗi (401: redirect login, 403: forbidden, 500+: server error)
 - Typed methods: get<T>, post<T>, put<T>, patch<T>, delete<T>
 
 **Fetch-based Alternative:**
+
 - Base config: baseURL, default headers
 - handleResponse: Kiểm tra ok, xử lý status codes (401: logout, parse JSON)
 - Typed methods với proper error handling
 
-### Service Layer Pattern (features/*/services/)
+### Service Layer Pattern (features/\*/services/)
 
 **Service Class Structure:**
+
 ```typescript
 class NoteService {
-  private basePath = '/api/notes';
-  
-  // CRUD operations
-  async getNotes(params?: GetNotesParams): Promise<Note[]>
-  async getNoteById(id: string): Promise<Note>
-  async createNote(data: CreateNoteDTO): Promise<Note>
-  async updateNote(id: string, data: UpdateNoteDTO): Promise<Note>
-  async deleteNote(id: string): Promise<void>
-  
-  // Convenience methods
-  async archiveNote(id: string): Promise<Note>
-  async bulkDelete(ids: string[]): Promise<void>
+    private basePath = "/api/notes";
+
+    // CRUD operations
+    async getNotes(params?: GetNotesParams): Promise<Note[]>;
+    async getNoteById(id: string): Promise<Note>;
+    async createNote(data: CreateNoteDTO): Promise<Note>;
+    async updateNote(id: string, data: UpdateNoteDTO): Promise<Note>;
+    async deleteNote(id: string): Promise<void>;
+
+    // Convenience methods
+    async archiveNote(id: string): Promise<Note>;
+    async bulkDelete(ids: string[]): Promise<void>;
 }
 
 export const noteService = new NoteService(); // Singleton
 ```
 
 **Data Transformation:**
+
 - DTOs từ API (dates as strings) → Domain models (Date objects)
 - Transform trong service layer trước khi return
 - Consistent transformation cho tất cả responses
@@ -120,43 +125,48 @@ export const noteService = new NoteService(); // Singleton
 ### Common Service Patterns
 
 **Authentication Service:**
+
 ```typescript
 class AuthService {
-  login(credentials): Promise<AuthResponse>      // Lưu token
-  logout(): void                                  // Xóa token
-  getCurrentUser(): Promise<User>
-  verifyToken(token): Promise<boolean>
-  refreshToken(): Promise<string>                // Cập nhật token
-  requestPasswordReset(email): Promise<void>
-  resetPassword(token, password): Promise<void>
+    login(credentials): Promise<AuthResponse>; // Lưu token
+    logout(): void; // Xóa token
+    getCurrentUser(): Promise<User>;
+    verifyToken(token): Promise<boolean>;
+    refreshToken(): Promise<string>; // Cập nhật token
+    requestPasswordReset(email): Promise<void>;
+    resetPassword(token, password): Promise<void>;
 }
 ```
 
 **File Upload Service:**
+
 ```typescript
 class UploadService {
-  uploadFile(file, onProgress): Promise<{url: string, id: string}>
-  uploadFiles(files, onProgress): Promise<Array<{url, id}>>
-  deleteFile(fileId): Promise<void>
+    uploadFile(file, onProgress): Promise<{ url: string; id: string }>;
+    uploadFiles(files, onProgress): Promise<Array<{ url; id }>>;
+    deleteFile(fileId): Promise<void>;
 }
 ```
+
 - Sử dụng FormData cho multipart/form-data
 - Progress tracking cho UX tốt hơn
 
 ### Error Handling Strategy
 
 **Custom Error Classes:**
+
 ```typescript
 class ApiError extends Error {
-  constructor(status: number, message: string, data?: any)
+    constructor(status: number, message: string, data?: any);
 }
 class NetworkError extends Error {}
 class ValidationError extends Error {
-  constructor(message: string, errors: Record<string, string>)
+    constructor(message: string, errors: Record<string, string>);
 }
 ```
 
 **Service Error Handling:**
+
 - Try/catch Axios/Fetch errors
 - Transform thành typed errors (ApiError, NetworkError)
 - Re-throw để React Query/Component xử lý
@@ -165,21 +175,25 @@ class ValidationError extends Error {
 ### Advanced Features
 
 **Retry Logic:**
+
 - Sử dụng axios-retry: 3 attempts, exponential backoff
 - Retry điều kiện: network errors hoặc 5xx status codes
 - Không retry cho 4xx (client errors)
 
 **Request Cancellation:**
+
 - Axios: CancelToken source, cancel on unmount
 - React Query: Tự động sử dụng AbortController signal
 - Tránh memory leaks và race conditions
 
 **Query Parameters:**
+
 - Build với URLSearchParams
 - Append key-value pairs
 - Hỗ trợ arrays (multiple values cho cùng key)
 
 **API Security:**
+
 - CSRF token: Thêm X-CSRF-Token header từ meta tag
 - API key: X-API-Key từ environment
 - Rate limiting headers
@@ -188,6 +202,7 @@ class ValidationError extends Error {
 ### Service Best Practices
 
 **Checklist:**
+
 - [ ] Class có tên mô tả rõ domain (NoteService, AuthService)
 - [ ] basePath private, không hardcode
 - [ ] Tất cả methods async, return Promise
@@ -199,6 +214,7 @@ class ValidationError extends Error {
 - [ ] Unit tests cho critical paths
 
 **Guidelines:**
+
 1. **Keep Services Thin**: Không business logic (filter/sort) - để ở component/hook
 2. **Descriptive Names**: getNotes, createNote (không get, create)
 3. **Consistent Error Handling**: Log và re-throw, không swallow errors
@@ -256,7 +272,7 @@ class ValidationError extends Error {
 
 ## 🎪 Provider Hierarchy
 
-- Centralized ở Main.tsx: BrowserRouter, SnackbarProvider, AuthProvider, NoteUIProvider, v.v.
+- Centralized ở Main.tsx: BrowserRouter, SnackbarProvider, AuthProvider, NoteDetailProvider, v.v.
 - Pages: Direct dùng context, không wrap provider.
 
 ## 🚀 Performance Considerations
@@ -279,6 +295,7 @@ class ValidationError extends Error {
 ## 🔧 Troubleshooting
 
 Decision tree cho code placement:
+
 - Component: Multi features → shared/components; Specific → features/[name]/components.
 - Hook: Query → features/hooks; Generic → shared/hooks; Specific → component folder.
 - Business logic → features/services.

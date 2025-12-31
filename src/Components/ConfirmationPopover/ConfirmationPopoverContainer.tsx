@@ -4,10 +4,10 @@
  * Following SuperApp architecture patterns
  */
 
-import React from 'react';
-import { ConfirmationPopover } from '@/shared/components/feedback/ConfirmationPopover';
-import { useConfirmationPopoverHelper } from '@/hooks/useConfirmationPopover.helper';
-import { useConfirmationPopoverStore } from '@/store/confirmationPopover/ConfirmationPopover.store';
+import React from "react";
+import { ConfirmationPopover } from "@/shared/components/feedback/ConfirmationPopover";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { useConfirmationPopoverStore } from "@/store/confirmationPopover/ConfirmationPopover.store";
 
 /**
  * Container component that manages confirmation popover state
@@ -15,22 +15,26 @@ import { useConfirmationPopoverStore } from '@/store/confirmationPopover/Confirm
  */
 export function ConfirmationPopoverContainer() {
     const { isOpen, options } = useConfirmationPopoverStore();
-    const { handleConfirm, handleCancel } = useConfirmationPopoverHelper();
+    const { handleConfirm, handleThirdButton, handleCancel } = useConfirmationPopoverHelper();
 
     return (
         <ConfirmationPopover
             open={isOpen}
             anchorEl={options?.anchorEl || null}
-            message={options?.message || ''}
+            title={options?.title || ""}
+            subtitle={options?.subtitle}
             confirmText={options?.confirmText}
             cancelText={options?.cancelText}
+            thirdButtonText={options?.thirdButtonText}
             confirmColor={options?.confirmColor}
             cancelColor={options?.cancelColor}
+            thirdButtonColor={options?.thirdButtonColor}
             buttonVariant={options?.buttonVariant}
             width={options?.width}
             zIndex={options?.zIndex || 20000}
             onConfirm={handleConfirm}
             onCancel={handleCancel}
+            onThirdButton={handleThirdButton}
         />
     );
 }

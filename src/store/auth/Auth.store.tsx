@@ -5,6 +5,7 @@
  */
 
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import { UserFilters } from "@/types/common.types";
 
 /**
  * User interface representing authenticated user data
@@ -18,14 +19,15 @@ export interface User {
     firstName?: string;
     lastName?: string;
     picture?: string;
-    authType?: 'google' | 'local';
+    authType?: "google" | "local";
     userToken: string;
+    filters?: UserFilters; // User-level filter preferences for different views
 }
 
 export interface AuthStoreData {
     // Core auth data
-    auth: User;
-    setAuth: Dispatch<SetStateAction<User>>;
+    $user: User;
+    set$User: Dispatch<SetStateAction<User>>;
     isAuthenticated: boolean;
     setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
 
@@ -50,40 +52,41 @@ export interface AuthStoreData {
 
 const DEFAULT_AUTH_STATE: User = {
     userId: null,
-    userName: '',
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    picture: '',
+    userName: "",
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    picture: "",
     authType: undefined,
-    userToken: '',
+    userToken: "",
+    filters: {},
 };
 
 const authStoreDefaultValue: AuthStoreData = {
     // Core auth data
-    auth: DEFAULT_AUTH_STATE,
-    setAuth: () => { },
+    $user: DEFAULT_AUTH_STATE,
+    set$User: () => {},
     isAuthenticated: false,
-    setIsAuthenticated: () => { },
-    
+    setIsAuthenticated: () => {},
+
     // Auth operation states
     loading: false,
-    setLoading: () => { },
+    setLoading: () => {},
     error: null,
-    setError: () => { },
-    
+    setError: () => {},
+
     // Login specific states
     loginLoading: false,
-    setLoginLoading: () => { },
+    setLoginLoading: () => {},
     loginError: null,
-    setLoginError: () => { },
-    
+    setLoginError: () => {},
+
     // Token exchange states
     tokenExchangeLoading: false,
-    setTokenExchangeLoading: () => { },
+    setTokenExchangeLoading: () => {},
     tokenExchangeError: null,
-    setTokenExchangeError: () => { },
+    setTokenExchangeError: () => {},
 };
 
 export const AuthStore = createContext<AuthStoreData>(authStoreDefaultValue);
@@ -92,48 +95,49 @@ export const useAuthStore = () => useContext(AuthStore);
 
 export const AuthStoreProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Core auth data
-    const [auth, setAuth] = useState<User>(DEFAULT_AUTH_STATE);
+    const [$user, set$User] = useState<User>(DEFAULT_AUTH_STATE);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    
+
     // Auth operation states
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     // Login specific states
     const [loginLoading, setLoginLoading] = useState<boolean>(false);
     const [loginError, setLoginError] = useState<string | null>(null);
-    
+
     // Token exchange states
     const [tokenExchangeLoading, setTokenExchangeLoading] = useState<boolean>(false);
     const [tokenExchangeError, setTokenExchangeError] = useState<string | null>(null);
-    
+
     return (
         <AuthStore.Provider
             value={{
                 // Core auth data
-                auth,
-                setAuth,
+                $user,
+                set$User,
                 isAuthenticated,
                 setIsAuthenticated,
-                
+
                 // Auth operation states
                 loading,
                 setLoading,
                 error,
                 setError,
-                
+
                 // Login specific states
                 loginLoading,
                 setLoginLoading,
                 loginError,
                 setLoginError,
-                
+
                 // Token exchange states
                 tokenExchangeLoading,
                 setTokenExchangeLoading,
                 tokenExchangeError,
                 setTokenExchangeError,
-            }}>
+            }}
+        >
             {children}
         </AuthStore.Provider>
     );

@@ -1,120 +1,286 @@
 /**
  * Workspace Folder Menu Helper Hook
  * Business logic for folder context menu operations
- * Extracted from useContextMenuHelper for folder-specific logic
+ * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
  */
 
-import { useContextMenuStore } from '@/store/contextMenu/ContextMenu.store';
-import { useExplorerStore } from '@/store/explorer/Explorer.store';
-import { useFolderDialogHelper } from '@/hooks/explorer/useFolderDialog.helper';
-import { useConfirmationPopover } from '@/shared/hooks/useConfirmationPopover';
-import { constants } from '@/utils/constants';
-import type { ItemType } from '@/store/explorer/FolderDialog.store';
-import { Folder } from '@/types/folder.types';
-import { _deleteWorkspaceItems } from '@/services/workspace.service';
-import { storageService } from '@/services/storage.service';
-import { useAuthStore } from '@/store/auth/Auth.store';
-import { parseApiError, isUnauthorizedError } from '@/utils/api-error.utils';
-import { useSnackbar } from 'notistack';
+import React from "react";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useFolderDialogHelper } from "@/hooks/workspace/useFolderDialog.helper";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { constants } from "@/utils/constants";
+import type { ItemType } from "@/store/workspace/FolderDialog.store";
+import { Folder } from "@/types/folder.types";
+import { workspaceService } from "@/services/workspace.service";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { useSnackbar } from "notistack";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "@/hooks/workspace/tree.miniHelper";
+import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
+import { isFolder, WorkspaceItemAction } from "@/types/workspace.types";
+import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import {WorkspaceDTO} from "@/types/workspace-dto.types";
+import { getConfirmMessage } from "@/utils/confirmation-message.utils";
+import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { useStandardRegistryStore } from "@/store/index";
+import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
+import { Note } from "@/types/note.types";
+import { useNoteGridPopupHelper } from "@/hooks/workspace/useNoteGridPopup.helper";
+
+// --------------------------------
+// RECURSIVE HELPER FUNCTIONS
+// --------------------------------
+
+/**
+ * Traverse tree and collect all visible folder IDs in order (for VS Code-like navigation)
+ */
+const $getAllVisibleFolderIds = (items: any[]): number[] => {
+    const result: number[] = [];
+
+    function $traverse(nodes: any[]) {
+        for (const node of nodes) {
+            const nodeId = node.id;
+            if (nodeId) {
+                result.push(nodeId);
+            }
+            if (node.children && node.children.length > 0) {
+                $traverse(node.children);
+            }
+        }
+    }
+
+    $traverse(items);
+    return result;
+};
+
+/**
+ * Recursively collect all descendant tags (children, grandchildren, etc.)
+ * Returns array of all tags in the subtree including the root 
+ */
+const $collectAllDescendants = (folder: Folder): Folder[] => {
+    const descendants: Folder[] = [folder];
+
+    if (folder.children && folder.children.length > 0) {
+        for (const child of folder.children) {
+            descendants.push(...$collectAllDescendants(child));
+        }
+    }
+
+    return descendants;
+};
+
+/**
+ * Find folder by ID in tree structure
+ */
+const $findFolderById = (items: any[], folderId: number): Folder | null => {
+    for (const item of items) {
+        const nodeId = item.id;
+        if (nodeId === folderId) {
+            return item;
+        }
+        if (item.children?.length > 0) {
+            const found = $findFolderById(item.children, folderId);
+            if (found) return found;
+        }
+    }
+    return null;
+};
+
+/**
+ * Count total children recursively
+ */
+const $countChildren = (folder: any): number => {
+    if (!folder.children || folder.children.length === 0) return 0;
+    return folder.children.length + folder.children.reduce((sum: number, child: any) => sum + $countChildren(child), 0);
+};
+    
+/**
+ * Recursively remove items by IDs from tree
+ */
+const $removeItems = (items: any[], idsToRemove: Set<number>): any[] => {
+    return items
+        .filter((item) => !idsToRemove.has(item.id))
+        .map((item) => ({
+            ...item,
+            children: item.children ? $removeItems(item.children, idsToRemove) : [],
+        }));
+};
 
 export const useWorkspaceFolderMenuHelper = () => {
-    const { auth } = useAuthStore();
+    const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
-    const {
-        contextData,
-        setIsContextMenuOpen,
-    } = useContextMenuStore();
-
-    const {
-        selectedFolderIds,
-        setSelectedFolderIds,
-        setLastSelectedFolderId,
-        currentTree,
-        setCurrentTree,
-    } = useExplorerStore();
-
+    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { showConfirmation } = useConfirmationPopoverHelper();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
+    const { processTabAfterDelete, openTab } = useEditorTabHelper();
+    const { openTabs } = useEditorTabsStore();
+    const { registries } = useStandardRegistryStore();
+    const { setShouldFocusNoteName } = useNoteDetailStore();
+    const { openNoteGridPopup } = useNoteGridPopupHelper();
 
-    // Derived state
-    const isWorkspaceRoot = contextData && contextData.tagId < 0;
-    const selectedCount = selectedFolderIds.length;
+    const selectedCount = selectedItemIds.length;
     const isMultipleSelected = selectedCount > 1;
 
-    /**
-     * Get all visible tag IDs in tree order (for VS Code-like navigation)
-     */
-    const getAllVisibleTagIds = (items: any[]): number[] => {
-        const result: number[] = [];
-
-        function traverse(nodes: any[]) {
-            for (const node of nodes) {
-                const nodeId = node.id;
-                if (nodeId) {
-                    result.push(nodeId);
-                }
-                if (node.children && node.children.length > 0) {
-                    traverse(node.children);
-                }
-            }
-        }
-
-        traverse(items);
-        return result;
-    };
 
     /**
-     * Recursively collect all descendant tags (children, grandchildren, etc.)
-     * Returns array of all tags in the subtree including the root tag
+     * Create new note in workspace
+     * Moved from WorkspaceFolderNodeMenu component
      */
-    const collectAllDescendants = (folder: Folder): Folder[] => {
-        const descendants: Folder[] = [folder];
+    const createNewNote = (contextData: any) => {
+        // Collect IDs from workspace tree (flatData)
+        const { workspaceItemIds, noteEntityIds } = collectIdsFromTree(currentWorkspace?.flatData || []);
 
-        if (folder.children && folder.children.length > 0) {
-            for (const child of folder.children) {
-                descendants.push(...collectAllDescendants(child));
-            }
+        // Generate unique temp IDs for workspace item and note entity
+        const tempWorkspaceItemId = generateTempId(workspaceItemIds);
+        const tempNoteEntityId = generateTempId(noteEntityIds);
+        const name = generateUnsavedName(tempNoteEntityId);
+
+        // CRITICAL: parentId must be workspace_items.id (contextData.id), NOT entityId!
+        // contextData.id = workspace_items.id of parent folder
+        // contextData.entityId = folders.id (entity ID, NOT used for parentId!)
+        const parentWorkspaceItemId = contextData?.id ?? null;
+
+        // Get entity ID (support both V1 and V2 structure)
+        // const parentEntityId = contextData?.entityId
+
+        // Create folder object from contextData
+        // const parentFolder: Folder | undefined = contextData
+        //     ? {
+        //           id: parentEntityId,
+        //           name: contextData.name || contextData.data?.name,
+        //           description: contextData.description || contextData.data?.description,
+        //           color: contextData.color || contextData.data?.color,
+        //           createdAt: new Date(contextData.createdAt || contextData.data?.createdAt),
+        //           isActive: !contextData.isArchived,
+        //       }
+        //     : undefined;
+
+        // Create temporary note (uses note entity ID)
+        const newNote: Note = {
+            id: tempNoteEntityId,
+            name: name,
+            userId: $user.userId || 0,
+            description: "",
+            hashtags: "",
+            statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            type: "idea",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: $user.userName || "Unknown",
+            deletedAt: null,
+        };
+
+        // Create WorkspaceNoteItem for flat array (WorkspaceItemV2 structure)
+        const newWorkspaceItem: any = {
+            id: tempWorkspaceItemId, // workspace_items.id (unique for workspace item)
+            workspaceId: currentWorkspace?.id || 1,
+            parentId: parentWorkspaceItemId, // ✅ FIXED: Use workspace_items.id of parent, not entityId!
+            entityType: 3, // 3 = note
+            entityId: tempNoteEntityId, // notes.id (entity ID)
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            deletedAt: null,
+            copyInfo: null,
+            level: (contextData?.level || 0) + 1,
+            position: 0,
+            accessType: "owner",
+            isOriginal: true,
+            isExpanded: false,
+            isSelected: false,
+
+            // Note entity data
+            data: {
+                id: tempNoteEntityId, // notes.id (same as entityId)
+                userId: $user.userId ?? 0,
+                name: name,
+                description: "",
+                statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                deletedAt: null,
+                copyInfo: null,
+            },
+        };
+
+        // Add note to currentWorkspace.flatData
+        if (currentWorkspace && contextData) {
+            const newFlatData = [newWorkspaceItem, ...currentWorkspace.flatData];
+
+            const newWorkspace = {
+                ...currentWorkspace,
+                flatData: newFlatData,
+                noteCount: currentWorkspace.noteCount + 1,
+            };
+            console.log("✅ New note added to workspace:", {
+                workspaceItemId: tempWorkspaceItemId,
+                noteEntityId: tempNoteEntityId,
+                name,
+                parentWorkspaceItemId
+            });
+
+            setCurrentWorkspace(newWorkspace);
         }
 
-        return descendants;
+        // Open tab for editing
+        openTab(newNote, constants.vscode.tab.tabTypes.note);
+
+        // Focus on note name field after tab opens
+        setShouldFocusNoteName(true);
     };
 
     /**
      * Handle create item action (folder/note/file)
      */
-    const handleCreateItem = (itemType: ItemType, parentTag?: any) => {
-        console.log(`📁 Folder Menu: Add ${itemType} clicked for parent:`, parentTag);
+    const createFolder = (itemType: ItemType, parentTag?: any) => {
+        // ----------------
+        // Close context menu and open create dialog
+        // ----------------
         setIsContextMenuOpen(false);
-        openFolderDialog('create', itemType, null, parentTag);
+        openFolderDialog("create", itemType, null, parentTag);
     };
 
     /**
      * Handle edit folder action
      */
-    const handleEditItem = (itemData: any) => {
-        console.log('✏️ Folder Menu: Edit folder clicked', itemData);
+    const editFolder = (itemData: any) => {
+        // ----------------
+        // Close context menu
+        // ----------------
         setIsContextMenuOpen(false);
 
+        // ----------------
+        // Determine item type and open edit dialog
+        // ----------------
         if (itemData) {
-            const itemType: ItemType = itemData.type || constants.itemTypes.folder;
-            openFolderDialog('edit', itemType, itemData, null);
+            const itemType: ItemType = itemData.type || constants.workspace.itemTypes.folder;
+            openFolderDialog("edit", itemType, itemData, null);
         }
     };
 
     /**
      * Handle delete single folder
      */
-    const handleDeleteFolder = (folder: Folder, isHardDelete: boolean = false) => {
-        // Validate folder ID exists
+    const __deleteItems = async (folder: Folder, isHardDelete: boolean = false) => {
+        // ----------------
+        // STEP 1: Validate folder ID
+        // ----------------
         if (!folder.id) {
-            console.error('❌ Cannot remove folder: missing folder ID');
-            alert('Cannot remove folder: missing folder information');
+            console.error("❌ Cannot remove folder: missing folder ID");
+            enqueueSnackbar("Cannot remove folder: missing folder information", { variant: "error" });
             return;
         }
 
-        // VS Code behavior: Find next item to select after deletion
+        // ----------------
+        // STEP 2: Find next item to select after deletion (VS Code behavior)
+        // ----------------
         let nextFolderIdToSelect: number | null = null;
-        if (currentTree?.items) {
-            const allVisibleFolderIds = getAllVisibleTagIds(currentTree.items);
+        if (currentWorkspace?.flatData) {
+            const allVisibleFolderIds = $getAllVisibleFolderIds(currentWorkspace.flatData);
             const currentIndex = allVisibleFolderIds.indexOf(folder.id);
 
             if (currentIndex !== -1) {
@@ -129,15 +295,11 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
         }
 
-        // Collect all descendants (children, grandchildren, etc.) for cascade deletion
-        const allFolders = collectAllDescendants(folder);
-        console.log(
-            `🗑️ Cascade delete: removing ${allFolders.length} folder(s) (including ${
-                allFolders.length - 1
-            } descendants)`
-        );
+        // ----------------
+        // STEP 3: Collect all descendants for cascade deletion
+        // ----------------
+        const allFolders = $collectAllDescendants(folder);
 
-        // Filter out folders without ID and warn about them
         const foldersToDelete = allFolders.filter((f) => {
             if (!f.id) {
                 console.warn(`⚠️ Skipping folder without ID: ${f.name}`);
@@ -146,137 +308,101 @@ export const useWorkspaceFolderMenuHelper = () => {
             return true;
         });
 
-        // Delete all folders using workspace service
-        const deleteItems = async () => {
-            try {
-                const token = auth.userToken;
+        // ----------------
+        // STEP 4: Delete items via API
+        // ----------------
+        try {
+            const token = $user.userToken;
 
-                // Map items with proper type codes (2=folder, 3=note, 4=file)
-                const deleteItems = foldersToDelete.map((f) => {
-                    const itemType = (f as any).type;
-                    let type: 2 | 3 | 4 = 2; // Default to folder
+            // Map items with proper type codes (2=folder, 3=note, 4=file)
+            const deleteItems = foldersToDelete.map((f) => {
+                const itemType = (f as any).type;
+                let type: 2 | 3 | 4 = 2; // Default to folder
 
-                    if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
-                        type = 2;
-                    } else if (itemType === constants.itemTypes.note) {
-                        type = 3;
-                    } else if (itemType === constants.itemTypes.file) {
-                        type = 4;
-                    }
-
-                    return {
-                        id: f.id!,
-                        type,
-                    };
-                });
-
-                console.log('🗑️ Deleting items:', deleteItems);
-
-                const result = await _deleteWorkspaceItems(
-                    token || '',
-                    currentTree?.workspaceId || 1,
-                    {
-                        items: deleteItems,
-                        isHardDelete,
-                    }
-                );
-
-                if (result && result.message === 'Items deleted successfully') {
-                    console.log('✅ Folders deleted successfully');
-
-                    // Remove folders from tree
-                    if (currentTree) {
-                        const removeItemsRecursively = (
-                            items: any[],
-                            idsToRemove: Set<number>
-                        ): any[] => {
-                            return items
-                                .filter((item) => !idsToRemove.has(item.id))
-                                .map((item) => ({
-                                    ...item,
-                                    children: item.children
-                                        ? removeItemsRecursively(item.children, idsToRemove)
-                                        : [],
-                                }));
-                        };
-
-                        const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                        const updatedItems = removeItemsRecursively(
-                            currentTree.items,
-                            idsToRemove
-                        );
-
-                        setCurrentTree({
-                            ...currentTree,
-                            items: updatedItems,
-                        });
-
-                        // VS Code behavior: Select next item after deletion
-                        if (nextFolderIdToSelect !== null) {
-                            setSelectedFolderIds([nextFolderIdToSelect]);
-                            setLastSelectedFolderId(nextFolderIdToSelect);
-                            console.log(
-                                `✅ VS Code navigation: selected next folder ${nextFolderIdToSelect}`
-                            );
-                        } else {
-                            // Clear selection if no next item
-                            setSelectedFolderIds([]);
-                            setLastSelectedFolderId(null);
-                        }
-                    }
-
-                    const action = isHardDelete ? 'permanently deleted' : 'deleted';
-                    alert(`✅ Folder ${action} successfully`);
-                } else {
-                    throw new Error('Failed to delete folders');
+                if (itemType === constants.workspace.itemTypes.folder) {
+                    type = 2;
+                } else if (itemType === constants.workspace.itemTypes.note) {
+                    type = 3;
+                } else if (itemType === constants.workspace.itemTypes.file) {
+                    type = 4;
                 }
-            } catch (error) {
-                console.error('❌ Failed to delete folders:', error);
-                const errorMessage = await parseApiError(error);
-                if (isUnauthorizedError(error)) {
-                    enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
-                } else {
-                    enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: 'error' });
+
+                return {
+                    id: f.id!,
+                    type,
+                };
+            });
+
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentWorkspace?.id || 1, {
+                items: deleteItems,
+                isHardDelete,
+            });
+
+            // ----------------
+            // STEP 5: Update UI after successful deletion
+            // ----------------
+            if (result && result.success) {
+                // Remove folders from tree
+                if (currentWorkspace) {
+                    const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
+                    const updatedItems = $removeItems(currentWorkspace.flatData, idsToRemove);
+
+                    setCurrentWorkspace({
+                        ...currentWorkspace,
+                        flatData: updatedItems,
+                    });
+
+                    // VS Code behavior: Select next item after deletion
+                    if (nextFolderIdToSelect !== null) {
+                        setSelectedItemIds([nextFolderIdToSelect]);
+                        setLastSelectedItemId(nextFolderIdToSelect);
+                    } else {
+                        // Clear selection if no next item
+                        setSelectedItemIds([]);
+                        setLastSelectedItemId(null);
+                    }
                 }
+
+                enqueueSnackbar(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`, { variant: "success" });
+            } else {
+                throw new Error("Failed to delete folders");
             }
-        };
-
-        deleteItems();
+        } catch (error) {
+            // ----------------
+            // STEP 6: Handle errors
+            // ----------------
+            console.error("❌ Failed to delete folders:", error);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+            } else {
+                enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: "error" });
+            }
+        }
     };
 
     /**
      * Handle bulk delete for multiple selected folders
      */
-    const handleBulkDeleteFolders = (selectedIds: number[], isHardDelete: boolean = false) => {
-        console.log('🗑️ Bulk deleting folders:', selectedIds, 'isHardDelete:', isHardDelete);
-
-        if (!currentTree?.items) {
-            console.error('❌ Cannot delete: no tree data');
+    const __bulkDeleteFolders = async (selectedIds: number[], isHardDelete: boolean = false) => {
+        // ----------------
+        // STEP 1: Validate tree data
+        // ----------------
+        if (!currentWorkspace?.flatData) {
+            console.error("❌ Cannot delete: no tree data");
             return;
         }
 
-        // Find all selected folders in the tree
-        const findFolderById = (items: any[], folderId: number): Folder | null => {
-            for (const item of items) {
-                const nodeId = item.id;
-                if (nodeId === folderId) {
-                    return item;
-                }
-                if (item.children?.length > 0) {
-                    const found = findFolderById(item.children, folderId);
-                    if (found) return found;
-                }
-            }
-            return null;
-        };
-
+        // ----------------
+        // STEP 2: Find selected folders and filter out workspace root nodes
+        // ----------------
         const selectedFolders: Folder[] = [];
         for (const folderId of selectedIds) {
-            const folder = findFolderById(currentTree.items, folderId);
+            const folder = $findFolderById(currentWorkspace.flatData, folderId);
             if (folder) {
                 // Check if this is a workspace root node (negative ID)
                 if (folder.id < 0) {
-                    console.warn('⚠️ Skipping workspace root node:', folder.id);
+                    console.warn("⚠️ Skipping workspace root node:", folder.id);
                     continue;
                 }
                 selectedFolders.push(folder);
@@ -284,13 +410,15 @@ export const useWorkspaceFolderMenuHelper = () => {
         }
 
         if (selectedFolders.length === 0) {
-            console.warn('⚠️ No valid folders to delete');
+            console.warn("⚠️ No valid folders to delete");
             return;
         }
 
-        // VS Code behavior: Find next item to select after deletion
+        // ----------------
+        // STEP 3: Find next item to select after deletion (VS Code behavior)
+        // ----------------
         let nextFolderIdToSelect: number | null = null;
-        const allVisibleFolderIds = getAllVisibleTagIds(currentTree.items);
+        const allVisibleFolderIds = $getAllVisibleFolderIds(currentWorkspace.flatData);
 
         // Find the highest index among selected folders
         const selectedIndices = selectedIds
@@ -307,15 +435,16 @@ export const useWorkspaceFolderMenuHelper = () => {
             }
             // If it's the last item, select the previous one before the first selected
             else if (selectedIndices[selectedIndices.length - 1] > 0) {
-                nextFolderIdToSelect =
-                    allVisibleFolderIds[selectedIndices[selectedIndices.length - 1] - 1];
+                nextFolderIdToSelect = allVisibleFolderIds[selectedIndices[selectedIndices.length - 1] - 1];
             }
         }
 
-        // Collect all descendants for all selected folders
+        // ----------------
+        // STEP 4: Collect all descendants and remove duplicates
+        // ----------------
         const allFoldersToDelete: Folder[] = [];
         for (const folder of selectedFolders) {
-            const descendants = collectAllDescendants(folder);
+            const descendants = $collectAllDescendants(folder);
             allFoldersToDelete.push(...descendants);
         }
 
@@ -328,202 +457,340 @@ export const useWorkspaceFolderMenuHelper = () => {
         }
         const foldersToDelete = Array.from(uniqueFoldersMap.values());
 
-        console.log(
-            `🗑️ Bulk cascade delete: removing ${foldersToDelete.length} folder(s) total`
-        );
+        // ----------------
+        // STEP 5: Execute bulk delete via API
+        // ----------------
+        try {
+            const token = $user.userToken;
 
-        // Delete all folders using workspace service
-        const deleteItems = async () => {
-            try {
-                const token = auth.userToken;
+            // Map items with proper type codes (2=folder, 3=note, 4=file)
+            const deleteItems = foldersToDelete.map((f) => {
+                const itemType = (f as any).type;
+                let type: 2 | 3 | 4 = 2;
 
-                // Map items with proper type codes
-                const deleteItems = foldersToDelete.map((f) => {
-                    const itemType = (f as any).type;
-                    let type: 2 | 3 | 4 = 2;
-
-                    if (itemType === constants.itemTypes.folder || itemType === constants.itemTypes.tag) {
-                        type = 2;
-                    } else if (itemType === constants.itemTypes.note) {
-                        type = 3;
-                    } else if (itemType === constants.itemTypes.file) {
-                        type = 4;
-                    }
-
-                    return {
-                        id: f.id!,
-                        type,
-                    };
-                });
-
-                console.log('🗑️ Bulk deleting items:', deleteItems);
-
-                const result = await _deleteWorkspaceItems(
-                    token || '',
-                    currentTree?.workspaceId || 1,
-                    {
-                        items: deleteItems,
-                        isHardDelete,
-                    }
-                );
-
-                if (result && result.message === 'Items deleted successfully') {
-                    console.log('✅ Folders bulk deleted successfully');
-
-                    // Remove folders from tree
-                    if (currentTree) {
-                        const removeItemsRecursively = (
-                            items: any[],
-                            idsToRemove: Set<number>
-                        ): any[] => {
-                            return items
-                                .filter((item) => !idsToRemove.has(item.id))
-                                .map((item) => ({
-                                    ...item,
-                                    children: item.children
-                                        ? removeItemsRecursively(item.children, idsToRemove)
-                                        : [],
-                                }));
-                        };
-
-                        const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                        const updatedItems = removeItemsRecursively(
-                            currentTree.items,
-                            idsToRemove
-                        );
-
-                        setCurrentTree({
-                            ...currentTree,
-                            items: updatedItems,
-                        });
-
-                        // VS Code behavior: Select next item after deletion
-                        if (nextFolderIdToSelect !== null) {
-                            setSelectedFolderIds([nextFolderIdToSelect]);
-                            setLastSelectedFolderId(nextFolderIdToSelect);
-                            console.log(
-                                `✅ VS Code navigation: selected next folder ${nextFolderIdToSelect}`
-                            );
-                        } else {
-                            setSelectedFolderIds([]);
-                            setLastSelectedFolderId(null);
-                        }
-                    }
-
-                    const action = isHardDelete ? 'permanently deleted' : 'deleted';
-                    alert(`✅ ${foldersToDelete.length} folders ${action} successfully`);
-                } else {
-                    throw new Error('Failed to bulk delete folders');
+                if (itemType === constants.workspace.itemTypes.folder) {
+                    type = 2;
+                } else if (itemType === constants.workspace.itemTypes.note) {
+                    type = 3;
+                } else if (itemType === constants.workspace.itemTypes.file) {
+                    type = 4;
                 }
-            } catch (error) {
-                console.error('❌ Failed to bulk delete folders:', error);
-                const errorMessage = await parseApiError(error);
-                if (isUnauthorizedError(error)) {
-                    enqueueSnackbar('Unauthorized. Please login again.', { variant: 'error' });
-                } else {
-                    enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: 'error' });
+
+                return {
+                    id: f.id!,
+                    type,
+                };
+            });
+
+            const result = await workspaceService._deleteWorkspaceItems(token || "", currentWorkspace?.id || 1, {
+                items: deleteItems,
+                isHardDelete,
+            });
+
+            // ----------------
+            // STEP 6: Update UI after successful deletion
+            // ----------------
+            if (result && result.message === "Items deleted successfully") {
+                // Remove folders from tree
+                if (currentWorkspace) {
+                    const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
+                    const updatedItems = $removeItems(currentWorkspace.flatData, idsToRemove);
+
+                    setCurrentWorkspace({
+                        ...currentWorkspace,
+                        flatData: updatedItems,
+                    });
+
+                    // VS Code behavior: Select next item after deletion
+                    if (nextFolderIdToSelect !== null) {
+                        setSelectedItemIds([nextFolderIdToSelect]);
+                        setLastSelectedItemId(nextFolderIdToSelect);
+                    } else {
+                        setSelectedItemIds([]);
+                        setLastSelectedItemId(null);
+                    }
                 }
+
+                enqueueSnackbar(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`, { variant: "success" });
+            } else {
+                throw new Error("Failed to bulk delete folders");
             }
-        };
-
-        deleteItems();
+        } catch (error) {
+            // ----------------
+            // STEP 7: Handle errors
+            // ----------------
+            console.error("❌ Failed to bulk delete folders:", error);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+            } else {
+                enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: "error" });
+            }
+        }
     };
 
-    /**
-     * Handle delete with confirmation
-     */
-    const deleteConfirmation = useConfirmationPopover({
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-        confirmColor: 'destructive',
-        buttonVariant: 'default',
-        zIndex: 20000,
-    });
+    
 
     /**
-     * Wrapper for delete with confirmation popover
+     * DELETE / HARD DELETE / RESTORE
      */
-    const onDeleteItemClick = (event: any, isHardDelete: boolean = false) => {
+    const dhr_items = (event: any, isHardDelete: boolean = false) => {
+        // ----------------
+        // STEP 1: Validate context data and workspace root check
+        // ----------------
         if (!contextData) return;
 
         // Check if this is a workspace root node (negative ID)
         if (contextData.tagId < 0) {
-            console.warn('⚠️ Cannot delete workspace root node');
+            console.warn("⚠️ Cannot delete workspace root node");
             setIsContextMenuOpen(false);
             return;
         }
 
         setIsContextMenuOpen(false);
 
-        // Extract anchor element from menu event
+        // ----------------
+        // STEP 2: Extract anchor element for popover positioning
+        // ----------------
         const nativeEvent = event.syntheticEvent || event;
         const anchorElement = nativeEvent?.target as HTMLElement;
 
-        let message: string;
+        // ----------------
+        // STEP 3: Build confirmation message based on delete type and selection
+        // ----------------
+        const childCount = isMultipleSelected ? 0 : $countChildren(contextData);
+        const entityName = isMultipleSelected ? undefined : contextData.name;
+        
+        const confirmMsg = getConfirmMessage({
+            type: isHardDelete ? "hard-delete" : "soft-delete",
+            entityType: "folder",
+            count: selectedCount,
+            isMultiple: isMultipleSelected,
+            entityName,
+            childCount
+        });
 
-        if (isHardDelete) {
-            // Hard delete warning messages
-            if (isMultipleSelected) {
-                message = `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete ${selectedCount} selected folders and ALL their contents (notes, files, subfolders).\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
-            } else {
-                const countChildren = (tag: any): number => {
-                    if (!tag.children || tag.children.length === 0) return 0;
-                    return (
-                        tag.children.length +
-                        tag.children.reduce(
-                            (sum: number, child: any) => sum + countChildren(child),
-                            0
-                        )
-                    );
-                };
-
-                const childCount = countChildren(contextData);
-                message =
-                    childCount > 0
-                        ? `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ${childCount} child folder(s) with ALL their contents.\n\n❌ This action CANNOT be undone.\n❌ All notes, files, and subfolders will be LOST FOREVER.`
-                        : `⚠️ HARD DELETE WARNING\n\nThis will PERMANENTLY delete "${contextData.name}" and ALL its contents.\n\n❌ This action CANNOT be undone.\n❌ All data will be LOST FOREVER.`;
-            }
-        } else {
-            // Soft delete messages
-            if (isMultipleSelected) {
-                message = `Are you sure you want to delete ${selectedCount} selected folders?\n\nThis action cannot be undone.`;
-            } else {
-                const countChildren = (tag: any): number => {
-                    if (!tag.children || tag.children.length === 0) return 0;
-                    return (
-                        tag.children.length +
-                        tag.children.reduce(
-                            (sum: number, child: any) => sum + countChildren(child),
-                            0
-                        )
-                    );
-                };
-
-                const childCount = countChildren(contextData);
-                message =
-                    childCount > 0
-                        ? `Are you sure you want to delete "${contextData.name}"?\n\nThis will also delete ${childCount} child folder(s).`
-                        : `Are you sure you want to delete "${contextData.name}"?`;
-            }
-        }
-
-        deleteConfirmation.show({
+        // ----------------
+        // STEP 4: Show confirmation popover and handle user response
+        // ----------------
+        showConfirmation({
             anchorEl: anchorElement,
-            message,
+            title: confirmMsg.title,
+            subtitle: confirmMsg.subtitle,
+            confirmText: isHardDelete ? "Delete Permanently" : "Delete",
+            cancelText: "Cancel",
+            confirmColor: "destructive",
+            buttonVariant: "default",
+            zIndex: 20000,
             onConfirm: () => {
-                if (isMultipleSelected) {
-                    handleBulkDeleteFolders(selectedFolderIds, isHardDelete);
+                if (isHardDelete) {
+                    // Hard delete - use old API (TODO: implement batch hard delete later)
+                    if (isMultipleSelected) {
+                        __bulkDeleteFolders(selectedItemIds, isHardDelete);
+                    } else {
+                        __deleteItems(contextData, isHardDelete);
+                    }
                 } else {
-                    handleDeleteFolder(contextData, isHardDelete);
+                    // Soft delete/restore - use NEW batch API
+                    // Determine operation type based on current deletedAt status
+                    const isCurrentlyDeleted = contextData.deletedAt !== null && contextData.deletedAt !== undefined;
+                    const operationType: "soft-delete" | "restore" = isCurrentlyDeleted ? "restore" : "soft-delete";
+
+                    // For single item, pass the specific item ID; for multiple, use selected IDs
+                    const idsToProcess = isMultipleSelected ? selectedItemIds : [contextData.id];
+                    __deleteRestore_SelectedItems(idsToProcess, operationType);
                 }
             },
         });
     };
 
+    /**
+     * Delete/Restore selected workspace items using batch upsert API
+     * Follows __deleteRestore_SelectedNotes pattern from useNoteGrid.helper.ts
+     * Pattern: 100% follows NotesController batch pattern
+     */
+    const __deleteRestore_SelectedItems = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+        // ===== STEP 1: Get selected items (giống __deleteRestore_SelectedNotes) =====
+        const selectedIds = ids ?? selectedItemIds;
+        if (selectedIds.length === 0) {
+            console.warn("⚠️ No items selected");
+            return;
+        }
+
+        // ===== STEP 2: Validate tree data =====
+        if (!currentWorkspace?.flatData) {
+            console.error("❌ Cannot delete: no tree data");
+            return;
+        }
+
+        try {
+            const token = $user.userToken;
+
+            // ===== STEP 3: Filter to top-level parents only =====
+            const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
+            const topLevelIds = filterTopLevelParents(selectedIds, treeData);
+
+            console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
+
+            if (topLevelIds.length === 0) {
+                console.warn("⚠️ No valid items after filtering");
+                return;
+            }
+
+            // ===== STEP 4: Find items and skip workspace root =====
+            const selectedItems: WorkspaceItemV2[] = [];
+            for (const itemId of topLevelIds) {
+                const item = $findItemById(currentWorkspace.flatData, itemId);
+                if (item && item.id > 0) {
+                    // Skip workspace root (negative ID)
+                    selectedItems.push(item);
+                }
+            }
+
+            if (selectedItems.length === 0) {
+                console.warn("⚠️ No valid items to process");
+                return;
+            }
+
+            // ===== STEP 5: Only process selected items, no descendants =====
+            // Both DELETE and RESTORE: Only selected items, no cascade
+            // Backend will handle cascade delete if needed via database constraints
+            const allItemsToUpdate: WorkspaceItemV2[] = [...selectedItems];
+
+            // Remove duplicates
+            const uniqueItemsMap = new Map<number, WorkspaceItemV2>();
+            for (const item of allItemsToUpdate) {
+                uniqueItemsMap.set(item.id, item);
+            }
+            const itemsToUpdate = Array.from(uniqueItemsMap.values());
+
+            console.log(`📦 Collected ${itemsToUpdate.length} selected items (type: ${type})`);
+
+            // -------------------------------------------------------
+            // STEP 7: BUILD BATCH DELETE/RESTORE REQUESTS
+            // -------------------------------------------------------
+            // For each selected item, create a DELETE or RESTORE action
+            // - action: WorkspaceItemAction.Delete or WorkspaceItemAction.Restore
+            // - id: workspace_items.id (V2: item.id = workspace_items.id)
+            const batchRequests: UpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {
+                return {
+                    action: type === "soft-delete" ? WorkspaceItemAction.Delete : WorkspaceItemAction.Restore,
+                    id: item.id, // ✅ workspace_items.id
+                };
+            });
+
+            // ===== STEP 8: Call batch upsert API (giống __deleteRestore_SelectedNotes) =====
+            const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentWorkspace.id, batchRequests);
+
+            if (!result.success) {
+                throw new Error(result.message || "Batch update failed");
+            }
+
+            // ===== STEP 9: Post-processing (giống __deleteRestore_SelectedNotes) =====
+
+            if (type === "soft-delete") {
+                // Clean up open tabs (giống __deleteRestore_SelectedNotes)
+                // In V2: entityType is numeric: 2=folder, 3=note, 4=file
+                const folderIds = itemsToUpdate.filter((item) => item.entityType === 2).map((item) => item.id);
+                const noteIds = itemsToUpdate.filter((item) => item.entityType === 3).map((item) => item.id);
+                const fileIds = itemsToUpdate.filter((item) => item.entityType === 4).map((item) => item.id);
+
+                if (folderIds.length > 0) {
+                    processTabAfterDelete(folderIds, "folder");
+                }
+                if (noteIds.length > 0) {
+                    processTabAfterDelete(noteIds, "note");
+                }
+                if (fileIds.length > 0) {
+                    processTabAfterDelete(fileIds, "file");
+                }
+            }
+
+            // Reload workspace tree (giống __deleteRestore_SelectedNotes: await loadNotes())
+            const res = await workspaceService._getWorkspaceTreeV2(token ?? "", currentWorkspace.id);
+            if(res && res.success){
+                setCurrentWorkspace(res.object as WorkspaceDTO);
+                // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
+    
+                // Show success message
+                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
+            }
+            else {
+                throw new Error("Failed to reload workspace tree");
+            }
+
+        } catch (error) {
+            console.error("❌ Failed to update items:", error);
+            const errorMessage = await parseApiError(error);
+
+            if (isUnauthorizedError(error)) {
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+            } else {
+                enqueueSnackbar(`Failed to update items: ${errorMessage}`, { variant: "error" });
+            }
+        }
+    };
+
+    /**
+     * Helper: Recursively collect all descendants for workspace items
+     */
+    const $collectAllDescendants_WorkspaceItems = (item: WorkspaceItemV2): WorkspaceItemV2[] => {
+        const descendants: WorkspaceItemV2[] = [item];
+
+        // With V2 flat structure, find all descendants by traversing parentId relationships
+        const findDescendants = (parentId: number) => {
+            const children = currentWorkspace?.flatData.filter(i => i.parentId === parentId) || [];
+            for (const child of children) {
+                descendants.push(child);
+                // Recursively find descendants of this child
+                findDescendants(child.id);
+            }
+        };
+
+        findDescendants(item.id);
+        return descendants;
+    };
+
+    /**
+     * Helper: Find item by ID recursively in workspace tree
+     */
+    const $findItemById = (items: WorkspaceItemV2[], targetId: number): WorkspaceItemV2 | null => {
+        // With V2 flat structure, we can just find directly
+        return items.find(item => item.id === targetId) || null;
+    };
+/**
+     * Open popup to add existing notes to folder
+     */
+    const openAddExistingNotePopup = (folderData: any) => {
+        // Close context menu
+        setIsContextMenuOpen(false);
+
+        // Determine folder info
+        const folderId = folderData?.id; // workspace_items.id
+        const folderName = folderData?.name || folderData?.data?.name || "workspace root";
+        const folderEntityId = folderData?.entityId; // folder entity ID
+
+        if (!folderId) {
+            console.error("❌ Cannot open popup: missing folder ID");
+            enqueueSnackbar("Cannot open popup: missing folder information", { variant: "error" });
+            return;
+        }
+
+        // Open popup
+        openNoteGridPopup({
+            id: folderId,
+            name: folderName,
+            entityId: folderEntityId,
+        });
+    };
+
     return {
-        handleCreateItem,
-        handleEditItem,
-        onDeleteItemClick,
-        deleteConfirmation,
+        createFolder,
+        editFolder,
+        dhr_items,
+        createNewNote,
+        openAddExistingNotePopup,
     };
 };

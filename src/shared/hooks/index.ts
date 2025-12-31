@@ -3,5 +3,4 @@
  * Exports all shared hooks
  */
 
-export { useConfirmationPopover } from './useConfirmationPopover';
-export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from './useKeyboardShortcut';
+export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from "./useKeyboardShortcut";

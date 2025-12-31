@@ -24,7 +24,7 @@ Hệ thống layout linh hoạt giống VS Code, hỗ trợ chia/sắp xếp/res
 ### 4. NoteDetailPanelReal
 
 - Location: src/Components/Layout/NoteDetailPanelReal.tsx
-- Hiển thị/chỉnh sửa note detail, view/edit modes, dùng useNoteUIStore, mutations với useUpdateNote, metadata display.
+- Hiển thị/chỉnh sửa note detail, view/edit modes, dùng useNoteDetailStore, mutations với useUpdateNote, metadata display.
 
 ## Integration
 
@@ -34,7 +34,7 @@ Tích hợp Routes: path "/" và "/notes" dùng FlexibleLayout, "/tags" dùng Ta
 
 ### Provider Requirements
 
-QueryClientProvider, NoteUIProvider, TagUIProvider setup trong Main.tsx.
+QueryClientProvider, NoteDetailProvider, TagUIProvider setup trong Main.tsx.
 
 ## Usage Examples
 

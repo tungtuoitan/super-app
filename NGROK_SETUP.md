@@ -100,13 +100,14 @@ REACT_APP_GOOGLE_REDIRECT_URI=https://abc123.ngrok.io/auth/callback
 ```
 
 ### Backend `appsettings.json` (Temporary):
+
 ```json
 {
-  "OAuth": {
-    "Google": {
-      "RedirectUri": "https://abc123.ngrok.io/auth/callback"
+    "OAuth": {
+        "Google": {
+            "RedirectUri": "https://abc123.ngrok.io/auth/callback"
+        }
     }
-  }
 }
 ```
 
@@ -133,9 +134,9 @@ npm run build
 1. Upgrade to paid plan ($8/tháng)
 2. Reserve static domain
 3. Start tunnel với domain cố định:
-   ```bash
-   ngrok http 3000 --domain=superapp.ngrok.app
-   ```
+    ```bash
+    ngrok http 3000 --domain=superapp.ngrok.app
+    ```
 
 ---
 
@@ -157,24 +158,27 @@ npm run build
 
 ## 📊 So sánh Free Solutions
 
-| Solution | URL cố định? | HTTPS | Chi phí | Setup time |
-|----------|-------------|-------|---------|------------|
-| **ngrok (free)** | ❌ Thay đổi | ✅ Yes | Free | 5 phút |
-| **ngrok (paid)** | ✅ Static | ✅ Yes | $8/tháng | 5 phút |
-| **Cloudflare Tunnel** | ✅ Static | ✅ Yes | Free | 15 phút |
-| **Mua domain** | ✅ Static | ⚠️ Cần SSL | ~$10/năm | 30 phút |
+| Solution              | URL cố định? | HTTPS      | Chi phí  | Setup time |
+| --------------------- | ------------ | ---------- | -------- | ---------- |
+| **ngrok (free)**      | ❌ Thay đổi  | ✅ Yes     | Free     | 5 phút     |
+| **ngrok (paid)**      | ✅ Static    | ✅ Yes     | $8/tháng | 5 phút     |
+| **Cloudflare Tunnel** | ✅ Static    | ✅ Yes     | Free     | 15 phút    |
+| **Mua domain**        | ✅ Static    | ⚠️ Cần SSL | ~$10/năm | 30 phút    |
 
 ---
 
 ## 💡 Recommendation
 
 ### Để test nhanh (vài ngày):
+
 → **ngrok free tier** (đơn giản nhất)
 
 ### Để dùng lâu dài (free):
+
 → **Cloudflare Tunnel** (ổn định, miễn phí)
 
 ### Để production thực sự:
+
 → **Mua domain** + SSL certificate (professional)
 
 ---

@@ -3,8 +3,10 @@
  * Domain models and DTOs for the folder feature (workspace navigation)
  */
 
-// API Response DTO (from backend TagResponse - backend still uses "tag" terminology)
-// Backend returns: TagId, Name, Description, Color, CreatedAt, IsActive, Depth
+import type { FolderEntity } from "@/types/workspace-v2.types";
+
+// API Response DTO (from backend FolderResponse)
+// Backend returns: Id, Name, Description, Color, CreatedAt, IsActive, Depth
 export interface FolderDTO {
     name: string;
     description?: string;
@@ -14,7 +16,7 @@ export interface FolderDTO {
     depth?: number; // Depth in hierarchy (0 = root, 1 = child, etc.)
 }
 
-// API Response DTO for Folder Tree (from backend TagTreeResponse)
+// API Response DTO for Folder Tree (from backend FolderTreeResponse if exists, or WorkspaceItemResponse)
 export interface FolderTreeResponseDTO {
     userId: number;
     name: string;
@@ -32,25 +34,32 @@ export interface FolderTreeResponseDTO {
     isSelected: boolean;
 }
 
-// Domain model (what we use in app)
-export interface Folder {
-    id: number; // Primary key (maps to backend tagId)
-    name: string;
-    description?: string;
-    color?: string;
+/**
+ * Folder domain model (extends FolderEntity with UI state & business logic)
+ * Use this for in-app state management and UI components
+ */
+export interface Folder extends Omit<FolderEntity, 'userId' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+    // Override userId to optional (not always available when transforming from WorkspaceItem)
+    userId?: number;
+
+    // Override date types from ISO string to Date for domain model
     createdAt: Date;
+    updatedAt?: Date;
+    deletedAt?: Date | null;
+
+    // Business logic fields (not in entity)
     isActive: boolean;
     depth?: number; // Depth in hierarchy from backend (0 = root, 1 = child, etc.)
     parentId?: number | null; // Parent folder ID (null for root level)
 
-    // Frontend-only properties for tree UI and backward compatibility
+    // UI state fields (frontend-only)
     children?: Folder[]; // Child folders for tree structure
     isExpanded?: boolean; // For tree UI state
     isArchived?: boolean; // Computed from isActive (!isActive)
     noteCount?: number; // Number of notes in this folder
 }
 
-// Create request (matches backend CreateTagRequest - backend uses "tag")
+// Create request (matches backend CreateFolderRequest)
 export interface CreateFolderDTO {
     name: string;
     description?: string;
@@ -86,12 +95,12 @@ export interface GetFoldersParams {
     search?: string;
     parentId?: number; // For fetching children of specific folder
     isArchived?: boolean;
-    sortBy?: 'name' | 'createdAt' | 'updatedAt';
-    sortOrder?: 'asc' | 'desc';
+    sortBy?: "name" | "createdAt" | "updatedAt";
+    sortOrder?: "asc" | "desc";
 }
 
 // Layout types for FolderPage
-export type FolderLayoutType = 'grid' | 'tree' | 'card';
+export type FolderLayoutType = "grid" | "tree" | "card";
 
 // Tree node for FolderTree component
 export interface FolderTreeNode extends Folder {
@@ -129,7 +138,7 @@ export interface WorkspaceWithTreeDTO {
     isPublic: boolean;
     isTemplate: boolean;
     isArchived: boolean;
-    tagCount: number; // Backend field name
+    folderCount: number; // Backend field name (renamed from tagCount)
     noteCount: number;
     fileCount: number;
     memberCount: number;
@@ -153,16 +162,13 @@ export interface WorkspaceWithFolderTree {
     isPublic: boolean;
     isTemplate: boolean;
     isArchived: boolean;
-    folderCount: number; // Frontend field (maps to backend tagCount)
+    folderCount: number; // Maps to backend folderCount
     memberCount: number;
     settings?: string;
     createdAt: Date;
     updatedAt?: Date;
     folders: Folder[]; // Transformed folders
 
-    // DEPRECATED: Backward compatibility
-    tagCount: number; // Maps to backend tagCount
-    tags: Folder[]; // Alias for folders
 }
 
 // Folder with hierarchy path (for breadcrumbs, etc.)

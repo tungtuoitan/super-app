@@ -5,7 +5,7 @@
  * Navigation is handled by NavigationContext
  */
 
-import React, { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
+import React, { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
 export interface ActivityBarContextData {
     // Dialog states
@@ -14,9 +14,11 @@ export interface ActivityBarContextData {
     accountsOpen: boolean;
     setAccountsOpen: Dispatch<SetStateAction<boolean>>;
 
-    // Sidebar state
+    // Layout states
     isSideBarVisible: boolean;
     setIsSideBarVisible: Dispatch<SetStateAction<boolean>>;
+    isPanelVisible: boolean;
+    setIsPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
 
 export const activityBarContextDefaultValue: ActivityBarContextData = {
@@ -26,9 +28,11 @@ export const activityBarContextDefaultValue: ActivityBarContextData = {
     accountsOpen: false,
     setAccountsOpen: () => {},
 
-    // Sidebar state
+    // Layout states
     isSideBarVisible: true,
     setIsSideBarVisible: () => {},
+    isPanelVisible: true,
+    setIsPanelVisible: () => {},
 };
 
 const ActivityBarContext = createContext<ActivityBarContextData>(activityBarContextDefaultValue);
@@ -36,7 +40,7 @@ const ActivityBarContext = createContext<ActivityBarContextData>(activityBarCont
 export const useActivityBarStore = () => {
     const ctx = useContext(ActivityBarContext);
     if (!ctx) {
-        throw new Error('useActivityBarStore must be used within ActivityBarProvider');
+        throw new Error("useActivityBarStore must be used within ActivityBarProvider");
     }
     return ctx;
 };
@@ -46,8 +50,9 @@ export const ActivityBarProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [accountsOpen, setAccountsOpen] = useState(false);
 
-    // Sidebar state
+    // Layout states
     const [isSideBarVisible, setIsSideBarVisible] = useState(true);
+    const [isPanelVisible, setIsPanelVisible] = useState(true);
 
     return (
         <ActivityBarContext.Provider
@@ -58,9 +63,11 @@ export const ActivityBarProvider: React.FC<React.PropsWithChildren<unknown>> = (
                 accountsOpen,
                 setAccountsOpen,
 
-                // Sidebar state
+                // Layout states
                 isSideBarVisible,
                 setIsSideBarVisible,
+                isPanelVisible,
+                setIsPanelVisible,
             }}
         >
             {children}

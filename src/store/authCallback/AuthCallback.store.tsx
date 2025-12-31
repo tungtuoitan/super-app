@@ -3,7 +3,7 @@
  * Minimal UI state management for AuthCallback page
  */
 
-import React, { useContext, createContext, Dispatch, SetStateAction, useState } from 'react';
+import React, { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
 export interface AuthCallbackContextData {
     // Processing state
@@ -30,7 +30,7 @@ const AuthCallbackContext = createContext<AuthCallbackContextData>(authCallbackC
 export const useAuthCallbackStore = () => {
     const ctx = useContext(AuthCallbackContext);
     if (!ctx) {
-        throw new Error('useAuthCallbackStore must be used within AuthCallbackProvider');
+        throw new Error("useAuthCallbackStore must be used within AuthCallbackProvider");
     }
     return ctx;
 };
