@@ -207,6 +207,11 @@ div[role="tree"] > div {
   scrollbar-gutter: stable;
 }
 
+/* Disable vertical scrolling on workspace tree container khi Resize panel */
+div[data-workspace-tree="true"] {
+  overflow-y: hidden;
+}
+
 
 /* Debug border utilities - outside of @layer to ensure they apply */
 .bred {

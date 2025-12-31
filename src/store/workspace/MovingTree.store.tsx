@@ -35,6 +35,9 @@ export interface MovingTreeContextData {
     // Force tree re-render after drop operations
     treeRenderKey: number;
     setTreeRenderKey: Dispatch<SetStateAction<number>>;
+
+    dropZoneHeight: number;
+    setDropZoneHeight: Dispatch<SetStateAction<number>>;
 }
 
 // ========================================
@@ -66,6 +69,8 @@ const movingTreeContextDefaultValue: MovingTreeContextData = {
     // Force tree re-render
     treeRenderKey: 0,
     setTreeRenderKey: () => {},
+    dropZoneHeight: 0,
+    setDropZoneHeight: () => {},
 };
 
 const MovingTreeStore = createContext<MovingTreeContextData>(movingTreeContextDefaultValue);
@@ -105,6 +110,7 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
 
     // Force tree re-render
     const [treeRenderKey, setTreeRenderKey] = useState<number>(0);
+    const [dropZoneHeight, setDropZoneHeight] = React.useState(0);
 
     return (
         <MovingTreeStore.Provider
@@ -133,6 +139,9 @@ export const MovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 // Force tree re-render
                 treeRenderKey,
                 setTreeRenderKey,
+
+                dropZoneHeight,
+                setDropZoneHeight,
             }}
         >
             {children}

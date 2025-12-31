@@ -30,7 +30,8 @@
             "@/features/*": ["features/*"],
             "@/pages/*": ["pages/*"],
             "@/store/*": ["store/*"],
-            "@/styles/*": ["styles/*"]
+            "@/styles/*": ["styles/*"],
+            "@/HeadlessComponents/*": ["HeadlessComponents/*"]
         }
     },
     "include": ["src"]

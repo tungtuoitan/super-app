@@ -14,74 +14,14 @@ import { FileNode } from "./FileNode";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
+import {CalculateWorkspaceTreeContainerHeight} from "@/HeadlessComponents/CalculateWorkspaceTreeContainerHeight";
 
 export function WorkspaceTree() {
-    const { searchText, isDragging, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { searchText, isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef } = useWorkspaceStore();
     const { handleSelectionChange, handleKeyDown } = useTreeHelper2();
     const { handleMove } = useTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const manager = useDragDropManager();
-    const [containerHeight, setContainerHeight] = React.useState(800);
-
-    // Track container height to make Tree component responsive
-    useEffect(() => {
-        const updateHeight = () => {
-            if (treeContainerRef.current) {
-                const height = treeContainerRef.current.clientHeight;
-                // Ensure height is always a valid number
-                if (height && typeof height === "number" && height > 0) {
-                    setContainerHeight(height);
-                }
-            }
-        };
-
-        // Initial height with delay to ensure DOM is ready
-        setTimeout(updateHeight, 100);
-
-        // Observe container size changes
-        const resizeObserver = new ResizeObserver(updateHeight);
-        if (treeContainerRef.current) {
-            resizeObserver.observe(treeContainerRef.current);
-        }
-
-        // Also listen to window resize
-        window.addEventListener("resize", updateHeight);
-
-        return () => {
-            resizeObserver.disconnect();
-            window.removeEventListener("resize", updateHeight);
-        };
-    }, []);
-
-    // Add global styles for drop zone indicator
-    useEffect(() => {
-        const styleId = "drop-zone-styles";
-        if (!document.getElementById(styleId)) {
-            const style = document.createElement("style");
-            style.id = styleId;
-            style.textContent = `
-                /* Drop zone indicator - show blue line when dragging over */
-                .drop-zone-root[data-dragging-over="true"] .drop-indicator {
-                    background-color: #007ACC !important;
-                }
-                
-                /* React-arborist may add drop-target class or data attribute */
-                [data-drop-target="true"] .drop-zone-root .drop-indicator,
-                .drop-target .drop-zone-root .drop-indicator {
-                    background-color: #007ACC !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        return () => {
-            const style = document.getElementById(styleId);
-            if (style) {
-                style.remove();
-            }
-        };
-    }, []);
 
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
@@ -221,6 +161,7 @@ export function WorkspaceTree() {
                 onContextMenu={handleContainerContextMenu}
                 className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
+                <CalculateWorkspaceTreeContainerHeight />
                 {/* Loading overlay when dragging */}
                 {isDragging && (
                     <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">

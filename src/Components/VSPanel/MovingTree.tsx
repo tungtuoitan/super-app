@@ -15,9 +15,10 @@ import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2, Workspa
 import { constants } from "@/utils/constants";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useMovingTreeHelper } from "@/hooks/workspace/useMovingTree.helper";
+import {CalculateMovingTreeDropZoneHeight} from "HeadlessComponents/CalculateMovingTreeDropZoneHeight";
 
 export function MovingTree() {
-    const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey } = useMovingTreeStore();
+    const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight } = useMovingTreeStore();
     const { dropToMovingTree } = useMovingTreeHelper();
     const manager = useDragDropManager();
 
@@ -71,56 +72,9 @@ export function MovingTree() {
         return baseTree;
     }, [targetWorkspace]);
 
-    // Calculate drop zone height = remaining space in container
-    const [dropZoneHeight, setDropZoneHeight] = React.useState(0);
-
-    useEffect(() => {
-        const calculateDropZoneHeight = () => {
-            const ROW_HEIGHT = 32;
-
-            if (!targetTreeData || targetTreeData.length === 0) {
-                setDropZoneHeight(0);
-                return;
-            }
-
-            // Count visible nodes (excluding drop zone)
-            // Since MovingTree doesn't have multi-level expansion state tracking,
-            // we'll estimate based on openByDefault=true
-            let visibleCount = 0;
-
-            const countVisibleNodes = (nodes: TreeFolder[]): number => {
-                let count = 0;
-                for (const node of nodes) {
-                    const entityId = (node.data as any)?.entityId;
-
-                    // Skip drop zone itself
-                    if (entityId === constants.workspace.dropZone.entityId) {
-                        continue;
-                    }
-
-                    count++; // Count this node
-
-                    // Count children (all are visible since openByDefault=true)
-                    if (node.children && node.children.length > 0) {
-                        count += countVisibleNodes(node.children);
-                    }
-                }
-                return count;
-            };
-
-            visibleCount = countVisibleNodes(targetTreeData);
-
-            const actualTreeHeight = (visibleCount + 1) * ROW_HEIGHT; // +1 for Root Node
-            const remaining = containerHeight - actualTreeHeight;
-
-            setDropZoneHeight(Math.max(remaining, 0));
-        };
-
-        calculateDropZoneHeight();
-    }, [targetTreeData, containerHeight]);
-
     return (
         <div ref={treeContainerRef} className="h-full pl-4 py-2">
+            <CalculateMovingTreeDropZoneHeight targetTreeData={targetTreeData} />
             <Tree
                 key={treeRenderKey}
                 data={targetTreeData}

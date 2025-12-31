@@ -7,6 +7,7 @@
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 import type { WsResponse } from "@/types/workspace.types";
 import type { WorkspaceDTO } from "@/types/workspace-dto.types";
+import type { TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 
 export interface WorkspaceContextData {
     // Workspace state
@@ -39,6 +40,15 @@ export interface WorkspaceContextData {
     _treeRef: React.RefObject<any>;
     selectedWorkspaceId: number | null;
     setSelectedWorkspaceId: Dispatch<SetStateAction<number | null>>;
+
+    // WorkspaceTree state for height calculations and drop zone
+    treeContainerRef: React.RefObject<HTMLDivElement>;
+    containerHeight: number;
+    setContainerHeight: Dispatch<SetStateAction<number>>;
+    dropZoneHeight: number;
+    setDropZoneHeight: Dispatch<SetStateAction<number>>;
+    treeData: TreeFolder[];
+    setTreeData: Dispatch<SetStateAction<TreeFolder[]>>;
 }
 
 export const workspaceContextDefaultValue: WorkspaceContextData = {
@@ -65,6 +75,15 @@ export const workspaceContextDefaultValue: WorkspaceContextData = {
     _treeRef: { current: null },
     selectedWorkspaceId: null,
     setSelectedWorkspaceId: () => {},
+
+    // WorkspaceTree state defaults
+    treeContainerRef: { current: null },
+    containerHeight: 800,
+    setContainerHeight: () => {},
+    dropZoneHeight: 0,
+    setDropZoneHeight: () => {},
+    treeData: [],
+    setTreeData: () => {},
 };
 
 export const WorkspaceStore = createContext<WorkspaceContextData>(workspaceContextDefaultValue);
@@ -88,6 +107,12 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const _treeRef = useRef<any>(null);
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<number | null>(null);
+    
+    // WorkspaceTree state
+    const treeContainerRef = useRef<HTMLDivElement>(null);
+    const [containerHeight, setContainerHeight] = useState<number>(800);
+    const [dropZoneHeight, setDropZoneHeight] = useState<number>(0);
+    const [treeData, setTreeData] = useState<TreeFolder[]>([]);
     
 
     return (
@@ -116,6 +141,15 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 _treeRef,
                 selectedWorkspaceId,
                 setSelectedWorkspaceId,
+
+                // WorkspaceTree state
+                treeContainerRef,
+                containerHeight,
+                setContainerHeight,
+                dropZoneHeight,
+                setDropZoneHeight,
+                treeData,
+                setTreeData,
             }}
         >
             {children}
