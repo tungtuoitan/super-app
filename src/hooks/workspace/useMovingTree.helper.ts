@@ -285,7 +285,22 @@ export const useMovingTreeHelper = () => {
                 // STEP 6: Build batch requests for MOVECROSS action
                 // Use targetId (from drop position) instead of state
                 // Only move top-level parents - children will follow automatically
-                const requests: UpsertWorkspaceItemRequest[] = topLevelItemIds.map((itemId: number) => ({
+                // check if any items are already in target workspace
+                const itemsToMove = topLevelItemIds.filter((itemId: number) => {
+                    const item = currentWorkspace?.flatData.find((fd) => fd.id === itemId);
+                    if (item && item.workspaceId === targetWorkspaceId) {
+                        console.warn(`Item ${itemId} already in target workspace ${targetWorkspaceId}, skipping`);
+                        return false; // Skip this item
+                    }
+                    return true;
+                });
+
+                if (itemsToMove.length < topLevelItemIds.length) {
+                    enqueueSnackbar("Some items were already in the target workspace and were skipped", { variant: "warning" });
+                    return;
+                }
+
+                const requests: UpsertWorkspaceItemRequest[] = itemsToMove.map((itemId: number) => ({
                     action: WorkspaceItemAction.MoveCross,
                     id: itemId,
                     workspaceId: targetWorkspaceId,
@@ -296,12 +311,15 @@ export const useMovingTreeHelper = () => {
                 const result = await workspaceService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
 
                 if (result.success) {
-                    enqueueSnackbar(`Moved ${itemIds.length} item(s) to target workspace`, { variant: "success" });
+                    enqueueSnackbar(`Moved ${itemsToMove.length} item(s) to target workspace`, { variant: "success" });
 
-                    // STEP 8: Reload current workspace tree
+                    // STEP 8: Clear selection immediately (items no longer in this workspace)
+                    setSelectedItemIds([]);
+
+                    // STEP 9: Reload current workspace tree (to remove moved items from source)
                     await loadTree();
 
-                    // STEP 9: Reload target workspace tree and re-detect duplicates
+                    // STEP 10: Reload target workspace tree (to show moved items in target)
                     await loadTargetWorkspaceTree();
 
                     // Success - drag state will be cleared automatically
