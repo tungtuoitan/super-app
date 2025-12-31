@@ -9,7 +9,6 @@ import { noteService } from "@/services/note.service";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
 import { useAuthStore } from "@/store/index";
 import { useStandardRegistryStore } from "@/store/index";
@@ -36,7 +35,6 @@ export function useNoteGridTableHelper(disabledRowIds?: Set<number>) {
         containerWidth,
     } = useNoteGridStore();
 
-    const { searchQuery } = useGridControlStore();
     const { registries } = useStandardRegistryStore();
 
     // Calculate which optional columns to show based on container width
@@ -171,24 +169,9 @@ export function useNoteGridTableHelper(disabledRowIds?: Set<number>) {
         return [...baseColumns, ...optionalColumns];
     }, [containerWidth, showStatusColumn, showCreatedDateColumn, showDeletedColumn, registries]);
 
-    // Filter data by search query
-    const filteredData = useMemo(() => {
-        if (!searchQuery) {
-            return notes;
-        }
-        const query = searchQuery.toLowerCase();
-        return notes.filter(
-            (note) =>
-                note.name?.toLowerCase().includes(query) ||
-                note.description?.toLowerCase().includes(query) ||
-                note.type?.toLowerCase().includes(query) ||
-                String(note.id).includes(query)
-        );
-    }, [notes, searchQuery]);
-
     // Create table instance
     const table = useReactTable({
-        data: filteredData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        data: notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),

@@ -12,9 +12,11 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabsStore, useNavigationHistoryStore, useStandardRegistryStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
+    const { searchQuery } = useGridControlStore();
 
     const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection, noteGridPagination, setNoteGridPagination, setTotalCount } = useNoteGridStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -235,6 +237,7 @@ export const useNoteGridHelper = () => {
 
             // Build filter params for API
             const filterParams = {
+                searchText: searchQuery || undefined,
                 statusCode: noteGridFilters?.statusCode,
                 deletedAt: noteGridFilters?.deletedAt,
                 createdAtFrom: createdAtRange.from,

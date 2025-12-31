@@ -62,7 +62,7 @@ export function MovingTab() {
     });
 
     return (
-        <div className="h-full flex overflow-hidden bred" ref={treeContainerRef} data-workspace-tree="true">
+        <div className="h-full flex overflow-hidden" ref={treeContainerRef} data-workspace-tree="true">
             <CalculateMovingTreeContainerHeight />
             {/* Left Panel - Workspace Selector & Status */}
             <div className="w-1/2 flex flex-col border-r border-editor-border">
@@ -96,7 +96,7 @@ export function MovingTab() {
             </div>
 
             {/* Right Panel - Tree View */}
-            <div ref={drop} className={`w-5/6 flex flex-col overflow-hidden relative bblue`}>
+            <div ref={drop} className={`w-5/6 flex flex-col overflow-hidden relative`}>
                 {isLoadingTargetTree ? (
                     <div className="h-full flex items-center justify-center">
                         <Loader2 className="w-6 h-6 text-primary animate-spin" />

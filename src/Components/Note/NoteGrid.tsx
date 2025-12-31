@@ -25,7 +25,7 @@ export function NoteGrid({ disabledRowIds }: { disabledRowIds?: Set<number> } = 
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { $user } = useAuthStore();
     const { table } = useNoteGridTableHelper(disabledRowIds);
-    const { filterViewKey } = useGridControlStore();
+    const { filterViewKey, searchQuery } = useGridControlStore();
     const { openTabs, activeTabId } = useEditorTabsStore();
 
     // Update container width on resize
@@ -50,7 +50,7 @@ export function NoteGrid({ disabledRowIds }: { disabledRowIds?: Set<number> } = 
         }
         // Load with current pagination state from store
         loadNotes();
-    }, [$user.userId, $user.filters, filterViewKey, noteGridPagination.pageIndex, noteGridPagination.pageSize]);
+    }, [$user.userId, $user.filters, filterViewKey, noteGridPagination.pageIndex, noteGridPagination.pageSize, searchQuery]);
 
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">

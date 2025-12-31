@@ -73,7 +73,7 @@ export function MovingTree() {
     }, [targetWorkspace]);
 
     return (
-        <div ref={treeContainerRef} className="h-full pl-4 py-2 bgreen">
+        <div ref={treeContainerRef} className="h-full pl-4 py-2">
             <CalculateMovingTreeDropZoneHeight
                 treeData={targetTreeData}
                 containerHeight={containerHeight}

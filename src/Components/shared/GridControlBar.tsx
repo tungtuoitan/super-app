@@ -3,7 +3,7 @@
  * Used in VSSideBar header to control active grid
  */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/Components/ui/input";
 import { Button } from "@/Components/ui/button";
@@ -12,6 +12,27 @@ import { useGridControlStore } from "@/store/grid/useGridControl.store";
 
 export function GridControlBar() {
     const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useGridControlStore();
+    const [inputValue, setInputValue] = useState(searchQuery);
+
+    // Sync inputValue with searchQuery from store
+    useEffect(() => {
+        setInputValue(searchQuery);
+    }, [searchQuery]);
+
+    const handleSearch = () => {
+        setSearchQuery(inputValue);
+    };
+
+    const handleClear = () => {
+        setInputValue("");
+        setSearchQuery("");
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            handleSearch();
+        }
+    };
 
     return (
         <div className="flex items-center gap-2">
@@ -21,13 +42,14 @@ export function GridControlBar() {
                 <Input
                     type="text"
                     placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className="!outline-none !ring-0 h-7 w-[160px] pl-7 pr-7 text-xs bg-editor-bg ring-0 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none"
                     style={{ outline: "none" }}
                 />
-                {searchQuery && (
-                    <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")} className="absolute right-0 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent">
+                {inputValue && (
+                    <Button variant="ghost" size="sm" onClick={handleClear} className="absolute right-0 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent">
                         <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                     </Button>
                 )}
