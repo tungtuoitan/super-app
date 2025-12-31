@@ -3,6 +3,10 @@ import { X, FileText, Folder } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
+import { useWsStore } from "@/store/ws/useWs.store";
 
 /**
  * Get icon component based on tab type
@@ -24,6 +28,44 @@ function getTabIcon(type: string) {
 export function TabBar() {
     const { openTabs, activeTabId, isLoadingTabs } = useEditorTabsStore();
     const { closeTab, updateActiveTab } = useEditorTabHelper();
+    const { currentWorkspace } = useWorkspaceStore();
+    const { moduleName } = useGridControlStore();
+    const { notes } = useNoteGridStore();
+    const { workspaces } = useWsStore();
+
+    /**
+     * Check if tab exists in current module's data source
+     * Based on moduleName (Note/Workspace/Ws) and corresponding data
+     */
+    const isInCurrentModule = (tab: any) => {
+        // Check based on moduleName from GridControl
+        if (moduleName === constants.modules.note) {
+            // NoteGrid view - check if note exists in notes array
+            if (tab.type === constants.vscode.tab.tabTypes.note) {
+                const note = tab.data;
+                return notes.some(n => n.id === note.id);
+            }
+        } else if (moduleName === constants.modules.ws) {
+            // WsGrid view - check if workspace exists in workspaces array
+            if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+                const ws = tab.data;
+                return workspaces.some(w => w.id === ws.id);
+            }
+        } else if (moduleName === constants.modules.workspace) {
+            // Workspace tree view - check if note/workspace exists in currentWorkspace.flatData
+            if (!currentWorkspace?.flatData) return false;
+            
+            if (tab.type === constants.vscode.tab.tabTypes.note) {
+                const note = tab.data;
+                return currentWorkspace.flatData.some(item => item.entityType === 3 && item.entityId === note.id);
+            } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+                const ws = tab.data;
+                return ws.id === currentWorkspace.id;
+            }
+        }
+
+        return false;
+    };
 
     const handleCloseTab = (event: React.MouseEvent, tabId: string) => {
         event.stopPropagation();
@@ -53,7 +95,7 @@ export function TabBar() {
                     border-r border-b
                     ${
                         activeTabId === tab.id
-                            ? "bg-editor-bg text-editor-fg border-b-transparent border-t-2 border-t-blue-500"
+                            ? `bg-editor-bg text-editor-fg border-b-transparent border-t-2 ${isInCurrentModule(tab) ? "border-t-blue-500" : "border-t-gray-400"}`
                             : "bg-transparent text-muted-foreground  border-t border-t-transparent text-gray-600"
                     }
                   `}

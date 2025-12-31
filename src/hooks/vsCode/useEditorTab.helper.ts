@@ -8,6 +8,7 @@ import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsStore, Ws } from "@/store/ws/useWs.store";
 import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
 import { useWorkspaceStore } from "@/store/index";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -16,8 +17,8 @@ export const useEditorTabHelper = () => {
     const { originalWsRef } = useWsDetailStore();
     const { setSelectedWs } = useWsStore();
     const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
-    const { currentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
-
+    const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
+    const { moduleName } = useGridControlStore();
     /**
      * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
      * @param entityType - 2 (folder), 3 (note), 4 (file)
@@ -31,9 +32,7 @@ export const useEditorTabHelper = () => {
         }
 
         // Tìm trong flatData dựa trên entityType và entityId
-        const item = currentWorkspace.flatData.find(
-            (item) => item.entityType === entityType && item.entityId === entityId
-        );
+        const item = currentWorkspace.flatData.find((item) => item.entityType === entityType && item.entityId === entityId);
 
         if (item) {
             console.log(`✅ Found workspace item: entityType=${entityType}, entityId=${entityId}, workspaceItemId=${item.id}`);
@@ -78,11 +77,11 @@ export const useEditorTabHelper = () => {
                         // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
                         console.log("🔓 Opening parents first using TreeApi...");
                         _treeRef.current.openParents(workspaceItemId.toString());
-                        
+
                         // Scroll to node để đảm bảo nó visible
                         console.log("📦 Scrolling to node...");
                         _treeRef.current.scrollTo(workspaceItemId.toString());
-                        
+
                         // Bây giờ get node sau khi parents đã expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
@@ -91,7 +90,7 @@ export const useEditorTabHelper = () => {
                                 isOpen: node.isOpen,
                                 level: node.level,
                                 parent: node.parent?.id,
-                                isInternal: node.isInternal
+                                isInternal: node.isInternal,
                             });
                             console.log("✅ Now focusing...");
                             // Use focus() to scroll the node into view (react-arborist API)
@@ -126,11 +125,11 @@ export const useEditorTabHelper = () => {
                         // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
                         console.log("🔓 Opening parents first using TreeApi...");
                         _treeRef.current.openParents(workspaceItemId.toString());
-                        
+
                         // Scroll to node để đảm bảo nó visible
                         console.log("📦 Scrolling to node...");
                         _treeRef.current.scrollTo(workspaceItemId.toString());
-                        
+
                         // Bây giờ get node sau khi parents đã expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
@@ -139,7 +138,7 @@ export const useEditorTabHelper = () => {
                                 isOpen: node.isOpen,
                                 level: node.level,
                                 parent: node.parent?.id,
-                                isInternal: node.isInternal
+                                isInternal: node.isInternal,
                             });
                             console.log("✅ Now focusing...");
                             // Use focus() to scroll the node into view (react-arborist API)
@@ -250,6 +249,15 @@ export const useEditorTabHelper = () => {
             // Remove temporary notes (negative ID) from grid
             if (noteData.id < 0) {
                 setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteData.id));
+                if (moduleName === constants.modules.workspace) {
+                    setCurrentWorkspace((prevWs) => {
+                        if (!prevWs || !prevWs.flatData) return prevWs;
+                        return {
+                            ...prevWs,
+                            flatData: prevWs.flatData.filter((item) => !(item.entityType === 3 && item.entityId === noteData.id)),
+                        };
+                    });
+                }
             }
 
             // Additional note-specific cleanup can go here...
@@ -286,7 +294,6 @@ export const useEditorTabHelper = () => {
             }
         }
     };
-
 
     // ================================================================
     // CONVENIENCE METHODS - Specific tab type openers
@@ -352,15 +359,15 @@ export const useEditorTabHelper = () => {
         setOpenTabs(newTabs);
 
         // 2. Clean navigation history - remove entries with deleted noteIds
-        let cleanedPast = past.filter(entry => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
-        let cleanedFuture = future.filter(entry => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
+        let cleanedPast = past.filter((entry) => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
+        let cleanedFuture = future.filter((entry) => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
 
         // 3. Remove duplicate adjacent entries and filter out invalid itemIds (id <= 0)
-        cleanedPast = removeDuplicateAdjacentEntries(cleanedPast).filter(entry => {
+        cleanedPast = removeDuplicateAdjacentEntries(cleanedPast).filter((entry) => {
             const itemIdNum = parseInt(entry.itemId);
             return !isNaN(itemIdNum) && itemIdNum > 0;
         });
-        cleanedFuture = removeDuplicateAdjacentEntries(cleanedFuture).filter(entry => {
+        cleanedFuture = removeDuplicateAdjacentEntries(cleanedFuture).filter((entry) => {
             const itemIdNum = parseInt(entry.itemId);
             return !isNaN(itemIdNum) && itemIdNum > 0;
         });
