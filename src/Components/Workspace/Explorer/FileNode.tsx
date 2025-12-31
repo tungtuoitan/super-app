@@ -2,6 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
@@ -10,6 +11,7 @@ import { WorkspaceFileItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { StatusDot } from "./StatusDot";
+import { HighlightText } from "./HighlightText";
 
 function getFileIcon(extension?: string) {
     if (!extension) return File;
@@ -49,6 +51,7 @@ interface FileNodeProps {
 
 export function FileNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FileNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { searchQuery } = useGridControlStore();
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
@@ -200,9 +203,11 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
 
                 {/* File Info */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
-                    <span className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
-                        {fileItem.data.name}
-                    </span>
+                    <HighlightText
+                        text={fileItem.data.name}
+                        highlight={treeType === "workspaceTree" ? searchQuery : ""}
+                        className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}
+                    />
                     {fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
                     <StatusDot
                         isUnsaved={isUnsaved}

@@ -2,12 +2,14 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { HighlightText } from "./HighlightText";
 
 interface FolderNodeProps {
     node: NodeApi<TreeFolder>;
@@ -19,6 +21,7 @@ interface FolderNodeProps {
 
 export function FolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FolderNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { searchQuery } = useGridControlStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();
@@ -226,7 +229,10 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
                 {/* Folder Info */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                     <div className="w-full min-w-0 flex items-center gap-2">
-                        <span
+                        <HighlightText
+                            text={`${folderName}`}
+                            // text={`${folderName} - ${workspaceItemId} - ${entityId}`}
+                            highlight={treeType === "workspaceTree" ? searchQuery : ""} // Only highlight in workspaceTree, tạm thời chưa làm cho targetTree có search
                             className={`
                             text-sm truncate
                             ${hasChildren ? "font-semibold" : "font-normal"}
@@ -234,9 +240,7 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
                             ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}
                             ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
                         `}
-                        >
-                            {folderName} - {workspaceItemId} - {entityId}
-                        </span>
+                        />
                     </div>
                 </div>
             </div>

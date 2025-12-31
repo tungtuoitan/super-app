@@ -2,12 +2,14 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { FolderItem } from "@/types/workspace.types";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
+import { HighlightText } from "./HighlightText";
 
 interface RootFolderNodeProps {
     node: NodeApi<TreeFolder>;
@@ -23,6 +25,7 @@ interface RootFolderNodeProps {
  */
 export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: RootFolderNodeProps) {
     const { currentWorkspace } = useWorkspaceStore();
+    const { searchQuery } = useGridControlStore();
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
@@ -90,7 +93,11 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
 
             {/* Workspace Name */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate">{folderItem.name}</span>
+                <HighlightText
+                    text={folderItem.name}
+                    highlight={treeType === "workspaceTree" ? searchQuery : ""}
+                    className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate"
+                />
             </div>
 
             {/* Action Buttons - Hidden by default, shown on hover - Only for workspaceTree */}

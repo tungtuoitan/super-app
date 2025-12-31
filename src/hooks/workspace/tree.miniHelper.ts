@@ -89,6 +89,69 @@ export function $filterTreeBySearch(nodes: Folder[], searchText: string): Folder
 }
 
 /**
+ * Recursive filter TreeFolder by search text (V2 structure)
+ * Includes node if it matches OR any descendant matches
+ * Shows matching nodes WITH all their ancestors (parent, grandparent, etc.)
+ *
+ * Search modes (configured in constants.workspace.search.mode):
+ * - "showAllDescendants": When node X matches → show X + ALL children/grandchildren
+ * - "exactMatchOnly": When node X matches → show only X (hide children unless they also match)
+ *
+ * @param nodes - TreeFolder array to filter
+ * @param searchText - Search text to match against node names
+ * @returns Filtered tree with matching nodes and their ancestors
+ */
+export function $filterTreeBySearchV2(nodes: TreeFolder[], searchText: string): TreeFolder[] {
+    if (!searchText || !searchText.trim()) return nodes;
+
+    const query = searchText.toLowerCase().trim();
+    const searchMode = constants.workspace.search.mode;
+    const results: TreeFolder[] = [];
+
+    for (const node of nodes) {
+        // Check if current node matches search
+        const matchesSearch = node.name?.toLowerCase().includes(query);
+
+        // Recursively filter children
+        const filteredChildren = node.children && node.children.length > 0
+            ? $filterTreeBySearchV2(node.children, searchText)
+            : [];
+
+        const hasMatchingDescendant = filteredChildren.length > 0;
+
+        // Include node if:
+        // 1. Node itself matches search, OR
+        // 2. Any descendant matches (to show ancestors)
+        if (matchesSearch || hasMatchingDescendant) {
+            // Determine which children to include based on search mode
+            let childrenToInclude: TreeFolder[];
+
+            if (matchesSearch) {
+                // Current node matches search
+                if (searchMode === "showAllDescendants") {
+                    // Mode 1: Show ALL children/grandchildren (original tree structure)
+                    childrenToInclude = node.children || [];
+                } else {
+                    // Mode 2: Only show children that also match search
+                    childrenToInclude = filteredChildren;
+                }
+            } else {
+                // Current node doesn't match, but descendant does
+                // Always show filtered children (to maintain path to matching nodes)
+                childrenToInclude = filteredChildren;
+            }
+
+            results.push({
+                ...node,
+                children: childrenToInclude,
+            });
+        }
+    }
+
+    return results;
+}
+
+/**
  * Recursive transform WorkspaceItem to Folder
  * Only transforms FolderItem - notes and files return null
  */
@@ -428,7 +491,12 @@ export function transformToTreeData(
     const v2Items = data.flatData;
 
     // Build tree structure from flat V2 list
-    const treeRoots = buildTreeFromV2Items(v2Items);
+    let treeRoots = buildTreeFromV2Items(v2Items);
+
+    // Filter by search text if provided
+    if (searchText && searchText.trim()) {
+        treeRoots = $filterTreeBySearchV2(treeRoots, searchText);
+    }
 
     // Create workspace root node from WorkspaceDTO
     const workspaceRootV2: TreeFolder = {
@@ -476,6 +544,7 @@ export const treeMiniHelper = {
     $checkSubtree,
     $findFolderById,
     $filterTreeBySearch,
+    $filterTreeBySearchV2,
     $transformItemToFolder,
     isDescendant,
     getAllVisibleFolderIds,

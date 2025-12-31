@@ -67,6 +67,18 @@ export const constants = {
             workspaceItemId: -23456, // workspace_items.id for drop zone
             entityId: -23456,        // folders.id for drop zone (same value for simplicity)
         },
+
+        // Search behavior configuration
+        search: {
+            /**
+             * Search mode for tree filtering
+             * - "showAllDescendants": When folder X matches search, show X + all its children/grandchildren
+             * - "exactMatchOnly": When folder X matches search, show only X (hide children unless they also match)
+             *
+             * Default: "showAllDescendants"
+             */
+            mode: "showAllDescendants" as "showAllDescendants" | "exactMatchOnly",
+        },
     },
 
     contextMenu: {

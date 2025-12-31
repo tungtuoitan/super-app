@@ -3,6 +3,7 @@ import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -18,7 +19,8 @@ import { CalculateWorkspaceTreeContainerHeight } from "@/HeadlessComponents/Calc
 import { CalculateWorkspaceTreeDropZoneHeight } from "@/HeadlessComponents/CalculateWorkspaceTreeDropZoneHeight";
 
 export function WorkspaceTree() {
-    const { searchText, isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight } = useWorkspaceStore();
+    const { isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight } = useWorkspaceStore();
+    const { searchQuery } = useGridControlStore();
     const { handleSelectionChange, handleKeyDown } = useTreeHelper2();
     const { handleMove } = useTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -27,7 +29,7 @@ export function WorkspaceTree() {
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
     const treeData = useMemo(() => {
-        const baseTree = treeMiniHelper.transformToTreeData(currentWorkspace, searchText);
+        const baseTree = treeMiniHelper.transformToTreeData(currentWorkspace, searchQuery);
 
         // Add invisible drop zone at the end to catch drops to root level
         if (baseTree.length > 0 && currentWorkspace?.id) {
@@ -72,7 +74,7 @@ export function WorkspaceTree() {
         }
 
         return baseTree;
-    }, [currentWorkspace, searchText]);
+    }, [currentWorkspace, searchQuery]);
 
     // Keep original treeData for tree structure (including root)
     // Root will be hidden via CSS, not by removing from data

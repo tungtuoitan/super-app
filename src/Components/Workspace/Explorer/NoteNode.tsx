@@ -2,6 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { FileText, ArrowUpRight } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -12,6 +13,7 @@ import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { StatusDot } from "./StatusDot";
+import { HighlightText } from "./HighlightText";
 
 interface NoteNodeProps {
     node: NodeApi<TreeFolder>;
@@ -23,6 +25,7 @@ interface NoteNodeProps {
 
 export function NoteNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: NoteNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef } = useWorkspaceStore();
+    const { searchQuery } = useGridControlStore();
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
@@ -55,11 +58,10 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
         e.stopPropagation();
         e.preventDefault();
 
-
         // Focus the tree container for keyboard navigation
         const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
         treeContainer?.focus();
-        if(treeType === "targetTree") return; // Disable opening tab in targetTree
+        if (treeType === "targetTree") return; // Disable opening tab in targetTree
 
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
@@ -115,8 +117,6 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
             setLastSelectedItemId(workspaceItemId);
             node.select();
 
-            
-
             // ✅ Open note in editor tab (convert WorkspaceNoteItem to Note)
             const note: Note = {
                 id: noteItem.data.id,
@@ -138,7 +138,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     const handleRightClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        if(treeType === "targetTree") return; // Disable context menu in targetTree
+        if (treeType === "targetTree") return; // Disable context menu in targetTree
 
         const _currentItem = currentWorkspace?.flatData.find((i: any) => i.entityId === entityId);
 
@@ -188,17 +188,15 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
 
                 {/* Note Info */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
-                    <span className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}>
-                        {noteItem.data.name} - {noteItem.id} - {entityId}
-                    </span>
-                    {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
-                    <StatusDot
-                        isUnsaved={isUnsaved}
-                        isDuplicate={isDuplicate}
-                        itemType="Note"
-                        itemName={noteItem.data.name}
-                        targetWorkspaceName={targetWorkspace?.name}
+                    <HighlightText
+                        text={noteItem.data.name}
+                        highlight={ treeType === "workspaceTree" ? searchQuery : ""}
+                        className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${
+                            _ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""
+                        }`}
                     />
+                    {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
+                    <StatusDot isUnsaved={isUnsaved} isDuplicate={isDuplicate} itemType="Note" itemName={noteItem.data.name} targetWorkspaceName={targetWorkspace?.name} />
                 </div>
             </div>
         </div>
