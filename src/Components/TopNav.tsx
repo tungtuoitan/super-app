@@ -33,8 +33,8 @@ export function TopNav() {
     };
 
     return (
-        <div className="top-navigation flex-grow bg-black h-[36px] z-[10000000000] sticky top-0">
-            <nav className="bg-[#1B1D23] sticky top-0 h-[36px] flex items-center px-4 gap-2">
+        <div className="top-navigation w-full bg-black h-[36px] sticky top-0 z-50">
+            <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
                 {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
                 
                 {/* Mobile sidebar toggle button */}
