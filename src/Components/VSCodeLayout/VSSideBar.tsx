@@ -8,6 +8,7 @@ import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
 import { WsView } from "./WsView";
+import { useMobileStore } from "@/store/mobile/Mobile.store";
 
 interface VSSideBarProps {
     activeView: ActivityBarView;
@@ -30,13 +31,18 @@ interface VSSideBarProps {
  */
 export function VSSideBar({ activeView }: VSSideBarProps) {
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
+    const { isMobile } = useMobileStore();
+
+    // On mobile: default 50%, max 50% | On desktop: default 20%, max 40%
+    const defaultSize = isMobile ? 70 : 20;
+    const maxSize = isMobile ? 70 : 40;
 
     return (
         <Panel
             id="sidebar"
-            defaultSize={20}
+            defaultSize={defaultSize}
             minSize={5}
-            maxSize={40}
+            maxSize={maxSize}
             collapsible
             collapsedSize={0}
             onCollapse={() => setIsSideBarVisible(false)}
@@ -68,18 +74,20 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                         <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
 
                         {/* Bottom panel: secondary area (e.g., quick actions, details) */}
-                        <Panel defaultSize={30} minSize={5} collapsible collapsedSize={0}>
-                            {/* Mirror VSEditorArea structure but leave content empty */}
-                            <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden border-1 border-red-0">
-                                {/* Tab bar style header */}
-                                <div className="h-[35px] flex items-center border-b border-editor-border bg-editor-sidebar overflow-hidden px-3">
-                                    <div className="text-[13px] text-muted-foreground">Secondary</div>
-                                </div>
+                        {(!isMobile) && (
+                            <Panel defaultSize={30} minSize={5} collapsible collapsedSize={0}>
+                                {/* Mirror VSEditorArea structure but leave content empty */}
+                                <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden border-1 border-red-0">
+                                    {/* Tab bar style header */}
+                                    <div className="h-[35px] flex items-center border-b border-editor-border bg-editor-sidebar overflow-hidden px-3">
+                                        <div className="text-[13px] text-muted-foreground">Secondary</div>
+                                    </div>
 
-                                {/* Main content area (intentionally empty) */}
-                                <div className="flex-1 overflow-hidden flex">{/* Intentionally left blank - secondary panel content goes here */}</div>
-                            </div>
-                        </Panel>
+                                    {/* Main content area (intentionally empty) */}
+                                    <div className="flex-1 overflow-hidden flex">{/* Intentionally left blank - secondary panel content goes here */}</div>
+                                </div>
+                            </Panel>
+                        )}
                     </PanelGroup>
                 </>
             )}
