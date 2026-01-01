@@ -45,7 +45,7 @@ export default function MainNav() {
             <NavigationKeyboardShortcuts />
             
             {/* Debug Panel for mobile debugging */}
-            <DebugPanel />
+            {/* <DebugPanel /> */}
             
             <div
                 className="outline-none"
