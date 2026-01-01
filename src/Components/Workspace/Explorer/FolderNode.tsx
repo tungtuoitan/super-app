@@ -69,9 +69,13 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
             return;
         }
 
-        // Focus the tree container for keyboard navigation
+        // Focus the tree container for keyboard navigation without scrolling
         const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
-        treeContainer?.focus();
+        if (treeContainer) {
+            const scrollPos = window.scrollY || window.pageYOffset;
+            treeContainer.focus({ preventScroll: true });
+            window.scrollTo(0, scrollPos);
+        }
 
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
