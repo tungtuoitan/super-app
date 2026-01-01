@@ -6,6 +6,9 @@ import { config } from "@/config/app.config";
 import { constants } from "@/utils/constants";
 import { envConfig } from "../config";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
+import { CheckIsMobile } from "@/hooks/CheckIsMobile";
+import { useActivityBarStore } from "@/store/index";
+import {useMobileStore} from "@/store/mobile/Mobile.store";
 
 /**
  * Top navigation component.
@@ -22,11 +25,56 @@ import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.stor
  */
 export function TopNav() {
     const showDevBadge = envConfig.ENVIRONMENT !== constants.environments.production;
+    const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
+    const { isMobile } = useMobileStore();
+
+    const handleToggleSidebar = () => {
+        setIsSideBarVisible(!isSideBarVisible);
+    };
 
     return (
         <div className="top-navigation flex-grow bg-black h-[36px] z-[10000000000] sticky top-0">
             <nav className="bg-[#1B1D23] sticky top-0 h-[36px] flex items-center px-4 gap-2">
                 {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
+                
+                {/* Mobile sidebar toggle button */}
+                {isMobile && (
+                    <button
+                        onClick={handleToggleSidebar}
+                        className="p-1 rounded text-gray-300 transition-colors"
+                        title={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
+                        aria-label={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
+                    >
+                        {isSideBarVisible ? (
+                            /* Close (X) icon when sidebar is visible */
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        ) : (
+                            /* Hamburger menu icon when sidebar is hidden */
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            >
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <line x1="3" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        )}
+                    </button>
+                )}
                     
                 {/* <DevDetail /> */}
 
