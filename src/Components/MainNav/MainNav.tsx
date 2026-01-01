@@ -7,6 +7,7 @@ import { AuthCallback } from "@/pages/AuthCallback";
 import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { NavigationKeyboardShortcuts } from "@/Components/VSCodeLayout/NavigationKeyboardShortcuts";
+import { DebugPanel } from "@/Components/DebugPanel";
 
 /**
  * Main navigation component.
@@ -42,6 +43,9 @@ export default function MainNav() {
         >
             {/* Global navigation keyboard shortcuts (Alt + Arrow) */}
             <NavigationKeyboardShortcuts />
+            
+            {/* Debug Panel for mobile debugging */}
+            <DebugPanel />
             
             <div
                 className="outline-none"
