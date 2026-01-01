@@ -15,6 +15,7 @@ import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { StatusDot } from "./StatusDot";
 import { HighlightText } from "./HighlightText";
+import { useLogger } from "store/debug/DebugLogger.store";
 
 interface NoteNodeProps {
     node: NodeApi<TreeFolder>;
@@ -35,6 +36,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     const _TREESTATUS = useTreeStatusHelper();
     const navigate = useNavigate();
     const location = useLocation();
+    const logger = useLogger("NoteNode");
 
     // Safe cast: WorkspaceTree already filters to only render NoteNode for notes
     const noteItem = node.data.data as unknown as WorkspaceNoteItem;
@@ -88,9 +90,60 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
         e.stopPropagation();
         e.preventDefault();
 
-        // Focus the tree container for keyboard navigation
+        logger.log("NoteNode Click", {
+            noteName: noteItem.data.name,
+            workspaceItemId,
+        });
+
+        // Log before focus
+        logger.log("Before Focus - TopNav Status", {
+            scrollY: window.scrollY,
+            windowHeight: window.innerHeight,
+            topNavRect: (() => {
+                const el = document.querySelector(".top-navigation") as HTMLElement;
+                if (!el) return null;
+                const rect = el.getBoundingClientRect();
+                return {
+                    top: rect.top,
+                    bottom: rect.bottom,
+                    height: rect.height,
+                    isVisible: rect.top >= 0 && rect.top < window.innerHeight,
+                };
+            })(),
+        });
+
+        // Focus the tree container for keyboard navigation without scrolling
         const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
-        treeContainer?.focus();
+        if (treeContainer) {
+            const scrollPos = window.scrollY || window.pageYOffset;
+            
+            logger.log("Focusing Tree Container", {
+                currentScrollY: scrollPos,
+                preventScroll: true,
+            });
+            
+            treeContainer.focus({ preventScroll: true });
+            window.scrollTo(0, scrollPos);
+            
+            // Log after focus
+            setTimeout(() => {
+                logger.log("After Focus - TopNav Status", {
+                    scrollY: window.scrollY,
+                    topNavRect: (() => {
+                        const el = document.querySelector(".top-navigation") as HTMLElement;
+                        if (!el) return null;
+                        const rect = el.getBoundingClientRect();
+                        return {
+                            top: rect.top,
+                            bottom: rect.bottom,
+                            height: rect.height,
+                            isVisible: rect.top >= 0 && rect.top < window.innerHeight,
+                        };
+                    })(),
+                });
+            }, 50);
+        }
+        
         if (treeType === "targetTree") return; // Disable opening tab in targetTree
 
         if (e.ctrlKey || e.metaKey) {
