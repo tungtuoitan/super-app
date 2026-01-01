@@ -9,9 +9,11 @@ import { Input } from "@/Components/ui/input";
 import { Button } from "@/Components/ui/button";
 import { GenericFilterPopup } from "./GenericFilterPopup";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useMobileStore } from "@/store/mobile/Mobile.store";
 
 export function GridControlBar() {
     const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useGridControlStore();
+    const { isMobile } = useMobileStore();
     const [inputValue, setInputValue] = useState(searchQuery);
 
     // Sync inputValue with searchQuery from store
@@ -45,7 +47,7 @@ export function GridControlBar() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="!outline-none !ring-0 h-7 w-[160px] pl-7 pr-7 text-xs bg-editor-bg ring-0 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none"
+                    className={`!outline-none !ring-0 h-7 ${isMobile ? "w-[100px]" : "w-[160px]"} pl-7 pr-7 text-xs bg-editor-bg ring-0 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none`}
                     style={{ outline: "none" }}
                 />
                 {inputValue && (

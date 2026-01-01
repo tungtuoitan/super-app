@@ -10,6 +10,8 @@ import { useNavigationStore } from "@/contexts/NavigationContext";
 import { useActivityBarStore } from "@/store/index";
 import {useGridAutoRegisterHelper} from "@/hooks/vsCode/useGridAutoRegister.helper";
 import {useLocation} from "react-router-dom";
+import { useMobileStore } from "@/store/mobile/Mobile.store";
+import {CheckIsMobile} from "@/hooks/CheckIsMobile";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -46,6 +48,7 @@ interface VSCodeLayoutProps {
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const { activeView } = useNavigationStore();
     const location = useLocation();
+    const { isMobile } = useMobileStore();
     const { isSideBarVisible, setIsSideBarVisible, isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     
     // Auto-register grid based on current URL
@@ -63,32 +66,40 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                 color: "#cccccc",
             }}
         >
+            <CheckIsMobile />
             {/* Main content area with resizable panels */}
             <div className="flex-1 flex overflow-hidden">
-                {/* Activity Bar - Fixed width, no resize */}
-                <ActivityBar />
+                {/* Activity Bar - Fixed width, no resize - Hidden on mobile unless toggled */}
+                {(!isMobile || isSideBarVisible) && <ActivityBar />}
 
                 {/* Horizontal PanelGroup: SideBar | Editor+Panel */}
                 <PanelGroup direction="horizontal" autoSaveId="notes-layout-horizontal" className="flex-1">
                     {/* Side Bar - Always rendered to allow resize handle interaction */}
-                    <VSSideBar activeView={activeView} />
-
-                    {/* Resize handle - Always visible to allow re-expanding */}
-                    <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
+                    {(!isMobile || isSideBarVisible) && (
+                        <>
+                            <VSSideBar activeView={activeView} />
+                            {/* Resize handle - Always visible to allow re-expanding */}
+                            <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
+                        </>
+                    )}
 
                     {/* Main content: Editor + Panel (Vertical split) */}
-                    <Panel id="main-content" minSize={50}>
+                    <Panel id="main-content" minSize={isMobile ? 20 : 50}>
                         <PanelGroup direction="vertical" autoSaveId="notes-layout-vertical">
                             {/* Editor Area - NoteGrid (Future: react-mosaic) */}
-                            <Panel id="editor-area" defaultSize={70} minSize={30}>
+                            <Panel id="editor-area" defaultSize={isMobile ? 150 : 70} minSize={30}>
                                 <VSEditorArea />
                             </Panel>
 
-                            {/* Resize handle between editor and panel */}
-                            <VSCodeResizeHandle direction="vertical" id="panel-resize" />
+                            {/* Resize handle between editor and panel - Hidden on mobile */}
+                            {!isMobile && <VSCodeResizeHandle direction="vertical" id="panel-resize" />}
 
-                            {/* Bottom Panel - NoteDetail and Properties */}
-                            <VSPanel onClose={() => setIsPanelVisible(false)} />
+                            {/* Bottom Panel - NoteDetail and Properties - Hidden on mobile */}
+                            {!isMobile && (
+                                isPanelVisible && (
+                                    <VSPanel onClose={() => setIsPanelVisible(false)} />
+                                )
+                            )}
                         </PanelGroup>
                     </Panel>
                 </PanelGroup>
