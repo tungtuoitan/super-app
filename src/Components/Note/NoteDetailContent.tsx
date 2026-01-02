@@ -7,7 +7,7 @@
 import React, { useEffect, useRef } from "react";
 import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from "@/shared/components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import { Textarea } from "@/Components/ui/textarea";
+import { EditorWithKeywords } from "@/Components/Editor/EditorWithKeywords";
 import { Note } from "../../types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
@@ -23,7 +23,7 @@ export function NoteDetailContent() {
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
-    const [noteKey, setNoteKey] = React.useState(0);
+    // const [noteKey, setNoteKey] = React.useState(0); // Removed - no longer using key to force remount
     const activeTab = getActiveTab();
     const { trackNavigation } = useNavigationHistoryHelper();
     const {getItemStatus} = useTreeStatusHelper()
@@ -62,7 +62,8 @@ export function NoteDetailContent() {
 
     useEffect(() => {
         if (activeNote) {
-            setNoteKey((prev) => prev + 1);
+            // Don't increment noteKey - let components sync via props instead
+            // setNoteKey((prev) => prev + 1);
             setNameError(""); // Reset error khi chuyển note
         }
     }, [activeNote?.id]);
@@ -92,28 +93,34 @@ export function NoteDetailContent() {
     //     : "";
 
     if (!activeNote) {
+        console.log('[NoteDetailContent] No activeNote, returning null');
         return null;
     }
 
-
+    console.log('[NoteDetailContent] Rendering with activeNote:', { 
+        id: activeNote.id, 
+        name: activeNote.name,
+        descriptionLength: activeNote.description?.length,
+        isDisabled
+    });
 
     return (
-        <div key={noteKey} className="p-6 space-y-6 h-full ">
+        <div className="p-6 space-y-6 h-full ">
             {/* Full Width - Description */}
             <div className="border-none">
                 <CardContent className="p-0">
-                    <Textarea
-                        id="note-description-field"
-                        name="note-description"
+                    <EditorWithKeywords
                         value={activeNote?.description || ""}
-                        onChange={(e) => {
-                            const newValue = e.target.value;
+                        onChange={(newValue) => {
+                            console.log("[NoteDetail] Description onChange fired:", { 
+                                length: newValue?.length, 
+                                preview: newValue?.substring(0, 50),
+                                noteId: activeNote?.id 
+                            });
                             handleNoteFieldChange("description", newValue);
                         }}
-                        onFocus={() => trackNavigation("description")}
-                        placeholder="Enter note description..."
-                        className="min-h-[400px] resize-none font-mono text-sm overscroll-behavior-y-contain"
                         disabled={isDisabled}
+                        placeholder="Enter note description..."
                     />
                 </CardContent>
             </div>
