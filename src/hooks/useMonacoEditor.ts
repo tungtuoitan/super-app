@@ -80,20 +80,35 @@ export function useMonacoEditor({
             keywordsCount: keywords?.length
         });
 
+        // Define custom dark theme with #09090B background
+        monacoEditor.defineTheme('custom-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [],
+            colors: {
+                'editor.background': '#09090B',
+            }
+        });
+
         const instance = monacoEditor.create(element, {
             value: initialValue,
             language: "markdown",
-            theme: "vs-dark",
+            theme: "custom-dark",
             minimap: { enabled: false },
-            wordWrap: "off",
+            wordWrap: "wordWrapColumn",
+            wordWrapColumn: 120,
             fontSize: 14,
-            fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace",
+            fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
             lineNumbers: "off",
+            lineNumbersMinChars: 0,
+            lineDecorationsWidth: 0,
             folding: false,
             glyphMargin: false,
             readOnly: disabled,
             scrollBeyondLastLine: false,
             automaticLayout: true,
+            rulers: [],
+            renderLineHighlight: "none",
         });
 
         editorRef.current = instance;

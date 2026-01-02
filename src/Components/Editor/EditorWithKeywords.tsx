@@ -55,11 +55,10 @@ export function EditorWithKeywords({ value, onChange, disabled = false, placehol
             style={{
                 width: "100%",
                 height: "400px",
-                border: "1px solid #333",
-                borderRadius: "4px",
                 overflow: "hidden",
                 textAlign: "left",
-
+                backgroundColor: "#09090B",
+                fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
             }}
             // className="bred"
         />
