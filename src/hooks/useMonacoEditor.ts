@@ -265,7 +265,7 @@ export function useMonacoEditor({
 }
 
 /**
- * Update decorations (highlight keywords)
+ * Update decorations (highlight keywords and URLs)
  */
 function updateDecorations(
     editor: monaco.editor.IStandaloneCodeEditor,
@@ -275,6 +275,7 @@ function updateDecorations(
 ) {
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
+    // Highlight keywords
     keywords.forEach((kw) => {
         const regex = new RegExp(`\\b${escapeRegex(kw.text)}\\b`, "gi");
         let match;
@@ -297,6 +298,28 @@ function updateDecorations(
             });
         }
     });
+
+    // custom css URLs (http://, https://, ftp://)
+    const urlRegex = /\b(https?|ftp):\/\/[^\s]+/gi;
+    let urlMatch;
+    
+    while ((urlMatch = urlRegex.exec(text)) !== null) {
+        const startPos = editor.getModel()!.getPositionAt(urlMatch.index);
+        const endPos = editor.getModel()!.getPositionAt(urlMatch.index + urlMatch[0].length);
+
+        decorations.push({
+            range: new monaco.Range(
+                startPos.lineNumber,
+                startPos.column,
+                endPos.lineNumber,
+                endPos.column
+            ),
+            options: {
+                inlineClassName: 'url-link',
+                isWholeLine: false,
+            },
+        });
+    }
 
     // Clear all old decorations and apply new ones
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);

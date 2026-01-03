@@ -29,3 +29,9 @@
     color: #FFA500 !important;
     font-weight: 500 !important;
 }
+
+/* URL Link Highlighting */
+.url-link {
+    color: #a8a8a82f !important;
+    text-decoration: underline !important;
+}
