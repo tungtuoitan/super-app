@@ -124,22 +124,14 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
             // Check if current line is a heading - if so, don't autocomplete headings
             const isOnHeadingLine = /^#{1,6}\s+/.test(lineContent);
             
-            console.log('[Autocomplete] Current line:', lineContent);
-            console.log('[Autocomplete] Is on heading line:', isOnHeadingLine);
-            
             // Dynamically extract headings from current text (excluding current line if it's a heading)
             const currentText = model.getValue();
             const headings = isOnHeadingLine 
                 ? [] // Don't extract headings when typing on a heading line
                 : extractHeadingsAsKeywords(currentText, noteId);
             
-            console.log('[Autocomplete] Static keywords:', keywords.length);
-            console.log('[Autocomplete] Extracted headings:', headings.length, headings);
-            
             // Merge with static keywords
             const allKeywords = [...keywords, ...headings];
-            
-            console.log('[Autocomplete] Total keywords:', allKeywords.length);
             
             // Tìm partial match dài nhất từ text trước cursor
             interface BestMatchType { 
@@ -236,8 +228,6 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
             // Sort matches by score (cao nhất trước)
             allMatches.sort((a, b) => b.score - a.score);
 
-            console.log('[Autocomplete] Matches:', allMatches.length, 'suggestions');
-
             // Determine start column - use first match or cursor position
             const startColumn = allMatches.length > 0 && allMatches[0].matchedText
                 ? allMatches[0].startColumn
@@ -288,8 +278,6 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
                     };
                 });
 
-            console.log('[Autocomplete] Final suggestions:', suggestions.map(s => s.label));
-
             return { suggestions };
         },
     });
@@ -335,7 +323,6 @@ export function setupDefinitionProvider(
 
                 // Check if cursor is within this link (1-based columns)
                 if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                    console.log('[DefinitionProvider] Hovering on wiki link (preview only):', { name, link });
                     // Don't navigate here - navigation is handled by mouse click event
                     // This is only for preview/peek functionality
                 }
@@ -372,11 +359,8 @@ export function setupDefinitionProvider(
             }
             
             if (!keyword) {
-                console.log('[DefinitionProvider] No keyword found at cursor position');
                 return null;
             }
-
-            console.log('[DefinitionProvider] Hovering on keyword (preview only):', keyword.text, 'Type:', keyword.type);
 
             // Navigation is handled by mouse click event in useMonacoEditor
             // This definition provider is only for preview/peek functionality
@@ -392,12 +376,6 @@ export function setupDefinitionProvider(
                     
                     // If target noteId is different from current noteId, it's a cross-note reference
                     if (noteId && targetNoteId !== noteId && onNavigateToNote) {
-                        console.log('[DefinitionProvider] Cross-note reference detected:', {
-                            currentNoteId: noteId,
-                            targetNoteId,
-                            path: keywordWithPath.path,
-                            keyword: keyword.text
-                        });
                         
                         // Trigger navigation callback
                         onNavigateToNote(targetNoteId, keywordWithPath.path || '');
@@ -732,7 +710,6 @@ export function extractHeadingsAsKeywords(text: string, noteId?: number): Array<
         }
     });
     
-    // console.log('[ExtractHeadings] Extracted', headings.length, 'headings:', headings.map(h => ({ title: h.text, path: h.path })));
     return headings;
 }
 

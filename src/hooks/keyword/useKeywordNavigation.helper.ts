@@ -21,20 +21,14 @@ export const useKeywordNavigationHelper = () => {
     const { openTab } = useEditorTabHelper();
     const { enqueueSnackbar } = useSnackbar();
 
-    console.log('[useKeywordNavigationHelper] currentWorkspace:', currentWorkspace);
-
     /**
      * Navigate to keyword link (note, heading, external)
      */
     const navigateToKeyword = useCallback(
         async (link: string) => {
-            console.log("[KeywordNavigation] navigateToKeyword called with link:", link);
-            console.log("[KeywordNavigation] currentWorkspace at execution:", currentWorkspace);
-
             try {
             // Parse link
             const parsed = parseKeywordLink(link);
-            console.log("[KeywordNavigation] Parsed link:", parsed);
 
             if (!parsed) {
                 console.warn("Invalid keyword link:", link);

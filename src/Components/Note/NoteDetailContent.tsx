@@ -15,8 +15,8 @@ import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
 import { useEditorTabsStore, useStandardRegistryStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
-import {useTreeStatusHelper} from "@/hooks/workspace/useTreeStatusHelper";
-import {MarkdownEditor} from "../Editor/MarkdownEditor";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { MarkdownEditor } from "../Editor/MarkdownEditor";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -26,20 +26,19 @@ export function NoteDetailContent() {
     // const [noteKey, setNoteKey] = React.useState(0); // Removed - no longer using key to force remount
     const activeTab = getActiveTab();
     const { trackNavigation } = useNavigationHistoryHelper();
-    const {getItemStatus} = useTreeStatusHelper()
-    const { currentWorkspace} = useWorkspaceStore();
-    const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find(i => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
+    const { getItemStatus } = useTreeStatusHelper();
+    const { currentWorkspace } = useWorkspaceStore();
+    const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
     // Get note data from active tab instead of activeNote
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 
     // Get standard registry data from global state
     const { registries, registriesLoading } = useStandardRegistryStore();
 
-        // Check if note is deleted (soft deleted)
+    // Check if note is deleted (soft deleted)
     let isDeleted = activeNote?.deletedAt !== null;
-    let isHardDeleted = activeNote?.isHardDeleted;   
+    let isHardDeleted = activeNote?.isHardDeleted;
     const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
-
 
     const hashtagOptions = registries
         .filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
@@ -70,7 +69,7 @@ export function NoteDetailContent() {
 
     // useEffect(() => {
     //     isDeleted = activeNote?.deletedAt !== null;
-    //     isHardDeleted = activeTab?.data && (activeTab.data as Note).isHardDeleted;    
+    //     isHardDeleted = activeTab?.data && (activeTab.data as Note).isHardDeleted;
     // }, [activeNote, openTabs]);
 
     // Focus vào Note Name field khi tạo note mới
@@ -101,15 +100,7 @@ export function NoteDetailContent() {
             {/* Full Width - Description */}
             <div className="border-none">
                 <CardContent className="p-0">
-                    <MarkdownEditor
-                        value={activeNote?.description || ""}
-                        onChange={(newValue) => {
-                            handleNoteFieldChange("description", newValue);
-                        }}
-                        disabled={isDisabled}
-                        placeholder="Enter note description..."
-                        currentNoteId={activeNote?.id}
-                    />
+                    <MarkdownEditor />
                 </CardContent>
             </div>
 

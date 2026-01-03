@@ -5,23 +5,41 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { useMonacoEditor } from "@/hooks/useMonacoEditor";
-import { useStandardRegistryStore, useWorkspaceStore } from "@/store/index";
+import { useStandardRegistryStore, useWorkspaceStore, useEditorTabsStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useNoteDetailHelper } from "@/hooks/note/useNoteDetail.helper";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, convertToOriginalVersion } from "@/utils/markdown.utils";
+import { Note } from "@/types/note.types";
 
-interface EditorWithKeywordsProps {
-    value: string; // Original version (with links)
-    onChange: (value: string) => void; // Returns original version
-    disabled?: boolean;
-    placeholder?: string;
-    currentNoteId?: number; // For cross-note reference navigation
-}
 
-export function MarkdownEditor({ value, onChange, disabled = false, placeholder, currentNoteId }: EditorWithKeywordsProps) {
+export function MarkdownEditor() {
     const { registries, allKeywords } = useStandardRegistryStore();
     const { navigateToKeyword } = useKeywordNavigationHelper();
-    const {currentWorkspace } = useWorkspaceStore();
+    const { currentWorkspace } = useWorkspaceStore();
+    const { getActiveTab } = useEditorTabHelper();
+    const { handleNoteFieldChange } = useNoteDetailHelper();
+    const { getItemStatus } = useTreeStatusHelper();
+
+    // Get active tab and note
+    const activeTab = getActiveTab();
+    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const currentNoteId = activeNote?.id;
+    
+    // Check if note is disabled (deleted or has deleted ancestor)
+    const _itemStatus = getItemStatus(
+        currentWorkspace?.flatData?.find(
+            (i) => i.entityId === activeNote?.id && i.entityType === 3
+        )
+    );
+    const isDeleted = activeNote?.deletedAt !== null;
+    const isHardDeleted = activeNote?.isHardDeleted;
+    const disabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
+    
+    // Get value from activeNote
+    const value = activeNote?.description || "";
 
     // Internal state: Display version (clean text for editing)
     const [displayValue, setDisplayValue] = useState(() => convertToDisplayVersion(value));
@@ -32,14 +50,14 @@ export function MarkdownEditor({ value, onChange, disabled = false, placeholder,
         setDisplayValue(newDisplayValue);
     }, [value]);
 
-    // Handle internal changes: Update display and convert to original for parent
+    // Handle internal changes: Update display and convert to original
     const handleDisplayChange = (newDisplayValue: string) => {
         setDisplayValue(newDisplayValue);
 
-        // Convert display → original before calling parent onChange
+        // Convert display → original before updating note
         // Use allKeywords to map [name] to [[link]]
         const originalValue = convertToOriginalVersion(newDisplayValue, allKeywords);
-        onChange(originalValue);
+        handleNoteFieldChange("description", originalValue);
     };
 
     // Extract keywords from registries + allKeywords
@@ -61,39 +79,13 @@ export function MarkdownEditor({ value, onChange, disabled = false, placeholder,
                 type: k.type,
                 // type: "comment", // Show all as comment type for now
             }));
-        console.log("System Keywords:", systemKeywords);
-
-        //         const dummyKeywords = [
-        //     { text: "function", type: "keyword" },
-        //     { text: "const", type: "keyword" },
-        //     { text: "let", type: "keyword" },
-        //     { text: "var", type: "keyword" },
-        //     { text: "return", type: "keyword" },
-        //     { text: "import", type: "keyword" },
-        //     { text: "export", type: "keyword" },
-        //     { text: "class", type: "class" },
-        //     { text: "interface", type: "class" },
-        //     { text: "type", type: "class" },
-        //     { text: "string", type: "type" },
-        //     { text: "number", type: "type" },
-        //     { text: "boolean", type: "type" },
-        //     { text: "Cộng hoà xã hội chủ nghĩa việt nam", type: "comment" },
-        //     { text: "FIXME", type: "comment" },
-        //     { text: "NOTE", type: "comment" },
-
-        // ];
 
         return [
             // ...registryKeywords,
             ...systemKeywords,
         ];
     }, [registries, allKeywords]);
-    console.log("Keywords for MarkdownEditor:", keywords);
-    console.log("[MarkdownEditor] allKeywords to pass:", {
-        count: allKeywords.length,
-        sample: allKeywords.slice(0, 3).map((k) => ({ name: k.name, type: k.type, link: k.link })),
-    });
-    console.log("[MarkdownEditor] navigateToKeyword function:", navigateToKeyword);
+
 
     const { containerRef } = useMonacoEditor({
         initialValue: displayValue, // Use display version for editor

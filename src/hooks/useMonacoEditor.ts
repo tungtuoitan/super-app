@@ -191,7 +191,6 @@ export function useMonacoEditor({
 
         // Navigation handler for cross-note references
         const handleNavigateToNote = async (targetNoteId: number, headingPath: string) => {
-            console.log('[Monaco] Navigate to note:', targetNoteId, 'path:', headingPath);
             
             try {
                 // Check if note exists in current workspace
@@ -201,7 +200,6 @@ export function useMonacoEditor({
                 
                 if (noteInWorkspace) {
                     // Note exists in workspace - convert and open
-                    console.log('[Monaco] Note found in workspace:', noteInWorkspace);
                     
                     // Type guard: ensure it's a note entity
                     if (noteInWorkspace.entityType !== 3) {
@@ -228,10 +226,8 @@ export function useMonacoEditor({
                     openTab(note, constants.vscode.tab.tabTypes.note);
                     
                     // TODO: Scroll to heading after tab opens
-                    console.log('[Monaco] TODO: Scroll to heading:', headingPath);
                 } else {
                     // Note not in workspace - fetch from API
-                    console.log('[Monaco] Note not in workspace, fetching from API...');
                     
                     if (!$user?.userToken) {
                         console.error('[Monaco] No auth token available');
@@ -257,11 +253,9 @@ export function useMonacoEditor({
                             userId: noteDTO.userId,
                         };
                         
-                        console.log('[Monaco] Note fetched from API:', note);
                         openTab(note, constants.vscode.tab.tabTypes.note);
                         
                         // TODO: Scroll to heading after tab opens
-                        console.log('[Monaco] TODO: Scroll to heading:', headingPath);
                     } else {
                         console.error('[Monaco] Failed to fetch note:', result);
                     }
@@ -276,15 +270,6 @@ export function useMonacoEditor({
 
         // Setup hover provider
         setupHoverProvider(instance, keywords, currentNoteId);
-
-        console.log('[Monaco Hook] Setting up definition provider with:', {
-            keywordsCount: keywords.length,
-            currentNoteId,
-            hasHandleNavigateToNote: !!handleNavigateToNote,
-            allKeywordsCount: allKeywords?.length || 0,
-            hasOnKeywordClick: !!onKeywordClick,
-            allKeywordsSample: allKeywords?.slice(0, 3).map(k => ({ name: k.name, type: k.type, link: k.link }))
-        });
 
         // Setup definition provider (for preview only, no navigation)
         setupDefinitionProvider(instance, keywords, currentNoteId, handleNavigateToNote, allKeywords, undefined);
@@ -306,7 +291,6 @@ export function useMonacoEditor({
             const lineContent = model.getLineContent(position.lineNumber);
             const clickColumn = position.column;
 
-            console.log('[Monaco Click] Ctrl+Click at position:', position, 'Line:', lineContent);
 
             // Check if clicking on [[name|link]] format
             const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
@@ -319,7 +303,6 @@ export function useMonacoEditor({
                 const link = wikiMatch[2];
 
                 if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                    console.log('[Monaco Click] Clicked on wiki link:', { name, link });
                     if (onKeywordClick) {
                         onKeywordClick(link);
                         e.event.preventDefault();
@@ -341,7 +324,6 @@ export function useMonacoEditor({
                         const endIndex = startIndex + match[0].length;
 
                         if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                            console.log('[Monaco Click] Clicked on keyword:', kw.name, 'Link:', kw.link);
                             onKeywordClick(kw.link);
                             e.event.preventDefault();
                             e.event.stopPropagation();
