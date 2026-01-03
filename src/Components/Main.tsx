@@ -26,6 +26,7 @@ import { OrchestratorContextMenuStoreProvider } from "@/store/contextMenu/Contex
 import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.store";
 import { MobileProvider } from "@/store/mobile/Mobile.store";
+import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 
 /**
  * Main application layout component.
@@ -52,9 +53,10 @@ export function Main() {
         <BrowserRouter>
             <NavProvider>
                 <MobileProvider>
-                    <AuthCallbackProvider>
-                        <ActivityBarProvider>
-                            <SnackbarProvider autoHideDuration={3000}>
+                    <DebugLoggerProvider>
+                        <AuthCallbackProvider>
+                            <ActivityBarProvider>
+                                <SnackbarProvider autoHideDuration={3000}>
                                 <DndProvider backend={HTML5Backend}>
                                     <AuthStoreProvider>
                                         <NavigationHistoryProvider>
@@ -97,9 +99,10 @@ export function Main() {
                                         </NavigationHistoryProvider>
                                     </AuthStoreProvider>
                                 </DndProvider>
-                            </SnackbarProvider>
-                        </ActivityBarProvider>
-                    </AuthCallbackProvider>
+                                </SnackbarProvider>
+                            </ActivityBarProvider>
+                        </AuthCallbackProvider>
+                    </DebugLoggerProvider>
                 </MobileProvider>
             </NavProvider>
         </BrowserRouter>

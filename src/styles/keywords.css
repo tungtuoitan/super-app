@@ -1,0 +1,61 @@
+/* Keyword Highlighting Styles */
+
+.keyword-hashtag {
+    color: #fad000 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-status {
+    color: #6496c8 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-keyword {
+    color: #C586C0 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-class {
+    color: #4EC9B0 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-type {
+    color: #569CD6 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-comment {
+    color: #FFA500 !important;
+    font-weight: 500 !important;
+}
+
+/* URL Link Highlighting */
+.url-link {
+    color: #a8a8a82f !important;
+    text-decoration: underline !important;
+}
+
+/* Monaco Editor Folding Icons - Smaller Size */
+.monaco-editor .margin .codicon {
+    font-size: 13px !important;
+}
+
+.monaco-editor .folding {
+    cursor: pointer;
+}
+
+/* Folding icons - collapsed (arrow right) */
+.monaco-editor .codicon-folding-collapsed::before {
+    font-size: 13px !important;
+}
+
+/* Folding icons - expanded (arrow down) */
+.monaco-editor .codicon-folding-expanded::before {
+    font-size: 13px !important;
+}
+
+/* Line decoration width adjustment for smaller icons */
+.monaco-editor .margin-view-overlays .line-numbers {
+    font-size: 11px !important;
+}

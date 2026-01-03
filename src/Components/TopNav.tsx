@@ -9,6 +9,7 @@ import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.stor
 import { CheckIsMobile } from "@/hooks/CheckIsMobile";
 import { useActivityBarStore } from "@/store/index";
 import {useMobileStore} from "@/store/mobile/Mobile.store";
+// import { useLogger } from "store/debug/DebugLogger.store";
 
 /**
  * Top navigation component.
@@ -27,9 +28,57 @@ export function TopNav() {
     const showDevBadge = envConfig.ENVIRONMENT !== constants.environments.production;
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useMobileStore();
+    // const logger = useLogger("TopNav");
+
+    useEffect(() => {
+        const topNavElement = document.querySelector(".top-navigation") as HTMLElement;
+        const navElement = document.querySelector("nav") as HTMLElement;
+        
+        // logger.log("TopNav Mounted", {
+        //     isMobile,
+        //     isSideBarVisible,
+        //     topNavElement: topNavElement ? {
+        //         className: topNavElement.className,
+        //         zIndex: window.getComputedStyle(topNavElement).zIndex,
+        //         position: window.getComputedStyle(topNavElement).position,
+        //         top: window.getComputedStyle(topNavElement).top,
+        //         visibility: window.getComputedStyle(topNavElement).visibility,
+        //         display: window.getComputedStyle(topNavElement).display,
+        //     } : null,
+        //     navElement: navElement ? {
+        //         className: navElement.className,
+        //         zIndex: window.getComputedStyle(navElement).zIndex,
+        //         position: window.getComputedStyle(navElement).position,
+        //     } : null,
+        //     windowHeight: window.innerHeight,
+        //     windowWidth: window.innerWidth,
+        // });
+    }, [isMobile, isSideBarVisible]);
 
     const handleToggleSidebar = () => {
+        // logger.log("Toggle Sidebar Clicked", {
+        //     currentIsSideBarVisible: isSideBarVisible,
+        //     newIsSideBarVisible: !isSideBarVisible,
+        //     isMobile,
+        // });
+        
         setIsSideBarVisible(!isSideBarVisible);
+        
+        // Check position after toggle
+        setTimeout(() => {
+            const topNavElement = document.querySelector(".top-navigation") as HTMLElement;
+            if (topNavElement) {
+                const rect = topNavElement.getBoundingClientRect();
+                // logger.log("TopNav Position After Toggle", {
+                //     top: rect.top,
+                //     bottom: rect.bottom,
+                //     height: rect.height,
+                //     isVisible: rect.top >= 0 && rect.top < window.innerHeight,
+                //     scrollY: window.scrollY,
+                //     pageYOffset: window.pageYOffset,
+                // });
+            }
+        }, 100);
     };
 
     return (

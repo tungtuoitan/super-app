@@ -29,7 +29,6 @@ ngrok version
 ```
 
 ### Hoặc trên Windows (Local test):
-
 1. Download từ [ngrok.com](https://ngrok.com/download)
 2. Extract zip file
 3. Chạy `ngrok.exe`
@@ -55,13 +54,11 @@ ngrok config add-authtoken YOUR_AUTHTOKEN_HERE
 ## 🚀 Bước 4: Start tunnel
 
 ### Tunnel cho Frontend (port 3000):
-
 ```bash
 ngrok http 3000
 ```
 
 Output:
-
 ```
 Session Status                online
 Account                       your@email.com (Plan: Free)
@@ -73,13 +70,11 @@ Forwarding                    https://abc123.ngrok.io -> http://localhost:3000
 ### Tunnel cả Frontend + Backend (2 ports):
 
 **Terminal 1** (Frontend):
-
 ```bash
 ngrok http 3000 --region=us --log=stdout
 ```
 
 **Terminal 2** (Backend):
-
 ```bash
 ngrok http 5000 --region=us --log=stdout
 ```
@@ -89,7 +84,6 @@ ngrok http 5000 --region=us --log=stdout
 ## ⚙️ Bước 5: Update Google Cloud Console
 
 **Authorized redirect URIs**:
-
 ```
 https://abc123.ngrok.io/auth/callback
 ```
@@ -101,7 +95,6 @@ https://abc123.ngrok.io/auth/callback
 ## 🔄 Bước 6: Update Config (Temporary)
 
 ### Frontend `.env` (Temporary override):
-
 ```env
 REACT_APP_GOOGLE_REDIRECT_URI=https://abc123.ngrok.io/auth/callback
 ```
@@ -119,7 +112,6 @@ REACT_APP_GOOGLE_REDIRECT_URI=https://abc123.ngrok.io/auth/callback
 ```
 
 ### Rebuild frontend:
-
 ```bash
 npm run build
 ```
@@ -151,17 +143,14 @@ npm run build
 ## 🐛 Troubleshooting
 
 ### "ERR_NGROK_108" - Domain already in use
-
 - Ngrok free tier chỉ cho 1 tunnel cùng lúc
 - Stop tunnel cũ trước khi start tunnel mới
 
 ### "Tunnel not found"
-
 - Check frontend/backend có đang chạy trên localhost:3000, localhost:5000 không
 - Restart ngrok
 
 ### CORS error
-
 - Thêm ngrok URL vào `AllowedOrigins` trong backend
 - Rebuild backend
 

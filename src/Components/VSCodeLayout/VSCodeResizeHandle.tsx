@@ -29,7 +29,7 @@ export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
                 role="separator"
                 aria-orientation={isHorizontal ? "vertical" : "horizontal"}
                 // outer acts as hit area (transparent); inner is the visible 1px line
-                className={`${isHorizontal ? " h-full cursor-col-resize" : "w-full cursor-row-resize"}` + " group relative z-[10001] pointer-events-auto bg-transparent"}
+                className={`group relative z-[10001] pointer-events-auto bg-transparent ${isHorizontal ? "h-full cursor-col-resize" : "w-full cursor-row-resize"}`}
             >
                 {/* Inner element used as the visible 1px line (absolute overlay to cover panel borders) */}
                 <div
