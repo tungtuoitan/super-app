@@ -105,7 +105,7 @@ export function NoteDetailContent() {
     });
 
     return (
-        <div className="p-6 space-y-6 h-full ">
+        <div className="py-6 space-y-6 h-full ">
             {/* Full Width - Description */}
             <div className="border-none">
                 <CardContent className="p-0">
@@ -126,7 +126,7 @@ export function NoteDetailContent() {
             </div>
 
             {/* Two Column Layout - Details and Metadata */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="px-6 grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 {/* Left Column - Note Details */}
                 <div className="border-none">
                     <CardContent className="p-0 space-y-2">

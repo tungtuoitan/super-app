@@ -119,11 +119,13 @@ export function useMonacoEditor({
             wordWrap: "on", // Wrap at viewport width
             fontSize: 14,
             fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
-            lineNumbers: "off",
-            lineNumbersMinChars: 0,
-            lineDecorationsWidth: 0,
-            folding: false,
-            glyphMargin: false,
+            lineNumbers: "on", // Bật line numbers để hiển thị fold indicators
+            lineNumbersMinChars: 3,
+            lineDecorationsWidth: 16, // Space cho fold icons (tăng lên)
+            folding: true, // Bật folding cho markdown headings
+            foldingStrategy: "auto", // Auto detect folding
+            showFoldingControls: "mouseover", // Hiển thị khi hover
+            glyphMargin: true, // Bật glyph margin cho fold icons
             readOnly: disabled,
             scrollBeyondLastLine: false,
             automaticLayout: true,
@@ -171,6 +173,9 @@ export function useMonacoEditor({
         
         // Setup definition provider
         setupDefinitionProvider(instance, keywords);
+        
+        // Setup folding provider for markdown headings
+        setupMarkdownFolding(instance);
         
         // Initial decorations
         updateDecorations(instance, initialValue, keywords, decorationsRef);
@@ -418,6 +423,56 @@ function setupDefinitionProvider(editor: monaco.editor.IStandaloneCodeEditor, ke
                     endPos.column
                 )
             };
+        }
+    });
+
+    return () => disposable.dispose();
+}
+
+/**
+ * Setup folding provider for markdown headings
+ */
+function setupMarkdownFolding(editor: monaco.editor.IStandaloneCodeEditor) {
+    const disposable = monacoLanguages.registerFoldingRangeProvider("markdown", {
+        provideFoldingRanges: (model) => {
+            const lines = model.getLinesContent();
+            const foldingRanges: monaco.languages.FoldingRange[] = [];
+            const headingStack: Array<{ level: number; line: number }> = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const headingMatch = line.match(/^(#{1,6})\s/);
+
+                if (headingMatch) {
+                    const level = headingMatch[1].length;
+                    const lineNumber = i + 1;
+
+                    // Close all headings of equal or lower level
+                    while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) {
+                        const parent = headingStack.pop()!;
+                        foldingRanges.push({
+                            start: parent.line,
+                            end: i, // End at line before this heading
+                            kind: monacoLanguages.FoldingRangeKind.Region
+                        });
+                    }
+
+                    // Add current heading to stack
+                    headingStack.push({ level, line: lineNumber });
+                }
+            }
+
+            // Close remaining headings at end of document
+            while (headingStack.length > 0) {
+                const parent = headingStack.pop()!;
+                foldingRanges.push({
+                    start: parent.line,
+                    end: lines.length,
+                    kind: monacoLanguages.FoldingRangeKind.Region
+                });
+            }
+
+            return foldingRanges;
         }
     });
 
