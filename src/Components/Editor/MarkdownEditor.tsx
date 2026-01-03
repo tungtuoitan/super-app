@@ -3,21 +3,41 @@
  * Monaco-based editor with keyword highlighting and autocomplete
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useMonacoEditor } from "@/hooks/useMonacoEditor";
 import { useStandardRegistryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
+import { convertToDisplayVersion, convertToOriginalVersion } from "@/utils/markdown.utils";
 
 interface EditorWithKeywordsProps {
-    value: string;
-    onChange: (value: string) => void;
+    value: string; // Original version (with links)
+    onChange: (value: string) => void; // Returns original version
     disabled?: boolean;
     placeholder?: string;
+    currentNoteId?: number; // For cross-note reference navigation
 }
 
-export function MarkdownEditor({ value, onChange, disabled = false, placeholder }: EditorWithKeywordsProps) {
+export function MarkdownEditor({ value, onChange, disabled = false, placeholder, currentNoteId }: EditorWithKeywordsProps) {
 
     const { registries } = useStandardRegistryStore();
+    
+    // Internal state: Display version (clean text for editing)
+    const [displayValue, setDisplayValue] = useState(() => convertToDisplayVersion(value));
+    
+    // Sync display version when external value changes
+    useEffect(() => {
+        const newDisplayValue = convertToDisplayVersion(value);
+        setDisplayValue(newDisplayValue);
+    }, [value]);
+    
+    // Handle internal changes: Update display and convert to original for parent
+    const handleDisplayChange = (newDisplayValue: string) => {
+        setDisplayValue(newDisplayValue);
+        
+        // Convert display → original before calling parent onChange
+        const originalValue = convertToOriginalVersion(newDisplayValue, currentNoteId);
+        onChange(originalValue);
+    };
 
     // Extract keywords from registries + add dummy keywords
     const keywords = useMemo(() => {
@@ -52,10 +72,11 @@ export function MarkdownEditor({ value, onChange, disabled = false, placeholder 
     }, [registries]);
 
     const { containerRef } = useMonacoEditor({
-        initialValue: value,
-        onChange,
+        initialValue: displayValue, // Use display version for editor
+        onChange: handleDisplayChange, // Convert on change
         disabled,
         keywords,
+        currentNoteId,
     });
 
     return (

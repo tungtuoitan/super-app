@@ -82,6 +82,28 @@ export function updateDecorations(
         });
     }
 
+    // Wiki-style links [[path]]
+    const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+    let wikiMatch;
+    
+    while ((wikiMatch = wikiLinkRegex.exec(text)) !== null) {
+        const startPos = model.getPositionAt(wikiMatch.index);
+        const endPos = model.getPositionAt(wikiMatch.index + wikiMatch[0].length);
+
+        decorations.push({
+            range: new monaco.Range(
+                startPos.lineNumber,
+                startPos.column,
+                endPos.lineNumber,
+                endPos.column
+            ),
+            options: {
+                inlineClassName: 'wiki-link',
+                isWholeLine: false,
+            },
+        });
+    }
+
     // Clear all old decorations and apply new ones
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
 }
@@ -89,7 +111,7 @@ export function updateDecorations(
 /**
  * Setup autocomplete provider with dynamic heading extraction
  */
-export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
+export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>, noteId?: number) {
     const disposable = monacoLanguages.registerCompletionItemProvider("markdown", {
         // Trigger characters để autocomplete dễ xuất hiện hơn
         triggerCharacters: ['#', '@', ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
@@ -108,7 +130,7 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
             const currentText = model.getValue();
             const headings = isOnHeadingLine 
                 ? [] // Don't extract headings when typing on a heading line
-                : extractHeadingsAsKeywords(currentText);
+                : extractHeadingsAsKeywords(currentText, noteId);
             
             console.log('[Autocomplete] Static keywords:', keywords.length);
             console.log('[Autocomplete] Extracted headings:', headings.length, headings);
@@ -260,22 +282,78 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
 }
 
 /**
- * Setup definition provider with dynamic heading extraction
- * Supports heading definitions, explicit comments, and first occurrence
+ * Setup definition provider with dynamic heading extraction and cross-note navigation
  */
-export function setupDefinitionProvider(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
+export function setupDefinitionProvider(
+    editor: monaco.editor.IStandaloneCodeEditor, 
+    keywords: Array<{ text: string; type: string }>,
+    noteId?: number,
+    onNavigateToNote?: (targetNoteId: number, headingPath: string) => void
+) {
     const disposable = monacoLanguages.registerDefinitionProvider("markdown", {
         provideDefinition: (model, position) => {
             // Dynamically extract headings from current text
             const currentText = model.getValue();
-            const headings = extractHeadingsAsKeywords(currentText);
+            const headings = extractHeadingsAsKeywords(currentText, noteId);
             
             // Merge with static keywords
             const allKeywords = [...keywords, ...headings];
             
-            // Get line content to check for multi-word keywords
+// Get line content to check for keywords or wiki-style links
             const lineContent = model.getLineContent(position.lineNumber);
             const clickColumn = position.column;
+            
+            // Strategy 0: Check if clicking on [[path]] wiki-style link
+            // Pattern: [[path/to/heading]] or [[heading]]
+            const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+            let wikiMatch;
+            
+            while ((wikiMatch = wikiLinkRegex.exec(lineContent)) !== null) {
+                const startIndex = wikiMatch.index;
+                const endIndex = startIndex + wikiMatch[0].length;
+                const path = wikiMatch[1];
+                
+                // Check if cursor is within this link (1-based columns)
+                if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
+                    console.log('[DefinitionProvider] Clicked on wiki link:', path);
+                    
+                    // Parse path to extract noteId
+                    // Formats:
+                    // - 123/Introduction/Getting Started
+                    // - Introduction (same note)
+                    
+                    let targetNoteId: number | null = null;
+                    let headingName: string;
+                    
+                    if (/^\d+\//.test(path)) {
+                        // Full format: 123/Introduction/Getting Started
+                        const pathMatch = path.match(/^(\d+)\/(.+)$/);
+                        if (pathMatch) {
+                            targetNoteId = parseInt(pathMatch[1], 10);
+                            const remainingPath = pathMatch[2];
+                            const segments = remainingPath.split('/');
+                            headingName = segments[segments.length - 1];
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        // Just heading name: Introduction (same note)
+                        const segments = path.split('/');
+                        headingName = segments[segments.length - 1];
+                    }
+                    
+                    // If cross-note reference (different noteId), trigger navigation
+                    if (targetNoteId && noteId && targetNoteId !== noteId && onNavigateToNote) {
+                        console.log('[DefinitionProvider] Cross-note wiki link detected');
+                        onNavigateToNote(targetNoteId, path);
+                        return null;
+                    }
+                    
+                    // Same note or no noteId in path - find heading and jump
+                    // Continue with regular heading search using headingName
+                    // We'll search for this heading below
+                }
+            }
             
             // Try to find multi-word keyword at cursor position
             let keyword = null;
@@ -307,6 +385,33 @@ export function setupDefinitionProvider(editor: monaco.editor.IStandaloneCodeEdi
             }
             
             if (!keyword) return null;
+
+            // Check if this is a cross-note reference (path with different noteId)
+            // Type assertion: keyword from headings will have 'path' property
+            const keywordWithPath = keyword as { text: string; type: string; path?: string };
+            
+            if (keywordWithPath.path) {
+                const pathMatch = keywordWithPath.path.match(/^super-app\/(\d+)\//);
+                if (pathMatch) {
+                    const targetNoteId = parseInt(pathMatch[1], 10);
+                    
+                    // If target noteId is different from current noteId, it's a cross-note reference
+                    if (noteId && targetNoteId !== noteId && onNavigateToNote) {
+                        console.log('[DefinitionProvider] Cross-note reference detected:', {
+                            currentNoteId: noteId,
+                            targetNoteId,
+                            path: keywordWithPath.path,
+                            keyword: keyword.text
+                        });
+                        
+                        // Trigger navigation callback
+                        onNavigateToNote(targetNoteId, keywordWithPath.path || '');
+                        
+                        // Return null to prevent default navigation
+                        return null;
+                    }
+                }
+            }
 
             const text = model.getValue();
             const lines = text.split('\n');
@@ -474,11 +579,98 @@ export function escapeRegex(str: string): string {
 }
 
 /**
- * Extract all headings from markdown text as keywords
+ * Convert original version (with links) to display version (clean text)
+ * Original: [[super-app/123/Introduction]] or [[Introduction]]
+ * Display: Introduction
+ * 
+ * @param text - Original markdown with wiki-style links
+ * @returns Clean display text
  */
-export function extractHeadingsAsKeywords(text: string): Array<{ text: string; type: string; line: number }> {
+export function convertToDisplayVersion(text: string): string {
+    // Match pattern: [[path/to/heading]] or [[heading]]
+    // Extract just the last part (heading name)
+    return text.replace(/\[\[([^\]]+)\]\]/g, (match, path) => {
+        // Extract last segment of path as display text
+        // super-app/123/Introduction/Getting Started → Getting Started
+        // Introduction → Introduction
+        const segments = path.split('/');
+        return segments[segments.length - 1];
+    });
+}
+
+/**
+ * Convert display version to original version (with wiki-style links)
+ * This requires current note context and heading extraction
+ * 
+ * @param text - Display text
+ * @param noteId - Current note ID
+ * @returns Original markdown with generated [[path]] links
+ */
+export function convertToOriginalVersion(text: string, noteId?: number): string {
+    if (!noteId) return text;
+    
+    // Extract all headings from current text to build link map
+    const headings = extractHeadingsAsKeywords(text, noteId);
+    
+    // Build a map of keyword -> path for replacement
+    const keywordPathMap = new Map<string, string>();
+    headings.forEach(h => {
+        if (h.path) {
+            keywordPathMap.set(h.text.toLowerCase(), h.path);
+        }
+    });
+    
+    let result = text;
     const lines = text.split('\n');
-    const headings: Array<{ text: string; type: string; line: number }> = [];
+    const resultLines: string[] = [];
+    
+    lines.forEach((line) => {
+        const trimmedLine = line.trim();
+        
+        // Skip heading lines themselves
+        if (/^#{1,6}\s+/.test(trimmedLine)) {
+            resultLines.push(line);
+            return;
+        }
+        
+        let processedLine = line;
+        
+        // For each keyword, check if it appears in this line
+        keywordPathMap.forEach((path, keywordLower) => {
+            // Find the original keyword with proper casing
+            const originalKeyword = Array.from(keywordPathMap.entries())
+                .find(([k]) => k === keywordLower)?.[0];
+            
+            if (!originalKeyword) return;
+            
+            // Get actual keyword text from headings
+            const heading = headings.find(h => h.text.toLowerCase() === keywordLower);
+            if (!heading) return;
+            
+            // Create regex to match whole keyword (case-insensitive, word boundary)
+            const regex = new RegExp(`\\b(${escapeRegex(heading.text)})\\b`, 'gi');
+            
+            // Replace all occurrences with [[path]]
+            processedLine = processedLine.replace(regex, `[[${path}]]`);
+        });
+        
+        resultLines.push(processedLine);
+    });
+    
+    return resultLines.join('\n');
+}
+
+/**
+ * Extract all headings from markdown text as keywords with hierarchical paths
+ * @param text - Markdown text
+ * @param noteId - Current note ID for generating full paths
+ */
+export function extractHeadingsAsKeywords(text: string, noteId?: number): Array<{ text: string; type: string; line: number; path?: string }> {
+    const lines = text.split('\n');
+    const headings: Array<{ text: string; type: string; line: number; path?: string }> = [];
+    
+    // Track heading hierarchy for path generation
+    const headingStack: Array<{ level: number; title: string }> = [];
     
     lines.forEach((line, index) => {
         // Trim to handle Windows CRLF line endings
@@ -502,28 +694,46 @@ export function extractHeadingsAsKeywords(text: string): Array<{ text: string; t
                 .trim();
             
             if (cleanTitle) {
+                // Pop headings from stack until we find parent (lower level number)
+                while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) {
+                    headingStack.pop();
+                }
+                
+                // Build hierarchical path
+                const pathParts = headingStack.map(h => h.title);
+                pathParts.push(cleanTitle);
+                
+                // Generate path: noteId/title1/title2/title3
+                const fullPath = noteId 
+                    ? `${noteId}/${pathParts.join('/')}`
+                    : pathParts.join('/');
+                
                 headings.push({
                     text: cleanTitle,
                     type: `heading-${level}`,
-                    line: index + 1  // Monaco uses 1-based line numbers
+                    line: index + 1,  // Monaco uses 1-based line numbers
+                    path: fullPath
                 });
+                
+                // Add current heading to stack
+                headingStack.push({ level, title: cleanTitle });
             }
         }
     });
     
-    console.log('[ExtractHeadings] Extracted', headings.length, 'headings:', headings.map(h => h.text));
+    console.log('[ExtractHeadings] Extracted', headings.length, 'headings:', headings.map(h => ({ title: h.text, path: h.path })));
     return headings;
 }
 
 /**
  * Setup hover provider with dynamic heading extraction
  */
-export function setupHoverProvider(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
+export function setupHoverProvider(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>, noteId?: number) {
     const disposable = monacoLanguages.registerHoverProvider("markdown", {
         provideHover: (model, position) => {
             // Dynamically extract headings from current text
             const currentText = model.getValue();
-            const headings = extractHeadingsAsKeywords(currentText);
+            const headings = extractHeadingsAsKeywords(currentText, noteId);
             
             // Merge with static keywords
             const allKeywords = [...keywords, ...headings];

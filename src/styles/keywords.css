@@ -61,6 +61,21 @@
     text-decoration: underline !important;
 }
 
+/* Wiki-style Link [[path]] */
+.wiki-link {
+    color: #569CD6 !important;
+    background-color: rgba(86, 156, 214, 0.1) !important;
+    border-radius: 3px !important;
+    padding: 2px 4px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+
+.wiki-link:hover {
+    background-color: rgba(86, 156, 214, 0.2) !important;
+}
+
 /* Monaco Editor Folding Icons - Smaller Size */
 .monaco-editor .margin .codicon {
     font-size: 13px !important;

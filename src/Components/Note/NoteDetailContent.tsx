@@ -108,6 +108,7 @@ export function NoteDetailContent() {
                         }}
                         disabled={isDisabled}
                         placeholder="Enter note description..."
+                        currentNoteId={activeNote?.id}
                     />
                 </CardContent>
             </div>

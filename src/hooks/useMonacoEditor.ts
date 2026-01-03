@@ -7,6 +7,13 @@ import { useEffect, useRef, useCallback } from "react";
 import * as monaco from "monaco-editor";
 import "@/styles/keywords.css";
 import {setupAutocomplete, setupDefinitionProvider, setupHoverProvider, setupMarkdownFolding, updateDecorations, extractHeadingsAsKeywords} from "@/utils/markdown.utils";
+import { useWorkspaceStore } from "@/store/index";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { noteService } from "@/services/note.service";
+import { useAuthStore } from "@/store/index";
+import { Note } from "@/types/note.types";
+import { constants } from "@/utils/constants";
+import { NoteEntity } from "@/types/workspace-v2.types";
 
 const monacoEditor = monaco.editor;
 const monacoLanguages = monaco.languages;
@@ -16,6 +23,7 @@ interface UseMonacoEditorOptions {
     onChange: (value: string) => void;
     disabled?: boolean;
     keywords: Array<{ text: string; type: string }>;
+    currentNoteId?: number; // Current note ID for cross-note references
 }
 
 export function useMonacoEditor({
@@ -23,6 +31,7 @@ export function useMonacoEditor({
     onChange,
     disabled = false,
     keywords,
+    currentNoteId,
 }: UseMonacoEditorOptions) {
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -32,6 +41,11 @@ export function useMonacoEditor({
     const isProgrammaticChangeRef = useRef(false);
     const keywordsRef = useRef(keywords);
     const decorationsRef = useRef<string[]>([]);
+    
+    // Workspace integration for cross-note navigation
+    const { currentWorkspace } = useWorkspaceStore();
+    const { openTab } = useEditorTabHelper();
+    const { $user } = useAuthStore();
 
     // Always keep the latest onChange callback
     useEffect(() => {
@@ -150,7 +164,7 @@ export function useMonacoEditor({
             const value = instance.getValue();
             
             // Extract headings from text and merge with keywords
-            const headings = extractHeadingsAsKeywords(value);
+            const headings = extractHeadingsAsKeywords(value, currentNoteId);
             const mergedKeywords = [...keywordsRef.current, ...headings];
             
             onChangeRef.current(value);
@@ -158,17 +172,99 @@ export function useMonacoEditor({
         });
 
         // Extract headings from initial value and merge with keywords
-        const initialHeadings = extractHeadingsAsKeywords(initialValue);
+        const initialHeadings = extractHeadingsAsKeywords(initialValue, currentNoteId);
         const initialMergedKeywords = [...keywords, ...initialHeadings];
 
+        // Navigation handler for cross-note references
+        const handleNavigateToNote = async (targetNoteId: number, headingPath: string) => {
+            console.log('[Monaco] Navigate to note:', targetNoteId, 'path:', headingPath);
+            
+            try {
+                // Check if note exists in current workspace
+                const noteInWorkspace = currentWorkspace?.flatData?.find(
+                    item => item.entityType === 3 && item.entityId === targetNoteId
+                );
+                
+                if (noteInWorkspace) {
+                    // Note exists in workspace - convert and open
+                    console.log('[Monaco] Note found in workspace:', noteInWorkspace);
+                    
+                    // Type guard: ensure it's a note entity
+                    if (noteInWorkspace.entityType !== 3) {
+                        console.error('[Monaco] Item is not a note');
+                        return;
+                    }
+                    
+                    const noteData = noteInWorkspace.data as NoteEntity;
+                    
+                    const note: Note = {
+                        id: noteData.id,
+                        name: noteData.name,
+                        description: noteData.description || "",
+                        hashtags: "",
+                        type: "idea",
+                        statusCode: noteData.statusCode,
+                        createdAt: new Date(noteData.createdAt),
+                        updatedAt: noteData.updatedAt ? new Date(noteData.updatedAt) : undefined,
+                        createdBy: "You",
+                        deletedAt: noteData.deletedAt ? new Date(noteData.deletedAt) : null,
+                        userId: noteData.userId,
+                    };
+                    
+                    openTab(note, constants.vscode.tab.tabTypes.note);
+                    
+                    // TODO: Scroll to heading after tab opens
+                    console.log('[Monaco] TODO: Scroll to heading:', headingPath);
+                } else {
+                    // Note not in workspace - fetch from API
+                    console.log('[Monaco] Note not in workspace, fetching from API...');
+                    
+                    if (!$user?.userToken) {
+                        console.error('[Monaco] No auth token available');
+                        return;
+                    }
+                    
+                    const result = await noteService._getNoteById($user.userToken, targetNoteId);
+                    
+                    if (result.success && result.data) {
+                        const noteDTO = Array.isArray(result.data) ? result.data[0] : result.data;
+                        
+                        const note: Note = {
+                            id: noteDTO.id,
+                            name: noteDTO.name,
+                            description: noteDTO.description || "",
+                            hashtags: "",
+                            type: "idea",
+                            statusCode: noteDTO.statusCode,
+                            createdAt: new Date(noteDTO.createdAt),
+                            updatedAt: noteDTO.updatedAt ? new Date(noteDTO.updatedAt) : undefined,
+                            createdBy: "You",
+                            deletedAt: noteDTO.deletedAt ? new Date(noteDTO.deletedAt) : null,
+                            userId: noteDTO.userId,
+                        };
+                        
+                        console.log('[Monaco] Note fetched from API:', note);
+                        openTab(note, constants.vscode.tab.tabTypes.note);
+                        
+                        // TODO: Scroll to heading after tab opens
+                        console.log('[Monaco] TODO: Scroll to heading:', headingPath);
+                    } else {
+                        console.error('[Monaco] Failed to fetch note:', result);
+                    }
+                }
+            } catch (error) {
+                console.error('[Monaco] Error navigating to note:', error);
+            }
+        };
+
         // Setup providers with ONLY static keywords (they will extract headings dynamically)
-        setupAutocomplete(instance, keywords);
+        setupAutocomplete(instance, keywords, currentNoteId);
         
         // Setup hover provider
-        setupHoverProvider(instance, keywords);
+        setupHoverProvider(instance, keywords, currentNoteId);
         
-        // Setup definition provider
-        setupDefinitionProvider(instance, keywords);
+        // Setup definition provider with navigation callback
+        setupDefinitionProvider(instance, keywords, currentNoteId, handleNavigateToNote);
         
         // Setup folding provider for markdown headings
         setupMarkdownFolding(instance);
@@ -190,14 +286,14 @@ export function useMonacoEditor({
             const value = editor.getValue();
             
             // Extract headings from current text and merge with keywords
-            const headings = extractHeadingsAsKeywords(value);
+            const headings = extractHeadingsAsKeywords(value, currentNoteId);
             const mergedKeywords = [...keywords, ...headings];
             
             updateDecorations(editor, value, mergedKeywords, decorationsRef);
         } catch (error) {
             console.warn('[Monaco Hook] Update decorations error (editor may be disposed)');
         }
-    }, [keywords]);
+    }, [keywords, currentNoteId]);
 
     // Handle disabled state
     useEffect(() => {
