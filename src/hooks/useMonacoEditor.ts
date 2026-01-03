@@ -143,6 +143,12 @@ export function useMonacoEditor({
             suggest: {
                 showWords: false, // Don't suggest random words from the document
                 showKeywords: true,
+                snippetsPreventQuickSuggestions: false,
+                localityBonus: true,
+                shareSuggestSelections: false,
+            },
+            parameterHints: {
+                enabled: true
             },
         });
 
@@ -335,8 +341,14 @@ function updateDecorations(
  */
 function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
     const disposable = monacoLanguages.registerCompletionItemProvider("markdown", {
+        // Trigger characters để autocomplete dễ xuất hiện hơn
+        triggerCharacters: ['#', '@', ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
+        
         provideCompletionItems: (model: any, position: any) => {
             const word = model.getWordUntilPosition(position);
+            const lineContent = model.getLineContent(position.lineNumber);
+            const textBeforeCursor = lineContent.substring(0, position.column - 1);
+            
             const range = {
                 startLineNumber: position.lineNumber,
                 endLineNumber: position.lineNumber,
@@ -344,15 +356,32 @@ function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, keywords
                 endColumn: word.endColumn,
             };
 
+            // Filter keywords dựa trên input
+            const inputText = word.word.toLowerCase();
             const suggestions = keywords
-                .filter((kw) => kw.text.toLowerCase().includes(word.word.toLowerCase()))
-                .map((kw) => ({
-                    label: kw.text,
-                    kind: monacoLanguages.CompletionItemKind.Text,
-                    insertText: kw.text,
-                    range,
-                    documentation: `Type: ${kw.type}`,
-                }));
+                .filter((kw) => {
+                    const kwLower = kw.text.toLowerCase();
+                    // Match từ đầu hoặc chứa input
+                    return kwLower.startsWith(inputText) || kwLower.includes(inputText);
+                })
+                .map((kw) => {
+                    // Icon dựa trên type
+                    let kind = monacoLanguages.CompletionItemKind.Keyword;
+                    if (kw.type === 'hashtag') kind = monacoLanguages.CompletionItemKind.Color;
+                    if (kw.type === 'status') kind = monacoLanguages.CompletionItemKind.Enum;
+                    if (kw.type === 'class') kind = monacoLanguages.CompletionItemKind.Class;
+                    if (kw.type === 'type') kind = monacoLanguages.CompletionItemKind.Interface;
+                    
+                    return {
+                        label: kw.text,
+                        kind: kind,
+                        insertText: kw.text,
+                        range,
+                        documentation: `Type: ${kw.type}`,
+                        detail: `${kw.type} keyword`,
+                        sortText: kw.text.toLowerCase().startsWith(inputText) ? `0${kw.text}` : `1${kw.text}`, // Prioritize starts-with matches
+                    };
+                });
 
             return { suggestions };
         },
