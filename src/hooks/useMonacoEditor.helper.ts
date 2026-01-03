@@ -1,5 +1,5 @@
 /**
- * useMonacoEditor Hook
+ * useMonacoEditorHelper Hook
  * Manage Monaco Editor instance, decorations, and autocomplete
  */
 
@@ -15,6 +15,7 @@ import { Note } from "@/types/note.types";
 import { Keyword } from "@/types/keyword.types";
 import { constants } from "@/utils/constants";
 import { NoteEntity } from "@/types/workspace-v2.types";
+import {useKeywordNavigationHelper} from "./keyword/useKeywordNavigation.helper";
 
 const monacoEditor = monaco.editor;
 const monacoLanguages = monaco.languages;
@@ -26,17 +27,15 @@ interface UseMonacoEditorOptions {
     keywords: Array<{ text: string; type: string }>;
     currentNoteId?: number; // Current note ID for cross-note references
     allKeywords?: Keyword[]; // All keywords with links for navigation
-    onKeywordClick?: (link: string) => void; // Callback when keyword is clicked
 }
 
-export function useMonacoEditor({
+export function useMonacoEditorHelper({
     initialValue,
     onChange,
     disabled = false,
     keywords,
     currentNoteId,
     allKeywords = [],
-    onKeywordClick,
 }: UseMonacoEditorOptions) {
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -46,6 +45,7 @@ export function useMonacoEditor({
     const isProgrammaticChangeRef = useRef(false);
     const keywordsRef = useRef(keywords);
     const decorationsRef = useRef<string[]>([]);
+    const { navigateToKeyword } = useKeywordNavigationHelper();
     
     // Workspace integration for cross-note navigation
     const { currentWorkspace } = useWorkspaceStore();
@@ -303,17 +303,16 @@ export function useMonacoEditor({
                 const link = wikiMatch[2];
 
                 if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                    if (onKeywordClick) {
-                        onKeywordClick(link);
-                        e.event.preventDefault();
-                        e.event.stopPropagation();
-                        return;
-                    }
+                    navigateToKeyword(link);
+                    e.event.preventDefault();
+                    e.event.stopPropagation();
+                    return;
                 }
+                
             }
 
             // Check if clicking on [keyword] format
-            if (allKeywords && onKeywordClick) {
+            if (allKeywords.length > 0) {
                 for (const kw of allKeywords) {
                     const pattern = `\\[${kw.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\](?!\\()`;
                     const regex = new RegExp(pattern, 'gi');
@@ -324,7 +323,7 @@ export function useMonacoEditor({
                         const endIndex = startIndex + match[0].length;
 
                         if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                            onKeywordClick(kw.link);
+                            navigateToKeyword(kw.link);
                             e.event.preventDefault();
                             e.event.stopPropagation();
                             return;

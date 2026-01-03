@@ -362,7 +362,7 @@ export function setupDefinitionProvider(
                 return null;
             }
 
-            // Navigation is handled by mouse click event in useMonacoEditor
+            // Navigation is handled by mouse click event in useMonacoEditorHelper
             // This definition provider is only for preview/peek functionality
 
             // Check if this is a cross-note reference (path with different noteId)

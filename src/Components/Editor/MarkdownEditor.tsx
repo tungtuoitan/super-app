@@ -4,7 +4,6 @@
  */
 
 import React, { useMemo, useState, useEffect } from "react";
-import { useMonacoEditor } from "@/hooks/useMonacoEditor";
 import { useStandardRegistryStore, useWorkspaceStore, useEditorTabsStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -13,6 +12,7 @@ import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, convertToOriginalVersion } from "@/utils/markdown.utils";
 import { Note } from "@/types/note.types";
+import {useMonacoEditorHelper} from "@/hooks/useMonacoEditor.helper";
 
 
 export function MarkdownEditor() {
@@ -87,14 +87,13 @@ export function MarkdownEditor() {
     }, [registries, allKeywords]);
 
 
-    const { containerRef } = useMonacoEditor({
+    const { containerRef } = useMonacoEditorHelper({
         initialValue: displayValue, // Use display version for editor
         onChange: handleDisplayChange, // Convert on change
         disabled,
         keywords,
         currentNoteId,
         allKeywords, // Pass all keywords for link resolution
-        onKeywordClick: navigateToKeyword, // Handle keyword navigation
     });
 
     return (
