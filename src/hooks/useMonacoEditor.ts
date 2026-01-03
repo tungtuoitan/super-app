@@ -36,6 +36,7 @@ export function useMonacoEditor({
     const onChangeRef = useRef(onChange);
     const isProgrammaticChangeRef = useRef(false);
     const keywordsRef = useRef(keywords);
+    const decorationsRef = useRef<string[]>([]);
 
     // Always keep the latest onChange callback
     useEffect(() => {
@@ -80,13 +81,33 @@ export function useMonacoEditor({
             keywordsCount: keywords?.length
         });
 
-        // Define custom dark theme with #09090B background
+        // Define custom dark theme with #09090B background and markdown syntax colors
         monacoEditor.defineTheme('custom-dark', {
             base: 'vs-dark',
             inherit: true,
-            rules: [],
+            rules: [
+                // Markdown-specific styling
+                { token: 'emphasis', fontStyle: 'italic' },
+                { token: 'strong', fontStyle: 'bold' },
+                { token: 'heading', foreground: '569CD6', fontStyle: 'bold' },
+                { token: 'keyword', foreground: 'C586C0' },
+                { token: 'string', foreground: 'CE9178' },
+                { token: 'comment', foreground: '6A9955' },
+                { token: 'type', foreground: '4EC9B0' },
+                { token: 'delimiter', foreground: 'D4D4D4' },
+                { token: 'number', foreground: 'B5CEA8' },
+                { token: 'regexp', foreground: 'D16969' },
+                // Custom keyword types
+                { token: 'keyword.hashtag', foreground: '569CD6', fontStyle: 'bold' },
+                { token: 'keyword.status', foreground: '4EC9B0', fontStyle: 'bold' },
+            ],
             colors: {
                 'editor.background': '#09090B',
+                'editor.foreground': '#D4D4D4',
+                'editorLineNumber.foreground': '#858585',
+                'editorCursor.foreground': '#AEAFAD',
+                'editor.selectionBackground': '#264F78',
+                'editor.inactiveSelectionBackground': '#3A3D41',
             }
         });
 
@@ -95,8 +116,7 @@ export function useMonacoEditor({
             language: "markdown",
             theme: "custom-dark",
             minimap: { enabled: false },
-            wordWrap: "wordWrapColumn",
-            wordWrapColumn: 120,
+            wordWrap: "on", // Wrap at viewport width
             fontSize: 14,
             fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
             lineNumbers: "off",
@@ -109,6 +129,19 @@ export function useMonacoEditor({
             automaticLayout: true,
             rulers: [],
             renderLineHighlight: "none",
+            // Markdown-specific options
+            quickSuggestions: {
+                other: true,
+                comments: true,
+                strings: true
+            },
+            acceptSuggestionOnCommitCharacter: true,
+            acceptSuggestionOnEnter: "on",
+            wordBasedSuggestions: "off", // Turn off default word-based suggestions to prioritize custom keywords
+            suggest: {
+                showWords: false, // Don't suggest random words from the document
+                showKeywords: true,
+            },
         });
 
         editorRef.current = instance;
@@ -127,11 +160,20 @@ export function useMonacoEditor({
             const value = instance.getValue();
             console.log('[Monaco Hook] 📝 Content changed, calling onChange:', value.substring(0, 50) + '...');
             onChangeRef.current(value);
-            updateDecorations(instance, value, keywordsRef.current);
+            updateDecorations(instance, value, keywordsRef.current, decorationsRef);
         });
 
         // Setup autocomplete
         setupAutocomplete(instance, keywords);
+        
+        // Setup hover provider
+        setupHoverProvider(instance, keywords);
+        
+        // Setup definition provider
+        setupDefinitionProvider(instance, keywords);
+        
+        // Initial decorations
+        updateDecorations(instance, initialValue, keywords, decorationsRef);
     }, []); // Empty deps - callback should never change
 
     // Update decorations when keywords change
@@ -145,7 +187,7 @@ export function useMonacoEditor({
 
         try {
             const value = editor.getValue();
-            updateDecorations(editor, value, keywords);
+            updateDecorations(editor, value, keywords, decorationsRef);
         } catch (error) {
             console.warn('[Monaco Hook] Update decorations error (editor may be disposed)');
         }
@@ -228,7 +270,8 @@ export function useMonacoEditor({
 function updateDecorations(
     editor: monaco.editor.IStandaloneCodeEditor,
     text: string,
-    keywords: Array<{ text: string; type: string }>
+    keywords: Array<{ text: string; type: string }>,
+    decorationsRef: React.MutableRefObject<string[]>
 ) {
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
@@ -255,7 +298,8 @@ function updateDecorations(
         }
     });
 
-    editor.deltaDecorations([], decorations);
+    // Clear all old decorations and apply new ones
+    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
 }
 
 /**
@@ -284,6 +328,74 @@ function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, keywords
 
             return { suggestions };
         },
+    });
+
+    return () => disposable.dispose();
+}
+
+/**
+ * Setup hover provider
+ */
+function setupHoverProvider(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
+    const disposable = monacoLanguages.registerHoverProvider("markdown", {
+        provideHover: (model, position) => {
+            const word = model.getWordAtPosition(position);
+            if (!word) return null;
+
+            const keyword = keywords.find(kw => kw.text.toLowerCase() === word.word.toLowerCase());
+            if (!keyword) return null;
+
+            return {
+                range: new monaco.Range(
+                    position.lineNumber,
+                    word.startColumn,
+                    position.lineNumber,
+                    word.endColumn
+                ),
+                contents: [
+                    { value: `**${keyword.text}**` },
+                    { value: `Type: \`${keyword.type}\`` },
+                    { value: `_Click to go to definition (Ctrl+Click or F12)_` }
+                ]
+            };
+        }
+    });
+
+    return () => disposable.dispose();
+}
+
+/**
+ * Setup definition provider
+ */
+function setupDefinitionProvider(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
+    const disposable = monacoLanguages.registerDefinitionProvider("markdown", {
+        provideDefinition: (model, position) => {
+            const word = model.getWordAtPosition(position);
+            if (!word) return null;
+
+            const keyword = keywords.find(kw => kw.text.toLowerCase() === word.word.toLowerCase());
+            if (!keyword) return null;
+
+            // Find first occurrence of this keyword in the document
+            const text = model.getValue();
+            const regex = new RegExp(`\\b${escapeRegex(keyword.text)}\\b`, "i");
+            const match = regex.exec(text);
+
+            if (!match) return null;
+
+            const startPos = model.getPositionAt(match.index);
+            const endPos = model.getPositionAt(match.index + keyword.text.length);
+
+            return {
+                uri: model.uri,
+                range: new monaco.Range(
+                    startPos.lineNumber,
+                    startPos.column,
+                    endPos.lineNumber,
+                    endPos.column
+                )
+            };
+        }
     });
 
     return () => disposable.dispose();

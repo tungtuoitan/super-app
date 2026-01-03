@@ -7,7 +7,6 @@
 import React, { useEffect, useRef } from "react";
 import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from "@/shared/components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import { EditorWithKeywords } from "@/Components/Editor/EditorWithKeywords";
 import { Note } from "../../types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
@@ -17,6 +16,7 @@ import { useEditorTabsStore, useStandardRegistryStore, useWorkspaceStore } from 
 import { constants } from "@/utils/constants";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import {useTreeStatusHelper} from "@/hooks/workspace/useTreeStatusHelper";
+import {MarkdownEditor} from "../Editor/MarkdownEditor";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -109,7 +109,7 @@ export function NoteDetailContent() {
             {/* Full Width - Description */}
             <div className="border-none">
                 <CardContent className="p-0">
-                    <EditorWithKeywords
+                    <MarkdownEditor
                         value={activeNote?.description || ""}
                         onChange={(newValue) => {
                             console.log("[NoteDetail] Description onChange fired:", { 

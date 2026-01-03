@@ -1,13 +1,31 @@
 /* Keyword Highlighting Styles */
 
 .keyword-hashtag {
-    background-color: rgba(250, 208, 0, 0.3) !important;
     color: #fad000 !important;
-    font-weight: bold !important;
+    font-weight: 500 !important;
 }
 
 .keyword-status {
-    background-color: rgba(100, 150, 200, 0.3) !important;
     color: #6496c8 !important;
-    font-weight: bold !important;
+    font-weight: 500 !important;
+}
+
+.keyword-keyword {
+    color: #C586C0 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-class {
+    color: #4EC9B0 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-type {
+    color: #569CD6 !important;
+    font-weight: 500 !important;
+}
+
+.keyword-comment {
+    color: #FFA500 !important;
+    font-weight: 500 !important;
 }

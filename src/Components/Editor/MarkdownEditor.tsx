@@ -1,5 +1,5 @@
 /**
- * EditorWithKeywords Component
+ * MarkdownEditor Component
  * Monaco-based editor with keyword highlighting and autocomplete
  */
 
@@ -15,8 +15,8 @@ interface EditorWithKeywordsProps {
     placeholder?: string;
 }
 
-export function EditorWithKeywords({ value, onChange, disabled = false, placeholder }: EditorWithKeywordsProps) {
-    console.log('[EditorWithKeywords] Component rendering...', {
+export function MarkdownEditor({ value, onChange, disabled = false, placeholder }: EditorWithKeywordsProps) {
+    console.log('[MarkdownEditor] Component rendering...', {
         valueLength: value?.length,
         valuePreview: value?.substring(0, 50),
         disabled,
@@ -26,7 +26,7 @@ export function EditorWithKeywords({ value, onChange, disabled = false, placehol
 
     const { registries } = useStandardRegistryStore();
 
-    // Extract keywords from registries
+    // Extract keywords from registries + add dummy keywords
     const keywords = useMemo(() => {
         const kws = registries
             .filter((r) => r.isActive && (r.type === constants.standardRegistryFE.types.hashtag || r.type === constants.standardRegistryFE.types.noteStatus))
@@ -34,11 +34,32 @@ export function EditorWithKeywords({ value, onChange, disabled = false, placehol
                 text: r.code,
                 type: r.type === constants.standardRegistryFE.types.hashtag ? "hashtag" : "status",
             }));
-        console.log('[EditorWithKeywords] Keywords computed:', kws.length);
-        return kws;
+        
+        // Add dummy keywords for testing
+        const dummyKeywords = [
+            { text: "function", type: "keyword" },
+            { text: "const", type: "keyword" },
+            { text: "let", type: "keyword" },
+            { text: "var", type: "keyword" },
+            { text: "return", type: "keyword" },
+            { text: "import", type: "keyword" },
+            { text: "export", type: "keyword" },
+            { text: "class", type: "class" },
+            { text: "interface", type: "class" },
+            { text: "type", type: "class" },
+            { text: "string", type: "type" },
+            { text: "number", type: "type" },
+            { text: "boolean", type: "type" },
+            { text: "Cộng hoà xã hội chủ nghĩa việt nam", type: "comment" },
+            { text: "FIXME", type: "comment" },
+            { text: "NOTE", type: "comment" },
+        ];
+        
+        console.log('[MarkdownEditor] Keywords computed:', kws.length + dummyKeywords.length);
+        return [...kws, ...dummyKeywords];
     }, [registries]);
 
-    console.log('[EditorWithKeywords] About to call useMonacoEditor...');
+    console.log('[MarkdownEditor] About to call useMonacoEditor...');
 
     const { containerRef } = useMonacoEditor({
         initialValue: value,
@@ -47,7 +68,7 @@ export function EditorWithKeywords({ value, onChange, disabled = false, placehol
         keywords,
     });
 
-    console.log('[EditorWithKeywords] useMonacoEditor returned, containerRef:', !!containerRef);
+    console.log('[MarkdownEditor] useMonacoEditor returned, containerRef:', !!containerRef);
 
     return (
         <div
