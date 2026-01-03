@@ -29,14 +29,15 @@ export function updateDecorations(
         }
     });
 
-    // Highlight keywords
+    // Highlight keywords in [name] format
     keywords.forEach((kw) => {
-        const regex = new RegExp(`\\b${escapeRegex(kw.text)}\\b`, "gi");
+        // Match [keyword] pattern (not markdown links [text](url))
+        const regex = new RegExp(`\\[${escapeRegex(kw.text)}\\](?!\\()`, "gi");
         let match;
 
         while ((match = regex.exec(text)) !== null) {
             const startPos = model.getPositionAt(match.index);
-            const endPos = model.getPositionAt(match.index + kw.text.length);
+            const endPos = model.getPositionAt(match.index + match[0].length);
 
             // Skip if this keyword is on a heading line (the title itself)
             if (headingLines.has(startPos.lineNumber)) {
@@ -82,10 +83,10 @@ export function updateDecorations(
         });
     }
 
-    // Wiki-style links [[path]]
-    const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+    // Wiki-style links [[name|link]]
+    const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
     let wikiMatch;
-    
+
     while ((wikiMatch = wikiLinkRegex.exec(text)) !== null) {
         const startPos = model.getPositionAt(wikiMatch.index);
         const endPos = model.getPositionAt(wikiMatch.index + wikiMatch[0].length);
@@ -114,7 +115,7 @@ export function updateDecorations(
 export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>, noteId?: number) {
     const disposable = monacoLanguages.registerCompletionItemProvider("markdown", {
         // Trigger characters để autocomplete dễ xuất hiện hơn
-        triggerCharacters: ['#', '@', ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
+        triggerCharacters: ['#', '@', '[', ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
         
         provideCompletionItems: (model: any, position: any) => {
             const lineContent = model.getLineContent(position.lineNumber);
@@ -238,10 +239,14 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
             console.log('[Autocomplete] Matches:', allMatches.length, 'suggestions');
 
             // Determine start column - use first match or cursor position
-            const startColumn = allMatches.length > 0 && allMatches[0].matchedText 
-                ? allMatches[0].startColumn 
+            const startColumn = allMatches.length > 0 && allMatches[0].matchedText
+                ? allMatches[0].startColumn
                 : position.column;
-            
+
+            // Check if user already typed opening bracket
+            const hasOpeningBracket = textBeforeCursor.trimEnd().endsWith('[') ||
+                                     (startColumn > 1 && lineContent[startColumn - 2] === '[');
+
             const suggestions = allMatches
                 .map((matchResult) => {
                     const kw = matchResult.keyword;
@@ -252,19 +257,30 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
                     if (kw.type === 'class') kind = monacoLanguages.CompletionItemKind.Class;
                     if (kw.type === 'type') kind = monacoLanguages.CompletionItemKind.Interface;
                     if (kw.type.startsWith('heading-')) kind = monacoLanguages.CompletionItemKind.Reference; // Heading icon
-                    
+
+                    // Smart insertion: if user typed '[', only insert 'keyword]'
+                    let insertText = `[${kw.text}]`;
+                    let rangeStartColumn = startColumn;
+
+                    if (hasOpeningBracket) {
+                        // User already typed '[', just insert 'keyword]'
+                        insertText = `${kw.text}]`;
+                        // Adjust range to not replace the '['
+                        rangeStartColumn = startColumn;
+                    }
+
                     // Range phải thay thế từ đầu partial match đến cursor
                     const range = {
                         startLineNumber: position.lineNumber,
                         endLineNumber: position.lineNumber,
-                        startColumn: startColumn,
+                        startColumn: rangeStartColumn,
                         endColumn: position.column,
                     };
-                    
+
                     return {
                         label: kw.text,
                         kind: kind,
-                        insertText: kw.text,
+                        insertText: insertText,
                         range,
                         documentation: `Type: ${kw.type}`,
                         detail: `${kw.type} keyword`,
@@ -285,10 +301,12 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
  * Setup definition provider with dynamic heading extraction and cross-note navigation
  */
 export function setupDefinitionProvider(
-    editor: monaco.editor.IStandaloneCodeEditor, 
+    editor: monaco.editor.IStandaloneCodeEditor,
     keywords: Array<{ text: string; type: string }>,
     noteId?: number,
-    onNavigateToNote?: (targetNoteId: number, headingPath: string) => void
+    onNavigateToNote?: (targetNoteId: number, headingPath: string) => void,
+    allKeywordsWithLinks?: Array<{ name: string; link: string; type: string }>,
+    onKeywordClick?: (link: string) => void
 ) {
     const disposable = monacoLanguages.registerDefinitionProvider("markdown", {
         provideDefinition: (model, position) => {
@@ -303,73 +321,43 @@ export function setupDefinitionProvider(
             const lineContent = model.getLineContent(position.lineNumber);
             const clickColumn = position.column;
             
-            // Strategy 0: Check if clicking on [[path]] wiki-style link
-            // Pattern: [[path/to/heading]] or [[heading]]
-            const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+            // Strategy 0: Check if clicking on [[name|link]] wiki-style link (original format)
+            // This handles the case where user is viewing original content
+            // Pattern: [[name|link]] (both external and internal)
+            const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
             let wikiMatch;
-            
+
             while ((wikiMatch = wikiLinkRegex.exec(lineContent)) !== null) {
                 const startIndex = wikiMatch.index;
                 const endIndex = startIndex + wikiMatch[0].length;
-                const path = wikiMatch[1];
-                
+                const name = wikiMatch[1];
+                const link = wikiMatch[2];
+
                 // Check if cursor is within this link (1-based columns)
                 if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                    console.log('[DefinitionProvider] Clicked on wiki link:', path);
-                    
-                    // Parse path to extract noteId
-                    // Formats:
-                    // - 123/Introduction/Getting Started
-                    // - Introduction (same note)
-                    
-                    let targetNoteId: number | null = null;
-                    let headingName: string;
-                    
-                    if (/^\d+\//.test(path)) {
-                        // Full format: 123/Introduction/Getting Started
-                        const pathMatch = path.match(/^(\d+)\/(.+)$/);
-                        if (pathMatch) {
-                            targetNoteId = parseInt(pathMatch[1], 10);
-                            const remainingPath = pathMatch[2];
-                            const segments = remainingPath.split('/');
-                            headingName = segments[segments.length - 1];
-                        } else {
-                            return null;
-                        }
-                    } else {
-                        // Just heading name: Introduction (same note)
-                        const segments = path.split('/');
-                        headingName = segments[segments.length - 1];
-                    }
-                    
-                    // If cross-note reference (different noteId), trigger navigation
-                    if (targetNoteId && noteId && targetNoteId !== noteId && onNavigateToNote) {
-                        console.log('[DefinitionProvider] Cross-note wiki link detected');
-                        onNavigateToNote(targetNoteId, path);
-                        return null;
-                    }
-                    
-                    // Same note or no noteId in path - find heading and jump
-                    // Continue with regular heading search using headingName
-                    // We'll search for this heading below
+                    console.log('[DefinitionProvider] Hovering on wiki link (preview only):', { name, link });
+                    // Don't navigate here - navigation is handled by mouse click event
+                    // This is only for preview/peek functionality
                 }
             }
-            
-            // Try to find multi-word keyword at cursor position
-            let keyword = null;
-            let matchRange = null;
-            
-            // Check each keyword to see if cursor is within it
+
+            // Try to find multi-word keyword at cursor position in [keyword] format
+            let keyword: { text: string; type: string; path?: string } | null = null;
+            let matchRange: { startColumn: number; endColumn: number } | null = null;
+
+            // Check each keyword to see if cursor is within [keyword] pattern
             for (const kw of allKeywords) {
-                const kwLower = kw.text.toLowerCase();
+                // Match [keyword] pattern (not markdown links)
+                const pattern = `\\[${escapeRegex(kw.text)}\\](?!\\()`;
+                const regex = new RegExp(pattern, 'gi');
                 const lineLower = lineContent.toLowerCase();
-                
-                // Find all occurrences in the line
-                let startIndex = 0;
-                while ((startIndex = lineLower.indexOf(kwLower, startIndex)) !== -1) {
-                    const endIndex = startIndex + kw.text.length;
-                    
-                    // Check if cursor is within this keyword (1-based columns)
+
+                let match;
+                while ((match = regex.exec(lineContent)) !== null) {
+                    const startIndex = match.index;
+                    const endIndex = startIndex + match[0].length;
+
+                    // Check if cursor is within this [keyword] (1-based columns)
                     if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
                         keyword = kw;
                         matchRange = {
@@ -378,13 +366,20 @@ export function setupDefinitionProvider(
                         };
                         break;
                     }
-                    startIndex = endIndex;
                 }
-                
+
                 if (keyword) break;
             }
             
-            if (!keyword) return null;
+            if (!keyword) {
+                console.log('[DefinitionProvider] No keyword found at cursor position');
+                return null;
+            }
+
+            console.log('[DefinitionProvider] Hovering on keyword (preview only):', keyword.text, 'Type:', keyword.type);
+
+            // Navigation is handled by mouse click event in useMonacoEditor
+            // This definition provider is only for preview/peek functionality
 
             // Check if this is a cross-note reference (path with different noteId)
             // Type assertion: keyword from headings will have 'path' property
@@ -579,84 +574,100 @@ export function escapeRegex(str: string): string {
 }
 
 /**
- * Convert original version (with links) to display version (clean text)
- * Original: [[super-app/123/Introduction]] or [[Introduction]]
- * Display: Introduction
- * 
- * @param text - Original markdown with wiki-style links
- * @returns Clean display text
+ * Extract external links from markdown text
+ * Format: [[name|url]] where url starts with http:// or https://
+ * @param text - Markdown text
+ * @returns Array of {name, url} objects
+ */
+export function extractExternalLinks(text: string): Array<{ name: string; url: string }> {
+    const externalLinks: Array<{ name: string; url: string }> = [];
+
+    // Regex to match [[name|link]] pattern
+    const linkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
+    let match;
+
+    while ((match = linkRegex.exec(text)) !== null) {
+        const name = match[1].trim();
+        const link = match[2].trim();
+
+        // Only include external links (those starting with http:// or https://)
+        if (name && link && (link.startsWith('http://') || link.startsWith('https://'))) {
+            externalLinks.push({ name, url: link });
+        }
+    }
+
+    return externalLinks;
+}
+
+/**
+ * Convert original version to display version
+ * Original: [[name|link]] (both external and internal)
+ * Display: [name]
+ *
+ * @param text - Original markdown with [[name|link]] format
+ * @returns Display text with single brackets [name]
  */
 export function convertToDisplayVersion(text: string): string {
-    // Match pattern: [[path/to/heading]] or [[heading]]
-    // Extract just the last part (heading name)
-    return text.replace(/\[\[([^\]]+)\]\]/g, (match, path) => {
-        // Extract last segment of path as display text
-        // super-app/123/Introduction/Getting Started → Getting Started
-        // Introduction → Introduction
-        const segments = path.split('/');
-        return segments[segments.length - 1];
+    // Convert [[name|link]] → [name]
+    return text.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, (match, name, link) => {
+        return `[${name}]`;
     });
 }
 
 /**
- * Convert display version to original version (with wiki-style links)
- * This requires current note context and heading extraction
- * 
- * @param text - Display text
- * @param noteId - Current note ID
- * @returns Original markdown with generated [[path]] links
+ * Convert display version to original version
+ * Display: [name]
+ * Original: [[name|link]] (both external and internal)
+ *
+ * @param text - Display text with single brackets [name]
+ * @param allKeywords - All keywords with name and link from database
+ * @returns Original markdown with [[name|link]] format
  */
-export function convertToOriginalVersion(text: string, noteId?: number): string {
-    if (!noteId) return text;
-    
-    // Extract all headings from current text to build link map
-    const headings = extractHeadingsAsKeywords(text, noteId);
-    
-    // Build a map of keyword -> path for replacement
-    const keywordPathMap = new Map<string, string>();
-    headings.forEach(h => {
-        if (h.path) {
-            keywordPathMap.set(h.text.toLowerCase(), h.path);
-        }
+export function convertToOriginalVersion(
+    text: string,
+    allKeywords: Array<{ name: string; link: string }>
+): string {
+    if (!allKeywords || allKeywords.length === 0) return text;
+
+    // Build a map of keyword name (lowercase) -> link for fast lookup
+    const keywordLinkMap = new Map<string, string>();
+    allKeywords.forEach(kw => {
+        keywordLinkMap.set(kw.name.toLowerCase(), kw.link);
     });
-    
-    let result = text;
+
+    // Process text line by line
     const lines = text.split('\n');
     const resultLines: string[] = [];
-    
+
     lines.forEach((line) => {
         const trimmedLine = line.trim();
-        
+
         // Skip heading lines themselves
         if (/^#{1,6}\s+/.test(trimmedLine)) {
             resultLines.push(line);
             return;
         }
-        
+
         let processedLine = line;
-        
-        // For each keyword, check if it appears in this line
-        keywordPathMap.forEach((path, keywordLower) => {
-            // Find the original keyword with proper casing
-            const originalKeyword = Array.from(keywordPathMap.entries())
-                .find(([k]) => k === keywordLower)?.[0];
-            
-            if (!originalKeyword) return;
-            
-            // Get actual keyword text from headings
-            const heading = headings.find(h => h.text.toLowerCase() === keywordLower);
-            if (!heading) return;
-            
-            // Create regex to match whole keyword (case-insensitive, word boundary)
-            const regex = new RegExp(`\\b(${escapeRegex(heading.text)})\\b`, 'gi');
-            
-            // Replace all occurrences with [[path]]
-            processedLine = processedLine.replace(regex, `[[${path}]]`);
+
+        // Match [keyword] pattern (but not [text](url) markdown links)
+        // Replace with [[name|link]] for all keywords
+        processedLine = processedLine.replace(/\[([^\]]+)\](?!\()/g, (match, keywordName) => {
+            const keywordLower = keywordName.trim().toLowerCase();
+            const link = keywordLinkMap.get(keywordLower);
+
+            if (link) {
+                // Found matching keyword, convert to [[name|link]]
+                return `[[${keywordName}|${link}]]`;
+            } else {
+                // Not a keyword, keep as is
+                return match;
+            }
         });
-        
+
         resultLines.push(processedLine);
     });
-    
+
     return resultLines.join('\n');
 }
 
@@ -721,7 +732,7 @@ export function extractHeadingsAsKeywords(text: string, noteId?: number): Array<
         }
     });
     
-    console.log('[ExtractHeadings] Extracted', headings.length, 'headings:', headings.map(h => ({ title: h.text, path: h.path })));
+    // console.log('[ExtractHeadings] Extracted', headings.length, 'headings:', headings.map(h => ({ title: h.text, path: h.path })));
     return headings;
 }
 
@@ -742,21 +753,22 @@ export function setupHoverProvider(editor: monaco.editor.IStandaloneCodeEditor, 
             const lineContent = model.getLineContent(position.lineNumber);
             const hoverColumn = position.column;
             
-            // Try to find multi-word keyword at cursor position
+            // Try to find multi-word keyword at cursor position in [keyword] format
             let keyword = null;
             let matchRange = null;
-            
-            // Check each keyword to see if cursor is within it
+
+            // Check each keyword to see if cursor is within [keyword] pattern
             for (const kw of allKeywords) {
-                const kwLower = kw.text.toLowerCase();
-                const lineLower = lineContent.toLowerCase();
-                
-                // Find all occurrences in the line
-                let startIndex = 0;
-                while ((startIndex = lineLower.indexOf(kwLower, startIndex)) !== -1) {
-                    const endIndex = startIndex + kw.text.length;
-                    
-                    // Check if cursor is within this keyword (1-based columns)
+                // Match [keyword] pattern (not markdown links)
+                const pattern = `\\[${escapeRegex(kw.text)}\\](?!\\()`;
+                const regex = new RegExp(pattern, 'gi');
+
+                let match;
+                while ((match = regex.exec(lineContent)) !== null) {
+                    const startIndex = match.index;
+                    const endIndex = startIndex + match[0].length;
+
+                    // Check if cursor is within this [keyword] (1-based columns)
                     if (hoverColumn >= startIndex + 1 && hoverColumn <= endIndex + 1) {
                         keyword = kw;
                         matchRange = {
@@ -766,9 +778,8 @@ export function setupHoverProvider(editor: monaco.editor.IStandaloneCodeEditor, 
                         };
                         break;
                     }
-                    startIndex = endIndex;
                 }
-                
+
                 if (keyword) break;
             }
             

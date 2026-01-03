@@ -7,6 +7,7 @@
 import { useSnackbar } from "notistack";
 import { useStandardRegistryStore } from "@/store/standardRegistry/StandardRegistry.store";
 import { standardRegistryService } from "@/services/standardRegistry.service";
+import { keywordService } from "@/services/keyword.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { StandardRegistry } from "@/types/standardRegistry.types";
@@ -25,7 +26,15 @@ const transformStandardRegistryData = (data: any[]): StandardRegistry[] => {
 
 export const useStandardRegistryHelper = () => {
     const { $user } = useAuthStore();
-    const { registries, setRegistries, setRegistriesLoading, setRegistriesError } = useStandardRegistryStore();
+    const {
+        registries,
+        setRegistries,
+        setRegistriesLoading,
+        setRegistriesError,
+        setAllKeywords,
+        setKeywordsLoading,
+        setKeywordsError
+    } = useStandardRegistryStore();
     const { enqueueSnackbar } = useSnackbar();
 
     /**
@@ -66,7 +75,37 @@ export const useStandardRegistryHelper = () => {
         }
     };
 
+    /**
+     * Load all keywords from backend (workspaces, folders, notes, headings, external links)
+     * Stores in global state for markdown editor autocomplete
+     */
+    const loadKeywords = async () => {
+        try {
+            setKeywordsLoading(true);
+            const token = $user.userToken;
+
+            // Call API to get all keywords
+            const keywords = await keywordService._getKeywords(token);
+
+            setAllKeywords(keywords);
+            setKeywordsError(null);
+        } catch (err) {
+            const errorMessage = await parseApiError(err);
+            setKeywordsError(new Error(errorMessage));
+
+            // Show snackbar for unauthorized errors
+            if (isUnauthorizedError(err)) {
+                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+            } else {
+                console.error("Failed to load keywords:", errorMessage);
+            }
+        } finally {
+            setKeywordsLoading(false);
+        }
+    };
+
     return {
         loadStandardRegistries,
+        loadKeywords,
     };
 };

@@ -5,7 +5,8 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { useMonacoEditor } from "@/hooks/useMonacoEditor";
-import { useStandardRegistryStore } from "@/store/index";
+import { useStandardRegistryStore, useWorkspaceStore } from "@/store/index";
+import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, convertToOriginalVersion } from "@/utils/markdown.utils";
 
@@ -18,58 +19,81 @@ interface EditorWithKeywordsProps {
 }
 
 export function MarkdownEditor({ value, onChange, disabled = false, placeholder, currentNoteId }: EditorWithKeywordsProps) {
+    const { registries, allKeywords } = useStandardRegistryStore();
+    const { navigateToKeyword } = useKeywordNavigationHelper();
+    const {currentWorkspace } = useWorkspaceStore();
 
-    const { registries } = useStandardRegistryStore();
-    
     // Internal state: Display version (clean text for editing)
     const [displayValue, setDisplayValue] = useState(() => convertToDisplayVersion(value));
-    
+
     // Sync display version when external value changes
     useEffect(() => {
         const newDisplayValue = convertToDisplayVersion(value);
         setDisplayValue(newDisplayValue);
     }, [value]);
-    
+
     // Handle internal changes: Update display and convert to original for parent
     const handleDisplayChange = (newDisplayValue: string) => {
         setDisplayValue(newDisplayValue);
-        
+
         // Convert display → original before calling parent onChange
-        const originalValue = convertToOriginalVersion(newDisplayValue, currentNoteId);
+        // Use allKeywords to map [name] to [[link]]
+        const originalValue = convertToOriginalVersion(newDisplayValue, allKeywords);
         onChange(originalValue);
     };
 
-    // Extract keywords from registries + add dummy keywords
+    // Extract keywords from registries + allKeywords
     const keywords = useMemo(() => {
-        const kws = registries
+        // Get hashtag and status keywords from registries
+        const registryKeywords = registries
             .filter((r) => r.isActive && (r.type === constants.standardRegistryFE.types.hashtag || r.type === constants.standardRegistryFE.types.noteStatus))
             .map((r) => ({
                 text: r.code,
                 type: r.type === constants.standardRegistryFE.types.hashtag ? "hashtag" : "status",
             }));
-        
-        // Add dummy keywords for testing
-        const dummyKeywords = [
-            { text: "function", type: "keyword" },
-            { text: "const", type: "keyword" },
-            { text: "let", type: "keyword" },
-            { text: "var", type: "keyword" },
-            { text: "return", type: "keyword" },
-            { text: "import", type: "keyword" },
-            { text: "export", type: "keyword" },
-            { text: "class", type: "class" },
-            { text: "interface", type: "class" },
-            { text: "type", type: "class" },
-            { text: "string", type: "type" },
-            { text: "number", type: "type" },
-            { text: "boolean", type: "type" },
-            { text: "Cộng hoà xã hội chủ nghĩa việt nam", type: "comment" },
-            { text: "FIXME", type: "comment" },
-            { text: "NOTE", type: "comment" },
+
+        // Get keywords from allKeywords (workspaces, folders, notes, headings, external links)
+        // Filter out deleted keywords if needed
+        const systemKeywords = allKeywords
+            .filter((k) => !k.isDeleted) // Only show non-deleted keywords
+            .map((k) => ({
+                text: k.name,
+                type: k.type,
+                // type: "comment", // Show all as comment type for now
+            }));
+        console.log("System Keywords:", systemKeywords);
+
+        //         const dummyKeywords = [
+        //     { text: "function", type: "keyword" },
+        //     { text: "const", type: "keyword" },
+        //     { text: "let", type: "keyword" },
+        //     { text: "var", type: "keyword" },
+        //     { text: "return", type: "keyword" },
+        //     { text: "import", type: "keyword" },
+        //     { text: "export", type: "keyword" },
+        //     { text: "class", type: "class" },
+        //     { text: "interface", type: "class" },
+        //     { text: "type", type: "class" },
+        //     { text: "string", type: "type" },
+        //     { text: "number", type: "type" },
+        //     { text: "boolean", type: "type" },
+        //     { text: "Cộng hoà xã hội chủ nghĩa việt nam", type: "comment" },
+        //     { text: "FIXME", type: "comment" },
+        //     { text: "NOTE", type: "comment" },
+
+        // ];
+
+        return [
+            // ...registryKeywords,
+            ...systemKeywords,
         ];
-        
-        return [...kws, ...dummyKeywords];
-    }, [registries]);
+    }, [registries, allKeywords]);
+    console.log("Keywords for MarkdownEditor:", keywords);
+    console.log("[MarkdownEditor] allKeywords to pass:", {
+        count: allKeywords.length,
+        sample: allKeywords.slice(0, 3).map((k) => ({ name: k.name, type: k.type, link: k.link })),
+    });
+    console.log("[MarkdownEditor] navigateToKeyword function:", navigateToKeyword);
 
     const { containerRef } = useMonacoEditor({
         initialValue: displayValue, // Use display version for editor
@@ -77,6 +101,8 @@ export function MarkdownEditor({ value, onChange, disabled = false, placeholder,
         disabled,
         keywords,
         currentNoteId,
+        allKeywords, // Pass all keywords for link resolution
+        onKeywordClick: navigateToKeyword, // Handle keyword navigation
     });
 
     return (

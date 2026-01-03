@@ -4,12 +4,14 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { Note, UpsertNoteDTO } from "@/types/note.types";
 import { noteService } from "@/services/note.service";
+import { keywordService } from "@/services/keyword.service";
 import { workspaceService } from "@/services/workspace.service";
 import { constants } from "@/utils/constants";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { transformANote } from "@/utils/note.utils";
+import { extractExternalLinks } from "@/utils/markdown.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
@@ -17,6 +19,7 @@ import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
@@ -26,9 +29,10 @@ export const useNoteDetailHelper = () => {
     const { currentWorkspace } = useWorkspaceStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
-    const { registries, registriesLoading } = useStandardRegistryStore();
+    const { registries, registriesLoading, allKeywords } = useStandardRegistryStore();
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useGridControlStore();
+    const { loadKeywords } = useStandardRegistryHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
         
@@ -104,6 +108,38 @@ export const useNoteDetailHelper = () => {
                 };
 
                 // ============================================================
+                // Step 3.5: Auto-insert external keywords if any found in description
+                // ============================================================
+                if (activeNote.description) {
+                    const externalLinks = extractExternalLinks(activeNote.description);
+
+                    if (externalLinks.length > 0) {
+                        // Filter out links that already exist in allKeywords
+                        const newExternalLinks = externalLinks.filter(link => {
+                            return !allKeywords.some(k => k.type === 'external' && k.link === link.url);
+                        });
+
+                        // If there are new external links, upsert them
+                        if (newExternalLinks.length > 0) {
+                            try {
+                                const upsertRequests = newExternalLinks.map(link => ({
+                                    name: link.name,
+                                    link: link.url,
+                                }));
+
+                                await keywordService._upsertExternalKeywords(token, upsertRequests);
+
+                                // Reload keywords to update allKeywords state
+                                loadKeywords();
+                            } catch (err) {
+                                // Log error but don't block note save
+                                console.error("Failed to insert external keywords:", err);
+                            }
+                        }
+                    }
+                }
+
+                // ============================================================
                 // Step 4: Call batch API to upsert note
                 // ============================================================
                 const result = await noteService._upsertNotes(token, [upsertData]);
@@ -153,6 +189,8 @@ export const useNoteDetailHelper = () => {
                 } else if (moduleName === constants.modules.workspace) {
                     loadTree();
                 }
+
+                loadKeywords();
 
                 return transformedNote;
             } catch (error) {

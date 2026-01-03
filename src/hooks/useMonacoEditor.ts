@@ -12,6 +12,7 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { noteService } from "@/services/note.service";
 import { useAuthStore } from "@/store/index";
 import { Note } from "@/types/note.types";
+import { Keyword } from "@/types/keyword.types";
 import { constants } from "@/utils/constants";
 import { NoteEntity } from "@/types/workspace-v2.types";
 
@@ -24,6 +25,8 @@ interface UseMonacoEditorOptions {
     disabled?: boolean;
     keywords: Array<{ text: string; type: string }>;
     currentNoteId?: number; // Current note ID for cross-note references
+    allKeywords?: Keyword[]; // All keywords with links for navigation
+    onKeywordClick?: (link: string) => void; // Callback when keyword is clicked
 }
 
 export function useMonacoEditor({
@@ -32,6 +35,8 @@ export function useMonacoEditor({
     disabled = false,
     keywords,
     currentNoteId,
+    allKeywords = [],
+    onKeywordClick,
 }: UseMonacoEditorOptions) {
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -98,6 +103,14 @@ export function useMonacoEditor({
                 // Custom keyword types
                 { token: 'keyword.hashtag', foreground: '569CD6', fontStyle: 'bold' },
                 { token: 'keyword.status', foreground: '4EC9B0', fontStyle: 'bold' },
+                { token: 'workspace', foreground: '6A9955', fontStyle: 'bold' },
+                { token: 'note', foreground: '6A9955', fontStyle: 'bold' },
+                { token: 'heading-1', foreground: '6A9955', fontStyle: 'bold' },
+                { token: 'heading-2', foreground: '6A9955', fontStyle: 'bold' },
+                { token: 'heading-3', foreground: '6A9955', fontStyle: 'bold' },
+                { token: 'heading-4', foreground: '6A9955', fontStyle: 'bold' },
+                { token: 'heading-5', foreground: '6A9955', fontStyle: 'bold' },
+                { token: 'heading-6', foreground: '6A9955', fontStyle: 'bold' },
             ],
             colors: {
                 'editor.background': '#09090B',
@@ -165,7 +178,8 @@ export function useMonacoEditor({
             
             // Extract headings from text and merge with keywords
             const headings = extractHeadingsAsKeywords(value, currentNoteId);
-            const mergedKeywords = [...keywordsRef.current, ...headings];
+            const mergedKeywords = [...keywordsRef.current];
+            // const mergedKeywords = [...keywordsRef.current, ...headings];
             
             onChangeRef.current(value);
             updateDecorations(instance, value, mergedKeywords, decorationsRef);
@@ -259,16 +273,85 @@ export function useMonacoEditor({
 
         // Setup providers with ONLY static keywords (they will extract headings dynamically)
         setupAutocomplete(instance, keywords, currentNoteId);
-        
+
         // Setup hover provider
         setupHoverProvider(instance, keywords, currentNoteId);
-        
-        // Setup definition provider with navigation callback
-        setupDefinitionProvider(instance, keywords, currentNoteId, handleNavigateToNote);
-        
+
+        console.log('[Monaco Hook] Setting up definition provider with:', {
+            keywordsCount: keywords.length,
+            currentNoteId,
+            hasHandleNavigateToNote: !!handleNavigateToNote,
+            allKeywordsCount: allKeywords?.length || 0,
+            hasOnKeywordClick: !!onKeywordClick,
+            allKeywordsSample: allKeywords?.slice(0, 3).map(k => ({ name: k.name, type: k.type, link: k.link }))
+        });
+
+        // Setup definition provider (for preview only, no navigation)
+        setupDefinitionProvider(instance, keywords, currentNoteId, handleNavigateToNote, allKeywords, undefined);
+
         // Setup folding provider for markdown headings
         setupMarkdownFolding(instance);
-        
+
+        // Setup click handler for keyword navigation (Ctrl+Click only)
+        instance.onMouseDown((e) => {
+            // Only handle Ctrl+Click
+            if (!e.event.ctrlKey && !e.event.metaKey) return;
+
+            const position = e.target.position;
+            if (!position) return;
+
+            const model = instance.getModel();
+            if (!model) return;
+
+            const lineContent = model.getLineContent(position.lineNumber);
+            const clickColumn = position.column;
+
+            console.log('[Monaco Click] Ctrl+Click at position:', position, 'Line:', lineContent);
+
+            // Check if clicking on [[name|link]] format
+            const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
+            let wikiMatch;
+
+            while ((wikiMatch = wikiLinkRegex.exec(lineContent)) !== null) {
+                const startIndex = wikiMatch.index;
+                const endIndex = startIndex + wikiMatch[0].length;
+                const name = wikiMatch[1];
+                const link = wikiMatch[2];
+
+                if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
+                    console.log('[Monaco Click] Clicked on wiki link:', { name, link });
+                    if (onKeywordClick) {
+                        onKeywordClick(link);
+                        e.event.preventDefault();
+                        e.event.stopPropagation();
+                        return;
+                    }
+                }
+            }
+
+            // Check if clicking on [keyword] format
+            if (allKeywords && onKeywordClick) {
+                for (const kw of allKeywords) {
+                    const pattern = `\\[${kw.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\](?!\\()`;
+                    const regex = new RegExp(pattern, 'gi');
+
+                    let match;
+                    while ((match = regex.exec(lineContent)) !== null) {
+                        const startIndex = match.index;
+                        const endIndex = startIndex + match[0].length;
+
+                        if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
+                            console.log('[Monaco Click] Clicked on keyword:', kw.name, 'Link:', kw.link);
+                            onKeywordClick(kw.link);
+                            e.event.preventDefault();
+                            e.event.stopPropagation();
+                            return;
+                        }
+                    }
+                }
+            }
+        });
+
         // Initial decorations with merged keywords
         updateDecorations(instance, initialValue, initialMergedKeywords, decorationsRef);
     }, []); // Empty deps - callback should never change
