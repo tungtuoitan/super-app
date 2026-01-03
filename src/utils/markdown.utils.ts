@@ -17,6 +17,17 @@ export function updateDecorations(
     decorationsRef: React.MutableRefObject<string[]>
 ) {
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+    const model = editor.getModel();
+    if (!model) return;
+
+    // Get all heading lines to skip decorating them
+    const headingLines = new Set<number>();
+    const lines = text.split('\n');
+    lines.forEach((line, index) => {
+        if (/^#{1,6}\s+/.test(line.trim())) {
+            headingLines.add(index + 1); // Monaco uses 1-based line numbers
+        }
+    });
 
     // Highlight keywords
     keywords.forEach((kw) => {
@@ -24,8 +35,13 @@ export function updateDecorations(
         let match;
 
         while ((match = regex.exec(text)) !== null) {
-            const startPos = editor.getModel()!.getPositionAt(match.index);
-            const endPos = editor.getModel()!.getPositionAt(match.index + kw.text.length);
+            const startPos = model.getPositionAt(match.index);
+            const endPos = model.getPositionAt(match.index + kw.text.length);
+
+            // Skip if this keyword is on a heading line (the title itself)
+            if (headingLines.has(startPos.lineNumber)) {
+                continue;
+            }
 
             decorations.push({
                 range: new monaco.Range(
@@ -37,6 +53,8 @@ export function updateDecorations(
                 options: {
                     inlineClassName: `keyword-${kw.type}`,
                     isWholeLine: false,
+                    // Add underline for better visibility
+                    inlineClassNameAffectsLetterSpacing: true,
                 },
             });
         }
@@ -47,8 +65,8 @@ export function updateDecorations(
     let urlMatch;
     
     while ((urlMatch = urlRegex.exec(text)) !== null) {
-        const startPos = editor.getModel()!.getPositionAt(urlMatch.index);
-        const endPos = editor.getModel()!.getPositionAt(urlMatch.index + urlMatch[0].length);
+        const startPos = model.getPositionAt(urlMatch.index);
+        const endPos = model.getPositionAt(urlMatch.index + urlMatch[0].length);
 
         decorations.push({
             range: new monaco.Range(
@@ -69,7 +87,7 @@ export function updateDecorations(
 }
 
 /**
- * Setup autocomplete provider
+ * Setup autocomplete provider with dynamic heading extraction
  */
 export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
     const disposable = monacoLanguages.registerCompletionItemProvider("markdown", {
@@ -79,6 +97,26 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
         provideCompletionItems: (model: any, position: any) => {
             const lineContent = model.getLineContent(position.lineNumber);
             const textBeforeCursor = lineContent.substring(0, position.column - 1);
+            
+            // Check if current line is a heading - if so, don't autocomplete headings
+            const isOnHeadingLine = /^#{1,6}\s+/.test(lineContent);
+            
+            console.log('[Autocomplete] Current line:', lineContent);
+            console.log('[Autocomplete] Is on heading line:', isOnHeadingLine);
+            
+            // Dynamically extract headings from current text (excluding current line if it's a heading)
+            const currentText = model.getValue();
+            const headings = isOnHeadingLine 
+                ? [] // Don't extract headings when typing on a heading line
+                : extractHeadingsAsKeywords(currentText);
+            
+            console.log('[Autocomplete] Static keywords:', keywords.length);
+            console.log('[Autocomplete] Extracted headings:', headings.length, headings);
+            
+            // Merge with static keywords
+            const allKeywords = [...keywords, ...headings];
+            
+            console.log('[Autocomplete] Total keywords:', allKeywords.length);
             
             // Tìm partial match dài nhất từ text trước cursor
             interface BestMatchType { 
@@ -128,7 +166,7 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
             }
             const allMatches: MatchResult[] = [];
 
-            keywords.forEach((kw) => {
+            allKeywords.forEach((kw) => {
                 if (!textTrimmed) {
                     // Nếu chưa gõ gì, show all keywords
                     allMatches.push({
@@ -175,6 +213,8 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
             // Sort matches by score (cao nhất trước)
             allMatches.sort((a, b) => b.score - a.score);
 
+            console.log('[Autocomplete] Matches:', allMatches.length, 'suggestions');
+
             // Determine start column - use first match or cursor position
             const startColumn = allMatches.length > 0 && allMatches[0].matchedText 
                 ? allMatches[0].startColumn 
@@ -189,6 +229,7 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
                     if (kw.type === 'status') kind = monacoLanguages.CompletionItemKind.Enum;
                     if (kw.type === 'class') kind = monacoLanguages.CompletionItemKind.Class;
                     if (kw.type === 'type') kind = monacoLanguages.CompletionItemKind.Interface;
+                    if (kw.type.startsWith('heading-')) kind = monacoLanguages.CompletionItemKind.Reference; // Heading icon
                     
                     // Range phải thay thế từ đầu partial match đến cursor
                     const range = {
@@ -209,6 +250,8 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
                     };
                 });
 
+            console.log('[Autocomplete] Final suggestions:', suggestions.map(s => s.label));
+
             return { suggestions };
         },
     });
@@ -217,19 +260,142 @@ export function setupAutocomplete(editor: monaco.editor.IStandaloneCodeEditor, k
 }
 
 /**
- * Setup definition provider
+ * Setup definition provider with dynamic heading extraction
+ * Supports heading definitions, explicit comments, and first occurrence
  */
 export function setupDefinitionProvider(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
     const disposable = monacoLanguages.registerDefinitionProvider("markdown", {
         provideDefinition: (model, position) => {
-            const word = model.getWordAtPosition(position);
-            if (!word) return null;
-
-            const keyword = keywords.find(kw => kw.text.toLowerCase() === word.word.toLowerCase());
+            // Dynamically extract headings from current text
+            const currentText = model.getValue();
+            const headings = extractHeadingsAsKeywords(currentText);
+            
+            // Merge with static keywords
+            const allKeywords = [...keywords, ...headings];
+            
+            // Get line content to check for multi-word keywords
+            const lineContent = model.getLineContent(position.lineNumber);
+            const clickColumn = position.column;
+            
+            // Try to find multi-word keyword at cursor position
+            let keyword = null;
+            let matchRange = null;
+            
+            // Check each keyword to see if cursor is within it
+            for (const kw of allKeywords) {
+                const kwLower = kw.text.toLowerCase();
+                const lineLower = lineContent.toLowerCase();
+                
+                // Find all occurrences in the line
+                let startIndex = 0;
+                while ((startIndex = lineLower.indexOf(kwLower, startIndex)) !== -1) {
+                    const endIndex = startIndex + kw.text.length;
+                    
+                    // Check if cursor is within this keyword (1-based columns)
+                    if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
+                        keyword = kw;
+                        matchRange = {
+                            startColumn: startIndex + 1,
+                            endColumn: endIndex + 1
+                        };
+                        break;
+                    }
+                    startIndex = endIndex;
+                }
+                
+                if (keyword) break;
+            }
+            
             if (!keyword) return null;
 
-            // Find first occurrence of this keyword in the document
             const text = model.getValue();
+            const lines = text.split('\n');
+            
+            // Strategy 1: Look for EXACT heading match (# Title)
+            // This is highest priority for title-based navigation
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim(); // Trim to handle CRLF
+                const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+                
+                if (headingMatch) {
+                    const title = headingMatch[2].trim();
+                    // Remove markdown formatting
+                    const cleanTitle = title
+                        .replace(/\*\*(.+?)\*\*/g, '$1')
+                        .replace(/\*(.+?)\*/g, '$1')
+                        .replace(/__(.+?)__/g, '$1')
+                        .replace(/_(.+?)_/g, '$1')
+                        .replace(/`(.+?)`/g, '$1')
+                        .replace(/~~(.+?)~~/g, '$1')
+                        .trim();
+                    
+                    // Check for exact match (case-insensitive)
+                    if (cleanTitle.toLowerCase() === keyword.text.toLowerCase()) {
+                        const lineNumber = i + 1;
+                        const originalLine = lines[i]; // Get original line for column calculation
+                        const startColumn = originalLine.indexOf('#') + 1;
+                        const endColumn = originalLine.trimEnd().length + 1;
+                        
+                        return {
+                            uri: model.uri,
+                            range: new monaco.Range(
+                                lineNumber,
+                                startColumn,
+                                lineNumber,
+                                endColumn
+                            )
+                        };
+                    }
+                }
+            }
+            
+            // Strategy 2: Look for explicit definition comment
+            // Format: <!-- Define: keyword --> or <!--Define:keyword-->
+            const defineCommentRegex = new RegExp(
+                `<!--\\s*Define\\s*:\\s*${escapeRegex(keyword.text)}\\s*-->`,
+                "i"
+            );
+            const defineMatch = defineCommentRegex.exec(text);
+            
+            if (defineMatch) {
+                const startPos = model.getPositionAt(defineMatch.index);
+                const endPos = model.getPositionAt(defineMatch.index + defineMatch[0].length);
+                
+                return {
+                    uri: model.uri,
+                    range: new monaco.Range(
+                        startPos.lineNumber,
+                        startPos.column,
+                        endPos.lineNumber,
+                        endPos.column
+                    )
+                };
+            }
+
+            // Strategy 3: Look for heading that CONTAINS the keyword (partial match)
+            // Format: # My keyword explanation
+            const headingRegex = new RegExp(
+                `^#{1,6}\\s+.*\\b${escapeRegex(keyword.text)}\\b.*$`,
+                "im"
+            );
+            const headingMatch = headingRegex.exec(text);
+            
+            if (headingMatch) {
+                const startPos = model.getPositionAt(headingMatch.index);
+                const endPos = model.getPositionAt(headingMatch.index + headingMatch[0].length);
+                
+                return {
+                    uri: model.uri,
+                    range: new monaco.Range(
+                        startPos.lineNumber,
+                        startPos.column,
+                        endPos.lineNumber,
+                        endPos.column
+                    )
+                };
+            }
+
+            // Strategy 4: Find first occurrence (fallback)
             const regex = new RegExp(`\\b${escapeRegex(keyword.text)}\\b`, "i");
             const match = regex.exec(text);
 
@@ -308,23 +474,102 @@ export function escapeRegex(str: string): string {
 }
 
 /**
- * Setup hover provider
+ * Extract all headings from markdown text as keywords
+ */
+export function extractHeadingsAsKeywords(text: string): Array<{ text: string; type: string; line: number }> {
+    const lines = text.split('\n');
+    const headings: Array<{ text: string; type: string; line: number }> = [];
+    
+    lines.forEach((line, index) => {
+        // Trim to handle Windows CRLF line endings
+        const trimmedLine = line.trim();
+        
+        // Match markdown headings: # Title or ## Title, etc.
+        const headingMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
+        
+        if (headingMatch) {
+            const level = headingMatch[1].length;
+            const title = headingMatch[2].trim();
+            
+            // Remove any markdown formatting from title (bold, italic, code, etc.)
+            const cleanTitle = title
+                .replace(/\*\*(.+?)\*\*/g, '$1')  // Bold
+                .replace(/\*(.+?)\*/g, '$1')      // Italic
+                .replace(/__(.+?)__/g, '$1')      // Bold alt
+                .replace(/_(.+?)_/g, '$1')        // Italic alt
+                .replace(/`(.+?)`/g, '$1')        // Code
+                .replace(/~~(.+?)~~/g, '$1')      // Strikethrough
+                .trim();
+            
+            if (cleanTitle) {
+                headings.push({
+                    text: cleanTitle,
+                    type: `heading-${level}`,
+                    line: index + 1  // Monaco uses 1-based line numbers
+                });
+            }
+        }
+    });
+    
+    console.log('[ExtractHeadings] Extracted', headings.length, 'headings:', headings.map(h => h.text));
+    return headings;
+}
+
+/**
+ * Setup hover provider with dynamic heading extraction
  */
 export function setupHoverProvider(editor: monaco.editor.IStandaloneCodeEditor, keywords: Array<{ text: string; type: string }>) {
     const disposable = monacoLanguages.registerHoverProvider("markdown", {
         provideHover: (model, position) => {
-            const word = model.getWordAtPosition(position);
-            if (!word) return null;
-
-            const keyword = keywords.find(kw => kw.text.toLowerCase() === word.word.toLowerCase());
-            if (!keyword) return null;
+            // Dynamically extract headings from current text
+            const currentText = model.getValue();
+            const headings = extractHeadingsAsKeywords(currentText);
+            
+            // Merge with static keywords
+            const allKeywords = [...keywords, ...headings];
+            
+            // Get line content to check for multi-word keywords
+            const lineContent = model.getLineContent(position.lineNumber);
+            const hoverColumn = position.column;
+            
+            // Try to find multi-word keyword at cursor position
+            let keyword = null;
+            let matchRange = null;
+            
+            // Check each keyword to see if cursor is within it
+            for (const kw of allKeywords) {
+                const kwLower = kw.text.toLowerCase();
+                const lineLower = lineContent.toLowerCase();
+                
+                // Find all occurrences in the line
+                let startIndex = 0;
+                while ((startIndex = lineLower.indexOf(kwLower, startIndex)) !== -1) {
+                    const endIndex = startIndex + kw.text.length;
+                    
+                    // Check if cursor is within this keyword (1-based columns)
+                    if (hoverColumn >= startIndex + 1 && hoverColumn <= endIndex + 1) {
+                        keyword = kw;
+                        matchRange = {
+                            startColumn: startIndex + 1,
+                            endColumn: endIndex + 1,
+                            lineNumber: position.lineNumber
+                        };
+                        break;
+                    }
+                    startIndex = endIndex;
+                }
+                
+                if (keyword) break;
+            }
+            
+            if (!keyword || !matchRange) return null;
 
             return {
                 range: new monaco.Range(
-                    position.lineNumber,
-                    word.startColumn,
-                    position.lineNumber,
-                    word.endColumn
+                    matchRange.lineNumber,
+                    matchRange.startColumn,
+                    matchRange.lineNumber,
+                    matchRange.endColumn
                 ),
                 contents: [
                     { value: `**${keyword.text}**` },

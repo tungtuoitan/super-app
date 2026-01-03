@@ -6,7 +6,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import * as monaco from "monaco-editor";
 import "@/styles/keywords.css";
-import {setupAutocomplete, setupDefinitionProvider, setupHoverProvider, setupMarkdownFolding, updateDecorations} from "@/utils/markdown.utils";
+import {setupAutocomplete, setupDefinitionProvider, setupHoverProvider, setupMarkdownFolding, updateDecorations, extractHeadingsAsKeywords} from "@/utils/markdown.utils";
 
 const monacoEditor = monaco.editor;
 const monacoLanguages = monaco.languages;
@@ -148,11 +148,20 @@ export function useMonacoEditor({
                 return;
             }
             const value = instance.getValue();
+            
+            // Extract headings from text and merge with keywords
+            const headings = extractHeadingsAsKeywords(value);
+            const mergedKeywords = [...keywordsRef.current, ...headings];
+            
             onChangeRef.current(value);
-            updateDecorations(instance, value, keywordsRef.current, decorationsRef);
+            updateDecorations(instance, value, mergedKeywords, decorationsRef);
         });
 
-        // Setup autocomplete
+        // Extract headings from initial value and merge with keywords
+        const initialHeadings = extractHeadingsAsKeywords(initialValue);
+        const initialMergedKeywords = [...keywords, ...initialHeadings];
+
+        // Setup providers with ONLY static keywords (they will extract headings dynamically)
         setupAutocomplete(instance, keywords);
         
         // Setup hover provider
@@ -164,8 +173,8 @@ export function useMonacoEditor({
         // Setup folding provider for markdown headings
         setupMarkdownFolding(instance);
         
-        // Initial decorations
-        updateDecorations(instance, initialValue, keywords, decorationsRef);
+        // Initial decorations with merged keywords
+        updateDecorations(instance, initialValue, initialMergedKeywords, decorationsRef);
     }, []); // Empty deps - callback should never change
 
     // Update decorations when keywords change
@@ -179,7 +188,12 @@ export function useMonacoEditor({
 
         try {
             const value = editor.getValue();
-            updateDecorations(editor, value, keywords, decorationsRef);
+            
+            // Extract headings from current text and merge with keywords
+            const headings = extractHeadingsAsKeywords(value);
+            const mergedKeywords = [...keywords, ...headings];
+            
+            updateDecorations(editor, value, mergedKeywords, decorationsRef);
         } catch (error) {
             console.warn('[Monaco Hook] Update decorations error (editor may be disposed)');
         }
