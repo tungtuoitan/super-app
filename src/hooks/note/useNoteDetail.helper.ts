@@ -31,24 +31,20 @@ export const useNoteDetailHelper = () => {
     const { moduleName } = useGridControlStore();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
-        console.log('[Helper] handleNoteFieldChange called:', { field, valueType: typeof value, valuePreview: typeof value === 'string' ? value.substring(0, 50) : value });
         
         // Get current note from active tab
         const activeTab = getActiveTab();
         if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
-            console.log('[Helper] No active note tab found');
             return;
         }
 
         const activeNote = activeTab.data as Note;
-        console.log('[Helper] Current note:', { id: activeNote.id, name: activeNote.name });
 
         // Extract value based on field type
         let _value;
         if (field === "statusCode") {
             // value is synthetic event with structure: { target: { value: { id, label, ... } } }
             _value = value?.target?.value?.id || null;
-            console.log("Changing statusCode to:", _value, "from event:", value);
         } else {
             _value = value;
         }
@@ -59,11 +55,9 @@ export const useNoteDetailHelper = () => {
         }
 
         const updated = { ...activeNote, [field]: _value };
-        console.log('[Helper] Updated note:', { field, newValue: typeof _value === 'string' ? _value.substring(0, 50) : _value });
 
         // Update tab data directly
         setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated, hasUnsavedChanges: true } : t)));
-        console.log('[Helper] Tabs updated');
     };
 
     /**

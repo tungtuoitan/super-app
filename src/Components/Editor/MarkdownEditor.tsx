@@ -16,13 +16,6 @@ interface EditorWithKeywordsProps {
 }
 
 export function MarkdownEditor({ value, onChange, disabled = false, placeholder }: EditorWithKeywordsProps) {
-    console.log('[MarkdownEditor] Component rendering...', {
-        valueLength: value?.length,
-        valuePreview: value?.substring(0, 50),
-        disabled,
-        onChangeType: typeof onChange,
-        hasOnChange: !!onChange
-    });
 
     const { registries } = useStandardRegistryStore();
 
@@ -55,11 +48,8 @@ export function MarkdownEditor({ value, onChange, disabled = false, placeholder 
             { text: "NOTE", type: "comment" },
         ];
         
-        console.log('[MarkdownEditor] Keywords computed:', kws.length + dummyKeywords.length);
         return [...kws, ...dummyKeywords];
     }, [registries]);
-
-    console.log('[MarkdownEditor] About to call useMonacoEditor...');
 
     const { containerRef } = useMonacoEditor({
         initialValue: value,
@@ -67,8 +57,6 @@ export function MarkdownEditor({ value, onChange, disabled = false, placeholder 
         disabled,
         keywords,
     });
-
-    console.log('[MarkdownEditor] useMonacoEditor returned, containerRef:', !!containerRef);
 
     return (
         <div

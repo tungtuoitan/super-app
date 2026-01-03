@@ -181,8 +181,6 @@ export const useWorkspaceChildMenuHelper = () => {
             const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
             const topLevelIds = filterTopLevelParents(selectedIds, treeData);
 
-            console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
-
             if (topLevelIds.length === 0) {
                 console.warn("⚠️ No valid items after filtering");
                 return;
@@ -214,8 +212,6 @@ export const useWorkspaceChildMenuHelper = () => {
                 uniqueItemsMap.set(item.id, item);
             }
             const itemsToUpdate = Array.from(uniqueItemsMap.values());
-
-            console.log(`📦 Collected ${itemsToUpdate.length} selected items (type: ${type})`);
 
             // -------------------------------------------------------
             // STEP 6: BUILD BATCH DELETE/RESTORE REQUESTS
@@ -355,8 +351,6 @@ export const useWorkspaceChildMenuHelper = () => {
 
         // TODO: Implement rename dialog for note
         // Similar to editFolder in useWorkspaceFolderMenu.helper.ts
-        console.log("Edit note:", noteData);
-        alert("Edit note feature coming soon!");
     };
 
     return {

@@ -60,8 +60,6 @@ export const DebugLoggerProvider: React.FC<React.PropsWithChildren<unknown>> = (
         // Keep only last 100 logs to avoid memory issues
         setLogs((prevLogs) => [newLog, ...prevLogs].slice(0, 100));
 
-        // Also log to console
-        console.log(`[${component}] ${message}`, data);
     };
 
     const clearLogs = () => {

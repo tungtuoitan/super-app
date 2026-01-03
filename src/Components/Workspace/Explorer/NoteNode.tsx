@@ -67,7 +67,6 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     const handleWorkspaceNavigation = useCallback(
         (workspaceId: number, workspaceItemId: number) => {
             if (workspaceItemId === null) {
-                console.log("WorkspaceItemId is null, cannot navigate.");
                 return;
             }
 

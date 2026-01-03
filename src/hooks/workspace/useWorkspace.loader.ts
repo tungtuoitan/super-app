@@ -93,7 +93,6 @@ export const useWorkspaceLoader = () => {
             // };
 
             // Fetch workspace tree with V2 structure (ALL items, no filtering)
-            console.log("🔧 Loading Workspace V2 API (NO SERVER FILTERING - all items returned)");
             const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, selectedWorkspaceId);
             if(result && result.success){
                 // Merge data: API data + existing virtual items (ID < 0) + new virtual items
@@ -109,12 +108,6 @@ export const useWorkspaceLoader = () => {
                         ...mergedVirtualItems // KEEP VIRTUAL ITEMS (NEW FILE/NOTE/FOLDER,...)
                     ]
                 } as WorkspaceDTO;
-                
-                console.log("📦 Merged workspace data:", {
-                    apiItems: result.object?.flatData?.length ?? 0,
-                    calculatedirtualItems: mergedVirtualItems.length,
-                    total: newWorkspace.flatData?.length ?? 0
-                });
                 
                 setCurrentWorkspace(newWorkspace);
                 return result.object;

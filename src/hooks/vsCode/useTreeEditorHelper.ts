@@ -55,7 +55,6 @@ export const useTreeEditorHelper = () => {
                         },
                     };
 
-                    console.log("🔹 Creating note in workspace:", request);
                     const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentWorkspace?.id ?? 0, [request]);
 
                     if (!result.success) {
@@ -78,8 +77,6 @@ export const useTreeEditorHelper = () => {
                         if (!_workspaceItemFromDB) {
                             throw new Error("Failed to find created workspace item in reloaded data");
                         }
-
-                        console.log("✅ Note created with ID:", _createdItem.entityId, "WorkspaceItem ID:", _createdItem.id);
 
                         // Update tab data with real IDs
                         setOpenTabs((prev) =>

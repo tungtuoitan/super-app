@@ -157,7 +157,6 @@ export const useTreeHelper2 = () => {
 
                                 if (siblings.length > 0) {
                                     itemsToSelect = siblings;
-                                    console.log(`✅ Ctrl+A: Selecting ${siblings.length} siblings`);
                                 } else {
                                     // Fallback: select all if no siblings found
                                     itemsToSelect = allVisibleFolderIds;
@@ -169,7 +168,6 @@ export const useTreeHelper2 = () => {
                         } else {
                             // No selection → select all visible items
                             itemsToSelect = allVisibleFolderIds;
-                            console.log(`✅ Ctrl+A: Selecting all ${allVisibleFolderIds.length} items`);
                         }
 
                         // Sync with react-arborist tree (critical for dragIds to work!)

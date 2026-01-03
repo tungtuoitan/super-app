@@ -182,8 +182,6 @@ export const useMovingTreeHelper = () => {
                 targetId = null;
             }
 
-            console.log("📂 Drop target folder entityId:", targetId);
-
             // STEP 3: Validate workspace selection
             if (!currentWorkspace?.id || !targetWorkspaceId) {
                 enqueueSnackbar("No target workspace selected", { variant: "error" });
@@ -235,12 +233,11 @@ export const useMovingTreeHelper = () => {
                 if (selectedItemIds && selectedItemIds.length > 0) {
                     // Use store's selectedItemIds (most reliable for cross-tree drops)
                     itemIds = selectedItemIds;
-                    console.log("✅ Using selectedItemIds from store:", itemIds);
                 } else {
                     // Fallback: Try to get from dragItem (for backward compatibility)
                     const draggedNodeIds = dragItem.dragIds || [dragItem.id];
                     itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
-                    console.log("⚠️ Fallback to dragItem.dragIds:", itemIds);
+                    console.warn("⚠️ Fallback to dragItem.dragIds:", itemIds);
                 }
 
                 if (itemIds.length === 0) {

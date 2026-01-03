@@ -27,7 +27,7 @@ export const useEditorTabHelper = () => {
      */
     const findWorkspaceItemId = (entityType: 2 | 3 | 4, entityId: number): number | null => {
         if (!currentWorkspace?.flatData) {
-            console.log("⚠️ findWorkspaceItemId: No currentWorkspace or flatData");
+            console.warn("⚠️ findWorkspaceItemId: No currentWorkspace or flatData");
             return null;
         }
 
@@ -35,9 +35,8 @@ export const useEditorTabHelper = () => {
         const item = currentWorkspace.flatData.find((item) => item.entityType === entityType && item.entityId === entityId);
 
         if (item) {
-            console.log(`✅ Found workspace item: entityType=${entityType}, entityId=${entityId}, workspaceItemId=${item.id}`);
         } else {
-            console.log(`❌ Not found in workspace: entityType=${entityType}, entityId=${entityId}`);
+            console.warn(`❌ Not found in workspace: entityType=${entityType}, entityId=${entityId}`);
         }
 
         return item?.id || null; // workspace_items.id
@@ -70,36 +69,25 @@ export const useEditorTabHelper = () => {
                 // ⭐ Select item trong workspace tree nếu note này có trong workspace
                 const workspaceItemId = findWorkspaceItemId(3, noteData.id); // 3 = note entity type
                 if (workspaceItemId) {
-                    console.log(`🎯 Selecting note in tree: workspaceItemId=${workspaceItemId}, noteId=${noteData.id}`);
                     setSelectedItemIds([workspaceItemId]);
                     // Scroll to item trong tree
                     if (_treeRef.current) {
                         // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
-                        console.log("🔓 Opening parents first using TreeApi...");
                         _treeRef.current.openParents(workspaceItemId.toString());
 
                         // Scroll to node để đảm bảo nó visible
-                        console.log("📦 Scrolling to node...");
                         _treeRef.current.scrollTo(workspaceItemId.toString());
 
                         // Bây giờ get node sau khi parents đã expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
-                            console.log("📜 Node found:", {
-                                id: node.id,
-                                isOpen: node.isOpen,
-                                level: node.level,
-                                parent: node.parent?.id,
-                                isInternal: node.isInternal,
-                            });
-                            console.log("✅ Now focusing...");
                             // Use focus() to scroll the node into view (react-arborist API)
                             node.focus();
                         } else {
-                            console.log("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                            console.warn("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
                         }
                     } else {
-                        console.log("⚠️ Tree ref not available");
+                        console.warn("⚠️ Tree ref not available");
                     }
                 }
             } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
@@ -118,36 +106,25 @@ export const useEditorTabHelper = () => {
                 // ⭐ Select workspace folder item trong tree (workspace type = folder type 2)
                 const workspaceItemId = findWorkspaceItemId(2, wsData.id); // 2 = folder entity type
                 if (workspaceItemId) {
-                    console.log(`🎯 Selecting workspace in tree: workspaceItemId=${workspaceItemId}, wsId=${wsData.id}`);
                     setSelectedItemIds([workspaceItemId]);
                     // Scroll to item trong tree
                     if (_treeRef.current) {
                         // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
-                        console.log("🔓 Opening parents first using TreeApi...");
                         _treeRef.current.openParents(workspaceItemId.toString());
 
                         // Scroll to node để đảm bảo nó visible
-                        console.log("📦 Scrolling to node...");
                         _treeRef.current.scrollTo(workspaceItemId.toString());
 
                         // Bây giờ get node sau khi parents đã expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
-                            console.log("📜 Node found:", {
-                                id: node.id,
-                                isOpen: node.isOpen,
-                                level: node.level,
-                                parent: node.parent?.id,
-                                isInternal: node.isInternal,
-                            });
-                            console.log("✅ Now focusing...");
                             // Use focus() to scroll the node into view (react-arborist API)
                             node.focus();
                         } else {
-                            console.log("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                            console.warn("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
                         }
                     } else {
-                        console.log("⚠️ Tree ref not available");
+                        console.warn("⚠️ Tree ref not available");
                     }
                 }
             } else {

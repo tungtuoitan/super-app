@@ -47,7 +47,6 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
     // Handle workspace navigation with highlight
     const handleWorkspaceNavigation = useCallback((workspaceId: number, workspaceItemId: number) => {
         if (!workspaceItemId) {
-            console.log("WorkspaceItemId is null, cannot navigate.");
             return;
         }
 

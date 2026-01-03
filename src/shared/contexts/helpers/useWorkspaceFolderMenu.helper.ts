@@ -216,12 +216,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                 flatData: newFlatData,
                 noteCount: currentWorkspace.noteCount + 1,
             };
-            console.log("✅ New note added to workspace:", {
-                workspaceItemId: tempWorkspaceItemId,
-                noteEntityId: tempNoteEntityId,
-                name,
-                parentWorkspaceItemId
-            });
 
             setCurrentWorkspace(newWorkspace);
         }
@@ -630,8 +624,6 @@ export const useWorkspaceFolderMenuHelper = () => {
             const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
             const topLevelIds = filterTopLevelParents(selectedIds, treeData);
 
-            console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
-
             if (topLevelIds.length === 0) {
                 console.warn("⚠️ No valid items after filtering");
                 return;
@@ -663,8 +655,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                 uniqueItemsMap.set(item.id, item);
             }
             const itemsToUpdate = Array.from(uniqueItemsMap.values());
-
-            console.log(`📦 Collected ${itemsToUpdate.length} selected items (type: ${type})`);
 
             // -------------------------------------------------------
             // STEP 7: BUILD BATCH DELETE/RESTORE REQUESTS

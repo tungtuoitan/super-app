@@ -265,7 +265,6 @@ export const useNavigationHistoryHelper = () => {
     //     }
 
     //     const field = editorAreaRef.current.querySelector(`#${fieldId}`) as HTMLElement;
-    //     console.log("Restoring focus to field:", fieldId, field);
     //     if (field) {
     //         field.focus();
     //         // Move cursor to end of text

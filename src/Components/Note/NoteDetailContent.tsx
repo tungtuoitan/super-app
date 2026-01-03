@@ -93,16 +93,8 @@ export function NoteDetailContent() {
     //     : "";
 
     if (!activeNote) {
-        console.log('[NoteDetailContent] No activeNote, returning null');
         return null;
     }
-
-    console.log('[NoteDetailContent] Rendering with activeNote:', { 
-        id: activeNote.id, 
-        name: activeNote.name,
-        descriptionLength: activeNote.description?.length,
-        isDisabled
-    });
 
     return (
         <div className="py-6 space-y-6 h-full ">
@@ -112,11 +104,6 @@ export function NoteDetailContent() {
                     <MarkdownEditor
                         value={activeNote?.description || ""}
                         onChange={(newValue) => {
-                            console.log("[NoteDetail] Description onChange fired:", { 
-                                length: newValue?.length, 
-                                preview: newValue?.substring(0, 50),
-                                noteId: activeNote?.id 
-                            });
                             handleNoteFieldChange("description", newValue);
                         }}
                         disabled={isDisabled}

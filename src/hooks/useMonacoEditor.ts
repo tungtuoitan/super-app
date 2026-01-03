@@ -24,12 +24,6 @@ export function useMonacoEditor({
     disabled = false,
     keywords,
 }: UseMonacoEditorOptions) {
-    console.log('[Monaco Hook] useMonacoEditor called:', { 
-        initialValueLength: initialValue?.length,
-        onChangeType: typeof onChange,
-        disabled,
-        keywordsCount: keywords?.length 
-    });
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -51,11 +45,7 @@ export function useMonacoEditor({
 
     // Initialize editor using callback ref - memoized to prevent re-creation
     const callbackRef = useCallback((element: HTMLDivElement | null) => {
-        console.log('[Monaco Hook] Callback ref called:', {
-            hasElement: !!element,
-            isInitialized: isInitializedRef.current
-        });
-
+        
         // Assign to containerRef for external use
         (containerRef as any).current = element;
 
@@ -63,7 +53,6 @@ export function useMonacoEditor({
             console.warn('[Monaco Hook] Element is null, cleaning up...');
             // Cleanup when element is removed
             if (editorRef.current) {
-                console.log('[Monaco Hook] Disposing editor');
                 editorRef.current.dispose();
                 editorRef.current = null;
                 isInitializedRef.current = false;
@@ -75,12 +64,6 @@ export function useMonacoEditor({
             console.warn('[Monaco Hook] Already initialized, skipping...');
             return;
         }
-
-        console.log('[Monaco Hook] Starting editor initialization with:', {
-            initialValue: initialValue?.substring(0, 50),
-            disabled,
-            keywordsCount: keywords?.length
-        });
 
         // Define custom dark theme with #09090B background and markdown syntax colors
         monacoEditor.defineTheme('custom-dark', {
@@ -156,19 +139,15 @@ export function useMonacoEditor({
 
         editorRef.current = instance;
         isInitializedRef.current = true;
-        console.log('[Monaco Hook] ✅ Editor created successfully');
 
         // Setup change listener - use ref to always get latest onChange
         instance.onDidChangeModelContent(() => {
-            console.log('[Monaco Hook] 🔥 onDidChangeModelContent triggered');
             // Skip onChange if it's a programmatic change
             if (isProgrammaticChangeRef.current) {
-                console.log('[Monaco Hook] Skipping - programmatic change');
                 isProgrammaticChangeRef.current = false;
                 return;
             }
             const value = instance.getValue();
-            console.log('[Monaco Hook] 📝 Content changed, calling onChange:', value.substring(0, 50) + '...');
             onChangeRef.current(value);
             updateDecorations(instance, value, keywordsRef.current, decorationsRef);
         });
@@ -228,17 +207,11 @@ export function useMonacoEditor({
 
         // Check if editor exists and is not disposed
         if (!editor || (editor as any)._isDisposed) {
-            console.log('[Monaco Hook] Value sync skipped - editor not ready or disposed');
             return;
         }
 
         try {
             const currentValue = editor.getValue();
-            console.log('[Monaco Hook] Value sync effect:', {
-                currentValue: currentValue?.substring(0, 30),
-                newValue: initialValue?.substring(0, 30),
-                needsUpdate: currentValue !== initialValue
-            });
 
             if (currentValue !== initialValue) {
                 isProgrammaticChangeRef.current = true;
