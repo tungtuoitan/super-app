@@ -8,7 +8,7 @@ import Editor, { useMonaco } from "@monaco-editor/react";
 import { useGeneralStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
-import { updateDecorations, extractHeadingsAsKeywords } from "@/utils/markdown.utils";
+import { updateDecorations } from "@/utils/markdown.utils";
 import { Note } from "@/types/note.types";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
@@ -26,8 +26,12 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     // Extract keywords from registries + allKeywords
     const _allKeywords = useMemo(() => {
         return allKeywords.map((k) => ({
-            text: k.name,
+            // Format: [name] for nameIndex=1, [name][nameIndex] for others
+            text: k.nameIndex === 1 ? `[${k.name}]` : `[${k.name}][${k.nameIndex}]`,
             type: k.type,
+            link: k.link,
+            name: k.name,
+            nameIndex: k.nameIndex,
         }));
     }, [allKeywords]);
 
@@ -49,11 +53,9 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
         try {
             const value = editor.getValue();
 
-            // Extract headings from current text and merge with keywords
-            const headings = extractHeadingsAsKeywords(value, currentNoteId);
-            const mergedKeywords = [..._allKeywords, ...headings];
-
-            updateDecorations(editor, value, mergedKeywords, decorationsRef);
+            // Only decorate keywords, NOT headings
+            // Headings should not have underlines or be clickable
+            updateDecorations(editor, value, _allKeywords, decorationsRef);
         } catch (error) {
             console.warn("[Monaco] Update decorations error (editor may be disposed)");
         }

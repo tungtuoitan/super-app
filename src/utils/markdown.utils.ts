@@ -25,9 +25,9 @@ export function updateDecorations(
         }
     });
 
-    // Highlight _allKeywords in [name][nameIndex] format
+    // Highlight _allKeywords in [name] or [name][nameIndex] format
     _allKeywords.forEach((kw) => {
-        // Match keyword pattern: [name][nameIndex]
+        // Match keyword pattern
         const regex = new RegExp(escapeRegex(kw.text), "gi");
         let match;
 
@@ -40,20 +40,72 @@ export function updateDecorations(
                 continue;
             }
 
-            decorations.push({
-                range: {
-                    startLineNumber: startPos.lineNumber,
-                    startColumn: startPos.column,
-                    endLineNumber: endPos.lineNumber,
-                    endColumn: endPos.column,
-                },
-                options: {
-                    inlineClassName: `keyword-${kw.type}`,
-                    isWholeLine: false,
-                    // Add underline for better visibility
-                    inlineClassNameAffectsLetterSpacing: true,
-                },
-            });
+            // Check if this is [name][nameIndex] format (not just [name])
+            const hasExplicitIndex = /\[.+?\]\[\d+\]/.test(match[0]);
+
+            if (hasExplicitIndex) {
+                // For [name][nameIndex] format, we need two decorations:
+                // 1. Full keyword with main styling
+                // 2. Just the [nameIndex] part with dimmed styling
+
+                // Find where [nameIndex] starts
+                const nameIndexMatch = match[0].match(/\[(\d+)\]$/);
+                if (nameIndexMatch) {
+                    const indexPartLength = nameIndexMatch[0].length; // Length of [number]
+                    const namePartEnd = match.index + match[0].length - indexPartLength;
+                    
+                    // Decoration for [name] part
+                    const nameStartPos = model.getPositionAt(match.index);
+                    const nameEndPos = model.getPositionAt(namePartEnd);
+                    
+                    decorations.push({
+                        range: {
+                            startLineNumber: nameStartPos.lineNumber,
+                            startColumn: nameStartPos.column,
+                            endLineNumber: nameEndPos.lineNumber,
+                            endColumn: nameEndPos.column,
+                        },
+                        options: {
+                            inlineClassName: `keyword-${kw.type}`,
+                            isWholeLine: false,
+                            inlineClassNameAffectsLetterSpacing: true,
+                        },
+                    });
+
+                    // Decoration for [nameIndex] part - dimmed and smaller
+                    const indexStartPos = model.getPositionAt(namePartEnd);
+                    const indexEndPos = model.getPositionAt(match.index + match[0].length);
+                    
+                    decorations.push({
+                        range: {
+                            startLineNumber: indexStartPos.lineNumber,
+                            startColumn: indexStartPos.column,
+                            endLineNumber: indexEndPos.lineNumber,
+                            endColumn: indexEndPos.column,
+                        },
+                        options: {
+                            inlineClassName: 'keyword-index',
+                            isWholeLine: false,
+                            inlineClassNameAffectsLetterSpacing: true,
+                        },
+                    });
+                }
+            } else {
+                // For [name] format (nameIndex=1), single decoration
+                decorations.push({
+                    range: {
+                        startLineNumber: startPos.lineNumber,
+                        startColumn: startPos.column,
+                        endLineNumber: endPos.lineNumber,
+                        endColumn: endPos.column,
+                    },
+                    options: {
+                        inlineClassName: `keyword-${kw.type}`,
+                        isWholeLine: false,
+                        inlineClassNameAffectsLetterSpacing: true,
+                    },
+                });
+            }
         }
     });
 
@@ -111,7 +163,7 @@ export function updateDecorations(
 export function setupAutocomplete(
     $mi: Monaco | null,
     editor: _monaco.editor.IStandaloneCodeEditor,
-    _allKeywords: Array<{ text: string; type: string; link?: string }>,
+    _allKeywords: Array<{ text: string; type: string; link?: string; name?: string; nameIndex?: number }>,
     noteId?: number
 ) {
     if (!$mi) return () => {};
@@ -125,16 +177,16 @@ export function setupAutocomplete(
             const textBeforeCursor = lineContent.substring(0, position.column - 1);
 
             // Check if current line is a heading - if so, don't autocomplete headings
-            const isOnHeadingLine = /^#{1,6}\s+/.test(lineContent);
+            // const isOnHeadingLine = /^#{1,6}\s+/.test(lineContent);
 
             // Dynamically extract headings from current text (excluding current line if it's a heading)
-            const currentText = model.getValue();
-            const headings = isOnHeadingLine
-                ? [] // Don't extract headings when typing on a heading line
-                : extractHeadingsAsKeywords(currentText, noteId);
+            // const currentText = model.getValue();
+            // const headings = isOnHeadingLine
+            //     ? [] // Don't extract headings when typing on a heading line
+            //     : extractHeadingsAsKeywords(currentText, noteId);
 
             // Merge with static _allKeywords
-            const allKeywordAndHeadings = [..._allKeywords, ...headings];
+            // const allKeywordAndHeadings = [..._allKeywords, ...headings];
 
             // Tìm partial match dài nhất từ text trước cursor
             interface BestMatchType {
@@ -143,7 +195,7 @@ export function setupAutocomplete(
                 matchedText: string;
                 score: number; // Thêm score để rank
             }
-            let bestMatch: BestMatchType | null = null;
+            // let bestMatch: BestMatchType | null = null;
 
             // Helper: Fuzzy match - check if searchWords match keyword (any order)
             const fuzzyMatch = (keyword: string, searchWords: string[]): { match: boolean; score: number } => {
@@ -184,7 +236,7 @@ export function setupAutocomplete(
             }
             const allMatches: MatchResult[] = [];
 
-            allKeywordAndHeadings.forEach((kw) => {
+            _allKeywords.forEach((kw) => {
                 if (!textTrimmed) {
                     // Nếu chưa gõ gì, show all _allKeywords
                     allMatches.push({
@@ -201,8 +253,12 @@ export function setupAutocomplete(
                     const searchWords = wordsInText.slice(-wordCount);
                     const phrase = searchWords.join(" ");
 
-                    // Fuzzy match
-                    const { match, score } = fuzzyMatch(kw.text, searchWords);
+                    // Get keyword name for matching (without brackets)
+                    const kwWithDetails = kw as { text: string; type: string; link?: string; name?: string; nameIndex?: number };
+                    const matchTarget = kwWithDetails.name || kw.text; // Use name if available, fallback to text
+
+                    // Fuzzy match with keyword name (not brackets)
+                    const { match, score } = fuzzyMatch(matchTarget, searchWords);
 
                     if (match) {
                         // Tìm vị trí bắt đầu của phrase trong text
@@ -247,13 +303,22 @@ export function setupAutocomplete(
                 if (kw.type === "type") kind = $mi.languages.CompletionItemKind.Interface;
                 if (kw.type.startsWith("heading-")) kind = $mi.languages.CompletionItemKind.Reference; // Heading icon
 
-                // insertText is kw.text which already includes [name][nameIndex]
+                // For autocomplete, always insert explicit format [name][nameIndex]
+                // even if display format might be just [name] for nameIndex=1
+                // Check if kw has name and nameIndex properties (from _allKeywords)
+                const kwWithDetails = kw as { text: string; type: string; link?: string; name?: string; nameIndex?: number };
                 let insertText = kw.text;
+                
+                // If this is from _allKeywords (has name/nameIndex), use explicit format
+                if (kwWithDetails.name && kwWithDetails.nameIndex !== undefined) {
+                    insertText = `[${kwWithDetails.name}][${kwWithDetails.nameIndex}]`;
+                }
+                
                 let rangeStartColumn = startColumn;
 
                 if (hasOpeningBracket) {
                     // User already typed '[', remove the first '[' from insertText
-                    insertText = kw.text.substring(1);
+                    insertText = insertText.substring(1);
                     rangeStartColumn = startColumn;
                 }
 
@@ -275,14 +340,18 @@ export function setupAutocomplete(
                     ? `${kw.type} • ${kw.link}` 
                     : `${kw.type} keyword`;
 
+                // Label shows just the name (without brackets) for readability
+                // But insertText includes full format [name][nameIndex]
+                const displayLabel = kwWithDetails.name || kw.text;
+
                 return {
-                    label: kw.text,
+                    label: displayLabel,
                     kind: kind,
                     insertText: insertText,
                     range,
                     documentation,
                     detail,
-                    sortText: `${1000 - matchResult.score}${kw.text}`, // Sort by score (higher first)
+                    sortText: `${1000 - matchResult.score}${displayLabel}`, // Sort by score (higher first)
                 };
             });
 
@@ -300,8 +369,7 @@ export function setupDefinitionProvider(
     $mi: Monaco | null,
     editor: _monaco.editor.IStandaloneCodeEditor,
     _allKeywords: Array<{ text: string; type: string }>,
-    noteId?: number,
-    onNavigateToNote?: (targetNoteId: number, headingPath: string) => void
+    noteId?: number
 ) {
     if (!$mi) return () => {};
 
@@ -309,10 +377,7 @@ export function setupDefinitionProvider(
         provideDefinition: (model, position) => {
             // Dynamically extract headings from current text
             const currentText = model.getValue();
-            const headings = extractHeadingsAsKeywords(currentText, noteId);
-
-            // Merge with static _allKeywords
-            const allKeywordAndHeadings = [..._allKeywords, ...headings];
+            // const headings = extractHeadingsAsKeywords(currentText, noteId);
 
             // Get line content to check for _allKeywords or wiki-style links
             const lineContent = model.getLineContent(position.lineNumber);
@@ -327,8 +392,8 @@ export function setupDefinitionProvider(
             while ((wikiMatch = wikiLinkRegex.exec(lineContent)) !== null) {
                 const startIndex = wikiMatch.index;
                 const endIndex = startIndex + wikiMatch[0].length;
-                const name = wikiMatch[1];
-                const link = wikiMatch[2];
+                // const name = wikiMatch[1];
+                // const link = wikiMatch[2];
 
                 // Check if cursor is within this link (1-based columns)
                 if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
@@ -342,7 +407,7 @@ export function setupDefinitionProvider(
             let matchRange: { startColumn: number; endColumn: number } | null = null;
 
             // Check each keyword to see if cursor is within keyword pattern
-            for (const kw of allKeywordAndHeadings) {
+            for (const kw of _allKeywords) {
                 // Match keyword pattern (kw.text already includes [name][nameIndex])
                 const pattern = escapeRegex(kw.text);
                 const regex = new RegExp(pattern, "gi");
@@ -370,28 +435,9 @@ export function setupDefinitionProvider(
                 return null;
             }
 
-            // Navigation is handled by mouse click event in useMonacoEditorHelper
+            // Navigation is handled by mouse click event
             // This definition provider is only for preview/peek functionality
-
-            // Check if this is a cross-note reference (path with different noteId)
-            // Type assertion: keyword from headings will have 'path' property
-            const keywordWithPath = keyword as { text: string; type: string; path?: string };
-
-            if (keywordWithPath.path) {
-                const pathMatch = keywordWithPath.path.match(/^super-app\/(\d+)\//);
-                if (pathMatch) {
-                    const targetNoteId = parseInt(pathMatch[1], 10);
-
-                    // If target noteId is different from current noteId, it's a cross-note reference
-                    if (noteId && targetNoteId !== noteId && onNavigateToNote) {
-                        // Trigger navigation callback
-                        onNavigateToNote(targetNoteId, keywordWithPath.path || "");
-
-                        // Return null to prevent default navigation
-                        return null;
-                    }
-                }
-            }
+            // Cross-note references are handled by navigateLink in click handler
 
             const text = model.getValue();
             const lines = text.split("\n");
@@ -592,13 +638,16 @@ export function extractExternalLinks(text: string): Array<{ name: string; url: s
 export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string {
     if (!allKeywords || allKeywords.length === 0) return text;
 
-    // Build a map of keyword id -> [name][nameIndex] for fast lookup
+    // Build a map of keyword id -> display format
     const keywordMap = new Map<number, string>();
     allKeywords.forEach((kw) => {
-        keywordMap.set(kw.id, `[${kw.name}][${kw.nameIndex}]`);
+        // If nameIndex is 1, only show [name]
+        // Otherwise show [name][nameIndex]
+        const displayText = kw.nameIndex === 1 ? `[${kw.name}]` : `[${kw.name}][${kw.nameIndex}]`;
+        keywordMap.set(kw.id, displayText);
     });
 
-    // Replace [[id]] with [name][nameIndex]
+    // Replace [[id]] with [name] or [name][nameIndex]
     return text.replace(/\[\[(\d+)\]\]/g, (match, idStr) => {
         const id = parseInt(idStr, 10);
         const displayText = keywordMap.get(id);
@@ -618,20 +667,39 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
 export function convertToOriginalVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string {
     if (!allKeywords || allKeywords.length === 0) return text;
 
-    // Build a map of [name][nameIndex] (lowercase) -> id for fast lookup
-    const keywordIdMap = new Map<string, number>();
+    // Build two maps for lookup:
+    // 1. [name][nameIndex] -> id (for explicit index)
+    // 2. [name] -> id (for nameIndex=1, implicit)
+    const keywordIdMapExplicit = new Map<string, number>();
+    const keywordIdMapImplicit = new Map<string, number>();
+    
     allKeywords.forEach((kw) => {
-        const key = `[${kw.name}][${kw.nameIndex}]`.toLowerCase();
-        keywordIdMap.set(key, kw.id);
+        const keyExplicit = `[${kw.name}][${kw.nameIndex}]`.toLowerCase();
+        keywordIdMapExplicit.set(keyExplicit, kw.id);
+        
+        // For nameIndex=1, also map [name] -> id
+        if (kw.nameIndex === 1) {
+            const keyImplicit = `[${kw.name}]`.toLowerCase();
+            keywordIdMapImplicit.set(keyImplicit, kw.id);
+        }
     });
 
-    // Replace [name][nameIndex] with [[id]]
-    // Pattern: [name][number]
-    return text.replace(/\[([^\]]+)\]\[(\d+)\]/g, (match, name, nameIndex) => {
+    // First pass: Replace [name][nameIndex] with [[id]]
+    let result = text.replace(/\[([^\]]+)\]\[(\d+)\]/g, (match, name, nameIndex) => {
         const key = `[${name}][${nameIndex}]`.toLowerCase();
-        const id = keywordIdMap.get(key);
-        return id !== undefined ? `[[${id}]]` : match; // Keep original if not found
+        const id = keywordIdMapExplicit.get(key);
+        return id !== undefined ? `[[${id}]]` : match;
     });
+
+    // Second pass: Replace [name] with [[id]] (only for nameIndex=1)
+    // Use negative lookbehind to avoid matching [name] that's part of [name][index]
+    result = result.replace(/\[([^\]]+)\](?!\[\d+\])/g, (match, name) => {
+        const key = `[${name}]`.toLowerCase();
+        const id = keywordIdMapImplicit.get(key);
+        return id !== undefined ? `[[${id}]]` : match;
+    });
+
+    return result;
 }
 
 /**
@@ -714,15 +782,15 @@ export function setupLinkProvider(
         provideLinks: (model) => {
             // Dynamically extract headings from current text
             const currentText = model.getValue();
-            const headings = extractHeadingsAsKeywords(currentText, noteId);
+            // const headings = extractHeadingsAsKeywords(currentText, noteId);
 
             // Merge with static _allKeywords
-            const allKeywordAndHeadings = [..._allKeywords, ...headings];
+            // const allKeywordAndHeadings = [..._allKeywords, ...headings];
 
             const links: _monaco.languages.ILink[] = [];
 
             // Find all keyword patterns
-            allKeywordAndHeadings.forEach((kw) => {
+            _allKeywords.forEach((kw) => {
                 // Match keyword pattern (kw.text already includes [name][nameIndex])
                 const regex = new RegExp(escapeRegex(kw.text), "gi");
                 let match;

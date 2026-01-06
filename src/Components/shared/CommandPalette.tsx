@@ -89,8 +89,8 @@ export function CommandPalette() {
                                         data-index={index}
                                         onClick={() => !isDisabled && handleSelectKeyword(keyword)}
                                         className={`
-                                            px-4 py-1.5 cursor-pointer flex items-center gap-3
-                                            ${isSelected ? "bg-[#094771]" : "hover:bg-[#2A2D2E]"}
+                                            px-4 py-1.5 cursor-pointer flex items-center gap-3 hover:bg-[#2A2D2E]
+                                            ${isSelected ? "bg-[#44475A]" : ""}
                                             ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
                                         `}
                                     >
@@ -108,8 +108,8 @@ export function CommandPalette() {
                                             <HighlightedText
                                                 text={keyword.name}
                                                 matchIndices={match.matchedIndices.name}
-                                                className="text-white text-sm truncate"
-                                                highlightClassName="text-blue-400 font-semibold"
+                                                className="text-gray-200 text-sm truncate"
+                                                highlightClassName="text-blue-400 font-bold"
                                             />
                                             {match.displayLink && (
                                                 <HighlightedText

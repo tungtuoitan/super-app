@@ -3,51 +3,78 @@
 .keyword-hashtag {
     color: #fad000 !important;
     font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(128, 128, 128, 0.3) !important;
+    cursor: pointer !important;
 }
 
 .keyword-status {
     color: #6496c8 !important;
     font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(128, 128, 128, 0.3) !important;
+    cursor: pointer !important;
 }
 
 .keyword-keyword {
     color: #C586C0 !important;
     font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(128, 128, 128, 0.3) !important;
+    cursor: pointer !important;
 }
 
 .keyword-class {
     color: #4EC9B0 !important;
     font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(128, 128, 128, 0.3) !important;
+    cursor: pointer !important;
 }
 
 .keyword-type {
     color: #569CD6 !important;
     font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(128, 128, 128, 0.3) !important;
+    cursor: pointer !important;
 }
 
 .keyword-comment {
     color: #FFA500 !important;
     font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(128, 128, 128, 0.3) !important;
+    cursor: pointer !important;
 }
 
-.keyword-workspace, .keyword-note,
-.keyword-heading-1, .keyword-heading-2,
-.keyword-heading-3, .keyword-heading-4,
-.keyword-heading-5, .keyword-heading-6
-{
+.keyword-workspace, .keyword-note {
     color: #FFA500 !important;
     font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(128, 128, 128, 0.3) !important;
+    cursor: pointer !important;
 }
 
-/* Heading keywords - special styling */
+/* Heading keywords - NO underline, NO cursor pointer, normal display */
 .keyword-heading-1,
 .keyword-heading-2,
 .keyword-heading-3,
 .keyword-heading-4,
 .keyword-heading-5,
 .keyword-heading-6 {
-    /* color: #569CD6 !important; */
-    font-weight: 600 !important;
+    color: inherit !important;
+    font-weight: inherit !important;
+    text-decoration: none !important;
+    cursor: default !important;
+}
+
+/* Keyword index part [nameIndex] - dimmed and smaller */
+.keyword-index {
+    color: rgba(128, 128, 128, 0.5) !important;
+    font-size: 0.85em !important;
+    text-decoration: none !important;
+    font-weight: 400 !important;
 }
 
 /* URL Link Highlighting */
