@@ -1,19 +1,19 @@
 import { useCallback } from "react";
 import { useSnackbar } from "notistack";
 import type { Note } from "@/types/note.types";
-import { useEditorTabHelper } from "./useEditorTab.helper";
+import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { workspaceService } from "@/services/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
-import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
+import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { isNumber } from "lodash";
 
-export const useTreeEditorHelper = () => {
+export const useWorkspaceItemHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { getActiveTab } = useEditorTabHelper();
     const { originalNoteRef } = useNoteDetailStore();

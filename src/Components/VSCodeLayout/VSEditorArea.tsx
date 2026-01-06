@@ -7,10 +7,10 @@ import { WsEditorPanel } from "@/Components/Workspace";
 import { useEditorTabsStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
-import { OpenTabsSync } from "../../HeadlessComponents/OpenTabsSync";
+import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";
 import { Track } from "@radix-ui/react-slider";
-import { TrackTabNavigation } from "HeadlessComponents/TrackTabNavigation";
-import { NavigationHistorySync } from "HeadlessComponents/NavigationHistorySync";
+import { TrackTabNavigation } from "@/HeadlessComponents/vsCode/TrackTabNavigation";
+import { NavigationHistorySync } from "@/HeadlessComponents/vsCode/NavigationHistorySync";
 import { TabBar } from "./TabBar";
 
 /**

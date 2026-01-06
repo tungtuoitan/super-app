@@ -12,7 +12,7 @@ import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
 import MainNav from "./MainNav/MainNav";
-import { DialogProvider, EditorTabProvider, StandardRegistryProvider, CommandPaletteProvider } from "@/store/index";
+import { DialogProvider, EditorTabProvider, GeneralProvider, CommandPaletteProvider } from "@/store/index";
 import { EditorToolbarProvider } from "@/store/editor/EditorToolbar.store";
 import { NoteDetailProvider } from "@/store/note/useNoteDetail.store";
 import { NoteGridProvider } from "@/store/note/useNoteGrid.store";
@@ -60,7 +60,7 @@ export function Main() {
                                     <DndProvider backend={HTML5Backend}>
                                         <AuthStoreProvider>
                                             <NavigationHistoryProvider>
-                                                <StandardRegistryProvider>
+                                                <GeneralProvider>
                                                     <CommandPaletteProvider>
                                                         <WorkspaceProvider>
                                                             <FolderDialogProvider>
@@ -97,7 +97,7 @@ export function Main() {
                                                             </FolderDialogProvider>
                                                         </WorkspaceProvider>
                                                     </CommandPaletteProvider>
-                                                </StandardRegistryProvider>
+                                                </GeneralProvider>
                                             </NavigationHistoryProvider>
                                         </AuthStoreProvider>
                                     </DndProvider>

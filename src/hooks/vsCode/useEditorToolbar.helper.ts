@@ -21,7 +21,7 @@ import { useWsDetailHelper } from "../ws/useWsDetail.helper";
 import { Ws, useWsStore } from "@/store/ws/useWs.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { useTreeEditorHelper } from "./useTreeEditorHelper";
+import { useWorkspaceItemHelper } from "../workspace/useWorkspaceItemHelper";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 import { useWorkspaceLoader } from "../workspace";
@@ -32,7 +32,7 @@ export const useEditorToolbarHelper = () => {
     const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
     const { $user } = useAuthStore();
-    const _treeEditor = useTreeEditorHelper();
+    const _treeEditor = useWorkspaceItemHelper();
 
     // Get active tab
     const activeTab = getActiveTab();

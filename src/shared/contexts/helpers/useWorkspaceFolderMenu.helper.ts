@@ -25,7 +25,7 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
-import { useStandardRegistryStore } from "@/store/index";
+import { useGeneralStore } from "@/store/index";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/types/note.types";
@@ -119,7 +119,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { openFolderDialog } = useFolderDialogHelper();
     const { processTabAfterDelete, openTab } = useEditorTabHelper();
     const { openTabs } = useEditorTabsStore();
-    const { registries } = useStandardRegistryStore();
+    const { registries } = useGeneralStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { openNoteGridPopup } = useNoteGridPopupHelper();
 

@@ -8,7 +8,7 @@ import { Search } from "lucide-react";
 import { useCommandPaletteStore } from "@/store/commandPalette/useCommandPalette.store";
 import { useCommandPaletteHelper } from "@/hooks/index";
 import { HighlightedText } from "./HighlightedText";
-import { CommandPaletteKeyDown } from "@/HeadlessComponents/keydown/CommandPaletteKeyDown";
+import { CommandPaletteKeyDown } from "@/HeadlessComponents/vsCode/CommandPaletteKeyDown";
 
 export function CommandPalette() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef } = useCommandPaletteStore();

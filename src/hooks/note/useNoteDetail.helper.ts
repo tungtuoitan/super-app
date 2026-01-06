@@ -15,7 +15,7 @@ import { extractExternalLinks } from "@/utils/markdown.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
@@ -29,7 +29,7 @@ export const useNoteDetailHelper = () => {
     const { currentWorkspace } = useWorkspaceStore();
     const { enqueueSnackbar } = useSnackbar();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
-    const { registries, registriesLoading, allKeywords } = useStandardRegistryStore();
+    const { registries, registriesLoading, allKeywords } = useGeneralStore();
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useGridControlStore();
     const { loadKeywords } = useStandardRegistryHelper();

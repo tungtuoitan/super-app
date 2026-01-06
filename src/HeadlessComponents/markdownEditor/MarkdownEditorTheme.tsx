@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import { useStandardRegistryStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } from "@/store/index";
+import { useGeneralStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { updateDecorations, extractHeadingsAsKeywords } from "@/utils/markdown.utils";
@@ -14,7 +14,7 @@ import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 
 export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
-    const { registries, allKeywords } = useStandardRegistryStore();
+    const { registries, allKeywords } = useGeneralStore();
     const { getActiveTab, openTab } = useEditorTabHelper();
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
 

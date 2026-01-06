@@ -5,7 +5,7 @@
  */
 
 import { useSnackbar } from "notistack";
-import { useStandardRegistryStore } from "@/store/standardRegistry/StandardRegistry.store";
+import { useGeneralStore } from "@/store/general/General.store";
 import { standardRegistryService } from "@/services/standardRegistry.service";
 import { keywordService } from "@/services/keyword.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
@@ -34,7 +34,7 @@ export const useStandardRegistryHelper = () => {
         setAllKeywords,
         setKeywordsLoading,
         setKeywordsError
-    } = useStandardRegistryStore();
+    } = useGeneralStore();
     const { enqueueSnackbar } = useSnackbar();
 
     /**

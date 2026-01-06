@@ -6,7 +6,7 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
-import { useStandardRegistryStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } from "@/store/index";
+import { useGeneralStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteDetailHelper } from "@/hooks/note/useNoteDetail.helper";
@@ -28,11 +28,11 @@ import { NoteEntity } from "@/types/workspace-v2.types";
 import { noteService } from "@/services/note.service";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { MarkdownEditorTheme } from "../../HeadlessComponents/MarkdownEditorTheme";
-import {MarkdownEditorSync} from "@/HeadlessComponents/MarkdownEditorSync"; 
+import { MarkdownEditorTheme } from "../../HeadlessComponents/markdownEditor/MarkdownEditorTheme";
+import {MarkdownEditorSync} from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync"; 
 
 export function MarkdownEditor() {
-    const { registries, allKeywords } = useStandardRegistryStore();
+    const { registries, allKeywords } = useGeneralStore();
     const { navigateLink } = useKeywordNavigationHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const { getActiveTab, openTab } = useEditorTabHelper();

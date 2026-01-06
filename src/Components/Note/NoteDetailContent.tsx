@@ -12,7 +12,7 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { formatNoteDate } from "@/utils/note.utils";
 import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
-import { useEditorTabsStore, useStandardRegistryStore, useWorkspaceStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
@@ -33,7 +33,7 @@ export function NoteDetailContent() {
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 
     // Get standard registry data from global state
-    const { registries, registriesLoading } = useStandardRegistryStore();
+    const { registries, registriesLoading } = useGeneralStore();
 
     // Check if note is deleted (soft deleted)
     let isDeleted = activeNote?.deletedAt !== null;

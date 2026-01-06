@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { useStandardRegistryStore } from "@/store/index";
+import { useGeneralStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion } from "@/utils/markdown.utils";
 import { Note } from "@/types/note.types";
@@ -14,7 +14,7 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 
 export function MarkdownEditorSync() {
     const { getActiveTab, openTab } = useEditorTabHelper();
-    const { allKeywords } = useStandardRegistryStore();
+    const { allKeywords } = useGeneralStore();
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
 
     // Get active tab and note

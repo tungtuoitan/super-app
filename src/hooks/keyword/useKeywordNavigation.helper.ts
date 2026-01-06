@@ -9,7 +9,7 @@ import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
-import { useTreeEditorHelper } from "@/hooks/vsCode/useTreeEditorHelper";
+import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { noteService } from "@/services/note.service";
 import { parseKeywordLink, getHeadingAnchor } from "@/utils/keyword-link.utils";
@@ -25,7 +25,7 @@ export const useKeywordNavigationHelper = () => {
     const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef } = useWorkspaceStore();
     const { openTabs } = useEditorTabsStore();
     const { openTab } = useEditorTabHelper();
-    const { upsertWorkspaceItem } = useTreeEditorHelper();
+    const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();
     const { enqueueSnackbar } = useSnackbar();
 
