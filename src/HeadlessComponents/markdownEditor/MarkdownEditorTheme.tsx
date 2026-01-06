@@ -30,6 +30,7 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
             text: k.nameIndex === 1 ? `[${k.name}]` : `[${k.name}][${k.nameIndex}]`,
             type: k.type,
             link: k.link,
+            longLink: k.longLink,
             name: k.name,
             nameIndex: k.nameIndex,
         }));

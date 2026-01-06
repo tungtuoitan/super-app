@@ -293,7 +293,7 @@ export const constants = {
                     strings: true,
                 },
                 acceptSuggestionOnCommitCharacter: true,
-                acceptSuggestionOnEnter: "on",
+                acceptSuggestionOnEnter: "off", // Only accept with Tab, Enter for new line
                 wordBasedSuggestions: "off", // Turn off default word-based suggestions to prioritize custom keywords
                 suggest: {
                     showWords: false, // Don't suggest random words from the document
@@ -307,6 +307,27 @@ export const constants = {
                 },
             }) as _monaco.editor.IStandaloneEditorConstructionOptions,
         },
+    } as const,
+
+    // Keyword type icons mapping (for autocomplete and command palette)
+    keywordIcons: {
+        workspace: "folder", // Monaco CompletionItemKind.Folder
+        folder: "folder",
+        note: "file",
+        file: "file",
+        h1: "text", // Monaco CompletionItemKind.Text for headings
+        h2: "text",
+        h3: "text",
+        h4: "text",
+        h5: "text",
+        h6: "text",
+        external: "reference", // Monaco CompletionItemKind.Reference
+        hashtag: "color", // Monaco CompletionItemKind.Color
+        status: "enum", // Monaco CompletionItemKind.Enum
+        keyword: "keyword",
+        class: "class",
+        type: "interface",
+        comment: "snippet",
     } as const,
 } as const;
 

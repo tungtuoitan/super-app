@@ -53,11 +53,11 @@ export function updateDecorations(
                 if (nameIndexMatch) {
                     const indexPartLength = nameIndexMatch[0].length; // Length of [number]
                     const namePartEnd = match.index + match[0].length - indexPartLength;
-                    
+
                     // Decoration for [name] part
                     const nameStartPos = model.getPositionAt(match.index);
                     const nameEndPos = model.getPositionAt(namePartEnd);
-                    
+
                     decorations.push({
                         range: {
                             startLineNumber: nameStartPos.lineNumber,
@@ -75,7 +75,7 @@ export function updateDecorations(
                     // Decoration for [nameIndex] part - dimmed and smaller
                     const indexStartPos = model.getPositionAt(namePartEnd);
                     const indexEndPos = model.getPositionAt(match.index + match[0].length);
-                    
+
                     decorations.push({
                         range: {
                             startLineNumber: indexStartPos.lineNumber,
@@ -84,7 +84,7 @@ export function updateDecorations(
                             endColumn: indexEndPos.column,
                         },
                         options: {
-                            inlineClassName: 'keyword-index',
+                            inlineClassName: "keyword-index",
                             isWholeLine: false,
                             inlineClassNameAffectsLetterSpacing: true,
                         },
@@ -157,13 +157,46 @@ export function updateDecorations(
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
 }
 
+// Helper: Fuzzy match - check if searchWords match keyword (any order)
+const fuzzyMatch = (keyword: string, searchWords: string[]): { match: boolean; score: number } => {
+    const kwLower = keyword.toLowerCase();
+    let matchedCount = 0;
+    let totalPosition = 0; // Tổng vị trí các từ match để tính score
+
+    // Check từng word có tồn tại trong keyword không (bất kể thứ tự)
+    for (const word of searchWords) {
+        const wordLower = word.toLowerCase();
+        const foundIndex = kwLower.indexOf(wordLower);
+
+        if (foundIndex !== -1) {
+            matchedCount++;
+            totalPosition += foundIndex; // Cộng vị trí để ưu tiên từ ở đầu
+        } else {
+            // Word không tìm thấy
+            return { match: false, score: 0 };
+        }
+    }
+
+    // Score: cao hơn nếu match nhiều words và các từ ở gần đầu keyword
+    const score = matchedCount * 1000 - totalPosition;
+    return { match: true, score };
+};
+
+interface MatchResult {
+    keyword: { text: string; type: string; link?: string };
+    startColumn: number;
+    matchedText: string;
+    score: number;
+}
+
+
 /**
  * Setup autocomplete provider with dynamic heading extraction
  */
 export function setupAutocomplete(
     $mi: Monaco | null,
     editor: _monaco.editor.IStandaloneCodeEditor,
-    _allKeywords: Array<{ text: string; type: string; link?: string; name?: string; nameIndex?: number }>,
+    _allKeywords: Array<{ text: string; type: string; link?: string; longLink?: string; name?: string; nameIndex?: number }>,
     noteId?: number
 ) {
     if (!$mi) return () => {};
@@ -176,51 +209,7 @@ export function setupAutocomplete(
             const lineContent = model.getLineContent(position.lineNumber);
             const textBeforeCursor = lineContent.substring(0, position.column - 1);
 
-            // Check if current line is a heading - if so, don't autocomplete headings
-            // const isOnHeadingLine = /^#{1,6}\s+/.test(lineContent);
-
-            // Dynamically extract headings from current text (excluding current line if it's a heading)
-            // const currentText = model.getValue();
-            // const headings = isOnHeadingLine
-            //     ? [] // Don't extract headings when typing on a heading line
-            //     : extractHeadingsAsKeywords(currentText, noteId);
-
-            // Merge with static _allKeywords
-            // const allKeywordAndHeadings = [..._allKeywords, ...headings];
-
             // Tìm partial match dài nhất từ text trước cursor
-            interface BestMatchType {
-                keyword: { text: string; type: string };
-                startColumn: number;
-                matchedText: string;
-                score: number; // Thêm score để rank
-            }
-            // let bestMatch: BestMatchType | null = null;
-
-            // Helper: Fuzzy match - check if searchWords match keyword (any order)
-            const fuzzyMatch = (keyword: string, searchWords: string[]): { match: boolean; score: number } => {
-                const kwLower = keyword.toLowerCase();
-                let matchedCount = 0;
-                let totalPosition = 0; // Tổng vị trí các từ match để tính score
-
-                // Check từng word có tồn tại trong keyword không (bất kể thứ tự)
-                for (const word of searchWords) {
-                    const wordLower = word.toLowerCase();
-                    const foundIndex = kwLower.indexOf(wordLower);
-
-                    if (foundIndex !== -1) {
-                        matchedCount++;
-                        totalPosition += foundIndex; // Cộng vị trí để ưu tiên từ ở đầu
-                    } else {
-                        // Word không tìm thấy
-                        return { match: false, score: 0 };
-                    }
-                }
-
-                // Score: cao hơn nếu match nhiều words và các từ ở gần đầu keyword
-                const score = matchedCount * 1000 - totalPosition;
-                return { match: true, score };
-            };
 
             // Get search words from text before cursor
             const textTrimmed = textBeforeCursor.trim();
@@ -228,14 +217,7 @@ export function setupAutocomplete(
 
             // Try fuzzy matching với từng word combination từ cuối text
             // Track tất cả matches, không chỉ best match
-            interface MatchResult {
-                keyword: { text: string; type: string; link?: string };
-                startColumn: number;
-                matchedText: string;
-                score: number;
-            }
             const allMatches: MatchResult[] = [];
-
             _allKeywords.forEach((kw) => {
                 if (!textTrimmed) {
                     // Nếu chưa gõ gì, show all _allKeywords
@@ -295,25 +277,48 @@ export function setupAutocomplete(
 
             const suggestions = allMatches.map((matchResult) => {
                 const kw = matchResult.keyword;
-                // Icon dựa trên type
-                let kind = $mi.languages.CompletionItemKind.Keyword;
-                if (kw.type === "hashtag") kind = $mi.languages.CompletionItemKind.Color;
-                if (kw.type === "status") kind = $mi.languages.CompletionItemKind.Enum;
-                if (kw.type === "class") kind = $mi.languages.CompletionItemKind.Class;
-                if (kw.type === "type") kind = $mi.languages.CompletionItemKind.Interface;
-                if (kw.type.startsWith("heading-")) kind = $mi.languages.CompletionItemKind.Reference; // Heading icon
+                
+                // Get icon based on keyword type using mapping
+                let kind = $mi.languages.CompletionItemKind.Value; // Default
+                
+                switch (kw.type) {
+                    case "workspace":
+                        kind = $mi.languages.CompletionItemKind.Constructor;
+                        break;
+                    case "folder":
+                        kind = $mi.languages.CompletionItemKind.Folder;
+                        break;
+                    case "note":
+                    case "file":
+                        kind = $mi.languages.CompletionItemKind.File;
+                        break;
+                    case "h1":
+                    case "h2":
+                    case "h3":
+                    case "h4":
+                    case "h5":
+                    case "h6":
+                        kind = $mi.languages.CompletionItemKind.Unit;
+                        break;
+                    case "external":
+                        kind = $mi.languages.CompletionItemKind.Reference;
+                        break;
+                    default:
+                        kind = $mi.languages.CompletionItemKind.Value;
+                        break;
+                }
 
                 // For autocomplete, always insert explicit format [name][nameIndex]
                 // even if display format might be just [name] for nameIndex=1
                 // Check if kw has name and nameIndex properties (from _allKeywords)
-                const kwWithDetails = kw as { text: string; type: string; link?: string; name?: string; nameIndex?: number };
+                const kwWithDetails = kw as { text: string; type: string; link?: string; longLink?: string; name?: string; nameIndex?: number };
                 let insertText = kw.text;
-                
+
                 // If this is from _allKeywords (has name/nameIndex), use explicit format
                 if (kwWithDetails.name && kwWithDetails.nameIndex !== undefined) {
                     insertText = `[${kwWithDetails.name}][${kwWithDetails.nameIndex}]`;
                 }
-                
+
                 let rangeStartColumn = startColumn;
 
                 if (hasOpeningBracket) {
@@ -330,15 +335,26 @@ export function setupAutocomplete(
                     endColumn: position.column,
                 };
 
-                // Build documentation with type and link
-                const documentation = kw.link 
-                    ? `Type: ${kw.type}\nLink: ${kw.link}` 
-                    : `Type: ${kw.type}`;
+                // Build documentation with type and longLink
+                const fullPath = kwWithDetails.longLink || kw.link || '';
                 
-                // Build detail with type and link
-                const detail = kw.link 
-                    ? `${kw.type} • ${kw.link}` 
-                    : `${kw.type} keyword`;
+                // Remove name (last part) from longLink for display
+                // Example: "Workspace[1]/Folder[2]/NoteName[3]" -> "Workspace[1]/Folder[2]"
+                let displayLink = fullPath;
+                if (fullPath) {
+                    const parts = fullPath.split("/");
+                    if (parts.length > 1) {
+                        parts.pop(); // Remove last part (name)
+                        displayLink = parts.join("/");
+                    } else {
+                        displayLink = ""; // If only one part, no parent path to show
+                    }
+                }
+                
+                const documentation = displayLink ? `Type: ${kw.type}\nPath: ${displayLink}` : `Type: ${kw.type}`;
+
+                // Build detail - shows path without name, right-aligned automatically by Monaco
+                const detail = displayLink || undefined; // undefined hides detail if no path
 
                 // Label shows just the name (without brackets) for readability
                 // But insertText includes full format [name][nameIndex]
@@ -350,7 +366,7 @@ export function setupAutocomplete(
                     insertText: insertText,
                     range,
                     documentation,
-                    detail,
+                    detail, // Monaco displays this on the right side
                     sortText: `${1000 - matchResult.score}${displayLabel}`, // Sort by score (higher first)
                 };
             });
@@ -365,12 +381,7 @@ export function setupAutocomplete(
 /**
  * Setup definition provider with dynamic heading extraction and cross-note navigation
  */
-export function setupDefinitionProvider(
-    $mi: Monaco | null,
-    editor: _monaco.editor.IStandaloneCodeEditor,
-    _allKeywords: Array<{ text: string; type: string }>,
-    noteId?: number
-) {
+export function setupDefinitionProvider($mi: Monaco | null, editor: _monaco.editor.IStandaloneCodeEditor, _allKeywords: Array<{ text: string; type: string }>, noteId?: number) {
     if (!$mi) return () => {};
 
     const disposable = $mi.languages.registerDefinitionProvider("markdown", {
@@ -672,11 +683,11 @@ export function convertToOriginalVersion(text: string, allKeywords: Array<{ id: 
     // 2. [name] -> id (for nameIndex=1, implicit)
     const keywordIdMapExplicit = new Map<string, number>();
     const keywordIdMapImplicit = new Map<string, number>();
-    
+
     allKeywords.forEach((kw) => {
         const keyExplicit = `[${kw.name}][${kw.nameIndex}]`.toLowerCase();
         keywordIdMapExplicit.set(keyExplicit, kw.id);
-        
+
         // For nameIndex=1, also map [name] -> id
         if (kw.nameIndex === 1) {
             const keyImplicit = `[${kw.name}]`.toLowerCase();
@@ -770,12 +781,7 @@ export function extractHeadingsAsKeywords(text: string, noteId?: number): Array<
 /**
  * Setup link provider for Ctrl+hover behavior (underline + pointer cursor)
  */
-export function setupLinkProvider(
-    $mi: Monaco | null,
-    editor: _monaco.editor.IStandaloneCodeEditor,
-    _allKeywords: Array<{ text: string; type: string }>,
-    noteId?: number
-) {
+export function setupLinkProvider($mi: Monaco | null, editor: _monaco.editor.IStandaloneCodeEditor, _allKeywords: Array<{ text: string; type: string }>, noteId?: number) {
     if (!$mi) return () => {};
 
     const disposable = $mi.languages.registerLinkProvider("markdown", {
@@ -837,12 +843,7 @@ export function setupLinkProvider(
     return () => disposable.dispose();
 }
 
-export function setupHoverProvider(
-    $mi: Monaco | null,
-    editor: _monaco.editor.IStandaloneCodeEditor,
-    _allKeywords: Array<{ text: string; type: string }>,
-    noteId?: number
-) {
+export function setupHoverProvider($mi: Monaco | null, editor: _monaco.editor.IStandaloneCodeEditor, _allKeywords: Array<{ text: string; type: string }>, noteId?: number) {
     if (!$mi) return () => {};
 
     const disposable = $mi.languages.registerHoverProvider("markdown", {
