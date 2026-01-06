@@ -8,10 +8,10 @@ import { StatusBar } from "./StatusBar";
 import { VSEditorArea } from "./VSEditorArea";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 import { useActivityBarStore } from "@/store/index";
-import {useGridAutoRegisterHelper} from "@/hooks/vsCode/useGridAutoRegister.helper";
-import {useLocation} from "react-router-dom";
+import { useGridAutoRegisterHelper } from "@/hooks/vsCode/useGridAutoRegister.helper";
+import { useLocation } from "react-router-dom";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
-import {CheckIsMobile} from "@/hooks/CheckIsMobile";
+import { CheckIsMobile } from "@/hooks/CheckIsMobile";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -50,7 +50,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const location = useLocation();
     const { isMobile } = useMobileStore();
     const { isSideBarVisible, setIsSideBarVisible, isPanelVisible, setIsPanelVisible } = useActivityBarStore();
-    
+
     // Auto-register grid based on current URL
     const { getGridConfigFromPath, registerGrid } = useGridAutoRegisterHelper();
 
@@ -95,11 +95,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                             {!isMobile && <VSCodeResizeHandle direction="vertical" id="panel-resize" />}
 
                             {/* Bottom Panel - NoteDetail and Properties - Hidden on mobile */}
-                            {!isMobile && (
-                                isPanelVisible && (
-                                    <VSPanel onClose={() => setIsPanelVisible(false)} />
-                                )
-                            )}
+                            {!isMobile && <VSPanel onClose={() => setIsPanelVisible(false)} />}
                         </PanelGroup>
                     </Panel>
                 </PanelGroup>

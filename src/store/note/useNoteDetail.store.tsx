@@ -7,7 +7,7 @@
 
 import { Note } from "@/types/note.types";
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
-
+import type * as _monaco from "monaco-editor";
 export interface NoteDetailContextData {
     // Dialog state
     originalNoteRef: React.MutableRefObject<Note | null>;
@@ -22,6 +22,12 @@ export interface NoteDetailContextData {
     // Validation state
     nameError: string;
     setNameError: Dispatch<SetStateAction<string>>;
+
+    displayDesc: string;
+    setDisplayDesc: Dispatch<SetStateAction<string>>;
+    editorRef: React.MutableRefObject<_monaco.editor.IStandaloneCodeEditor | null>;
+    decorationsRef: React.MutableRefObject<string[]>;
+    disposablesRef: React.MutableRefObject<_monaco.IDisposable[]>;
 }
 
 export const noteDetailContextDefaultValue: NoteDetailContextData = {
@@ -38,6 +44,12 @@ export const noteDetailContextDefaultValue: NoteDetailContextData = {
     // Validation state
     nameError: "",
     setNameError: () => {},
+
+    displayDesc: "",
+    setDisplayDesc: () => {},
+    editorRef: { current: null },
+    decorationsRef: { current: [] },
+    disposablesRef: { current: [] },
 };
 
 const NoteDetailContext = createContext<NoteDetailContextData>(noteDetailContextDefaultValue);
@@ -55,6 +67,11 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     // Validation state
     const [nameError, setNameError] = useState("");
 
+    const [displayDesc, setDisplayDesc] = useState("");
+    const editorRef = useRef<_monaco.editor.IStandaloneCodeEditor | null>(null);
+    const decorationsRef = useRef<string[]>([]);
+    const disposablesRef = useRef<_monaco.IDisposable[]>([]);
+
     return (
         <NoteDetailContext.Provider
             value={{
@@ -71,6 +88,12 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 // Validation state
                 nameError,
                 setNameError,
+
+                displayDesc,
+                setDisplayDesc,
+                editorRef,
+                decorationsRef,
+                disposablesRef,
             }}
         >
             {children}

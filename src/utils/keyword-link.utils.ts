@@ -13,7 +13,7 @@ export interface ParsedKeywordLink {
     workspaceId?: number;
     folderId?: number;
     noteWorkspaceItemId?: number;
-    headingPath?: string[]; // For headings: ["h1", "Introduction", "h2", "Overview"]
+    headingPath?: string[]; // For headings: ["Introduction", "Overview", "Details"]
     url?: string; // For external links
     raw: string; // Original link
 }
@@ -22,10 +22,13 @@ export interface ParsedKeywordLink {
  * Parse keyword link to extract information
  *
  * Format examples:
- * - workspace/123
- * - workspace/123/folder/456
- * - workspace/123/folder/456/note/789
- * - workspace/123/note/789/h1/Introduction/h2/Overview
+ * - w77 (workspace)
+ * - w77/f183 (folder)
+ * - w77/f183/f184 (nested folder)
+ * - w77/n185 (note)
+ * - w77/n186/ (note with trailing slash)
+ * - w77/n186/Nhà sản xuất (note with heading)
+ * - w77/n187/Wonbin2/ai nữa2 (note with nested headings)
  * - https://google.com (external)
  */
 export function parseKeywordLink(link: string): ParsedKeywordLink | null {
@@ -40,10 +43,10 @@ export function parseKeywordLink(link: string): ParsedKeywordLink | null {
         };
     }
 
-    const parts = link.split("/");
+    const parts = link.split("/").filter(p => p.length > 0); // Remove empty parts
 
-    // Must start with "workspace"
-    if (parts[0] !== "workspace") {
+    // Must start with "w{number}"
+    if (!parts[0] || !parts[0].match(/^w\d+$/)) {
         return null;
     }
 
@@ -52,40 +55,40 @@ export function parseKeywordLink(link: string): ParsedKeywordLink | null {
         raw: link,
     };
 
-    // Parse workspace ID
-    if (parts.length >= 2) {
-        result.workspaceId = parseInt(parts[1], 10);
-        if (isNaN(result.workspaceId)) return null;
+    // Parse workspace ID from "w123"
+    result.workspaceId = parseInt(parts[0].substring(1), 10);
+    if (isNaN(result.workspaceId)) return null;
+
+    // If only workspace, return
+    if (parts.length === 1) {
+        return result;
     }
 
     // Parse remaining parts
-    let i = 2;
+    let i = 1;
     while (i < parts.length) {
-        const prefix = parts[i];
-        const value = parts[i + 1];
+        const part = parts[i];
 
-        if (prefix === "folder" && value) {
+        // Check if it's a folder (f{number})
+        if (part.match(/^f\d+$/)) {
             result.type = "folder";
-            result.folderId = parseInt(value, 10);
-            i += 2;
-        } else if (prefix === "note" && value) {
+            result.folderId = parseInt(part.substring(1), 10);
+            i += 1;
+        }
+        // Check if it's a note (n{number})
+        else if (part.match(/^n\d+$/)) {
             result.type = "note";
-            result.noteWorkspaceItemId = parseInt(value, 10);
-            i += 2;
-        } else if (prefix.match(/^h[1-6]$/) && value) {
-            // Heading detected
-            result.type = "heading";
-            result.headingPath = [];
+            result.noteWorkspaceItemId = parseInt(part.substring(1), 10);
+            i += 1;
 
-            // Parse all heading levels
-            while (i < parts.length && parts[i].match(/^h[1-6]$/)) {
-                result.headingPath.push(parts[i]); // h1, h2, etc
-                result.headingPath.push(parts[i + 1]); // title
-                i += 2;
+            // After note, remaining parts are headings
+            if (i < parts.length) {
+                result.type = "heading";
+                result.headingPath = parts.slice(i);
+                break;
             }
-            break;
         } else {
-            // Unknown prefix, stop parsing
+            // Unknown format, stop parsing
             break;
         }
     }
@@ -102,7 +105,8 @@ export function findKeywordByLink(link: string, allKeywords: Keyword[]): Keyword
 
 /**
  * Get heading anchor from heading path
- * Example: ["h1", "Introduction", "h2", "Overview"] -> "overview"
+ * Example: ["Introduction", "Overview"] -> "overview"
+ * Example: ["Nhà sản xuất"] -> "nhà-sản-xuất"
  */
 export function getHeadingAnchor(headingPath: string[]): string {
     if (!headingPath || headingPath.length === 0) return "";

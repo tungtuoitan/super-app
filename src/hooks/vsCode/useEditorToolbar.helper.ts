@@ -25,6 +25,7 @@ import { useTreeEditorHelper } from "./useTreeEditorHelper";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 import { useWorkspaceLoader } from "../workspace";
+import {useStandardRegistryHelper} from "../standardRegistry/useStandardRegistry.helper";
 
 export const useEditorToolbarHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
@@ -51,6 +52,7 @@ export const useEditorToolbarHelper = () => {
     const { moduleName } = useGridControlStore();
     const { currentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
+    const { loadKeywords } = useStandardRegistryHelper();
 
     // Get status text based on tab type and deletion state
     const _deleteStatusText = (() => {
@@ -95,6 +97,7 @@ export const useEditorToolbarHelper = () => {
                 case constants.vscode.tab.tabTypes.workspace:
                     // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
                     await upsertWorkspace(activeTab.id);
+                    loadWorkspaces();
                     break;
                 case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
                     const data = activeTab.data as Note;
@@ -107,12 +110,14 @@ export const useEditorToolbarHelper = () => {
                             if (!savedNote) {
                                 throw new Error("Failed to update note");
                             }
+                            loadKeywords();
                         }
                         //* thêm các entity type khác ở đây
                     }
                     // CREATE new entity + workspace_item - use workspace API
                     else if (workspaceItem.id < 0 && activeTab.data.id < 0) {
                         await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
+                        loadKeywords()
                     }
                     else {
                         console.error("⚠️ Unexpected case in upsertOrchestraitor");

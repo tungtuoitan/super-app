@@ -304,10 +304,14 @@ export const useEditorTabHelper = () => {
     // };
 
     /**
-     * Get the currently active tab
-     * @returns The active tab or null if no tab is active
+     * Get the currently active tab or a specific tab by ID
+     * @param tabId Optional tab ID to get specific tab
+     * @returns The active/specific tab or null if not found
      */
-    const getActiveTab = (): BaseTab | null => {
+    const getActiveTab = (tabId?: string): BaseTab | null => {
+        if (tabId) {
+            return openTabs.find((tab: BaseTab) => tab.id === tabId) || null;
+        }
         if (!activeTabId) return null;
         return openTabs.find((tab: BaseTab) => tab.id === activeTabId) || null;
     };

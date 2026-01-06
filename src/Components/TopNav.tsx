@@ -1,15 +1,10 @@
-import { MouseEvent, useEffect } from "react";
-import { useSnackbar } from "notistack";
-
-import { useAuthStore } from "@/store/auth/Auth.store";
-import { config } from "@/config/app.config";
+import { MouseEvent, useEffect, useState } from "react";
 import { constants } from "@/utils/constants";
 import { envConfig } from "../config";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
-import { CheckIsMobile } from "@/hooks/CheckIsMobile";
-import { useActivityBarStore } from "@/store/index";
+import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
 import {useMobileStore} from "@/store/mobile/Mobile.store";
-// import { useLogger } from "store/debug/DebugLogger.store";
+import {CommandPalette} from "./shared/CommandPalette";
 
 /**
  * Top navigation component.
@@ -28,32 +23,22 @@ export function TopNav() {
     const showDevBadge = envConfig.ENVIRONMENT !== constants.environments.production;
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useMobileStore();
-    // const logger = useLogger("TopNav");
+    const { setIsOpen } = useCommandPaletteStore();
 
+
+    // Handle Ctrl+P to open command palette
     useEffect(() => {
-        const topNavElement = document.querySelector(".top-navigation") as HTMLElement;
-        const navElement = document.querySelector("nav") as HTMLElement;
-        
-        // logger.log("TopNav Mounted", {
-        //     isMobile,
-        //     isSideBarVisible,
-        //     topNavElement: topNavElement ? {
-        //         className: topNavElement.className,
-        //         zIndex: window.getComputedStyle(topNavElement).zIndex,
-        //         position: window.getComputedStyle(topNavElement).position,
-        //         top: window.getComputedStyle(topNavElement).top,
-        //         visibility: window.getComputedStyle(topNavElement).visibility,
-        //         display: window.getComputedStyle(topNavElement).display,
-        //     } : null,
-        //     navElement: navElement ? {
-        //         className: navElement.className,
-        //         zIndex: window.getComputedStyle(navElement).zIndex,
-        //         position: window.getComputedStyle(navElement).position,
-        //     } : null,
-        //     windowHeight: window.innerHeight,
-        //     windowWidth: window.innerWidth,
-        // });
-    }, [isMobile, isSideBarVisible]);
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Check for Ctrl+P (Windows/Linux) or Cmd+P (Mac)
+            if ((e.ctrlKey || e.metaKey)  && e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                setIsOpen(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     const handleToggleSidebar = () => {
         // logger.log("Toggle Sidebar Clicked", {
@@ -82,54 +67,58 @@ export function TopNav() {
     };
 
     return (
-        <div className="top-navigation w-full bg-black h-[36px] sticky top-0 z-50">
-            <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
-                {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
-                
-                {/* Mobile sidebar toggle button */}
-                {isMobile && (
-                    <button
-                        onClick={handleToggleSidebar}
-                        className="p-1 rounded text-gray-300 transition-colors"
-                        title={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
-                        aria-label={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
-                    >
-                        {isSideBarVisible ? (
-                            /* Close (X) icon when sidebar is visible */
-                            <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                            >
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                        ) : (
-                            /* Hamburger menu icon when sidebar is hidden */
-                            <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                            >
-                                <line x1="3" y1="6" x2="21" y2="6" />
-                                <line x1="3" y1="12" x2="21" y2="12" />
-                                <line x1="3" y1="18" x2="21" y2="18" />
-                            </svg>
-                        )}
-                    </button>
-                )}
+        <>
+            <CommandPalette />
+            
+            <div className="top-navigation w-full bg-black h-[36px] sticky top-0 z-50">
+                <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
+                    {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
                     
-                {/* <DevDetail /> */}
+                    {/* Mobile sidebar toggle button */}
+                    {isMobile && (
+                        <button
+                            onClick={handleToggleSidebar}
+                            className="p-1 rounded text-gray-300 transition-colors"
+                            title={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
+                            aria-label={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
+                        >
+                            {isSideBarVisible ? (
+                                /* Close (X) icon when sidebar is visible */
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            ) : (
+                                /* Hamburger menu icon when sidebar is hidden */
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <line x1="3" y1="12" x2="21" y2="12" />
+                                    <line x1="3" y1="18" x2="21" y2="18" />
+                                </svg>
+                            )}
+                        </button>
+                    )}
+                        
+                    {/* <DevDetail /> */}
 
-                <div className="flex-1">{/* Right side content can go here */}</div>
-            </nav>
-        </div>
+                    <div className="flex-1">{/* Right side content can go here */}</div>
+                </nav>
+            </div>
+        </>
     );
 }
 

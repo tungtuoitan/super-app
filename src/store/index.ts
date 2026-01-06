@@ -37,3 +37,6 @@ export type { StandardRegistryContextData } from "./standardRegistry/StandardReg
 
 export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "./editor/NavigationHistory.store";
 export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "./editor/NavigationHistory.store";
+
+export { CommandPaletteStore, CommandPaletteProvider, useCommandPaletteStore } from "./commandPalette/useCommandPalette.store";
+export type { CommandPaletteContextData } from "./commandPalette/useCommandPalette.store";

@@ -3,53 +3,40 @@
 .keyword-hashtag {
     color: #fad000 !important;
     font-weight: 500 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
 
 .keyword-status {
     color: #6496c8 !important;
     font-weight: 500 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
 
 .keyword-keyword {
     color: #C586C0 !important;
     font-weight: 500 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
 
 .keyword-class {
     color: #4EC9B0 !important;
     font-weight: 500 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
 
 .keyword-type {
     color: #569CD6 !important;
     font-weight: 500 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
 
 .keyword-comment {
     color: #FFA500 !important;
     font-weight: 500 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
-.keyword-workspace, .keyword-note, 
-.keyword-heading-1, .keyword-heading-2, 
-.keyword-heading-3, .keyword-heading-4, 
+
+.keyword-workspace, .keyword-note,
+.keyword-heading-1, .keyword-heading-2,
+.keyword-heading-3, .keyword-heading-4,
 .keyword-heading-5, .keyword-heading-6
 {
     color: #FFA500 !important;
     font-weight: 500 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
 
 /* Heading keywords - special styling */
@@ -61,8 +48,6 @@
 .keyword-heading-6 {
     /* color: #569CD6 !important; */
     font-weight: 600 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
 }
 
 /* URL Link Highlighting */

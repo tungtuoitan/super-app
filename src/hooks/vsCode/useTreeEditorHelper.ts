@@ -17,98 +17,160 @@ export const useTreeEditorHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { getActiveTab } = useEditorTabHelper();
     const { originalNoteRef } = useNoteDetailStore();
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabsStore();
     const { $user } = useAuthStore();
     const { currentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
 
-    //* hàm này chỉ phục vụ cho save button trong Editor Toolbar
+    //* hàm này phục vụ cho save button trong Editor Toolbar và batch save
     const upsertWorkspaceItem = useCallback(
-        async (action: WorkspaceItemAction) => {
-            const activeTab = getActiveTab();
-            if (!activeTab) return;
-            const noteData = activeTab.data as Note;
+        async (action: WorkspaceItemAction, tabIds?: string[]): Promise<boolean> => {
             const token = $user.userToken;
 
             switch (action) {
                 case WorkspaceItemAction.Create:
-                    const workspaceItem = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteData.id);
-                    if (!workspaceItem) {
-                        console.warn("⚠️ Note not found in workspace tree");
-                        enqueueSnackbar("Note not found in workspace tree", { variant: "error" });
-                        return;
-                    }
                     // =====================================
-                    // CREATE: Create new note entity + workspace_item in one transaction
-                    // API will create both note and workspace_item automatically
+                    // Collect tabs to process
                     // =====================================
-                    const request: UpsertWorkspaceItemRequest = {
-                        action: WorkspaceItemAction.Create,
-                        entityType: 3, // Note
-                        parentId: isNumber(workspaceItem.parentId) && SPECIAL_IDS.includes(workspaceItem.parentId) ? null : workspaceItem.parentId ?? null, // Parent workspace_items.id
-                        noteData: {
-                            userId: noteData.userId,
-                            name: noteData.name,
-                            description: noteData.description || null,
-                            statusCode: noteData.statusCode || null,
-                            deletedAt: noteData.deletedAt ? noteData.deletedAt.toISOString() : null,
-                        },
-                    };
+                    const tabsToProcess =
+                        tabIds && tabIds.length > 0 ? tabIds.map((id) => getActiveTab(id)).filter((tab) => tab !== null) : [getActiveTab()].filter((tab) => tab !== null);
 
-                    const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentWorkspace?.id ?? 0, [request]);
-
-                    if (!result.success) {
-                        throw new Error(result.message || "Failed to create note");
+                    if (tabsToProcess.length === 0) {
+                        console.warn("⚠️ No tabs to process");
+                        return false;
                     }
 
-                    // remove old temporary workspace item
-                    const newFlatData = currentWorkspace?.flatData.filter((item) => item.id !== workspaceItem.id) || [];
+                    // =====================================
+                    // Build batch requests for all tabs
+                    // =====================================
+                    const batchRequests: UpsertWorkspaceItemRequest[] = [];
+                    const tabWorkspaceItemMap = new Map<string, { tabId: string; tempWorkspaceItemId: number; noteData: Note }>();
 
-                    // update openTabs to replace temporary workspace item id with real one after reload
-                    const newWorkspace = await loadTree(newFlatData.filter((item) => item.id < 0));
+                    for (const tab of tabsToProcess) {
+                        if(!tab) continue;
+                        const noteData = tab.data as Note;
+                        const workspaceItem = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteData.id);
 
-                    // Extract created note ID from response
-                    // API returns Data: List<WorkspaceItemEntity> with entityId = real note ID
-                    if (result.data && result.data.length > 0) {
-                        const _createdItem = result.data[0];
-                        const _workspaceItemFromDB: WorkspaceItemV2 | undefined = newWorkspace?.flatData.find(
-                            (item) => item.entityType === 3 && item.entityId === _createdItem.entityId
-                        );
-                        if (!_workspaceItemFromDB) {
-                            throw new Error("Failed to find created workspace item in reloaded data");
+                        if (!workspaceItem) {
+                            console.warn(`⚠️ Note not found in workspace tree: ${noteData.name}`);
+                            enqueueSnackbar(`Note not found in workspace tree: ${noteData.name}`, { variant: "warning" });
+                            return false;
                         }
 
-                        // Update tab data with real IDs
+                        // Build request for this tab
+                        const request: UpsertWorkspaceItemRequest = {
+                            action: WorkspaceItemAction.Create,
+                            entityType: 3, // Note
+                            parentId: isNumber(workspaceItem.parentId) && SPECIAL_IDS.includes(workspaceItem.parentId) ? null : workspaceItem.parentId ?? null,
+                            noteData: {
+                                userId: noteData.userId,
+                                name: noteData.name,
+                                description: noteData.description || null,
+                                statusCode: noteData.statusCode || null,
+                                deletedAt: noteData.deletedAt ? noteData.deletedAt.toISOString() : null,
+                            },
+                        };
+
+                        batchRequests.push(request);
+                        tabWorkspaceItemMap.set(tab.id, {
+                            tabId: tab.id,
+                            tempWorkspaceItemId: workspaceItem.id,
+                            noteData,
+                        });
+                    }
+
+                    if (batchRequests.length === 0) {
+                        console.warn("⚠️ No valid requests to process");
+                        return false;
+                    }
+
+                    // =====================================
+                    // Call batch API once for all tabs
+                    // =====================================
+                    const result = await workspaceService._upsertWorkspaceItems(token ?? "", currentWorkspace?.id ?? 0, batchRequests);
+
+                    if (!result.success) {
+                        const errorMessage = result.message || "Failed to create notes";
+                        console.error("⚠️ Failed to create notes:", errorMessage);
+                        enqueueSnackbar(errorMessage, { variant: "error" });
+                        return false;
+                    }
+
+                    // =====================================
+                    // Remove old temporary workspace items
+                    // =====================================
+                    const tempWorkspaceItemIds = Array.from(tabWorkspaceItemMap.values()).map((item) => item.tempWorkspaceItemId);
+                    const newFlatData = currentWorkspace?.flatData.filter((item) => !tempWorkspaceItemIds.includes(item.id)) || [];
+
+                    // =====================================
+                    // Reload tree to get new workspace items
+                    // =====================================
+                    const newWorkspace = await loadTree(newFlatData.filter((item) => item.id < 0));
+
+                    // =====================================
+                    // Update all tabs with real IDs from response
+                    // =====================================
+                    if (result.data && result.data.length > 0) {
                         setOpenTabs((prev) =>
                             prev.map((tab) => {
-                                if (tab.id === activeTab.id) {
-                                    const updatedNote: Note = {
-                                        ...(_workspaceItemFromDB.data as any as Note),
-                                        id: _createdItem.entityId,
-                                    };
-                                    return {
-                                        ...tab,
-                                        data: updatedNote,
-                                        title: updatedNote.name,
-                                        hasUnsavedChanges: false,
-                                    };
-                                }
-                                return tab;
+                                const tabInfo = tabWorkspaceItemMap.get(tab.id);
+                                if (!tabInfo) return tab;
+
+                                // Find corresponding created item in response
+                                const createdItem = result.data?.find((item) => item.entityType === 3);
+
+                                if (!createdItem) return tab;
+
+                                // Find workspace item from reloaded data
+                                const workspaceItemFromDB = newWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === createdItem.entityId);
+
+                                if (!workspaceItemFromDB) return tab;
+
+                                // Update tab with real data
+                                const updatedNote: Note = {
+                                    ...(workspaceItemFromDB.data as any as Note),
+                                    id: createdItem.entityId,
+                                };
+
+                                return {
+                                    ...tab,
+                                    data: updatedNote,
+                                    title: updatedNote.name,
+                                    hasUnsavedChanges: false,
+                                };
                             })
                         );
 
-                        // Update originalNoteRef
-                        originalNoteRef.current = {
-                            ...noteData,
-                            id: _createdItem.entityId,
-                        };
+                        // Update originalNoteRef for active tab if it's a note tab
+                        if (activeTabId) {
+                            const activeTabInfo = tabWorkspaceItemMap.get(activeTabId);
+                            if (activeTabInfo) {
+                                // Find corresponding created item for active tab
+                                const activeTabCreatedItem = result.data?.find((item) => {
+                                    const workspaceItemFromDB = newWorkspace?.flatData.find(
+                                        (wsItem) => wsItem.entityType === 3 && wsItem.entityId === item.entityId
+                                    );
+                                    return workspaceItemFromDB && activeTabInfo.tempWorkspaceItemId === workspaceItemFromDB.id;
+                                });
 
-                        enqueueSnackbar("Note created successfully", { variant: "success" });
+                                if (activeTabCreatedItem) {
+                                    originalNoteRef.current = {
+                                        ...activeTabInfo.noteData,
+                                        id: activeTabCreatedItem.entityId,
+                                    };
+                                }
+                            }
+                        }
+
+                        const count = result.data.length;
+                        enqueueSnackbar(count === 1 ? "Note created successfully" : `${count} notes created successfully`, { variant: "success" });
+                        return true;
                     }
-                    break;
+                    return false;
                 default:
                     console.warn(`⚠️ Unsupported action: ${action}`);
                     enqueueSnackbar(`Unsupported action: ${action}`, { variant: "error" });
+                    return false;
             }
         },
         [getActiveTab, currentWorkspace, $user, loadTree, setOpenTabs, originalNoteRef, enqueueSnackbar]
