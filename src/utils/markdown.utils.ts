@@ -28,117 +28,97 @@ export function updateDecorations(
         }
     });
 
-    // Highlight _allKeywords in [name] or [name][nameIndex] format
+    // Highlight _allKeywords in [name]nameIndex format (new format)
     _allKeywords.forEach((kw, kwIndex) => {
-        // Match keyword pattern
+        // Match keyword pattern: [name]number (e.g., [w1]2)
         const regex = new RegExp(escapeRegex(kw.text), "gi");
         let match;
         let matchCount = 0;
 
         while ((match = regex.exec(text)) !== null) {
             matchCount++;
-            const startPos = model.getPositionAt(match.index);
-            const endPos = model.getPositionAt(match.index + match[0].length);
 
             // Skip if this keyword is on a heading line (the title itself)
+            const startPos = model.getPositionAt(match.index);
             if (headingLines.has(startPos.lineNumber)) {
                 continue;
             }
 
-            // Check if this is [name][nameIndex] format (not just [name])
-            let hasExplicitIndex = /\[.+?\]\[\d+\]/.test(match[0]);
+            // New format: [name]number
+            // Example: [w1]2
+            // Parse: [ = bracket, w1 = name, ]2 = bracket + index
+            const keywordText = match[0]; // e.g., "[w1]2"
+            const nameMatch = keywordText.match(/^\[([^\]]+)\](\d+)$/);
 
-            // IMPORTANT: If this match is [name] but text after it has [\d+], skip it
-            // Example: keyword "[w1]" matches at "[w1][3]" but should skip because "[w1][3]" will be handled by another keyword
-            // EXCEPTION: If text after is [1], don't skip because [name][1] = [name] (nameIndex=1 is default, no separate keyword)
-            if (!hasExplicitIndex) {
-                const textAfterMatch = text.substring(match.index + match[0].length, match.index + match[0].length + 10);
-                const indexAfterMatch = textAfterMatch.match(/^\[(\d+)\]/);
+            if (nameMatch) {
+                const name = nameMatch[1]; // e.g., "w1"
+                const nameIndex = nameMatch[2]; // e.g., "2"
 
-                if (indexAfterMatch) {
-                    const indexNumber = indexAfterMatch[1];
+                // Position calculations
+                const bracketStartPos = match.index; // Position of "["
+                const nameStartPos = match.index + 1; // Position of "w1"
+                const nameEndPos = match.index + 1 + name.length; // End of "w1"
+                const bracketEndAndIndexPos = nameEndPos; // Position of "]2"
+                const fullEnd = match.index + keywordText.length;
 
-                    // If index is [1], treat this as [name][1] format (special case)
-                    if (indexNumber === "1") {
-                        console.log(`  🔍 Special case: [name][1] detected - treating as explicit index format`);
-                        hasExplicitIndex = true; // Pretend this match is "[name][1]"
-                        // Extend match to include [1]
-                        match[0] = match[0] + indexAfterMatch[0];
-                    } else {
-                        // Skip for [2], [3], etc. (will be handled by [name][2], [name][3] keywords)
-                        console.log(`  ⏭️ Skipping [name] match because text after has [index]: "${match[0]}${indexAfterMatch[0]}"`);
-                        continue;
-                    }
-                }
-            }
-            if (hasExplicitIndex) {
-                // For [name][nameIndex] format, we need two decorations:
-                // 1. Full keyword with main styling
-                // 2. Just the [nameIndex] part with dimmed styling
-
-                // Find where [nameIndex] starts
-                const nameIndexMatch = match[0].match(/\[(\d+)\]$/);
-                if (nameIndexMatch) {
-                    const indexPartLength = nameIndexMatch[0].length; // Length of [number]
-                    const namePartEnd = match.index + match[0].length - indexPartLength;
-
-                    // Decoration for [name] part - white color, underline, cursor pointer
-                    const nameStartPos = model.getPositionAt(match.index);
-                    const nameEndPos = model.getPositionAt(namePartEnd);
-
-                    console.log(`  🎨 [NAME PART] Applying decoration with class "keyword-${kw.type}"`);
-                    console.log(`     Range: Line ${nameStartPos.lineNumber}, Col ${nameStartPos.column}-${nameEndPos.column}`);
-
-                    decorations.push({
-                        range: {
-                            startLineNumber: nameStartPos.lineNumber,
-                            startColumn: nameStartPos.column,
-                            endLineNumber: nameEndPos.lineNumber,
-                            endColumn: nameEndPos.column,
-                        },
-                        options: {
-                            inlineClassName: `keyword-${kw.type}`,
-                            isWholeLine: false,
-                            inlineClassNameAffectsLetterSpacing: true,
-                        },
-                    });
-
-                    // Decoration for [nameIndex] part - gray color, smaller font
-                    const indexStartPos = model.getPositionAt(namePartEnd);
-                    const indexEndPos = model.getPositionAt(match.index + match[0].length);
-
-                    console.log(`  🎨 [INDEX PART] Applying decoration with class "keyword-index"`);
-                    console.log(`     Range: Line ${indexStartPos.lineNumber}, Col ${indexStartPos.column}-${indexEndPos.column}`);
-                    console.log(`     Text: "${text.substring(namePartEnd, match.index + match[0].length)}"`);
-
-                    decorations.push({
-                        range: {
-                            startLineNumber: indexStartPos.lineNumber,
-                            startColumn: indexStartPos.column,
-                            endLineNumber: indexEndPos.lineNumber,
-                            endColumn: indexEndPos.column,
-                        },
-                        options: {
-                            inlineClassName: "keyword-index",
-                            isWholeLine: false,
-                            inlineClassNameAffectsLetterSpacing: true,
-                        },
-                    });
-                }
-            } else {
-                // For [name] format (nameIndex=1) - white color, underline, cursor pointer
-                console.log(`  🎨 [NAME ONLY] Applying decoration with class "keyword-${kw.type}"`);
-                console.log(`     Range: Line ${startPos.lineNumber}, Col ${startPos.column}-${endPos.column}`);
-
+                // Decoration 1: Opening bracket "[" - gray color, smaller font
                 decorations.push({
                     range: {
-                        startLineNumber: startPos.lineNumber,
-                        startColumn: startPos.column,
-                        endLineNumber: endPos.lineNumber,
-                        endColumn: endPos.column,
+                        startLineNumber: model.getPositionAt(bracketStartPos).lineNumber,
+                        startColumn: model.getPositionAt(bracketStartPos).column,
+                        endLineNumber: model.getPositionAt(nameStartPos).lineNumber,
+                        endColumn: model.getPositionAt(nameStartPos).column,
                     },
                     options: {
-                        inlineClassName: `keyword-${kw.type}`,
+                        inlineClassName: "keyword-bracket-open",
+                        isWholeLine: false,
+                        inlineClassNameAffectsLetterSpacing: true,
+                    },
+                });
+
+                // Decoration 2: Name "w1" - white color, hover underline, cursor pointer
+                decorations.push({
+                    range: {
+                        startLineNumber: model.getPositionAt(nameStartPos).lineNumber,
+                        startColumn: model.getPositionAt(nameStartPos).column,
+                        endLineNumber: model.getPositionAt(nameEndPos).lineNumber,
+                        endColumn: model.getPositionAt(nameEndPos).column,
+                    },
+                    options: {
+                        inlineClassName: `keyword-name keyword-name-${kw.type}`,
+                        isWholeLine: false,
+                        inlineClassNameAffectsLetterSpacing: true,
+                    },
+                });
+
+                // Decoration 3: Closing bracket "]" - gray color, smaller font
+                const bracketClosePos = nameEndPos;
+                const bracketCloseEnd = bracketClosePos + 1;
+                decorations.push({
+                    range: {
+                        startLineNumber: model.getPositionAt(bracketClosePos).lineNumber,
+                        startColumn: model.getPositionAt(bracketClosePos).column,
+                        endLineNumber: model.getPositionAt(bracketCloseEnd).lineNumber,
+                        endColumn: model.getPositionAt(bracketCloseEnd).column,
+                    },
+                    options: {
+                        inlineClassName: "keyword-bracket-close",
+                        isWholeLine: false,
+                        inlineClassNameAffectsLetterSpacing: true,
+                    },
+                });
+
+                // Decoration 4: Index number "2" - gray color, smaller font
+                const indexNumberPos = bracketCloseEnd;
+                decorations.push({
+                    range: {
+                        startLineNumber: model.getPositionAt(indexNumberPos).lineNumber,
+                        startColumn: model.getPositionAt(indexNumberPos).column,
+                        endLineNumber: model.getPositionAt(fullEnd).lineNumber,
+                        endColumn: model.getPositionAt(fullEnd).column,
+                    },
+                    options: {
+                        inlineClassName: "keyword-index-number",
                         isWholeLine: false,
                         inlineClassNameAffectsLetterSpacing: true,
                     },
@@ -263,7 +243,8 @@ export function setupAutocomplete(
             const lineContent = model.getLineContent(position.lineNumber);
             const textBeforeCursor = lineContent.substring(0, position.column - 1);
 
-            // Tìm partial match dài nhất từ text trước cursor
+            // Check if we're in a heading line (starts with #)
+            const isInHeading = /^#{1,6}\s+/.test(lineContent.trim());
 
             // Get search words from text before cursor
             const textTrimmed = textBeforeCursor.trim();
@@ -362,20 +343,31 @@ export function setupAutocomplete(
                         break;
                 }
 
-                // For autocomplete, always insert explicit format [name][nameIndex]
-                // even if display format might be just [name] for nameIndex=1
+                // For autocomplete, insert format based on context and type
                 // Check if kw has name and nameIndex properties (from _allKeywords)
                 const kwWithDetails = kw as { text: string; type: string; link?: string; longLink?: string; name?: string; nameIndex?: number };
                 let insertText = kw.text;
 
-                // If this is from _allKeywords (has name/nameIndex), use explicit format
+                // If this is from _allKeywords (has name/nameIndex)
                 if (kwWithDetails.name && kwWithDetails.nameIndex !== undefined) {
-                    insertText = `[${kwWithDetails.name}][${kwWithDetails.nameIndex}]`;
+                    // If we're in a heading line, ALWAYS insert plain name only (no format)
+                    if (isInHeading) {
+                        insertText = kwWithDetails.name;
+                    }
+                    // Headings type: insert plain name only (no brackets, no index)
+                    else if (kw.type === "h1" || kw.type === "h2" || kw.type === "h3" ||
+                        kw.type === "h4" || kw.type === "h5" || kw.type === "h6") {
+                        insertText = kwWithDetails.name;
+                    } else {
+                        // Keywords (workspace, note, folder, file, etc.): use [name]nameIndex format
+                        insertText = `[${kwWithDetails.name}]${kwWithDetails.nameIndex}`;
+                    }
                 }
 
                 let rangeStartColumn = startColumn;
 
-                if (hasOpeningBracket) {
+                // Only handle opening bracket if NOT in heading line
+                if (hasOpeningBracket && !isInHeading) {
                     // User already typed '[', remove the first '[' from insertText
                     insertText = insertText.substring(1);
                     rangeStartColumn = startColumn;

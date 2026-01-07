@@ -122,18 +122,11 @@ export function MarkdownEditor() {
                         continue; // Headings should not be clickable
                     }
 
-                    // Two patterns to check:
-                    // 1. [name][nameIndex] - explicit format
-                    // 2. [name] - implicit format (for nameIndex=1)
+                    // New format: [name]nameIndex (e.g., [w1]2)
                     const patterns = [];
-                    
-                    // Always check explicit format
-                    patterns.push(`\\[${kw.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]\\[${kw.nameIndex}\\]`);
-                    
-                    // If nameIndex is 1, also check implicit format [name]
-                    if (kw.nameIndex === 1) {
-                        patterns.push(`\\[${kw.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\](?!\\[)`);
-                    }
+
+                    // Pattern: [name]number
+                    patterns.push(`\\[${kw.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]${kw.nameIndex}`);
 
                     for (const pattern of patterns) {
                         const regex = new RegExp(pattern, "gi");

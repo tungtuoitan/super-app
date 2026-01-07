@@ -232,7 +232,7 @@ export const constants = {
                     { token: "string.link.markdown", foreground: "D4D4D4" },
                     { token: "string", foreground: "D4D4D4" },
                     { token: "meta.link.inline.markdown", foreground: "D4D4D4" },
-                    { token: "markup.underline.link.markdown", foreground: "D4D4D4" },
+                    // { token: "markup.underline.link.markdown", foreground: "D4D4D4" },
                 ],
                 colors: {
                     "editor.background": "#09090B",
