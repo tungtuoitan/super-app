@@ -35,8 +35,8 @@ export function MarkdownEditor() {
     const { getActiveTab } = useEditorTabHelper();
     const { handleNoteFieldChange } = useNoteDetailHelper();
     const { getItemStatus } = useTreeStatusHelper();
-    const $mi = useMonaco(); // Monaco instance
-    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
+    // const $mi = useMonaco(); // Monaco instance
+    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
 
     // Get active tab and note
     const activeTab = getActiveTab();
@@ -79,12 +79,11 @@ export function MarkdownEditor() {
 
 
         // Setup providers
-        const autocompleteCleanup = setupAutocomplete($mi, editor, _allKeywords, currentNoteId);
+        const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
         // const hoverCleanup = setupHoverProvider($mi, editor, _allKeywords, currentNoteId);
-        const linkCleanup = setupLinkProvider($mi, editor, _allKeywords, currentNoteId);
+        const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, currentNoteId);
         // const definitionCleanup = setupDefinitionProvider($mi, editor, _allKeywords, currentNoteId);
-        const foldingCleanup = setupMarkdownFolding($mi, editor);
-
+        const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
         // Store disposables for cleanup
         disposablesRef.current = [
             { dispose: autocompleteCleanup },
@@ -157,49 +156,49 @@ export function MarkdownEditor() {
 
         // Initial decorations with keywords only (NOT headings)
         // Headings should not have decorations/underlines
-        updateDecorations(editor, displayDesc, _allKeywords, decorationsRef);
+        updateDecorations(editor, displayDesc ?? "", _allKeywords, decorationsRef);
     };
 
     // Re-setup providers when keywords change (fix stale closures)
     // * ta phải re-setup vì closure:
     // * tức các providers đã được tạo lúc đầu sẽ "nhớ" giá trị keywords cũ,..., không cập nhật khi keywords thay đổi
-    useEffect(() => {
-        const editor = editorRef.current;
+    // useEffect(() => {
+    //     const editor = editorRef.current;
 
-        // Only setup if both editor and monaco instance are ready
-        if (!editor || (editor as any)._isDisposed || !$mi) {
-            return;
-        }
+    //     // Only setup if both editor and monaco instance are ready
+    //     if (!editor || (editor as any)._isDisposed || !$mi) {
+    //         return;
+    //     }
 
-        try {
-            // Dispose old providers
-            disposablesRef.current.forEach((d) => {
-                try {
-                    d.dispose();
-                } catch (error) {
-                    // Ignore disposal errors
-                }
-            });
-            disposablesRef.current = [];
+    //     try {
+    //         // Dispose old providers
+    //         disposablesRef.current.forEach((d) => {
+    //             try {
+    //                 d.dispose();
+    //             } catch (error) {
+    //                 // Ignore disposal errors
+    //             }
+    //         });
+    //         disposablesRef.current = [];
 
-            // Re-setup providers with fresh keywords
-            const autocompleteCleanup = setupAutocomplete($mi, editor, _allKeywords, currentNoteId);
-            // const hoverCleanup = setupHoverProvider($mi, editor, _allKeywords, currentNoteId);
-            const linkCleanup = setupLinkProvider($mi, editor, _allKeywords, currentNoteId);
-            // const definitionCleanup = setupDefinitionProvider($mi, editor, _allKeywords, currentNoteId);
-            const foldingCleanup = setupMarkdownFolding($mi, editor);
+    //         // Re-setup providers with fresh keywords
+    //         const autocompleteCleanup = setupAutocomplete($mi, editor, _allKeywords, currentNoteId);
+    //         // const hoverCleanup = setupHoverProvider($mi, editor, _allKeywords, currentNoteId);
+    //         const linkCleanup = setupLinkProvider($mi, editor, _allKeywords, currentNoteId);
+    //         // const definitionCleanup = setupDefinitionProvider($mi, editor, _allKeywords, currentNoteId);
+    //         const foldingCleanup = setupMarkdownFolding($mi, editor);
 
-            disposablesRef.current = [
-                { dispose: autocompleteCleanup },
-                // { dispose: hoverCleanup },
-                { dispose: linkCleanup },
-                // { dispose: definitionCleanup },
-                { dispose: foldingCleanup },
-            ];
-        } catch (error) {
-            console.warn("[Monaco] Provider setup error (editor may be disposed)");
-        }
-    }, [$mi, _allKeywords, currentNoteId]);
+    //         disposablesRef.current = [
+    //             { dispose: autocompleteCleanup },
+    //             // { dispose: hoverCleanup },
+    //             { dispose: linkCleanup },
+    //             // { dispose: definitionCleanup },
+    //             { dispose: foldingCleanup },
+    //         ];
+    //     } catch (error) {
+    //         console.warn("[Monaco] Provider setup error (editor may be disposed)");
+    //     }
+    // }, [$mi, _allKeywords, currentNoteId]);
 
     // Handle disabled state
     useEffect(() => {
@@ -233,20 +232,18 @@ export function MarkdownEditor() {
         };
     }, []);
 
-    if(!$mi) return null
+    if(!$miRef.current || allKeywords.length===0) return null
 
     return (
         <>
-            <MarkdownEditorSync />
-            <MarkdownEditorTheme $mi={$mi} />
             <Editor
                 height={540}
                 defaultLanguage="markdown"
                 theme={constants.markdown.theme.name}
-                value={displayDesc}
+                value={displayDesc??""}
                 onChange={handleDisplayChange}
                 onMount={handleEditorDidMount}
-                options={constants.markdown.editor.options(disabled, displayDesc)}
+                options={constants.markdown.editor.options(disabled, displayDesc??"")}
             />
         </>
     );

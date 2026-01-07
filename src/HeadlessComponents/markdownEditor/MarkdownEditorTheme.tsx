@@ -35,6 +35,7 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
             nameIndex: k.nameIndex,
         }));
     }, [allKeywords]);
+    console.log("MarkdownEditorTheme - _allKeywords:", _allKeywords);
 
     // Define custom dark theme on monaco load
     useEffect(() => {

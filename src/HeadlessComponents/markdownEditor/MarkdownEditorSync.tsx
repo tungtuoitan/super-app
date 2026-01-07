@@ -42,7 +42,7 @@ export function MarkdownEditorSync() {
             // This prevents flicker when user is actively editing
             if (currentValue !== displayDesc && !editor.hasTextFocus()) {
                 const currentPosition = editor.getPosition();
-                editor.setValue(displayDesc);
+                editor.setValue(displayDesc??"");
                 // Restore cursor position if possible
                 if (currentPosition) {
                     editor.setPosition(currentPosition);

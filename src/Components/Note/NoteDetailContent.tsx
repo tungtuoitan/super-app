@@ -17,6 +17,10 @@ import { constants } from "@/utils/constants";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { MarkdownEditor } from "../Editor/MarkdownEditor";
+import {MarkdownEditorSync} from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync";
+import {MarkdownEditorTheme} from "@/HeadlessComponents/markdownEditor/MarkdownEditorTheme";
+import {useMonaco} from "@monaco-editor/react";
+import {Loader2} from "lucide-react";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -31,6 +35,8 @@ export function NoteDetailContent() {
     const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
     // Get note data from active tab instead of activeNote
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
+    $miRef.current = useMonaco();
 
     // Get standard registry data from global state
     const { registries, registriesLoading } = useGeneralStore();
@@ -99,8 +105,10 @@ export function NoteDetailContent() {
         <div className="py-6 space-y-6 h-full ">
             {/* Full Width - Description */}
             <div className="border-none">
-                <CardContent className="p-0">
-                    <MarkdownEditor />
+                <CardContent className="p-0 h-[540px]">
+                    {$miRef.current && <MarkdownEditorSync />}
+                    {$miRef.current && <MarkdownEditorTheme $mi={$miRef.current} />}
+                    {displayDesc !== null ? <MarkdownEditor /> : <div className="w-full h-full flex justify-center items-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
                 </CardContent>
             </div>
 
