@@ -706,15 +706,12 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
     // Build a map of keyword id -> display format
     const keywordMap = new Map<number, string>();
     allKeywords.forEach((kw) => {
-        // If nameIndex is 1, only show [name]
-        // Otherwise show [name][nameIndex]
-        // const displayText = `[${kw.name}][${kw.nameIndex}]`;
-        const displayText = `[${kw.name}][${kw.nameIndex}]`;
-        // const displayText = kw.nameIndex === 1 ? `[${kw.name}]` : `[${kw.name}][${kw.nameIndex}]`;
+        // New format: [name]nameIndex (always show nameIndex, even if it's 1)
+        const displayText = `[${kw.name}]${kw.nameIndex}`;
         keywordMap.set(kw.id, displayText);
     });
 
-    // Replace [[id]] with [name] or [name][nameIndex]
+    // Replace [[id]] with [name]nameIndex
     return text.replace(/\[\[(\d+)\]\]/g, (match, idStr) => {
         const id = parseInt(idStr, 10);
         const displayText = keywordMap.get(id);
@@ -734,35 +731,20 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
 export function convertToOriginalVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string {
     if (!allKeywords || allKeywords.length === 0) return text;
 
-    // Build two maps for lookup:
-    // 1. [name][nameIndex] -> id (for explicit index)
-    // 2. [name] -> id (for nameIndex=1, implicit)
-    const keywordIdMapExplicit = new Map<string, number>();
-    const keywordIdMapImplicit = new Map<string, number>();
+    // Build map for lookup: [name]nameIndex -> id
+    const keywordIdMap = new Map<string, number>();
 
     allKeywords.forEach((kw) => {
-        const keyExplicit = `[${kw.name}][${kw.nameIndex}]`.toLowerCase();
-        keywordIdMapExplicit.set(keyExplicit, kw.id);
-
-        // For nameIndex=1, also map [name] -> id
-        if (kw.nameIndex === 1) {
-            const keyImplicit = `[${kw.name}]`.toLowerCase();
-            keywordIdMapImplicit.set(keyImplicit, kw.id);
-        }
+        // New format: [name]nameIndex (e.g., [w1]2)
+        const key = `[${kw.name}]${kw.nameIndex}`.toLowerCase();
+        keywordIdMap.set(key, kw.id);
     });
 
-    // First pass: Replace [name][nameIndex] with [[id]]
-    let result = text.replace(/\[([^\]]+)\]\[(\d+)\]/g, (match, name, nameIndex) => {
-        const key = `[${name}][${nameIndex}]`.toLowerCase();
-        const id = keywordIdMapExplicit.get(key);
-        return id !== undefined ? `[[${id}]]` : match;
-    });
-
-    // Second pass: Replace [name] with [[id]] (only for nameIndex=1)
-    // Use negative lookbehind to avoid matching [name] that's part of [name][index]
-    result = result.replace(/\[([^\]]+)\](?!\[\d+\])/g, (match, name) => {
-        const key = `[${name}]`.toLowerCase();
-        const id = keywordIdMapImplicit.get(key);
+    // Replace [name]nameIndex with [[id]]
+    // Pattern: [name]123 where name can contain any chars except ]
+    const result = text.replace(/\[([^\]]+)\](\d+)/g, (match, name, nameIndex) => {
+        const key = `[${name}]${nameIndex}`.toLowerCase();
+        const id = keywordIdMap.get(key);
         return id !== undefined ? `[[${id}]]` : match;
     });
 

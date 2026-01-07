@@ -28,8 +28,8 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
         return allKeywords
             // .filter((k) => k.hardDeletedAt === null)
             .map((k) => ({
-                // Format: [name] for nameIndex=1, [name][nameIndex] for others
-                text: `[${k.name}][${k.nameIndex}]`,
+                // New format: [name]nameIndex (always show nameIndex, even if it's 1)
+                text: `[${k.name}]${k.nameIndex}`,
                 type: k.type,
                 link: k.link,
                 longLink: k.longLink,

@@ -65,9 +65,8 @@ export function MarkdownEditor() {
     // Extract keywords from registries + allKeywords
     const _allKeywords = useMemo(() => {
         return allKeywords.map((k) => ({
-            // Format: [name] for nameIndex=1, [name][nameIndex] for others
-            text: `[${k.name}][${k.nameIndex}]`,
-            // text: k.nameIndex === 1 ? `[${k.name}]` : `[${k.name}][${k.nameIndex}]`,
+            // New format: [name]nameIndex (always show nameIndex, even if it's 1)
+            text: `[${k.name}]${k.nameIndex}`,
             type: k.type,
             link: k.link,
             longLink: k.longLink,
