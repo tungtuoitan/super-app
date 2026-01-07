@@ -1,5 +1,5 @@
 /* Keyword Highlighting Styles */
-
+/* 
 .keyword-hashtag {
     color: #fad000 !important;
     font-weight: 500 !important;
@@ -47,14 +47,15 @@
     text-decoration-color: rgba(128, 128, 128, 0.3) !important;
     cursor: pointer !important;
 }
+*/
 
 .keyword-workspace, .keyword-note {
-    color: #FFA500 !important;
+    color: #ff0000 !important;
     font-weight: 500 !important;
     text-decoration: underline !important;
     text-decoration-color: rgba(128, 128, 128, 0.3) !important;
     cursor: pointer !important;
-}
+} 
 
 /* Heading keywords - NO underline, NO cursor pointer, normal display */
 .keyword-heading-1,
@@ -85,7 +86,7 @@
 
 /* Wiki-style Link [[path]] */
 .wiki-link {
-    color: #569CD6 !important;
+    /* color: #569CD6 !important; */
     background-color: rgba(86, 156, 214, 0.1) !important;
     border-radius: 3px !important;
     padding: 2px 4px !important;
@@ -121,3 +122,11 @@
 .monaco-editor .margin-view-overlays .line-numbers {
     font-size: 11px !important;
 }
+
+/* CUSTOM SUGGESTION POPUP CSS */
+/* .monaco-editor .suggest-widget .details .detail {
+    text-align: right !important;
+}
+.monaco-editor .suggest-widget .monaco-list-row div:nth-child(1) {
+    border: 1px solid red !important;
+} */
