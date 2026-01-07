@@ -25,8 +25,7 @@ export function MarkdownEditorSync() {
     useEffect(() => {
         const displayValue = convertToDisplayVersion(activeNote?.description || "", allKeywords);
         setDisplayDesc(displayValue);
-    }, []);
-    // [activeNote?.description, allKeywords]);
+    }, [activeNote?.description, allKeywords]);
 
     // Sync external value changes to editor (only when editor doesn't have focus)
     useEffect(() => {

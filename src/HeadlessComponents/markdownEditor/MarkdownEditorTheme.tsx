@@ -26,7 +26,8 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     // Extract keywords from registries + allKeywords
     const _allKeywords = useMemo(() => {
         return allKeywords
-            // .filter((k) => k.hardDeletedAt === null)
+            // Don't filter hardDeleted keywords - they should still be rendered/styled
+            // But autocomplete will skip them
             .map((k) => ({
                 // New format: [name]nameIndex (always show nameIndex, even if it's 1)
                 text: `[${k.name}]${k.nameIndex}`,
@@ -35,6 +36,7 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
                 longLink: k.longLink,
                 name: k.name,
                 nameIndex: k.nameIndex,
+                hardDeletedAt: k.hardDeletedAt, // Pass through for autocomplete filtering
             }));
     }, [allKeywords]);
 

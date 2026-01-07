@@ -19,16 +19,9 @@ export function updateDecorations(
         return;
     }
 
-    // Get all heading lines to skip decorating them
-    const headingLines = new Set<number>();
-    const lines = text.split("\n");
-    lines.forEach((line, index) => {
-        if (/^#{1,6}\s+/.test(line.trim())) {
-            headingLines.add(index + 1); // Monaco uses 1-based line numbers
-        }
-    });
-
     // Highlight _allKeywords in [name]nameIndex format (new format)
+    // If keyword is in allKeywords, it will be decorated (including headings)
+    // If heading text is NOT in allKeywords, it won't match and won't be decorated
     _allKeywords.forEach((kw, kwIndex) => {
         // Match keyword pattern: [name]number (e.g., [w1]2)
         const regex = new RegExp(escapeRegex(kw.text), "gi");
@@ -37,12 +30,6 @@ export function updateDecorations(
 
         while ((match = regex.exec(text)) !== null) {
             matchCount++;
-
-            // Skip if this keyword is on a heading line (the title itself)
-            const startPos = model.getPositionAt(match.index);
-            if (headingLines.has(startPos.lineNumber)) {
-                continue;
-            }
 
             // New format: [name]number
             // Example: [w1]2
@@ -254,8 +241,14 @@ export function setupAutocomplete(
             // Track tất cả matches, không chỉ best match
             const allMatches: MatchResult[] = [];
             _allKeywords.forEach((kw) => {
+                // Skip hardDeleted keywords in autocomplete (but still render them in editor)
+                const kwWithDetails = kw as { text: string; type: string; hardDeletedAt?: Date | null; [key: string]: any };
+                if (kwWithDetails.hardDeletedAt !== null && kwWithDetails.hardDeletedAt !== undefined) {
+                    return; // Skip this keyword in autocomplete
+                }
+
                 if (!textTrimmed) {
-                    // Nếu chưa gõ gì, show all _allKeywords
+                    // Nếu chưa gõ gì, show all _allKeywords (except hardDeleted)
                     allMatches.push({
                         keyword: kw,
                         startColumn: position.column,
@@ -350,16 +343,20 @@ export function setupAutocomplete(
 
                 // If this is from _allKeywords (has name/nameIndex)
                 if (kwWithDetails.name && kwWithDetails.nameIndex !== undefined) {
-                    // If we're in a heading line, ALWAYS insert plain name only (no format)
-                    if (isInHeading) {
+                    // Check if keyword type is heading
+                    const isHeadingType = kw.type === "h1" || kw.type === "h2" || kw.type === "h3" ||
+                                         kw.type === "h4" || kw.type === "h5" || kw.type === "h6";
+
+                    // Only insert plain name when BOTH: in heading line AND keyword is heading type
+                    // This is for creating NEW headings (e.g., typing "# w1" to create a new h1 heading)
+                    if (isInHeading && isHeadingType) {
                         insertText = kwWithDetails.name;
                     }
-                    // Headings type: insert plain name only (no brackets, no index)
-                    else if (kw.type === "h1" || kw.type === "h2" || kw.type === "h3" ||
-                        kw.type === "h4" || kw.type === "h5" || kw.type === "h6") {
-                        insertText = kwWithDetails.name;
-                    } else {
-                        // Keywords (workspace, note, folder, file, etc.): use [name]nameIndex format
+                    // For all other cases, insert full format [name]nameIndex:
+                    // - Heading keywords referenced in normal lines (e.g., "see [w1]1")
+                    // - Non-heading keywords in heading lines (e.g., "# See [note1]2")
+                    // - Normal keywords in normal lines
+                    else {
                         insertText = `[${kwWithDetails.name}]${kwWithDetails.nameIndex}`;
                     }
                 }

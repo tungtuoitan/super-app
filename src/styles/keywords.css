@@ -61,18 +61,9 @@
     top: -2px !important;
 }
 
-/* Heading keywords - NO underline, NO cursor pointer, normal display */
-.keyword-heading-1,
-.keyword-heading-2,
-.keyword-heading-3,
-.keyword-heading-4,
-.keyword-heading-5,
-.keyword-heading-6 {
-    color: inherit !important;
-    font-weight: inherit !important;
-    text-decoration: none !important;
-    cursor: default !important;
-}
+/* Note: Heading keywords (h1-h6) are now treated like regular keywords if they're in allKeywords
+   They use .keyword-name, .keyword-bracket-open/close, .keyword-index-number like other keywords
+   No special CSS needed for heading types */
 
 /* URL Link Highlighting */
 .url-link {

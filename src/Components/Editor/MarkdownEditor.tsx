@@ -72,6 +72,7 @@ export function MarkdownEditor() {
             longLink: k.longLink,
             name: k.name,
             nameIndex: k.nameIndex,
+            hardDeletedAt: k.hardDeletedAt, // Pass through for autocomplete filtering
         }));
     }, [allKeywords]);
 
@@ -108,20 +109,11 @@ export function MarkdownEditor() {
             const lineContent = model.getLineContent(position.lineNumber);
             const clickColumn = position.column;
 
-            // Check if line is a heading - if so, ignore click
-            const trimmedLine = lineContent.trim();
-            if (/^#{1,6}\s+/.test(trimmedLine)) {
-                return; // Don't handle clicks on heading lines
-            }
-
             // Check if clicking on keyword format
+            // If keyword is in allKeywords (including headings), it's clickable
+            // If heading text is NOT in allKeywords, it won't match and won't be clickable
             if (allKeywords.length > 0) {
                 for (const kw of allKeywords) {
-                    // Skip if this keyword is a heading type (extracted headings)
-                    if (kw.type && kw.type.startsWith('heading-')) {
-                        continue; // Headings should not be clickable
-                    }
-
                     // New format: [name]nameIndex (e.g., [w1]2)
                     const patterns = [];
 
@@ -156,43 +148,43 @@ export function MarkdownEditor() {
     // Re-setup providers when keywords change (fix stale closures)
     // * ta phải re-setup vì closure:
     // * tức các providers đã được tạo lúc đầu sẽ "nhớ" giá trị keywords cũ,..., không cập nhật khi keywords thay đổi
-    // useEffect(() => {
-    //     const editor = editorRef.current;
+    useEffect(() => {
+        const editor = editorRef.current;
 
-    //     // Only setup if both editor and monaco instance are ready
-    //     if (!editor || (editor as any)._isDisposed || !$mi) {
-    //         return;
-    //     }
+        // Only setup if both editor and monaco instance are ready
+        if (!editor || (editor as any)._isDisposed || !$miRef.current) {
+            return;
+        }
 
-    //     try {
-    //         // Dispose old providers
-    //         disposablesRef.current.forEach((d) => {
-    //             try {
-    //                 d.dispose();
-    //             } catch (error) {
-    //                 // Ignore disposal errors
-    //             }
-    //         });
-    //         disposablesRef.current = [];
+        try {
+            // Dispose old providers
+            disposablesRef.current.forEach((d) => {
+                try {
+                    d.dispose();
+                } catch (error) {
+                    // Ignore disposal errors
+                }
+            });
+            disposablesRef.current = [];
 
-    //         // Re-setup providers with fresh keywords
-    //         const autocompleteCleanup = setupAutocomplete($mi, editor, _allKeywords, currentNoteId);
-    //         // const hoverCleanup = setupHoverProvider($mi, editor, _allKeywords, currentNoteId);
-    //         const linkCleanup = setupLinkProvider($mi, editor, _allKeywords, currentNoteId);
-    //         // const definitionCleanup = setupDefinitionProvider($mi, editor, _allKeywords, currentNoteId);
-    //         const foldingCleanup = setupMarkdownFolding($mi, editor);
+            // Re-setup providers with fresh keywords
+            const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
+            // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
+            const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, currentNoteId);
+            // const definitionCleanup = setupDefinitionProvider($miRef.current, editor, _allKeywords, currentNoteId);
+            const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
 
-    //         disposablesRef.current = [
-    //             { dispose: autocompleteCleanup },
-    //             // { dispose: hoverCleanup },
-    //             { dispose: linkCleanup },
-    //             // { dispose: definitionCleanup },
-    //             { dispose: foldingCleanup },
-    //         ];
-    //     } catch (error) {
-    //         console.warn("[Monaco] Provider setup error (editor may be disposed)");
-    //     }
-    // }, [$mi, _allKeywords, currentNoteId]);
+            disposablesRef.current = [
+                { dispose: autocompleteCleanup },
+                // { dispose: hoverCleanup },
+                { dispose: linkCleanup },
+                // { dispose: definitionCleanup },
+                { dispose: foldingCleanup },
+            ];
+        } catch (error) {
+            console.warn("[Monaco] Provider setup error (editor may be disposed)");
+        }
+    }, [_allKeywords, currentNoteId]); // Re-run when keywords or note changes
 
     // Handle disabled state
     useEffect(() => {
