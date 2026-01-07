@@ -23,7 +23,7 @@ export function MarkdownEditorSync() {
 
     // Sync when external activeNote.description changes - convert [id] to [name][nameIndex]
     useEffect(() => {
-        const displayValue = convertToDisplayVersion(activeNote?.description || "", allKeywords.filter((k) => k.hardDeletedAt === null));
+        const displayValue = convertToDisplayVersion(activeNote?.description || "", allKeywords);
         setDisplayDesc(displayValue);
     }, []);
     // [activeNote?.description, allKeywords]);

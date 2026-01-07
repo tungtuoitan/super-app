@@ -709,7 +709,8 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
         // If nameIndex is 1, only show [name]
         // Otherwise show [name][nameIndex]
         // const displayText = `[${kw.name}][${kw.nameIndex}]`;
-        const displayText = kw.nameIndex === 1 ? `[${kw.name}]` : `[${kw.name}][${kw.nameIndex}]`;
+        const displayText = `[${kw.name}][${kw.nameIndex}]`;
+        // const displayText = kw.nameIndex === 1 ? `[${kw.name}]` : `[${kw.name}][${kw.nameIndex}]`;
         keywordMap.set(kw.id, displayText);
     });
 

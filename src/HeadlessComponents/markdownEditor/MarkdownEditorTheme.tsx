@@ -26,10 +26,10 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     // Extract keywords from registries + allKeywords
     const _allKeywords = useMemo(() => {
         return allKeywords
-            .filter((k) => k.hardDeletedAt === null)
+            // .filter((k) => k.hardDeletedAt === null)
             .map((k) => ({
                 // Format: [name] for nameIndex=1, [name][nameIndex] for others
-                text: k.nameIndex === 1 ? `[${k.name}]` : `[${k.name}][${k.nameIndex}]`,
+                text: `[${k.name}][${k.nameIndex}]`,
                 type: k.type,
                 link: k.link,
                 longLink: k.longLink,

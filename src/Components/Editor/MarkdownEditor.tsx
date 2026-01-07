@@ -66,7 +66,8 @@ export function MarkdownEditor() {
     const _allKeywords = useMemo(() => {
         return allKeywords.map((k) => ({
             // Format: [name] for nameIndex=1, [name][nameIndex] for others
-            text: k.nameIndex === 1 ? `[${k.name}]` : `[${k.name}][${k.nameIndex}]`,
+            text: `[${k.name}][${k.nameIndex}]`,
+            // text: k.nameIndex === 1 ? `[${k.name}]` : `[${k.name}][${k.nameIndex}]`,
             type: k.type,
             link: k.link,
             longLink: k.longLink,
