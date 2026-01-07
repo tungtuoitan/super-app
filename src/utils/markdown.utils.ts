@@ -14,7 +14,10 @@ export function updateDecorations(
 ) {
     const decorations: _monaco.editor.IModelDeltaDecoration[] = [];
     const model = editor.getModel();
-    if (!model) return;
+    if (!model) {
+        console.warn('⚠️ [DECORATIONS] No model found, aborting');
+        return;
+    }
 
     // Get all heading lines to skip decorating them
     const headingLines = new Set<number>();
@@ -26,12 +29,14 @@ export function updateDecorations(
     });
 
     // Highlight _allKeywords in [name] or [name][nameIndex] format
-    _allKeywords.forEach((kw) => {
+    _allKeywords.forEach((kw, kwIndex) => {
         // Match keyword pattern
         const regex = new RegExp(escapeRegex(kw.text), "gi");
         let match;
+        let matchCount = 0;
 
         while ((match = regex.exec(text)) !== null) {
+            matchCount++;
             const startPos = model.getPositionAt(match.index);
             const endPos = model.getPositionAt(match.index + match[0].length);
 
@@ -41,8 +46,31 @@ export function updateDecorations(
             }
 
             // Check if this is [name][nameIndex] format (not just [name])
-            const hasExplicitIndex = /\[.+?\]\[\d+\]/.test(match[0]);
+            let hasExplicitIndex = /\[.+?\]\[\d+\]/.test(match[0]);
 
+            // IMPORTANT: If this match is [name] but text after it has [\d+], skip it
+            // Example: keyword "[w1]" matches at "[w1][3]" but should skip because "[w1][3]" will be handled by another keyword
+            // EXCEPTION: If text after is [1], don't skip because [name][1] = [name] (nameIndex=1 is default, no separate keyword)
+            if (!hasExplicitIndex) {
+                const textAfterMatch = text.substring(match.index + match[0].length, match.index + match[0].length + 10);
+                const indexAfterMatch = textAfterMatch.match(/^\[(\d+)\]/);
+
+                if (indexAfterMatch) {
+                    const indexNumber = indexAfterMatch[1];
+
+                    // If index is [1], treat this as [name][1] format (special case)
+                    if (indexNumber === "1") {
+                        console.log(`  🔍 Special case: [name][1] detected - treating as explicit index format`);
+                        hasExplicitIndex = true; // Pretend this match is "[name][1]"
+                        // Extend match to include [1]
+                        match[0] = match[0] + indexAfterMatch[0];
+                    } else {
+                        // Skip for [2], [3], etc. (will be handled by [name][2], [name][3] keywords)
+                        console.log(`  ⏭️ Skipping [name] match because text after has [index]: "${match[0]}${indexAfterMatch[0]}"`);
+                        continue;
+                    }
+                }
+            }
             if (hasExplicitIndex) {
                 // For [name][nameIndex] format, we need two decorations:
                 // 1. Full keyword with main styling
@@ -54,9 +82,12 @@ export function updateDecorations(
                     const indexPartLength = nameIndexMatch[0].length; // Length of [number]
                     const namePartEnd = match.index + match[0].length - indexPartLength;
 
-                    // Decoration for [name] part
+                    // Decoration for [name] part - white color, underline, cursor pointer
                     const nameStartPos = model.getPositionAt(match.index);
                     const nameEndPos = model.getPositionAt(namePartEnd);
+
+                    console.log(`  🎨 [NAME PART] Applying decoration with class "keyword-${kw.type}"`);
+                    console.log(`     Range: Line ${nameStartPos.lineNumber}, Col ${nameStartPos.column}-${nameEndPos.column}`);
 
                     decorations.push({
                         range: {
@@ -72,9 +103,13 @@ export function updateDecorations(
                         },
                     });
 
-                    // Decoration for [nameIndex] part - dimmed and smaller
+                    // Decoration for [nameIndex] part - gray color, smaller font
                     const indexStartPos = model.getPositionAt(namePartEnd);
                     const indexEndPos = model.getPositionAt(match.index + match[0].length);
+
+                    console.log(`  🎨 [INDEX PART] Applying decoration with class "keyword-index"`);
+                    console.log(`     Range: Line ${indexStartPos.lineNumber}, Col ${indexStartPos.column}-${indexEndPos.column}`);
+                    console.log(`     Text: "${text.substring(namePartEnd, match.index + match[0].length)}"`);
 
                     decorations.push({
                         range: {
@@ -91,7 +126,10 @@ export function updateDecorations(
                     });
                 }
             } else {
-                // For [name] format (nameIndex=1), single decoration
+                // For [name] format (nameIndex=1) - white color, underline, cursor pointer
+                console.log(`  🎨 [NAME ONLY] Applying decoration with class "keyword-${kw.type}"`);
+                console.log(`     Range: Line ${startPos.lineNumber}, Col ${startPos.column}-${endPos.column}`);
+
                 decorations.push({
                     range: {
                         startLineNumber: startPos.lineNumber,
@@ -107,13 +145,22 @@ export function updateDecorations(
                 });
             }
         }
+
+        // if (matchCount === 0) {
+        //     // console.log(`  ⚠️ No matches found for keyword "${kw.text}"`);
+        // } else {
+        //     // console.log(`  ✅ Total matches for "${kw.text}": ${matchCount}`);
+        // }
     });
 
     // custom css URLs (http://, https://, ftp://)
     const urlRegex = /\b(https?|ftp):\/\/[^\s]+/gi;
     let urlMatch;
+    let urlCount = 0;
 
     while ((urlMatch = urlRegex.exec(text)) !== null) {
+        urlCount++;
+
         const startPos = model.getPositionAt(urlMatch.index);
         const endPos = model.getPositionAt(urlMatch.index + urlMatch[0].length);
 
@@ -134,8 +181,11 @@ export function updateDecorations(
     // Wiki-style links [[name|link]]
     const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
     let wikiMatch;
+    let wikiCount = 0;
 
     while ((wikiMatch = wikiLinkRegex.exec(text)) !== null) {
+        wikiCount++;
+
         const startPos = model.getPositionAt(wikiMatch.index);
         const endPos = model.getPositionAt(wikiMatch.index + wikiMatch[0].length);
 
@@ -154,7 +204,11 @@ export function updateDecorations(
     }
 
     // Clear all old decorations and apply new ones
-    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
+    try {
+        decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
+    } catch (error) {
+        console.error(`❌ [DECORATIONS] Failed to apply decorations:`, error);
+    }
 }
 
 // Helper: Fuzzy match - check if searchWords match keyword (any order)
@@ -654,6 +708,7 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
     allKeywords.forEach((kw) => {
         // If nameIndex is 1, only show [name]
         // Otherwise show [name][nameIndex]
+        // const displayText = `[${kw.name}][${kw.nameIndex}]`;
         const displayText = kw.nameIndex === 1 ? `[${kw.name}]` : `[${kw.name}][${kw.nameIndex}]`;
         keywordMap.set(kw.id, displayText);
     });

@@ -23,10 +23,7 @@ import {
     updateDecorations,
 } from "@/utils/markdown.utils";
 import { Note } from "@/types/note.types";
-import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { MarkdownEditorTheme } from "../../HeadlessComponents/markdownEditor/MarkdownEditorTheme";
-import {MarkdownEditorSync} from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync"; 
 
 export function MarkdownEditor() {
     const { registries, allKeywords } = useGeneralStore();
@@ -51,13 +48,18 @@ export function MarkdownEditor() {
 
     // Handle internal changes: Convert to original version before saving
     const handleDisplayChange = (newDisplayDesc: string | undefined) => {
-        if (newDisplayDesc === undefined) return;
+        console.log('📝 [EDITOR] New content:', newDisplayDesc);
 
-        setDisplayDesc(newDisplayDesc);
+        if (newDisplayDesc === undefined) {
+            console.warn('⚠️ [EDITOR] New content is undefined, skipping');
+            return;
+        }
+                setDisplayDesc(newDisplayDesc); // phải update ở đây, nếu không sẽ bị chớp
 
-        // Convert [name][nameIndex] -> [[id]] before saving
+        // Convert [name][nameIndex] -> [[id]] before savingt
         const originalValue = convertToOriginalVersion(newDisplayDesc, allKeywords);
         handleNoteFieldChange("description", originalValue);
+        updateDecorations(editorRef.current!, newDisplayDesc, _allKeywords, decorationsRef);
     };
 
     // Extract keywords from registries + allKeywords
@@ -76,7 +78,6 @@ export function MarkdownEditor() {
     // Handle editor mount
     const handleEditorDidMount = (editor: _monaco.editor.IStandaloneCodeEditor) => {
         editorRef.current = editor;
-
 
         // Setup providers
         const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);

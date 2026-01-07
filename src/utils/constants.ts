@@ -228,30 +228,11 @@ export const constants = {
                 base: "vs-dark",
                 inherit: true,
                 rules: [
-                    // Markdown-specific styling
-                    { token: "emphasis", fontStyle: "italic" },
-                    { token: "strong", fontStyle: "bold" },
-                    // Keywords styled yellow (headings will override this)
-                    { token: "keyword", foreground: "FFFF00" },
-                    // Headings styled red (override keyword styling)
-                    // { token: "heading.markdown", foreground: "FF0000", fontStyle: "italic" },
-                    // { token: "heading", foreground: "FF0000", fontStyle: "italic" },
-                    // { token: "string", foreground: "FF0000" },
-                    // { token: "comment", foreground: "6A9955" },
-                    // { token: "type", foreground: "4EC9B0" },
-                    // { token: "delimiter", foreground: "D4D4D4" },
-                    // { token: "number", foreground: "B5CEA8" },
-                    // { token: "regexp", foreground: "D16969" },
-                    // Custom keyword types
-                    // { token: "keyword.hashtag", foreground: "569CD6", fontStyle: "bold" },
-                    // { token: "keyword.status", foreground: "4EC9B0", fontStyle: "bold" },
-                    { token: "workspace", foreground: "6A9955", fontStyle: "bold" },
-                    { token: "note", foreground: "6A9955", fontStyle: "bold" },
-                    // { token: "heading-2", foreground: "6A9955", fontStyle: "bold" },
-                    // { token: "heading-3", foreground: "6A9955", fontStyle: "bold" },
-                    // { token: "heading-4", foreground: "6A9955", fontStyle: "bold" },
-                    // { token: "heading-5", foreground: "6A9955", fontStyle: "bold" },
-                    // { token: "heading-6", foreground: "6A9955", fontStyle: "bold" },
+                    // Override markdown link colors to be white (default text color)
+                    { token: "string.link.markdown", foreground: "D4D4D4" },
+                    { token: "string", foreground: "D4D4D4" },
+                    { token: "meta.link.inline.markdown", foreground: "D4D4D4" },
+                    { token: "markup.underline.link.markdown", foreground: "D4D4D4" },
                 ],
                 colors: {
                     "editor.background": "#09090B",

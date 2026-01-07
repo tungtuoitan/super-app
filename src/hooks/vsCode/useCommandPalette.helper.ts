@@ -21,7 +21,7 @@ export const useCommandPaletteHelper = () => {
         if (!longLink) return "";
 
         // Split by '/' to get all parts
-        const parts = longLink.split("/"); 
+        const parts = longLink.split("/");
 
         // Remove last part (which should be the name)
         if (parts.length > 1) {
@@ -36,11 +36,13 @@ export const useCommandPaletteHelper = () => {
     // Filter keywords based on search query with fuzzy matching (diacritics-insensitive)
     const getFilteredKeywords = (searchQuery: string) => {
         if (!searchQuery.trim()) {
-            return allKeywords.map((keyword) => ({
-                keyword,
-                matchedIndices: { name: [], link: [] },
-                displayLink: getDisplayLink(keyword.longLink, keyword.name),
-            }));
+            return allKeywords
+                // .filter((k) => k.hardDeletedAt === null)
+                .map((keyword) => ({
+                    keyword,
+                    matchedIndices: { name: [], link: [] },
+                    displayLink: getDisplayLink(keyword.longLink, keyword.name),
+                }));
         }
 
         const searchWords = searchQuery.trim().split(/\s+/);
@@ -120,7 +122,7 @@ export const useCommandPaletteHelper = () => {
         setIsOpen(false);
         setSearchQuery("");
         setSelectedIndex(0);
-    }
+    };
 
     // Handle keyword selection with close callback
     const handleSelectKeyword = (keyword: any) => {
