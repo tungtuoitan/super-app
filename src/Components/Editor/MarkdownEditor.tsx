@@ -48,8 +48,6 @@ export function MarkdownEditor() {
 
     // Handle internal changes: Convert to original version before saving
     const handleDisplayChange = (newDisplayDesc: string | undefined) => {
-        console.log('📝 [EDITOR] New content:', newDisplayDesc);
-
         if (newDisplayDesc === undefined) {
             console.warn('⚠️ [EDITOR] New content is undefined, skipping');
             return;
@@ -59,7 +57,7 @@ export function MarkdownEditor() {
         // Convert [name][nameIndex] -> [[id]] before savingt
         const originalValue = convertToOriginalVersion(newDisplayDesc, allKeywords);
         handleNoteFieldChange("description", originalValue);
-        updateDecorations(editorRef.current!, newDisplayDesc, _allKeywords, decorationsRef);
+        updateDecorations(editorRef.current!, newDisplayDesc, _allKeywords, decorationsRef, "handleDisplayChange");
     };
 
     // Extract keywords from registries + allKeywords
@@ -82,8 +80,8 @@ export function MarkdownEditor() {
 
         // Setup providers
         const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
-        // const hoverCleanup = setupHoverProvider($mi, editor, _allKeywords, currentNoteId);
-        const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, currentNoteId);
+        // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
+        const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, navigateLink, currentNoteId);
         // const definitionCleanup = setupDefinitionProvider($mi, editor, _allKeywords, currentNoteId);
         const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
         // Store disposables for cleanup
@@ -95,54 +93,10 @@ export function MarkdownEditor() {
             { dispose: foldingCleanup },
         ];
 
-        // Setup click handler for keyword navigation (Ctrl+Click only)
-        editor.onMouseDown((e) => {
-            // Only handle Ctrl+Click
-            if (!e.event.ctrlKey && !e.event.metaKey) return;
-
-            const position = e.target.position;
-            if (!position) return;
-
-            const model = editor.getModel();
-            if (!model) return;
-
-            const lineContent = model.getLineContent(position.lineNumber);
-            const clickColumn = position.column;
-
-            // Check if clicking on keyword format
-            // If keyword is in allKeywords (including headings), it's clickable
-            // If heading text is NOT in allKeywords, it won't match and won't be clickable
-            if (allKeywords.length > 0) {
-                for (const kw of allKeywords) {
-                    // New format: [name]nameIndex (e.g., [w1]2)
-                    const patterns = [];
-
-                    // Pattern: [name]number
-                    patterns.push(`\\[${kw.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]${kw.nameIndex}`);
-
-                    for (const pattern of patterns) {
-                        const regex = new RegExp(pattern, "gi");
-                        let match;
-                        
-                        while ((match = regex.exec(lineContent)) !== null) {
-                            const startIndex = match.index;
-                            const endIndex = startIndex + match[0].length;
-
-                            if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                                navigateLink(kw.link);
-                                e.event.preventDefault();
-                                e.event.stopPropagation();
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        });
 
         // Initial decorations with keywords only (NOT headings)
         // Headings should not have decorations/underlines
-        updateDecorations(editor, displayDesc ?? "", _allKeywords, decorationsRef);
+        updateDecorations(editor, displayDesc ?? "", _allKeywords, decorationsRef, "handleEditorDidMount");
     };
 
     // Re-setup providers when keywords change (fix stale closures)
@@ -170,7 +124,7 @@ export function MarkdownEditor() {
             // Re-setup providers with fresh keywords
             const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
             // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
-            const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, currentNoteId);
+            const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, navigateLink, currentNoteId);
             // const definitionCleanup = setupDefinitionProvider($miRef.current, editor, _allKeywords, currentNoteId);
             const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
 

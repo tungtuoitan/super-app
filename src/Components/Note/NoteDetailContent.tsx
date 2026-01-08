@@ -27,19 +27,17 @@ export function NoteDetailContent() {
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
-    // const [noteKey, setNoteKey] = React.useState(0); // Removed - no longer using key to force remount
     const activeTab = getActiveTab();
     const { trackNavigation } = useNavigationHistoryHelper();
     const { getItemStatus } = useTreeStatusHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
-    // Get note data from active tab instead of activeNote
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
 
     // Get standard registry data from global state
-    const { registries, registriesLoading } = useGeneralStore();
+    const { registries, registriesLoading,allKeywords } = useGeneralStore();
 
     // Check if note is deleted (soft deleted)
     let isDeleted = activeNote?.deletedAt !== null;
@@ -88,15 +86,6 @@ export function NoteDetailContent() {
         }
     }, [shouldFocusNoteName, noteNameRef]);
 
-    // Convert hashtags array to comma-separated string of IDs for TagAutoComplete
-    // Map selected hashtags to match the format expected by the component (comma-separated string of IDs)
-    // const currentHashTagsValue = activeNote?.hashtags
-    //     ? activeNote.hashtags
-    //           .map((hashtag: any) => hashtag.id.toString())
-    //           .filter(Boolean)
-    //           .join(",")
-    //     : "";
-
     if (!activeNote) {
         return null;
     }
@@ -107,8 +96,8 @@ export function NoteDetailContent() {
             <div className="border-none">
                 <CardContent className="p-0 h-[540px]">
                     {$miRef.current && <MarkdownEditorSync />}
-                    {$miRef.current && <MarkdownEditorTheme $mi={$miRef.current} />}
-                    {displayDesc !== null ? <MarkdownEditor /> : <div className="w-full h-full flex justify-center items-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
+                    {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />}
+                    {displayDesc !== null && allKeywords && allKeywords.length > 0 ? <MarkdownEditor /> : <div className="w-full h-full flex justify-center items-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
                 </CardContent>
             </div>
 

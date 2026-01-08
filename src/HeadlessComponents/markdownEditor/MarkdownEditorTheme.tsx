@@ -73,7 +73,7 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
 
                 // Only decorate keywords, NOT headings
                 // Headings should not have underlines or be clickable
-                updateDecorations(editor, value, _allKeywords, decorationsRef);
+                updateDecorations(editor, value, _allKeywords, decorationsRef, "MarkdownEditorTheme");
             } catch (error) {
                 console.error("❌ [THEME] Update decorations error:", error);
                 console.warn("[Monaco] Update decorations error (editor may be disposed)");

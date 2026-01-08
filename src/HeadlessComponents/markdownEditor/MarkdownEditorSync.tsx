@@ -24,7 +24,7 @@ export function MarkdownEditorSync() {
     // Sync when external activeNote.description changes - convert [id] to [name][nameIndex]
     useEffect(() => {
         const displayValue = convertToDisplayVersion(activeNote?.description || "", allKeywords);
-        setDisplayDesc(displayValue);
+        setDisplayDesc(displayValue ?? null);
     }, [activeNote?.description, allKeywords]);
 
     // Sync external value changes to editor (only when editor doesn't have focus)

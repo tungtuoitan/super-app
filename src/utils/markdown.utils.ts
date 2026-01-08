@@ -10,7 +10,8 @@ export function updateDecorations(
     editor: _monaco.editor.IStandaloneCodeEditor,
     text: string,
     _allKeywords: Array<{ text: string; type: string }>,
-    decorationsRef: React.MutableRefObject<string[]>
+    decorationsRef: React.MutableRefObject<string[]>,
+    source?: string,
 ) {
     const decorations: _monaco.editor.IModelDeltaDecoration[] = [];
     const model = editor.getModel();
@@ -112,12 +113,6 @@ export function updateDecorations(
                 });
             }
         }
-
-        // if (matchCount === 0) {
-        //     // console.log(`  ⚠️ No matches found for keyword "${kw.text}"`);
-        // } else {
-        //     // console.log(`  ✅ Total matches for "${kw.text}": ${matchCount}`);
-        // }
     });
 
     // custom css URLs (http://, https://, ftp://)
@@ -787,7 +782,9 @@ export function extractExternalLinks(text: string): Array<{ name: string; url: s
  * @returns Display text with [name][nameIndex]
  */
 export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string {
-    if (!allKeywords || allKeywords.length === 0) return text;
+    if (!allKeywords || allKeywords.length === 0) {
+        return text;
+    }
 
     // Build a map of keyword id -> display format
     const keywordMap = new Map<number, string>();
@@ -798,11 +795,12 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
     });
 
     // Replace [[id]] with [name]nameIndex
-    return text.replace(/\[\[(\d+)\]\]/g, (match, idStr) => {
+    const result = text.replace(/\[\[(\d+)\]\]/g, (match, idStr) => {
         const id = parseInt(idStr, 10);
         const displayText = keywordMap.get(id);
         return displayText || match; // Keep original if not found
     });
+    return result;
 }
 
 /**
@@ -904,19 +902,21 @@ export function extractHeadingsAsKeywords(text: string, noteId?: number): Array<
  */
 /**
  * Setup link provider for Ctrl+hover behavior (underline + pointer cursor)
+ * Also handles click navigation
  */
-export function setupLinkProvider($mi: Monaco | null, editor: _monaco.editor.IStandaloneCodeEditor, _allKeywords: Array<{ text: string; type: string }>, noteId?: number) {
+export function setupLinkProvider(
+    $mi: Monaco | null,
+    editor: _monaco.editor.IStandaloneCodeEditor,
+    _allKeywords: Array<{ text: string; type: string; link?: string }>,
+    navigateLink: (link: string) => void,
+    noteId?: number
+) {
     if (!$mi) return () => {};
 
-    const disposable = $mi.languages.registerLinkProvider("markdown", {
+    // Register link provider for underline + pointer cursor
+    const linkProviderDisposable = $mi.languages.registerLinkProvider("markdown", {
         provideLinks: (model) => {
-            // Dynamically extract headings from current text
             const currentText = model.getValue();
-            // const headings = extractHeadingsAsKeywords(currentText, noteId);
-
-            // Merge with static _allKeywords
-            // const allKeywordAndHeadings = [..._allKeywords, ...headings];
-
             const links: _monaco.languages.ILink[] = [];
 
             // Find all keyword patterns
@@ -964,7 +964,75 @@ export function setupLinkProvider($mi: Monaco | null, editor: _monaco.editor.ISt
         },
     });
 
-    return () => disposable.dispose();
+    // Register click handler for navigation (CHỈ khi click vào keyword)
+    const clickDisposable = editor.onMouseDown((e) => {
+        if (!e.event.ctrlKey && !e.event.metaKey) return; // Only handle Ctrl+Click or Cmd+Click
+        const position = e.target.position;
+        if (!position) {
+            return;
+        }
+
+        const model = editor.getModel();
+        if (!model) {
+            return;
+        }
+
+        const lineContent = model.getLineContent(position.lineNumber);
+        const clickColumn = position.column;
+
+        // Check if clicking on keyword - tìm keyword chứa vị trí click
+        let foundMatch = false;
+
+        for (const kw of _allKeywords) {
+            // Match keyword pattern: [name]nameIndex
+            const regex = new RegExp(escapeRegex(kw.text), "gi");
+            let match;
+
+            while ((match = regex.exec(lineContent)) !== null) {
+                const startIndex = match.index;
+                const endIndex = startIndex + match[0].length;
+
+                // Check if click is within this keyword (1-based columns)
+                if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
+                    // Found keyword at click position - navigate
+                    if (kw.link) {
+                        navigateLink(kw.link);
+                        e.event.preventDefault();
+                        e.event.stopPropagation();
+                        foundMatch = true;
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Check wiki-style links [[name|link]]
+        const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
+        let wikiMatch;
+
+        while ((wikiMatch = wikiLinkRegex.exec(lineContent)) !== null) {
+            const startIndex = wikiMatch.index;
+            const endIndex = startIndex + wikiMatch[0].length;
+            const link = wikiMatch[2];
+
+            if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
+                navigateLink(link);
+                e.event.preventDefault();
+                e.event.stopPropagation();
+                foundMatch = true;
+                return;
+            }
+        }
+
+        if (!foundMatch) {
+        }
+    });
+
+    // Return cleanup function
+    return () => {
+        linkProviderDisposable.dispose();
+        clickDisposable.dispose();
+    };
 }
 
 export function setupHoverProvider($mi: Monaco | null, editor: _monaco.editor.IStandaloneCodeEditor, _allKeywords: Array<{ text: string; type: string }>, noteId?: number) {
