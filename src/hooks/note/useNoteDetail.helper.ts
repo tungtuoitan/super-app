@@ -110,34 +110,34 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 3.5: Auto-insert external keywords if any found in description
                 // ============================================================
-                if (activeNote.description) {
-                    const externalLinks = extractExternalLinks(activeNote.description);
+                // if (activeNote.description) {
+                //     const externalLinks = extractExternalLinks(activeNote.description);
 
-                    if (externalLinks.length > 0) {
-                        // Filter out links that already exist in allKeywords
-                        const newExternalLinks = externalLinks.filter(link => {
-                            return !allKeywords.some(k => k.type === 'external' && k.link === link.url);
-                        });
+                //     if (externalLinks.length > 0) {
+                //         // Filter out links that already exist in allKeywords
+                //         const newExternalLinks = externalLinks.filter(link => {
+                //             return !allKeywords.some(k => k.type === 'external' && k.link === link.url);
+                //         });
 
-                        // If there are new external links, upsert them
-                        if (newExternalLinks.length > 0) {
-                            try {
-                                const upsertRequests = newExternalLinks.map(link => ({
-                                    name: link.name,
-                                    link: link.url,
-                                }));
+                //         // If there are new external links, upsert them
+                //         if (newExternalLinks.length > 0) {
+                //             try {
+                //                 const upsertRequests = newExternalLinks.map(link => ({
+                //                     name: link.name,
+                //                     link: link.url,
+                //                 }));
 
-                                await keywordService._upsertExternalKeywords(token, upsertRequests);
+                //                 await keywordService._upsertExternalKeywords(token, upsertRequests);
 
-                                // Reload keywords to update allKeywords state
-                                loadKeywords();
-                            } catch (err) {
-                                // Log error but don't block note save
-                                console.error("Failed to insert external keywords:", err);
-                            }
-                        }
-                    }
-                }
+                //                 // Reload keywords to update allKeywords state
+                //                 loadKeywords();
+                //             } catch (err) {
+                //                 // Log error but don't block note save
+                //                 console.error("Failed to insert external keywords:", err);
+                //             }
+                //         }
+                //     }
+                // }
 
                 // ============================================================
                 // Step 4: Call batch API to upsert note

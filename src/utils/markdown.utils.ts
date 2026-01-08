@@ -139,30 +139,9 @@ export function updateDecorations(
         });
     }
 
-    // Wiki-style links [[name|link]]
-    const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
-    let wikiMatch;
-    let wikiCount = 0;
-
-    while ((wikiMatch = wikiLinkRegex.exec(text)) !== null) {
-        wikiCount++;
-
-        const startPos = model.getPositionAt(wikiMatch.index);
-        const endPos = model.getPositionAt(wikiMatch.index + wikiMatch[0].length);
-
-        decorations.push({
-            range: {
-                startLineNumber: startPos.lineNumber,
-                startColumn: startPos.column,
-                endLineNumber: endPos.lineNumber,
-                endColumn: endPos.column,
-            },
-            options: {
-                inlineClassName: "wiki-link",
-                isWholeLine: false,
-            },
-        });
-    }
+    // Wiki-style links [[name|link]] - NO DECORATIONS
+    // External links are displayed as plain text without any styling
+    // They will be converted to [[id]] format by backend after saving
 
     // Clear all old decorations and apply new ones
     try {
@@ -445,6 +424,15 @@ export function setupAutocomplete(
             const lineContent = model.getLineContent(position.lineNumber);
             const textBeforeCursor = lineContent.substring(0, position.column - 1);
 
+            // Kiểm tra có đang gõ trong external link format [[name|url]] không
+            // If typing external link, don't show autocomplete suggestions
+            const externalLinkPattern = /\[\[([^|\]]*)\|([^\]]*)$/;
+            const isInExternalLink = externalLinkPattern.test(textBeforeCursor);
+
+            if (isInExternalLink) {
+                return { suggestions: [] }; // No suggestions for external links
+            }
+
             // Kiểm tra có đang gõ trong dòng heading không (dòng bắt đầu bằng #)
             const isInHeading = /^#{1,6}\s+/.test(lineContent.trim());
 
@@ -528,24 +516,8 @@ export function setupDefinitionProvider($mi: Monaco | null, editor: _monaco.edit
             const lineContent = model.getLineContent(position.lineNumber);
             const clickColumn = position.column;
 
-            // Strategy 0: Check if clicking on [[name|link]] wiki-style link (original format)
-            // This handles the case where user is viewing original content
-            // Pattern: [[name|link]] (both external and internal)
-            const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
-            let wikiMatch;
-
-            while ((wikiMatch = wikiLinkRegex.exec(lineContent)) !== null) {
-                const startIndex = wikiMatch.index;
-                const endIndex = startIndex + wikiMatch[0].length;
-                // const name = wikiMatch[1];
-                // const link = wikiMatch[2];
-
-                // Check if cursor is within this link (1-based columns)
-                if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                    // Don't navigate here - navigation is handled by mouse click event
-                    // This is only for preview/peek functionality
-                }
-            }
+            // Wiki-style links [[name|link]] are treated as plain text
+            // No preview/peek functionality for external links
 
             // Try to find multi-word keyword at cursor position in [keyword] format
             let keyword: { text: string; type: string; path?: string } | null = null;
@@ -784,6 +756,7 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
     if (!allKeywords || allKeywords.length === 0) {
         return null; //* khi nào có keywords thì mới convert và display UI, còn k thì để null, UI = loading
     }
+    console.log(text, allKeywords);
 
     // Build a map of keyword id -> display format
     const keywordMap = new Map<number, string>();
@@ -799,6 +772,12 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
         const displayText = keywordMap.get(id);
         return displayText || match; // Keep original if not found
     });
+
+
+    if(result.includes("[[") || result.includes("]]")){
+        console.log("Conversion incomplete, some IDs not found in keywords.");
+        return null;
+    }
 
     
     return result;
@@ -1007,23 +986,8 @@ export function setupLinkProvider(
             }
         }
 
-        // Check wiki-style links [[name|link]]
-        const wikiLinkRegex = /\[\[([^|\]]+)\|([^\]]+)\]\]/g;
-        let wikiMatch;
-
-        while ((wikiMatch = wikiLinkRegex.exec(lineContent)) !== null) {
-            const startIndex = wikiMatch.index;
-            const endIndex = startIndex + wikiMatch[0].length;
-            const link = wikiMatch[2];
-
-            if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
-                navigateLink(link);
-                e.event.preventDefault();
-                e.event.stopPropagation();
-                foundMatch = true;
-                return;
-            }
-        }
+        // Wiki-style links [[name|link]] are now treated as plain text
+        // No click navigation for external links - they will be converted by backend
 
         if (!foundMatch) {
         }

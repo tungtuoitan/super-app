@@ -11,6 +11,8 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useNavigationStore } from "@/contexts/NavigationContext";
 import { noteService } from "@/services/note.service";
 import { parseKeywordLink, getHeadingAnchor } from "@/utils/keyword-link.utils";
 import { constants } from "@/utils/constants";
@@ -28,6 +30,8 @@ export const useKeywordNavigationHelper = () => {
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();
     const { enqueueSnackbar } = useSnackbar();
+    const { moduleName } = useGridControlStore();
+    const { navigateToView } = useNavigationStore();
 
     /**
      * Navigate to keyword link (note, heading, external)
@@ -41,6 +45,11 @@ export const useKeywordNavigationHelper = () => {
                 if (!parsed) {
                     console.warn("Invalid keyword link:", link);
                     return;
+                }
+
+                // If current module is not workspace, navigate to workspace view first
+                if (moduleName !== constants.modules.workspace) {
+                    navigateToView(constants.vscode.viewTypes.workspace);
                 }
 
                 // Handle external links
@@ -201,7 +210,7 @@ export const useKeywordNavigationHelper = () => {
                 enqueueSnackbar("Failed to navigate to keyword", { variant: "error" });
             }
         },
-        [currentWorkspace, $user, openTab, enqueueSnackbar, openTabs, upsertWorkspaceItem, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, loadTree]
+        [currentWorkspace, $user, openTab, enqueueSnackbar, openTabs, upsertWorkspaceItem, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, loadTree, moduleName, navigateToView]
     );
 
 
