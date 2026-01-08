@@ -211,8 +211,228 @@ interface MatchResult {
 }
 
 
+// =====================================================
+// HELPER FUNCTIONS - Autocomplete
+// =====================================================
+
+type KeywordWithDetails = {
+    text: string;
+    type: string;
+    link?: string;
+    longLink?: string;
+    name?: string;
+    nameIndex?: number;
+    hardDeletedAt?: Date | null;
+    [key: string]: any;
+};
+
 /**
- * Setup autocomplete provider with dynamic heading extraction
+ * HELPER: Kiểm tra keyword có bị hard deleted không
+ * Keywords bị hard deleted sẽ vẫn được render trong editor nhưng không xuất hiện trong autocomplete
+ */
+function isKeywordHardDeleted(kw: KeywordWithDetails): boolean {
+    return kw.hardDeletedAt !== null && kw.hardDeletedAt !== undefined;
+}
+
+/**
+ * HELPER: Lấy text để match với user input (dùng name nếu có, fallback về text)
+ */
+function getKeywordMatchTarget(kw: KeywordWithDetails): string {
+    return kw.name || kw.text;
+}
+
+/**
+ * HELPER: Kiểm tra keyword type có phải là heading không
+ */
+function isHeadingType(type: string): boolean {
+    return type === "h1" || type === "h2" || type === "h3" ||
+           type === "h4" || type === "h5" || type === "h6";
+}
+
+/**
+ * HELPER: Xác định icon cho từng keyword type trong autocomplete dropdown
+ */
+function getCompletionItemKind($mi: Monaco, keywordType: string): any {
+    switch (keywordType) {
+        case "workspace":
+            return $mi.languages.CompletionItemKind.Constructor;
+        case "folder":
+            return $mi.languages.CompletionItemKind.Folder;
+        case "note":
+        case "file":
+            return $mi.languages.CompletionItemKind.File;
+        case "h1":
+        case "h2":
+        case "h3":
+        case "h4":
+        case "h5":
+        case "h6":
+            return $mi.languages.CompletionItemKind.Unit;
+        case "external":
+            return $mi.languages.CompletionItemKind.Reference;
+        default:
+            return $mi.languages.CompletionItemKind.Value;
+    }
+}
+
+/**
+ * HELPER: Xác định text sẽ được insert khi user chọn suggestion
+ *
+ * Logic:
+ * - Nếu đang gõ trong dòng heading (#...) → LUÔN insert plain name (bất kể keyword type)
+ *   Ví dụ: "# w1" + Tab → "w1", "# note1" + Tab → "note1"
+ * - Nếu gõ ngoài dòng heading → insert format [name]nameIndex (reference keyword)
+ *   Ví dụ: "see w1" + Tab → "[w1]1", "see note1" + Tab → "[note1]2"
+ */
+function determineInsertText(kw: KeywordWithDetails, isInHeading: boolean): string {
+    // Nếu keyword không có name/nameIndex → dùng text mặc định
+    if (!kw.name || kw.nameIndex === undefined) {
+        return kw.text;
+    }
+
+    // QUAN TRỌNG: Nếu đang gõ trong dòng heading → LUÔN insert plain name
+    // (bất kể keyword type là note, workspace, heading, folder, ...)
+    // Lý do: Trong heading không nên có format [name]nameIndex, chỉ có plain text
+    if (isInHeading) {
+        return kw.name;
+    }
+
+    // Nếu gõ ngoài dòng heading → insert full format [name]nameIndex
+    // Đây là cách reference đến keyword
+    return `[${kw.name}]${kw.nameIndex}`;
+}
+
+/**
+ * HELPER: Build documentation và detail cho suggestion item
+ *
+ * - documentation: hiển thị trong tooltip khi hover
+ * - detail: hiển thị bên phải item trong dropdown
+ * - displayLabel: hiển thị trong dropdown (chỉ name, không có brackets)
+ */
+function buildCompletionItemDetails(kw: KeywordWithDetails) {
+    const fullPath = kw.longLink || kw.link || '';
+
+    // Loại bỏ phần name (phần cuối) khỏi longLink để hiển thị path
+    // Ví dụ: "Workspace[1]/Folder[2]/NoteName[3]" → "Workspace[1]/Folder[2]"
+    let displayPath = '';
+    if (fullPath) {
+        const parts = fullPath.split('/');
+        if (parts.length > 1) {
+            parts.pop(); // Xóa phần cuối (name)
+            displayPath = parts.join('/');
+        }
+    }
+
+    return {
+        documentation: displayPath ? `Type: ${kw.type}\nPath: ${displayPath}` : `Type: ${kw.type}`,
+        detail: displayPath || undefined, // undefined để ẩn nếu không có path
+        displayLabel: kw.name || kw.text,
+    };
+}
+
+/**
+ * HELPER: Thực hiện fuzzy matching với tất cả keywords
+ *
+ * Logic:
+ * 1. Nếu chưa gõ gì → show tất cả keywords (trừ hardDeleted)
+ * 2. Nếu đã gõ → fuzzy match với từng word combination từ cuối text
+ * 3. Tìm vị trí bắt đầu của match để xác định range thay thế
+ */
+function findMatchingKeywords(
+    keywords: KeywordWithDetails[],
+    textBeforeCursor: string,
+    cursorColumn: number
+): MatchResult[] {
+    const textTrimmed = textBeforeCursor.trim();
+    const wordsInText = textTrimmed ? textTrimmed.split(/\s+/) : [];
+    const allMatches: MatchResult[] = [];
+
+    keywords.forEach((kw) => {
+        // BƯỚC 1: Lọc bỏ keywords đã bị hard deleted
+        if (isKeywordHardDeleted(kw)) {
+            return;
+        }
+
+        // BƯỚC 2: Nếu chưa gõ gì → show tất cả keywords
+        if (!textTrimmed) {
+            allMatches.push({
+                keyword: kw,
+                startColumn: cursorColumn,
+                matchedText: '',
+                score: 0,
+            });
+            return;
+        }
+
+        // BƯỚC 3: Fuzzy match với các word combinations từ cuối text
+        // Ví dụ: "hello w1 no" → thử match ["hello", "w1", "no"], ["w1", "no"], ["no"]
+        for (let wordCount = wordsInText.length; wordCount > 0; wordCount--) {
+            const searchWords = wordsInText.slice(-wordCount);
+            const phrase = searchWords.join(' ');
+
+            // Lấy text để match (name nếu có, fallback về text)
+            const matchTarget = getKeywordMatchTarget(kw);
+
+            // Thực hiện fuzzy match
+            const { match, score } = fuzzyMatch(matchTarget, searchWords);
+
+            if (match) {
+                // Tìm vị trí bắt đầu của phrase trong text
+                const phraseStartInText = textBeforeCursor.lastIndexOf(phrase);
+
+                if (phraseStartInText !== -1) {
+                    // Kiểm tra word boundary (đảm bảo không match giữa chừng từ)
+                    const charBefore = phraseStartInText > 0 ? textBeforeCursor[phraseStartInText - 1] : ' ';
+
+                    if (charBefore === ' ' || phraseStartInText === 0 || /\s/.test(charBefore)) {
+                        allMatches.push({
+                            keyword: kw,
+                            startColumn: phraseStartInText + 1,
+                            matchedText: phrase,
+                            score: score,
+                        });
+                        // Đã match → break để thử keyword tiếp theo
+                        break;
+                    }
+                }
+            }
+        }
+    });
+
+    return allMatches;
+}
+
+/**
+ * HELPER: Xử lý opening bracket nếu user đã gõ sẵn
+ *
+ * Logic: Nếu user đã gõ '[' thì bỏ '[' ở đầu insertText để tránh bị duplicate
+ */
+function handleOpeningBracket(
+    insertText: string,
+    hasOpeningBracket: boolean,
+    isInHeading: boolean
+): string {
+    // Chỉ xử lý opening bracket nếu KHÔNG phải dòng heading
+    if (hasOpeningBracket && !isInHeading) {
+        // User đã gõ '[' → bỏ '[' ở đầu insertText
+        return insertText.substring(1);
+    }
+    return insertText;
+}
+
+// =====================================================
+// MAIN FUNCTION - Setup Autocomplete Provider
+// =====================================================
+
+/**
+ * Setup autocomplete provider cho Monaco Editor
+ *
+ * Autocomplete hiển thị danh sách keywords gợi ý khi user gõ text.
+ * Hỗ trợ:
+ * - Fuzzy matching (gõ "w1 no" match "w1-note")
+ * - Context-aware insertion (tạo heading mới vs reference keyword)
+ * - Lọc hardDeleted keywords
+ * - Hiển thị icon, path, documentation
  */
 export function setupAutocomplete(
     $mi: Monaco | null,
@@ -222,195 +442,72 @@ export function setupAutocomplete(
 ) {
     if (!$mi) return () => {};
 
-    const disposable = $mi.languages.registerCompletionItemProvider("markdown", {
-        // Trigger characters để autocomplete dễ xuất hiện hơn
-        triggerCharacters: ["#", "@", "[", " ", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"],
+    const disposable = $mi.languages.registerCompletionItemProvider('markdown', {
+        // Trigger characters: các ký tự sẽ kích hoạt autocomplete
+        triggerCharacters: ['#', '@', '[', ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
 
         provideCompletionItems: (model: any, position: any) => {
+            // ========== BƯỚC 1: LẤY CONTEXT HIỆN TẠI ==========
             const lineContent = model.getLineContent(position.lineNumber);
             const textBeforeCursor = lineContent.substring(0, position.column - 1);
 
-            // Check if we're in a heading line (starts with #)
+            // Kiểm tra có đang gõ trong dòng heading không (dòng bắt đầu bằng #)
             const isInHeading = /^#{1,6}\s+/.test(lineContent.trim());
 
-            // Get search words from text before cursor
-            const textTrimmed = textBeforeCursor.trim();
-            const wordsInText = textTrimmed ? textTrimmed.split(/\s+/) : [];
+            // ========== BƯỚC 2: TÌM KEYWORDS MATCHING ==========
+            const allMatches = findMatchingKeywords(
+                _allKeywords as KeywordWithDetails[],
+                textBeforeCursor,
+                position.column
+            );
 
-            // Try fuzzy matching với từng word combination từ cuối text
-            // Track tất cả matches, không chỉ best match
-            const allMatches: MatchResult[] = [];
-            _allKeywords.forEach((kw) => {
-                // Skip hardDeleted keywords in autocomplete (but still render them in editor)
-                const kwWithDetails = kw as { text: string; type: string; hardDeletedAt?: Date | null; [key: string]: any };
-                if (kwWithDetails.hardDeletedAt !== null && kwWithDetails.hardDeletedAt !== undefined) {
-                    return; // Skip this keyword in autocomplete
-                }
-
-                if (!textTrimmed) {
-                    // Nếu chưa gõ gì, show all _allKeywords (except hardDeleted)
-                    allMatches.push({
-                        keyword: kw,
-                        startColumn: position.column,
-                        matchedText: "",
-                        score: 0,
-                    });
-                    return;
-                }
-
-                // Thử fuzzy match với các word combinations từ cuối text
-                for (let wordCount = wordsInText.length; wordCount > 0; wordCount--) {
-                    const searchWords = wordsInText.slice(-wordCount);
-                    const phrase = searchWords.join(" ");
-
-                    // Get keyword name for matching (without brackets)
-                    const kwWithDetails = kw as { text: string; type: string; link?: string; name?: string; nameIndex?: number };
-                    const matchTarget = kwWithDetails.name || kw.text; // Use name if available, fallback to text
-
-                    // Fuzzy match with keyword name (not brackets)
-                    const { match, score } = fuzzyMatch(matchTarget, searchWords);
-
-                    if (match) {
-                        // Tìm vị trí bắt đầu của phrase trong text
-                        const phraseStartInText = textBeforeCursor.lastIndexOf(phrase);
-
-                        if (phraseStartInText !== -1) {
-                            // Check word boundary
-                            const charBefore = phraseStartInText > 0 ? textBeforeCursor[phraseStartInText - 1] : " ";
-
-                            if (charBefore === " " || phraseStartInText === 0 || /\s/.test(charBefore)) {
-                                // Add to matches
-                                allMatches.push({
-                                    keyword: kw,
-                                    startColumn: phraseStartInText + 1,
-                                    matchedText: phrase,
-                                    score: score,
-                                });
-                                // Đã match, break để thử keyword tiếp theo
-                                break;
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Sort matches by score (cao nhất trước)
+            // ========== BƯỚC 3: SẮP XẾP MATCHES THEO SCORE ==========
+            // Score cao hơn = match tốt hơn → sắp xếp lên đầu
             allMatches.sort((a, b) => b.score - a.score);
 
-            // Determine start column - use first match or cursor position
-            const startColumn = allMatches.length > 0 && allMatches[0].matchedText ? allMatches[0].startColumn : position.column;
+            // ========== BƯỚC 4: XÁC ĐỊNH START COLUMN ==========
+            // Start column là vị trí bắt đầu của text sẽ bị thay thế
+            const startColumn = allMatches.length > 0 && allMatches[0].matchedText
+                ? allMatches[0].startColumn
+                : position.column;
 
-            // Check if user already typed opening bracket
-            const hasOpeningBracket = textBeforeCursor.trimEnd().endsWith("[") || (startColumn > 1 && lineContent[startColumn - 2] === "[");
+            // Kiểm tra user đã gõ '[' chưa
+            const hasOpeningBracket = textBeforeCursor.trimEnd().endsWith('[') ||
+                                     (startColumn > 1 && lineContent[startColumn - 2] === '[');
 
+            // ========== BƯỚC 5: BUILD SUGGESTION ITEMS ==========
             const suggestions = allMatches.map((matchResult) => {
-                const kw = matchResult.keyword;
-                
-                // Get icon based on keyword type using mapping
-                let kind = $mi.languages.CompletionItemKind.Value; // Default
-                
-                switch (kw.type) {
-                    case "workspace":
-                        kind = $mi.languages.CompletionItemKind.Constructor;
-                        break;
-                    case "folder":
-                        kind = $mi.languages.CompletionItemKind.Folder;
-                        break;
-                    case "note":
-                    case "file":
-                        kind = $mi.languages.CompletionItemKind.File;
-                        break;
-                    case "h1":
-                    case "h2":
-                    case "h3":
-                    case "h4":
-                    case "h5":
-                    case "h6":
-                        kind = $mi.languages.CompletionItemKind.Unit;
-                        break;
-                    case "external":
-                        kind = $mi.languages.CompletionItemKind.Reference;
-                        break;
-                    default:
-                        kind = $mi.languages.CompletionItemKind.Value;
-                        break;
-                }
+                const kw = matchResult.keyword as KeywordWithDetails;
 
-                // For autocomplete, insert format based on context and type
-                // Check if kw has name and nameIndex properties (from _allKeywords)
-                const kwWithDetails = kw as { text: string; type: string; link?: string; longLink?: string; name?: string; nameIndex?: number };
-                let insertText = kw.text;
+                // BƯỚC 5.1: Xác định icon cho keyword type
+                const kind = getCompletionItemKind($mi, kw.type);
 
-                // If this is from _allKeywords (has name/nameIndex)
-                if (kwWithDetails.name && kwWithDetails.nameIndex !== undefined) {
-                    // Check if keyword type is heading
-                    const isHeadingType = kw.type === "h1" || kw.type === "h2" || kw.type === "h3" ||
-                                         kw.type === "h4" || kw.type === "h5" || kw.type === "h6";
+                // BƯỚC 5.2: Xác định text sẽ insert (dựa trên context và type)
+                let insertText = determineInsertText(kw, isInHeading);
 
-                    // Only insert plain name when BOTH: in heading line AND keyword is heading type
-                    // This is for creating NEW headings (e.g., typing "# w1" to create a new h1 heading)
-                    if (isInHeading && isHeadingType) {
-                        insertText = kwWithDetails.name;
-                    }
-                    // For all other cases, insert full format [name]nameIndex:
-                    // - Heading keywords referenced in normal lines (e.g., "see [w1]1")
-                    // - Non-heading keywords in heading lines (e.g., "# See [note1]2")
-                    // - Normal keywords in normal lines
-                    else {
-                        insertText = `[${kwWithDetails.name}]${kwWithDetails.nameIndex}`;
-                    }
-                }
+                // BƯỚC 5.3: Xử lý opening bracket nếu user đã gõ sẵn
+                insertText = handleOpeningBracket(insertText, hasOpeningBracket, isInHeading);
 
-                let rangeStartColumn = startColumn;
-
-                // Only handle opening bracket if NOT in heading line
-                if (hasOpeningBracket && !isInHeading) {
-                    // User already typed '[', remove the first '[' from insertText
-                    insertText = insertText.substring(1);
-                    rangeStartColumn = startColumn;
-                }
-
-                // Range phải thay thế từ đầu partial match đến cursor
+                // BƯỚC 5.4: Xác định range sẽ thay thế (từ start column đến cursor)
                 const range = {
                     startLineNumber: position.lineNumber,
                     endLineNumber: position.lineNumber,
-                    startColumn: rangeStartColumn,
+                    startColumn: startColumn,
                     endColumn: position.column,
                 };
 
-                // Build documentation with type and longLink
-                const fullPath = kwWithDetails.longLink || kw.link || '';
-                
-                // Remove name (last part) from longLink for display
-                // Example: "Workspace[1]/Folder[2]/NoteName[3]" -> "Workspace[1]/Folder[2]"
-                let displayLink = fullPath;
-                if (fullPath) {
-                    const parts = fullPath.split("/");
-                    if (parts.length > 1) {
-                        parts.pop(); // Remove last part (name)
-                        displayLink = parts.join("/");
-                    } else {
-                        displayLink = ""; // If only one part, no parent path to show
-                    }
-                }
-                
-                const documentation = displayLink ? `Type: ${kw.type}\nPath: ${displayLink}` : `Type: ${kw.type}`;
+                // BƯỚC 5.5: Build documentation, detail, label
+                const { documentation, detail, displayLabel } = buildCompletionItemDetails(kw);
 
-                // Build detail - shows path without name, right-aligned automatically by Monaco
-                const detail = displayLink || undefined; // undefined hides detail if no path
-
-                // Label shows just the name (without brackets) for readability
-                // But insertText includes full format [name][nameIndex]
-                const displayLabel = kwWithDetails.name || kw.text;
-
+                // BƯỚC 5.6: Return suggestion item
                 return {
                     label: displayLabel,
                     kind: kind,
                     insertText: insertText,
                     range,
                     documentation,
-                    detail, // Monaco displays this on the right side
-                    sortText: `${1000 - matchResult.score}${displayLabel}`, // Sort by score (higher first)
+                    detail, // Monaco hiển thị bên phải item
+                    sortText: `${1000 - matchResult.score}${displayLabel}`, // Sắp xếp theo score (cao hơn lên đầu)
                 };
             });
 
