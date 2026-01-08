@@ -11,7 +11,6 @@ export function updateDecorations(
     text: string,
     _allKeywords: Array<{ text: string; type: string }>,
     decorationsRef: React.MutableRefObject<string[]>,
-    source?: string,
 ) {
     const decorations: _monaco.editor.IModelDeltaDecoration[] = [];
     const model = editor.getModel();
@@ -781,9 +780,9 @@ export function extractExternalLinks(text: string): Array<{ name: string; url: s
  * @param allKeywords - All keywords with id, name, nameIndex
  * @returns Display text with [name][nameIndex]
  */
-export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string {
+export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string|null {
     if (!allKeywords || allKeywords.length === 0) {
-        return text;
+        return null; //* khi nào có keywords thì mới convert và display UI, còn k thì để null, UI = loading
     }
 
     // Build a map of keyword id -> display format
@@ -800,6 +799,8 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
         const displayText = keywordMap.get(id);
         return displayText || match; // Keep original if not found
     });
+
+    
     return result;
 }
 
@@ -812,8 +813,8 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
  * @param allKeywords - All keywords with id, name, nameIndex
  * @returns Original markdown with [[id]] format
  */
-export function convertToOriginalVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string {
-    if (!allKeywords || allKeywords.length === 0) return text;
+export function convertToOriginalVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string|null {
+    if (!allKeywords || allKeywords.length === 0) return null
 
     // Build map for lookup: [name]nameIndex -> id
     const keywordIdMap = new Map<string, number>();

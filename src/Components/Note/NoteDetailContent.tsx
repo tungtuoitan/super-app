@@ -89,12 +89,12 @@ export function NoteDetailContent() {
     if (!activeNote) {
         return null;
     }
-
     return (
         <div className="py-6 space-y-6 h-full ">
             {/* Full Width - Description */}
             <div className="border-none">
                 <CardContent className="p-0 h-[540px]">
+                    {/* //* khi nào load đủ data thì mới render, không thì UI=loading, nếu không thì sẽ hiển thị sai*/}
                     {$miRef.current && <MarkdownEditorSync />}
                     {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />}
                     {displayDesc !== null && allKeywords && allKeywords.length > 0 ? <MarkdownEditor /> : <div className="w-full h-full flex justify-center items-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}

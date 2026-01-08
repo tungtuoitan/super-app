@@ -276,7 +276,7 @@ export const constants = {
                     strings: true,
                 },
                 acceptSuggestionOnCommitCharacter: true,
-                acceptSuggestionOnEnter: "off", // Only accept with Tab, Enter for new line
+                acceptSuggestionOnEnter: "on", // Only accept with Tab, Enter for new line
                 wordBasedSuggestions: "off", // Turn off default word-based suggestions to prioritize custom keywords
                 suggest: {
                     showWords: false, // Don't suggest random words from the document

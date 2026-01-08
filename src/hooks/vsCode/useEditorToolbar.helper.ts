@@ -98,6 +98,7 @@ export const useEditorToolbarHelper = () => {
                     // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
                     await upsertWorkspace(activeTab.id);
                     loadWorkspaces();
+                    loadKeywords();
                     break;
                 case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
                     const data = activeTab.data as Note;

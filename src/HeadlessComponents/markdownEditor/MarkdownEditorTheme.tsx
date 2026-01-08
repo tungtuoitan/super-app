@@ -12,6 +12,7 @@ import { updateDecorations } from "@/utils/markdown.utils";
 import { Note } from "@/types/note.types";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import {update} from "lodash";
 
 export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     const { registries, allKeywords } = useGeneralStore();
@@ -62,49 +63,8 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
             console.warn("⚠️ [THEME] Editor is disposed, skipping decoration update");
             return;
         }
-
-        // Debounce timer for decoration updates (to prevent flickering during Unikey composition)
-        // let debounceTimer: NodeJS.Timeout | null = null;
-
-        // Function to update decorations
-        const performDecorationUpdate = () => {
-            try {
-                const value = editor.getValue();
-
-                // Only decorate keywords, NOT headings
-                // Headings should not have underlines or be clickable
-                updateDecorations(editor, value, _allKeywords, decorationsRef, "MarkdownEditorTheme");
-            } catch (error) {
-                console.error("❌ [THEME] Update decorations error:", error);
-                console.warn("[Monaco] Update decorations error (editor may be disposed)");
-            }
-        };
-
-        // Initial decoration update (no debounce)
-        performDecorationUpdate();
-
-        // Listen to editor content changes with debounce to prevent flickering
-        // const contentChangeDisposable = editor.onDidChangeModelContent(() => {
-        //     // Clear previous timer
-        //     if (debounceTimer) {
-        //         clearTimeout(debounceTimer);
-        //     }
-
-        //     // Schedule new update after 100ms (allows Unikey composition to complete)
-        //     debounceTimer = setTimeout(() => {
-        //         performDecorationUpdate();
-        //         debounceTimer = null;
-        //     }, 100);
-        // });
-
-        // Cleanup
-        // return () => {
-        //     if (debounceTimer) {
-        //         clearTimeout(debounceTimer);
-        //     }
-        //     contentChangeDisposable.dispose();
-        // };
-    }, [_allKeywords, currentNoteId]); // Removed displayDesc dependency!
+        updateDecorations(editor, editor.getValue(), _allKeywords, decorationsRef);
+    }, [_allKeywords, currentNoteId, displayDesc]); // Removed displayDesc dependency!
 
     return null;
 }

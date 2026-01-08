@@ -9,14 +9,14 @@
     font-weight: 500 !important;
     text-decoration: none !important; 
     text-decoration: underline !important;
-    text-decoration-color: rgba(255, 255, 255) !important;
+    text-decoration-color: rgb(82, 82, 82) !important;
     cursor: pointer !important;
 }
 
-/* Keyword name - underline on hover only */
-.monaco-editor .keyword-name:hover,
-.monaco-editor .view-line .keyword-name:hover,
-.monaco-editor .view-lines .keyword-name:hover {
+/* Keyword name - underline and color change ONLY when hover + Ctrl key pressed */
+.monaco-editor.ctrl-pressed .keyword-name:hover,
+.monaco-editor.ctrl-pressed .view-line .keyword-name:hover,
+.monaco-editor.ctrl-pressed .view-lines .keyword-name:hover {
     text-decoration-color: rgb(3, 86, 194) !important;
     color: rgb(3, 86, 194) !important;
 }

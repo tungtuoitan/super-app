@@ -27,6 +27,10 @@ export function MarkdownEditorSync() {
         setDisplayDesc(displayValue ?? null);
     }, [activeNote?.description, allKeywords]);
 
+    // useEffect(() => {
+    //     console.log("displayDesc:", displayDesc);
+    // }, [displayDesc]);
+
     // Sync external value changes to editor (only when editor doesn't have focus)
     useEffect(() => {
         const editor = editorRef.current;
