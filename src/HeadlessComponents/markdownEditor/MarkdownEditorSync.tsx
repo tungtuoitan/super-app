@@ -41,12 +41,13 @@ export function MarkdownEditorSync() {
         }
         
         const displayValue = convertToDisplayVersion(activeNote?.description || "", allKeywords);
-        setDisplayDesc(_ => {
-            if (editorRef.current) {
-                updateDecorations(editorRef.current, displayValue ?? "", _allKeywords, decorationsRef);
-            }
-            return displayValue ?? null
-        });
+        // setDisplayDesc(_ => {
+        //     if (editorRef.current) {
+        //         updateDecorations(editorRef.current, displayValue ?? "", _allKeywords, decorationsRef);
+        //     }
+        //     return displayValue ?? null
+        // });
+        setDisplayDesc(displayValue ?? null);
         
     }, [activeNote?.description, allKeywords]);
 

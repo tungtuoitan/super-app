@@ -14,7 +14,6 @@ export function updateDecorations(
     _allKeywords: Array<{ text: string; type: string }>,
     decorationsRef: React.MutableRefObject<string[]>,
 ) {
-    console.log(">>>>>>>>>>> [DECORATIONS] Updating decorations...", editor.getModel(), JSON.stringify(decorationsRef.current), JSON.stringify(_allKeywords), JSON.stringify(decorationsRef), JSON.stringify(text));
     const decorations: _monaco.editor.IModelDeltaDecoration[] = [];
     const model = editor.getModel();
     if (!model) {

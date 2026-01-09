@@ -66,9 +66,9 @@ export function MarkdownEditor() {
 
         // CRITICAL: Update decorations IMMEDIATELY sau khi text change
         // Đảm bảo editor instance tồn tại trước khi update
-        if (editorRef.current && !((editorRef.current as any)._isDisposed)) {
-            updateDecorations(editorRef.current, newDisplayDesc, _allKeywords, decorationsRef);
-        }
+        // if (editorRef.current && !((editorRef.current as any)._isDisposed)) {
+        //     updateDecorations(editorRef.current, newDisplayDesc, _allKeywords, decorationsRef);
+        // }
     };
 
     // Extract keywords from registries + allKeywords
