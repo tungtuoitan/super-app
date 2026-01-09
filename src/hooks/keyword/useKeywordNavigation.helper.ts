@@ -143,11 +143,10 @@ export const useKeywordNavigationHelper = () => {
                             name: noteInWorkspace.data.name,
                             description: noteInWorkspace.data.description || "",
                             hashtags: "",
-                            type: "idea",
                             statusCode: noteInWorkspace.data.statusCode,
                             createdAt: new Date(noteInWorkspace.data.createdAt),
                             updatedAt: noteInWorkspace.data.updatedAt ? new Date(noteInWorkspace.data.updatedAt) : undefined,
-                            createdBy: "You",
+                            createdBy: $user.userName || "You",
                             deletedAt: noteInWorkspace.data.deletedAt ? new Date(noteInWorkspace.data.deletedAt) : null,
                             userId: noteInWorkspace.data.userId,
                         };

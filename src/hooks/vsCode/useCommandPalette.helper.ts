@@ -35,9 +35,9 @@ export const useCommandPaletteHelper = () => {
 
     // Filter keywords based on search query with fuzzy matching (diacritics-insensitive)
     const getFilteredKeywords = (searchQuery: string) => {
+        const activeKeywords = allKeywords.filter((k) => k.hardDeletedAt === null);
         if (!searchQuery.trim()) {
-            return allKeywords
-                .filter((k) => k.hardDeletedAt === null)
+            return activeKeywords
                 .map((keyword) => ({
                     keyword,
                     matchedIndices: { name: [], link: [] },
@@ -58,7 +58,7 @@ export const useCommandPaletteHelper = () => {
         }
         const matches: MatchResult[] = [];
 
-        allKeywords.forEach((keyword) => {
+        activeKeywords.forEach((keyword) => {
             // Get display link without name at the end
             const displayLink = getDisplayLink(keyword.longLink, keyword.name);
 

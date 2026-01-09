@@ -18,6 +18,7 @@ import { constants } from "@/utils/constants";
 import { CalculateWorkspaceTreeContainerHeight } from "@/HeadlessComponents/workspaceTree/CalculateWorkspaceTreeContainerHeight";
 import { CalculateWorkspaceTreeDropZoneHeight } from "@/HeadlessComponents/workspaceTree/CalculateWorkspaceTreeDropZoneHeight";
 import { ScrollToHighlightItem } from "@/HeadlessComponents/vsCode/ScrollToHighlightItem";
+import {UpdateWhenTabChange} from "../../../HeadlessComponents/workspaceTree/UpdateWhenTabChange";
 
 export function WorkspaceTree() {
     const { isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } =
@@ -185,7 +186,8 @@ export function WorkspaceTree() {
                                     // Override height for drop zone to fill remaining space
                                     height: isDropZone ? `${dropZoneHeight}px` : style.height,
                                 }}
-                            >
+                            >   
+                                <UpdateWhenTabChange />
                                 {isDropZone ? (
                                     // Drop zone at bottom - fills remaining space for easy root-level drops
                                     <div
