@@ -24,6 +24,7 @@ import {
 } from "@/utils/markdown.utils";
 import { Note } from "@/types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import {useSnackbar} from "notistack";
 
 export function MarkdownEditor() {
     const { registries, allKeywords } = useGeneralStore();
@@ -34,6 +35,7 @@ export function MarkdownEditor() {
     const { getItemStatus } = useTreeStatusHelper();
     // const $mi = useMonaco(); // Monaco instance
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
+    const { enqueueSnackbar } = useSnackbar();
 
     // Get active tab and note
     const activeTab = getActiveTab();
@@ -90,7 +92,7 @@ export function MarkdownEditor() {
         // Setup providers
         const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
         // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
-        const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, navigateLink, currentNoteId);
+        const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, navigateLink, enqueueSnackbar, currentNoteId);
         // const definitionCleanup = setupDefinitionProvider($mi, editor, _allKeywords, currentNoteId);
         const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
         // Store disposables for cleanup
@@ -109,7 +111,6 @@ export function MarkdownEditor() {
             const handleKeyDown = (e: KeyboardEvent) => {
                 if (e.ctrlKey || e.metaKey) {
                     editorDomNode.classList.add("ctrl-pressed");
-                    console.log("Ctrl pressed - hover effect enabled");
                 }
             };
 
@@ -169,7 +170,7 @@ export function MarkdownEditor() {
             // Re-setup providers with fresh keywords
             const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
             // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
-            const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, navigateLink, currentNoteId);
+            const linkCleanup = setupLinkProvider($miRef.current, editor, _allKeywords, navigateLink, enqueueSnackbar, currentNoteId);
             // const definitionCleanup = setupDefinitionProvider($miRef.current, editor, _allKeywords, currentNoteId);
             const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
 

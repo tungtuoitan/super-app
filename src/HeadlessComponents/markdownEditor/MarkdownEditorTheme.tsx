@@ -17,6 +17,7 @@ import {update} from "lodash";
 export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     const { registries, allKeywords } = useGeneralStore();
     const { getActiveTab, openTab } = useEditorTabHelper();
+    const { activeTabId } = useEditorTabsStore();
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
 
     // Get active tab and note
@@ -64,7 +65,7 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
             return;
         }
         updateDecorations(editor, editor.getValue(), _allKeywords, decorationsRef);
-    }, [_allKeywords, currentNoteId, displayDesc]); // Removed displayDesc dependency!
+    }, [_allKeywords, currentNoteId, displayDesc, activeTabId]); // Removed displayDesc dependency!
 
     return null;
 }

@@ -49,7 +49,7 @@ export function MarkdownEditorSync() {
     }, [activeNote?.description, allKeywords]);
 
     useEffect(() => {
-        console.log("displayDesc:", displayDesc);
+        // console.log("displayDesc:", displayDesc);
     }, [displayDesc]);
 
     // Sync external value changes to editor (only when editor doesn't have focus)

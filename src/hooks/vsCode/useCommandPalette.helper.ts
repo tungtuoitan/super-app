@@ -37,7 +37,7 @@ export const useCommandPaletteHelper = () => {
     const getFilteredKeywords = (searchQuery: string) => {
         if (!searchQuery.trim()) {
             return allKeywords
-                // .filter((k) => k.hardDeletedAt === null)
+                .filter((k) => k.hardDeletedAt === null)
                 .map((keyword) => ({
                     keyword,
                     matchedIndices: { name: [], link: [] },

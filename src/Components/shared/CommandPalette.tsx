@@ -9,15 +9,17 @@ import { useCommandPaletteStore } from "@/store/commandPalette/useCommandPalette
 import { useCommandPaletteHelper } from "@/hooks/index";
 import { HighlightedText } from "./HighlightedText";
 import { CommandPaletteKeyDown } from "@/HeadlessComponents/vsCode/CommandPaletteKeyDown";
+import {useGeneralStore} from "@/store/general/General.store";
 
 export function CommandPalette() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, getKeywordIcon, close } = useCommandPaletteHelper();
+    const { allKeywords } = useGeneralStore();
 
     // Get filtered keywords using helper function
     const filteredKeywords = useMemo(() => {
         return getFilteredKeywords(searchQuery);
-    }, [searchQuery]);
+    }, [searchQuery, allKeywords.length]);
 
     // Reset selection when filtered list changes
     useEffect(() => {

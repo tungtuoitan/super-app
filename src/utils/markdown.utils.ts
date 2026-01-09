@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import type * as _monaco from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
 import "@/styles/keywords.css";
+import {EnqueueSnackbar} from "notistack";
 
 /**
  * Update decorations (highlight _allKeywords and URLs)
@@ -756,8 +757,6 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
     if (!allKeywords || allKeywords.length === 0) {
         return null; //* khi nào có keywords thì mới convert và display UI, còn k thì để null, UI = loading
     }
-    console.log(text, allKeywords);
-
     // Build a map of keyword id -> display format
     const keywordMap = new Map<number, string>();
     allKeywords.forEach((kw) => {
@@ -775,7 +774,6 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
 
 
     if(result.includes("[[") || result.includes("]]")){
-        console.log("Conversion incomplete, some IDs not found in keywords.");
         return null;
     }
 
@@ -887,8 +885,9 @@ export function extractHeadingsAsKeywords(text: string, noteId?: number): Array<
 export function setupLinkProvider(
     $mi: Monaco | null,
     editor: _monaco.editor.IStandaloneCodeEditor,
-    _allKeywords: Array<{ text: string; type: string; link?: string }>,
+    _allKeywords: Array<{ text: string; type: string; link?: string, hardDeletedAt?: Date | null }>,
     navigateLink: (link: string) => void,
+    enqueueSnackbar: EnqueueSnackbar,
     noteId?: number
 ) {
     if (!$mi) return () => {};
@@ -975,7 +974,12 @@ export function setupLinkProvider(
                 // Check if click is within this keyword (1-based columns)
                 if (clickColumn >= startIndex + 1 && clickColumn <= endIndex + 1) {
                     // Found keyword at click position - navigate
-                    if (kw.link) {
+                    if(kw.link && kw.hardDeletedAt) {
+                        // do nothing
+                        enqueueSnackbar("Keyword is deleted or not existed.", { variant: "warning" });
+                        foundMatch = true;
+                        return;
+                    }else if (kw.link && !kw.hardDeletedAt) {
                         navigateLink(kw.link);
                         e.event.preventDefault();
                         e.event.stopPropagation();
