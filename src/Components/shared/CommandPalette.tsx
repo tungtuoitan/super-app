@@ -91,8 +91,8 @@ export function CommandPalette() {
                                         data-index={index}
                                         onClick={() => !isDisabled && handleSelectKeyword(keyword)}
                                         className={`
-                                            px-4 py-1.5 cursor-pointer flex items-center gap-3 hover:bg-[#2A2D2E]
-                                            ${isSelected ? "bg-[#44475A]" : ""}
+                                            px-4 py-1.5 cursor-pointer flex items-center gap-3
+                                            ${isSelected ? "bg-[#44475A] hover:bg-[#44475A]" : "hover:bg-[#2A2D2E]"}
                                             ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
                                         `}
                                     >

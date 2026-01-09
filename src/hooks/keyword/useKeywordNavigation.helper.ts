@@ -23,6 +23,7 @@ import { WorkspaceDTO } from "@/types/workspace-dto.types";
 import { BaseTab } from "@/types/editor/tab.types";
 import { Keyword } from "@/types/keyword.types";
 import {isValid} from "date-fns";
+import {set} from "lodash";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
@@ -161,6 +162,11 @@ export const useKeywordNavigationHelper = () => {
                         };
 
                         openTab(note, constants.vscode.tab.tabTypes.note);
+                        //* Select note in workspace tree after a small delay (nếu k thì có bug: k select đc node)
+                        setTimeout(() => {
+                            setSelectedItemIds([noteInWorkspace.id]);
+                            setLastSelectedItemId(noteInWorkspace.id);
+                        });
 
                         // If heading, scroll to it after a small delay
                         if (parsed.type === "heading" && parsed.headingPath) {

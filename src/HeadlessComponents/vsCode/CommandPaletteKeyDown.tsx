@@ -20,12 +20,12 @@ export function CommandPaletteKeyDown() {
             switch (e.key) {
                 case "ArrowDown":
                     e.preventDefault();
-                    setSelectedIndex((prev: number) => Math.min(prev + 1, filteredKeywords.length - 1));
+                    setSelectedIndex((prev: number) => prev ===filteredKeywords.length-1 ? 0 : Math.min(prev + 1, filteredKeywords.length - 1));
                     break;
 
                 case "ArrowUp":
                     e.preventDefault();
-                    setSelectedIndex((prev: number) => Math.max(prev - 1, 0));
+                    setSelectedIndex((prev: number) => prev === 0 ? filteredKeywords.length-1 : Math.max(prev - 1, 0));
                     break;
 
                 case "Enter":
