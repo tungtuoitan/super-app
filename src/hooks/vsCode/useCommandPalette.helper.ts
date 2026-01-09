@@ -130,7 +130,7 @@ export const useCommandPaletteHelper = () => {
             return; // Don't navigate to deleted keywords
         }
 
-        navigateLink(keyword.link);
+        navigateLink(keyword);
         close();
     };
 

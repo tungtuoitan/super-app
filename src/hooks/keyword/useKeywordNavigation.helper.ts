@@ -21,6 +21,8 @@ import { Note } from "@/types/note.types";
 import { WorkspaceNoteItem, WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { WorkspaceDTO } from "@/types/workspace-dto.types";
 import { BaseTab } from "@/types/editor/tab.types";
+import { Keyword } from "@/types/keyword.types";
+import {isValid} from "date-fns";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
@@ -37,13 +39,13 @@ export const useKeywordNavigationHelper = () => {
      * Navigate to keyword link (note, heading, external)
      */
     const navigateLink = useCallback(
-        async (link: string) => {
+        async (keyword: Keyword) => {
             try {
                 // Parse link
-                const parsed = parseKeywordLink(link);
+                const parsed = parseKeywordLink(keyword);
 
                 if (!parsed) {
-                    console.warn("Invalid keyword link:", link);
+                    console.warn("Invalid keyword link:", keyword.link);
                     return;
                 }
 
@@ -54,8 +56,15 @@ export const useKeywordNavigationHelper = () => {
 
                 // Handle external links
                 if (parsed.type === "external" && parsed.url) {
-                    window.open(parsed.url, "_blank", "noopener,noreferrer");
-                    return;
+                    const _url = parsed.url.startsWith("http") ? parsed.url : `https://${parsed.url}`;
+                    if(isValid(_url)){
+                        window.open(_url, "_blank", "noopener,noreferrer");
+                        return;
+                    }
+                    else {
+                        enqueueSnackbar("Invalid URL", { variant: "error" });
+                        return;
+                    }
                 }
 
                 // Variable to hold target workspace data after switch
@@ -73,9 +82,9 @@ export const useKeywordNavigationHelper = () => {
                     if (unsavedTabs.length > 0) {
                         enqueueSnackbar(`Saving ${unsavedTabs.length} unsaved note(s)...`, { variant: "info" });
                         try {
-                            const tabIdsToSave = unsavedTabs.map(tab => tab.id);
+                            const tabIdsToSave = unsavedTabs.map((tab) => tab.id);
                             const saveSuccess = await upsertWorkspaceItem(WorkspaceItemAction.Create, tabIdsToSave);
-                            
+
                             if (!saveSuccess) {
                                 enqueueSnackbar("Failed to save notes. Navigation cancelled.", { variant: "error" });
                                 return;
@@ -90,7 +99,7 @@ export const useKeywordNavigationHelper = () => {
                     // Switch to target workspace and load tree directly
                     setSelectedWorkspaceId(parsed.workspaceId);
                     enqueueSnackbar("Switching workspace...", { variant: "info" });
-                    
+
                     // Load tree directly with target workspace ID
                     const loadedWorkspace = await loadTree(undefined, parsed.workspaceId);
                     if (!loadedWorkspace) {
@@ -209,9 +218,22 @@ export const useKeywordNavigationHelper = () => {
                 enqueueSnackbar("Failed to navigate to keyword", { variant: "error" });
             }
         },
-        [currentWorkspace, $user, openTab, enqueueSnackbar, openTabs, upsertWorkspaceItem, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, loadTree, moduleName, navigateToView]
+        [
+            currentWorkspace,
+            $user,
+            openTab,
+            enqueueSnackbar,
+            openTabs,
+            upsertWorkspaceItem,
+            setSelectedWorkspaceId,
+            setSelectedItemIds,
+            setLastSelectedItemId,
+            _treeRef,
+            loadTree,
+            moduleName,
+            navigateToView,
+        ]
     );
-
 
     return {
         navigateLink,

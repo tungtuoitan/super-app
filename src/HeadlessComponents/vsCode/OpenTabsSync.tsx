@@ -20,6 +20,7 @@ import { noteService } from "@/services/note.service";
 import { wsService, WsDTO } from "@/services/ws.service";
 import { transformNotes } from "@/utils/note.utils";
 import { transformWs } from "@/utils/ws.utils";
+import {useEditorTabHelper} from "@/hooks/index";
 
 // Storage types
 export interface TabStorage {
@@ -45,6 +46,7 @@ export const OpenTabsSync = () => {
     const { notes } = useNoteGridStore();
     const { workspaces } = useWsStore();
     const { present } = useNavigationHistoryStore();
+    const { setNewTabAnd } = useEditorTabHelper();
 
     // Load tabs from localStorage on mount or userId change
     useEffect(() => {
@@ -53,7 +55,7 @@ export const OpenTabsSync = () => {
             const storageKey = getStorageKey($user.userId);
             if (!storageKey) {
                 setOpenTabs([]);
-                setActiveTabId(null);
+                setNewTabAnd(null);
                 return;
             }
 
@@ -188,19 +190,19 @@ export const OpenTabsSync = () => {
                     });
 
                     if (matchingTab) {
-                        setActiveTabId(matchingTab.id);
+                        setNewTabAnd(matchingTab.id);
                     } else if (restoredTabs.length > 0) {
                         // Fallback to last tab
-                        setActiveTabId(restoredTabs[restoredTabs.length - 1].id);
+                        setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
                     }
                 } else if (restoredTabs.length > 0) {
                     // No history, just activate last tab
-                    setActiveTabId(restoredTabs[restoredTabs.length - 1].id);
+                    setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
                 }
             } catch (error) {
                 console.error("Failed to restore tabs from localStorage:", error);
                 setOpenTabs([]);
-                setActiveTabId(null);
+                setNewTabAnd(null);
             } finally {
                 setIsLoadingTabs(false);
             }

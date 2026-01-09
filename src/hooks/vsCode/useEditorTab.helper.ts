@@ -9,6 +9,7 @@ import { useWsStore, Ws } from "@/store/ws/useWs.store";
 import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import {WorkspaceItemV2} from "@/types/workspace-v2.types";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -19,6 +20,8 @@ export const useEditorTabHelper = () => {
     const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
+    const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
+    
     /**
      * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
      * @param entityType - 2 (folder), 3 (note), 4 (file)
@@ -49,7 +52,7 @@ export const useEditorTabHelper = () => {
     const updateActiveTab = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
         const tabsToSearch = tabs || openTabs;
 
-        setActiveTabId(newActiveTabId);
+        setNewTabAnd(newActiveTabId);
 
         if (newActiveTabId) {
             const activeTab = tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId);
@@ -316,6 +319,23 @@ export const useEditorTabHelper = () => {
         return openTabs.find((tab: BaseTab) => tab.id === activeTabId) || null;
     };
 
+    const setNewTabAnd = (newActiveTabId: string | null) => {
+        setActiveTabId(newActiveTabId);
+        const newTab = openTabs.find((tab: BaseTab) => tab.id === newActiveTabId);
+        if (newTab && (newTab.type === constants.vscode.tab.tabTypes.note)) {
+            const noteId = newTab.data.id;
+            const item: WorkspaceItemV2 | undefined = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteId);
+            if (item && item.id) {
+                setSelectedItemIds([item.id]);
+                setLastSelectedItemId(item.id);
+            }
+            else {
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
+            }
+        }
+    }
+
     /**
      * Check if two history entries are duplicates (adjacent items that are "same")
      */
@@ -385,11 +405,11 @@ export const useEditorTabHelper = () => {
                 setPast(cleanedPast.slice(0, -1)); // Remove last item from past
 
                 // Set activeTabId to the new present's tab
-                setActiveTabId(newPresent.tabId);
+                setNewTabAnd(newPresent.tabId);
             } else {
                 // No past entries, clear present and active tab
                 setPresent(null);
-                setActiveTabId(null);
+                setNewTabAnd(null);
             }
         }
     };
@@ -402,5 +422,6 @@ export const useEditorTabHelper = () => {
         getActiveTab,
         updateActiveTab,
         processTabAfterDelete,
+        setNewTabAnd,
     };
 };

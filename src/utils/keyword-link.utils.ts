@@ -31,11 +31,12 @@ export interface ParsedKeywordLink {
  * - w77/n187/Wonbin2/ai nữa2 (note with nested headings)
  * - https://google.com (external)
  */
-export function parseKeywordLink(link: string): ParsedKeywordLink | null {
+export function parseKeywordLink(keyword: Keyword): ParsedKeywordLink | null {
+    const link = keyword.link;
     if (!link) return null;
 
     // Check if external link (starts with http:// or https://)
-    if (link.startsWith("http://") || link.startsWith("https://")) {
+    if (keyword.type === "external" || link.startsWith("http://") || link.startsWith("https://")) {
         return {
             type: "external",
             url: link,

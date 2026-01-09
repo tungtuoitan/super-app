@@ -4,26 +4,16 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
-import Editor, { useMonaco } from "@monaco-editor/react";
 import { useGeneralStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } from "@/store/index";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { updateDecorations } from "@/utils/markdown.utils";
-import { Note } from "@/types/note.types";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import {update} from "lodash";
 
 export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     const { registries, allKeywords } = useGeneralStore();
-    const { getActiveTab, openTab } = useEditorTabHelper();
     const { activeTabId } = useEditorTabsStore();
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
-
-    // Get active tab and note
-    const activeTab = getActiveTab();
-    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
-    const currentNoteId = activeNote?.id;
 
     // Extract keywords from registries + allKeywords
     const _allKeywords = useMemo(() => {
@@ -65,7 +55,7 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
             return;
         }
         updateDecorations(editor, editor.getValue(), _allKeywords, decorationsRef);
-    }, [_allKeywords, currentNoteId, displayDesc, activeTabId]); // Removed displayDesc dependency!
+    }, [_allKeywords, displayDesc, activeTabId]); // Removed displayDesc dependency!
 
     return null;
 }

@@ -3,6 +3,7 @@ import type * as _monaco from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
 import "@/styles/keywords.css";
 import {EnqueueSnackbar} from "notistack";
+import {Keyword} from "@/types/keyword.types";
 
 /**
  * Update decorations (highlight _allKeywords and URLs)
@@ -13,6 +14,7 @@ export function updateDecorations(
     _allKeywords: Array<{ text: string; type: string }>,
     decorationsRef: React.MutableRefObject<string[]>,
 ) {
+    console.log(">>>>>>>>>>> [DECORATIONS] Updating decorations...", editor.getModel(), JSON.stringify(decorationsRef.current), JSON.stringify(_allKeywords), JSON.stringify(decorationsRef), JSON.stringify(text));
     const decorations: _monaco.editor.IModelDeltaDecoration[] = [];
     const model = editor.getModel();
     if (!model) {
@@ -885,8 +887,8 @@ export function extractHeadingsAsKeywords(text: string, noteId?: number): Array<
 export function setupLinkProvider(
     $mi: Monaco | null,
     editor: _monaco.editor.IStandaloneCodeEditor,
-    _allKeywords: Array<{ text: string; type: string; link?: string, hardDeletedAt?: Date | null }>,
-    navigateLink: (link: string) => void,
+    _allKeywords: Array<Keyword>,
+    navigateLink: (keyword: Keyword) => void,
     enqueueSnackbar: EnqueueSnackbar,
     noteId?: number
 ) {
@@ -901,7 +903,8 @@ export function setupLinkProvider(
             // Find all keyword patterns
             _allKeywords.forEach((kw) => {
                 // Match keyword pattern (kw.text already includes [name][nameIndex])
-                const regex = new RegExp(escapeRegex(kw.text), "gi");
+                const displayName = `[${kw.name}]${kw.nameIndex}`;
+                const regex = new RegExp(escapeRegex(displayName), "gi");
                 let match;
 
                 while ((match = regex.exec(currentText)) !== null) {
@@ -915,7 +918,7 @@ export function setupLinkProvider(
                             endLineNumber: endPos.lineNumber,
                             endColumn: endPos.column,
                         },
-                        url: `keyword://${kw.text}`, // Dummy URL for link detection
+                        url: `keyword://${displayName}`, // Dummy URL for link detection
                     });
                 }
             });
@@ -963,8 +966,9 @@ export function setupLinkProvider(
         let foundMatch = false;
 
         for (const kw of _allKeywords) {
+            const displayName = `[${kw.name}]${kw.nameIndex}`;
             // Match keyword pattern: [name]nameIndex
-            const regex = new RegExp(escapeRegex(kw.text), "gi");
+            const regex = new RegExp(escapeRegex(displayName), "gi");
             let match;
 
             while ((match = regex.exec(lineContent)) !== null) {
@@ -980,7 +984,7 @@ export function setupLinkProvider(
                         foundMatch = true;
                         return;
                     }else if (kw.link && !kw.hardDeletedAt) {
-                        navigateLink(kw.link);
+                        navigateLink(kw);
                         e.event.preventDefault();
                         e.event.stopPropagation();
                         foundMatch = true;

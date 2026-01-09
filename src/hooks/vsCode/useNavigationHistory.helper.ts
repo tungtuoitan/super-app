@@ -52,6 +52,7 @@ export const useNavigationHistoryHelper = () => {
     const { past, setPast, present, setPresent, future, setFuture } = useNavigationHistoryStore();
     const { openTabs, activeTabId, setActiveTabId, setOpenTabs, editorAreaRef } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
+    const { setNewTabAnd } = useEditorTabHelper();
 
     // Track if we're currently navigating (to prevent tracking during restore)
     const isNavigatingRef = useRef(false);
@@ -299,7 +300,7 @@ export const useNavigationHistoryHelper = () => {
 
         if (existingTab) {
             // Tab exists - just switch to it
-            setActiveTabId(entry.tabId);
+            setNewTabAnd(entry.tabId);
         } else {
             // Tab doesn't exist - need to reopen it based on type
             let newTab: BaseTab | null = null;
@@ -329,7 +330,7 @@ export const useNavigationHistoryHelper = () => {
 
             if (newTab) {
                 setOpenTabs(prev => [...prev, newTab!]);
-                setActiveTabId(newTab.id);
+                setNewTabAnd(newTab.id);
             }
         }
 

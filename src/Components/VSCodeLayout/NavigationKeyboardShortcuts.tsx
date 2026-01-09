@@ -7,10 +7,12 @@
 import { useEffect } from "react";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import {useEditorTabsStore} from "@/store/index";
+import {useEditorTabHelper} from "@/hooks/index";
 
 export const NavigationKeyboardShortcuts = () => {
     const { handleGoBack, handleGoForward, canGoBack, canGoForward } = useNavigationHistoryHelper();
     const { openTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { setNewTabAnd } = useEditorTabHelper();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -35,10 +37,10 @@ export const NavigationKeyboardShortcuts = () => {
                 if (openTabs.length > 0 && activeTabId) {
                     const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
                     if (currentIndex > 0) {
-                        setActiveTabId(openTabs[currentIndex - 1].id);
+                        setNewTabAnd(openTabs[currentIndex - 1].id);
                     }
                     else {
-                        setActiveTabId(openTabs[openTabs.length - 1].id);
+                        setNewTabAnd(openTabs[openTabs.length - 1].id);
                     }
                 
                 }
@@ -50,10 +52,10 @@ export const NavigationKeyboardShortcuts = () => {
                 if (openTabs.length > 0 && activeTabId) {
                     const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
                     if (currentIndex < openTabs.length - 1) {
-                        setActiveTabId(openTabs[currentIndex + 1].id);
+                        setNewTabAnd(openTabs[currentIndex + 1].id);
                     }
                     else {
-                        setActiveTabId(openTabs[0].id);
+                        setNewTabAnd(openTabs[0].id);
                     }
                 }
             }
