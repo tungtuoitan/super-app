@@ -20,10 +20,11 @@ import {ResultOptions} from "@/types/common.types";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import {useMovingTreeStore} from "@/store/workspace/MovingTree.store";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useWorkspaceLoader = () => {
     const { $user } = useAuthStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
     const { setTargetWorkspaceId } = useMovingTreeStore();
 
@@ -72,10 +73,14 @@ export const useWorkspaceLoader = () => {
      * Filtering happens in transformToTreeData() in tree.miniHelper.ts
      *
      * @param calculatedVirtualItems - Optional array of virtual items (ID < 0) to preserve in state
+     * @param targetWorkspaceId - Optional workspace ID to load. If not provided, uses selectedWorkspaceId
+     * @returns The loaded workspace data
      */
-    const loadTree = async (calculatedVirtualItems?: WorkspaceItemV2[]) => {
-        if(selectedWorkspaceId == null){
-            console.warn("selectedWorkspaceId is null, cant load tree")
+    const loadTree = async (calculatedVirtualItems?: WorkspaceItemV2[], targetWorkspaceId?: number): Promise<WorkspaceDTO | undefined> => {
+        const workspaceIdToLoad = targetWorkspaceId ?? selectedWorkspaceId;
+        
+        if(workspaceIdToLoad == null){
+            console.warn("workspaceId is null, cant load tree")
             return
         }
 
@@ -93,8 +98,7 @@ export const useWorkspaceLoader = () => {
             // };
 
             // Fetch workspace tree with V2 structure (ALL items, no filtering)
-            console.log("🔧 Loading Workspace V2 API (NO SERVER FILTERING - all items returned)");
-            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, selectedWorkspaceId);
+            const result: ResultOptions<WorkspaceDTO> = await workspaceService._getWorkspaceTreeV2(token, workspaceIdToLoad);
             if(result && result.success){
                 // Merge data: API data + existing virtual items (ID < 0) + new virtual items
                 const existingVirtualItems = (currentWorkspace?.flatData ?? []).filter((item: WorkspaceItemV2) => item?.id < 0);
@@ -110,14 +114,8 @@ export const useWorkspaceLoader = () => {
                     ]
                 } as WorkspaceDTO;
                 
-                console.log("📦 Merged workspace data:", {
-                    apiItems: result.object?.flatData?.length ?? 0,
-                    calculatedirtualItems: mergedVirtualItems.length,
-                    total: newWorkspace.flatData?.length ?? 0
-                });
-                
                 setCurrentWorkspace(newWorkspace);
-                return result.object;
+                return newWorkspace;
             }
 
         } catch (error) {

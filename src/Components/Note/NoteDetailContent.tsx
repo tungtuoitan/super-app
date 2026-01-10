@@ -12,34 +12,36 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { formatNoteDate } from "@/utils/note.utils";
 import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
-import { useEditorTabsStore, useStandardRegistryStore, useWorkspaceStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
-import {useTreeStatusHelper} from "@/hooks/workspace/useTreeStatusHelper";
-import {MarkdownEditor} from "../Editor/MarkdownEditor";
+import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { MarkdownEditor } from "../Editor/MarkdownEditor";
+import {MarkdownEditorSync} from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync";
+import {MarkdownEditorTheme} from "@/HeadlessComponents/markdownEditor/MarkdownEditorTheme";
+import {useMonaco} from "@monaco-editor/react";
+import {Loader2} from "lucide-react";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
-    // const [noteKey, setNoteKey] = React.useState(0); // Removed - no longer using key to force remount
     const activeTab = getActiveTab();
-    const { trackNavigation } = useNavigationHistoryHelper();
-    const {getItemStatus} = useTreeStatusHelper()
-    const { currentWorkspace} = useWorkspaceStore();
-    const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find(i => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
-    // Get note data from active tab instead of activeNote
+    const { getItemStatus } = useTreeStatusHelper();
+    const { currentWorkspace } = useWorkspaceStore();
+    const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
+    $miRef.current = useMonaco();
 
     // Get standard registry data from global state
-    const { registries, registriesLoading } = useStandardRegistryStore();
+    const { registries, registriesLoading,allKeywords } = useGeneralStore();
 
-        // Check if note is deleted (soft deleted)
+    // Check if note is deleted (soft deleted)
     let isDeleted = activeNote?.deletedAt !== null;
-    let isHardDeleted = activeNote?.isHardDeleted;   
+    let isHardDeleted = activeNote?.isHardDeleted;
     const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
-
 
     const hashtagOptions = registries
         .filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
@@ -70,7 +72,7 @@ export function NoteDetailContent() {
 
     // useEffect(() => {
     //     isDeleted = activeNote?.deletedAt !== null;
-    //     isHardDeleted = activeTab?.data && (activeTab.data as Note).isHardDeleted;    
+    //     isHardDeleted = activeTab?.data && (activeTab.data as Note).isHardDeleted;
     // }, [activeNote, openTabs]);
 
     // Focus vào Note Name field khi tạo note mới
@@ -83,45 +85,19 @@ export function NoteDetailContent() {
         }
     }, [shouldFocusNoteName, noteNameRef]);
 
-    // Convert hashtags array to comma-separated string of IDs for TagAutoComplete
-    // Map selected hashtags to match the format expected by the component (comma-separated string of IDs)
-    // const currentHashTagsValue = activeNote?.hashtags
-    //     ? activeNote.hashtags
-    //           .map((hashtag: any) => hashtag.id.toString())
-    //           .filter(Boolean)
-    //           .join(",")
-    //     : "";
-
     if (!activeNote) {
         console.log('[NoteDetailContent] No activeNote, returning null');
         return null;
     }
-
-    console.log('[NoteDetailContent] Rendering with activeNote:', { 
-        id: activeNote.id, 
-        name: activeNote.name,
-        descriptionLength: activeNote.description?.length,
-        isDisabled
-    });
-
     return (
         <div className="py-6 space-y-6 h-full ">
             {/* Full Width - Description */}
             <div className="border-none">
-                <CardContent className="p-0">
-                    <MarkdownEditor
-                        value={activeNote?.description || ""}
-                        onChange={(newValue) => {
-                            console.log("[NoteDetail] Description onChange fired:", { 
-                                length: newValue?.length, 
-                                preview: newValue?.substring(0, 50),
-                                noteId: activeNote?.id 
-                            });
-                            handleNoteFieldChange("description", newValue);
-                        }}
-                        disabled={isDisabled}
-                        placeholder="Enter note description..."
-                    />
+                <CardContent className="p-0 h-[540px]">
+                    {/* //* khi nào load đủ data thì mới render, không thì UI=loading, nếu không thì sẽ hiển thị sai*/}
+                    {$miRef.current && <MarkdownEditorSync />}
+                    {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />}
+                    {displayDesc !== null && allKeywords && allKeywords.length > 0 ? <MarkdownEditor /> : <div className="w-full h-full flex justify-center items-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
                 </CardContent>
             </div>
 

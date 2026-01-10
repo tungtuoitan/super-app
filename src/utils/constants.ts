@@ -3,6 +3,8 @@
  * Non-configuration constants used throughout the app
  */
 
+import type * as _monaco from "monaco-editor";
+
 export const constants = {
     environments: {
         development: "development",
@@ -59,13 +61,13 @@ export const constants = {
         // Virtual node IDs for workspace root
         root: {
             workspaceItemId: -12345, // workspace_items.id for root node
-            entityId: -12345,        // folders.id for root node (same value for simplicity)
+            entityId: -12345, // folders.id for root node (same value for simplicity)
         },
 
         // Virtual node IDs for drop zone
         dropZone: {
             workspaceItemId: -23456, // workspace_items.id for drop zone
-            entityId: -23456,        // folders.id for drop zone (same value for simplicity)
+            entityId: -23456, // folders.id for drop zone (same value for simplicity)
         },
 
         // Search behavior configuration
@@ -217,6 +219,100 @@ export const constants = {
             ],
         } as const,
     },
+
+    markdown: {
+        // ==================== Monaco Editor Configuration ====================
+        theme: {
+            name: "custom-dark",
+            config: {
+                base: "vs-dark",
+                inherit: true,
+                rules: [
+                    // Override markdown link colors to be white (default text color)
+                    { token: "string.link.markdown", foreground: "D4D4D4" },
+                    { token: "string", foreground: "D4D4D4" },
+                    { token: "meta.link.inline.markdown", foreground: "D4D4D4" },
+                    // { token: "markup.underline.link.markdown", foreground: "D4D4D4" },
+                ],
+                colors: {
+                    "editor.background": "#09090B",
+                    "editor.foreground": "#D4D4D4",
+                    "editorLineNumber.foreground": "#858585",
+                    "editorCursor.foreground": "#AEAFAD",
+                    "editor.selectionBackground": "#264F78",
+                    "editor.inactiveSelectionBackground": "#3A3D41",
+                },
+            } as _monaco.editor.IStandaloneThemeData,
+        },
+
+        editor: {
+            fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
+
+            options: (disabled: boolean, value: string) =>
+                ({
+                    value,
+                    language: "markdown",
+                    theme: "custom-dark",
+                    minimap: { enabled: false },
+                    wordWrap: "on", // Wrap at viewport width
+                    fontSize: 14,
+                    fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
+                    lineNumbers: "on", // Bật line numbers để hiển thị fold indicators
+                    lineNumbersMinChars: 3,
+                    lineDecorationsWidth: 16, // Space cho fold icons (tăng lên)
+                    folding: true, // Bật folding cho markdown headings
+                    foldingStrategy: "auto", // Auto detect folding
+                    showFoldingControls: "mouseover", // Hiển thị khi hover
+                    glyphMargin: true, // Bật glyph margin cho fold icons
+                    readOnly: disabled,
+                    scrollBeyondLastLine: true, // Cho phép scroll xuống dưới dòng cuối (~10 lines)
+                    padding: { top: 0, bottom: 200 }, // Khoảng trống ~10 lines ở cuối (10 * 20px)
+                    automaticLayout: true,
+                    rulers: [],
+                    renderLineHighlight: "none",
+                    // Markdown-specific options
+                    quickSuggestions: {
+                        other: true,
+                        comments: true,
+                        strings: true,
+                    },
+                    acceptSuggestionOnCommitCharacter: true,
+                    acceptSuggestionOnEnter: "on", // Only accept with Tab, Enter for new line
+                    wordBasedSuggestions: "off", // Turn off default word-based suggestions to prioritize custom keywords
+                    suggest: {
+                        showWords: false, // Don't suggest random words from the document
+                        showKeywords: true,
+                        snippetsPreventQuickSuggestions: false,
+                        localityBonus: true,
+                        shareSuggestSelections: false,
+                    },
+                    parameterHints: {
+                        enabled: true,
+                    },
+                } as _monaco.editor.IStandaloneEditorConstructionOptions),
+        },
+    } as const,
+
+    // Keyword type icons mapping (for autocomplete and command palette)
+    keywordIcons: {
+        workspace: "folder", // Monaco CompletionItemKind.Folder
+        folder: "folder",
+        note: "file",
+        file: "file",
+        h1: "text", // Monaco CompletionItemKind.Text for headings
+        h2: "text",
+        h3: "text",
+        h4: "text",
+        h5: "text",
+        h6: "text",
+        external: "reference", // Monaco CompletionItemKind.Reference
+        hashtag: "color", // Monaco CompletionItemKind.Color
+        status: "enum", // Monaco CompletionItemKind.Enum
+        keyword: "keyword",
+        class: "class",
+        type: "interface",
+        comment: "snippet",
+    } as const,
 } as const;
 
 // Type exports

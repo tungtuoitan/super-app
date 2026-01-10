@@ -1,40 +1,87 @@
-/* Keyword Highlighting Styles */
+/* Keyword Highlighting Styles - New Format: [name]number */
 
-.keyword-hashtag {
-    color: #fad000 !important;
+/* Keyword name part (e.g., "w1" in [w1]2) - white color, no underline by default */
+.monaco-editor .keyword-name,
+.monaco-editor .view-line .keyword-name,
+.monaco-editor .view-lines .keyword-name,
+.keyword-name {
+    color: #d4d4d4 !important;
     font-weight: 500 !important;
+    text-decoration: none !important; 
+    text-decoration: underline !important;
+    text-decoration-color: rgb(82, 82, 82) !important;
 }
 
-.keyword-status {
-    color: #6496c8 !important;
-    font-weight: 500 !important;
+/* Keyword name - underline and color change ONLY when hover + Ctrl key pressed */
+.monaco-editor.ctrl-pressed .keyword-name:hover,
+.monaco-editor.ctrl-pressed .view-line .keyword-name:hover,
+.monaco-editor.ctrl-pressed .view-lines .keyword-name:hover {
+    text-decoration-color: rgb(3, 86, 194) !important;
+    color: rgb(3, 86, 194) !important;
 }
 
-.keyword-keyword {
-    color: #C586C0 !important;
-    font-weight: 500 !important;
+
+/* Opening bracket "[" - gray, smaller */
+.monaco-editor .keyword-bracket-open,
+.monaco-editor .view-line .keyword-bracket-open,
+.monaco-editor .view-lines .keyword-bracket-open,
+.keyword-bracket-open {
+    color: rgba(128, 128, 128, 0.3) !important;
+    font-size: 0.55em !important;
+    text-decoration: none !important;
+    font-weight: 400 !important;
+    position: relative;
+    top: -2px !important;
 }
 
-.keyword-class {
-    color: #4EC9B0 !important;
-    font-weight: 500 !important;
+/* Closing bracket "]" - gray, smaller */
+.monaco-editor .keyword-bracket-close,
+.monaco-editor .view-line .keyword-bracket-close,
+.monaco-editor .view-lines .keyword-bracket-close,
+.keyword-bracket-close {
+    color: rgba(128, 128, 128, 0.3) !important;
+    font-size: 0.55em !important;
+    text-decoration: none !important;
+    font-weight: 400 !important;
+    position: relative;
+    top: -2px !important;
 }
 
-.keyword-type {
-    color: #569CD6 !important;
-    font-weight: 500 !important;
+/* Index number "2" - gray, smaller */
+.monaco-editor .keyword-index-number,
+.monaco-editor .view-line .keyword-index-number,
+.monaco-editor .view-lines .keyword-index-number,
+.keyword-index-number {
+    color: rgba(128, 128, 128, 0.3) !important;
+    font-size: 0.55em !important;
+    text-decoration: none !important;
+    font-weight: 400 !important;
+    position: relative;
+    top: -2px !important;
 }
 
-.keyword-comment {
-    color: #FFA500 !important;
-    font-weight: 500 !important;
-}
+/* Note: Heading keywords (h1-h6) are now treated like regular keywords if they're in allKeywords
+   They use .keyword-name, .keyword-bracket-open/close, .keyword-index-number like other keywords
+   No special CSS needed for heading types */
 
 /* URL Link Highlighting */
 .url-link {
     color: #a8a8a82f !important;
-    text-decoration: underline !important;
 }
+
+/* Wiki-style Link [[path]] */
+/* .wiki-link {
+    background-color: rgba(86, 156, 214, 0.1) !important;
+    border-radius: 3px !important;
+    padding: 2px 4px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+
+.wiki-link:hover {
+    background-color: rgba(86, 156, 214, 0.2) !important;
+} */
 
 /* Monaco Editor Folding Icons - Smaller Size */
 .monaco-editor .margin .codicon {
@@ -58,4 +105,15 @@
 /* Line decoration width adjustment for smaller icons */
 .monaco-editor .margin-view-overlays .line-numbers {
     font-size: 11px !important;
+}
+
+
+.monaco-editor .monaco-hover {
+    display: none !important;
+    height: 0 !important;
+    border:red !important;
+}
+
+.monaco-editor .link-hover, .monaco-sash, .monaco-resizable-hover {
+    display: none !important;
 }

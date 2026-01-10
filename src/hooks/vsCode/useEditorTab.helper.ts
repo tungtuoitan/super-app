@@ -9,6 +9,7 @@ import { useWsStore, Ws } from "@/store/ws/useWs.store";
 import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import {WorkspaceItemV2} from "@/types/workspace-v2.types";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -19,6 +20,8 @@ export const useEditorTabHelper = () => {
     const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
+    const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
+    
     /**
      * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
      * @param entityType - 2 (folder), 3 (note), 4 (file)
@@ -27,7 +30,7 @@ export const useEditorTabHelper = () => {
      */
     const findWorkspaceItemId = (entityType: 2 | 3 | 4, entityId: number): number | null => {
         if (!currentWorkspace?.flatData) {
-            console.log("⚠️ findWorkspaceItemId: No currentWorkspace or flatData");
+            console.warn("⚠️ findWorkspaceItemId: No currentWorkspace or flatData");
             return null;
         }
 
@@ -35,9 +38,8 @@ export const useEditorTabHelper = () => {
         const item = currentWorkspace.flatData.find((item) => item.entityType === entityType && item.entityId === entityId);
 
         if (item) {
-            console.log(`✅ Found workspace item: entityType=${entityType}, entityId=${entityId}, workspaceItemId=${item.id}`);
         } else {
-            console.log(`❌ Not found in workspace: entityType=${entityType}, entityId=${entityId}`);
+            console.warn(`❌ Not found in workspace: entityType=${entityType}, entityId=${entityId}`);
         }
 
         return item?.id || null; // workspace_items.id
@@ -50,7 +52,7 @@ export const useEditorTabHelper = () => {
     const updateActiveTab = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
         const tabsToSearch = tabs || openTabs;
 
-        setActiveTabId(newActiveTabId);
+        setNewTabAnd(newActiveTabId);
 
         if (newActiveTabId) {
             const activeTab = tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId);
@@ -70,36 +72,25 @@ export const useEditorTabHelper = () => {
                 // ⭐ Select item trong workspace tree nếu note này có trong workspace
                 const workspaceItemId = findWorkspaceItemId(3, noteData.id); // 3 = note entity type
                 if (workspaceItemId) {
-                    console.log(`🎯 Selecting note in tree: workspaceItemId=${workspaceItemId}, noteId=${noteData.id}`);
                     setSelectedItemIds([workspaceItemId]);
                     // Scroll to item trong tree
                     if (_treeRef.current) {
                         // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
-                        console.log("🔓 Opening parents first using TreeApi...");
                         _treeRef.current.openParents(workspaceItemId.toString());
 
                         // Scroll to node để đảm bảo nó visible
-                        console.log("📦 Scrolling to node...");
                         _treeRef.current.scrollTo(workspaceItemId.toString());
 
                         // Bây giờ get node sau khi parents đã expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
-                            console.log("📜 Node found:", {
-                                id: node.id,
-                                isOpen: node.isOpen,
-                                level: node.level,
-                                parent: node.parent?.id,
-                                isInternal: node.isInternal,
-                            });
-                            console.log("✅ Now focusing...");
                             // Use focus() to scroll the node into view (react-arborist API)
                             node.focus();
                         } else {
-                            console.log("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                            console.warn("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
                         }
                     } else {
-                        console.log("⚠️ Tree ref not available");
+                        console.warn("⚠️ Tree ref not available");
                     }
                 }
             } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
@@ -118,36 +109,25 @@ export const useEditorTabHelper = () => {
                 // ⭐ Select workspace folder item trong tree (workspace type = folder type 2)
                 const workspaceItemId = findWorkspaceItemId(2, wsData.id); // 2 = folder entity type
                 if (workspaceItemId) {
-                    console.log(`🎯 Selecting workspace in tree: workspaceItemId=${workspaceItemId}, wsId=${wsData.id}`);
                     setSelectedItemIds([workspaceItemId]);
                     // Scroll to item trong tree
                     if (_treeRef.current) {
                         // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
-                        console.log("🔓 Opening parents first using TreeApi...");
                         _treeRef.current.openParents(workspaceItemId.toString());
 
                         // Scroll to node để đảm bảo nó visible
-                        console.log("📦 Scrolling to node...");
                         _treeRef.current.scrollTo(workspaceItemId.toString());
 
                         // Bây giờ get node sau khi parents đã expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
-                            console.log("📜 Node found:", {
-                                id: node.id,
-                                isOpen: node.isOpen,
-                                level: node.level,
-                                parent: node.parent?.id,
-                                isInternal: node.isInternal,
-                            });
-                            console.log("✅ Now focusing...");
                             // Use focus() to scroll the node into view (react-arborist API)
                             node.focus();
                         } else {
-                            console.log("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                            console.warn("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
                         }
                     } else {
-                        console.log("⚠️ Tree ref not available");
+                        console.warn("⚠️ Tree ref not available");
                     }
                 }
             } else {
@@ -327,20 +307,41 @@ export const useEditorTabHelper = () => {
     // };
 
     /**
-     * Get the currently active tab
-     * @returns The active tab or null if no tab is active
+     * Get the currently active tab or a specific tab by ID
+     * @param tabId Optional tab ID to get specific tab
+     * @returns The active/specific tab or null if not found
      */
-    const getActiveTab = (): BaseTab | null => {
+    const getActiveTab = (tabId?: string): BaseTab | null => {
+        if (tabId) {
+            return openTabs.find((tab: BaseTab) => tab.id === tabId) || null;
+        }
         if (!activeTabId) return null;
         return openTabs.find((tab: BaseTab) => tab.id === activeTabId) || null;
     };
+
+    const setNewTabAnd = (newActiveTabId: string | null) => {
+        setActiveTabId(newActiveTabId);
+        const newTab = openTabs.find((tab: BaseTab) => tab.id === newActiveTabId);
+        if (newTab && (newTab.type === constants.vscode.tab.tabTypes.note)) {
+            const noteId = newTab.data.id;
+            const item: WorkspaceItemV2 | undefined = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteId);
+            if (item && item.id) {
+                setSelectedItemIds([item.id]);
+                setLastSelectedItemId(item.id);
+            }
+            else {
+                setSelectedItemIds([]);
+                setLastSelectedItemId(null);
+            }
+        }
+    }
 
     /**
      * Check if two history entries are duplicates (adjacent items that are "same")
      */
     const $areEntriesDuplicate = (entry1: HistoryEntry, entry2: HistoryEntry): boolean => {
-        // Same tab and same item
-        return entry1.tabId === entry2.tabId && entry1.itemId === entry2.itemId && entry1.type === entry2.type;
+        // Same item and same type
+        return entry1.itemId === entry2.itemId && entry1.type === entry2.type;
     };
 
     /**
@@ -404,11 +405,11 @@ export const useEditorTabHelper = () => {
                 setPast(cleanedPast.slice(0, -1)); // Remove last item from past
 
                 // Set activeTabId to the new present's tab
-                setActiveTabId(newPresent.tabId);
+                setNewTabAnd(`note-${newPresent.itemId}-${Date.now()}`);
             } else {
                 // No past entries, clear present and active tab
                 setPresent(null);
-                setActiveTabId(null);
+                setNewTabAnd(null);
             }
         }
     };
@@ -421,5 +422,6 @@ export const useEditorTabHelper = () => {
         getActiveTab,
         updateActiveTab,
         processTabAfterDelete,
+        setNewTabAnd,
     };
 };

@@ -42,3 +42,6 @@ export * from "./standardRegistry/useStandardRegistry.helper";
 
 // Filter helpers
 export { useGenericFilterHelper } from "./useGenericFilterHelper";
+
+// Command Palette helpers
+export * from "./vsCode/useCommandPalette.helper";

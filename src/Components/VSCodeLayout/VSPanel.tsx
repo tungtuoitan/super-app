@@ -1,5 +1,5 @@
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { X, FileText, Settings, ArrowRightLeft } from "lucide-react";
+import { X, FileText, Settings, ArrowRightLeft, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
 import { useActivityBarStore, useMovingTreeStore } from "@/store/index";
@@ -7,12 +7,15 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { Note } from "@/types/note.types";
 import { MovingTab } from "../VSPanel/MovingTab";
+import { useConsoleStore } from "@/store/console/useConsole.store";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useMobileStore } from "@/store/mobile/Mobile.store";
 
 interface VSPanelProps {
     onClose: () => void;
 }
 
-type PanelTab = "noteDetail" | "properties" | "moving";
+type PanelTab = "noteDetail" | "properties" | "moving" | "console";
 
 /**
  * VSPanel - Bottom panel for content details
@@ -29,10 +32,9 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const [activeTab, setActiveTab] = useState<PanelTab>("noteDetail");
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const { setTargetWorkspace } = useMovingTreeStore();
-    
+    const { isMobile } = useMobileStore();
     const changeTab = (tab: PanelTab) => {
-        if(tab !== "moving")
-            setTargetWorkspace(null);
+        if (tab !== "moving") setTargetWorkspace(null);
         setActiveTab(tab);
     };
 
@@ -79,6 +81,17 @@ export function VSPanel({ onClose }: VSPanelProps) {
                                 <ArrowRightLeft className="w-4 h-4" />
                                 <span>Moving</span>
                             </button>
+                            {isMobile && (
+                                <button
+                                    onClick={() => changeTab("console")}
+                                    className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
+                                        activeTab === "console" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
+                                    }`}
+                                >
+                                    <Terminal className="w-4 h-4" />
+                                    <span>Console</span>
+                                </button>
+                            )}
                         </div>
 
                         <button onClick={onClose} className="p-1 mr-2 text-muted-foreground hover:text-editor-fg hover:bg-editor-hover rounded transition-colors">
@@ -87,10 +100,11 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     </div>
 
                     {/* Panel Content */}
-                    <div className={`flex-1 overflow-auto ${activeTab === "moving" ? "" : "p-3"}`}>
+                    <div className={`flex-1 overflow-auto ${activeTab === "moving" || activeTab === "console" ? "" : "p-3"}`}>
                         {activeTab === "noteDetail" && <NoteDetailTab />}
                         {activeTab === "properties" && <PropertiesTab />}
                         {activeTab === "moving" && <MovingTab />}
+                        {activeTab === "console" && isMobile && <ConsoleTab />}
                     </div>
                 </div>
             )}
@@ -177,6 +191,97 @@ function PropertyRow({ label, value }: { label: string; value: string }) {
         <div className="flex gap-2">
             <span className="min-w-[100px] text-muted-foreground text-xs">{label}:</span>
             <span className="text-editor-fg text-xs">{value}</span>
+        </div>
+    );
+}
+
+/**
+ * Console Tab - Display console messages
+ */
+
+function ConsoleTab() {
+    const { messages } = useConsoleStore();
+    const { clearMessages, removeMessage } = useConsoleHelper();
+
+    return (
+        <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-2 border-b border-editor-border">
+                <span className="text-sm font-semibold text-editor-fg">Console Messages</span>
+                {messages.length > 0 && (
+                    <button onClick={clearMessages} className="text-xs px-2 py-1 text-muted-foreground hover:text-editor-fg hover:bg-editor-hover rounded transition-colors">
+                        Clear All
+                    </button>
+                )}
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-auto p-2 space-y-1">
+                {messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-muted-foreground text-sm">No messages</div>
+                ) : (
+                    messages.map((msg) => <ConsoleMessage key={msg.id} id={msg.id} type={msg.type} message={msg.message} timestamp={msg.timestamp} onRemove={removeMessage} />)
+                )}
+            </div>
+        </div>
+    );
+}
+
+/**
+ * Console Message Component
+ */
+function ConsoleMessage({ id, type, message, timestamp, onRemove }: { id: string; type: string; message: string; timestamp: Date; onRemove: (id: string) => void }) {
+    const getTypeStyles = (type: string) => {
+        switch (type) {
+            case "error":
+                return "text-red-400/80";
+            case "warning":
+                return "text-yellow-400/80";
+            case "info":
+                return "text-blue-400/80";
+            case "success":
+                return "text-green-400/80";
+            default:
+                return "text-muted-foreground";
+        }
+    };
+
+    const getTypeIcon = (type: string) => {
+        switch (type) {
+            case "error":
+                return "✕";
+            case "warning":
+                return "⚠";
+            case "info":
+                return "ℹ";
+            case "success":
+                return "✓";
+            default:
+                return "•";
+        }
+    };
+
+    const formatTime = (date: Date) => {
+        return date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        });
+    };
+
+    return (
+        <div className="group flex items-start gap-2 px-2 py-1 hover:bg-editor-hover/50 rounded text-sm font-mono">
+            <span className={`flex-shrink-0 ${getTypeStyles(type)}`}>{getTypeIcon(type)}</span>
+            <span className="flex-shrink-0 text-muted-foreground text-xs">{formatTime(timestamp)}</span>
+            <span className={`flex-1 ${getTypeStyles(type)} break-all`}>{message}</span>
+            <button
+                onClick={() => onRemove(id)}
+                className="flex-shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-editor-fg transition-opacity text-xs"
+                title="Remove"
+            >
+                ✕
+            </button>
         </div>
     );
 }

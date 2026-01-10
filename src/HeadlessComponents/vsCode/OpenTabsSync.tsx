@@ -20,11 +20,12 @@ import { noteService } from "@/services/note.service";
 import { wsService, WsDTO } from "@/services/ws.service";
 import { transformNotes } from "@/utils/note.utils";
 import { transformWs } from "@/utils/ws.utils";
+import {useEditorTabHelper} from "@/hooks/index";
 
 // Storage types
 export interface TabStorage {
     tabId: string;
-    type: string;
+    type: string; 
     dataId: number;
     index: number;
 }
@@ -45,6 +46,7 @@ export const OpenTabsSync = () => {
     const { notes } = useNoteGridStore();
     const { workspaces } = useWsStore();
     const { present } = useNavigationHistoryStore();
+    const { setNewTabAnd } = useEditorTabHelper();
 
     // Load tabs from localStorage on mount or userId change
     useEffect(() => {
@@ -53,7 +55,7 @@ export const OpenTabsSync = () => {
             const storageKey = getStorageKey($user.userId);
             if (!storageKey) {
                 setOpenTabs([]);
-                setActiveTabId(null);
+                setNewTabAnd(null);
                 return;
             }
 
@@ -177,30 +179,32 @@ export const OpenTabsSync = () => {
                 // Set restored tabs
                 setOpenTabs(restoredTabs);
 
-                // Set active tab based on Present in navigation history (note only)
+                // Set active tab based on Present in navigation history
                 if (present) {
                     // HistoryEntry tracks different types, so match by type and itemId
                     const matchingTab = restoredTabs.find((tab) => {
                         if (tab.type === constants.vscode.tab.tabTypes.note && present.type === 'note') {
                             return (tab.data as Note).id === parseInt(present.itemId);
+                        } else if (tab.type === constants.vscode.tab.tabTypes.workspace && present.type === 'workspace') {
+                            return (tab.data as Ws).id === parseInt(present.itemId);
                         }
                         return false;
                     });
 
                     if (matchingTab) {
-                        setActiveTabId(matchingTab.id);
+                        setNewTabAnd(matchingTab.id);
                     } else if (restoredTabs.length > 0) {
                         // Fallback to last tab
-                        setActiveTabId(restoredTabs[restoredTabs.length - 1].id);
+                        setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
                     }
                 } else if (restoredTabs.length > 0) {
                     // No history, just activate last tab
-                    setActiveTabId(restoredTabs[restoredTabs.length - 1].id);
+                    setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
                 }
             } catch (error) {
                 console.error("Failed to restore tabs from localStorage:", error);
                 setOpenTabs([]);
-                setActiveTabId(null);
+                setNewTabAnd(null);
             } finally {
                 setIsLoadingTabs(false);
             }

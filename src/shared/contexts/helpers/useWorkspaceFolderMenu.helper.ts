@@ -25,11 +25,12 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
-import { useStandardRegistryStore } from "@/store/index";
+import { useGeneralStore } from "@/store/index";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/types/note.types";
 import { useNoteGridPopupHelper } from "@/hooks/workspace/useNoteGridPopup.helper";
+import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -112,14 +113,14 @@ const $removeItems = (items: any[], idsToRemove: Set<number>): any[] => {
 
 export const useWorkspaceFolderMenuHelper = () => {
     const { $user } = useAuthStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
     const { processTabAfterDelete, openTab } = useEditorTabHelper();
     const { openTabs } = useEditorTabsStore();
-    const { registries } = useStandardRegistryStore();
+    const { registries } = useGeneralStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { openNoteGridPopup } = useNoteGridPopupHelper();
 
@@ -216,12 +217,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                 flatData: newFlatData,
                 noteCount: currentWorkspace.noteCount + 1,
             };
-            console.log("✅ New note added to workspace:", {
-                workspaceItemId: tempWorkspaceItemId,
-                noteEntityId: tempNoteEntityId,
-                name,
-                parentWorkspaceItemId
-            });
 
             setCurrentWorkspace(newWorkspace);
         }
@@ -271,7 +266,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         if (!folder.id) {
             console.error("❌ Cannot remove folder: missing folder ID");
-            enqueueSnackbar("Cannot remove folder: missing folder information", { variant: "error" });
+            _console.error("Cannot remove folder: missing folder information");
             return;
         }
 
@@ -363,7 +358,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                     }
                 }
 
-                enqueueSnackbar(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`, { variant: "success" });
+                _console.success(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`);
             } else {
                 throw new Error("Failed to delete folders");
             }
@@ -374,9 +369,9 @@ export const useWorkspaceFolderMenuHelper = () => {
             console.error("❌ Failed to delete folders:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to delete folders: ${errorMessage}`);
             }
         }
     };
@@ -511,7 +506,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                     }
                 }
 
-                enqueueSnackbar(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`, { variant: "success" });
+                _console.success(`Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`);
             } else {
                 throw new Error("Failed to bulk delete folders");
             }
@@ -522,9 +517,9 @@ export const useWorkspaceFolderMenuHelper = () => {
             console.error("❌ Failed to bulk delete folders:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to delete folders: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to delete folders: ${errorMessage}`);
             }
         }
     };
@@ -630,8 +625,6 @@ export const useWorkspaceFolderMenuHelper = () => {
             const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
             const topLevelIds = filterTopLevelParents(selectedIds, treeData);
 
-            console.log(`🔍 Filtered ${selectedIds.length} selected to ${topLevelIds.length} top-level parents`);
-
             if (topLevelIds.length === 0) {
                 console.warn("⚠️ No valid items after filtering");
                 return;
@@ -663,8 +656,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                 uniqueItemsMap.set(item.id, item);
             }
             const itemsToUpdate = Array.from(uniqueItemsMap.values());
-
-            console.log(`📦 Collected ${itemsToUpdate.length} selected items (type: ${type})`);
 
             // -------------------------------------------------------
             // STEP 7: BUILD BATCH DELETE/RESTORE REQUESTS
@@ -715,7 +706,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 setLastSelectedItemId(null);
     
                 // Show success message
-                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
+                _console.success(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`);
             }
             else {
                 throw new Error("Failed to reload workspace tree");
@@ -726,9 +717,9 @@ export const useWorkspaceFolderMenuHelper = () => {
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to update items: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to update items: ${errorMessage}`);
             }
         }
     };
@@ -774,7 +765,7 @@ export const useWorkspaceFolderMenuHelper = () => {
 
         if (!folderId) {
             console.error("❌ Cannot open popup: missing folder ID");
-            enqueueSnackbar("Cannot open popup: missing folder information", { variant: "error" });
+            _console.error("Cannot open popup: missing folder information");
             return;
         }
 

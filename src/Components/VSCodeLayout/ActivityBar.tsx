@@ -22,9 +22,6 @@ export function ActivityBar() {
     const { handleActivityClick } = useActivityBarHelper();
     const { activeView } = useNavigationStore();
     const { isAuthenticated } = useAuthStore();
-    const { openTabs } = useEditorTabsStore();
-    const { moduleName } = useGridControlStore();
-    const _hasNewTab = hasNewTabsInCurrentWorkspace(openTabs, moduleName);
 
     return (
         <>
@@ -37,22 +34,14 @@ export function ActivityBar() {
                             const isActive = activeView === activity.id;
 
                             return (
-                                <UnsavedTabsTooltip 
-                                    key={activity.id} 
-                                    side="right" 
-                                    actionText="Cannot switch module"
-                                    normalLabel={activity.label}
+                                <button
+                                    onClick={() => handleActivityClick(activity.id)}
+                                    className={`w-12 h-12 rounded-none transition-colors border-transparent ${
+                                        isActive ? "text-editor-white border-editor-active": "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
+                                    }`}
                                 >
-                                    <button
-                                        onClick={_hasNewTab ? undefined : () => handleActivityClick(activity.id)}
-                                        disabled={_hasNewTab}
-                                        className={`w-12 h-12 rounded-none transition-colors border-transparent ${
-                                            isActive ? "text-editor-white border-editor-active" : _hasNewTab ? "text-[#6a6a6a]" : "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
-                                        }`}
-                                    >
-                                        <Icon className="w-6 h-6 mx-auto" />
-                                    </button>
-                                </UnsavedTabsTooltip>
+                                    <Icon className="w-6 h-6 mx-auto" />
+                                </button>
                             );
                         })}
                     </TooltipProvider>

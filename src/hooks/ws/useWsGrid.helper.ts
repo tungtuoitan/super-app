@@ -12,6 +12,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabsStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import {filterUtils} from "@/utils/filter.utils";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
@@ -36,7 +37,7 @@ export const useWsGridHelper = () => {
 
     const { openTab } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { setShouldFocusWsName } = useWsDetailStore();
 
     // Create new workspace (temporary with negative ID)
@@ -89,9 +90,7 @@ export const useWsGridHelper = () => {
             if (type === "soft-delete" && tempWsIds.length > 0) {
                 setWorkspaces((prevWs) => prevWs.filter((ws) => !tempWsIds.includes(ws.id)));
 
-                enqueueSnackbar(`Removed ${tempWsIds.length} unsaved workspace(s)`, {
-                    variant: "success",
-                });
+                _console.success(`Removed ${tempWsIds.length} unsaved workspace(s)`);
             }
 
             // Handle persisted workspaces - call API
@@ -122,7 +121,7 @@ export const useWsGridHelper = () => {
                     throw new Error(result.message || `Failed to ${type === "soft-delete" ? "delete" : "restore"} workspaces`);
                 }
 
-                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedWsIds.length} workspace(s)`, { variant: "success" });
+                _console.success(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedWsIds.length} workspace(s)`);
 
                 // Update opened tabs
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
@@ -151,9 +150,9 @@ export const useWsGridHelper = () => {
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to ${type === "soft-delete" ? "delete" : "restore"} workspaces: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} workspaces: ${errorMessage}`);
             }
         }
     };
@@ -181,9 +180,7 @@ export const useWsGridHelper = () => {
                     throw new Error(result.message || "Failed to hard delete workspaces");
                 }
 
-                enqueueSnackbar(`Successfully permanently deleted ${persistedWsIds.length} workspace(s)`, {
-                    variant: "success",
-                });
+                _console.success(`Successfully permanently deleted ${persistedWsIds.length} workspace(s)`);
 
                 // Mark opened tabs as hard deleted
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
@@ -206,9 +203,9 @@ export const useWsGridHelper = () => {
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to permanently delete workspaces: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to permanently delete workspaces: ${errorMessage}`);
             }
         }
     };
@@ -283,7 +280,7 @@ export const useWsGridHelper = () => {
 
             // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             }
         } finally {
             setWsGridIsLoading(false);
