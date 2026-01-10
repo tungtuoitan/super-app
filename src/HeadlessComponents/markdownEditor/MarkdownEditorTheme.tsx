@@ -76,7 +76,7 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
         });
 
         return () => disposable.dispose();
-    }, [_allKeywords, currentNoteId]); // Re-setup listener when keywords change
+    }, [_allKeywords, currentNoteId, activeNote?.description]); // Re-setup listener when keywords change
 
     return null;
 }

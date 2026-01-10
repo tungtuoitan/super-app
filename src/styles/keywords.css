@@ -106,3 +106,14 @@
 .monaco-editor .margin-view-overlays .line-numbers {
     font-size: 11px !important;
 }
+
+
+.monaco-editor .monaco-hover {
+    display: none !important;
+    height: 0 !important;
+    border:red !important;
+}
+
+.monaco-editor .link-hover, .monaco-sash, .monaco-resizable-hover {
+    display: none !important;
+}
