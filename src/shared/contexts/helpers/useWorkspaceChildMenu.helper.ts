@@ -21,11 +21,12 @@ import { WorkspaceItemAction } from "@/types/workspace.types";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import type { WorkspaceDTO } from "@/types/workspace-dto.types";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
@@ -60,7 +61,7 @@ export const useWorkspaceChildMenuHelper = () => {
         const noteEntityId = noteData?.entityId ?? noteData?.data?.id;
         if (!noteEntityId) {
             console.error("❌ Cannot delete note: missing entityId");
-            enqueueSnackbar("Cannot delete note: missing note information", { variant: "error" });
+            _console.error("Cannot delete note: missing note information");
             return;
         }
 
@@ -89,9 +90,9 @@ export const useWorkspaceChildMenuHelper = () => {
             console.error("❌ Failed to delete note:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Error deleting note: ${errorMessage}`, { variant: "error" });
+                _console.error(`Error deleting note: ${errorMessage}`);
             }
         }
     };
@@ -109,7 +110,7 @@ export const useWorkspaceChildMenuHelper = () => {
         const workspaceItemId = fileData?.id;
         if (!workspaceItemId) {
             console.error("❌ Cannot delete file: missing workspace item id");
-            enqueueSnackbar("Cannot delete file: missing file information", { variant: "error" });
+            _console.error("Cannot delete file: missing file information");
             return;
         }
 
@@ -139,7 +140,7 @@ export const useWorkspaceChildMenuHelper = () => {
                 window.location.reload();
             } else {
                 console.error("❌ Delete failed:", result.message);
-                enqueueSnackbar(`Failed to delete file: ${result.message}`, { variant: "error" });
+                _console.error(`Failed to delete file: ${result.message}`);
             }
         } catch (error) {
             // ---------
@@ -148,9 +149,9 @@ export const useWorkspaceChildMenuHelper = () => {
             console.error("❌ Failed to delete file:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Error deleting file: ${errorMessage}`, { variant: "error" });
+                _console.error(`Error deleting file: ${errorMessage}`);
             }
         }
     };
@@ -258,7 +259,7 @@ export const useWorkspaceChildMenuHelper = () => {
                 setLastSelectedItemId(null);
 
                 // Show success message
-                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`, { variant: "success" });
+                _console.success(`Successfully ${type === "soft-delete" ? "deleted" : "restored"} ${itemsToUpdate.length} item(s)`);
             }
             else {
                 throw new Error("Failed to reload workspace tree");
@@ -269,9 +270,9 @@ export const useWorkspaceChildMenuHelper = () => {
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to update items: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to update items: ${errorMessage}`);
             }
         }
     };

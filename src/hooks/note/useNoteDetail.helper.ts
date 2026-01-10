@@ -28,13 +28,12 @@ export const useNoteDetailHelper = () => {
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceLoader();
     const { currentWorkspace } = useWorkspaceStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
     const { registries, registriesLoading, allKeywords } = useGeneralStore();
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useGridControlStore();
     const { loadKeywords } = useStandardRegistryHelper();
-    const _console = useConsoleHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
         
@@ -162,7 +161,7 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 10: Update tab data with server response
                 // ============================================================
-                // enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
+                // _console.(isCreateMode ? "Note created successfully" : "Note saved successfully");
                 _console.success(isCreateMode ? "Note created successfully" : "Note saved successfully");
 
                 if (tabId) {
@@ -201,9 +200,9 @@ export const useNoteDetailHelper = () => {
                 const errorMessage = await parseApiError(error);
 
                 if (isUnauthorizedError(error)) {
-                    enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                    _console.error("Unauthorized. Please login again.");
                 } else {
-                    enqueueSnackbar(`Failed to save note: ${errorMessage}`, { variant: "error" });
+                    _console.error(`Failed to save note: ${errorMessage}`);
                 }
                 return null;
             }

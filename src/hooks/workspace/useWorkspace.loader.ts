@@ -20,10 +20,11 @@ import {ResultOptions} from "@/types/common.types";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import {useMovingTreeStore} from "@/store/workspace/MovingTree.store";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useWorkspaceLoader = () => {
     const { $user } = useAuthStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useWorkspaceStore();
     const { setTargetWorkspaceId } = useMovingTreeStore();
 

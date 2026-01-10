@@ -16,6 +16,7 @@ import { envConfig } from "../config";
 import { STORAGE_KEYS, storageService } from "@/services/storage.service";
 import { parseApiError } from "../utils";
 import { set } from "lodash";
+import {useConsoleHelper} from "./console/useConsole.helper";
 
 /**
  * Generic filter helper hook for filter operations
@@ -26,7 +27,7 @@ import { set } from "lodash";
  */
 export function useGenericFilterHelper() {
     const { filterViewKey, uiFilters, setUIFilters } = useGridControlStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { $user, set$User } = useAuthStore();
 
     /**
@@ -76,7 +77,7 @@ export function useGenericFilterHelper() {
             }
         } catch (err) {
             const errorMessage = await parseApiError(err);
-            enqueueSnackbar(`Failed to update filters: ${errorMessage}`, { variant: "error" });
+            _console.error(`Failed to update filters: ${errorMessage}`);
             throw err;
         }
     };

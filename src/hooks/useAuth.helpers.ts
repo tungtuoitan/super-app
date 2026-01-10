@@ -19,6 +19,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
+import {useConsoleHelper} from "./console/useConsole.helper";
 
 /**
  * Auth helper hook for authentication operations
@@ -29,7 +30,7 @@ import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
  * @returns Object containing auth helper functions
  */
 export function useAuthHelper() {
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     // Get state setters from AuthStore
     const { $user, set$User, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
     const { uiFilters, setUIFilters, filterViewKey } = useGridControlStore();
@@ -70,7 +71,7 @@ export function useAuthHelper() {
 
             // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             }
 
             throw err;
@@ -306,7 +307,7 @@ export function useAuthHelper() {
             }
         } catch (err) {
             const errorMessage = await parseApiError(err);
-            enqueueSnackbar(`Failed to update filters: ${errorMessage}`, { variant: "error" });
+            _console.error(`Failed to update filters: ${errorMessage}`);
             throw err;
         }
     };

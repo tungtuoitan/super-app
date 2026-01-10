@@ -888,7 +888,7 @@ export function setupLinkProvider(
     editor: _monaco.editor.IStandaloneCodeEditor,
     _allKeywords: Array<Keyword>,
     navigateLink: (keyword: Keyword) => void,
-    enqueueSnackbar: EnqueueSnackbar,
+    _console: any,
     noteId?: number
 ) {
     if (!$mi) return () => {};
@@ -979,7 +979,7 @@ export function setupLinkProvider(
                     // Found keyword at click position - navigate
                     if(kw.link && kw.hardDeletedAt) {
                         // do nothing
-                        enqueueSnackbar("Keyword is deleted or not existed.", { variant: "warning" });
+                        _console.warning("Keyword is deleted or not existed.");
                         foundMatch = true;
                         return;
                     }else if (kw.link && !kw.hardDeletedAt) {

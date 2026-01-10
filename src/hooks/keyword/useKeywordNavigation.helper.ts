@@ -24,6 +24,7 @@ import { BaseTab } from "@/types/editor/tab.types";
 import { Keyword } from "@/types/keyword.types";
 import { isValidUrl } from "@/utils/url.utils";
 import {useWorkspaceHelper} from "../workspace/useWorkspaceHelper";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
@@ -32,7 +33,7 @@ export const useKeywordNavigationHelper = () => {
     const { openTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { moduleName } = useGridControlStore();
     const { navigateToView } = useNavigationStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
@@ -63,7 +64,7 @@ export const useKeywordNavigationHelper = () => {
                         window.open(_url, "_blank", "noopener,noreferrer");
                         return;
                     } else {
-                        enqueueSnackbar(`Invalid URL: ${_url}`, { variant: "error" });
+                        _console.error(`Invalid URL: ${_url}`);
                         return;
                     }
                 }
@@ -81,12 +82,12 @@ export const useKeywordNavigationHelper = () => {
 
                     // Switch to target workspace and load tree directly
                     setSelectedWorkspaceId(parsed.workspaceId);
-                    enqueueSnackbar("Switching workspace...", { variant: "info" });
+                    _console.info("Switching workspace...");
 
                     // Load tree directly with target workspace ID
                     const loadedWorkspace = await loadTree(undefined, parsed.workspaceId);
                     if (!loadedWorkspace) {
-                        enqueueSnackbar("Failed to load workspace", { variant: "error" });
+                        _console.error("Failed to load workspace");
                         return;
                     }
                     targetWorkspace = loadedWorkspace;
@@ -94,7 +95,7 @@ export const useKeywordNavigationHelper = () => {
 
                 // Handle workspace navigation
                 if (parsed.type === "workspace" && parsed.workspaceId) {
-                    enqueueSnackbar("Switched workspace successfully", { variant: "success" });
+                    _console.success("Switched workspace successfully");
                     return;
                 }
 
@@ -116,9 +117,9 @@ export const useKeywordNavigationHelper = () => {
                             }
                         }
 
-                        enqueueSnackbar("Navigated to folder", { variant: "success" });
+                        _console.success("Navigated to folder");
                     } else {
-                        enqueueSnackbar("Folder not found in workspace", { variant: "warning" });
+                        _console.error("Folder not found in workspace");
                     }
                     return;
                 }
@@ -197,20 +198,19 @@ export const useKeywordNavigationHelper = () => {
                                 }, 300);
                             }
                         } else {
-                            enqueueSnackbar("Note not found", { variant: "warning" });
+                            _console.warning("Note not found");
                         }
                     }
                 }
             } catch (error) {
                 console.error("Error navigating to keyword:", error);
-                enqueueSnackbar("Failed to navigate to keyword", { variant: "error" });
+                _console.error("Failed to navigate to keyword");
             }
         },
         [
             currentWorkspace,
             $user,
             openTab,
-            enqueueSnackbar,
             openTabs,
             upsertWorkspaceItem,
             setSelectedWorkspaceId,

@@ -7,13 +7,14 @@ import { workspaceService } from "@/services/workspace.service";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import type { UpsertWorkspaceItemRequest } from "@/types/workspace.types";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 /**
  * Hook for NoteGridPopup business logic
  * Reuses existing notes data from useNoteGridStore
  */
 export function useNoteGridPopupHelper() {
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { loadTree } = useWorkspaceLoader();
 
     // Store state
@@ -61,7 +62,7 @@ export function useNoteGridPopupHelper() {
      */
     const addNotesToFolder = async () => {
         if (!targetFolder) {
-            enqueueSnackbar("No target folder selected", { variant: "error" });
+            _console.error("No target folder selected");
             return;
         }
 
@@ -73,12 +74,12 @@ export function useNoteGridPopupHelper() {
             .filter(id => !isNaN(id));
 
         if (selectedNoteIds.length === 0) {
-            enqueueSnackbar("Please select at least one note", { variant: "warning" });
+            _console.error("Please select at least one note");
             return;
         }
 
         if (!currentWorkspace?.id) {
-            enqueueSnackbar("No workspace selected", { variant: "error" });
+            _console.error("No workspace selected");
             return;
         }
 
@@ -100,7 +101,7 @@ export function useNoteGridPopupHelper() {
             );
 
             if (result.success) {
-                enqueueSnackbar(
+                _console.error(
                     `Added ${selectedNoteIds.length} note(s) to "${targetFolder.name}"`,
                     { variant: "success" }
                 );
@@ -108,11 +109,11 @@ export function useNoteGridPopupHelper() {
                 await loadTree();
                 closeNoteGridPopup();
             } else {
-                enqueueSnackbar(result.message || "Failed to add notes", { variant: "error" });
+                _console.error(result.message || "Failed to add notes");
             }
         } catch (error: any) {
             console.error("Failed to add notes to folder:", error);
-            enqueueSnackbar(error?.message || "Failed to add notes", { variant: "error" });
+            _console.error(error?.message || "Failed to add notes");
         } finally {
             setIsSubmitting(false);
         }

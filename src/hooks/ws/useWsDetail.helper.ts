@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();
@@ -15,7 +16,7 @@ export const useWsDetailHelper = () => {
     const { originalWsRef } = useWsDetailStore();
     const { setSelectedWs } = useWsStore();
     const { loadWorkspaces } = useWsGridHelper();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
 
     const handleWsFieldChange = (field: keyof Ws, value: any) => {
@@ -41,7 +42,7 @@ export const useWsDetailHelper = () => {
             // Step 1.5: Validate name field
             // ============================================================
             if (!selectedWs.name || selectedWs.name.trim() === "") {
-                enqueueSnackbar("Workspace name is required", { variant: "error" });
+                _console.error("Workspace name is required");
                 return null;
             }
 
@@ -100,7 +101,7 @@ export const useWsDetailHelper = () => {
                 // ============================================================
                 // Step 10: Update selected workspace in store with server response
                 // ============================================================
-                enqueueSnackbar(isCreateMode ? "Workspace created successfully" : "Workspace saved successfully", { variant: "success" });
+                _console.success(isCreateMode ? "Workspace created successfully" : "Workspace saved successfully");
                 setSelectedWs(transformedWs);
                 if (tabId) {
                     setOpenTabs((prev) =>
@@ -128,9 +129,9 @@ export const useWsDetailHelper = () => {
                 const errorMessage = await parseApiError(error);
 
                 if (isUnauthorizedError(error)) {
-                    enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                    _console.error("Unauthorized. Please login again.");
                 } else {
-                    enqueueSnackbar(`Failed to save workspace: ${errorMessage}`, { variant: "error" });
+                    _console.error(`Failed to save workspace: ${errorMessage}`);
                 }
                 return null;
             }

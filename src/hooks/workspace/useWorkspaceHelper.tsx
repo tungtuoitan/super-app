@@ -12,6 +12,7 @@ import { BaseTab } from "@/types/editor/tab.types";
 import { findNoteByEntityId } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { Note } from "@/types/index";
 import { WorkspaceItemAction } from "@/types/workspace.types";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection
@@ -20,7 +21,7 @@ export function useWorkspaceHelper() {
     const { currentWorkspace } = useWorkspaceStore();
     const { openTabs } = useEditorTabsStore();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
 
     // Handle workspace selection change
     const saveNewsBeforeNavigate = async (): Promise<boolean> => {
@@ -32,19 +33,19 @@ export function useWorkspaceHelper() {
         });
 
         if (unsavedTabs.length > 0) {
-            enqueueSnackbar(`Saving ${unsavedTabs.length} unsaved note(s)...`, { variant: "info" });
+            _console.info(`Saving ${unsavedTabs.length} unsaved note(s)...`);
             try {
                 const tabIdsToSave = unsavedTabs.map((tab) => tab.id);
                 const saveSuccess = await upsertWorkspaceItem(WorkspaceItemAction.Create, tabIdsToSave);
 
                 if (!saveSuccess) {
-                    enqueueSnackbar("Failed to save notes. Navigation cancelled.", { variant: "error" });
+                    _console.error("Failed to save notes. Navigation cancelled.");
                     return false;
                 }
                 return true;
             } catch (error) {
                 console.error("Failed to save tabs:", error);
-                enqueueSnackbar("Failed to save notes. Navigation cancelled.", { variant: "error" });
+                _console.error("Failed to save notes. Navigation cancelled.");
                 return false;
             }
         }

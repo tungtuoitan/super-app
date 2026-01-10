@@ -17,13 +17,14 @@ import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import {SPECIAL_IDS} from "@/utils/temp-id.utils";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceLoader();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { $user } = useAuthStore();
 
     /**
@@ -317,7 +318,7 @@ export const useTreeHelper = () => {
                     console.error(`❌ Failed to move real items:`, error);
 
                     // Show error toast with user-friendly message
-                    enqueueSnackbar("Failed to move items. Please try again.", { variant: "error" });
+                    _console.error("Failed to move items. Please try again.");
 
                     throw error;
                 }
@@ -358,7 +359,7 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             const totalMoved = realItemsNeedUpdate.length + virtualItemsNeedUpdate.length;
             if (totalMoved > 0) {
-                enqueueSnackbar(`Successfully moved ${totalMoved} item(s)`, { variant: "success" });
+                _console.success(`Successfully moved ${totalMoved} item(s)`);
             }
 
             // -------------------------------------------------------
@@ -377,7 +378,7 @@ export const useTreeHelper = () => {
             console.error("❌ Failed to move item(s):", error);
 
             // Show error toast to user
-            enqueueSnackbar("An error occurred while moving items", { variant: "error" });
+            _console.error("An error occurred while moving items");
         } finally {
             setIsDragging(false);
         }

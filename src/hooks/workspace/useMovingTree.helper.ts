@@ -13,6 +13,7 @@ import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.ty
 import { constants } from "@/utils/constants";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useMovingTreeHelper = () => {
     const {
@@ -32,7 +33,7 @@ export const useMovingTreeHelper = () => {
 
     const { allWorkspaces, currentWorkspace, selectedItemIds, setSelectedItemIds } = useWorkspaceStore();
     const { $user } = useAuthStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { loadTree } = useWorkspaceLoader();
     const manager = useDragDropManager();
 
@@ -69,7 +70,7 @@ export const useMovingTreeHelper = () => {
             }
         } catch (error: any) {
             console.error("Failed to load target workspace:", error);
-            enqueueSnackbar(error?.message || "Failed to load target workspace", { variant: "error" });
+            _console.error(error?.message || "Failed to load target workspace");
         } finally {
             setIsLoadingTargetTree(false);
         }
@@ -184,12 +185,12 @@ export const useMovingTreeHelper = () => {
 
             // STEP 3: Validate workspace selection
             if (!currentWorkspace?.id || !targetWorkspaceId) {
-                enqueueSnackbar("No target workspace selected", { variant: "error" });
+                _console.error("No target workspace selected");
                 return;
             }
 
             if (currentWorkspace.id === targetWorkspaceId) {
-                enqueueSnackbar("Cannot move to the same workspace", { variant: "error" });
+                _console.error("Cannot move to the same workspace");
                 return;
             }
 
@@ -203,7 +204,7 @@ export const useMovingTreeHelper = () => {
                 duplicateItems.forEach(({ sourceItem, targetItem }) => {
                     const itemTypeName = sourceItem.entityType === 1 ? "Note" : sourceItem.entityType === 2 ? "Folder" : "File";
                     const itemName = sourceItem.data.name;
-                    enqueueSnackbar(`${itemTypeName}: ${targetWorkspaceName} is already have ${itemTypeName}: ${itemName}`, { variant: "warning" });
+                    _console.error(`${itemTypeName}: ${targetWorkspaceName} is already have ${itemTypeName}: ${itemName}`);
                 });
 
                 // Highlight duplicates temporarily (5 seconds)
@@ -241,7 +242,7 @@ export const useMovingTreeHelper = () => {
                 }
 
                 if (itemIds.length === 0) {
-                    enqueueSnackbar("No valid items to move", { variant: "error" });
+                    _console.error("No valid items to move");
                     return;
                 }
 
@@ -255,14 +256,14 @@ export const useMovingTreeHelper = () => {
 
                 if (unsavedItems.length > 0) {
                     const itemNames = unsavedItems.join(", ");
-                    enqueueSnackbar(`Please save "${itemNames}" before move`, { variant: "error" });
+                    _console.error(`Please save "${itemNames}" before move`);
                     return;
                 }
 
                 // STEP 5.1: Prevent dragging root node
                 const hasRootNode = itemIds.includes(constants.workspace.root.workspaceItemId);
                 if (hasRootNode) {
-                    enqueueSnackbar("Cannot move workspace root node", { variant: "error" });
+                    _console.error("Cannot move workspace root node");
                     return;
                 }
 
@@ -275,7 +276,7 @@ export const useMovingTreeHelper = () => {
                 // Filter to get only top-level parent IDs
                 const topLevelItemIds = treeMiniHelper.filterTopLevelParents(itemIds, currentTreeData);
                 if (topLevelItemIds.length === 0) {
-                    enqueueSnackbar("No valid items to move", { variant: "error" });
+                    _console.error("No valid items to move");
                     return;
                 }
 
@@ -293,7 +294,7 @@ export const useMovingTreeHelper = () => {
                 });
 
                 if (itemsToMove.length < topLevelItemIds.length) {
-                    enqueueSnackbar("Some items were already in the target workspace and were skipped", { variant: "warning" });
+                    _console.error("Some items were already in the target workspace and were skipped");
                     return;
                 }
 
@@ -308,7 +309,7 @@ export const useMovingTreeHelper = () => {
                 const result = await workspaceService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
 
                 if (result.success) {
-                    enqueueSnackbar(`Moved ${itemsToMove.length} item(s) to target workspace`, { variant: "success" });
+                    _console.error(`Moved ${itemsToMove.length} item(s) to target workspace`);
 
                     // STEP 8: Clear selection immediately (items no longer in this workspace)
                     setSelectedItemIds([]);
@@ -321,15 +322,15 @@ export const useMovingTreeHelper = () => {
 
                     // Success - drag state will be cleared automatically
                 } else {
-                    enqueueSnackbar(result.message || "Failed to move items", { variant: "error" });
+                    _console.error(result.message || "Failed to move items");
                 }
             } catch (error: any) {
                 console.error("Failed to move items:", error);
-                enqueueSnackbar(error?.message || "Failed to move items", { variant: "error" });
+                _console.error(error?.message || "Failed to move items");
             }
         } catch {
             console.error("Unexpected error during drop operation");
-            enqueueSnackbar("Unexpected error during move operation", { variant: "error" });
+            _console.error("Unexpected error during move operation");
         } finally {
             setTreeRenderKey((prev) => prev + 1);
         }

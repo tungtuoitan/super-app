@@ -61,7 +61,7 @@ function ConsoleMessage({ id, type, message, timestamp, onRemove }: ConsoleMessa
     const getTypeStyles = (type: ConsoleMessageType) => {
         switch (type) {
             case "error":
-                return "text-red-400/80";
+                return "text-red-400";
             // case "warning":
             //     return "text-yellow-400/80";
             // case "info":
@@ -69,7 +69,7 @@ function ConsoleMessage({ id, type, message, timestamp, onRemove }: ConsoleMessa
             // case "success":
             //     return "text-green-400/80";
             default:
-                return "text-muted-foreground/70";
+                return "text-muted-foreground";
         }
     };
 
@@ -87,6 +87,10 @@ function ConsoleMessage({ id, type, message, timestamp, onRemove }: ConsoleMessa
                 return "•";
         }
     };
+    const isRecent = (date: Date, thresholdSeconds = 60) => {
+        const now = Date.now();
+        return now - date.getTime() <= thresholdSeconds * 1000;
+    };
 
     const formatTime = (date: Date) => {
         return date.toLocaleTimeString("en-US", {
@@ -98,13 +102,15 @@ function ConsoleMessage({ id, type, message, timestamp, onRemove }: ConsoleMessa
     };
 
     return (
-        <div className="group flex items-start gap-2 px-2 hover:bg-editor-hover/50 rounded text-xs font-mono items-center">
-            {/* <span className={`flex-shrink-0 ${getTypeStyles(type)}`}>{getTypeIcon(type)}</span> */}
+        <div
+            className={`
+            group flex items-start gap-2 px-2 rounded text-xs font-mono items-center
+            hover:bg-editor-hover/50
+            ${isRecent(timestamp) ? "opacity-100" : "opacity-50"}
+        `}
+        >
             <span className="flex-shrink-0 text-muted-foreground text-xs pr-2">{formatTime(timestamp)}</span>
             <span className={`flex-1 ${getTypeStyles(type)} break-all text-left`}>{message}</span>
-            {/* <button onClick={() => onRemove(id)} className="flex-shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-editor-fg transition-opacity" title="Remove message">
-                <X className="w-3 h-3" />
-            </button> */}
         </div>
     );
 }

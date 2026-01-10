@@ -12,6 +12,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { StandardRegistry } from "@/types/standardRegistry.types";
 import { IAutoCompleteOptions } from "@/shared/components";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 /**
  * Transform DTO date strings to Date objects
@@ -35,7 +36,7 @@ export const useStandardRegistryHelper = () => {
         setKeywordsLoading,
         setKeywordsError
     } = useGeneralStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
 
     /**
      * Load all standard registries from backend
@@ -66,7 +67,7 @@ export const useStandardRegistryHelper = () => {
 
             // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
                 console.error("Failed to load standard registries:", errorMessage);
             }
@@ -95,7 +96,7 @@ export const useStandardRegistryHelper = () => {
 
             // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
                 console.error("Failed to load keywords:", errorMessage);
             }

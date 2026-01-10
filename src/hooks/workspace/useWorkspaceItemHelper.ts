@@ -12,9 +12,10 @@ import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { isNumber } from "lodash";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useWorkspaceItemHelper = () => {
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabHelper();
     const { originalNoteRef } = useNoteDetailStore();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
@@ -53,7 +54,7 @@ export const useWorkspaceItemHelper = () => {
 
                         if (!workspaceItem) {
                             console.warn(`⚠️ Note not found in workspace tree: ${noteData.name}`);
-                            enqueueSnackbar(`Note not found in workspace tree: ${noteData.name}`, { variant: "warning" });
+                            _console.warning(`Note not found in workspace tree: ${noteData.name}`);
                             return false;
                         }
 
@@ -92,7 +93,7 @@ export const useWorkspaceItemHelper = () => {
                     if (!result.success) {
                         const errorMessage = result.message || "Failed to create notes";
                         console.error("⚠️ Failed to create notes:", errorMessage);
-                        enqueueSnackbar(errorMessage, { variant: "error" });
+                        _console.error(errorMessage);
                         return false;
                     }
 
@@ -163,17 +164,17 @@ export const useWorkspaceItemHelper = () => {
                         }
 
                         const count = result.data.length;
-                        enqueueSnackbar(count === 1 ? "Note created successfully" : `${count} notes created successfully`, { variant: "success" });
+                        _console.success(count === 1 ? "Note created successfully" : `${count} notes created successfully`);
                         return true;
                     }
                     return false;
                 default:
                     console.warn(`⚠️ Unsupported action: ${action}`);
-                    enqueueSnackbar(`Unsupported action: ${action}`, { variant: "error" });
+                    _console.error(`Unsupported action: ${action}`);
                     return false;
             }
         },
-        [getActiveTab, currentWorkspace, $user, loadTree, setOpenTabs, originalNoteRef, enqueueSnackbar]
+        [getActiveTab, currentWorkspace, $user, loadTree, setOpenTabs, originalNoteRef]
     );
 
     return {
