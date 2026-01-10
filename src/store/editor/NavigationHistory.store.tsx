@@ -27,6 +27,22 @@ export interface CursorPosition {
 }
 
 /**
+ * Monaco Editor position (for code/markdown editors)
+ */
+export interface EditorPosition {
+    lineNumber: number;
+    column: number;
+}
+
+/**
+ * Monaco Editor scroll position
+ */
+export interface EditorScrollPosition {
+    scrollTop: number;
+    scrollLeft: number;
+}
+
+/**
  * Single entry in navigation history
  */
 export interface HistoryEntry {
@@ -38,6 +54,8 @@ export interface HistoryEntry {
     scrollPositions?: ScrollPosition[];
     cursorPosition?: CursorPosition;
     focusedFieldId?: string; // ID of field that has focus
+    editorPosition?: EditorPosition; // Monaco editor cursor position
+    editorScrollPosition?: EditorScrollPosition; // Monaco editor scroll position
 }
 
 export interface NavigationHistoryContextData {

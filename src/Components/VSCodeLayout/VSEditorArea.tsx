@@ -43,7 +43,7 @@ export function VSEditorArea() {
         <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
             {/* LocalStorage sync components */}
             {/* <NavigationHistorySync /> */}
-            {/* <TrackTabNavigation /> */}
+            <TrackTabNavigation />
             <OpenTabsSync />
 
             {/* Tab bar */}

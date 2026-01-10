@@ -25,6 +25,7 @@ import {
 import { Note } from "@/types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import {useSnackbar} from "notistack";
+import { MarkdownEditorNavigationTracker } from "@/HeadlessComponents/markdownEditor/MarkdownEditorNavigationTracker";
 
 export function MarkdownEditor() {
     const { registries, allKeywords } = useGeneralStore();
@@ -34,7 +35,7 @@ export function MarkdownEditor() {
     const { handleNoteFieldChange } = useNoteDetailHelper();
     const { getItemStatus } = useTreeStatusHelper();
     // const $mi = useMonaco(); // Monaco instance
-    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
+    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef, isMounted, setIsMounted } = useNoteDetailStore();
     const { enqueueSnackbar } = useSnackbar();
 
     // Get active tab and note
@@ -88,6 +89,7 @@ export function MarkdownEditor() {
     // Handle editor mount
     const handleEditorDidMount = (editor: _monaco.editor.IStandaloneCodeEditor) => {
         editorRef.current = editor;
+        setIsMounted(true);
 
         // Setup providers
         const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
@@ -222,6 +224,11 @@ export function MarkdownEditor() {
 
     return (
         <>
+            {/* //* phải mounted thì mới có editor để gắn listener */}
+            {isMounted && <MarkdownEditorNavigationTracker />}
+            {
+
+            }
             <Editor
                 height={540}
                 defaultLanguage="markdown"

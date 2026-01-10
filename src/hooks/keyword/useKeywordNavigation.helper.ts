@@ -24,6 +24,7 @@ import { BaseTab } from "@/types/editor/tab.types";
 import { Keyword } from "@/types/keyword.types";
 import {isValid} from "date-fns";
 import {set} from "lodash";
+import {isValidUrl} from "@/utils/url.utils";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
@@ -58,12 +59,12 @@ export const useKeywordNavigationHelper = () => {
                 // Handle external links
                 if (parsed.type === "external" && parsed.url) {
                     const _url = parsed.url.startsWith("http") ? parsed.url : `https://${parsed.url}`;
-                    if(isValid(_url)){
+                    if(isValidUrl(_url)){
                         window.open(_url, "_blank", "noopener,noreferrer");
                         return;
                     }
                     else {
-                        enqueueSnackbar("Invalid URL", { variant: "error" });
+                        enqueueSnackbar(`Invalid URL: ${_url}`, { variant: "error" });
                         return;
                     }
                 }
