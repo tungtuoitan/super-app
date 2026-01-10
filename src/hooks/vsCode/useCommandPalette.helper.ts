@@ -8,7 +8,7 @@ import { useCommandPaletteStore, useGeneralStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { Keyword } from "@/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash } from "lucide-react";
-import { fuzzyMatchWithDiacritics } from "@/utils/string.utils";
+import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
 
 export const useCommandPaletteHelper = () => {
     const { allKeywords } = useGeneralStore();

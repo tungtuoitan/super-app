@@ -14,7 +14,6 @@ import {useEditorTabHelper} from "@/hooks/vsCode/useEditorTab.helper";
 
 export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     const { registries, allKeywords } = useGeneralStore();
-    const { activeTabId } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
     const activeTab = getActiveTab();
