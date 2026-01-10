@@ -15,8 +15,8 @@ import { EDITOR_LINE_DISTANCE_THRESHOLD } from "@/hooks/vsCode/useNavigationHist
 
 export function MarkdownEditorNavigationTracker() {
     const { editorRef } = useNoteDetailStore();
-    const { trackNavigation, captureEditorPosition, captureEditorScrollPosition, restoreEditorPosition, isNavigating, getCurrentEntry } = useNavigationHistoryHelper();
-    const { present } = useNavigationHistoryStore();
+    const { captureEditorPosition, captureEditorScrollPosition, restoreEditorPosition, isNavigating, getCurrentEntry } = useNavigationHistoryHelper();
+    const { present, setTriggerSave } = useNavigationHistoryStore();
 
     // Track last recorded position to implement threshold logic
     const lastPositionRef = useRef<{ lineNumber: number; column: number } | null>(null);
@@ -54,25 +54,25 @@ export function MarkdownEditorNavigationTracker() {
 
             // Only track if moved >5 lines (VS Code threshold)
             if (lineDistance > EDITOR_LINE_DISTANCE_THRESHOLD || lastPositionRef.current===null) {
+                setTriggerSave(Date.now());
                 // Debounce to avoid excessive tracking
-                if (debounceTimerRef.current) {
-                    clearTimeout(debounceTimerRef.current);
-                }
+                // if (debounceTimerRef.current) {
+                //     clearTimeout(debounceTimerRef.current);
+                // }
 
-                debounceTimerRef.current = setTimeout(() => {
-                    const mdPos = captureEditorPosition(editor);
-                    const mdScrollPos = captureEditorScrollPosition(editor);
+                // debounceTimerRef.current = setTimeout(() => {
+                //     const mdPos = captureEditorPosition(editor);
 
-                    if (mdPos) {
-                        trackNavigation({ mdPos, mdScrollPos });
+                //     if (mdPos) {
+                //         // Trigger save to update navigation history via TrackTabNavigation
 
-                        // Update last tracked position
-                        lastPositionRef.current = {
-                            lineNumber: mdPos.lineNumber,
-                            column: mdPos.column,
-                        };
-                    }
-                }, 500); // 500ms debounce
+                //         // Update last tracked position
+                //         lastPositionRef.current = {
+                //             lineNumber: mdPos.lineNumber,
+                //             column: mdPos.column,
+                //         };
+                //     }
+                // }, 500); // 500ms debounce
             }
         });
 
@@ -85,29 +85,29 @@ export function MarkdownEditorNavigationTracker() {
     }, []);
 
     // Restore editor position when navigating (present changes)
-    useEffect(() => {
-        const editor = editorRef.current;
+    // useEffect(() => {
+    //     const editor = editorRef.current;
 
-        if (!editor || (editor as any)._isDisposed || !present) {
-            return;
-        }
+    //     if (!editor || (editor as any)._isDisposed || !present) {
+    //         return;
+    //     }
 
-        // Only restore if we just navigated (not during normal tracking)
-        if (isNavigating() && present.mdPos) {
-            // Small delay to ensure editor content is loaded
-            setTimeout(() => {
-                restoreEditorPosition(editor, present.mdPos, present.mdScrollPos);
+    //     // Only restore if we just navigated (not during normal tracking)
+    //     if (isNavigating() && present.mdPos) {
+    //         // Small delay to ensure editor content is loaded
+    //         setTimeout(() => {
+    //             restoreEditorPosition(editor, present.mdPos, present.mdScrollPos);
 
-                // Update last tracked position to prevent immediate re-tracking
-                lastPositionRef.current = present.mdPos
-                    ? {
-                        lineNumber: present.mdPos.lineNumber,
-                        column: present.mdPos.column,
-                    }
-                    : null;
-            }, 100);
-        }
-    }, [present]);
+    //             // Update last tracked position to prevent immediate re-tracking
+    //             lastPositionRef.current = present.mdPos
+    //                 ? {
+    //                     lineNumber: present.mdPos.lineNumber,
+    //                     column: present.mdPos.column,
+    //                 }
+    //                 : null;
+    //         }, 100);
+    //     }
+    // }, [present]);
 
     return null;
 }

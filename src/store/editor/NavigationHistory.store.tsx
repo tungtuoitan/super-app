@@ -68,6 +68,8 @@ export interface NavigationHistoryContextData {
     setPresent: Dispatch<SetStateAction<HistoryEntry | null>>;
     future: HistoryEntry[]; // Stack of forward locations (for Forward)
     setFuture: Dispatch<SetStateAction<HistoryEntry[]>>;
+    triggerSave: number; // Used to trigger save to localStorage
+    setTriggerSave: Dispatch<SetStateAction<number>>;
 }
 
 const navigationHistoryDefaultValue: NavigationHistoryContextData = {
@@ -77,6 +79,8 @@ const navigationHistoryDefaultValue: NavigationHistoryContextData = {
     setPresent: () => {},
     future: [],
     setFuture: () => {},
+    triggerSave: 0,
+    setTriggerSave: () => {},
 };
 
 export const NavigationHistoryStore = createContext<NavigationHistoryContextData>(navigationHistoryDefaultValue);
@@ -93,6 +97,7 @@ export const NavigationHistoryProvider: React.FC<React.PropsWithChildren<{  }>> 
     const [past, setPast] = useState<HistoryEntry[]>([]);
     const [present, setPresent] = useState<HistoryEntry | null>(null);
     const [future, setFuture] = useState<HistoryEntry[]>([]);
+    const [triggerSave, setTriggerSave] = useState<number>(0); // Used to trigger save to localStorage
 
     return (
         <NavigationHistoryStore.Provider
@@ -103,6 +108,8 @@ export const NavigationHistoryProvider: React.FC<React.PropsWithChildren<{  }>> 
                 setPresent,
                 future,
                 setFuture,
+                triggerSave,
+                setTriggerSave,
             }}
         >
             {children}

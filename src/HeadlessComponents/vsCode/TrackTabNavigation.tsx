@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 
@@ -14,6 +14,7 @@ export function TrackTabNavigation() {
     const { activeTabId } = useEditorTabsStore();
     const { trackNavigation, isNavigating, captureEditorPosition, captureEditorScrollPosition } = useNavigationHistoryHelper();
     const { editorRef } = useNoteDetailStore();
+    const { triggerSave } = useNavigationHistoryStore();
 
     // Track navigation when active tab changes (but not during go back/forward)
     useEffect(() => {
@@ -41,7 +42,7 @@ export function TrackTabNavigation() {
             }, 250); // Increased delay to ensure editor is mounted
             return () => clearTimeout(timer);
         }
-    }, [activeTabId]);
+    }, [activeTabId,triggerSave]);
 
 
     return null

@@ -65,6 +65,9 @@ export const useNavigationHistoryHelper = () => {
     const { editorRef } = useNoteDetailStore();
     const { getActiveTab } = useEditorTabHelper();
     const { setNewTabAnd } = useEditorTabHelper();
+    const { $user } = useAuthStore();
+    const { notes } = useNoteGridStore();
+    const { workspaces } = useWsStore();
 
     // Track if we're currently navigating (to prevent tracking during restore)
     const isNavigatingRef = useRef(false);
@@ -195,6 +198,10 @@ export const useNavigationHistoryHelper = () => {
             // Then restore cursor position
             if (position) {
                 editor.setPosition(position);
+                console.log("[Navigation] Restored editor position to:", position);
+
+                // Focus editor to show cursor
+                editor.focus();
 
                 // If no scroll position provided, reveal cursor in center
                 if (!scrollPosition) {
@@ -228,33 +235,33 @@ export const useNavigationHistoryHelper = () => {
         // 2. Cùng tabId, type = note
         if (entry1.type === 'note' && entry2.type === 'note') {
             // Check Monaco editor scroll position first
-            const mdScroll1 = entry1.mdScrollPos;
-            const mdScroll2 = entry2.mdScrollPos;
+            // const mdScroll1 = entry1.mdScrollPos;
+            // const mdScroll2 = entry2.mdScrollPos;
 
-            if (mdScroll1 && mdScroll2) {
-                const scrollTopDistance = Math.abs(mdScroll1.scrollTop - mdScroll2.scrollTop);
-                const scrollLeftDistance = Math.abs(mdScroll1.scrollLeft - mdScroll2.scrollLeft);
+            // if (mdScroll1 && mdScroll2) {
+            //     // const scrollTopDistance = Math.abs(mdScroll1.scrollTop - mdScroll2.scrollTop);
+            //     // const scrollLeftDistance = Math.abs(mdScroll1.scrollLeft - mdScroll2.scrollLeft);
 
-                // 2a. Khác mdScrollPos → different
-                if (scrollTopDistance > MD_SCROLL_DISTANCE_THRESHOLD || scrollLeftDistance > MD_SCROLL_DISTANCE_THRESHOLD) {
+            //     // 2a. Khác mdScrollPos → different
+            //     // if (scrollTopDistance > MD_SCROLL_DISTANCE_THRESHOLD || scrollLeftDistance > MD_SCROLL_DISTANCE_THRESHOLD) {
+            //     //     return true;
+            //     // }
+
+            //     // 2b. Cùng mdScrollPos, check lineNumber
+            // } else if (mdScroll1 || mdScroll2) {
+            //     // One has scroll position, other doesn't → different
+            //     return true;
+            // }
+            const pos1 = entry1.mdPos;
+            const pos2 = entry2.mdPos;
+
+            if (pos1 && pos2) {
+                const lineDistance = Math.abs(pos1.lineNumber - pos2.lineNumber);
+
+                // Khác lineNumber (>EDITOR_LINE_DISTANCE_THRESHOLD) → different
+                if (lineDistance > EDITOR_LINE_DISTANCE_THRESHOLD) {
                     return true;
                 }
-
-                // 2b. Cùng mdScrollPos, check lineNumber
-                const pos1 = entry1.mdPos;
-                const pos2 = entry2.mdPos;
-
-                if (pos1 && pos2) {
-                    const lineDistance = Math.abs(pos1.lineNumber - pos2.lineNumber);
-
-                    // Khác lineNumber (>EDITOR_LINE_DISTANCE_THRESHOLD) → different
-                    if (lineDistance > EDITOR_LINE_DISTANCE_THRESHOLD) {
-                        return true;
-                    }
-                }
-            } else if (mdScroll1 || mdScroll2) {
-                // One has scroll position, other doesn't → different
-                return true;
             }
 
             // Same scroll position and line number → same (skip)
@@ -283,6 +290,10 @@ export const useNavigationHistoryHelper = () => {
 
         const newEntry: HistoryEntry = {
             ...entry,
+            mdPos: {
+                lineNumber: entry.mdPos?.lineNumber ?? 1,
+                column: entry.mdPos?.column ?? 1000,
+            },
             timestamp: Date.now(),
         };
 
@@ -303,22 +314,22 @@ export const useNavigationHistoryHelper = () => {
 
         // Special case: Same tab/item/type, but position data just became available
         // This happens when TrackTabNavigation tracks before editor mounts, then MarkdownEditorNavigationTracker tracks after mount
-        if (currentPresent.tabId === newEntry.tabId &&
-            currentPresent.itemId === newEntry.itemId &&
-            currentPresent.type === newEntry.type &&
-            currentPresent.type === 'note') {
+        // if (currentPresent.tabId === newEntry.tabId &&
+        //     currentPresent.itemId === newEntry.itemId &&
+        //     currentPresent.type === newEntry.type &&
+        //     currentPresent.type === 'note') {
 
-            const presentHasNoPosition = !currentPresent.mdPos && !currentPresent.mdScrollPos;
-            const newEntryHasPosition = newEntry.mdPos || newEntry.mdScrollPos;
+        //     const presentHasNoPosition = !currentPresent.mdPos && !currentPresent.mdScrollPos;
+        //     const newEntryHasPosition = newEntry.mdPos || newEntry.mdScrollPos;
 
-            if (presentHasNoPosition && newEntryHasPosition) {
-                // Update present with position data
-                setPresent(newEntry);
-                pendingPresentRef.current = newEntry;
-                console.log("[Navigation] Updated present with position data:", newEntry);
-                return;
-            }
-        }
+        //     if (presentHasNoPosition && newEntryHasPosition) {
+        //         // Update present with position data
+        //         setPresent(newEntry);
+        //         pendingPresentRef.current = newEntry;
+        //         console.log("[Navigation] Updated present with position data:", newEntry);
+        //         return;
+        //     }
+        // }
 
         // Validate: Check if new entry is significantly different from Present
         if (!areEntriesSignificantlyDifferent(currentPresent, newEntry)) {
@@ -449,11 +460,11 @@ export const useNavigationHistoryHelper = () => {
 
     /**
      * Navigate to a specific history entry
-     * - Opens tab if closed
+     * - Opens tab if closed (fetching data from API if needed)
      * - Switches to tab
      * - Restores positions
      */
-    const navigateToEntry = (entry: HistoryEntry | null) => {
+    const navigateToEntry = async (entry: HistoryEntry | null) => {
         if (!entry) return;
 
         // Validate itemId - don't navigate to invalid/temporary items
@@ -477,31 +488,83 @@ export const useNavigationHistoryHelper = () => {
             let newTab: BaseTab | null = null;
 
             if (entry.type === 'note') {
-                // Create a minimal Note object with the itemId to reopen the tab
-                const noteData: Note = { id: itemIdNum } as Note;
-                newTab = {
-                    id: `note-${noteData.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.note,
-                    data: noteData,
-                    title: noteData.name || constants.vscode.tabTitles.unsavedNote,
-                    hasUnsavedChanges: false,
-                };
+                // Try to find in grid first
+                let noteData = notes.find((n) => n.id === itemIdNum);
+
+                // If not in grid, fetch from API (similar to OpenTabsSync.tsx)
+                if (!noteData) {
+                    if (!$user.userToken) {
+                        console.error("[Navigation] No auth token found");
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+
+                    try {
+                        const result = await noteService._getNotes($user.userToken, { ids: itemIdNum.toString() });
+                        if (result.success && result.data && result.data.length > 0) {
+                            const fetchedNotes = transformNotes(result.data as NoteDTO[]);
+                            noteData = fetchedNotes[0];
+                        }
+                    } catch (error) {
+                        console.error("[Navigation] Failed to fetch note:", error);
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+                }
+
+                if (noteData) {
+                    newTab = {
+                        id: entry.tabId, // Use original tabId to maintain history consistency
+                        type: constants.vscode.tab.tabTypes.note,
+                        data: noteData,
+                        title: noteData.name || constants.vscode.tabTitles.unsavedNote,
+                        hasUnsavedChanges: false,
+                    };
+                }
             } else if (entry.type === 'workspace') {
-                // Create workspace tab
-                const wsData = { id: itemIdNum } as any; // Use Ws type when available
-                newTab = {
-                    id: `workspace-${wsData.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.workspace,
-                    data: wsData,
-                    title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
-                    hasUnsavedChanges: false,
-                };
+                // Try to find in grid first
+                let wsData = workspaces.find((w) => w.id === itemIdNum);
+
+                // If not in grid, fetch from API (similar to OpenTabsSync.tsx)
+                if (!wsData) {
+                    if (!$user.userToken) {
+                        console.error("[Navigation] No auth token found");
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+
+                    try {
+                        const result = await wsService._getWs($user.userToken, { ids: itemIdNum.toString() });
+                        if (result.success && result.data && result.data.length > 0) {
+                            const fetchedWs = transformWs(result.data as WsDTO[]);
+                            wsData = fetchedWs[0];
+                        }
+                    } catch (error) {
+                        console.error("[Navigation] Failed to fetch workspace:", error);
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+                }
+
+                if (wsData) {
+                    newTab = {
+                        id: entry.tabId, // Use original tabId to maintain history consistency
+                        type: constants.vscode.tab.tabTypes.workspace,
+                        data: wsData,
+                        title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
+                        hasUnsavedChanges: false,
+                    };
+                }
             }
             // Add other types here as needed (file, folder, etc.)
 
             if (newTab) {
                 setOpenTabs(prev => [...prev, newTab!]);
                 setNewTabAnd(newTab.id);
+            } else {
+                console.warn("[Navigation] Failed to create tab for entry:", entry);
+                isNavigatingRef.current = false;
+                return;
             }
         }
 
@@ -511,10 +574,12 @@ export const useNavigationHistoryHelper = () => {
             restoreScrollPositions(entry.scrollPositions);
 
             // Restore Monaco editor positions (for note type)
-            if (entry.type === 'note' && (entry.mdPos || entry.mdScrollPos)) {
+            if (entry.type === 'note') {
                 const editor = editorRef.current;
                 if (editor && !(editor as any)._isDisposed) {
-                    restoreEditorPosition(editor, entry.mdPos, entry.mdScrollPos);
+                    // If no position data, set cursor to end of first line
+                    const positionToRestore = entry.mdPos || { lineNumber: 1, column: 1000 };
+                    restoreEditorPosition(editor, positionToRestore, entry.mdScrollPos);
                 }
             }
 

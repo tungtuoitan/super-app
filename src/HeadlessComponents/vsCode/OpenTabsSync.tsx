@@ -25,7 +25,7 @@ import {useEditorTabHelper} from "@/hooks/index";
 // Storage types
 export interface TabStorage {
     tabId: string;
-    type: string;
+    type: string; 
     dataId: number;
     index: number;
 }
