@@ -9,10 +9,11 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useEditorTabsStore, useNavigationHistoryStore, useStandardRegistryStore } from "@/store/index";
+import { useEditorTabsStore, useNavigationHistoryStore, useGeneralStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
@@ -23,9 +24,9 @@ export const useNoteGridHelper = () => {
 
     const { openTab, processTabAfterDelete } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
-    const { registries } = useStandardRegistryStore();
+    const { registries } = useGeneralStore();
 
     // Create new note (temporary with negative ID)
     const __createNewNote = () => {
@@ -80,9 +81,7 @@ export const useNoteGridHelper = () => {
             if (type === "soft-delete" && tempNoteIds.length > 0) {
                 setNotes((prevNotes) => prevNotes.filter((note) => !tempNoteIds.includes(note.id)));
 
-                enqueueSnackbar(`Removed ${tempNoteIds.length} unsaved note(s)`, {
-                    variant: "success",
-                });
+                _console.success(`Removed ${tempNoteIds.length} unsaved note(s)`);
             }
 
             // Determine deletedAt value based on action
@@ -113,7 +112,7 @@ export const useNoteGridHelper = () => {
                     throw new Error(result.message || `Failed to ${type === "soft-delete" ? "delete" : "restore"} notes`);
                 }
 
-                enqueueSnackbar(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedNoteIds.length} note(s)`, { variant: "success" });
+                _console.success(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedNoteIds.length} note(s)`);
 
                 if(type === "soft-delete") {
                     // Process tabs and navigation history
@@ -131,9 +130,9 @@ export const useNoteGridHelper = () => {
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to ${type === "soft-delete" ? "delete" : "restore"} notes: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} notes: ${errorMessage}`);
             }
         }
     };
@@ -161,9 +160,7 @@ export const useNoteGridHelper = () => {
                     throw new Error(result.message || "Failed to hard delete notes");
                 }
 
-                enqueueSnackbar(`Successfully permanently deleted ${persistedNoteIds.length} note(s)`, {
-                    variant: "success",
-                });
+                _console.success(`Successfully permanently deleted ${persistedNoteIds.length} note(s)`);
 
                 processTabAfterDelete(persistedNoteIds, "note");
 
@@ -178,9 +175,9 @@ export const useNoteGridHelper = () => {
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to permanently delete notes: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to permanently delete notes: ${errorMessage}`);
             }
         }
     };
@@ -254,7 +251,7 @@ export const useNoteGridHelper = () => {
 
             // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.success("Unauthorized. Please login again.");
             }
         } finally {
             setNoteGridIsLoading(false);

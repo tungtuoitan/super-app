@@ -32,8 +32,13 @@ export type { ActivityBarContextData } from "./activityBar/ActivityBar.store";
 export { AuthCallbackProvider, useAuthCallbackStore } from "./authCallback/AuthCallback.store";
 export type { AuthCallbackContextData } from "./authCallback/AuthCallback.store";
 
-export { StandardRegistryStore, StandardRegistryProvider, useStandardRegistryStore } from "./standardRegistry/StandardRegistry.store";
-export type { StandardRegistryContextData } from "./standardRegistry/StandardRegistry.store";
+export { GeneralStore, GeneralProvider, useGeneralStore } from "./general/General.store";
 
 export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "./editor/NavigationHistory.store";
 export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "./editor/NavigationHistory.store";
+
+export { CommandPaletteStore, CommandPaletteProvider, useCommandPaletteStore } from "./commandPalette/useCommandPalette.store";
+export type { CommandPaletteContextData } from "./commandPalette/useCommandPalette.store";
+
+export { ConsoleStore, ConsoleProvider, useConsoleStore } from "./console/useConsole.store";
+export type { ConsoleContextData, ConsoleMessage, ConsoleMessageType } from "./console/useConsole.store";

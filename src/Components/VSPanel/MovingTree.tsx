@@ -15,7 +15,7 @@ import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2, Workspa
 import { constants } from "@/utils/constants";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useMovingTreeHelper } from "@/hooks/workspace/useMovingTree.helper";
-import { CalculateMovingTreeDropZoneHeight } from "@/HeadlessComponents/CalculateMovingTreeDropZoneHeight";
+import { CalculateMovingTreeDropZoneHeight } from "@/HeadlessComponents/workspaceTree/CalculateMovingTreeDropZoneHeight";
 
 export function MovingTree() {
     const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight, setDropZoneHeight, _treeRef } = useMovingTreeStore();

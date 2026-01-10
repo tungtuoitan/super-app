@@ -29,6 +29,7 @@ const _getNotes = async (
         createdAtFrom?: string; // ISO date string
         createdAtTo?: string; // ISO date string
         ids?: string; // Comma-separated IDs: "1,2,3"
+        workspaceItemIds?: string; // Comma-separated workspace item IDs: "1,2,3"
     },
 ) => {
     const headers = new Headers();
@@ -69,6 +70,9 @@ const _getNotes = async (
     }
     if (params?.ids) {
         queryParams.append("ids", params.ids);
+    }
+    if (params?.workspaceItemIds) {
+        queryParams.append("workspaceItemIds", params.workspaceItemIds);
     }
 
     const queryString = queryParams.toString();

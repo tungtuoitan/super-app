@@ -6,65 +6,71 @@
 
 import { useEffect } from "react";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
-import {useEditorTabsStore} from "@/store/index";
+import {useEditorTabsStore, useNavigationHistoryStore} from "@/store/index";
 
 export const NavigationKeyboardShortcuts = () => {
     const { handleGoBack, handleGoForward, canGoBack, canGoForward } = useNavigationHistoryHelper();
-    const { openTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { past, future } = useNavigationHistoryStore();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            //* HISTORICAL NAVIGATION - DISABLED FOR NOW
+            //* HISTORICAL NAVIGATION
             // Alt + Left Arrow - Navigate Back
-            // if (e.altKey && e.key === "ArrowLeft") {
-            //     e.preventDefault();
-            //     if (canGoBack()) {
-            //         handleGoBack();
-            //     }
-            // }
-
-            // // Alt + Right Arrow - Navigate Forward
-            // if (e.altKey && e.key === "ArrowRight") {
-            //     e.preventDefault();
-            //     if (canGoForward()) {
-            //         handleGoForward();
-            //     }
-            // }
             if (e.altKey && e.key === "ArrowLeft") {
                 e.preventDefault();
-                if (openTabs.length > 0 && activeTabId) {
-                    const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
-                    if (currentIndex > 0) {
-                        setActiveTabId(openTabs[currentIndex - 1].id);
-                    }
-                    else {
-                        setActiveTabId(openTabs[openTabs.length - 1].id);
-                    }
-                
+                e.stopPropagation();
+                if (past.length > 0) {
+                    handleGoBack();
                 }
             }
 
-            // Alt + Right Arrow - Next Tab
+            // Alt + Right Arrow - Navigate Forward
             if (e.altKey && e.key === "ArrowRight") {
                 e.preventDefault();
-                if (openTabs.length > 0 && activeTabId) {
-                    const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
-                    if (currentIndex < openTabs.length - 1) {
-                        setActiveTabId(openTabs[currentIndex + 1].id);
-                    }
-                    else {
-                        setActiveTabId(openTabs[0].id);
-                    }
+                e.stopPropagation();
+                if (future.length > 0) {
+                    handleGoForward();
                 }
             }
+
+            //* TAB NAVIGATION
+            // Alt + Left Arrow - Previous Tab
+            // if (e.shiftKey && e.key === "ArrowLeft") {
+            //     e.preventDefault();
+            //     if (openTabs.length > 0 && activeTabId) {
+            //         const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
+            //         if (currentIndex > 0) {
+            //             setNewTabAnd(openTabs[currentIndex - 1].id);
+            //         }
+            //         else {
+            //             setNewTabAnd(openTabs[openTabs.length - 1].id);
+            //         }
+
+            //     }
+            // }
+
+            // Alt + Right Arrow - Next Tab
+            // if (e.shiftKey && e.key === "ArrowRight") {
+            //     e.preventDefault();
+            //     if (openTabs.length > 0 && activeTabId) {
+            //         const currentIndex = openTabs.findIndex(tab => tab.id === activeTabId);
+            //         if (currentIndex < openTabs.length - 1) {
+            //             setNewTabAnd(openTabs[currentIndex + 1].id);
+            //         }
+            //         else {
+            //             setNewTabAnd(openTabs[0].id);
+            //         }
+            //     }
+            // }
         };
 
-        // Add global keyboard listener
-        window.addEventListener("keydown", handleKeyDown);
+        // CRITICAL: Use capture phase to intercept events BEFORE Monaco Editor
+        // This allows navigation shortcuts to work even when editor is focused (VS Code behavior)
+        window.addEventListener("keydown", handleKeyDown, { capture: true });
 
         // Cleanup on unmount
         return () => {
-            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keydown", handleKeyDown, { capture: true });
         };
     }, [handleGoBack, handleGoForward, canGoBack, canGoForward]);
 

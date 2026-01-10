@@ -6,8 +6,9 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useMemo } from "react";
 import { StandardRegistry } from "@/types/standardRegistry.types";
+import { Keyword } from "@/types/keyword.types";
 
-export interface StandardRegistryContextData {
+export interface GeneralContextData {
     // All standard registries loaded from backend (flat array)
     registries: StandardRegistry[];
     setRegistries: Dispatch<SetStateAction<StandardRegistry[]>>;
@@ -22,9 +23,21 @@ export interface StandardRegistryContextData {
     // Error state
     registriesError: Error | null;
     setRegistriesError: Dispatch<SetStateAction<Error | null>>;
+
+    // All keywords (workspaces, folders, notes, headings, external links)
+    allKeywords: Keyword[];
+    setAllKeywords: Dispatch<SetStateAction<Keyword[]>>;
+
+    // Keywords loading state
+    keywordsLoading: boolean;
+    setKeywordsLoading: Dispatch<SetStateAction<boolean>>;
+
+    // Keywords error state
+    keywordsError: Error | null;
+    setKeywordsError: Dispatch<SetStateAction<Error | null>>;
 }
 
-export const standardRegistryContextDefaultValue: StandardRegistryContextData = {
+export const generalContextDefaultValue: GeneralContextData = {
     registries: [],
     registriesByType: {},
     registriesLoading: true,
@@ -32,16 +45,26 @@ export const standardRegistryContextDefaultValue: StandardRegistryContextData = 
     setRegistries: () => {},
     setRegistriesLoading: () => {},
     setRegistriesError: () => {},
+    allKeywords: [],
+    setAllKeywords: () => {},
+    keywordsLoading: true,
+    setKeywordsLoading: () => {},
+    keywordsError: null,
+    setKeywordsError: () => {},
 };
 
-export const StandardRegistryStore = createContext<StandardRegistryContextData>(standardRegistryContextDefaultValue);
+export const GeneralStore = createContext<GeneralContextData>(generalContextDefaultValue);
 
-export const useStandardRegistryStore = () => useContext(StandardRegistryStore);
+export const useGeneralStore = () => useContext(GeneralStore);
 
-export const StandardRegistryProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const GeneralProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [registries, setRegistries] = useState<StandardRegistry[]>([]);
     const [registriesLoading, setRegistriesLoading] = useState<boolean>(true);
     const [registriesError, setRegistriesError] = useState<Error | null>(null);
+
+    const [allKeywords, setAllKeywords] = useState<Keyword[]>([]);
+    const [keywordsLoading, setKeywordsLoading] = useState<boolean>(true);
+    const [keywordsError, setKeywordsError] = useState<Error | null>(null);
 
     // Group registries by type for easy lookup
     const registriesByType = useMemo(() => {
@@ -56,7 +79,7 @@ export const StandardRegistryProvider: React.FC<React.PropsWithChildren<unknown>
     }, [registries]);
 
     return (
-        <StandardRegistryStore.Provider
+        <GeneralStore.Provider
             value={{
                 registries,
                 registriesByType,
@@ -65,9 +88,15 @@ export const StandardRegistryProvider: React.FC<React.PropsWithChildren<unknown>
                 setRegistriesLoading,
                 registriesError,
                 setRegistriesError,
+                allKeywords,
+                setAllKeywords,
+                keywordsLoading,
+                setKeywordsLoading,
+                keywordsError,
+                setKeywordsError,
             }}
         >
             {children}
-        </StandardRegistryStore.Provider>
+        </GeneralStore.Provider>
     );
 };

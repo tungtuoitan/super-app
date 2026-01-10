@@ -11,7 +11,6 @@ export function CalculateMovingTreeContainerHeight() {
     
     // Track container height to make Tree component responsive
     useEffect(() => {
-        console.log("Moving Tree Container Height:",containerHeight);
         const updateHeight = () => {
             if (treeContainerRef.current) {
                 const height = treeContainerRef.current.clientHeight;

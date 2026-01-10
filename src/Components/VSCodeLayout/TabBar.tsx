@@ -8,7 +8,7 @@ import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useWsStore } from "@/store/ws/useWs.store";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
-import { useTreeEditorHelper } from "@/hooks/vsCode/useTreeEditorHelper";
+import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper";
 import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
 
 /**

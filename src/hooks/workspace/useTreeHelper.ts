@@ -17,13 +17,14 @@ import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import {SPECIAL_IDS} from "@/utils/temp-id.utils";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceLoader();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { $user } = useAuthStore();
 
     /**
@@ -44,8 +45,6 @@ export const useTreeHelper = () => {
      */
     const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }, treeData: TreeFolder[]) => {
         try {
-            console.log("🚀 handleMove called:", { dragIds: args.dragIds, parentId: args.parentId, index: args.index });
-
             setIsDragging(true);
 
             // -------------------------------------------------------
@@ -91,7 +90,6 @@ export const useTreeHelper = () => {
             if (!args.parentId) {
                 // ---- Case 1: Drop at root level (bottom of tree) ----
                 newParentId = undefined;
-                console.log("🎯 Drop target: Root level (parentId is null)");
             } else {
                 const targetNode = validNodes.find((t) => t.id === args.parentId);
 
@@ -100,7 +98,6 @@ export const useTreeHelper = () => {
                     const dropZoneNode = allNodes.find((t) => t.id === args.parentId);
                     if (dropZoneNode && dropZoneNode.data.id === constants.workspace.dropZone.workspaceItemId) {
                         newParentId = undefined;
-                        console.log("🎯 Drop target: Root level (drop zone)");
 
                         // ---- VALIDATION: If all items already root-level, prevent drop ----
                         const allAlreadyRoot = selectedItemIds.every((id) => {
@@ -115,7 +112,6 @@ export const useTreeHelper = () => {
                     } else {
                         // ---- Parent node not found - treat as root level drop ----
                         newParentId = undefined;
-                        console.log("🎯 Drop target: Root level (parentNode not found)");
                     }
                 } else {
                     const targetItemId = targetNode.data.id; // workspace_items.id
@@ -123,7 +119,6 @@ export const useTreeHelper = () => {
                     // ---- workspace root nodes, drop zone ----
                     if (SPECIAL_IDS.includes(targetItemId)) {
                         newParentId = undefined; // Move to workspace root
-                        console.log("🎯 Drop target: Root level (negative entity ID)");
                     } else {
                         const targetNodeData = targetNode.data;
 
@@ -147,11 +142,9 @@ export const useTreeHelper = () => {
                         if (isFolder) {
                             // ---- Dropping INTO a folder ----
                             newParentId = targetItemId;
-                            console.log(`🎯 Drop target: Folder ${targetItemId}`);
                         } else {
                             // ---- Dropping BETWEEN siblings - use their parent ----
                             newParentId = targetNodeData.parentId ?? undefined;
-                            console.log(`🎯 Drop target: ${newParentId === undefined ? "Root level" : `Parent ${newParentId}`} (between siblings)`);
                         }
                     }
                 }
@@ -280,12 +273,6 @@ export const useTreeHelper = () => {
                 return !isDescendantOfOtherSelected;
             });
 
-            console.log("🎯 Items after filtering descendants:", {
-                all: selectedItemIds,
-                topLevel: itemsNeedUpdate,
-                filtered: selectedItemIds.length - itemsNeedUpdate.length,
-            });
-
             // -------------------------------------------------------
             // STEP 6: SPLIT INTO 2 FLOWS: REAL IDS (API) & VIRTUAL IDS (STATE ONLY)
             // -------------------------------------------------------
@@ -294,8 +281,6 @@ export const useTreeHelper = () => {
             // - virtualItemsNeedUpdate (<0): Virtual items (workspace root, drop zone) → Update state only
             const realItemsNeedUpdate = itemsNeedUpdate.filter((id) => id > 0);
             const virtualItemsNeedUpdate = itemsNeedUpdate.filter((id) => id < 0);
-
-            console.log("📊 Split IDs:", { realItemsNeedUpdate, virtualItemsNeedUpdate });
 
             // -------------------------------------------------------
             // FLOW 1: UPDATE REAL ITEMS VIA API (ID > 0)
@@ -329,12 +314,11 @@ export const useTreeHelper = () => {
                         throw new Error("Move API returned unsuccessful response");
                     }
 
-                    console.log(`✅ Successfully moved ${batchRequests.length} real item(s) via API`);
                 } catch (error) {
                     console.error(`❌ Failed to move real items:`, error);
 
                     // Show error toast with user-friendly message
-                    enqueueSnackbar("Failed to move items. Please try again.", { variant: "error" });
+                    _console.error("Failed to move items. Please try again.");
 
                     throw error;
                 }
@@ -346,7 +330,6 @@ export const useTreeHelper = () => {
             let updatedVirtualItems: WorkspaceItemV2[] = [];
             let allNewVirtualItems: WorkspaceItemV2[] = [];
             if (virtualItemsNeedUpdate.length > 0) {
-                console.log(`🔄 Updating ${virtualItemsNeedUpdate.length} virtual item(s) in state only (no API call)`);
                 updatedVirtualItems = virtualItemsNeedUpdate
                     .map((workspaceItemId) => {
                         const item = allNodes.find((t) => t.data.id === workspaceItemId);
@@ -376,7 +359,7 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             const totalMoved = realItemsNeedUpdate.length + virtualItemsNeedUpdate.length;
             if (totalMoved > 0) {
-                enqueueSnackbar(`Successfully moved ${totalMoved} item(s)`, { variant: "success" });
+                _console.success(`Successfully moved ${totalMoved} item(s)`);
             }
 
             // -------------------------------------------------------
@@ -395,7 +378,7 @@ export const useTreeHelper = () => {
             console.error("❌ Failed to move item(s):", error);
 
             // Show error toast to user
-            enqueueSnackbar("An error occurred while moving items", { variant: "error" });
+            _console.error("An error occurred while moving items");
         } finally {
             setIsDragging(false);
         }

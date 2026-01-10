@@ -9,10 +9,14 @@ import type { Folder } from "@/types/folder.types";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { constants } from "@/utils/constants";
 import { WorkspaceItemAction } from "@/types/workspace.types";
+import {useGeneralStore} from "@/store/index";
+import {useStandardRegistryHelper} from "../standardRegistry/useStandardRegistry.helper";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useFolderDialogHelper = () => {
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { loadTree } = useWorkspaceLoader();
+    const { loadKeywords } = useStandardRegistryHelper();
 
     // Form state from FolderDialogStore
     const {
@@ -87,13 +91,13 @@ export const useFolderDialogHelper = () => {
 
         // Check workspace ID
         if (!selectedWorkspaceId) {
-            enqueueSnackbar("No workspace selected", { variant: "error" });
+            _console.error("No workspace selected");
             return;
         }
 
         // Edit mode validation: check if we have editing folder
         if (mode === "edit" && (!editingFolder || !editingFolder.id)) {
-            enqueueSnackbar("No folder selected for editing", { variant: "error" });
+            _console.error("No folder selected for editing");
             return;
         }
 
@@ -134,10 +138,12 @@ export const useFolderDialogHelper = () => {
             // Success message based on mode
             const successMessage = mode === "edit" ? `Folder "${newFolderName}" updated successfully!` : `Folder "${newFolderName}" created successfully!`;
 
-            enqueueSnackbar(successMessage, { variant: "success" });
+            _console.success(successMessage);
 
             // Reload workspace tree
             loadTree();
+            loadKeywords();
+
 
             // Close dialog
             closeFolderDialog();
@@ -145,7 +151,7 @@ export const useFolderDialogHelper = () => {
             resetForm();
         } catch (error: any) {
             console.error(`Failed to ${mode} folder:`, error);
-            enqueueSnackbar(error?.message || `Failed to ${mode} folder`, { variant: "error" });
+            _console.error(error?.message || `Failed to ${mode} folder`);
         } finally {
             setIsSubmitting(false);
         }

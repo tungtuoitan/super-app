@@ -22,7 +22,6 @@ import { config, Locale } from "../config/app.config";
  * @example
  * ```typescript
  * const userLocale = getLocaleLanguage();
- * console.log(userLocale); // 'en-us', 'de-de', etc.
  * ```
  */
 export function getLocaleLanguage(): Locale {

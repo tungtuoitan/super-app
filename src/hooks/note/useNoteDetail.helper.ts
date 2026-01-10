@@ -4,19 +4,23 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { Note, UpsertNoteDTO } from "@/types/note.types";
 import { noteService } from "@/services/note.service";
+import { keywordService } from "@/services/keyword.service";
 import { workspaceService } from "@/services/workspace.service";
 import { constants } from "@/utils/constants";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { transformANote } from "@/utils/note.utils";
+import { extractExternalLinks } from "@/utils/markdown.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore, useStandardRegistryStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
@@ -24,16 +28,20 @@ export const useNoteDetailHelper = () => {
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceLoader();
     const { currentWorkspace } = useWorkspaceStore();
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
-    const { registries, registriesLoading } = useStandardRegistryStore();
+    const { registries, registriesLoading, allKeywords } = useGeneralStore();
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useGridControlStore();
+    const { loadKeywords } = useStandardRegistryHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
+        
         // Get current note from active tab
         const activeTab = getActiveTab();
-        if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) return;
+        if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
+            return;
+        }
 
         const activeNote = activeTab.data as Note;
 
@@ -42,7 +50,6 @@ export const useNoteDetailHelper = () => {
         if (field === "statusCode") {
             // value is synthetic event with structure: { target: { value: { id, label, ... } } }
             _value = value?.target?.value?.id || null;
-            // console.log("Changing statusCode to:", _value, "from event:", value);
         } else {
             _value = value;
         }
@@ -67,7 +74,7 @@ export const useNoteDetailHelper = () => {
             // Get current note from active tab
             const activeTab = getActiveTab();
             if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
-                console.warn("⚠️ No note tab active to upsert");
+                _console.warning("⚠️ No note tab active to upsert");
                 return null;
             }
 
@@ -77,7 +84,7 @@ export const useNoteDetailHelper = () => {
             // Step 1.5: Validate name field
             // ============================================================
             if (!activeNote.name || activeNote.name.trim() === "") {
-                enqueueSnackbar("Note name is required", { variant: "error" });
+                _console.error("Note name is required");
                 return null;
             }
 
@@ -102,6 +109,38 @@ export const useNoteDetailHelper = () => {
                 };
 
                 // ============================================================
+                // Step 3.5: Auto-insert external keywords if any found in description
+                // ============================================================
+                // if (activeNote.description) {
+                //     const externalLinks = extractExternalLinks(activeNote.description);
+
+                //     if (externalLinks.length > 0) {
+                //         // Filter out links that already exist in allKeywords
+                //         const newExternalLinks = externalLinks.filter(link => {
+                //             return !allKeywords.some(k => k.type === 'external' && k.link === link.url);
+                //         });
+
+                //         // If there are new external links, upsert them
+                //         if (newExternalLinks.length > 0) {
+                //             try {
+                //                 const upsertRequests = newExternalLinks.map(link => ({
+                //                     name: link.name,
+                //                     link: link.url,
+                //                 }));
+
+                //                 await keywordService._upsertExternalKeywords(token, upsertRequests);
+
+                //                 // Reload keywords to update allKeywords state
+                //                 loadKeywords();
+                //             } catch (err) {
+                //                 // Log error but don't block note save
+                //                 console.error("Failed to insert external keywords:", err);
+                //             }
+                //         }
+                //     }
+                // }
+
+                // ============================================================
                 // Step 4: Call batch API to upsert note
                 // ============================================================
                 const result = await noteService._upsertNotes(token, [upsertData]);
@@ -122,7 +161,8 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 10: Update tab data with server response
                 // ============================================================
-                enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
+                // _console.(isCreateMode ? "Note created successfully" : "Note saved successfully");
+                _console.success(isCreateMode ? "Note created successfully" : "Note saved successfully");
 
                 if (tabId) {
                     setOpenTabs((prev) =>
@@ -152,15 +192,17 @@ export const useNoteDetailHelper = () => {
                     loadTree();
                 }
 
+                loadKeywords();
+
                 return transformedNote;
             } catch (error) {
                 console.error("❌ Failed to save note:", error);
                 const errorMessage = await parseApiError(error);
 
                 if (isUnauthorizedError(error)) {
-                    enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                    _console.error("Unauthorized. Please login again.");
                 } else {
-                    enqueueSnackbar(`Failed to save note: ${errorMessage}`, { variant: "error" });
+                    _console.error(`Failed to save note: ${errorMessage}`);
                 }
                 return null;
             }

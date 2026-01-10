@@ -21,17 +21,19 @@ import { useWsDetailHelper } from "../ws/useWsDetail.helper";
 import { Ws, useWsStore } from "@/store/ws/useWs.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { useTreeEditorHelper } from "./useTreeEditorHelper";
+import { useWorkspaceItemHelper } from "../workspace/useWorkspaceItemHelper";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 import { useWorkspaceLoader } from "../workspace";
+import {useStandardRegistryHelper} from "../standardRegistry/useStandardRegistry.helper";
+import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const useEditorToolbarHelper = () => {
-    const { enqueueSnackbar } = useSnackbar();
+    const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
     const { $user } = useAuthStore();
-    const _treeEditor = useTreeEditorHelper();
+    const _treeEditor = useWorkspaceItemHelper();
 
     // Get active tab
     const activeTab = getActiveTab();
@@ -50,7 +52,7 @@ export const useEditorToolbarHelper = () => {
     // WorkspaceTree-specific
     const { moduleName } = useGridControlStore();
     const { currentWorkspace } = useWorkspaceStore();
-    const { loadTree } = useWorkspaceLoader();
+    const { loadKeywords } = useStandardRegistryHelper();
 
     // Get status text based on tab type and deletion state
     const _deleteStatusText = (() => {
@@ -95,6 +97,8 @@ export const useEditorToolbarHelper = () => {
                 case constants.vscode.tab.tabTypes.workspace:
                     // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
                     await upsertWorkspace(activeTab.id);
+                    loadWorkspaces();
+                    loadKeywords();
                     break;
                 case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
                     const data = activeTab.data as Note;
@@ -107,12 +111,14 @@ export const useEditorToolbarHelper = () => {
                             if (!savedNote) {
                                 throw new Error("Failed to update note");
                             }
+                            loadKeywords();
                         }
                         //* thêm các entity type khác ở đây
                     }
                     // CREATE new entity + workspace_item - use workspace API
                     else if (workspaceItem.id < 0 && activeTab.data.id < 0) {
                         await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
+                        loadKeywords()
                     }
                     else {
                         console.error("⚠️ Unexpected case in upsertOrchestraitor");
@@ -128,15 +134,15 @@ export const useEditorToolbarHelper = () => {
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
-                enqueueSnackbar("Unauthorized. Please login again.", { variant: "error" });
+                _console.error("Unauthorized. Please login again.");
             } else {
-                enqueueSnackbar(`Failed to save ${activeTab.type}: ${errorMessage}`, { variant: "error" });
+                _console.error(`Failed to save ${activeTab.type}: ${errorMessage}`);
             }
         } finally {
             // STEP 5: Reset Saving State
             setIsSaving(false);
         }
-    }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, _treeEditor, $user, setIsSaving, enqueueSnackbar]);
+    }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, _treeEditor, $user, setIsSaving]);
 
     // Handle Cancel - routes to appropriate reset logic
     const commonCancel = useCallback(() => {
@@ -147,14 +153,14 @@ export const useEditorToolbarHelper = () => {
                 // Reset tab data to original
                 setOpenTabs((prev) => prev.map((tab) => (tab.id === activeTab.id ? { ...tab, data: originalNoteRef.current as Note, hasUnsavedChanges: false } : tab)));
             }
-            enqueueSnackbar("Changes discarded", { variant: "info" });
+            _console.info("Changes discarded");
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             if (originalWsRef.current) {
                 setSelectedWs({ ...originalWsRef.current });
             }
-            enqueueSnackbar("Changes discarded", { variant: "info" });
+            _console.info("Changes discarded");
         }
-    }, [activeTab, originalNoteRef, originalWsRef, setOpenTabs, setSelectedWs, enqueueSnackbar]);
+    }, [activeTab, originalNoteRef, originalWsRef, setOpenTabs, setSelectedWs]);
 
     return {
         upsertOrchestraitor,

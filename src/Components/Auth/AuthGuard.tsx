@@ -19,7 +19,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated } = useAuthStore();
     const { initAuthFromStorageToken, logout } = useAuthHelper();
     const { setAccountsOpen } = useActivityBarStore();
-    const { loadStandardRegistries } = useStandardRegistryHelper();
+    const { loadStandardRegistries, loadKeywords } = useStandardRegistryHelper();
 
     // Initialize auth on mount
     useEffect(() => {
@@ -55,10 +55,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
     }, [isAuthenticated]);
 
-    // Load standard registries when authenticated
+    // Load standard registries and keywords when authenticated
     useEffect(() => {
         if (isAuthenticated) {
             loadStandardRegistries();
+            loadKeywords();
         }
     }, [isAuthenticated]);
 

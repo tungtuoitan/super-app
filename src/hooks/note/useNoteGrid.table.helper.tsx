@@ -11,7 +11,7 @@ import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
 import { constants } from "@/utils/constants";
 import { useAuthStore } from "@/store/index";
-import { useStandardRegistryStore } from "@/store/index";
+import { useGeneralStore } from "@/store/index";
 import { WorkspaceLinksCell } from "@/Components/Note/WorkspaceLinksCell";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useWorkspaceStore } from "@/store/index";
@@ -39,7 +39,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         containerWidth,
     } = useNoteGridStore();
 
-    const { registries } = useStandardRegistryStore();
+    const { registries } = useGeneralStore();
     const navigate = useNavigate();
     const location = useLocation();
     const { setSelectedWorkspaceId, setScrollToItem, setSelectedItemIds } = useWorkspaceStore();
@@ -47,7 +47,6 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
     // Handle workspace navigation with highlight
     const handleWorkspaceNavigation = useCallback((workspaceId: number, workspaceItemId: number) => {
         if (!workspaceItemId) {
-            console.log("WorkspaceItemId is null, cannot navigate.");
             return;
         }
 

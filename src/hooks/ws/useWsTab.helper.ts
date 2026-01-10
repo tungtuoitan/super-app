@@ -12,6 +12,7 @@ import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { updateActiveTab } = useEditorTabHelper();
+        const { setNewTabAnd } = useEditorTabHelper();
 
     /**
      * Open workspace in editor tab
@@ -52,9 +53,9 @@ export const useWsTabHelper = () => {
                 if (newTabs.length > 0) {
                     // Switch to the last tab
                     const lastTab = newTabs[newTabs.length - 1];
-                    setActiveTabId(lastTab.id);
+                    setNewTabAnd(lastTab.id);
                 } else {
-                    setActiveTabId(null);
+                    setNewTabAnd(null);
                 }
             }
 
