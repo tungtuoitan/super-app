@@ -15,19 +15,16 @@ import { EDITOR_LINE_DISTANCE_THRESHOLD } from "@/hooks/vsCode/useNavigationHist
 
 export function MarkdownEditorNavigationTracker() {
     const { editorRef } = useNoteDetailStore();
-    const { trackNavigation, captureEditorPosition, restoreEditorPosition, isNavigating, getCurrentEntry } = useNavigationHistoryHelper();
+    const { trackNavigation, captureEditorPosition, captureEditorScrollPosition, restoreEditorPosition, isNavigating, getCurrentEntry } = useNavigationHistoryHelper();
     const { present } = useNavigationHistoryStore();
 
     // Track last recorded position to implement threshold logic
-    const lastTrackedPositionRef = useRef<{ lineNumber: number; column: number } | null>(null);
-
-    // Debounce timer
+    const lastPositionRef = useRef<{ lineNumber: number; column: number } | null>(null);
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Listen to cursor position changes and track when moved significantly
     useEffect(() => {
         const editor = editorRef.current;
-
         if (!editor || (editor as any)._isDisposed) {
             return;
         }
@@ -35,40 +32,44 @@ export function MarkdownEditorNavigationTracker() {
         // Listen to cursor position changes
         const disposable = editor.onDidChangeCursorPosition((e) => {
             // Don't track if we're currently navigating (to prevent tracking during restore)
-            if (isNavigating()) return;
-
-            const currentPosition = e.position;
-            const lastPosition = lastTrackedPositionRef.current;
-
-            // If no last position, set it and skip (first time)
-            if (!lastPosition) {
-                lastTrackedPositionRef.current = {
-                    lineNumber: currentPosition.lineNumber,
-                    column: currentPosition.column,
-                };
+            if (isNavigating()) {
+                console.log("skipping tracking");
                 return;
             }
 
-            // Calculate line distance
-            const lineDistance = Math.abs(currentPosition.lineNumber - lastPosition.lineNumber);
+            const currentPosition = e.position;
 
-            // Only track if moved >10 lines (VS Code threshold)
-            if (lineDistance > EDITOR_LINE_DISTANCE_THRESHOLD) {
+            // If no last position, set it and skip (first time)
+            // if (!lastPosition) {
+            //     lastPositionRef.current = {
+            //         lineNumber: currentPosition.lineNumber,
+            //         column: currentPosition.column,
+            //     };
+            //     // console.log(">>>>>>>>>>> [NAVIGATION] Initial position set", lastPositionRef.current);
+            //     // return;
+            // }
+
+            // Calculate line distance
+            const lineDistance = Math.abs(currentPosition.lineNumber - (lastPositionRef.current ? lastPositionRef.current.lineNumber : 0));
+
+            // Only track if moved >5 lines (VS Code threshold)
+            if (lineDistance > EDITOR_LINE_DISTANCE_THRESHOLD || lastPositionRef.current===null) {
                 // Debounce to avoid excessive tracking
                 if (debounceTimerRef.current) {
                     clearTimeout(debounceTimerRef.current);
                 }
 
                 debounceTimerRef.current = setTimeout(() => {
-                    const editorPosition = captureEditorPosition(editor);
+                    const mdPos = captureEditorPosition(editor);
+                    const mdScrollPos = captureEditorScrollPosition(editor);
 
-                    if (editorPosition) {
-                        trackNavigation({ editorPosition });
+                    if (mdPos) {
+                        trackNavigation({ mdPos, mdScrollPos });
 
                         // Update last tracked position
-                        lastTrackedPositionRef.current = {
-                            lineNumber: editorPosition.lineNumber,
-                            column: editorPosition.column,
+                        lastPositionRef.current = {
+                            lineNumber: mdPos.lineNumber,
+                            column: mdPos.column,
                         };
                     }
                 }, 500); // 500ms debounce
@@ -92,16 +93,16 @@ export function MarkdownEditorNavigationTracker() {
         }
 
         // Only restore if we just navigated (not during normal tracking)
-        if (isNavigating() && present.editorPosition) {
+        if (isNavigating() && present.mdPos) {
             // Small delay to ensure editor content is loaded
             setTimeout(() => {
-                restoreEditorPosition(editor, present.editorPosition);
+                restoreEditorPosition(editor, present.mdPos, present.mdScrollPos);
 
                 // Update last tracked position to prevent immediate re-tracking
-                lastTrackedPositionRef.current = present.editorPosition
+                lastPositionRef.current = present.mdPos
                     ? {
-                        lineNumber: present.editorPosition.lineNumber,
-                        column: present.editorPosition.column,
+                        lineNumber: present.mdPos.lineNumber,
+                        column: present.mdPos.column,
                     }
                     : null;
             }, 100);

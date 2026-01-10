@@ -6,7 +6,7 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
-import { useGeneralStore, useWorkspaceStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useWorkspaceStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteDetailHelper } from "@/hooks/note/useNoteDetail.helper";
@@ -24,7 +24,7 @@ import {
 } from "@/utils/markdown.utils";
 import { Note } from "@/types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import {useSnackbar} from "notistack";
+import { useSnackbar } from "notistack";
 import { MarkdownEditorNavigationTracker } from "@/HeadlessComponents/markdownEditor/MarkdownEditorNavigationTracker";
 
 export function MarkdownEditor() {
@@ -48,6 +48,20 @@ export function MarkdownEditor() {
     const isDeleted = activeNote?.deletedAt !== null;
     const isHardDeleted = activeNote?.isHardDeleted;
     const disabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
+
+    const { past, setPast, present, setPresent, future, setFuture } = useNavigationHistoryStore();
+    const { openTabs } = useEditorTabsStore();
+
+    // Track if we're currently navigating (to prevent tracking during restore)
+    const isNavigatingRef = useRef(false);
+
+    useEffect(() => {
+        console.log("========================================== Updated:", {
+            past: past.map(e => (openTabs.find(t => t.id === e.tabId)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber??"-")).join(", "),
+            present: present ? (openTabs.find(t => t.id === present.tabId)?.title ?? "Unknown") + " " + (present.mdPos?.lineNumber??"-") : "None",
+            future: future.map(e => (openTabs.find(t => t.id === e.tabId)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber??"-")).join(", "),
+        });
+    }, [present]);
 
     // Handle internal changes: Convert to original version before saving
     const handleDisplayChange = (newDisplayDesc: string | undefined) => {
@@ -226,9 +240,7 @@ export function MarkdownEditor() {
         <>
             {/* //* phải mounted thì mới có editor để gắn listener */}
             {isMounted && <MarkdownEditorNavigationTracker />}
-            {
-
-            }
+            {}
             <Editor
                 height={540}
                 defaultLanguage="markdown"

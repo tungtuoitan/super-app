@@ -9,6 +9,7 @@ import { Note } from "@/types/note.types";
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 import type * as _monaco from "monaco-editor";
 import {useMonaco} from "@monaco-editor/react";
+import {is} from "date-fns/locale";
 export interface NoteDetailContextData {
     // Dialog state
     originalNoteRef: React.MutableRefObject<Note | null>;
@@ -30,6 +31,8 @@ export interface NoteDetailContextData {
     decorationsRef: React.MutableRefObject<string[]>;
     disposablesRef: React.MutableRefObject<_monaco.IDisposable[]>;
     $miRef: any;
+    isMounted: boolean;
+    setIsMounted: Dispatch<SetStateAction<boolean>>;
 }
 
 export const noteDetailContextDefaultValue: NoteDetailContextData = {
@@ -53,6 +56,8 @@ export const noteDetailContextDefaultValue: NoteDetailContextData = {
     decorationsRef: { current: [] },
     disposablesRef: { current: [] },
     $miRef: null,
+    isMounted: false,
+    setIsMounted: () => {},
 };
 
 const NoteDetailContext = createContext<NoteDetailContextData>(noteDetailContextDefaultValue);
@@ -76,6 +81,7 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const disposablesRef = useRef<_monaco.IDisposable[]>([]);
     // const $miRef = useRef<any>(useMonaco()); // khởi tạo ở đây vẫn bị null
     const $miRef = useRef<any>(null);
+    const [isMounted, setIsMounted] = useState(false);
 
     return (
         <NoteDetailContext.Provider
@@ -99,7 +105,9 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 editorRef,
                 decorationsRef,
                 disposablesRef,
-                $miRef: $miRef,
+                $miRef,
+                isMounted,
+                setIsMounted,
             }}
         >
             {children}

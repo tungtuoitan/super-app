@@ -8,17 +8,28 @@
  * Note: localStorage persistence handled in component level
  */
 
-import { useRef } from "react";
-import { useNavigationHistoryStore, ScrollPosition, CursorPosition, HistoryEntry } from "@/store/editor/NavigationHistory.store";
+import { useEffect, useRef } from "react";
+import { useNavigationHistoryStore, ScrollPosition, CursorPosition, HistoryEntry, MdPos, MdScrollPos } from "@/store/editor/NavigationHistory.store";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
-import { Note } from "@/types/note.types";
+import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
+import { useWsStore } from "@/store/ws/useWs.store";
+import { Note, NoteDTO } from "@/types/note.types";
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/index";
 import { useEditorTabHelper } from "./useEditorTab.helper";
+import { noteService } from "@/services/note.service";
+import { wsService, WsDTO } from "@/services/ws.service";
+import { transformNotes } from "@/utils/note.utils";
+import { transformWs } from "@/utils/ws.utils";
+import type * as _monaco from "monaco-editor";
 
 export const STORAGE_KEY_PREFIX = "navigation_history_";
 export const MAX_PAST_SIZE = 200; // Limit for Past stack
 export const SCROLL_DISTANCE_THRESHOLD = 100; // px - minimum scroll distance to consider "different position"
+export const EDITOR_LINE_DISTANCE_THRESHOLD = 5; // lines - minimum line distance for editor position changes (VS Code behavior)
+export const MD_SCROLL_DISTANCE_THRESHOLD = 50; // px - minimum Monaco scroll distance to consider "different position"
 
 /**
  * Map of tab types to their scroll element IDs
@@ -51,11 +62,24 @@ export const getStorageKey = (userId: number | null): string | null => {
 export const useNavigationHistoryHelper = () => {
     const { past, setPast, present, setPresent, future, setFuture } = useNavigationHistoryStore();
     const { openTabs, activeTabId, setActiveTabId, setOpenTabs, editorAreaRef } = useEditorTabsStore();
+    const { editorRef } = useNoteDetailStore();
     const { getActiveTab } = useEditorTabHelper();
     const { setNewTabAnd } = useEditorTabHelper();
 
     // Track if we're currently navigating (to prevent tracking during restore)
     const isNavigatingRef = useRef(false);
+
+    // Track pending present update to avoid race conditions
+    // When setPresent is called, present doesn't update immediately (React async state)
+    // This ref tracks the latest value we're trying to set
+    const pendingPresentRef = useRef<HistoryEntry | null>(null);
+
+    // Sync pendingPresentRef with present whenever present changes
+    useEffect(() => {
+        if (present) {
+            pendingPresentRef.current = present;
+        }
+    }, [present]);
 
     /**
      * Capture current scroll positions from DOM
@@ -103,46 +127,144 @@ export const useNavigationHistoryHelper = () => {
     // };
 
     /**
+     * Capture current cursor position from Monaco Editor
+     * @param editor - Monaco editor instance
+     * @returns MdPos or undefined if editor not available
+     */
+    const captureEditorPosition = (editor: _monaco.editor.IStandaloneCodeEditor | null): MdPos | undefined => {
+        if (!editor || (editor as any)._isDisposed) return undefined;
+
+        try {
+            const position = editor.getPosition();
+            if (!position) return undefined;
+
+            return {
+                lineNumber: position.lineNumber,
+                column: position.column,
+            };
+        } catch (error) {
+            console.warn("[Navigation] Failed to capture editor position:", error);
+            return undefined;
+        }
+    };
+
+    /**
+     * Capture current scroll position from Monaco Editor
+     * @param editor - Monaco editor instance
+     * @returns MdScrollPos or undefined if editor not available
+     */
+    const captureEditorScrollPosition = (editor: _monaco.editor.IStandaloneCodeEditor | null): MdScrollPos | undefined => {
+        if (!editor || (editor as any)._isDisposed) return undefined;
+
+        try {
+            const scrollTop = editor.getScrollTop();
+            const scrollLeft = editor.getScrollLeft();
+
+            return {
+                scrollTop,
+                scrollLeft,
+            };
+        } catch (error) {
+            console.warn("[Navigation] Failed to capture editor scroll position:", error);
+            return undefined;
+        }
+    };
+
+    /**
+     * Restore cursor position in Monaco Editor
+     * @param editor - Monaco editor instance
+     * @param position - Position to restore
+     * @param scrollPosition - Scroll position to restore (optional, for precise control)
+     */
+    const restoreEditorPosition = (
+        editor: _monaco.editor.IStandaloneCodeEditor | null,
+        position?: MdPos,
+        scrollPosition?: MdScrollPos
+    ) => {
+        if (!editor || (editor as any)._isDisposed) return;
+
+        try {
+            // Restore scroll position first (if provided, for exact scroll)
+            if (scrollPosition) {
+                editor.setScrollPosition({
+                    scrollTop: scrollPosition.scrollTop,
+                    scrollLeft: scrollPosition.scrollLeft,
+                });
+            }
+
+            // Then restore cursor position
+            if (position) {
+                editor.setPosition(position);
+
+                // If no scroll position provided, reveal cursor in center
+                if (!scrollPosition) {
+                    editor.revealPositionInCenter(position, 0);
+                }
+            }
+        } catch (error) {
+            console.warn("[Navigation] Failed to restore editor position:", error);
+        }
+    };
+
+    /**
      * Check if two entries are "significantly different"
      * Returns true if they should be considered different items in history
      *
      * Criteria for "significantly different":
-     * 1. Different tab or type → different
-     * 2. Same tab, scroll position far apart (>SCROLL_DISTANCE_THRESHOLD) → different
-     * 3. Same tab, close position, but both have field and fields are different → different
+     * 1. Khác tabId → different
+     * 2. Cùng tabId, type = note:
+     *    a. Khác mdScrollPos (>MD_SCROLL_DISTANCE_THRESHOLD) → different
+     *    b. Cùng mdScrollPos, khác lineNumber (>EDITOR_LINE_DISTANCE_THRESHOLD) → different
+     * 3. Other types: same as before
      *
      * Otherwise → same (skip push)
      */
     const areEntriesSignificantlyDifferent = (entry1: HistoryEntry, entry2: HistoryEntry): boolean => {
-        // 1. Different tab, type, or item → different
-        if (entry1.tabId !== entry2.tabId || entry1.itemId !== entry2.itemId || entry1.type !== entry2.type) {
+        // 1. Khác tabId → different
+        if (entry1.tabId !== entry2.tabId) {
             return true;
         }
 
-        // Same tab - check scroll distance using type-specific element
-        const scrollElementId = SCROLL_ELEMENT_MAP[entry1.type];
-        if (scrollElementId) {
-            const scroll1 = entry1.scrollPositions?.find(s => s.elementId === scrollElementId);
-            const scroll2 = entry2.scrollPositions?.find(s => s.elementId === scrollElementId);
+        // 2. Cùng tabId, type = note
+        if (entry1.type === 'note' && entry2.type === 'note') {
+            // Check Monaco editor scroll position first
+            const mdScroll1 = entry1.mdScrollPos;
+            const mdScroll2 = entry2.mdScrollPos;
 
-            const scrollTop1 = scroll1?.scrollTop || 0;
-            const scrollTop2 = scroll2?.scrollTop || 0;
-            const scrollDistance = Math.abs(scrollTop1 - scrollTop2);
+            if (mdScroll1 && mdScroll2) {
+                const scrollTopDistance = Math.abs(mdScroll1.scrollTop - mdScroll2.scrollTop);
+                const scrollLeftDistance = Math.abs(mdScroll1.scrollLeft - mdScroll2.scrollLeft);
 
-            // 2. Same tab, scroll position far apart → different
-            if (scrollDistance > SCROLL_DISTANCE_THRESHOLD) {
+                // 2a. Khác mdScrollPos → different
+                if (scrollTopDistance > MD_SCROLL_DISTANCE_THRESHOLD || scrollLeftDistance > MD_SCROLL_DISTANCE_THRESHOLD) {
+                    return true;
+                }
+
+                // 2b. Cùng mdScrollPos, check lineNumber
+                const pos1 = entry1.mdPos;
+                const pos2 = entry2.mdPos;
+
+                if (pos1 && pos2) {
+                    const lineDistance = Math.abs(pos1.lineNumber - pos2.lineNumber);
+
+                    // Khác lineNumber (>EDITOR_LINE_DISTANCE_THRESHOLD) → different
+                    if (lineDistance > EDITOR_LINE_DISTANCE_THRESHOLD) {
+                        return true;
+                    }
+                }
+            } else if (mdScroll1 || mdScroll2) {
+                // One has scroll position, other doesn't → different
                 return true;
             }
+
+            // Same scroll position and line number → same (skip)
+            return false;
         }
 
-        // 3. Same tab, close position → check fields
-        // const field1 = entry1.focusedFieldId;
-        // const field2 = entry2.focusedFieldId;
-
-        // Both have fields and fields are different → different
-        // if (field1 && field2 && field1 !== field2) {
-        //     return true;
-        // }
+        // 3. Other types (workspace, folder, etc.) - check by itemId and type
+        if (entry1.itemId !== entry2.itemId || entry1.type !== entry2.type) {
+            return true;
+        }
 
         // Otherwise → same (skip)
         return false;
@@ -158,21 +280,51 @@ export const useNavigationHistoryHelper = () => {
      * 5. Limit Past to MAX_PAST_SIZE (trim oldest)
      */
     const pushHistory = (entry: Omit<HistoryEntry, "timestamp">) => {
+
         const newEntry: HistoryEntry = {
             ...entry,
             timestamp: Date.now(),
         };
 
+        // CRITICAL: Use pendingPresentRef instead of present to avoid race conditions
+        // present doesn't update immediately after setPresent (React async state)
+        const currentPresent = pendingPresentRef.current;
+
+        // console.log("comparing present vs newEntry:", currentPresent, newEntry);
+
         // If no Present, just set it
-        if (!present) {
+        if (!currentPresent) {
             setPresent(newEntry);
+            pendingPresentRef.current = newEntry;
+            // console.log("new present:", newEntry);
             return;
         }
 
+
+        // Special case: Same tab/item/type, but position data just became available
+        // This happens when TrackTabNavigation tracks before editor mounts, then MarkdownEditorNavigationTracker tracks after mount
+        if (currentPresent.tabId === newEntry.tabId &&
+            currentPresent.itemId === newEntry.itemId &&
+            currentPresent.type === newEntry.type &&
+            currentPresent.type === 'note') {
+
+            const presentHasNoPosition = !currentPresent.mdPos && !currentPresent.mdScrollPos;
+            const newEntryHasPosition = newEntry.mdPos || newEntry.mdScrollPos;
+
+            if (presentHasNoPosition && newEntryHasPosition) {
+                // Update present with position data
+                setPresent(newEntry);
+                pendingPresentRef.current = newEntry;
+                console.log("[Navigation] Updated present with position data:", newEntry);
+                return;
+            }
+        }
+
         // Validate: Check if new entry is significantly different from Present
-        if (!areEntriesSignificantlyDifferent(present, newEntry)) {
+        if (!areEntriesSignificantlyDifferent(currentPresent, newEntry)) {
             // Not significantly different → just update Present timestamp
-            setPresent({ ...newEntry });
+            // setPresent({ ...newEntry });
+            // console.log("no diff, skipping push");
             return;
         }
 
@@ -180,16 +332,20 @@ export const useNavigationHistoryHelper = () => {
 
         // 2. Move Present to Past (if exists)
         setPast((prevPast) => {
-            let newPast = [...prevPast, present];
+            let newPast = [...prevPast, currentPresent];
             // 5. Limit Past size - remove oldest entries
             if (newPast.length > MAX_PAST_SIZE) {
                 newPast = newPast.slice(newPast.length - MAX_PAST_SIZE);
             }
+            console.log("new past:", newPast);
             return newPast;
+
         });
 
         // 3. New entry becomes Present
         setPresent(newEntry);
+        pendingPresentRef.current = newEntry;
+        // console.log("new present:", newEntry);
 
         // 4. Clear Future
         setFuture([]);
@@ -198,10 +354,18 @@ export const useNavigationHistoryHelper = () => {
     /**
      * Track current location - call this when switching tabs or focusing fields
      * Generic for all tab types (note, workspace, file, etc.)
+     * @param options - Optional tracking options
      */
-    const trackNavigation = (focusedFieldId?: string) => {
+    const trackNavigation = (options?: {
+        focusedFieldId?: string;
+        mdPos?: MdPos;
+        mdScrollPos?: MdScrollPos;
+    }) => {
         // Don't track if we're currently navigating back/forward
-        if (isNavigatingRef.current) return;
+        if (isNavigatingRef.current) {
+            // console.log("skipping tracking");
+            return;
+        }
 
         // Get active tab
         const activeTab = getActiveTab();
@@ -226,10 +390,15 @@ export const useNavigationHistoryHelper = () => {
         if (!itemId || !tabType) return;
 
         // Don't track temporary items (id < 0)
-        if (itemId < 0) return;
+        // if (itemId < 0) return;
 
         const scrollPositions = captureScrollPositions(tabType);
-        // const cursorPosition = captureCursorPosition(focusedFieldId);
+        // const cursorPosition = captureCursorPosition(options?.focusedFieldId);
+        // console.log("[Navigation] Tracking navigation:", {
+        //     tabName: activeTab.title,
+        //     scrollPositions,
+        //     mdPos: options?.mdPos?.lineNumber,
+        // })
 
         pushHistory({
             tabId: activeTabId,
@@ -237,7 +406,9 @@ export const useNavigationHistoryHelper = () => {
             itemId: itemId.toString(),
             scrollPositions,
             // cursorPosition,
-            // focusedFieldId,
+            // focusedFieldId: options?.focusedFieldId,
+            mdPos: options?.mdPos,
+            mdScrollPos: options?.mdScrollPos,
         });
     };
 
@@ -336,7 +507,16 @@ export const useNavigationHistoryHelper = () => {
 
         // Restore positions after DOM updates
         setTimeout(() => {
+            // Restore DOM scroll positions
             restoreScrollPositions(entry.scrollPositions);
+
+            // Restore Monaco editor positions (for note type)
+            if (entry.type === 'note' && (entry.mdPos || entry.mdScrollPos)) {
+                const editor = editorRef.current;
+                if (editor && !(editor as any)._isDisposed) {
+                    restoreEditorPosition(editor, entry.mdPos, entry.mdScrollPos);
+                }
+            }
 
             // Focus field if specified and move cursor to end
             // if (entry.focusedFieldId) {
@@ -365,13 +545,15 @@ export const useNavigationHistoryHelper = () => {
         const newPast = past.slice(0, -1);
 
         // 2. Old Present → Push to beginning of Future
-        if (present) {
-            setFuture((prevFuture) => [present, ...prevFuture]);
+        const currentPresent = pendingPresentRef.current;
+        if (currentPresent) {
+            setFuture((prevFuture) => [currentPresent, ...prevFuture]);
         }
 
         // 3. Update Past and Present
         setPast(newPast);
         setPresent(newPresent);
+        pendingPresentRef.current = newPresent;
 
         // Navigate to the new present
         navigateToEntry(newPresent);
@@ -394,9 +576,10 @@ export const useNavigationHistoryHelper = () => {
         const newFuture = future.slice(1);
 
         // 2. Old Present → Push to end of Past
-        if (present) {
+        const currentPresent = pendingPresentRef.current;
+        if (currentPresent) {
             setPast((prevPast) => {
-                let newPast = [...prevPast, present];
+                let newPast = [...prevPast, currentPresent];
                 // Apply limit
                 if (newPast.length > MAX_PAST_SIZE) {
                     newPast = newPast.slice(newPast.length - MAX_PAST_SIZE);
@@ -408,6 +591,7 @@ export const useNavigationHistoryHelper = () => {
         // 3. Update Future and Present
         setFuture(newFuture);
         setPresent(newPresent);
+        pendingPresentRef.current = newPresent;
 
         // Navigate to the new present
         navigateToEntry(newPresent);
@@ -430,6 +614,7 @@ export const useNavigationHistoryHelper = () => {
     const clearHistory = (userId: number | null) => {
         setPast([]);
         setPresent(null);
+        pendingPresentRef.current = null;
         setFuture([]);
         const storageKey = getStorageKey(userId);
         if (storageKey) {
@@ -439,9 +624,10 @@ export const useNavigationHistoryHelper = () => {
 
     /**
      * Get current entry in history (Present)
+     * Returns pendingPresentRef to get the most up-to-date value
      */
     const getCurrentEntry = (): HistoryEntry | null => {
-        return present;
+        return pendingPresentRef.current;
     };
 
     return {
@@ -454,6 +640,11 @@ export const useNavigationHistoryHelper = () => {
         handleGoForward,
         canGoBack,
         canGoForward,
+
+        // Editor position tracking
+        captureEditorPosition,
+        captureEditorScrollPosition,
+        restoreEditorPosition,
 
         // Utilities
         clearHistory,
