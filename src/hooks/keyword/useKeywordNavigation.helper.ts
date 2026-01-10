@@ -22,9 +22,8 @@ import { WorkspaceNoteItem, WorkspaceFolderItem } from "@/types/workspace-v2.typ
 import { WorkspaceDTO } from "@/types/workspace-dto.types";
 import { BaseTab } from "@/types/editor/tab.types";
 import { Keyword } from "@/types/keyword.types";
-import {isValid} from "date-fns";
-import {set} from "lodash";
-import {isValidUrl} from "@/utils/url.utils";
+import { isValidUrl } from "@/utils/url.utils";
+import {useWorkspaceHelper} from "../workspace/useWorkspaceHelper";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
@@ -36,6 +35,7 @@ export const useKeywordNavigationHelper = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { moduleName } = useGridControlStore();
     const { navigateToView } = useNavigationStore();
+    const { saveNewsBeforeNavigate } = useWorkspaceHelper();
 
     /**
      * Navigate to keyword link (note, heading, external)
@@ -59,11 +59,10 @@ export const useKeywordNavigationHelper = () => {
                 // Handle external links
                 if (parsed.type === "external" && parsed.url) {
                     const _url = parsed.url.startsWith("http") ? parsed.url : `https://${parsed.url}`;
-                    if(isValidUrl(_url)){
+                    if (isValidUrl(_url)) {
                         window.open(_url, "_blank", "noopener,noreferrer");
                         return;
-                    }
-                    else {
+                    } else {
                         enqueueSnackbar(`Invalid URL: ${_url}`, { variant: "error" });
                         return;
                     }
@@ -74,28 +73,10 @@ export const useKeywordNavigationHelper = () => {
 
                 // Save unsaved notes if navigating to different workspace
                 if (parsed.workspaceId && currentWorkspace?.id !== parsed.workspaceId) {
-                    const unsavedTabs = openTabs.filter((tab: BaseTab) => {
-                        if (tab.type !== constants.vscode.tab.tabTypes.note) return false;
-                        const note = tab.data as Note;
-                        const belongsToCurrentWorkspace = currentWorkspace && findNoteByEntityId(currentWorkspace, note.id);
-                        return belongsToCurrentWorkspace && note.id < 0;
-                    });
+                    const saveSuccess = await saveNewsBeforeNavigate();
 
-                    if (unsavedTabs.length > 0) {
-                        enqueueSnackbar(`Saving ${unsavedTabs.length} unsaved note(s)...`, { variant: "info" });
-                        try {
-                            const tabIdsToSave = unsavedTabs.map((tab) => tab.id);
-                            const saveSuccess = await upsertWorkspaceItem(WorkspaceItemAction.Create, tabIdsToSave);
-
-                            if (!saveSuccess) {
-                                enqueueSnackbar("Failed to save notes. Navigation cancelled.", { variant: "error" });
-                                return;
-                            }
-                        } catch (error) {
-                            console.error("Failed to save tabs:", error);
-                            enqueueSnackbar("Failed to save notes. Navigation cancelled.", { variant: "error" });
-                            return;
-                        }
+                    if (!saveSuccess) {
+                        return;
                     }
 
                     // Switch to target workspace and load tree directly
@@ -250,7 +231,7 @@ export const useKeywordNavigationHelper = () => {
 /**
  * Find folder in workspace by workspaceId and folderWorkspaceItemId
  */
-function findFolderInWorkspace(workspace: any, workspaceId: number, folderWorkspaceItemId: number): WorkspaceFolderItem | null {
+export function findFolderInWorkspace(workspace: any, workspaceId: number, folderWorkspaceItemId: number): WorkspaceFolderItem | null {
     if (!workspace || workspace.id !== workspaceId) {
         return null;
     }
@@ -282,7 +263,7 @@ function findNoteInWorkspace(workspace: any, workspaceId: number, noteWorkspaceI
 /**
  * Find note in workspace by entity ID (note.id from notes table)
  */
-function findNoteByEntityId(workspace: any, noteEntityId: number): WorkspaceNoteItem | null {
+export function findNoteByEntityId(workspace: any, noteEntityId: number): WorkspaceNoteItem | null {
     if (!workspace || noteEntityId < 0) {
         // New notes (id < 0) are always considered as belonging to current workspace
         return noteEntityId < 0 ? ({} as WorkspaceNoteItem) : null;
