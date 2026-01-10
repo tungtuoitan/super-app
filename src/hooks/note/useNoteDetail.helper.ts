@@ -20,6 +20,7 @@ import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
@@ -33,6 +34,7 @@ export const useNoteDetailHelper = () => {
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useGridControlStore();
     const { loadKeywords } = useStandardRegistryHelper();
+    const _console = useConsoleHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
         
@@ -73,7 +75,7 @@ export const useNoteDetailHelper = () => {
             // Get current note from active tab
             const activeTab = getActiveTab();
             if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
-                console.warn("⚠️ No note tab active to upsert");
+                _console.warning("⚠️ No note tab active to upsert");
                 return null;
             }
 
@@ -83,7 +85,7 @@ export const useNoteDetailHelper = () => {
             // Step 1.5: Validate name field
             // ============================================================
             if (!activeNote.name || activeNote.name.trim() === "") {
-                enqueueSnackbar("Note name is required", { variant: "error" });
+                _console.error("Note name is required");
                 return null;
             }
 
@@ -160,7 +162,8 @@ export const useNoteDetailHelper = () => {
                 // ============================================================
                 // Step 10: Update tab data with server response
                 // ============================================================
-                enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
+                // enqueueSnackbar(isCreateMode ? "Note created successfully" : "Note saved successfully", { variant: "success" });
+                _console.success(isCreateMode ? "Note created successfully" : "Note saved successfully");
 
                 if (tabId) {
                     setOpenTabs((prev) =>

@@ -51,9 +51,7 @@ export const useEditorToolbarHelper = () => {
     // WorkspaceTree-specific
     const { moduleName } = useGridControlStore();
     const { currentWorkspace } = useWorkspaceStore();
-    const { loadTree } = useWorkspaceLoader();
     const { loadKeywords } = useStandardRegistryHelper();
-    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
 
     // Get status text based on tab type and deletion state
     const _deleteStatusText = (() => {

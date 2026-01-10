@@ -39,3 +39,6 @@ export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, Cursor
 
 export { CommandPaletteStore, CommandPaletteProvider, useCommandPaletteStore } from "./commandPalette/useCommandPalette.store";
 export type { CommandPaletteContextData } from "./commandPalette/useCommandPalette.store";
+
+export { ConsoleStore, ConsoleProvider, useConsoleStore } from "./console/useConsole.store";
+export type { ConsoleContextData, ConsoleMessage, ConsoleMessageType } from "./console/useConsole.store";
