@@ -49,20 +49,6 @@ export function MarkdownEditor() {
     const isHardDeleted = activeNote?.isHardDeleted;
     const disabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
 
-    const { past, setPast, present, setPresent, future, setFuture } = useNavigationHistoryStore();
-    const { openTabs } = useEditorTabsStore();
-
-    // Track if we're currently navigating (to prevent tracking during restore)
-    const isNavigatingRef = useRef(false);
-
-    useEffect(() => {
-        console.log("========================================== Updated:", {
-            past: past.map(e => (openTabs.find(t => t.id === e.tabId)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber??"-")).join(", "),
-            present: present ? (openTabs.find(t => t.id === present.tabId)?.title ?? "Unknown") + " " + (present.mdPos?.lineNumber??"-") : "None",
-            future: future.map(e => (openTabs.find(t => t.id === e.tabId)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber??"-")).join(", "),
-        });
-    }, [present]);
-
     // Handle internal changes: Convert to original version before saving
     const handleDisplayChange = (newDisplayDesc: string | undefined) => {
         if (newDisplayDesc === undefined) {
@@ -240,7 +226,6 @@ export function MarkdownEditor() {
         <>
             {/* //* phải mounted thì mới có editor để gắn listener */}
             {isMounted && <MarkdownEditorNavigationTracker />}
-            {}
             <Editor
                 height={540}
                 defaultLanguage="markdown"

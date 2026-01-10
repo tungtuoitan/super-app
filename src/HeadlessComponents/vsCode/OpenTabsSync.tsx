@@ -179,12 +179,14 @@ export const OpenTabsSync = () => {
                 // Set restored tabs
                 setOpenTabs(restoredTabs);
 
-                // Set active tab based on Present in navigation history (note only)
+                // Set active tab based on Present in navigation history
                 if (present) {
                     // HistoryEntry tracks different types, so match by type and itemId
                     const matchingTab = restoredTabs.find((tab) => {
                         if (tab.type === constants.vscode.tab.tabTypes.note && present.type === 'note') {
                             return (tab.data as Note).id === parseInt(present.itemId);
+                        } else if (tab.type === constants.vscode.tab.tabTypes.workspace && present.type === 'workspace') {
+                            return (tab.data as Ws).id === parseInt(present.itemId);
                         }
                         return false;
                     });

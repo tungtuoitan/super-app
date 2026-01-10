@@ -7,13 +7,10 @@
 import { useEffect } from "react";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import {useEditorTabsStore, useNavigationHistoryStore} from "@/store/index";
-import {useEditorTabHelper} from "@/hooks/index";
 
 export const NavigationKeyboardShortcuts = () => {
     const { handleGoBack, handleGoForward, canGoBack, canGoForward } = useNavigationHistoryHelper();
     const { past, future } = useNavigationHistoryStore();
-    const { openTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
-    const { setNewTabAnd } = useEditorTabHelper();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

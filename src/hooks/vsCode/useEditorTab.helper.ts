@@ -340,8 +340,8 @@ export const useEditorTabHelper = () => {
      * Check if two history entries are duplicates (adjacent items that are "same")
      */
     const $areEntriesDuplicate = (entry1: HistoryEntry, entry2: HistoryEntry): boolean => {
-        // Same tab and same item
-        return entry1.tabId === entry2.tabId && entry1.itemId === entry2.itemId && entry1.type === entry2.type;
+        // Same item and same type
+        return entry1.itemId === entry2.itemId && entry1.type === entry2.type;
     };
 
     /**
@@ -405,7 +405,7 @@ export const useEditorTabHelper = () => {
                 setPast(cleanedPast.slice(0, -1)); // Remove last item from past
 
                 // Set activeTabId to the new present's tab
-                setNewTabAnd(newPresent.tabId);
+                setNewTabAnd(`note-${newPresent.itemId}-${Date.now()}`);
             } else {
                 // No past entries, clear present and active tab
                 setPresent(null);

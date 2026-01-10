@@ -137,9 +137,9 @@ export function DevDetail() {
             {/* Past entries */}
             {past.map((entry, index) => (
                 <div
-                    key={`past-${entry.tabId}-${entry.timestamp}`}
+                    key={`past-${entry.type}-${entry.itemId}-${entry.timestamp}`}
                     className="px-2 py-0.5 text-xs rounded bg-gray-600 text-gray-400 flex flex-col items-center"
-                    title={`PAST - Tab: ${entry.tabId}, Type: ${entry.type}, Item: ${entry.itemId}, Time: ${new Date(entry.timestamp).toLocaleTimeString()}
+                    title={`PAST - Type: ${entry.type}, Item: ${entry.itemId}, Time: ${new Date(entry.timestamp).toLocaleTimeString()}
 Scroll: ${entry.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
 Field: ${entry.focusedFieldId || "none"}`}
                 >
@@ -155,7 +155,7 @@ Field: ${entry.focusedFieldId || "none"}`}
             {present && (
                 <div
                     className="px-2 py-0.5 text-xs rounded bg-blue-600 text-white font-bold flex flex-col items-center"
-                    title={`PRESENT - Tab: ${present.tabId}, Type: ${present.type}, Item: ${present.itemId}, Time: ${new Date(present.timestamp).toLocaleTimeString()}
+                    title={`PRESENT - Type: ${present.type}, Item: ${present.itemId}, Time: ${new Date(present.timestamp).toLocaleTimeString()}
 Scroll: ${present.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
 Field: ${present.focusedFieldId || "none"}`}
                 >
@@ -170,9 +170,9 @@ Field: ${present.focusedFieldId || "none"}`}
             {/* Future entries */}
             {future.map((entry, index) => (
                 <div
-                    key={`future-${entry.tabId}-${entry.timestamp}`}
+                    key={`future-${entry.type}-${entry.itemId}-${entry.timestamp}`}
                     className="px-2 py-0.5 text-xs rounded bg-gray-500 text-gray-500 flex flex-col items-center"
-                    title={`FUTURE - Tab: ${entry.tabId}, Type: ${entry.type}, Item: ${entry.itemId}, Time: ${new Date(entry.timestamp).toLocaleTimeString()}
+                    title={`FUTURE - Type: ${entry.type}, Item: ${entry.itemId}, Time: ${new Date(entry.timestamp).toLocaleTimeString()}
 Scroll: ${entry.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
 Field: ${entry.focusedFieldId || "none"}`}
                 >

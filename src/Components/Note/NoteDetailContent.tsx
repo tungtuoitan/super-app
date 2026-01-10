@@ -28,7 +28,6 @@ export function NoteDetailContent() {
     const { activeTabId } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
-    const { trackNavigation } = useNavigationHistoryHelper();
     const { getItemStatus } = useTreeStatusHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));

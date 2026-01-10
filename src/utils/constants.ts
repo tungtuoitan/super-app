@@ -61,13 +61,13 @@ export const constants = {
         // Virtual node IDs for workspace root
         root: {
             workspaceItemId: -12345, // workspace_items.id for root node
-            entityId: -12345,        // folders.id for root node (same value for simplicity)
+            entityId: -12345, // folders.id for root node (same value for simplicity)
         },
 
         // Virtual node IDs for drop zone
         dropZone: {
             workspaceItemId: -23456, // workspace_items.id for drop zone
-            entityId: -23456,        // folders.id for drop zone (same value for simplicity)
+            entityId: -23456, // folders.id for drop zone (same value for simplicity)
         },
 
         // Search behavior configuration
@@ -248,47 +248,48 @@ export const constants = {
         editor: {
             fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
 
-            options: (disabled: boolean, value: string) => ({
-                value,
-                language: "markdown",
-                theme: "custom-dark",
-                minimap: { enabled: false },
-                wordWrap: "on", // Wrap at viewport width
-                fontSize: 14,
-                fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
-                lineNumbers: "on", // Bật line numbers để hiển thị fold indicators
-                lineNumbersMinChars: 3,
-                lineDecorationsWidth: 16, // Space cho fold icons (tăng lên)
-                folding: true, // Bật folding cho markdown headings
-                foldingStrategy: "auto", // Auto detect folding
-                showFoldingControls: "mouseover", // Hiển thị khi hover
-                glyphMargin: true, // Bật glyph margin cho fold icons
-                readOnly: disabled,
-                scrollBeyondLastLine: true, // Cho phép scroll xuống dưới dòng cuối (~10 lines)
-                padding: { top: 0, bottom: 200 }, // Khoảng trống ~10 lines ở cuối (10 * 20px)
-                automaticLayout: true,
-                rulers: [],
-                renderLineHighlight: "none",
-                // Markdown-specific options
-                quickSuggestions: {
-                    other: true,
-                    comments: true,
-                    strings: true,
-                },
-                acceptSuggestionOnCommitCharacter: true,
-                acceptSuggestionOnEnter: "on", // Only accept with Tab, Enter for new line
-                wordBasedSuggestions: "off", // Turn off default word-based suggestions to prioritize custom keywords
-                suggest: {
-                    showWords: false, // Don't suggest random words from the document
-                    showKeywords: true,
-                    snippetsPreventQuickSuggestions: false,
-                    localityBonus: true,
-                    shareSuggestSelections: false,
-                },
-                parameterHints: {
-                    enabled: true,
-                },
-            }) as _monaco.editor.IStandaloneEditorConstructionOptions,
+            options: (disabled: boolean, value: string) =>
+                ({
+                    value,
+                    language: "markdown",
+                    theme: "custom-dark",
+                    minimap: { enabled: false },
+                    wordWrap: "on", // Wrap at viewport width
+                    fontSize: 14,
+                    fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
+                    lineNumbers: "on", // Bật line numbers để hiển thị fold indicators
+                    lineNumbersMinChars: 3,
+                    lineDecorationsWidth: 16, // Space cho fold icons (tăng lên)
+                    folding: true, // Bật folding cho markdown headings
+                    foldingStrategy: "auto", // Auto detect folding
+                    showFoldingControls: "mouseover", // Hiển thị khi hover
+                    glyphMargin: true, // Bật glyph margin cho fold icons
+                    readOnly: disabled,
+                    scrollBeyondLastLine: true, // Cho phép scroll xuống dưới dòng cuối (~10 lines)
+                    padding: { top: 0, bottom: 200 }, // Khoảng trống ~10 lines ở cuối (10 * 20px)
+                    automaticLayout: true,
+                    rulers: [],
+                    renderLineHighlight: "none",
+                    // Markdown-specific options
+                    quickSuggestions: {
+                        other: true,
+                        comments: true,
+                        strings: true,
+                    },
+                    acceptSuggestionOnCommitCharacter: true,
+                    acceptSuggestionOnEnter: "on", // Only accept with Tab, Enter for new line
+                    wordBasedSuggestions: "off", // Turn off default word-based suggestions to prioritize custom keywords
+                    suggest: {
+                        showWords: false, // Don't suggest random words from the document
+                        showKeywords: true,
+                        snippetsPreventQuickSuggestions: false,
+                        localityBonus: true,
+                        shareSuggestSelections: false,
+                    },
+                    parameterHints: {
+                        enabled: true,
+                    },
+                } as _monaco.editor.IStandaloneEditorConstructionOptions),
         },
     } as const,
 

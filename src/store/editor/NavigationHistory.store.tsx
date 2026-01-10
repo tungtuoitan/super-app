@@ -46,9 +46,8 @@ export interface MdScrollPos {
  * Single entry in navigation history
  */
 export interface HistoryEntry {
-    tabId: string;
     type: string; // e.g., 'note', 'file', 'folder'
-    itemId: string;
+    itemId: string; // Entity ID (note.id, workspace.id, etc.)
     timestamp: number;
     // Optional position tracking
     scrollPositions?: ScrollPosition[];

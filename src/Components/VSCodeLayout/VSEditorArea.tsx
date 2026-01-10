@@ -4,7 +4,7 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { WsEditorPanel } from "@/Components/Workspace";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
 import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";
@@ -12,6 +12,7 @@ import { Track } from "@radix-ui/react-slider";
 import { TrackTabNavigation } from "@/HeadlessComponents/vsCode/TrackTabNavigation";
 import { NavigationHistorySync } from "@/HeadlessComponents/vsCode/NavigationHistorySync";
 import { TabBar } from "./TabBar";
+import {Note} from "@/types/index";
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -23,6 +24,7 @@ import { TabBar } from "./TabBar";
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, isLoadingTabs, editorAreaRef } = useEditorTabsStore();
     const { closeTab, getActiveTab, updateActiveTab } = useEditorTabHelper();
+    const { past, setPast, present, setPresent, future, setFuture } = useNavigationHistoryStore();
 
     // Get active tab
     const activeTab = getActiveTab();
@@ -38,6 +40,25 @@ export function VSEditorArea() {
             setConfirmCloseTabId(null);
         }
     };
+
+    // Helper to find tab by entity id
+    const findTabByEntity = (entry: any) => {
+        if (entry.type === "note") {
+            return openTabs.find((t) => t.type === constants.vscode.tab.tabTypes.note && (t.data as Note).id === parseInt(entry.itemId));
+        } else if (entry.type === "workspace") {
+            return openTabs.find((t) => t.type === constants.vscode.tab.tabTypes.workspace && (t.data as any).id === parseInt(entry.itemId));
+        }
+        return undefined;
+    };
+
+    //* chỗ này để debug, khi tab k có trong openTabs (có thể tab đã bị close) thì sẽ là Unknown
+    useEffect(() => {
+        console.log("========================================== Updated:", {
+            past: past.map((e) => (findTabByEntity(e)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber ?? "-")).join(", "),
+            present: present ? (findTabByEntity(present)?.title ?? "Unknown") + " " + (present.mdPos?.lineNumber ?? "-") : "None",
+            future: future.map((e) => (findTabByEntity(e)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber ?? "-")).join(", "),
+        });
+    }, [present]);
 
     return (
         <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">

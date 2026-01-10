@@ -15,7 +15,7 @@ import { EDITOR_LINE_DISTANCE_THRESHOLD } from "@/hooks/vsCode/useNavigationHist
 
 export function MarkdownEditorNavigationTracker() {
     const { editorRef } = useNoteDetailStore();
-    const { captureEditorPosition, captureEditorScrollPosition, restoreEditorPosition, isNavigating, getCurrentEntry } = useNavigationHistoryHelper();
+    const { isNavigating } = useNavigationHistoryHelper();
     const { present, setTriggerSave } = useNavigationHistoryStore();
 
     // Track last recorded position to implement threshold logic

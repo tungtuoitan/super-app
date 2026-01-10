@@ -198,7 +198,7 @@ export const useNavigationHistoryHelper = () => {
             // Then restore cursor position
             if (position) {
                 editor.setPosition(position);
-                console.log("[Navigation] Restored editor position to:", position);
+                // console.log("[Navigation] Restored editor position to:", position);
 
                 // Focus editor to show cursor
                 editor.focus();
@@ -218,40 +218,19 @@ export const useNavigationHistoryHelper = () => {
      * Returns true if they should be considered different items in history
      *
      * Criteria for "significantly different":
-     * 1. Khác tabId → different
-     * 2. Cùng tabId, type = note:
-     *    a. Khác mdScrollPos (>MD_SCROLL_DISTANCE_THRESHOLD) → different
-     *    b. Cùng mdScrollPos, khác lineNumber (>EDITOR_LINE_DISTANCE_THRESHOLD) → different
-     * 3. Other types: same as before
-     *
-     * Otherwise → same (skip push)
+     * 1. Khác itemId hoặc type → different (khác entity)
+     * 2. Cùng itemId + type = note: check lineNumber
+     *    - Khác lineNumber (>EDITOR_LINE_DISTANCE_THRESHOLD) → different
+     * 3. Otherwise → same (skip push)
      */
     const areEntriesSignificantlyDifferent = (entry1: HistoryEntry, entry2: HistoryEntry): boolean => {
-        // 1. Khác tabId → different
-        if (entry1.tabId !== entry2.tabId) {
+        // 1. Khác itemId hoặc type → different (khác entity)
+        if (entry1.itemId !== entry2.itemId || entry1.type !== entry2.type) {
             return true;
         }
 
-        // 2. Cùng tabId, type = note
+        // 2. Cùng entity (itemId + type), type = note: check line distance
         if (entry1.type === 'note' && entry2.type === 'note') {
-            // Check Monaco editor scroll position first
-            // const mdScroll1 = entry1.mdScrollPos;
-            // const mdScroll2 = entry2.mdScrollPos;
-
-            // if (mdScroll1 && mdScroll2) {
-            //     // const scrollTopDistance = Math.abs(mdScroll1.scrollTop - mdScroll2.scrollTop);
-            //     // const scrollLeftDistance = Math.abs(mdScroll1.scrollLeft - mdScroll2.scrollLeft);
-
-            //     // 2a. Khác mdScrollPos → different
-            //     // if (scrollTopDistance > MD_SCROLL_DISTANCE_THRESHOLD || scrollLeftDistance > MD_SCROLL_DISTANCE_THRESHOLD) {
-            //     //     return true;
-            //     // }
-
-            //     // 2b. Cùng mdScrollPos, check lineNumber
-            // } else if (mdScroll1 || mdScroll2) {
-            //     // One has scroll position, other doesn't → different
-            //     return true;
-            // }
             const pos1 = entry1.mdPos;
             const pos2 = entry2.mdPos;
 
@@ -264,16 +243,11 @@ export const useNavigationHistoryHelper = () => {
                 }
             }
 
-            // Same scroll position and line number → same (skip)
+            // Same line number → same (skip)
             return false;
         }
 
-        // 3. Other types (workspace, folder, etc.) - check by itemId and type
-        if (entry1.itemId !== entry2.itemId || entry1.type !== entry2.type) {
-            return true;
-        }
-
-        // Otherwise → same (skip)
+        // 3. Cùng entity, other types → same (skip)
         return false;
     };
 
@@ -348,13 +322,11 @@ export const useNavigationHistoryHelper = () => {
             if (newPast.length > MAX_PAST_SIZE) {
                 newPast = newPast.slice(newPast.length - MAX_PAST_SIZE);
             }
-            console.log("new past:", newPast);
             return newPast;
-
         });
 
         // 3. New entry becomes Present
-        setPresent(newEntry);
+        setPresent({...newEntry});
         pendingPresentRef.current = newEntry;
         // console.log("new present:", newEntry);
 
@@ -412,7 +384,6 @@ export const useNavigationHistoryHelper = () => {
         // })
 
         pushHistory({
-            tabId: activeTabId,
             type: tabType,
             itemId: itemId.toString(),
             scrollPositions,
@@ -477,12 +448,23 @@ export const useNavigationHistoryHelper = () => {
 
         isNavigatingRef.current = true;
 
-        // Check if tab exists
-        const existingTab = openTabs.find(tab => tab.id === entry.tabId);
+        // Check if tab exists by entity id (not tabId)
+        let existingTab: BaseTab | undefined;
+        if (entry.type === 'note') {
+            existingTab = openTabs.find(tab =>
+                tab.type === constants.vscode.tab.tabTypes.note &&
+                (tab.data as Note).id === itemIdNum
+            );
+        } else if (entry.type === 'workspace') {
+            existingTab = openTabs.find(tab =>
+                tab.type === constants.vscode.tab.tabTypes.workspace &&
+                (tab.data as any).id === itemIdNum
+            );
+        }
 
         if (existingTab) {
             // Tab exists - just switch to it
-            setNewTabAnd(entry.tabId);
+            setNewTabAnd(existingTab.id);
         } else {
             // Tab doesn't exist - need to reopen it based on type
             let newTab: BaseTab | null = null;
@@ -514,7 +496,7 @@ export const useNavigationHistoryHelper = () => {
 
                 if (noteData) {
                     newTab = {
-                        id: entry.tabId, // Use original tabId to maintain history consistency
+                        id: `note-${noteData.id}-${Date.now()}`, // Generate new tabId
                         type: constants.vscode.tab.tabTypes.note,
                         data: noteData,
                         title: noteData.name || constants.vscode.tabTitles.unsavedNote,
@@ -548,7 +530,7 @@ export const useNavigationHistoryHelper = () => {
 
                 if (wsData) {
                     newTab = {
-                        id: entry.tabId, // Use original tabId to maintain history consistency
+                        id: `workspace-${wsData.id}-${Date.now()}`, // Generate new tabId
                         type: constants.vscode.tab.tabTypes.workspace,
                         data: wsData,
                         title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
