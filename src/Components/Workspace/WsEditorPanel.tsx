@@ -6,7 +6,6 @@
 
 import React, { useEffect } from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
-import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
 import { useEditorTabsStore } from "@/store/index";
 import { WsDetailContent } from "./WsDetailContent";
@@ -16,32 +15,24 @@ interface WsEditorPanelProps {
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { originalWsRef } = useWsDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
 
     const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Get selectedWs from tab data
-    const selectedWs = tab.data as Ws;
-
-    // Calculate hasChanges by comparing selectedWs with original
-    const wsHasChanges = selectedWs && originalWsRef.current
-        ? JSON.stringify(selectedWs) !== JSON.stringify(originalWsRef.current)
-        : false;
-
     // Sync hasUnsavedChanges with wsHasChanges
+    //* khi tạo Panel mới thì thêm cái này vào.
     useEffect(() => {
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((t) =>
                 t.id === tab.id
                     ? {
                           ...t,
-                          hasUnsavedChanges: wsHasChanges,
+                          hasUnsavedChanges: tab.data && tab.data0 ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0) : false,
                       }
-                    : t,
-            ),
+                    : t
+            )
         );
-    }, [wsHasChanges, tab.id, setOpenTabs]);
+    }, [tab.id, tab.data]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {

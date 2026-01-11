@@ -24,7 +24,6 @@ import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
-    const { originalNoteRef } = useNoteDetailStore();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceLoader();
     const { currentWorkspace } = useWorkspaceStore();
@@ -36,7 +35,6 @@ export const useNoteDetailHelper = () => {
     const { loadKeywords } = useStandardRegistryHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
-        
         // Get current note from active tab
         const activeTab = getActiveTab();
         if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
@@ -44,7 +42,7 @@ export const useNoteDetailHelper = () => {
         }
 
         const activeNote = activeTab.data as Note;
-        console.log('[Helper] Current note:', { id: activeNote.id, name: activeNote.name });
+        console.log("[Helper] Current note:", { id: activeNote.id, name: activeNote.name });
 
         // Extract value based on field type
         let _value;
@@ -61,11 +59,11 @@ export const useNoteDetailHelper = () => {
         }
 
         const updated = { ...activeNote, [field]: _value };
-        console.log('[Helper] Updated note:', { field, newValue: typeof _value === 'string' ? _value.substring(0, 50) : _value });
+        console.log("[Helper] Updated note:", { field, newValue: typeof _value === "string" ? _value.substring(0, 50) : _value });
 
-        // Update tab data directly
-        setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated, hasUnsavedChanges: true } : t)));
-        console.log('[Helper] Tabs updated');
+        // Update tab data directly (hasUnsavedChanges will be auto-calculated in NoteEditorPanel)
+        setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated } : t)));
+        console.log("[Helper] Tabs updated");
     };
 
     /**
@@ -95,7 +93,8 @@ export const useNoteDetailHelper = () => {
             // Step 2: Determine operation mode (create/update/restore)
             // ============================================================
             const isCreateMode = activeNote.id <= 0;
-            const isRestoreMode = activeNote.id > 0 && originalNoteRef.current?.deletedAt && !activeNote.deletedAt;
+            const originalNote = activeTab.data0 as Note | undefined;
+            const isRestoreMode = activeNote.id > 0 && originalNote?.deletedAt && !activeNote.deletedAt;
             const token = $user.userToken;
 
             try {
@@ -174,18 +173,17 @@ export const useNoteDetailHelper = () => {
                                 return {
                                     ...tab,
                                     data: transformedNote,
+                                    data0: transformedNote, // Update data0 to new saved state
                                     noteId: transformedNote.id,
                                     title: transformedNote.name || "Unsaved Note",
                                     note: transformedNote,
-                                    hasUnsavedChanges: false,
+                                    // hasUnsavedChanges will be auto-calculated in NoteEditorPanel
                                 };
                             }
                             return tab;
                         })
                     );
                 }
-
-                originalNoteRef.current = { ...transformedNote };
 
                 // reload
                 //TODO: chỉ reload khi thay đổi tên/status hoặc khi insert, ta sẽ triển khai sau khi đổi sang dùng

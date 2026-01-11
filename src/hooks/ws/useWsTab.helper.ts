@@ -12,7 +12,7 @@ import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { updateActiveTab } = useEditorTabHelper();
-        const { setNewTabAnd } = useEditorTabHelper();
+    const { setNewTabAnd } = useEditorTabHelper();
 
     /**
      * Open workspace in editor tab
@@ -80,21 +80,15 @@ export const useWsTabHelper = () => {
                     };
                 }
                 return tab;
-            }),
+            })
         );
     };
 
-    /**
-     * Mark workspace tab as having unsaved changes
-     */
-    const markWorkspaceTabUnsaved = (tabId: string, hasChanges: boolean) => {
-        setOpenTabs((prev: BaseTab[]) => prev.map((tab) => (tab.id === tabId ? { ...tab, hasUnsavedChanges: hasChanges } : tab)));
-    };
+
 
     return {
         openWorkspaceTab,
         closeWorkspaceTab,
         updateWorkspaceInTabs,
-        markWorkspaceTabUnsaved,
     };
 };

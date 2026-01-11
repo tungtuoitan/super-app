@@ -5,15 +5,10 @@
  * Tab management is handled by NoteTabStore
  */
 
-import { Note } from "@/types/note.types";
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 import type * as _monaco from "monaco-editor";
-import {useMonaco} from "@monaco-editor/react";
-import {is} from "date-fns/locale";
-export interface NoteDetailContextData {
-    // Dialog state
-    originalNoteRef: React.MutableRefObject<Note | null>;
 
+export interface NoteDetailContextData {
     // Container refs
     noteNameRef: React.RefObject<HTMLInputElement>;
 
@@ -25,8 +20,8 @@ export interface NoteDetailContextData {
     nameError: string;
     setNameError: Dispatch<SetStateAction<string>>;
 
-    displayDesc: string|null;
-    setDisplayDesc: Dispatch<SetStateAction<string|null>>;
+    displayDesc: string | null;
+    setDisplayDesc: Dispatch<SetStateAction<string | null>>;
     editorRef: React.MutableRefObject<_monaco.editor.IStandaloneCodeEditor | null>;
     decorationsRef: React.MutableRefObject<string[]>;
     disposablesRef: React.MutableRefObject<_monaco.IDisposable[]>;
@@ -36,9 +31,6 @@ export interface NoteDetailContextData {
 }
 
 export const noteDetailContextDefaultValue: NoteDetailContextData = {
-    // Dialog state
-    originalNoteRef: { current: null },
-
     // Container refs
     noteNameRef: { current: null },
 
@@ -67,7 +59,6 @@ export const useNoteDetailStore = () => useContext(NoteDetailContext);
 export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Container refs
     const noteNameRef = useRef<HTMLInputElement>(null);
-    const originalNoteRef = useRef<Note | null>(null);
 
     // Focus state
     const [shouldFocusNoteName, setShouldFocusNoteName] = useState(false);
@@ -86,9 +77,6 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     return (
         <NoteDetailContext.Provider
             value={{
-                // Dialog state
-                originalNoteRef,
-
                 // Container refs
                 noteNameRef,
 
