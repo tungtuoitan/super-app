@@ -12,7 +12,7 @@ import { constants } from "@/utils/constants";
  */
 const getRedirectUri = (): string => {
   // Allow env variable override for custom domains
-  if (envConfig.REACT_APP_GOOGLE_REDIRECT_URI && envConfig.ENVIRONMENT === constants.environments.production) {
+  if (envConfig.REACT_APP_GOOGLE_REDIRECT_URI && envConfig.REACT_APP_ENVIRONMENT === constants.environments.production) {
     return envConfig.REACT_APP_GOOGLE_REDIRECT_URI;
   }
 

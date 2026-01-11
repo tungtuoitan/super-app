@@ -20,7 +20,7 @@ import { CommandPalette } from "./shared/CommandPalette";
  * @returns The top navigation component
  */
 export function TopNav() {
-    const showDevBadge = envConfig.ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
+    const showDevBadge = envConfig.REACT_APP_ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useMobileStore();
     const { setIsOpen } = useCommandPaletteStore();
@@ -116,7 +116,7 @@ export function TopNav() {
 }
 
 export function DevDetail() {
-    const show = envConfig.ENVIRONMENT !== constants.environments.production;
+    const show = envConfig.REACT_APP_ENVIRONMENT !== constants.environments.production;
     const { past, present, future } = useNavigationHistoryStore();
     if (!show) return null;
 
