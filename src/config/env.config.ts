@@ -7,7 +7,7 @@ import { constants } from "../utils";
 
 export const envConfig = {
     // Environment
-    ENVIRONMENT: process.env.ENVIRONMENT,
+    REACT_APP_ENVIRONMENT: process.env.REACT_APP_ENVIRONMENT,
     NODE_ENV: process.env.NODE_ENV,
 
     // API
@@ -35,7 +35,7 @@ export function validateEnvironmentConfig(): {
     const warnings: string[] = [];
 
     // Required variables
-    const required = ["NODE_ENV", "ENVIRONMENT", "REACT_APP_GOOGLE_CLIENT_ID", "REACT_APP_GOOGLE_REDIRECT_URI"];
+    const required = ["NODE_ENV", "REACT_APP_ENVIRONMENT", "REACT_APP_GOOGLE_CLIENT_ID", "REACT_APP_GOOGLE_REDIRECT_URI"];
 
     // Recommended variables for production
     const recommended = ["REACT_APP_LOCAL_API_URL"];
