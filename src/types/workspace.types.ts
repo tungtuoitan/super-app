@@ -419,6 +419,24 @@ export function canHaveChildren(item: WorkspaceItem): item is FolderItem {
 }
 
 /**
+ * Workspace (Ws) interface - domain model with Date objects
+ * Used in workspace grid and editor
+ */
+export interface Ws {
+    id: number;
+    name: string;
+    description?: string | null;
+    statusCode?: string; // Workspace status code
+    hashtags?: string; // Hashtags string
+    createdAt: Date;
+    updatedAt?: Date | null;
+    deletedAt: Date | null;
+    isHardDeleted?: boolean;
+    userId?: number;
+    createdBy?: string; // User who created the workspace
+}
+
+/**
  * Ws item response - for ws selection dropdown
  * Maps to backend WsResponse
  */

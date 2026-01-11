@@ -3,7 +3,7 @@
  * Helper functions for workspace data transformation and manipulation
  */
 
-import { Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { WsDTO } from "@/services/ws.service";
 
 /**

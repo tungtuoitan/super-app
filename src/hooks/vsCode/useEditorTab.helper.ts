@@ -5,18 +5,17 @@ import { BaseTab, TabType } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
-import { useWsStore, Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import {WorkspaceItemV2} from "@/types/workspace-v2.types";
+import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { originalNoteRef } = useNoteDetailStore();
     const { setNotes } = useNoteGridStore();
     const { originalWsRef } = useWsDetailStore();
-    const { setSelectedWs } = useWsStore();
     const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
@@ -67,7 +66,6 @@ export const useEditorTabHelper = () => {
 
                 // Clear workspace state when switching to note
                 originalWsRef.current = null;
-                setSelectedWs(null);
 
                 // ⭐ Select item trong workspace tree nếu note này có trong workspace
                 const workspaceItemId = findWorkspaceItemId(3, noteData.id); // 3 = note entity type
@@ -101,8 +99,6 @@ export const useEditorTabHelper = () => {
                     originalWsRef.current = { ...wsData };
                 }
 
-                setSelectedWs(wsData);
-
                 // Clear note state when switching to workspace
                 originalNoteRef.current = null;
 
@@ -133,12 +129,10 @@ export const useEditorTabHelper = () => {
             } else {
                 originalNoteRef.current = null;
                 originalWsRef.current = null;
-                setSelectedWs(null);
             }
         } else {
             originalNoteRef.current = null;
             originalWsRef.current = null;
-            setSelectedWs(null);
         }
     };
     // ================================================================
@@ -181,6 +175,7 @@ export const useEditorTabHelper = () => {
                     id: `note-${noteData.id}-${Date.now()}`,
                     type: constants.vscode.tab.tabTypes.note,
                     data: noteData,
+                    data0: noteData,
                     title: noteData.name || constants.vscode.tabTitles.unsavedNote,
                     hasUnsavedChanges: false,
                 };
@@ -190,6 +185,7 @@ export const useEditorTabHelper = () => {
                     id: `workspace-${wsData.id}-${Date.now()}`,
                     type: constants.vscode.tab.tabTypes.workspace,
                     data: wsData,
+                    data0: wsData,
                     title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
                     hasUnsavedChanges: false,
                 };
@@ -199,6 +195,7 @@ export const useEditorTabHelper = () => {
                     id: `unknown-${Date.now()}`,
                     type: type as TabType,
                     data: data,
+                    data0: data,
                     title: constants.vscode.tabTitles.unknownTab,
                     hasUnsavedChanges: false,
                 };

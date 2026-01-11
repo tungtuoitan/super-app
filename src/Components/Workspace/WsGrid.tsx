@@ -9,7 +9,8 @@ import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 
 import { Button } from "@/Components/ui/button";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
-import { useWsStore, Ws } from "@/store/ws/useWs.store";
+import { useWsStore } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";
 import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";

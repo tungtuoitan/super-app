@@ -53,7 +53,7 @@ export function CommandPalette() {
             <div className="fixed inset-0 bg-black/50 z-[100]" onClick={close} />
 
             {/* Command Palette */}
-            <div className="fixed top-[100px] left-1/2 -translate-x-1/2 w-[90%] max-w-[640px] z-[101]">
+            <div className="fixed top-[100px] left-1/2 -translate-x-1/2 w-[90%] max-w-[640px] z-[100000001]">
                 <div className="bg-[#252526] rounded-lg shadow-2xl border border-[#3E3E42] overflow-hidden">
                     {/* Search Input */}
                     <div className="flex items-center px-4 py-3 border-b border-[#3E3E42]">

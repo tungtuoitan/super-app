@@ -499,6 +499,7 @@ export const useNavigationHistoryHelper = () => {
                         id: `note-${noteData.id}-${Date.now()}`, // Generate new tabId
                         type: constants.vscode.tab.tabTypes.note,
                         data: noteData,
+                        data0: noteData,
                         title: noteData.name || constants.vscode.tabTitles.unsavedNote,
                         hasUnsavedChanges: false,
                     };
@@ -533,6 +534,7 @@ export const useNavigationHistoryHelper = () => {
                         id: `workspace-${wsData.id}-${Date.now()}`, // Generate new tabId
                         type: constants.vscode.tab.tabTypes.workspace,
                         data: wsData,
+                        data0: wsData,
                         title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
                         hasUnsavedChanges: false,
                     };
