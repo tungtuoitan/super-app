@@ -7,7 +7,7 @@
 import React, { useEffect } from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
-import { useWsStore, Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { useEditorTabsStore } from "@/store/index";
 import { WsDetailContent } from "./WsDetailContent";
 
@@ -16,18 +16,20 @@ interface WsEditorPanelProps {
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { selectedWs } = useWsStore();
     const { originalWsRef } = useWsDetailStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
 
     const contentRef = React.useRef<HTMLDivElement>(null);
 
+    // Get selectedWs from tab data
+    const selectedWs = tab.data as Ws;
+
     // Calculate hasChanges by comparing selectedWs with original
-    const wsHasChanges = selectedWs && originalWsRef.current 
+    const wsHasChanges = selectedWs && originalWsRef.current
         ? JSON.stringify(selectedWs) !== JSON.stringify(originalWsRef.current)
         : false;
 
-    // Sync hasUnsavedChanges AND tab.data with selectedWs state
+    // Sync hasUnsavedChanges with wsHasChanges
     useEffect(() => {
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((t) =>
@@ -35,13 +37,11 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
                     ? {
                           ...t,
                           hasUnsavedChanges: wsHasChanges,
-                          // Sync tab.data with current selectedWs (2-way binding)
-                          data: selectedWs || t.data,
                       }
                     : t,
             ),
         );
-    }, [wsHasChanges, selectedWs, tab.id]);
+    }, [wsHasChanges, tab.id, setOpenTabs]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {

@@ -1,30 +1,38 @@
 import { useCallback } from "react";
 import { useSnackbar } from "notistack";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
-import { useWsStore, Ws } from "@/store/ws/useWs.store";
+import { useWsStore } from "@/store/ws/useWs.store";
 import { wsService } from "@/services/ws.service";
 import { useWsGridHelper } from "./useWsGrid.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import { useConsoleHelper } from "../console/useConsole.helper";
+import { Ws } from "@/types/workspace.types";
 
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();
-    const { selectedWs, setWsGridPagination } = useWsStore();
+    const { setWsGridPagination } = useWsStore();
     const { originalWsRef } = useWsDetailStore();
-    const { setSelectedWs } = useWsStore();
     const { loadWorkspaces } = useWsGridHelper();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
 
     const handleWsFieldChange = (field: keyof Ws, value: any) => {
-        setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, hasUnsavedChanges: true } : t)));
-
-        if (!selectedWs) return;
-        const updated = { ...selectedWs, [field]: value };
-        setSelectedWs(updated);
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((t: BaseTab) => {
+                if (t.id === activeTabId) {
+                    const wsData = t.data as Ws;
+                    return {
+                        ...t,
+                        data: { ...wsData, [field]: value },
+                        hasUnsavedChanges: true,
+                    };
+                }
+                return t;
+            }),
+        );
     };
 
     /**
@@ -33,6 +41,10 @@ export const useWsDetailHelper = () => {
      */
     const upsertWorkspace = useCallback(
         async (tabId?: string): Promise<Ws | null> => {
+            // Get workspace data from active tab
+            const activeTab = openTabs.find((tab) => tab.id === (tabId || activeTabId));
+            const selectedWs = activeTab?.data as Ws | undefined;
+
             if (!selectedWs) {
                 console.warn("⚠️ No selected workspace to upsert");
                 return null;
@@ -99,10 +111,9 @@ export const useWsDetailHelper = () => {
                 };
 
                 // ============================================================
-                // Step 10: Update selected workspace in store with server response
+                // Step 10: Update tab data with server response
                 // ============================================================
                 _console.success(isCreateMode ? "Workspace created successfully" : "Workspace saved successfully");
-                setSelectedWs(transformedWs);
                 if (tabId) {
                     setOpenTabs((prev) =>
                         prev.map((tab: BaseTab) => {
@@ -118,7 +129,7 @@ export const useWsDetailHelper = () => {
                     );
                 }
 
-                originalWsRef.current = { ...selectedWs };
+                originalWsRef.current = { ...transformedWs };
 
                 // Reload workspaces immediately to show the newly saved workspace
                 await loadWorkspaces();
@@ -136,7 +147,7 @@ export const useWsDetailHelper = () => {
                 return null;
             }
         },
-        [selectedWs, loadWorkspaces],
+        [openTabs, activeTabId, loadWorkspaces, $user, _console, originalWsRef, setOpenTabs],
     );
 
     return {

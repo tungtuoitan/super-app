@@ -3,7 +3,7 @@
  * Helper functions for managing workspace editor tabs
  */
 
-import { Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "../../store";
 import { constants } from "@/utils/constants";
@@ -31,6 +31,7 @@ export const useWsTabHelper = () => {
                 id: `workspace-tab-${workspace.id}-${Date.now()}`,
                 type: constants.vscode.tab.tabTypes.workspace,
                 data: workspace,
+                data0: workspace,
                 title: workspace.name || "Unsaved Workspace",
                 hasUnsavedChanges: false,
             };

@@ -11,9 +11,8 @@ import { ScrollArea } from "@/Components/ui/scroll-area";
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsDetailHelper } from "@/hooks/ws/useWsDetail.helper";
-import { Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
-import { useWsStore } from "@/store/ws/useWs.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 
@@ -23,12 +22,12 @@ import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
  */
 export function WsDetailContent() {
     const { wsNameRef, shouldFocusWsName, setShouldFocusWsName, nameError, setNameError } = useWsDetailStore();
-    const { selectedWs } = useWsStore();
     const { handleWsFieldChange } = useWsDetailHelper();
     const { getActiveTab } = useEditorTabHelper();
 
     // Get active tab
     const activeTab = getActiveTab();
+    const selectedWs = activeTab?.data as Ws | undefined;
 
     const [wsKey, setWsKey] = React.useState(0);
     useEffect(() => {

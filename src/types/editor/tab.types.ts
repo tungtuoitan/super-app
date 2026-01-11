@@ -4,7 +4,7 @@
  */
 
 import { Note } from "@/types/note.types";
-import { Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 
 export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | "folder" | "settings";
@@ -27,6 +27,7 @@ export interface TabViewState {
 export interface BaseTab {
     id: string;
     data: Note | Ws;
+    data0: Note | Ws;
     type: TabType;
     title: string;
     hasUnsavedChanges?: boolean;
