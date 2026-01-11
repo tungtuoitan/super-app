@@ -86,6 +86,7 @@ export function NoteDetailContent() {
     }, [shouldFocusNoteName, noteNameRef]);
 
     if (!activeNote) {
+        console.log('[NoteDetailContent] No activeNote, returning null');
         return null;
     }
     return (
