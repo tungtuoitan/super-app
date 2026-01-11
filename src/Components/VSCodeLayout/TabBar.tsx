@@ -1,5 +1,5 @@
 import React from "react";
-import { X, FileText, Folder, Box } from "lucide-react";
+import { X, FileText, Folder, Box, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -10,6 +10,8 @@ import { useWsStore } from "@/store/ws/useWs.store";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper";
 import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useTabKeyboardShortcuts } from "@/hooks/vsCode/useTabKeyboardShortcuts";
 
 /**
  * Get icon component based on tab type
@@ -37,6 +39,14 @@ export function TabBar() {
     const { workspaces } = useWsStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { upsertOrchestraitor } = useEditorToolbarHelper();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
+
+    // Enable keyboard shortcuts
+    useTabKeyboardShortcuts();
+
+    // Separate pinned and unpinned tabs
+    const pinnedTabs = openTabs.filter((tab) => tab.isPinned);
+    const unpinnedTabs = openTabs.filter((tab) => !tab.isPinned);
 
     /**
      * Check if tab exists in current module's data source
@@ -110,8 +120,77 @@ export function TabBar() {
         }
     };
 
+    const handleTabRightClick = (event: React.MouseEvent, tabId: string) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Show context menu with tab data
+        showContextMenu(event, "tab", { tabId });
+    };
+
+    // Helper function to render a single tab
+    const renderTab = (tab: any, isPinned: boolean = false) => {
+        const isDeleted = !!tab.data.deletedAt;
+        const isHardDeleted = !!(tab.data as any).isHardDeleted;
+        const TabIcon = getTabIcon(tab.type);
+
+        return (
+            <button
+                key={tab.id}
+                onClick={() => updateActiveTab(tab.id)}
+                onContextMenu={(e) => handleTabRightClick(e, tab.id)}
+                className={`
+                    group h-[35px] pl-3 pr-1.5 flex items-center gap-2
+                    border-r border-b
+                    ${
+                        activeTabId === tab.id
+                            ? `bg-editor-bg text-editor-fg border-b-transparent border-t-2 ${isInCurrentModule(tab) ? "border-t-blue-500" : "border-t-gray-400"}`
+                            : "bg-transparent text-muted-foreground border-t border-t-transparent text-gray-600"
+                    }
+                `}
+            >
+                <TabIcon
+                    className={`w-4 h-4 ${
+                        isDeleted
+                            ? "text-gray-500"
+                            : tab.type === constants.vscode.tab.tabTypes.note
+                            ? "text-blue-400"
+                            : tab.type === constants.vscode.tab.tabTypes.workspace
+                            ? "text-purple-400"
+                            : "text-gray-400"
+                    } ${activeTabId === tab.id ? "opacity-100" : "opacity-50"}`}
+                />
+
+                <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>
+                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
+                    {isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""}
+                </span>
+
+                <button
+                    onClick={(e) => handleCloseTab(e, tab.id)}
+                    className={`relative pl-0.5 py-0.5 hover:bg-gray-500/20 rounded transition-opacity duration-150 group/close w-5 h-5 ${
+                        isPinned || tab.hasUnsavedChanges ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}
+                >
+                    {isPinned ? (
+                        <div className="w-4 h-4 flex items-center justify-center">
+                            <Pin className="w-3 h-3 rotate-45" />
+                        </div>
+                    ) : tab.hasUnsavedChanges ? (
+                        <>
+                            <div className="w-1.5 h-1.5 ml-1 rounded-full bg-white group-hover/close:hidden" />
+                            <X className="w-4 h-4 hidden group-hover/close:block absolute inset-0 m-auto" />
+                        </>
+                    ) : (
+                        <X className="w-4 h-4" />
+                    )}
+                </button>
+            </button>
+        );
+    };
+
     return (
-        <div className="min-h-[35px] flex items-start border-b border-editor-border bg-editor-sidebar">
+        <div className="min-h-[35px] flex items-start border-b border-editor-border  bg-editor-sidebar">
             {isLoadingTabs ? (
                 <div className="px-4 w-full h-[35px] flex items-center gap-2">
                     <div className="h-4 w-24 bg-muted/20 animate-pulse rounded"></div>
@@ -120,59 +199,8 @@ export function TabBar() {
                 </div>
             ) : openTabs.length > 0 ? (
                 <div className="flex-1 flex flex-wrap">
-                    {openTabs.map((tab) => {
-                        const isDeleted = !!tab.data.deletedAt;
-                        const isHardDeleted = !!(tab.data as any).isHardDeleted;
-                        const TabIcon = getTabIcon(tab.type);
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => updateActiveTab(tab.id)}
-                                className={`
-                    group h-[35px] pl-3 pr-1.5 flex items-center gap-2
-                    border-r border-b
-                    ${
-                        activeTabId === tab.id
-                            ? `bg-editor-bg text-editor-fg border-b-transparent border-t-2 ${isInCurrentModule(tab) ? "border-t-blue-500" : "border-t-gray-400"}`
-                            : "bg-transparent text-muted-foreground  border-t border-t-transparent text-gray-600"
-                    }
-                  `}
-                            >
-                                <TabIcon
-                                    className={`w-4 h-4 ${
-                                        isDeleted
-                                            ? "text-gray-500"
-                                            : tab.type === constants.vscode.tab.tabTypes.note
-                                            ? "text-blue-400"
-                                            : tab.type === constants.vscode.tab.tabTypes.workspace
-                                            ? "text-purple-400"
-                                            : "text-gray-400"
-                                    } ${activeTabId === tab.id ? "opacity-100" : "opacity-50"}`}
-                                />
-                                {/* ${activeTabId === tab.id ? 'font-medium' : 'font-normal'} */}
-                                <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>
-                                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
-                                    
-                                    {isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""}
-                                </span>
-                                <button
-                                    onClick={(e) => handleCloseTab(e, tab.id)}
-                                    className={`relative pl-0.5 py-0.5 hover:bg-gray-500/20 rounded transition-opacity duration-150 group/close w-5 h-5 ${
-                                        tab.hasUnsavedChanges ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                                    }`}
-                                >
-                                    {tab.hasUnsavedChanges ? (
-                                        <>
-                                            <div className="w-1.5 h-1.5 ml-1 rounded-full bg-white group-hover/close:hidden" />
-                                            <X className="w-4 h-4 hidden group-hover/close:block absolute inset-0 m-auto" />
-                                        </>
-                                    ) : (
-                                        <X className="w-4 h-4" />
-                                    )}
-                                </button>
-                            </button>
-                        );
-                    })}
+                    {pinnedTabs.map((tab) => renderTab(tab, true))}
+                    {unpinnedTabs.map((tab) => renderTab(tab, false))}
                 </div>
             ) : (
                 <div className="px-4 w-full h-[35px] flex items-center">

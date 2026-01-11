@@ -32,6 +32,7 @@ export interface BaseTab {
     title: string;
     hasUnsavedChanges?: boolean;
     viewState?: TabViewState;
+    isPinned?: boolean;
 }
 
 export interface EditorState {
