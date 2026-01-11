@@ -202,10 +202,10 @@
 } */
 
  /* Ensure tree inner div has stable scrollbar gutter */
-div[role="tree"] > div, div[id="noteEditorContent"] {
+/* div[role="tree"] > div, div[id="noteEditorContent"] {
   overflow-y: auto;
   scrollbar-gutter: stable;
-}
+} */
 
 /* Disable vertical scrolling on workspace tree container khi Resize panel */
 div[data-workspace-tree="true"] {

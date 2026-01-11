@@ -10,6 +10,7 @@ import { MovingTab } from "../VSPanel/MovingTab";
 import { useConsoleStore } from "@/store/console/useConsole.store";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
+import { NoteDetailTab } from "../Note/NoteDetailTab";
 
 interface VSPanelProps {
     onClose: () => void;
@@ -29,14 +30,16 @@ type PanelTab = "noteDetail" | "properties" | "moving" | "console";
  * - User can drag the resize handle to expand the panel again (like VSCode)
  */
 export function VSPanel({ onClose }: VSPanelProps) {
-    const [activeTab, setActiveTab] = useState<PanelTab>("noteDetail");
+    const [activeTabb, setActiveTabb] = useState<PanelTab>("noteDetail");
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const { setTargetWorkspace } = useMovingTreeStore();
     const { isMobile } = useMobileStore();
     const changeTab = (tab: PanelTab) => {
         if (tab !== "moving") setTargetWorkspace(null);
-        setActiveTab(tab);
+        setActiveTabb(tab);
     };
+    const { getActiveTab } = useEditorTabHelper();
+    const activeTab = getActiveTab();
 
     return (
         <Panel
@@ -57,16 +60,16 @@ export function VSPanel({ onClose }: VSPanelProps) {
                             <button
                                 onClick={() => changeTab("noteDetail")}
                                 className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
-                                    activeTab === "noteDetail" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
+                                    activeTabb === "noteDetail" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
                                 }`}
                             >
                                 <FileText className="w-4 h-4" />
-                                <span>Note Detail</span>
+                                <span>{activeTabb === "noteDetail" && activeTab?.type === constants.vscode.tab.tabTypes.note ? "Note Detail" : "Detail"}</span>
                             </button>
                             <button
                                 onClick={() => changeTab("properties")}
                                 className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
-                                    activeTab === "properties" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
+                                    activeTabb === "properties" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
                                 }`}
                             >
                                 <Settings className="w-4 h-4" />
@@ -75,7 +78,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                             <button
                                 onClick={() => changeTab("moving")}
                                 className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
-                                    activeTab === "moving" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
+                                    activeTabb === "moving" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
                                 }`}
                             >
                                 <ArrowRightLeft className="w-4 h-4" />
@@ -85,7 +88,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                                 <button
                                     onClick={() => changeTab("console")}
                                     className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
-                                        activeTab === "console" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
+                                        activeTabb === "console" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
                                     }`}
                                 >
                                     <Terminal className="w-4 h-4" />
@@ -100,11 +103,11 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     </div>
 
                     {/* Panel Content */}
-                    <div className={`flex-1 overflow-auto ${activeTab === "moving" || activeTab === "console" ? "" : "p-3"}`}>
-                        {activeTab === "noteDetail" && <NoteDetailTab />}
-                        {activeTab === "properties" && <PropertiesTab />}
-                        {activeTab === "moving" && <MovingTab />}
-                        {activeTab === "console" && isMobile && <ConsoleTab />}
+                    <div className={`flex-1 overflow-auto ${activeTabb === "moving" || activeTabb === "console" ? "" : "p-3"}`}>
+                        {activeTabb === "noteDetail" && activeTab?.type === constants.vscode.tab.tabTypes.note && <NoteDetailTab />}
+                        {activeTabb === "properties" && <PropertiesTab />}
+                        {activeTabb === "moving" && <MovingTab />}
+                        {activeTabb === "console" && isMobile && <ConsoleTab />}
                     </div>
                 </div>
             )}
@@ -113,52 +116,12 @@ export function VSPanel({ onClose }: VSPanelProps) {
 }
 
 /**
- * Note Detail Tab - Display selected note details
- */
-function NoteDetailTab() {
-    const { getActiveTab } = useEditorTabHelper();
-    const activeTab = getActiveTab();
-    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
-
-    if (!activeNote) {
-        return (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p className="text-sm">Select a note to view details</p>
-            </div>
-        );
-    }
-
-    return (
-        <div>
-            {/* <h3 className="text-base font-semibold mb-2 text-editor-fg">
-        {activeNote.name}
-      </h3>
-
-      <p className="text-sm text-editor-fg/80 mb-2 leading-relaxed">
-        {activeNote.description || 'No description'}
-      </p>
-
-      <div className="mt-3">
-        <span className="block text-xs text-muted-foreground mb-0.5">
-          Created: {new Date(activeNote.createdAt).toLocaleString()}
-        </span>
-        {activeNote.updatedAt && (
-          <span className="block text-xs text-muted-foreground">
-            Updated: {new Date(activeNote.updatedAt).toLocaleString()}
-          </span>
-        )}
-      </div> */}
-        </div>
-    );
-}
-
-/**
  * Properties Tab - Display note properties
  */
 function PropertiesTab() {
     const { getActiveTab } = useEditorTabHelper();
-    const activeTab = getActiveTab();
-    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const activeTabb = getActiveTab();
+    const activeNote = activeTabb?.type === constants.vscode.tab.tabTypes.note ? (activeTabb.data as Note) : null;
 
     if (!activeNote) {
         return (
