@@ -13,9 +13,7 @@ import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
-    const { originalNoteRef } = useNoteDetailStore();
     const { setNotes } = useNoteGridStore();
-    const { originalWsRef } = useWsDetailStore();
     const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
@@ -45,8 +43,8 @@ export const useEditorTabHelper = () => {
     };
 
     /**
-     * Update active tab ID and sync original refs for change tracking
-     * Now without activeNote - data comes directly from tabs
+     * Update active tab ID and handle tree selection
+     * Data tracking is now done via tab.data vs tab.data0
      */
     const updateActiveTab = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
         const tabsToSearch = tabs || openTabs;
@@ -58,14 +56,6 @@ export const useEditorTabHelper = () => {
 
             if (activeTab?.type === constants.vscode.tab.tabTypes.note) {
                 const noteData = activeTab.data as Note;
-
-                // Initialize originalNoteRef for change tracking
-                if (!originalNoteRef.current || originalNoteRef.current.id !== noteData.id) {
-                    originalNoteRef.current = { ...noteData };
-                }
-
-                // Clear workspace state when switching to note
-                originalWsRef.current = null;
 
                 // ⭐ Select item trong workspace tree nếu note này có trong workspace
                 const workspaceItemId = findWorkspaceItemId(3, noteData.id); // 3 = note entity type
@@ -94,14 +84,6 @@ export const useEditorTabHelper = () => {
             } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
                 const wsData = activeTab.data as Ws;
 
-                // Initialize originalWsRef for change tracking
-                if (!originalWsRef.current || originalWsRef.current.id !== wsData.id) {
-                    originalWsRef.current = { ...wsData };
-                }
-
-                // Clear note state when switching to workspace
-                originalNoteRef.current = null;
-
                 // ⭐ Select workspace folder item trong tree (workspace type = folder type 2)
                 const workspaceItemId = findWorkspaceItemId(2, wsData.id); // 2 = folder entity type
                 if (workspaceItemId) {
@@ -126,13 +108,7 @@ export const useEditorTabHelper = () => {
                         console.warn("⚠️ Tree ref not available");
                     }
                 }
-            } else {
-                originalNoteRef.current = null;
-                originalWsRef.current = null;
             }
-        } else {
-            originalNoteRef.current = null;
-            originalWsRef.current = null;
         }
     };
     // ================================================================

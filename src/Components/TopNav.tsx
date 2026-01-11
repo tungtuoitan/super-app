@@ -73,7 +73,7 @@ export function TopNav() {
                 <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
                     {/* Left side - Logo */}
                     <div className=" flex items-center">
-                        <img src="/logo-16x16.png" alt="Logo" className="w-4 h-4 mr-1 rounded-sm filter invert" />
+                        <img src="/logo-32x32-web.png" alt="Logo" className="w-4 h-4 mr-1 rounded-sm filter invert" />
                         <span className="text-white text-[10px] text-white/80 uppercase tracking-wide">S  u  p  e  r   A  p  p</span>
                     </div>
 

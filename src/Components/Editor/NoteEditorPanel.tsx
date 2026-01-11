@@ -15,8 +15,22 @@ interface NoteEditorPanelProps {
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     const { setOpenTabs, openTabs } = useEditorTabsStore();
-
     const contentRef = React.useRef<HTMLDivElement>(null);
+
+    // Sync hasUnsavedChanges with noteHasChanges
+    //* khi tạo Panel mới thì thêm cái này vào.
+    useEffect(() => {
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((t) =>
+                t.id === tab.id
+                    ? {
+                          ...t,
+                          hasUnsavedChanges: tab.data && tab.data0 ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0) : false,
+                      }
+                    : t
+            )
+        );
+    }, [tab.id, tab.data]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {
@@ -24,7 +38,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
         if (contentRef.current && viewState?.scrollTop !== undefined) {
             contentRef.current.scrollTop = viewState.scrollTop;
         }
-    }, [tab.id]);
+    }, [tab.id, openTabs]);
 
     // Save scroll position when scrolling
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {

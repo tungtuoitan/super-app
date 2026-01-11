@@ -17,7 +17,6 @@ import {useConsoleHelper} from "../console/useConsole.helper";
 export const useWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabHelper();
-    const { originalNoteRef } = useNoteDetailStore();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
     const { $user } = useAuthStore();
     const { currentWorkspace } = useWorkspaceStore();
@@ -136,32 +135,12 @@ export const useWorkspaceItemHelper = () => {
                                 return {
                                     ...tab,
                                     data: updatedNote,
+                                    data0: updatedNote, // Set data0 to saved state after creation
                                     title: updatedNote.name,
-                                    hasUnsavedChanges: false,
+                                    // hasUnsavedChanges will be auto-calculated
                                 };
                             })
                         );
-
-                        // Update originalNoteRef for active tab if it's a note tab
-                        if (activeTabId) {
-                            const activeTabInfo = tabWorkspaceItemMap.get(activeTabId);
-                            if (activeTabInfo) {
-                                // Find corresponding created item for active tab
-                                const activeTabCreatedItem = result.data?.find((item) => {
-                                    const workspaceItemFromDB = newWorkspace?.flatData.find(
-                                        (wsItem) => wsItem.entityType === 3 && wsItem.entityId === item.entityId
-                                    );
-                                    return workspaceItemFromDB && activeTabInfo.tempWorkspaceItemId === workspaceItemFromDB.id;
-                                });
-
-                                if (activeTabCreatedItem) {
-                                    originalNoteRef.current = {
-                                        ...activeTabInfo.noteData,
-                                        id: activeTabCreatedItem.entityId,
-                                    };
-                                }
-                            }
-                        }
 
                         const count = result.data.length;
                         _console.success(count === 1 ? "Note created successfully" : `${count} notes created successfully`);
@@ -174,7 +153,7 @@ export const useWorkspaceItemHelper = () => {
                     return false;
             }
         },
-        [getActiveTab, currentWorkspace, $user, loadTree, setOpenTabs, originalNoteRef]
+        [getActiveTab, currentWorkspace, $user, loadTree, setOpenTabs]
     );
 
     return {

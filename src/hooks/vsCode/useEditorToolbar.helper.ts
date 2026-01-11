@@ -39,11 +39,9 @@ export const useEditorToolbarHelper = () => {
     const { setOpenTabs, openTabs } = useEditorTabsStore();
 
     // Note-specific
-    const { originalNoteRef } = useNoteDetailStore();
     const { upsertNote } = useNoteDetailHelper();
 
     // Workspace-specific
-    const { originalWsRef } = useWsDetailStore();
     const { upsertWorkspace } = useWsDetailHelper();
     const { loadWorkspaces } = useWsGridHelper();
 
@@ -106,7 +104,7 @@ export const useEditorToolbarHelper = () => {
 
                     // UPDATE entity data - use entity-specific API (upsertNote)
                     if (!workspaceItem || workspaceItem.id > 0) {
-                        if(activeTab.type === constants.vscode.tab.tabTypes.note) {
+                        if (activeTab.type === constants.vscode.tab.tabTypes.note) {
                             const savedNote = await upsertNote(activeTab.id);
                             if (!savedNote) {
                                 throw new Error("Failed to update note");
@@ -118,9 +116,8 @@ export const useEditorToolbarHelper = () => {
                     // CREATE new entity + workspace_item - use workspace API
                     else if (workspaceItem.id < 0 && activeTab.data.id < 0) {
                         await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
-                        loadKeywords()
-                    }
-                    else {
+                        loadKeywords();
+                    } else {
                         console.error("⚠️ Unexpected case in upsertOrchestraitor");
                     }
                     break;
@@ -148,20 +145,18 @@ export const useEditorToolbarHelper = () => {
     const commonCancel = useCallback(() => {
         if (!activeTab) return;
 
-        if (activeTab.type === constants.vscode.tab.tabTypes.note) {
-            if (originalNoteRef.current) {
-                // Reset tab data to original
-                setOpenTabs((prev) => prev.map((tab) => (tab.id === activeTab.id ? { ...tab, data: originalNoteRef.current as Note, hasUnsavedChanges: false } : tab)));
-            }
-            _console.info("Changes discarded");
-        } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
-            if (originalWsRef.current) {
-                // Reset tab data to original
-                setOpenTabs((prev) => prev.map((tab) => (tab.id === activeTab.id ? { ...tab, data: originalWsRef.current as Ws, hasUnsavedChanges: false } : tab)));
-            }
+        // Reset tab.data to tab.data0 (original from DB/tree)
+        if (activeTab.data0) {
+            setOpenTabs((prev) =>
+                prev.map((tab) =>
+                    tab.id === activeTab.id
+                        ? { ...tab, data: tab.data0 } // hasUnsavedChanges will be auto-calculated
+                        : tab
+                )
+            );
             _console.info("Changes discarded");
         }
-    }, [activeTab, originalNoteRef, originalWsRef, setOpenTabs, _console]);
+    }, [activeTab, setOpenTabs, _console]);
 
     return {
         upsertOrchestraitor,
