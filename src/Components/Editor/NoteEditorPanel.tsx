@@ -47,9 +47,9 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     };
 
     return (
-        <div className="w-full h-full flex flex-col overflow-hidden bg-[#f6f6f6]">
+        <div className="w-full h-[100vh] flex flex-col overflow-hidden bg-[#f6f6f6]">
             {/* Content */}
-            <div ref={contentRef} onScroll={handleScroll} id="noteEditorContent" className="flex-1 overflow-auto bg-background">
+            <div ref={contentRef} onScroll={handleScroll} id="noteEditorContent" className="h-[100vh] flex-1 overflow-auto bg-background">
                 <NoteDetailContent />
             </div>
         </div>

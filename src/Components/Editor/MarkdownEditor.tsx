@@ -228,7 +228,7 @@ export function MarkdownEditor() {
             {/* //* phải mounted thì mới có editor để gắn listener */}
             {isMounted && <MarkdownEditorNavigationTracker />}
             <Editor
-                height={540}
+                height={"100vh"}
                 defaultLanguage="markdown"
                 theme={constants.markdown.theme.name}
                 value={displayDesc ?? ""}

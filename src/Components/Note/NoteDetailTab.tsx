@@ -22,7 +22,7 @@ import { MarkdownEditorTheme } from "@/HeadlessComponents/markdownEditor/Markdow
 import { useMonaco } from "@monaco-editor/react";
 import { Loader2 } from "lucide-react";
 
-export function NoteDetailContent() {
+export function NoteDetailTab() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabsStore();
@@ -90,19 +90,71 @@ export function NoteDetailContent() {
         return null;
     }
     return (
-        <div className="h-full">
-            <CardContent className="p-0 h-full">
-                {/* //* khi nào load đủ data thì mới render, không thì UI=loading, nếu không thì sẽ hiển thị sai*/}
-                {$miRef.current && <MarkdownEditorSync />}
-                {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />}
-                {displayDesc !== null && allKeywords && allKeywords.length > 0 ? (
-                    <MarkdownEditor />
-                ) : (
-                    <div className="w-full h-full flex justify-center items-center">
-                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                    </div>
-                )}
-            </CardContent>
+        <div className="py-6 space-y-6 h-full ">
+            <div className="px-6 grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* Left Column - Note Details */}
+                <div className="border-none">
+                    <CardContent className="p-0 space-y-2">
+                        {/* Note Name */}
+                        <GenericTextField
+                            ref={noteNameRef}
+                            id="note-name-field"
+                            name="note-name"
+                            label="Note Name"
+                            value={activeNote?.name || ""}
+                            onChange={(e) => {
+                                handleNoteFieldChange("name", e.target.value);
+                                if (e.target.value && e.target.value.trim() !== "") setNameError("");
+                                else setNameError("Note Name is required");
+                            }}
+                            size="small"
+                            disabled={isDisabled}
+                            error={!!nameError}
+                            helperText={nameError}
+                        />
+
+                        {/* Status */}
+                        <div className="space-y-2">
+                            <GenericAutoComplete
+                                allOptions={noteStatusOptions}
+                                value={noteStatusOptions.find((option) => option.id === activeNote?.statusCode) || null}
+                                onChange={(value) => handleNoteFieldChange("statusCode", value)}
+                                inputProps={{
+                                    name: "status",
+                                    label: "Status",
+                                }}
+                                size="small"
+                                disabled={isDisabled || registriesLoading}
+                            />
+                        </div>
+
+                        {/* HashTags */}
+                        {/* <div className="space-y-2">
+                            <GenericTagAutoComplete
+                                options={hashtagOptions as unknown as IAutoCompleteOptions[]}
+                                value={currentHashTagsValue}
+                                onChange={handleHashTagsChange}
+                                label="HashTags"
+                                placeholder={registriesLoading ? "Loading hashtags..." : "+ Add HashTag"}
+                                size="small"
+                                data-testid="note-tags"
+                                disabled={isDeleted || isHardDeleted || registriesLoading}
+                            />
+                        </div> */}
+                    </CardContent>
+                </div>
+
+                {/* Right Column - Metadata */}
+                <div className="border-none">
+                    <CardContent className="p-0 space-y-4">
+                        <GenericTextField label="Created" value={formatNoteDate(activeNote?.createdAt)} disabled size="small" />
+
+                        <GenericTextField label="Updated" value={formatNoteDate(activeNote?.updatedAt)} disabled size="small" />
+
+                        <GenericTextField label="Created by" value={activeNote?.createdBy || "-"} disabled size="small" />
+                    </CardContent>
+                </div>
+            </div>
         </div>
     );
 }
