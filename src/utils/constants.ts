@@ -91,6 +91,7 @@ export const constants = {
             folder: "folder",
             noteGrid: "note-grid",
             workspaceGrid: "workspace-grid",
+            tab: "tab",
         } as const,
     },
 

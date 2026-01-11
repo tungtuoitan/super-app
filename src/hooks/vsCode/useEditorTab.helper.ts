@@ -18,7 +18,7 @@ export const useEditorTabHelper = () => {
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
     const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
-    
+
     /**
      * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
      * @param entityType - 2 (folder), 3 (note), 4 (file)
@@ -217,10 +217,8 @@ export const useEditorTabHelper = () => {
                 // For existing notes (positive ID) in workspace module,
                 // remove the workspace item if closing without saving
                 // This handles the case where user clicks "Don't Save" on the confirmation
-                const workspaceItem = currentWorkspace?.flatData?.find(
-                    item => item.entityType === 3 && item.entityId === noteData.id
-                );
-                
+                const workspaceItem = currentWorkspace?.flatData?.find((item) => item.entityType === 3 && item.entityId === noteData.id);
+
                 // Only remove if the item itself is new (negative workspace_items.id)
                 if (workspaceItem && workspaceItem.id < 0) {
                     setCurrentWorkspace((prevWs) => {
@@ -269,6 +267,83 @@ export const useEditorTabHelper = () => {
     };
 
     // ================================================================
+    // CLOSE TABS - Close multiple tabs at once
+    // ================================================================
+    const closeTabs = (tabIds: string[]) => {
+        if (tabIds.length === 0) return;
+
+        const tabsToClose = openTabs.filter((t) => tabIds.includes(t.id));
+        if (tabsToClose.length === 0) return;
+
+        // ===================================
+        // 1. Collect cleanup targets
+        // ===================================
+        const noteIdsToRemove = new Set<number>();
+        const workspaceItemIdsToRemove = new Set<number>();
+
+        tabsToClose.forEach((tab) => {
+            if (tab.type === constants.vscode.tab.tabTypes.note) {
+                const noteData = tab.data as Note;
+
+                // Temporary notes
+                if (noteData.id < 0) {
+                    noteIdsToRemove.add(noteData.id);
+
+                    if (moduleName === constants.modules.workspace) {
+                        currentWorkspace?.flatData?.forEach((item) => {
+                            if (item.entityType === 3 && item.entityId === noteData.id) {
+                                workspaceItemIdsToRemove.add(item.id);
+                            }
+                        });
+                    }
+                }
+                // Existing notes but new workspace items
+                else if (moduleName === constants.modules.workspace) {
+                    const workspaceItem = currentWorkspace?.flatData?.find((item) => item.entityType === 3 && item.entityId === noteData.id);
+
+                    if (workspaceItem && workspaceItem.id < 0) {
+                        workspaceItemIdsToRemove.add(workspaceItem.id);
+                    }
+                }
+            }
+
+            // Workspace tab cleanup (future)
+            // else if (tab.type === constants.vscode.tab.tabTypes.workspace) {}
+        });
+
+        // ===================================
+        // 2. Apply cleanup (setState ONCE)
+        // ===================================
+        if (noteIdsToRemove.size > 0) {
+            setNotes((prev) => prev.filter((note) => !noteIdsToRemove.has(note.id)));
+        }
+
+        if (moduleName === constants.modules.workspace && workspaceItemIdsToRemove.size > 0) {
+            setCurrentWorkspace((prevWs) => {
+                if (!prevWs || !prevWs.flatData) return prevWs;
+
+                return {
+                    ...prevWs,
+                    flatData: prevWs.flatData.filter((item) => !workspaceItemIdsToRemove.has(item.id)),
+                };
+            });
+        }
+
+        // ===================================
+        // 3. Remove tabs
+        // ===================================
+        const newTabs = openTabs.filter((t) => !tabIds.includes(t.id));
+        setOpenTabs(newTabs);
+
+        // ===================================
+        // 4. Active tab handling
+        // ===================================
+        if (activeTabId && tabIds.includes(activeTabId)) {
+            updateActiveTab(newTabs.length > 0 ? newTabs[newTabs.length - 1].id : null, newTabs);
+        }
+    };
+
+    // ================================================================
     // CONVENIENCE METHODS - Specific tab type openers
     // ================================================================
     // const openNoteTab = (note: Note) => {
@@ -295,19 +370,18 @@ export const useEditorTabHelper = () => {
     const setNewTabAnd = (newActiveTabId: string | null) => {
         setActiveTabId(newActiveTabId);
         const newTab = openTabs.find((tab: BaseTab) => tab.id === newActiveTabId);
-        if (newTab && (newTab.type === constants.vscode.tab.tabTypes.note)) {
+        if (newTab && newTab.type === constants.vscode.tab.tabTypes.note) {
             const noteId = newTab.data.id;
             const item: WorkspaceItemV2 | undefined = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteId);
             if (item && item.id) {
                 setSelectedItemIds([item.id]);
                 setLastSelectedItemId(item.id);
-            }
-            else {
+            } else {
                 setSelectedItemIds([]);
                 setLastSelectedItemId(null);
             }
         }
-    }
+    };
 
     /**
      * Check if two history entries are duplicates (adjacent items that are "same")
@@ -392,6 +466,7 @@ export const useEditorTabHelper = () => {
         // openNoteTab,
         // openWorkspaceTab,
         closeTab,
+        closeTabs,
         getActiveTab,
         updateActiveTab,
         processTabAfterDelete,
