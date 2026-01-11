@@ -5,7 +5,7 @@
  * Tab management is handled by WorkspaceTabStore
  */
 
-import { Ws } from "./useWs.store";
+import { Ws } from "@/types/workspace.types";
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 
 export interface WsDetailContextData {

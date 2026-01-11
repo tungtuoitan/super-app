@@ -3,8 +3,8 @@ import { constants } from "@/utils/constants";
 import { envConfig } from "../config";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
 import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
-import {useMobileStore} from "@/store/mobile/Mobile.store";
-import {CommandPalette} from "./shared/CommandPalette";
+import { useMobileStore } from "@/store/mobile/Mobile.store";
+import { CommandPalette } from "./shared/CommandPalette";
 
 /**
  * Top navigation component.
@@ -20,24 +20,23 @@ import {CommandPalette} from "./shared/CommandPalette";
  * @returns The top navigation component
  */
 export function TopNav() {
-    const showDevBadge = envConfig.ENVIRONMENT !== constants.environments.production;
+    const showDevBadge = envConfig.ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useMobileStore();
     const { setIsOpen } = useCommandPaletteStore();
-
 
     // Handle Ctrl+P to open command palette
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Check for Ctrl+P (Windows/Linux) or Cmd+P (Mac)
-            if ((e.ctrlKey || e.metaKey)  && e.key.toLowerCase() === 'p') {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
                 e.preventDefault();
                 setIsOpen(true);
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
     const handleToggleSidebar = () => {
@@ -46,9 +45,9 @@ export function TopNav() {
         //     newIsSideBarVisible: !isSideBarVisible,
         //     isMobile,
         // });
-        
+
         setIsSideBarVisible(!isSideBarVisible);
-        
+
         // Check position after toggle
         setTimeout(() => {
             const topNavElement = document.querySelector(".top-navigation") as HTMLElement;
@@ -69,11 +68,15 @@ export function TopNav() {
     return (
         <>
             <CommandPalette />
-            
+
             <div className="top-navigation w-full bg-black h-[36px] sticky top-0 z-50">
                 <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
-                    {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
-                    
+                    {/* Left side - Logo */}
+                    <div className=" flex items-center">
+                        <img src="/logo-16x16.png" alt="Logo" className="w-4 h-4 mr-1 rounded-sm filter invert" />
+                        <span className="text-white text-[10px] text-white/80 uppercase tracking-wide">S  u  p  e  r   A  p  p</span>
+                    </div>
+
                     {/* Mobile sidebar toggle button */}
                     {isMobile && (
                         <button
@@ -84,27 +87,13 @@ export function TopNav() {
                         >
                             {isSideBarVisible ? (
                                 /* Close (X) icon when sidebar is visible */
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <line x1="18" y1="6" x2="6" y2="18" />
                                     <line x1="6" y1="6" x2="18" y2="18" />
                                 </svg>
                             ) : (
                                 /* Hamburger menu icon when sidebar is hidden */
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <line x1="3" y1="6" x2="21" y2="6" />
                                     <line x1="3" y1="12" x2="21" y2="12" />
                                     <line x1="3" y1="18" x2="21" y2="18" />
@@ -112,18 +101,19 @@ export function TopNav() {
                             )}
                         </button>
                     )}
-                        
+
                     {/* <DevDetail /> */}
 
-                    <div className="flex-1">{/* Right side content can go here */}</div>
+                    {/* Spacer to push content to right */}
+                    <div className="flex-1"></div>
+
+                    {/* Right side - DEV badge */}
+                    {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
                 </nav>
             </div>
         </>
     );
 }
-
-
-
 
 export function DevDetail() {
     const show = envConfig.ENVIRONMENT !== constants.environments.production;
@@ -143,7 +133,9 @@ export function DevDetail() {
 Scroll: ${entry.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
 Field: ${entry.focusedFieldId || "none"}`}
                 >
-                    <div>{entry.type}#{entry.itemId}</div>
+                    <div>
+                        {entry.type}#{entry.itemId}
+                    </div>
                     <div className="text-[10px] opacity-75">
                         {entry.scrollPositions && entry.scrollPositions.length > 0 && `S${entry.scrollPositions.length}`}
                         {entry.focusedFieldId && ` F:${entry.focusedFieldId}`}
@@ -159,7 +151,9 @@ Field: ${entry.focusedFieldId || "none"}`}
 Scroll: ${present.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
 Field: ${present.focusedFieldId || "none"}`}
                 >
-                    <div>{present.type}#{present.itemId} ←</div>
+                    <div>
+                        {present.type}#{present.itemId} ←
+                    </div>
                     <div className="text-[10px] opacity-90">
                         {present.scrollPositions && present.scrollPositions.length > 0 && `S${present.scrollPositions.length}`}
                         {present.focusedFieldId && ` F:${present.focusedFieldId}`}
@@ -176,7 +170,9 @@ Field: ${present.focusedFieldId || "none"}`}
 Scroll: ${entry.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
 Field: ${entry.focusedFieldId || "none"}`}
                 >
-                    <div>{entry.type}#{entry.itemId}</div>
+                    <div>
+                        {entry.type}#{entry.itemId}
+                    </div>
                     <div className="text-[10px] opacity-75">
                         {entry.scrollPositions && entry.scrollPositions.length > 0 && `S${entry.scrollPositions.length}`}
                         {entry.focusedFieldId && ` F:${entry.focusedFieldId}`}

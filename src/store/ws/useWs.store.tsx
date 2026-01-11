@@ -1,27 +1,11 @@
 /**
- * Ws List Store
- * Centralized state management for ws list grid
+ * Ws Grid Panel Store
+ * Centralized state management for ws grid panel
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
-
-/**
- * Workspace interface (domain model with Date objects)
- */
-export interface Ws {
-    id: number;
-    name: string;
-    description?: string | null;
-    statusCode?: string; // Workspace status code (matches Note pattern)
-    hashtags?: string; // Hashtags string (matches Note pattern)
-    createdAt: Date;
-    updatedAt?: Date | null;
-    deletedAt: Date | null;
-    isHardDeleted?: boolean;
-    userId?: number;
-    createdBy?: string; // User who created the workspace
-}
+import { Ws } from "@/types/workspace.types";
 
 export interface PaginationState {
     pageIndex: number;
@@ -33,23 +17,21 @@ export interface WsContextData {
     setWorkspaces: Dispatch<SetStateAction<Ws[]>>;
     totalCount: number;
     setTotalCount: Dispatch<SetStateAction<number>>;
-    wsGridIsLoading: boolean; // Renamed to match NoteGrid pattern
+    wsGridIsLoading: boolean;
     setWsGridIsLoading: Dispatch<SetStateAction<boolean>>;
-    wsGridError: Error | null; // Renamed to match NoteGrid pattern
+    wsGridError: Error | null;
     setWsGridError: Dispatch<SetStateAction<Error | null>>;
-    wsGridSorting: SortingState; // Renamed to match NoteGrid pattern
+    wsGridSorting: SortingState;
     setWsGridSorting: Dispatch<SetStateAction<SortingState>>;
-    wsGridPagination: PaginationState; // Renamed to match NoteGrid pattern
+    wsGridPagination: PaginationState;
     setWsGridPagination: Dispatch<SetStateAction<PaginationState>>;
-    wsGridRowSelection: RowSelectionState; // Renamed to match NoteGrid pattern
+    wsGridRowSelection: RowSelectionState;
     setWsGridRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
-    wsGridColumnFilters: ColumnFiltersState; // Renamed to match NoteGrid pattern
+    wsGridColumnFilters: ColumnFiltersState;
     setWsGridColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
     containerRef: RefObject<HTMLDivElement>;
     containerWidth: number;
     setContainerWidth: Dispatch<SetStateAction<number>>;
-    selectedWs: Ws | null;
-    setSelectedWs: Dispatch<SetStateAction<Ws | null>>;
 }
 
 export const wsContextDefaultValue: WsContextData = {
@@ -63,7 +45,6 @@ export const wsContextDefaultValue: WsContextData = {
     wsGridColumnFilters: [],
     containerRef: { current: null },
     containerWidth: 0,
-    selectedWs: null,
     setWorkspaces: () => {},
     setTotalCount: () => {},
     setWsGridIsLoading: () => {},
@@ -73,7 +54,6 @@ export const wsContextDefaultValue: WsContextData = {
     setWsGridRowSelection: () => {},
     setWsGridColumnFilters: () => {},
     setContainerWidth: () => {},
-    setSelectedWs: () => {},
 };
 
 export const WsStore = createContext<WsContextData>(wsContextDefaultValue);
@@ -91,7 +71,6 @@ export const WsProvider: React.FC<React.PropsWithChildren<unknown>> = ({ childre
     const [wsGridColumnFilters, setWsGridColumnFilters] = useState<ColumnFiltersState>([]);
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState<number>(0);
-    const [selectedWs, setSelectedWs] = useState<Ws | null>(null);
 
     return (
         <WsStore.Provider
@@ -115,8 +94,6 @@ export const WsProvider: React.FC<React.PropsWithChildren<unknown>> = ({ childre
                 containerRef,
                 containerWidth,
                 setContainerWidth,
-                selectedWs,
-                setSelectedWs,
             }}
         >
             {children}

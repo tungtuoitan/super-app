@@ -15,7 +15,7 @@ import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.stor
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
 import { Note, NoteDTO } from "@/types/note.types";
-import { Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { noteService } from "@/services/note.service";
 import { wsService, WsDTO } from "@/services/ws.service";
 import { transformNotes } from "@/utils/note.utils";
@@ -153,6 +153,7 @@ export const OpenTabsSync = () => {
                                 id: tabStorage.tabId,
                                 type: constants.vscode.tab.tabTypes.note,
                                 data: noteData,
+                                data0: noteData,
                                 title: noteData.name || constants.vscode.tabTitles.unsavedNote,
                                 hasUnsavedChanges: false,
                             });
@@ -169,6 +170,7 @@ export const OpenTabsSync = () => {
                                 id: tabStorage.tabId,
                                 type: constants.vscode.tab.tabTypes.workspace,
                                 data: wsData,
+                                data0: wsData,
                                 title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
                                 hasUnsavedChanges: false,
                             });

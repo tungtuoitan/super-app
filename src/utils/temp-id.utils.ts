@@ -9,7 +9,7 @@
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
-import type { Ws } from "@/store/ws/useWs.store";
+import type { Ws } from "@/types/workspace.types";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 
 /**

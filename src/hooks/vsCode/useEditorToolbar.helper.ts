@@ -18,15 +18,14 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useWsGridHelper } from "../ws/useWsGrid.helper";
 import { useWsDetailHelper } from "../ws/useWsDetail.helper";
-import { Ws, useWsStore } from "@/store/ws/useWs.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useWorkspaceItemHelper } from "../workspace/useWorkspaceItemHelper";
-import { WorkspaceItemAction } from "@/types/workspace.types";
+import { WorkspaceItemAction, Ws } from "@/types/workspace.types";
 import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 import { useWorkspaceLoader } from "../workspace";
-import {useStandardRegistryHelper} from "../standardRegistry/useStandardRegistry.helper";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
+import { useConsoleHelper } from "../console/useConsole.helper";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -44,7 +43,6 @@ export const useEditorToolbarHelper = () => {
     const { upsertNote } = useNoteDetailHelper();
 
     // Workspace-specific
-    const { selectedWs, setSelectedWs } = useWsStore();
     const { originalWsRef } = useWsDetailStore();
     const { upsertWorkspace } = useWsDetailHelper();
     const { loadWorkspaces } = useWsGridHelper();
@@ -62,7 +60,8 @@ export const useEditorToolbarHelper = () => {
             const noteData = activeTab.data as Note;
             return noteData?.deletedAt ? "Deleted" : "Existing";
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
-            return selectedWs?.deletedAt ? "Deleted" : "Existing";
+            const wsData = activeTab.data as Ws;
+            return wsData?.deletedAt ? "Deleted" : "Existing";
         }
 
         return "Existing";
@@ -76,7 +75,8 @@ export const useEditorToolbarHelper = () => {
             const noteData = activeTab.data as Note;
             return noteData?.id || null;
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
-            return selectedWs?.id || null;
+            const wsData = activeTab.data as Ws;
+            return wsData?.id || null;
         }
 
         return null;
@@ -156,11 +156,12 @@ export const useEditorToolbarHelper = () => {
             _console.info("Changes discarded");
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             if (originalWsRef.current) {
-                setSelectedWs({ ...originalWsRef.current });
+                // Reset tab data to original
+                setOpenTabs((prev) => prev.map((tab) => (tab.id === activeTab.id ? { ...tab, data: originalWsRef.current as Ws, hasUnsavedChanges: false } : tab)));
             }
             _console.info("Changes discarded");
         }
-    }, [activeTab, originalNoteRef, originalWsRef, setOpenTabs, setSelectedWs]);
+    }, [activeTab, originalNoteRef, originalWsRef, setOpenTabs, _console]);
 
     return {
         upsertOrchestraitor,

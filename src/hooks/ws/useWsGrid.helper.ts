@@ -1,6 +1,6 @@
 import { wsService, WsDTO } from "@/services/ws.service";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
-import { Ws } from "@/store/ws/useWs.store";
+import { Ws } from "@/types/workspace.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "../../utils";
 import { useSnackbar } from "notistack";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
