@@ -5,13 +5,9 @@
  * Tab management is handled by WorkspaceTabStore
  */
 
-import { Ws } from "@/types/workspace.types";
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 
 export interface WsDetailContextData {
-    // Dialog state
-    originalWsRef: React.MutableRefObject<Ws | null>;
-
     // Container refs
     wsNameRef: React.RefObject<HTMLInputElement>;
 
@@ -25,9 +21,6 @@ export interface WsDetailContextData {
 }
 
 export const wsDetailContextDefaultValue: WsDetailContextData = {
-    // Dialog state
-    originalWsRef: { current: null },
-
     // Container refs
     wsNameRef: { current: null },
 
@@ -47,7 +40,6 @@ export const useWsDetailStore = () => useContext(WsDetailContext);
 export const WsDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Container refs
     const wsNameRef = useRef<HTMLInputElement>(null);
-    const originalWsRef = useRef<Ws | null>(null);
 
     // Focus state
     const [shouldFocusWsName, setShouldFocusWsName] = useState(false);
@@ -58,9 +50,6 @@ export const WsDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     return (
         <WsDetailContext.Provider
             value={{
-                // Dialog state
-                originalWsRef,
-
                 // Container refs
                 wsNameRef,
 

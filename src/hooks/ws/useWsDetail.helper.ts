@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { useSnackbar } from "notistack";
-import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsStore } from "@/store/ws/useWs.store";
 import { wsService } from "@/services/ws.service";
 import { useWsGridHelper } from "./useWsGrid.helper";
@@ -14,7 +13,6 @@ import { Ws } from "@/types/workspace.types";
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();
     const { setWsGridPagination } = useWsStore();
-    const { originalWsRef } = useWsDetailStore();
     const { loadWorkspaces } = useWsGridHelper();
     const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
@@ -31,7 +29,7 @@ export const useWsDetailHelper = () => {
                     };
                 }
                 return t;
-            }),
+            })
         );
     };
 
@@ -62,7 +60,8 @@ export const useWsDetailHelper = () => {
             // Step 2: Determine operation mode (create/update/restore)
             // ============================================================
             const isCreateMode = selectedWs.id <= 0;
-            const isRestoreMode = selectedWs.id > 0 && originalWsRef.current?.deletedAt && !selectedWs.deletedAt;
+            const originalWs = activeTab?.data0 as Ws | undefined;
+            const isRestoreMode = selectedWs.id > 0 && originalWs?.deletedAt && !selectedWs.deletedAt;
             const token = $user.userToken;
 
             try {
@@ -111,7 +110,7 @@ export const useWsDetailHelper = () => {
                 };
 
                 // ============================================================
-                // Step 10: Update tab data with server response
+                // Step 10: Update tab data and data0 with server response
                 // ============================================================
                 _console.success(isCreateMode ? "Workspace created successfully" : "Workspace saved successfully");
                 if (tabId) {
@@ -122,14 +121,13 @@ export const useWsDetailHelper = () => {
                                     ...tab,
                                     title: transformedWs.name || "Unsaved Workspace",
                                     data: transformedWs,
+                                    data0: transformedWs, // Update data0 to new saved state
                                 };
                             }
                             return tab;
-                        }),
+                        })
                     );
                 }
-
-                originalWsRef.current = { ...transformedWs };
 
                 // Reload workspaces immediately to show the newly saved workspace
                 await loadWorkspaces();
@@ -147,7 +145,7 @@ export const useWsDetailHelper = () => {
                 return null;
             }
         },
-        [openTabs, activeTabId, loadWorkspaces, $user, _console, originalWsRef, setOpenTabs],
+        [openTabs, activeTabId, loadWorkspaces, $user, _console, setOpenTabs]
     );
 
     return {
