@@ -267,7 +267,7 @@ export const constants = {
                     glyphMargin: true, // Bật glyph margin cho fold icons
                     readOnly: disabled,
                     scrollBeyondLastLine: true, // Cho phép scroll xuống dưới dòng cuối (~10 lines)
-                    padding: { top: 0, bottom: 200 }, // Khoảng trống ~10 lines ở cuối (10 * 20px)
+                    padding: { top: 20, bottom: 200 }, // Khoảng trống ~10 lines ở cuối (10 * 20px)
                     automaticLayout: true,
                     rulers: [],
                     renderLineHighlight: "none",

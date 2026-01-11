@@ -94,8 +94,8 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                             {/* Resize handle between editor and panel - Hidden on mobile */}
                             {!isMobile && <VSCodeResizeHandle direction="vertical" id="panel-resize" />}
 
-                            {/* Bottom Panel - NoteDetail and Properties - Hidden on mobile */}
-                            {!isMobile && <VSPanel onClose={() => setIsPanelVisible(false)} />}
+                            <VSPanel onClose={() => setIsPanelVisible(false)} />
+                            {/* {!isMobile && <VSPanel onClose={() => setIsPanelVisible(false)} />} */}
                         </PanelGroup>
                     </Panel>
                 </PanelGroup>
