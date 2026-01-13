@@ -237,28 +237,28 @@ const _upsertWorkspaceItem = async (
  * @param data - Move items request data
  * @returns Operation result or rejects with response
  */
-const _moveWorkspaceItems = async (token: string, workspaceId: number, data: MoveItemsRequest): Promise<WorkspaceOperationResult> => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
+// const _moveWorkspaceItems = async (token: string, workspaceId: number, data: MoveItemsRequest): Promise<WorkspaceOperationResult> => {
+//     const headers = new Headers();
+//     const bearer = `Bearer ${token}`;
 
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
+//     headers.append("Authorization", bearer);
+//     headers.append("Content-Type", "application/json");
 
-    const options = {
-        method: "PATCH",
-        headers: headers,
-        body: JSON.stringify(data),
-    };
+//     const options = {
+//         method: "PATCH",
+//         headers: headers,
+//         body: JSON.stringify(data),
+//     };
 
-    const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items/move`, options);
+//     const res = await window.fetch(`${config.api.baseURL}/api/workspace/${workspaceId}/items/move`, options);
 
-    if (res.ok) {
-        const ret = await res.json();
-        return ret;
-    } else {
-        return Promise.reject(res);
-    }
-};
+//     if (res.ok) {
+//         const ret = await res.json();
+//         return ret;
+//     } else {
+//         return Promise.reject(res);
+//     }
+// };
 
 /**
  * Delete multiple workspace items with cascade support
@@ -447,7 +447,7 @@ export const workspaceService = {
     _getWorkspaceTreeV2, // V2 with full entity data
     _getWorkspaceItem,
     _upsertWorkspaceItem,
-    _moveWorkspaceItems,
+    // _moveWorkspaceItems,
     _deleteWorkspaceItems,
     _upsertFolder,
     // _addItemToWorkspace,
