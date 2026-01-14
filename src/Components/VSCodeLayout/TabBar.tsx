@@ -1,7 +1,7 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { X, FileText, Folder, Box, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
@@ -31,8 +31,8 @@ function getTabIcon(type: string) {
  * TabBar - VS Code style tab bar component
  */
 export function TabBar() {
-    const { openTabs, activeTabId, isLoadingTabs } = useEditorTabsStore();
-    const { closeTab, updateActiveTab } = useEditorTabHelper();
+    const { openTabs, setOpenTabs, activeTabId, isLoadingTabs } = useEditorTabsStore();
+    const { closeTab, updateActiveTab, getActiveTab } = useEditorTabHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
     const { notes } = useNoteGridStore();
@@ -40,6 +40,8 @@ export function TabBar() {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { upsertOrchestraitor } = useEditorToolbarHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { generateBreadcrumbForTab } = useEditorTabHelper();
+    const { allKeywords } = useGeneralStore();
 
     // Enable keyboard shortcuts
     useTabKeyboardShortcuts();
@@ -127,6 +129,20 @@ export function TabBar() {
         // Show context menu with tab data
         showContextMenu(event, "tab", { tabId });
     };
+
+    useEffect(() => {
+        // update breadcrumbs (when new note is created)
+        if (currentWorkspace && openTabs.length > 0) {
+            const newTabs = openTabs.map(tab => {
+                if (tab.type === constants.vscode.tab.tabTypes.note) {
+                    const breadcrumb = generateBreadcrumbForTab(tab.data, tab.type);
+                    return { ...tab, breadcrumb };
+                }
+                return tab;
+            });
+            setOpenTabs(newTabs);
+        }
+    }, [currentWorkspace, allKeywords]);
 
     // Helper function to render a single tab
     const renderTab = (tab: any, isPinned: boolean = false) => {
