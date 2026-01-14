@@ -14,6 +14,7 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
 import { constants } from "@/utils/constants";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
+import { Breadcrumb } from "./Breadcrumb";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();
@@ -40,15 +41,12 @@ export function EditorToolbar() {
     }, [activeTab, isSaving, upsertOrchestraitor]);
 
     return (
-        <div className="h-10 flex items-center justify-between px-4 border-b border-white/10 bg-[rgb(37,37,38)] gap-2">
-            {/* Status Info */}
-            <div className="flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                        {/* <span className={`text-xs ${_deleteStatusText === "InActive" ? "text-orange-500" : "text-muted-foreground"}`}>{_deleteStatusText}</span> */}
-                        <span className={`text-xs ${_itemId && _itemId < 0 ? "text-purple-500" : "text-muted-foreground"}`}>ID: {_itemId || "0"}</span>
-                    </div>
-                </div>
+        <div className="h-6 flex items-center justify-between px-4 bg-black border-b border-white/5 gap-2">
+            {/* Left: Breadcrumb Navigation */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+                {activeTab?.breadcrumb && activeTab.breadcrumb.length > 0 && (
+                    <Breadcrumb items={activeTab.breadcrumb} />
+                )}
             </div>
 
             {/* Action Buttons */}

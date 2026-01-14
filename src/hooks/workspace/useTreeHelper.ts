@@ -18,14 +18,16 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import {SPECIAL_IDS} from "@/utils/temp-id.utils";
 import {useConsoleHelper} from "../console/useConsole.helper";
+import {useStandardRegistryHelper} from "../standardRegistry/useStandardRegistry.helper";
 
 export const useTreeHelper = () => {
-    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace } = useWorkspaceStore();
 
     const { openFolderDialog } = useFolderDialogHelper();
     const { loadTree } = useWorkspaceLoader();
     const _console = useConsoleHelper();
     const { $user } = useAuthStore();
+    const { loadKeywords } = useStandardRegistryHelper();
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
@@ -367,6 +369,7 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // Pass virtual items to preserve them in state during reload
             await loadTree(allNewVirtualItems.length > 0 ? allNewVirtualItems : undefined);
+            loadKeywords()
 
             // VS Code behavior: Re-select the moved items after move completes
             // Use itemsNeedUpdate (top-level items) instead of selectedEntityIds (includes descendants)
