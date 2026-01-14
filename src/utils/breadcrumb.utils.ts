@@ -4,7 +4,6 @@
  */
 
 import type { Keyword } from "@/types/keyword.types";
-import { parseKeywordLink } from "./keyword-link.utils";
 
 /**
  * Breadcrumb item representing a segment in the navigation path

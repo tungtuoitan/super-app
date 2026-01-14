@@ -6,7 +6,7 @@
 import { Note } from "@/types/note.types";
 import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
-import { BreadcrumbItem } from "@/utils/breadcrumb.utils";
+import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
 
 export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | "folder" | "settings";
 

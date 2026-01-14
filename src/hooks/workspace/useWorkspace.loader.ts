@@ -121,7 +121,9 @@ export const useWorkspaceLoader = () => {
         } catch (error) {
             throw error;
         } finally {
-            setIsLoadingTree(false);
+            setTimeout(() => {
+                setIsLoadingTree(false)
+            }, 100);
         }
     };
 

@@ -23,9 +23,9 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
 
     const handleClick = (item: BreadcrumbItem, index: number) => {
         // Don't navigate if clicking on last item (current file)
-        if (index === items.length - 1) {
-            return;
-        }
+        // if (index === items.length - 1) {
+        //     return;
+        // }
 
         // Find keyword by link
         const keyword = allKeywords.find(k => k.link === item.link);
@@ -44,15 +44,16 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                         {/* Breadcrumb Item */}
                         <button
                             onClick={() => handleClick(item, index)}
-                            disabled={isLast}
+                            // disabled={isLast}
                             className={`
                                 flex items-center gap-1.5 px-1.5 py-0.5 rounded
-                                ${isLast
-                                    ? "cursor-default"
-                                    : "cursor-pointer hover:underline decoration-white/60 hover:text-white"
-                                }
+                                cursor-pointer hover:underline decoration-white/60 hover:text-white
                                 transition-colors
-                            `}
+                                `}
+                                // ${isLast
+                                //     ? "cursor-default"
+                                //     : "cursor-pointer hover:underline decoration-white/60 hover:text-white"
+                                // }
                         >
                             {/* Icon */}
                             {item.type === "workspace" && (

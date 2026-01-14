@@ -548,6 +548,93 @@ export function transformToTreeData(
     return [workspaceRootV2];
 };
 
+/**
+ * Find the path (ancestor IDs) from root to target item
+ * Returns array of workspace_items.id from root to target (includes target)
+ *
+ * Example: If tree is A > B > C > D and target is D
+ * Returns: [A_id, B_id, C_id, D_id]
+ *
+ * @param treeData - Tree structure
+ * @param targetId - workspace_items.id of target item
+ * @returns Array of workspace_items.id from root to target (or empty if not found)
+ */
+export function findPathToItem(treeData: TreeFolder[], targetId: number): number[] {
+    function $findPath(nodes: TreeFolder[], path: number[]): number[] | null {
+        for (const node of nodes) {
+            const currentId = (node.data as any).id;
+            const currentPath = [...path, currentId];
+
+            // Found target
+            if (currentId === targetId) {
+                return currentPath;
+            }
+
+            // Search in children
+            if (node.children && node.children.length > 0) {
+                const foundPath = $findPath(node.children, currentPath);
+                if (foundPath) {
+                    return foundPath;
+                }
+            }
+        }
+        return null;
+    }
+
+    return $findPath(treeData, []) || [];
+}
+
+/**
+ * Expand only the path to target item (collapse everything else)
+ *
+ * Algorithm:
+ * 1. Close ALL nodes in the tree
+ * 2. Open all nodes in the path (including target)
+ * 3. Children of target remain closed (not in path)
+ *
+ * Example: Tree is workspace A / folder B / folder C / note D
+ * Navigate to D: Opens A, B, C, D → see A's children (B), B's children (C), C's children (D)
+ * Navigate to B: Opens A, B → see A's children (B), B's children, but B's children remain closed
+ * Navigate to workspace root A: Opens A → see A's children, but A's children remain closed
+ *
+ * Result: Only see direct children of target, not grandchildren
+ *
+ * @param treeRef - React-arborist tree ref
+ * @param treeData - Tree structure
+ * @param targetId - workspace_items.id of target item
+ */
+export function expandPathToItem(
+    treeRef: React.RefObject<any>,
+    treeData: TreeFolder[],
+    targetId: number
+): void {
+    if (!treeRef.current) return;
+
+    // Find path to target (includes target itself)
+    const pathIds = findPathToItem(treeData, targetId);
+    if (pathIds.length === 0) return;
+
+    // Get all node IDs in tree
+    const allIds = getAllVisibleFolderIds(treeData);
+
+    // Close ALL nodes first
+    allIds.forEach((id) => {
+        const node = treeRef.current.get(id.toString());
+        if (node && node.isOpen) {
+            node.close();
+        }
+    });
+
+    // Open all nodes in path (including target)
+    // This shows target's children but keeps grandchildren closed
+    pathIds.forEach((id) => {
+        const node = treeRef.current.get(id.toString());
+        if (node && !node.isOpen) {
+            node.open();
+        }
+    });
+}
+
 export const treeMiniHelper = {
     $traverse,
     $checkSubtree,
@@ -560,5 +647,7 @@ export const treeMiniHelper = {
     transformItemsToTreeData,
     createWorkspaceRootFolder,
     transformToTreeData,
-    filterTopLevelParents
+    filterTopLevelParents,
+    findPathToItem,
+    expandPathToItem
 };

@@ -25,6 +25,7 @@ import { Keyword } from "@/types/keyword.types";
 import { isValidUrl } from "@/utils/url.utils";
 import {useWorkspaceHelper} from "../workspace/useWorkspaceHelper";
 import {useConsoleHelper} from "../console/useConsole.helper";
+import { treeMiniHelper } from "../workspace/tree.miniHelper";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
@@ -109,12 +110,10 @@ export const useKeywordNavigationHelper = () => {
                         setSelectedItemIds([folderInWorkspace.id]);
                         setLastSelectedItemId(folderInWorkspace.id);
 
-                        // Expand folder if collapsed
-                        if (!folderInWorkspace.isExpanded && _treeRef.current) {
-                            const node = _treeRef.current.get(folderInWorkspace.id.toString());
-                            if (node && !node.isOpen) {
-                                node.open();
-                            }
+                        // Expand only path to folder (collapse everything else)
+                        if (_treeRef.current && targetWorkspace?.flatData) {
+                            const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
+                            treeMiniHelper.expandPathToItem(_treeRef, treeData, folderInWorkspace.id);
                         }
 
                         _console.success("Navigated to folder");
@@ -145,10 +144,17 @@ export const useKeywordNavigationHelper = () => {
                         };
 
                         openTab(note, constants.vscode.tab.tabTypes.note);
-                        //* Select note in workspace tree after a small delay (nếu k thì có bug: k select đc node)
+
+                        //* Select note in workspace tree and expand only path to it
                         setTimeout(() => {
                             setSelectedItemIds([noteInWorkspace.id]);
                             setLastSelectedItemId(noteInWorkspace.id);
+
+                            // Expand only path to note (collapse everything else)
+                            if (_treeRef.current && targetWorkspace?.flatData) {
+                                const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
+                                treeMiniHelper.expandPathToItem(_treeRef, treeData, noteInWorkspace.id);
+                            }
                         });
 
                         // If heading, scroll to it after a small delay
