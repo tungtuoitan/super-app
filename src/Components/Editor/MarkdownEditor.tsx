@@ -6,12 +6,13 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
-import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useWorkspaceStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useWorkspaceStore, useEditorStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteDetailHelper } from "@/hooks/note/useNoteDetail.helper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
+import { Loader2 } from "lucide-react";
 import {
     convertToDisplayVersion,
     convertToOriginalVersion,
@@ -26,6 +27,7 @@ import { Note } from "@/types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useSnackbar } from "notistack";
 import { MarkdownEditorNavigationTracker } from "@/HeadlessComponents/markdownEditor/MarkdownEditorNavigationTracker";
+import { MarkdownEditorViewStateSync } from "@/HeadlessComponents/markdownEditor/MarkdownEditorViewStateSync";
 import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 
 export function MarkdownEditor() {
@@ -35,6 +37,7 @@ export function MarkdownEditor() {
     const { getActiveTab } = useEditorTabHelper();
     const { handleNoteFieldChange } = useNoteDetailHelper();
     const { getItemStatus } = useTreeStatusHelper();
+    const { isLoadingTab } = useEditorStore();
     // const $mi = useMonaco(); // Monaco instance
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef, isMounted, setIsMounted } = useNoteDetailStore();
     const _console = useConsoleHelper();
@@ -224,11 +227,13 @@ export function MarkdownEditor() {
     if (!$miRef.current || allKeywords.length === 0) return null;
 
     return (
-        <>
+        <div className="relative w-full h-[calc(100%-118px)]">
             {/* //* phải mounted thì mới có editor để gắn listener */}
             {isMounted && <MarkdownEditorNavigationTracker />}
+            {isMounted && <MarkdownEditorViewStateSync />}
+
             <Editor
-                height={"100vh"}
+                height={"100%"}
                 defaultLanguage="markdown"
                 theme={constants.markdown.theme.name}
                 value={displayDesc ?? ""}
@@ -236,6 +241,13 @@ export function MarkdownEditor() {
                 onMount={handleEditorDidMount}
                 options={constants.markdown.editor.options(disabled, displayDesc ?? "")}
             />
-        </>
+
+            {/* Loading Overlay */}
+            {isLoadingTab && (
+                <div className="absolute h-full inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-50">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                </div>
+            )}
+        </div>
     );
 }

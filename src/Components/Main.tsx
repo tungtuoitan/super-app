@@ -12,7 +12,7 @@ import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
 import MainNav from "./MainNav/MainNav";
-import { DialogProvider, EditorTabProvider, GeneralProvider, CommandPaletteProvider, ConsoleProvider } from "@/store/index";
+import { DialogProvider, EditorTabProvider, EditorProvider, GeneralProvider, CommandPaletteProvider, ConsoleProvider } from "@/store/index";
 import { EditorToolbarProvider } from "@/store/editor/EditorToolbar.store";
 import { NoteDetailProvider } from "@/store/note/useNoteDetail.store";
 import { NoteGridProvider } from "@/store/note/useNoteGrid.store";
@@ -72,8 +72,9 @@ export function Main() {
                                                                                     <NoteDetailProvider>
                                                                                         <NoteGridProvider>
                                                                                             <EditorTabProvider>
-                                                                                                <EditorToolbarProvider>
-                                                                                                    <DialogProvider>
+                                                                                                <EditorProvider>
+                                                                                                    <EditorToolbarProvider>
+                                                                                                        <DialogProvider>
                                                                                                         <OrchestratorContextMenuStoreProvider>
                                                                                                             <ConfirmationPopoverProvider>
                                                                                                                 <OrchestratorContextMenu>
@@ -86,8 +87,9 @@ export function Main() {
                                                                                                                 <ConfirmationPopoverContainer />
                                                                                                             </ConfirmationPopoverProvider>
                                                                                                         </OrchestratorContextMenuStoreProvider>
-                                                                                                    </DialogProvider>
-                                                                                                </EditorToolbarProvider>
+                                                                                                        </DialogProvider>
+                                                                                                    </EditorToolbarProvider>
+                                                                                                </EditorProvider>
                                                                                             </EditorTabProvider>
                                                                                         </NoteGridProvider>
                                                                                     </NoteDetailProvider>

@@ -15,11 +15,22 @@ export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constan
  * Extensible for future needs (cursor position, expanded sections, etc.)
  */
 export interface TabViewState {
-    /** Scroll position in the editor content */
+    /** Scroll position in the editor content container (div) */
     scrollTop?: number;
 
+    /** Monaco editor cursor position */
+    editorPosition?: {
+        lineNumber: number;
+        column: number;
+    };
+
+    /** Monaco editor scroll position */
+    editorScrollPosition?: {
+        scrollTop: number;
+        scrollLeft: number;
+    };
+
     // Future extensions:
-    // cursorPosition?: { line: number; column: number };
     // expandedSections?: string[];
     // selectedText?: { start: number; end: number };
     // zoom?: number;
