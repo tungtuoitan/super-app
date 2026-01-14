@@ -56,7 +56,7 @@ export interface HistoryEntry {
 
     // markdown
     mdPos?: MdPos; // Monaco editor cursor position
-    mdScrollPos?: MdScrollPos; // Monaco editor scroll position
+    mdScrollPos?: MdScrollPos; // Monaco editor scroll position 
 }
 
 export interface NavigationHistoryContextData {

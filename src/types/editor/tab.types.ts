@@ -6,6 +6,7 @@
 import { Note } from "@/types/note.types";
 import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
+import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
 
 export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | "folder" | "settings";
 
@@ -14,11 +15,22 @@ export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constan
  * Extensible for future needs (cursor position, expanded sections, etc.)
  */
 export interface TabViewState {
-    /** Scroll position in the editor content */
+    /** Scroll position in the editor content container (div) */
     scrollTop?: number;
 
+    /** Monaco editor cursor position */
+    editorPosition?: {
+        lineNumber: number;
+        column: number;
+    };
+
+    /** Monaco editor scroll position */
+    editorScrollPosition?: {
+        scrollTop: number;
+        scrollLeft: number;
+    };
+
     // Future extensions:
-    // cursorPosition?: { line: number; column: number };
     // expandedSections?: string[];
     // selectedText?: { start: number; end: number };
     // zoom?: number;
@@ -33,6 +45,7 @@ export interface BaseTab {
     hasUnsavedChanges?: boolean;
     viewState?: TabViewState;
     isPinned?: boolean;
+    breadcrumb?: BreadcrumbItem[];
 }
 
 export interface EditorState {

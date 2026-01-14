@@ -10,6 +10,14 @@ import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/Navigati
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { useGeneralStore } from "@/store/index";
+import {
+    findKeywordForNote,
+    parseBreadcrumbFromKeyword,
+    enrichBreadcrumbWithColors,
+    buildBreadcrumbFromTree,
+    BreadcrumbItem,
+} from "@/utils/breadcrumb.utils";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -18,6 +26,7 @@ export const useEditorTabHelper = () => {
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
     const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
+    const { allKeywords } = useGeneralStore();
 
     /**
      * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
@@ -40,6 +49,87 @@ export const useEditorTabHelper = () => {
         }
 
         return item?.id || null; // workspace_items.id
+    };
+
+    /**
+     * Helper: Generate breadcrumb for a tab
+     * @param data - Note or Workspace data
+     * @param type - Tab type
+     * @returns Breadcrumb items or undefined
+     */
+    const generateBreadcrumbForTab = (data: Note | Ws, type: string): BreadcrumbItem[] | undefined => {
+        // Only generate breadcrumb for note tabs
+        if (type !== constants.vscode.tab.tabTypes.note) {
+            return undefined;
+        }
+
+        if (!currentWorkspace) {
+            return undefined;
+        }
+
+        try {
+            const noteData = data as Note;
+
+            // Find workspace item ID
+            const workspaceItemId = findWorkspaceItemId(3, noteData.id);
+            if (!workspaceItemId) {
+                return undefined;
+            }
+
+            // For new notes (ID < 0), build breadcrumb from workspace tree
+            if (noteData.id < 0) {
+                return buildBreadcrumbFromTree(
+                    workspaceItemId,
+                    noteData.id,
+                    noteData.name,
+                    currentWorkspace.flatData,
+                    currentWorkspace.id,
+                    currentWorkspace.name
+                );
+            }
+
+            // For existing notes, use keyword-based approach
+            if (!allKeywords || allKeywords.length === 0) {
+                // Fallback to tree-based if keywords not loaded
+                return buildBreadcrumbFromTree(
+                    workspaceItemId,
+                    noteData.id,
+                    noteData.name,
+                    currentWorkspace.flatData,
+                    currentWorkspace.id,
+                    currentWorkspace.name
+                );
+            }
+
+            // Find keyword for this note
+            const keyword = findKeywordForNote(
+                noteData.id,
+                currentWorkspace.id,
+                workspaceItemId,
+                allKeywords
+            );
+
+            if (!keyword) {
+                // Fallback to tree-based if keyword not found
+                return buildBreadcrumbFromTree(
+                    workspaceItemId,
+                    noteData.id,
+                    noteData.name,
+                    currentWorkspace.flatData,
+                    currentWorkspace.id,
+                    currentWorkspace.name
+                );
+            }
+
+            // Parse breadcrumb from keyword
+            const breadcrumbs = parseBreadcrumbFromKeyword(keyword);
+
+            // Enrich with folder colors
+            return enrichBreadcrumbWithColors(breadcrumbs, currentWorkspace.flatData);
+        } catch (error) {
+            console.error("Error generating breadcrumb:", error);
+            return undefined;
+        }
     };
 
     /**
@@ -147,6 +237,8 @@ export const useEditorTabHelper = () => {
 
             if (type === constants.vscode.tab.tabTypes.note) {
                 const noteData = data as Note;
+                const breadcrumb = generateBreadcrumbForTab(noteData, type);
+
                 newTab = {
                     id: `note-${noteData.id}-${Date.now()}`,
                     type: constants.vscode.tab.tabTypes.note,
@@ -154,9 +246,12 @@ export const useEditorTabHelper = () => {
                     data0: noteData,
                     title: noteData.name || constants.vscode.tabTitles.unsavedNote,
                     hasUnsavedChanges: false,
+                    breadcrumb,
                 };
             } else if (type === constants.vscode.tab.tabTypes.workspace) {
                 const wsData = data as Ws;
+                // No breadcrumb for workspace tabs
+
                 newTab = {
                     id: `workspace-${wsData.id}-${Date.now()}`,
                     type: constants.vscode.tab.tabTypes.workspace,
@@ -465,6 +560,7 @@ export const useEditorTabHelper = () => {
         openTab,
         // openNoteTab,
         // openWorkspaceTab,
+        generateBreadcrumbForTab,
         closeTab,
         closeTabs,
         getActiveTab,
