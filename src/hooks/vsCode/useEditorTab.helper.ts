@@ -13,7 +13,6 @@ import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useGeneralStore } from "@/store/index";
 import {
     findKeywordForNote,
-    findKeywordForWorkspace,
     parseBreadcrumbFromKeyword,
     enrichBreadcrumbWithColors,
     buildBreadcrumbFromTree,
