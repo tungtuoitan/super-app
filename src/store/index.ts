@@ -11,6 +11,9 @@ export type { DialogContextData } from "./dialog/Dialog.store";
 
 export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "./editor/EditorTab.store";
 
+export { EditorStore, EditorProvider, useEditorStore } from "./editor/Editor.store";
+export type { EditorContextData } from "./editor/Editor.store";
+
 export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./hashtagUI/HashtagUI.store";
 export type { HashtagUIStoreData } from "./hashtagUI/HashtagUI.store";
 

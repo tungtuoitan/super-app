@@ -21,6 +21,9 @@ export function MarkdownEditorSync() {
     const activeTab = getActiveTab();
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 
+    // Track previous note ID to detect tab switches
+    const prevNoteIdRef = useRef<number | null>(null);
+
     const _allKeywords = allKeywords.map((k) => ({
             // New format: [name]nameIndex (always show nameIndex, even if it's 1)
             text: `[${k.name}]${k.nameIndex}`,
@@ -63,23 +66,44 @@ export function MarkdownEditorSync() {
             return;
         }
 
+        // Check if this is a tab switch (different note ID)
+        const isTabSwitch = prevNoteIdRef.current !== null && prevNoteIdRef.current !== activeNote?.id;
+        prevNoteIdRef.current = activeNote?.id ?? null;
+
         try {
             const currentValue = editor.getValue();
 
             // Only sync if value changed AND editor doesn't have focus
             // This prevents flicker when user is actively editing
             if (currentValue !== displayDesc && !editor.hasTextFocus()) {
+                // Capture current position AND scroll before setValue
                 const currentPosition = editor.getPosition();
+                const currentScrollTop = editor.getScrollTop();
+                const currentScrollLeft = editor.getScrollLeft();
+
                 editor.setValue(displayDesc??"");
-                // Restore cursor position if possible
-                if (currentPosition) {
-                    editor.setPosition(currentPosition);
+
+                // Only restore position/scroll if NOT switching tabs
+                // When switching tabs, MarkdownEditorViewStateSync will handle restoration
+                if (!isTabSwitch) {
+                    // Restore cursor position if possible
+                    if (currentPosition) {
+                        editor.setPosition(currentPosition);
+                    }
+
+                    // Restore scroll position (CRITICAL: setValue resets scroll to 0)
+                    editor.setScrollPosition({
+                        scrollTop: currentScrollTop,
+                        scrollLeft: currentScrollLeft,
+                    }, 1); // ScrollType.Immediate
                 }
+                // When switching tabs, leave at scroll 0 temporarily
+                // MarkdownEditorViewStateSync will restore correct scroll shortly
             }
         } catch (error) {
             console.warn("[Monaco] Value sync error (editor may be disposed):", error);
         }
-    }, [displayDesc]);
+    }, [displayDesc, activeNote?.id]);
 
     return null;
 }
