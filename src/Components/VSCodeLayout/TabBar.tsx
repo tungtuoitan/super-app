@@ -131,8 +131,8 @@ export function TabBar() {
     };
 
     useEffect(() => {
-        // update breadcrumbs (when new note is created)
-        if (currentWorkspace && openTabs.length > 0) {
+        // update breadcrumbs 
+        if (currentWorkspace && openTabs.length > 0 && allKeywords.length > 0) {
             const newTabs = openTabs.map(tab => {
                 if (tab.type === constants.vscode.tab.tabTypes.note) {
                     const breadcrumb = generateBreadcrumbForTab(tab.data, tab.type);
@@ -142,7 +142,7 @@ export function TabBar() {
             });
             setOpenTabs(newTabs);
         }
-    }, [allKeywords, openTabs.length,currentWorkspace?.id]);
+    }, [allKeywords, openTabs.length, currentWorkspace?.id]);
 
     // Helper function to render a single tab
     const renderTab = (tab: any, isPinned: boolean = false) => {

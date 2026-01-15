@@ -126,16 +126,14 @@ export function findKeywordForFolder(
 
 /**
  * Enrich breadcrumb items with folder colors
- * Can use either workspaceFlatData or allKeywords as color source
+ * Prioritizes allKeywords (source of truth) over workspaceFlatData
  *
  * @param breadcrumbs - Base breadcrumb items
- * @param workspaceFlatData - Workspace flat data containing folder colors (optional)
- * @param allKeywords - All keywords with color info (optional, used when flatData not available)
+ * @param allKeywords - All keywords with color info (preferred source)
  * @returns Breadcrumb items with folder colors populated
  */
 export function enrichBreadcrumbWithColors(
     breadcrumbs: BreadcrumbItem[],
-    workspaceFlatData?: any[],
     allKeywords?: Keyword[]
 ): BreadcrumbItem[] {
     return breadcrumbs.map(item => {
@@ -153,21 +151,7 @@ export function enrichBreadcrumbWithColors(
 
         const folderWorkspaceItemId = parseInt(folderMatch[1], 10);
 
-        // Try to get color from workspaceFlatData first (if available)
-        if (workspaceFlatData && workspaceFlatData.length > 0) {
-            const folderData = workspaceFlatData.find(
-                (wsItem: any) => wsItem.entityType === 2 && wsItem.id === folderWorkspaceItemId
-            );
-
-            if (folderData?.data?.color) {
-                return {
-                    ...item,
-                    color: folderData.data.color,
-                };
-            }
-        }
-
-        // Fallback: get color from keywords (if available)
+        // Priority 1: Get color from allKeywords (source of truth, triggers useEffect)
         if (allKeywords && allKeywords.length > 0) {
             const folderKeyword = allKeywords.find(
                 k => k.type === 'folder' && k.workspaceItemId === folderWorkspaceItemId
@@ -180,6 +164,20 @@ export function enrichBreadcrumbWithColors(
                 };
             }
         }
+
+        // Fallback: Get color from workspaceFlatData (when keywords not loaded yet)
+        // if (workspaceFlatData && workspaceFlatData.length > 0) {
+        //     const folderData = workspaceFlatData.find(
+        //         (wsItem: any) => wsItem.entityType === 2 && wsItem.id === folderWorkspaceItemId
+        //     );
+
+        //     if (folderData?.data?.color) {
+        //         return {
+        //             ...item,
+        //             color: folderData.data.color,
+        //         };
+        //     }
+        // }
 
         return item;
     });

@@ -90,21 +90,22 @@ export const useEditorTabHelper = () => {
             // For existing notes (ID >= 0), use keyword-based approach (no currentWorkspace dependency)
             if (!allKeywords || allKeywords.length === 0) {
                 // Fallback to tree-based if keywords not loaded yet
-                if (!currentWorkspace) {
-                    return undefined;
-                }
-                const workspaceItemId = findWorkspaceItemId(3, noteData.id);
-                if (!workspaceItemId) {
-                    return undefined;
-                }
-                return buildBreadcrumbFromTree(
-                    workspaceItemId,
-                    noteData.id,
-                    noteData.name,
-                    currentWorkspace.flatData,
-                    currentWorkspace.id,
-                    currentWorkspace.name
-                );
+                return undefined;
+                // if (!currentWorkspace) {
+                //     return undefined;
+                // }
+                // const workspaceItemId = findWorkspaceItemId(3, noteData.id);
+                // if (!workspaceItemId) {
+                //     return undefined;
+                // }
+                // return buildBreadcrumbFromTree(
+                //     workspaceItemId,
+                //     noteData.id,
+                //     noteData.name,
+                //     currentWorkspace.flatData,
+                //     currentWorkspace.id,
+                //     currentWorkspace.name
+                // );
             }
 
             // Find keyword for this note using entityId directly
@@ -133,7 +134,7 @@ export const useEditorTabHelper = () => {
             const breadcrumbs = parseBreadcrumbFromKeyword(keyword);
 
             // Enrich with folder colors (use flatData if available, otherwise use allKeywords)
-            return enrichBreadcrumbWithColors(breadcrumbs, currentWorkspace?.flatData, allKeywords);
+            return enrichBreadcrumbWithColors(breadcrumbs, allKeywords);
         } catch (error) {
             console.error("Error generating breadcrumb:", error);
             return undefined;
