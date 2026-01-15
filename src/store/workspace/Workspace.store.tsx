@@ -19,6 +19,8 @@ export interface WorkspaceContextData {
     setIsLoadingWorkspaces: Dispatch<SetStateAction<boolean>>;
     isLoadingTree: boolean;
     setIsLoadingTree: Dispatch<SetStateAction<boolean>>;
+    isLoadingTreeByOpeningFolder: boolean;
+    setIsLoadingTreeByOpeningFolder: Dispatch<SetStateAction<boolean>>;
 
     // Folder UI state (workspace folder UI, selection)
     selectedRowIds: number[];
@@ -64,6 +66,10 @@ export const workspaceContextDefaultValue: WorkspaceContextData = {
     setIsLoadingWorkspaces: () => {},
     isLoadingTree: false,
     setIsLoadingTree: () => {},
+    isLoadingTreeByOpeningFolder: false,
+    setIsLoadingTreeByOpeningFolder: () => {},
+
+
     selectedRowIds: [],
     setSelectedRowIds: () => {},
     expandedNodes: new Set(),
@@ -102,7 +108,8 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [allWorkspaces, setAllWorkspaces] = useState<WsResponse[]>([]);
     const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceDTO | null>(null);
     const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState<boolean>(false);
-    const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false);
+    const [isLoadingTree, setIsLoadingTree] = useState<boolean>(false); // loading này dùng cho tree khi đang load toàn bộ tree
+    const [isLoadingTreeByOpeningFolder, setIsLoadingTreeByOpeningFolder] = useState<boolean>(false); // loading này dùng cho tree khi đang mở rộng folder
 
     // Folder UI state
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
@@ -136,6 +143,11 @@ export const WorkspaceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 setIsLoadingWorkspaces,
                 isLoadingTree,
                 setIsLoadingTree,
+                isLoadingTreeByOpeningFolder,
+                setIsLoadingTreeByOpeningFolder,
+
+
+
                 selectedRowIds,
                 setSelectedRowIds,
                 expandedNodes,

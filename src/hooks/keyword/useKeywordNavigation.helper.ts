@@ -29,7 +29,7 @@ import { treeMiniHelper } from "../workspace/tree.miniHelper";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
-    const { currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef } = useWorkspaceStore();
+    const { currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
     const { openTabs } = useEditorTabsStore();
     const { openTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
@@ -113,9 +113,13 @@ export const useKeywordNavigationHelper = () => {
 
                         // Expand only path to folder (collapse everything else)
                         if (_treeRef.current && targetWorkspace?.flatData) {
-                            const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
-                            console.log(2, 'Expanding path to folder:', folderInWorkspace.id);
-                            treeMiniHelper.expandPathToItem(_treeRef, treeData, folderInWorkspace.id);
+                            setIsLoadingTreeByOpeningFolder(true);
+                            try {
+                                const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
+                                await treeMiniHelper.expandPathToItem(_treeRef, treeData, folderInWorkspace.id);
+                            } finally {
+                                setIsLoadingTreeByOpeningFolder(false);
+                            }
                         }
 
                         _console.success("Navigated to folder");
@@ -148,16 +152,19 @@ export const useKeywordNavigationHelper = () => {
                         openTab(note, constants.vscode.tab.tabTypes.note);
 
                         //* Select note in workspace tree and expand only path to it
-                        setTimeout(() => {
-                            setSelectedItemIds([noteInWorkspace.id]);
-                            setLastSelectedItemId(noteInWorkspace.id);
+                        setSelectedItemIds([noteInWorkspace.id]);
+                        setLastSelectedItemId(noteInWorkspace.id);
 
-                            // Expand only path to note (collapse everything else)
-                            if (_treeRef.current && targetWorkspace?.flatData) {
+                        // Expand only path to note (collapse everything else)
+                        if (_treeRef.current && targetWorkspace?.flatData) {
+                            setIsLoadingTreeByOpeningFolder(true);
+                            try {
                                 const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
-                                treeMiniHelper.expandPathToItem(_treeRef, treeData, noteInWorkspace.id);
+                                await treeMiniHelper.expandPathToItem(_treeRef, treeData, noteInWorkspace.id);
+                            } finally {
+                                setIsLoadingTreeByOpeningFolder(false);
                             }
-                        });
+                        }
 
                         // If heading, scroll to it after a small delay
                         if (parsed.type === "heading" && parsed.headingPath) {
@@ -225,6 +232,7 @@ export const useKeywordNavigationHelper = () => {
             setSelectedItemIds,
             setLastSelectedItemId,
             _treeRef,
+            setIsLoadingTreeByOpeningFolder,
             loadTree,
             moduleName,
             navigateToView,

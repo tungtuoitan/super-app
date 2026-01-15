@@ -588,9 +588,9 @@ export function findPathToItem(treeData: TreeFolder[], targetId: number): number
  * Expand only the path to target item (collapse everything else)
  *
  * Algorithm:
- * 1. Close ALL nodes in the tree
- * 2. Open all nodes in the path (including target)
- * 3. Children of target remain closed (not in path)
+ * 1. Open nodes sequentially from root to target (waiting for each to render)
+ * 2. After path is fully expanded, collapse sibling branches not in path
+ * 3. Scroll to target item to ensure it's visible
  *
  * Example: Tree is workspace A / folder B / folder C / note D
  * Navigate to D: Opens A, B, C, D → see A's children (B), B's children (C), C's children (D)
@@ -602,37 +602,109 @@ export function findPathToItem(treeData: TreeFolder[], targetId: number): number
  * @param treeRef - React-arborist tree ref
  * @param treeData - Tree structure
  * @param targetId - workspace_items.id of target item
+ * @returns Promise that resolves to true when expansion is complete
  */
-export function expandPathToItem(
+export async function expandPathToItem(
     treeRef: React.RefObject<any>,
     treeData: TreeFolder[],
     targetId: number
-): boolean {
+): Promise<boolean> {
     if (!treeRef.current) return false;
 
     // Find path to target (includes target itself)
     const pathIds = findPathToItem(treeData, targetId);
+    console.log('[expandPathToItem] pathIds:', pathIds, 'targetId:', targetId);
     if (pathIds.length === 0) return false;
 
-    // Get all node IDs in tree
-    const allIds = getAllVisibleFolderIds(treeData);
+    // Convert to Set for O(1) lookup
+    const pathIdSet = new Set(pathIds);
 
-    // Close ALL nodes first
-    allIds.forEach((id) => {
-        const node = treeRef.current.get(id.toString());
-        if (node && node.isOpen) {
-            node.close();
-        }
+    // Helper: wait for DOM update with timeout (more reliable than requestAnimationFrame for virtualized lists)
+    const waitForRender = (ms: number = 50) => new Promise<void>(resolve => {
+        setTimeout(resolve, ms);
     });
 
-    // Open all nodes in path (including target)
-    // This shows target's children but keeps grandchildren closed
-    pathIds.forEach((id) => {
-        const node = treeRef.current.get(id.toString());
-        if (node && !node.isOpen) {
-            node.open();
+    // Step 1: Open nodes sequentially from root to target
+    // Must wait for each level to render before opening next level
+    // For virtualized trees, we need longer waits and more retries for deep nesting
+    for (let i = 0; i < pathIds.length; i++) {
+        const id = pathIds[i];
+        const depth = i; // Current depth in tree
+
+        // Try to get node with retry (virtualized nodes may need time to mount)
+        // Increase retries for deeper nodes since they depend on parents being fully rendered
+        let node = treeRef.current.get(id.toString());
+        let retries = 0;
+        const maxRetries = 10 + depth * 2; // More retries for deeper nodes
+        const retryDelay = 50 + depth * 10; // Longer delays for deeper nodes
+
+        while (!node && retries < maxRetries) {
+            console.log(`[expandPathToItem] Node ${id} at depth ${depth} not found, retry ${retries + 1}/${maxRetries}`);
+            await waitForRender(retryDelay);
+            node = treeRef.current.get(id.toString());
+            retries++;
         }
-    });
+
+        if (node) {
+            console.log(`[expandPathToItem] Opening node ${id} at depth ${depth}, isOpen: ${node.isOpen}`);
+            if (!node.isOpen) {
+                node.open();
+                // Wait longer for children to render - virtualized lists need more time
+                // Increase wait time for deeper nodes
+                const openDelay = 80 + depth * 20;
+                await waitForRender(openDelay);
+            }
+
+            // Scroll to current node to ensure children will be in viewport for virtualization
+            // This is crucial for deep nesting - children won't render if parent is out of view
+            try {
+                treeRef.current.scrollTo(id.toString());
+                await waitForRender(30); // Small wait after scroll
+            } catch (e) {
+                // scrollTo might not be available in all versions, ignore error
+            }
+        } else {
+            console.warn(`[expandPathToItem] Failed to find node ${id} at depth ${depth} after ${maxRetries} retries`);
+            // Don't return false here - continue trying to open remaining nodes
+            // Some intermediate nodes might be found even if one is missing
+        }
+    }
+
+    // Final wait to ensure all DOM updates are complete
+    await waitForRender(100);
+
+    // Step 2: Close sibling branches that are not in the path
+    // Now all path nodes are rendered, we can traverse and close others
+    const closeNonPathNodes = (nodes: TreeFolder[]) => {
+        for (const treeNode of nodes) {
+            const nodeId = (treeNode.data as any).id;
+            const node = treeRef.current.get(nodeId.toString());
+
+            if (!node) continue;
+
+            if (pathIdSet.has(nodeId)) {
+                // This node is in path - recursively check its children
+                if (treeNode.children && treeNode.children.length > 0) {
+                    closeNonPathNodes(treeNode.children);
+                }
+            } else {
+                // This node is NOT in path - close it if open
+                if (node.isOpen) {
+                    node.close();
+                }
+            }
+        }
+    };
+
+    closeNonPathNodes(treeData);
+
+    // Final scroll to target to ensure it's visible
+    try {
+        treeRef.current.scrollTo(targetId.toString());
+    } catch (e) {
+        // Ignore scroll errors
+    }
+
     return true;
 }
 
