@@ -19,7 +19,7 @@ import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
  */
 export function WorkspaceView() {
     const { $user } = useAuthStore();
-    const { allWorkspaces, isLoadingWorkspaces, isLoadingTree, selectedWorkspaceId, setSelectedWorkspaceId } = useWorkspaceStore();
+    const { allWorkspaces, isLoadingWorkspaces, isLoadingTree, isLoadingTreeByOpeningFolder, selectedWorkspaceId, setSelectedWorkspaceId } = useWorkspaceStore();
     const { loadAllWorkspaces, loadTree } = useWorkspaceLoader();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
 
@@ -90,7 +90,7 @@ export function WorkspaceView() {
                 <NoteGridPopup />
 
                 {/* Loading Overlay */}
-                {(isLoadingWorkspaces || isLoadingTree) && (
+                {(isLoadingWorkspaces || isLoadingTree || isLoadingTreeByOpeningFolder) && (
                     <div className="absolute inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-10">
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     </div>
