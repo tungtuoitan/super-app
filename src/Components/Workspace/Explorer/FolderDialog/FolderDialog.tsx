@@ -20,17 +20,38 @@ import { useWorkspaceStore } from "@/store/index";
 import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
 import { useFolderDialogHelper } from "@/hooks/workspace/useFolderDialog.helper";
 import { constants } from "@/utils/constants";
+import { IconType } from "@/types/icon.types";
+import { ICON_MAP, findBestIconMatch, getActiveIcons, getAllIconKeywords, getAllIconLabel } from "@/utils/icon.utils";
+import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components/ui/GenericAutoComplete";
 
 export function FolderDialog() {
     // Get state from ExplorerStore
     const { currentWorkspace } = useWorkspaceStore();
 
     // Get form state from FolderDialogStore (unified approach)
-    const { isFolderDialogOpen, mode, itemType, editingFolder, parentFolder, newFolderName, setNewFolderName, description, setDescription, color, setColor, errors, setErrors, isSubmitting } =
+    const { isFolderDialogOpen, mode, itemType, editingFolder, parentFolder, newFolderName, setNewFolderName, description, setDescription, color, setColor, icon, setIcon, errors, setErrors, isSubmitting } =
         useFolderDialogStore();
 
     // Get business logic and dialog actions from helper
     const { submitFolder, closeFolderDialog } = useFolderDialogHelper();
+
+    // Track if user has manually selected an icon (to avoid overriding their choice)
+    const hasManuallySelectedIcon = React.useRef(false);
+
+    // Reset manual selection flag when dialog opens for create mode
+    useEffect(() => {
+        if (isFolderDialogOpen && mode === "create") {
+            hasManuallySelectedIcon.current = false;
+        }
+    }, [isFolderDialogOpen, mode]);
+
+    // Auto-select icon based on folder name (only in create mode and only for folders)
+    useEffect(() => {
+        if (mode === "create" && itemType === constants.workspace.itemTypes.folder && !hasManuallySelectedIcon.current) {
+            const matchedIcon = findBestIconMatch(newFolderName);
+            setIcon(matchedIcon);
+        }
+    }, [newFolderName, mode, itemType, setIcon]);
 
     // Derived values
     const parentFolderId = parentFolder?.id;
@@ -92,16 +113,32 @@ export function FolderDialog() {
         callback: handleClose,
     });
 
-    const colorOptions = [
-        { value: "#1976D2", label: "Blue" },
-        { value: "#388E3C", label: "Green" },
-        { value: "#F57C00", label: "Orange" },
-        { value: "#D32F2F", label: "Red" },
-        { value: "#7B1FA2", label: "Purple" },
-        { value: "#0288D1", label: "Light Blue" },
-        { value: "#00796B", label: "Teal" },
-        { value: "#616161", label: "Gray" },
-    ];
+
+    // Icon options - only active icons
+    const iconOptions = getActiveIcons().map(({ type, Icon, config }) => ({
+        value: type,
+        label: config.label,
+        Icon,
+    }));
+
+    // Keyword suggestions for autocomplete (only for folders)
+    const keywordSuggestions: IAutoCompleteOptions[] = React.useMemo(() => {
+        return getAllIconLabel().map((l) => ({
+            id: l.id,
+            label: l.label,
+            type: l.iconType,
+        }));
+    }, []);
+
+    
+
+    // Handle keyword suggestion selection
+    const handleKeywordSelect = (_: React.SyntheticEvent, option: IAutoCompleteOptions | null) => {
+        if (option) {
+            setNewFolderName(option.label??'');
+            // The icon will be auto-selected via useEffect
+        }
+    };
 
     // Dynamic labels based on itemType
     const getItemLabel = () => {
@@ -127,59 +164,157 @@ export function FolderDialog() {
                 </DialogHeader>
 
                 <div className="space-y-6">
-                    <div className="space-y-2">
-                        <GenericTextField
-                            id="new-folder-name"
-                            name="new-folder-name"
-                            label={`${itemLabel} Name *`}
-                            value={newFolderName}
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                // Auto capitalize first letter for folder name
-                                const capitalizedValue = newValue.charAt(0).toUpperCase() + newValue.slice(1);
-                                setNewFolderName(capitalizedValue);
-                                // Clear error when user types
-                                if (capitalizedValue && capitalizedValue.trim() !== "") {
-                                    setErrors({ ...errors, name: "" });
-                                } else {
-                                    setErrors({ ...errors, name: `${itemLabel} Name is required` });
-                                }
-                            }}
-                            placeholder={`Enter ${itemLabel.toLowerCase()} name`}
-                            autoFocus
-                            size="small"
-                            error={!!errors.name || isDuplicateName}
-                            helperText={errors.name || (isDuplicateName ? `A ${itemLabel.toLowerCase()} with this name already exists in this location` : "")}
-                            maxLength={30}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" rows={3} maxLength={50} />
-                    </div>
-
-                    {/* Only show color picker for folders */}
-                    {itemType === constants.workspace.itemTypes.folder && (
+                    {/* Folder name with suggestions dropdown for folders */}
+                    {itemType === constants.workspace.itemTypes.folder && mode === "create" ? (
                         <div className="space-y-2">
-                            <Label htmlFor="color">Color</Label>
-                            <div className="grid grid-cols-4 gap-2">
-                                {colorOptions.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={() => setColor(option.value)}
-                                        className={cn(
-                                            "flex items-center justify-center gap-2 p-3 rounded-md border-2 transition-all",
-                                            color === option.value ? "border-primary ring-2 ring-primary ring-offset-2" : "border-border hover:border-primary/50"
-                                        )}
-                                    >
-                                        <div className="w-5 h-5 rounded border" style={{ backgroundColor: option.value }} />
-                                        <span className="text-xs">{option.label}</span>
-                                    </button>
-                                ))}
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <GenericTextField
+                                        id="new-folder-name"
+                                        name="new-folder-name"
+                                        label={`${itemLabel} Name *`}
+                                        value={newFolderName}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            // Auto capitalize first letter for folder name
+                                            const capitalizedValue = newValue.charAt(0).toUpperCase() + newValue.slice(1);
+                                            setNewFolderName(capitalizedValue);
+                                            // Clear error when user types
+                                            if (capitalizedValue && capitalizedValue.trim() !== "") {
+                                                setErrors({ ...errors, name: "" });
+                                            } else {
+                                                setErrors({ ...errors, name: `${itemLabel} Name is required` });
+                                            }
+                                        }}
+                                        placeholder={`Enter ${itemLabel.toLowerCase()} name`}
+                                        autoFocus
+                                        size="small"
+                                        error={!!errors.name || isDuplicateName}
+                                        helperText={errors.name || (isDuplicateName ? `A ${itemLabel.toLowerCase()} with this name already exists in this location` : "")}
+                                        maxLength={30}
+                                    />
+                                </div>
+                                <div className="folder-name-suggestion">
+                                    <GenericAutoComplete
+                                        // id="folder-name-suggestion"
+                                        size="small"
+                                        value={null}
+                                        allOptions={keywordSuggestions}
+                                        onChange={handleKeywordSelect}
+                                        inputProps={{
+                                            name: "keyword-suggestion",
+                                            label: "Quick pick",
+                                            required: false,
+                                        }}
+                                        style={{
+                                            marginBottom: "0px",
+
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <GenericTextField
+                                id="new-folder-name"
+                                name="new-folder-name"
+                                label={`${itemLabel} Name *`}
+                                value={newFolderName}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    // Auto capitalize first letter for folder name
+                                    const capitalizedValue = newValue.charAt(0).toUpperCase() + newValue.slice(1);
+                                    setNewFolderName(capitalizedValue);
+                                    // Clear error when user types
+                                    if (capitalizedValue && capitalizedValue.trim() !== "") {
+                                        setErrors({ ...errors, name: "" });
+                                    } else {
+                                        setErrors({ ...errors, name: `${itemLabel} Name is required` });
+                                    }
+                                }}
+                                placeholder={`Enter ${itemLabel.toLowerCase()} name`}
+                                autoFocus
+                                size="small"
+                                error={!!errors.name || isDuplicateName}
+                                helperText={errors.name || (isDuplicateName ? `A ${itemLabel.toLowerCase()} with this name already exists in this location` : "")}
+                                maxLength={30}
+                            />
+                        </div>
+                    )}
+
+                    {/* <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" rows={3} maxLength={50} />
+                    </div> */}
+
+                    {/* Only show color and icon pickers for folders */}
+                    {itemType === constants.workspace.itemTypes.folder && (
+                        <>
+                            {/* Compact Color Picker */}
+                            <div className="space-y-2">
+                                <Label htmlFor="color">Color</Label>
+                                <div className="grid grid-cols-8 gap-2">
+                                    {constants.color.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() => setColor(option.value)}
+                                            title={option.label}
+                                            className={cn(
+                                                "flex items-center justify-center p-2 rounded-md border-2 transition-all",
+                                                color === option.value ? "border-primary " : "border-border hover:border-primary/50"
+                                            )}
+                                        >
+                                            <div className="w-5 h-5 rounded border" style={{ backgroundColor: option.value }} />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Icon Picker */}
+                            <div className="space-y-2">
+                                <Label htmlFor="icon">Icon</Label>
+                                <div className="grid grid-cols-4 gap-2 max-h-[200px] overflow-y-auto p-1">
+                                    {/* Default option (no icon - use folder) */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            hasManuallySelectedIcon.current = true;
+                                            setIcon(null);
+                                        }}
+                                        className={cn(
+                                            "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
+                                            icon === null ? "border-primary" : "border-border hover:border-primary/50"
+                                        )}
+                                    >
+                                        <div className="w-5 h-5 flex items-center justify-center" style={{ color: color }}>
+                                            {ICON_MAP.FOLDER && <ICON_MAP.FOLDER size={18} />}
+                                        </div>
+                                        <span className="text-xs truncate">Default</span>
+                                    </button>
+                                    {iconOptions.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() => {
+                                                hasManuallySelectedIcon.current = true;
+                                                setIcon(option.value);
+                                            }}
+                                            className={cn(
+                                                "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
+                                                icon === option.value ? "border-primary" : "border-border hover:border-primary/50"
+                                            )}
+                                        >
+                                            <div className="w-5 h-5 flex items-center justify-center" style={{ color: color }}>
+                                                <option.Icon size={18} />
+                                            </div>
+                                            <span className="text-xs truncate">{option.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
                     )}
                 </div>
 

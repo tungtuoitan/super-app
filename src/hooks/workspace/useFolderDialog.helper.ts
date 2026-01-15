@@ -1,4 +1,3 @@
-import { useSnackbar } from "notistack";
 import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
 import type { ItemType } from "@/store/workspace/FolderDialog.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
@@ -9,9 +8,10 @@ import type { Folder } from "@/types/folder.types";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { constants } from "@/utils/constants";
 import { WorkspaceItemAction } from "@/types/workspace.types";
-import {useGeneralStore} from "@/store/index";
-import {useStandardRegistryHelper} from "../standardRegistry/useStandardRegistry.helper";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
+import { useConsoleHelper } from "../console/useConsole.helper";
+import { treeMiniHelper } from "./tree.miniHelper";
+import { isFolder } from "@/types/workspace-v2.types";
 
 export const useFolderDialogHelper = () => {
     const _console = useConsoleHelper();
@@ -29,6 +29,7 @@ export const useFolderDialogHelper = () => {
         newFolderName,
         description,
         color,
+        icon,
         setErrors,
         setIsSubmitting,
         setIsLoadingTree,
@@ -38,10 +39,11 @@ export const useFolderDialogHelper = () => {
         setNewFolderName,
         setDescription,
         setColor,
+        setIcon,
     } = useFolderDialogStore();
 
     // Workspace state
-    const { currentWorkspace } = useWorkspaceStore();
+    const { currentWorkspace, treeData, _treeRef, setSelectedItemIds, setLastSelectedItemId, setScrollToItem } = useWorkspaceStore();
 
     // Auth
     const { $user } = useAuthStore();
@@ -56,7 +58,8 @@ export const useFolderDialogHelper = () => {
     const resetForm = () => {
         setNewFolderName("");
         setDescription("");
-        setColor("#1976D2");
+        setColor(constants.color[2].value); // Reset to default color
+        setIcon(null);
         setErrors({});
         setIsSubmitting(false);
     };
@@ -113,6 +116,7 @@ export const useFolderDialogHelper = () => {
                         name: newFolderName.trim(),
                         description: description.trim() || undefined,
                         color,
+                        icon: icon || undefined,
                     }
                 }]);
             } else {
@@ -131,6 +135,7 @@ export const useFolderDialogHelper = () => {
                         name: newFolderName.trim(),
                         description: description.trim() || undefined,
                         color,
+                        icon: icon || undefined,
                     }
                 }]);
             }
@@ -140,10 +145,42 @@ export const useFolderDialogHelper = () => {
 
             _console.success(successMessage);
 
+            // Store the folder name and parent ID for finding the new folder after reload
+            const createdFolderName = newFolderName.trim();
+            const parentId = parentFolder && "id" in parentFolder && (parentFolder as any).id > 0
+                ? (parentFolder as any).id
+                : null;
+
             // Reload workspace tree
-            loadTree();
+            const loadedWorkspace = await loadTree();
             loadKeywords();
 
+            // After tree reloads, find and select the new folder (only for create mode)
+            if (mode === "create" && loadedWorkspace?.flatData) {
+                // Find the newly created folder by name and parentId
+                const newFolder = loadedWorkspace.flatData.find(item =>
+                    isFolder(item) &&
+                    item.data.name === createdFolderName &&
+                    item.parentId === parentId
+                );
+
+                if (newFolder) {
+                    const newFolderId = newFolder.id; // workspace_items.id
+
+                    // Set as selected and lastSelectedItem
+                    setSelectedItemIds([newFolderId]);
+                    setLastSelectedItemId(newFolderId);
+                    setScrollToItem(true);
+
+                    // Get updated tree data and expand path to the new folder
+                    setTimeout(async () => {
+                        const updatedTreeData = treeMiniHelper.transformToTreeData(loadedWorkspace, "");
+                        if (updatedTreeData.length > 0) {
+                            await treeMiniHelper.expandPathToItem(_treeRef, updatedTreeData, newFolderId);
+                        }
+                    }, 100);
+                }
+            }
 
             // Close dialog
             closeFolderDialog();
@@ -191,7 +228,8 @@ export const useFolderDialogHelper = () => {
             const folderData = (folder as any).data || folder;
             setNewFolderName(folderData.name || "");
             setDescription(folderData.description || "");
-            setColor(folderData.color || "#1976D2");
+            setColor(folderData.color || constants.color[2].value);
+            setIcon(folderData.icon || null);
         }
 
         // Clear any previous errors

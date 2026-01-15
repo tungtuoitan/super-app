@@ -314,6 +314,16 @@ export const constants = {
         type: "interface",
         comment: "snippet",
     } as const,
+    color: [
+        { value: "#1976D2", label: "Blue" },
+        { value: "#388E3C", label: "Green" },
+        { value: "#F57C00", label: "Orange" },
+        { value: "#D32F2F", label: "Red" },
+        { value: "#7B1FA2", label: "Purple" },
+        { value: "#0288D1", label: "Light Blue" },
+        { value: "#00796B", label: "Teal" },
+        { value: "#616161", label: "Gray" },
+    ]
 } as const;
 
 // Type exports
