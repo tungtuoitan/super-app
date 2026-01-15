@@ -13,6 +13,7 @@ export interface BreadcrumbItem {
     name: string;
     link: string; // Keyword link for navigation (e.g., "w77", "w77/f183", "w77/f183/n185")
     color?: string; // For folders (will be populated from workspace data if available)
+    icon?: string; // Icon type for folders (e.g., "TASK", "IMAGE", etc.)
     isNew?: boolean; // For new notes (ID < 0) - will be displayed in purple
 }
 
@@ -125,12 +126,12 @@ export function findKeywordForFolder(
 }
 
 /**
- * Enrich breadcrumb items with folder colors
+ * Enrich breadcrumb items with folder colors and icons
  * Prioritizes allKeywords (source of truth) over workspaceFlatData
  *
  * @param breadcrumbs - Base breadcrumb items
- * @param allKeywords - All keywords with color info (preferred source)
- * @returns Breadcrumb items with folder colors populated
+ * @param allKeywords - All keywords with color/icon info (preferred source)
+ * @returns Breadcrumb items with folder colors and icons populated
  */
 export function enrichBreadcrumbWithColors(
     breadcrumbs: BreadcrumbItem[],
@@ -151,33 +152,20 @@ export function enrichBreadcrumbWithColors(
 
         const folderWorkspaceItemId = parseInt(folderMatch[1], 10);
 
-        // Priority 1: Get color from allKeywords (source of truth, triggers useEffect)
+        // Priority 1: Get color and icon from allKeywords (source of truth, triggers useEffect)
         if (allKeywords && allKeywords.length > 0) {
             const folderKeyword = allKeywords.find(
                 k => k.type === 'folder' && k.workspaceItemId === folderWorkspaceItemId
             );
 
-            if (folderKeyword?.color) {
+            if (folderKeyword) {
                 return {
                     ...item,
-                    color: folderKeyword.color,
+                    color: folderKeyword.color || item.color,
+                    icon: folderKeyword.icon || item.icon,
                 };
             }
         }
-
-        // Fallback: Get color from workspaceFlatData (when keywords not loaded yet)
-        // if (workspaceFlatData && workspaceFlatData.length > 0) {
-        //     const folderData = workspaceFlatData.find(
-        //         (wsItem: any) => wsItem.entityType === 2 && wsItem.id === folderWorkspaceItemId
-        //     );
-
-        //     if (folderData?.data?.color) {
-        //         return {
-        //             ...item,
-        //             color: folderData.data.color,
-        //         };
-        //     }
-        // }
 
         return item;
     });
@@ -256,6 +244,7 @@ export function buildBreadcrumbFromTree(
                 name: item.data.name,
                 link: `w${workspaceId}/f${item.id}`,
                 color: item.data.color,
+                icon: item.data.icon,
             });
         } else if (item.entityType === 3) {
             // Note (last item)
