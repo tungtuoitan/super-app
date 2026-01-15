@@ -69,6 +69,30 @@ export interface Keyword {
   description?: string;
 
   hardDeletedAt: Date | null;
+
+  // ===== New fields for folder/note/file keywords =====
+
+  /**
+   * Workspace item ID (workspace_items.id)
+   * Only populated for folder/note/file keywords
+   */
+  workspaceItemId?: number;
+
+  /**
+   * Entity ID (folders.id / notes.id / files.id)
+   * Only populated for folder/note/file keywords
+   */
+  entityId?: number;
+
+  /**
+   * Color for folder/note/file
+   */
+  color?: string;
+
+  /**
+   * Icon for folder/note/file
+   */
+  icon?: string;
 }
 
 /**

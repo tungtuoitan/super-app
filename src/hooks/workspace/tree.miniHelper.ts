@@ -607,12 +607,12 @@ export function expandPathToItem(
     treeRef: React.RefObject<any>,
     treeData: TreeFolder[],
     targetId: number
-): void {
-    if (!treeRef.current) return;
+): boolean {
+    if (!treeRef.current) return false;
 
     // Find path to target (includes target itself)
     const pathIds = findPathToItem(treeData, targetId);
-    if (pathIds.length === 0) return;
+    if (pathIds.length === 0) return false;
 
     // Get all node IDs in tree
     const allIds = getAllVisibleFolderIds(treeData);
@@ -633,6 +633,7 @@ export function expandPathToItem(
             node.open();
         }
     });
+    return true;
 }
 
 export const treeMiniHelper = {

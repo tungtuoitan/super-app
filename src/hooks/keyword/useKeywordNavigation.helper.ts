@@ -29,7 +29,7 @@ import { treeMiniHelper } from "../workspace/tree.miniHelper";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
-    const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef } = useWorkspaceStore();
+    const { currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef } = useWorkspaceStore();
     const { openTabs } = useEditorTabsStore();
     const { openTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
@@ -52,6 +52,7 @@ export const useKeywordNavigationHelper = () => {
                     console.warn("Invalid keyword link:", keyword.link);
                     return;
                 }
+
 
                 // If current module is not workspace, navigate to workspace view first
                 if (moduleName !== constants.modules.workspace) {
@@ -113,6 +114,7 @@ export const useKeywordNavigationHelper = () => {
                         // Expand only path to folder (collapse everything else)
                         if (_treeRef.current && targetWorkspace?.flatData) {
                             const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
+                            console.log(2, 'Expanding path to folder:', folderInWorkspace.id);
                             treeMiniHelper.expandPathToItem(_treeRef, treeData, folderInWorkspace.id);
                         }
 
