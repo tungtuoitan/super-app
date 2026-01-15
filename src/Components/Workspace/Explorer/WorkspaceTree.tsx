@@ -101,25 +101,23 @@ export function WorkspaceTree() {
 
     // Auto-expand workspace root when workspace loads
     // Collapses everything, then opens only workspace root to show its direct children
-    useEffect(() => {
-        if (!_treeRef.current || !currentWorkspace?.id || treeData.length === 0) return;
-        setIsLoadingTree(true);
+    // useEffect(() => {
+    //     if (!_treeRef.current || !currentWorkspace?.id || treeData.length === 0) return;
+    //     setIsLoadingTree(true);
 
-        // Small delay to ensure tree is fully rendered
-        const timer = setTimeout(() => {
-            // Get workspace root ID (first node in treeData)
-            const rootId = (treeData[0]?.data as any)?.id;
-            if (rootId !== undefined) {
-                // Expand only path to workspace root (collapse everything else)
-                treeMiniHelper.expandPathToItem(_treeRef, treeData, rootId);
-            }
-            setTimeout(() => {
-                setIsLoadingTree(false);
-            }, 100);
-        }, 100);
+    //     // Small delay to ensure tree is fully rendered
+    //     const timer = setTimeout(async () => {
+    //         // Get workspace root ID (first node in treeData)
+    //         const rootId = (treeData[0]?.data as any)?.id;
+    //         if (rootId !== undefined) {
+    //             // Expand only path to workspace root (collapse everything else)
+    //             await treeMiniHelper.expandPathToItem(_treeRef, treeData, rootId);
+    //         }
+    //         setIsLoadingTree(false);
+    //     }, 100);
 
-        return () => clearTimeout(timer);
-    }, [currentWorkspace?.id, treeData.length]); // Re-run when workspace changes or tree loads
+    //     return () => clearTimeout(timer);
+    // }, [currentWorkspace?.id, treeData.length]); // Re-run when workspace changes or tree loads
 
     // Handle context menu on empty space (treat as root workspace)
     const handleContainerContextMenu = (e: React.MouseEvent) => {
