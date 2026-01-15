@@ -53,6 +53,8 @@ export const useEditorTabHelper = () => {
 
     /**
      * Helper: Generate breadcrumb for a tab
+     * Now uses allKeywords directly instead of depending on currentWorkspace for existing notes
+     *
      * @param data - Note or Workspace data
      * @param type - Tab type
      * @returns Breadcrumb items or undefined
@@ -63,21 +65,18 @@ export const useEditorTabHelper = () => {
             return undefined;
         }
 
-        if (!currentWorkspace) {
-            return undefined;
-        }
-
         try {
             const noteData = data as Note;
 
-            // Find workspace item ID
-            const workspaceItemId = findWorkspaceItemId(3, noteData.id);
-            if (!workspaceItemId) {
-                return undefined;
-            }
-
-            // For new notes (ID < 0), build breadcrumb from workspace tree
+            // For new notes (ID < 0), use workspace tree (requires currentWorkspace)
             if (noteData.id < 0) {
+                if (!currentWorkspace) {
+                    return undefined;
+                }
+                const workspaceItemId = findWorkspaceItemId(3, noteData.id);
+                if (!workspaceItemId) {
+                    return undefined;
+                }
                 return buildBreadcrumbFromTree(
                     workspaceItemId,
                     noteData.id,
@@ -88,9 +87,16 @@ export const useEditorTabHelper = () => {
                 );
             }
 
-            // For existing notes, use keyword-based approach
+            // For existing notes (ID >= 0), use keyword-based approach (no currentWorkspace dependency)
             if (!allKeywords || allKeywords.length === 0) {
-                // Fallback to tree-based if keywords not loaded
+                // Fallback to tree-based if keywords not loaded yet
+                if (!currentWorkspace) {
+                    return undefined;
+                }
+                const workspaceItemId = findWorkspaceItemId(3, noteData.id);
+                if (!workspaceItemId) {
+                    return undefined;
+                }
                 return buildBreadcrumbFromTree(
                     workspaceItemId,
                     noteData.id,
@@ -101,16 +107,18 @@ export const useEditorTabHelper = () => {
                 );
             }
 
-            // Find keyword for this note
-            const keyword = findKeywordForNote(
-                noteData.id,
-                currentWorkspace.id,
-                workspaceItemId,
-                allKeywords
-            );
+            // Find keyword for this note using entityId directly
+            const keyword = findKeywordForNote(noteData.id, allKeywords);
 
             if (!keyword) {
                 // Fallback to tree-based if keyword not found
+                if (!currentWorkspace) {
+                    return undefined;
+                }
+                const workspaceItemId = findWorkspaceItemId(3, noteData.id);
+                if (!workspaceItemId) {
+                    return undefined;
+                }
                 return buildBreadcrumbFromTree(
                     workspaceItemId,
                     noteData.id,
@@ -124,8 +132,8 @@ export const useEditorTabHelper = () => {
             // Parse breadcrumb from keyword
             const breadcrumbs = parseBreadcrumbFromKeyword(keyword);
 
-            // Enrich with folder colors
-            return enrichBreadcrumbWithColors(breadcrumbs, currentWorkspace.flatData);
+            // Enrich with folder colors (use flatData if available, otherwise use allKeywords)
+            return enrichBreadcrumbWithColors(breadcrumbs, currentWorkspace?.flatData, allKeywords);
         } catch (error) {
             console.error("Error generating breadcrumb:", error);
             return undefined;

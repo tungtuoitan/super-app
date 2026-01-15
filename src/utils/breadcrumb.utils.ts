@@ -88,93 +88,56 @@ export function parseBreadcrumbFromKeyword(keyword: Keyword): BreadcrumbItem[] {
 }
 
 /**
- * Find keyword for a note in a specific workspace
+ * Find keyword for a note by entityId
+ * Now uses entityId directly instead of parsing link patterns
  *
  * @param noteId - Note entity ID (notes.id)
- * @param workspaceId - Workspace entity ID (workspaces.id)
- * @param workspaceItemId - Workspace item ID (workspace_items.id)
  * @param allKeywords - All loaded keywords
  * @returns Matching keyword or null
  */
 export function findKeywordForNote(
     noteId: number,
-    workspaceId: number,
-    workspaceItemId: number,
     allKeywords: Keyword[]
 ): Keyword | null {
-    // Find keyword with:
-    // 1. type === 'note' (or h1-h6 for headings)
-    // 2. link starts with "w{workspaceId}"
-    // 3. link contains "n{workspaceItemId}"
-
-    const targetLinkPattern = `w${workspaceId}`;
-    const notePattern = `n${workspaceItemId}`;
-
-    const matchingKeyword = allKeywords.find(keyword => {
-        // Must be note type (or heading which also represents a note)
-        const isNoteType = keyword.type === 'note' ||
-                          keyword.type === 'h1' ||
-                          keyword.type === 'h2' ||
-                          keyword.type === 'h3' ||
-                          keyword.type === 'h4' ||
-                          keyword.type === 'h5' ||
-                          keyword.type === 'h6';
-
-        if (!isNoteType) return false;
-
-        // Must start with correct workspace
-        if (!keyword.link.startsWith(targetLinkPattern)) return false;
-
-        // Must contain the note workspace item ID
-        // Example: "w77/n185" or "w77/f183/n185"
-        return keyword.link.includes(`/${notePattern}`) || keyword.link.endsWith(notePattern);
-    });
+    // Find keyword with type='note' and entityId matching noteId
+    const matchingKeyword = allKeywords.find(keyword =>
+        keyword.type === 'note' && keyword.entityId === noteId
+    );
 
     return matchingKeyword || null;
 }
 
 /**
- * Find keyword for a workspace/folder
+ * Find keyword for a folder by workspaceItemId
+ * Now uses workspaceItemId directly instead of parsing link patterns
  *
- * @param workspaceId - Workspace entity ID (workspaces.id)
- * @param workspaceItemId - Workspace item ID (workspace_items.id) - optional for workspace root
+ * @param workspaceItemId - Workspace item ID (workspace_items.id)
  * @param allKeywords - All loaded keywords
  * @returns Matching keyword or null
  */
-export function findKeywordForWorkspace(
-    workspaceId: number,
-    workspaceItemId: number | null,
+export function findKeywordForFolder(
+    workspaceItemId: number,
     allKeywords: Keyword[]
 ): Keyword | null {
-    if (workspaceItemId === null) {
-        // Workspace root - find by workspace ID only
-        return allKeywords.find(k => k.type === 'workspace' && k.link === `w${workspaceId}`) || null;
-    } else {
-        // Folder - find by workspace ID and folder item ID
-        const folderPattern = `f${workspaceItemId}`;
-        return allKeywords.find(k =>
-            k.type === 'folder' &&
-            k.link.startsWith(`w${workspaceId}`) &&
-            (k.link.includes(`/${folderPattern}`) || k.link.endsWith(folderPattern))
-        ) || null;
-    }
+    return allKeywords.find(k =>
+        k.type === 'folder' && k.workspaceItemId === workspaceItemId
+    ) || null;
 }
 
 /**
- * Enrich breadcrumb items with folder colors from workspace data
+ * Enrich breadcrumb items with folder colors
+ * Can use either workspaceFlatData or allKeywords as color source
  *
  * @param breadcrumbs - Base breadcrumb items
- * @param workspaceFlatData - Workspace flat data containing folder colors
+ * @param workspaceFlatData - Workspace flat data containing folder colors (optional)
+ * @param allKeywords - All keywords with color info (optional, used when flatData not available)
  * @returns Breadcrumb items with folder colors populated
  */
 export function enrichBreadcrumbWithColors(
     breadcrumbs: BreadcrumbItem[],
-    workspaceFlatData: any[] | undefined
+    workspaceFlatData?: any[],
+    allKeywords?: Keyword[]
 ): BreadcrumbItem[] {
-    if (!workspaceFlatData || workspaceFlatData.length === 0) {
-        return breadcrumbs;
-    }
-
     return breadcrumbs.map(item => {
         // Only enrich folders
         if (item.type !== 'folder') {
@@ -190,16 +153,32 @@ export function enrichBreadcrumbWithColors(
 
         const folderWorkspaceItemId = parseInt(folderMatch[1], 10);
 
-        // Find folder in workspace flat data
-        const folderData = workspaceFlatData.find(
-            (wsItem: any) => wsItem.entityType === 2 && wsItem.id === folderWorkspaceItemId
-        );
+        // Try to get color from workspaceFlatData first (if available)
+        if (workspaceFlatData && workspaceFlatData.length > 0) {
+            const folderData = workspaceFlatData.find(
+                (wsItem: any) => wsItem.entityType === 2 && wsItem.id === folderWorkspaceItemId
+            );
 
-        if (folderData?.data?.color) {
-            return {
-                ...item,
-                color: folderData.data.color,
-            };
+            if (folderData?.data?.color) {
+                return {
+                    ...item,
+                    color: folderData.data.color,
+                };
+            }
+        }
+
+        // Fallback: get color from keywords (if available)
+        if (allKeywords && allKeywords.length > 0) {
+            const folderKeyword = allKeywords.find(
+                k => k.type === 'folder' && k.workspaceItemId === folderWorkspaceItemId
+            );
+
+            if (folderKeyword?.color) {
+                return {
+                    ...item,
+                    color: folderKeyword.color,
+                };
+            }
         }
 
         return item;
