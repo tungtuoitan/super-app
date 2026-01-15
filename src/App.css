@@ -97,3 +97,17 @@ display: none ;
 .td {
     width: 20px !important;
 }
+
+
+/* ------------ */
+.folder-name-suggestion {
+    width: 200px;
+    label {
+        margin-bottom: 3px;
+    };
+    button {
+        height: 36px;
+    };
+    position: relative;
+    margin-top: -2px;
+}

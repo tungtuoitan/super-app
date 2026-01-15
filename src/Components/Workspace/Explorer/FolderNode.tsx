@@ -10,6 +10,8 @@ import { WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { HighlightText } from "./HighlightText";
+import { IconType } from "@/types/icon.types";
+import {ICON_MAP} from "@/utils/icon.utils";
 
 interface FolderNodeProps {
     node: NodeApi<TreeFolder>;
@@ -34,6 +36,7 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
     const entityId = folderItem.entityId; // folders.id (for API calls, context menu)
     const folderName = folderItem.data.name;
     const folderColor = folderItem.data.color;
+    const folderIcon = folderItem.data.icon as IconType | undefined; // Icon type from database
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isFolderSelected(workspaceItemId); // Use workspace_items.id for selection
     const isWorkspaceRoot = entityId < 0; // Workspace root node has negative ID
@@ -207,10 +210,21 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
                 </button>
 
                 {/* Folder Icon */}
-                <div className="mr-2 flex items-center">
+                <div className="mr-2 flex items-center"> 
                     {/* Workspace root node */}
                     {isWorkspaceRoot ? (
                         <Layers className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
+                    ) : folderIcon && ICON_MAP[folderIcon] ? (
+                        // Custom icon from database
+                        (() => {
+                            const CustomIcon = ICON_MAP[folderIcon];
+                            return (
+                                <CustomIcon
+                                    className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                                    style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: folderColor || "#75beff" } : {}}
+                                />
+                            );
+                        })()
                     ) : hasChildren ? (
                         node.isOpen ? (
                             <FolderOpen
