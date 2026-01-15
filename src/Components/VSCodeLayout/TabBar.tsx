@@ -142,7 +142,7 @@ export function TabBar() {
             });
             setOpenTabs(newTabs);
         }
-    }, [allKeywords]);
+    }, [allKeywords, openTabs.length,currentWorkspace?.id]);
 
     // Helper function to render a single tab
     const renderTab = (tab: any, isPinned: boolean = false) => {
