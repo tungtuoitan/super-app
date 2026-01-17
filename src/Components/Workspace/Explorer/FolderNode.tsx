@@ -10,8 +10,7 @@ import { WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { HighlightText } from "./HighlightText";
-import { IconType } from "@/types/icon.types";
-import {ICON_MAP} from "@/utils/icon.utils";
+import {ICON_MAP, IconType} from "@/shared/icons";
 
 interface FolderNodeProps {
     node: NodeApi<TreeFolder>;
