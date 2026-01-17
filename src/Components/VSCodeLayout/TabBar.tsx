@@ -22,30 +22,39 @@ type TabIconProps = {
     isActive?: boolean;
 };
 
+
 function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
-    const className = `w-4 h-4 ${
-        isDeleted
-            ? "text-gray-500"
-            : tab.type === constants.vscode.tab.tabTypes.note
-              ? "text-blue-400"
-              : tab.type === constants.vscode.tab.tabTypes.workspace
-                ? "text-purple-400"
-                : "text-gray-400"
-    } ${isActive ? "opacity-100" : "opacity-50"}`;
+  const note = tab.data0 as Note | undefined;
 
-    switch (tab.type) {
-        case constants.vscode.tab.tabTypes.note:
-            const note = tab.data0 as Note;
-            const IconComponent = note.icon && ICON_MAP[note.icon as IconType] ? ICON_MAP[note.icon as IconType] : FileText;
-            return <IconComponent className={className} />;
+  const iconColor =
+    isDeleted
+      ? "#9ca3af" // gray-400
+      : tab.type === constants.vscode.tab.tabTypes.note
+      ? note?.color ?? "#60a5fa" // blue-400
+      : tab.type === constants.vscode.tab.tabTypes.workspace
+      ? "#a78bfa" // purple-400
+      : "#9ca3af";
 
-        case constants.vscode.tab.tabTypes.workspace:
-            return <Box className={className} />;
+  const className = `w-4 h-4 ${isActive ? "opacity-100" : "opacity-50"}`;
 
-        default:
-            return <FileText className={className} />;
+  switch (tab.type) {
+    case constants.vscode.tab.tabTypes.note: {
+      const IconComponent =
+        note?.icon && ICON_MAP[note.icon as IconType]
+          ? ICON_MAP[note.icon as IconType]
+          : FileText;
+
+      return <IconComponent className={className} style={{ color: iconColor }} />;
     }
+
+    case constants.vscode.tab.tabTypes.workspace:
+      return <Box className={className} style={{ color: iconColor }} />;
+
+    default:
+      return <FileText className={className} style={{ color: iconColor }} />;
+  }
 }
+
 
 /**
  * TabBar - VS Code style tab bar component

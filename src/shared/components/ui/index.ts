@@ -21,3 +21,5 @@ export { Tooltip2 } from "./Tooltip2";
 export { CloseNotiBtn } from "./CloseNotiBtn";
 
 export { IconPicker, IconDisplay, IconWithLabel, type IconPickerProps, type IconDisplayProps, type IconWithLabelProps } from "./IconPicker";
+
+export { FolderIconWithBadge, FolderFilled, FolderOpenFilled, type FolderIconWithBadgeProps } from "./FolderIconWithBadge";
