@@ -315,14 +315,25 @@ export const constants = {
         comment: "snippet",
     } as const,
     color: [
-        { value: "#1976D2", label: "Blue" },
-        { value: "#388E3C", label: "Green" },
-        { value: "#F57C00", label: "Orange" },
-        { value: "#D32F2F", label: "Red" },
-        { value: "#7B1FA2", label: "Purple" },
-        { value: "#0288D1", label: "Light Blue" },
-        { value: "#00796B", label: "Teal" },
-        { value: "#616161", label: "Gray" },
+        // Material Design Icons for VS Code color palette
+        { value: "#90A4AE", label: "Grey" },           // Default
+        { value: "#42A5F5", label: "Blue" },
+        { value: "#29B6F6", label: "Light Blue" },
+        { value: "#26C6DA", label: "Cyan" },
+        { value: "#26A69A", label: "Teal" },
+        { value: "#66BB6A", label: "Green" },
+        { value: "#9CCC65", label: "Light Green" },
+        { value: "#D4E157", label: "Lime" },
+        { value: "#FFEE58", label: "Yellow" },
+        { value: "#FFCA28", label: "Amber" },
+        { value: "#FFA726", label: "Orange" },
+        { value: "#FF7043", label: "Deep Orange" },
+        { value: "#EF5350", label: "Red" },
+        { value: "#EC407A", label: "Pink" },
+        { value: "#AB47BC", label: "Purple" },
+        { value: "#7E57C2", label: "Deep Purple" },
+        { value: "#5C6BC0", label: "Indigo" },
+        { value: "#8D6E63", label: "Brown" },
     ]
 } as const;
 

@@ -1,7 +1,7 @@
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import type { WorkspaceItem } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
-import { IconType } from "@/types/icon.types";
+import { IconType, ICON_COLORS } from "@/shared/icons";
 
 export interface FolderDialogFormErrors {
     name?: string;
@@ -67,7 +67,7 @@ const folderDialogContextDefaultValue: FolderDialogContextData = {
     setNewFolderName: () => {},
     description: "",
     setDescription: () => {},
-    color: constants.color[2].value, // Default orange
+    color: ICON_COLORS.GREY, // Default grey
     setColor: () => {},
     icon: null,
     setIcon: () => {},
@@ -104,7 +104,7 @@ export const FolderDialogProvider: React.FC<React.PropsWithChildren<unknown>> = 
     // Form fields
     const [newFolderName, setNewFolderName] = useState<string>("");
     const [description, setDescription] = useState<string>("");
-    const [color, setColor] = useState<string>(constants.color[2].value); // Default orange
+    const [color, setColor] = useState<string>(ICON_COLORS.GREY); // Default grey
     const [icon, setIcon] = useState<IconType | null>(null);
 
     // Validation errors
