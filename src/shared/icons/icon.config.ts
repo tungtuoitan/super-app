@@ -115,7 +115,7 @@ export const ICON_MAP: Record<IconType, LucideIcon> = {
     BIN: Trash2,
     FOLDER: Folder,
     TASK: CheckSquare,
-    NOTE: StickyNote,
+    NOTE: FileText,
     FILE: FileText,
     INFORMATION: Info,
     IMAGE: Image,

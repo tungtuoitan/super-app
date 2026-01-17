@@ -40,6 +40,8 @@ export interface IconPickerProps {
     showDefaultOption?: boolean;
     /** Label for the default option */
     defaultOptionLabel?: string;
+    /** Icon type to use for the default option (defaults to FOLDER) */
+    defaultIconType?: IconType;
     /** Whether to show group labels */
     showGroupLabels?: boolean;
     /** Whether to show search input */
@@ -59,6 +61,7 @@ export function IconPicker({
     columns = 4,
     showDefaultOption = true,
     defaultOptionLabel = "Default",
+    defaultIconType = IconType.FOLDER,
     showGroupLabels = true,
     showSearch = true,
     searchPlaceholder = "Search icons...",
@@ -104,9 +107,9 @@ export function IconPicker({
         6: "grid-cols-6",
     };
 
-    const handleIconSelect = (iconType: IconType | null) => {
+    const handleIconSelect = (iconType: IconType | null, defaultIconType: IconType) => {
         if (disabled) return;
-        const color = getIconDefaultColor(iconType);
+        const color = !iconType && defaultIconType === IconType.NOTE ? ICON_COLORS.LIGHT_BLUE : getIconDefaultColor(iconType);
         onChange(iconType, color);
     };
 
@@ -114,7 +117,7 @@ export function IconPicker({
         <button
             key={option.value}
             type="button"
-            onClick={() => handleIconSelect(option.value)}
+            onClick={() => handleIconSelect(option.value, defaultIconType)}
             disabled={disabled}
             className={cn(
                 "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
@@ -136,31 +139,33 @@ export function IconPicker({
 
     return (
         <div className={cn("space-y-2", className)}>
-            {label && <Label htmlFor="icon-picker">{label}</Label>}
+            <div className="flex flex-row justify-between items-center gap-2">
+                {label && <Label className="text-left" htmlFor="icon-picker">{label}</Label>}
 
-            {/* Search Input */}
-            {showSearch && (
-                <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="text"
-                        placeholder={searchPlaceholder}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 pr-8 h-8 text-sm"
-                        disabled={disabled}
-                    />
-                    {searchQuery && (
-                        <button
-                            type="button"
-                            onClick={() => setSearchQuery("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
-                    )}
-                </div>
-            )}
+                {/* Search Input */}
+                {showSearch && (
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="text"
+                            placeholder={searchPlaceholder}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-8 pr-8 h-8 text-sm"
+                            disabled={disabled}
+                        />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <div
                 className="overflow-y-auto pr-1"
@@ -171,7 +176,7 @@ export function IconPicker({
                     <div className={cn("grid gap-1 mb-2", gridCols[columns])}>
                         <button
                             type="button"
-                            onClick={() => handleIconSelect(null)}
+                            onClick={() => handleIconSelect(null, defaultIconType)}
                             disabled={disabled}
                             className={cn(
                                 "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
@@ -183,9 +188,12 @@ export function IconPicker({
                         >
                             <div
                                 className="w-5 h-5 flex items-center justify-center flex-shrink-0"
-                                style={{ color: ICON_COLORS.GREY }}
+                                style={{ color: defaultIconType === IconType.FOLDER ? ICON_COLORS.GREY : ICON_COLORS.BLUE }}
                             >
-                                {ICON_MAP.FOLDER && <ICON_MAP.FOLDER size={18} />}
+                                {ICON_MAP[defaultIconType] && (() => {
+                                    const DefaultIcon = ICON_MAP[defaultIconType];
+                                    return <DefaultIcon size={18} />;
+                                })()}
                             </div>
                             <span className="text-xs truncate">{defaultOptionLabel}</span>
                         </button>
@@ -203,7 +211,7 @@ export function IconPicker({
                 {filteredGroups.map((group) => (
                     <div key={group.id} className="mb-3">
                         {showGroupLabels && (
-                            <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1 px-1">
+                            <div className="text-[10px] text-left font-medium text-muted-foreground uppercase tracking-wider mb-1 px-1">
                                 {group.label}
                             </div>
                         )}
@@ -229,6 +237,8 @@ export interface IconDisplayProps {
     className?: string;
     /** Override the default color */
     color?: string;
+    /** Fallback icon type when iconType is null (defaults to FOLDER) */
+    fallbackIconType?: IconType;
 }
 
 export function IconDisplay({
@@ -236,8 +246,9 @@ export function IconDisplay({
     size = 18,
     className,
     color,
+    fallbackIconType = IconType.FOLDER,
 }: IconDisplayProps) {
-    const Icon = iconType ? ICON_MAP[iconType] : ICON_MAP.FOLDER;
+    const Icon = iconType ? ICON_MAP[iconType] : ICON_MAP[fallbackIconType];
     const iconColor = color ?? getIconDefaultColor(iconType);
 
     return (
@@ -265,10 +276,11 @@ export function IconWithLabel({
     color,
     label,
     labelClassName,
+    fallbackIconType = IconType.FOLDER,
 }: IconWithLabelProps) {
     return (
         <div className={cn("flex items-center gap-2", className)}>
-            <IconDisplay iconType={iconType} size={size} color={color} />
+            <IconDisplay iconType={iconType} size={size} color={color} fallbackIconType={fallbackIconType} />
             {label && (
                 <span className={cn("text-sm", labelClassName)}>{label}</span>
             )}

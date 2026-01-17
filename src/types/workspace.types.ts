@@ -650,6 +650,8 @@ export interface UpsertNoteData {
     name: string;
     description?: string | null;
     statusCode?: string | null;
+    icon?: string | null;
+    color?: string | null;
     tagIds?: number[];
     deletedAt?: string | null;
 }
