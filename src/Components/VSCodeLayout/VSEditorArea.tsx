@@ -52,13 +52,13 @@ export function VSEditorArea() {
     };
 
     //* chỗ này để debug, khi tab k có trong openTabs (có thể tab đã bị close) thì sẽ là Unknown
-    useEffect(() => {
-        console.log("========================================== Updated:", {
-            past: past.map((e) => (findTabByEntity(e)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber ?? "-")).join(", "),
-            present: present ? (findTabByEntity(present)?.title ?? "Unknown") + " " + (present.mdPos?.lineNumber ?? "-") : "None",
-            future: future.map((e) => (findTabByEntity(e)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber ?? "-")).join(", "),
-        });
-    }, [present]);
+    // useEffect(() => {
+    //     console.log("========================================== Updated:", {
+    //         past: past.map((e) => (findTabByEntity(e)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber ?? "-")).join(", "),
+    //         present: present ? (findTabByEntity(present)?.title ?? "Unknown") + " " + (present.mdPos?.lineNumber ?? "-") : "None",
+    //         future: future.map((e) => (findTabByEntity(e)?.title ?? "Unknown") + " " + (e.mdPos?.lineNumber ?? "-")).join(", "),
+    //     });
+    // }, [present]);
 
     return (
         <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
