@@ -8,8 +8,7 @@ import { Layers, Folder, FolderOpen, FileText } from "lucide-react";
 import { BreadcrumbItem } from "@/utils/breadcrumb.utils";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useGeneralStore, useWorkspaceStore } from "@/store/index";
-import { ICON_MAP } from "@/utils/icon.utils";
-import { IconType } from "@/types/icon.types";
+import {ICON_MAP, IconType} from "@/shared/icons";
 
 interface BreadcrumbProps {
     items: BreadcrumbItem[];

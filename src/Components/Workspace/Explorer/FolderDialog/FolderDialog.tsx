@@ -9,10 +9,8 @@ import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
-import { Label } from "@/Components/ui/label";
 import { Textarea } from "@/Components/ui/textarea";
-import { GenericTextField } from "@/shared/components";
-import { cn } from "@/lib/utils";
+import { GenericTextField, IconPicker } from "@/shared/components";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { isFolder } from "@/types/workspace-v2.types";
 import { useKeyboardShortcut } from "@/shared/hooks";
@@ -20,8 +18,7 @@ import { useWorkspaceStore } from "@/store/index";
 import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
 import { useFolderDialogHelper } from "@/hooks/workspace/useFolderDialog.helper";
 import { constants } from "@/utils/constants";
-import { IconType } from "@/types/icon.types";
-import { ICON_MAP, findBestIconMatch, getActiveIcons, getAllIconKeywords, getAllIconLabel } from "@/utils/icon.utils";
+import { IconType, findBestIconMatch, getAllIconLabel, getIconDefaultColor } from "@/shared/icons";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components/ui/GenericAutoComplete";
 
 export function FolderDialog() {
@@ -50,8 +47,10 @@ export function FolderDialog() {
         if (mode === "create" && itemType === constants.workspace.itemTypes.folder && !hasManuallySelectedIcon.current) {
             const matchedIcon = findBestIconMatch(newFolderName);
             setIcon(matchedIcon);
+            // Also set the color based on the matched icon's default color
+            setColor(getIconDefaultColor(matchedIcon));
         }
-    }, [newFolderName, mode, itemType, setIcon]);
+    }, [newFolderName, mode, itemType, setIcon, setColor]);
 
     // Derived values
     const parentFolderId = parentFolder?.id;
@@ -114,12 +113,12 @@ export function FolderDialog() {
     });
 
 
-    // Icon options - only active icons
-    const iconOptions = getActiveIcons().map(({ type, Icon, config }) => ({
-        value: type,
-        label: config.label,
-        Icon,
-    }));
+    // Handle icon selection from IconPicker
+    const handleIconChange = (iconType: IconType | null, defaultColor: string) => {
+        hasManuallySelectedIcon.current = true;
+        setIcon(iconType);
+        setColor(defaultColor);
+    };
 
     // Keyword suggestions for autocomplete (only for folders)
     const keywordSuggestions: IAutoCompleteOptions[] = React.useMemo(() => {
@@ -251,8 +250,8 @@ export function FolderDialog() {
                     {/* Only show color and icon pickers for folders */}
                     {itemType === constants.workspace.itemTypes.folder && (
                         <>
-                            {/* Compact Color Picker */}
-                            <div className="space-y-2">
+                            {/* Compact Color Picker - Disabled, using default gray color from icon config */}
+                            {/* <div className="space-y-2">
                                 <Label htmlFor="color">Color</Label>
                                 <div className="grid grid-cols-8 gap-2">
                                     {constants.color.map((option) => (
@@ -270,50 +269,17 @@ export function FolderDialog() {
                                         </button>
                                     ))}
                                 </div>
-                            </div>
+                            </div> */}
 
-                            {/* Icon Picker */}
-                            <div className="space-y-2">
-                                <Label htmlFor="icon">Icon</Label>
-                                <div className="grid grid-cols-4 gap-2 max-h-[200px] overflow-y-auto p-1">
-                                    {/* Default option (no icon - use folder) */}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            hasManuallySelectedIcon.current = true;
-                                            setIcon(null);
-                                        }}
-                                        className={cn(
-                                            "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
-                                            icon === null ? "border-primary" : "border-border hover:border-primary/50"
-                                        )}
-                                    >
-                                        <div className="w-5 h-5 flex items-center justify-center" style={{ color: color }}>
-                                            {ICON_MAP.FOLDER && <ICON_MAP.FOLDER size={18} />}
-                                        </div>
-                                        <span className="text-xs truncate">Default</span>
-                                    </button>
-                                    {iconOptions.map((option) => (
-                                        <button
-                                            key={option.value}
-                                            type="button"
-                                            onClick={() => {
-                                                hasManuallySelectedIcon.current = true;
-                                                setIcon(option.value);
-                                            }}
-                                            className={cn(
-                                                "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
-                                                icon === option.value ? "border-primary" : "border-border hover:border-primary/50"
-                                            )}
-                                        >
-                                            <div className="w-5 h-5 flex items-center justify-center" style={{ color: color }}>
-                                                <option.Icon size={18} />
-                                            </div>
-                                            <span className="text-xs truncate">{option.label}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                            {/* Icon Picker - Reusable component with groups */}
+                            <IconPicker
+                                value={icon}
+                                onChange={handleIconChange}
+                                label="Icon"
+                                columns={4}
+                                maxHeight="300px"
+                                showGroupLabels={true}
+                            />
                         </>
                     )}
                 </div>

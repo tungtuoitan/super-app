@@ -309,7 +309,7 @@ export const useMovingTreeHelper = () => {
                 const result = await workspaceService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
 
                 if (result.success) {
-                    _console.error(`Moved ${itemsToMove.length} item(s) to target workspace`);
+                    _console.success(`Moved ${itemsToMove.length} item(s) to target workspace`);
 
                     // STEP 8: Clear selection immediately (items no longer in this workspace)
                     setSelectedItemIds([]);
