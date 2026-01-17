@@ -278,7 +278,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                             const CustomIcon = ICON_MAP[noteIcon];
                             return (
                                 <CustomIcon
-                                    className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                                    className={`w-3.5 h-3.5 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
                                     style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: noteColor || ICON_COLORS.BLUE } : {}}
                                 />
                             );
@@ -286,7 +286,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                     ) : (
                         // Default note icon
                         <FileText
-                            className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                            className={`w-3.5 h-3.5 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
                             style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: noteColor || ICON_COLORS.BLUE } : {}}
                         />
                     )}

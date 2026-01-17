@@ -4,11 +4,12 @@
  */
 
 import React from "react";
-import { Layers, Folder, FolderOpen, FileText } from "lucide-react";
+import { Layers, FileText } from "lucide-react";
 import { BreadcrumbItem } from "@/utils/breadcrumb.utils";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useGeneralStore, useWorkspaceStore } from "@/store/index";
-import {ICON_MAP, IconType} from "@/shared/icons";
+import { ICON_MAP, IconType } from "@/shared/icons";
+import { FolderIconWithBadge } from "@/shared/components";
 
 interface BreadcrumbProps {
     items: BreadcrumbItem[];
@@ -65,18 +66,11 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                                 />
                             )}
                             {item.type === "folder" && (
-                                (() => {
-                                    // Use custom icon if available, otherwise default to Folder
-                                    const IconComponent = item.icon && ICON_MAP[item.icon as IconType]
-                                        ? ICON_MAP[item.icon as IconType]
-                                        : Folder;
-                                    return (
-                                        <IconComponent
-                                            className="w-3.5 h-3.5"
-                                            style={{ color: item.color || "#75beff" }}
-                                        />
-                                    );
-                                })()
+                                <FolderIconWithBadge
+                                    iconType={item.icon as IconType}
+                                    color={item.color || "#75beff"}
+                                    size="sm"
+                                />
                             )}
                             {item.type === "note" && (
                                 (() => {
