@@ -67,6 +67,8 @@ export const useWorkspaceItemHelper = () => {
                                 name: noteData.name,
                                 description: noteData.description || null,
                                 statusCode: noteData.statusCode || null,
+                                icon: noteData.icon || null,
+                                color: noteData.color || null,
                                 deletedAt: noteData.deletedAt ? noteData.deletedAt.toISOString() : null,
                             },
                         };

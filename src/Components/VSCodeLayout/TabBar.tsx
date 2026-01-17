@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { X, FileText, Folder, Box, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
@@ -12,18 +12,38 @@ import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper
 import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useTabKeyboardShortcuts } from "@/hooks/vsCode/useTabKeyboardShortcuts";
+import { BaseTab } from "@/types/editor/tab.types";
+import { ICON_MAP, IconType } from "@/shared/icons";
+import { Note } from "@/types/note.types";
 
-/**
- * Get icon component based on tab type
- */
-function getTabIcon(type: string) {
-    switch (type) {
+type TabIconProps = {
+    tab: BaseTab;
+    isDeleted?: boolean;
+    isActive?: boolean;
+};
+
+function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
+    const className = `w-4 h-4 ${
+        isDeleted
+            ? "text-gray-500"
+            : tab.type === constants.vscode.tab.tabTypes.note
+              ? "text-blue-400"
+              : tab.type === constants.vscode.tab.tabTypes.workspace
+                ? "text-purple-400"
+                : "text-gray-400"
+    } ${isActive ? "opacity-100" : "opacity-50"}`;
+
+    switch (tab.type) {
         case constants.vscode.tab.tabTypes.note:
-            return FileText;
+            const note = tab.data0 as Note;
+            const IconComponent = note.icon && ICON_MAP[note.icon as IconType] ? ICON_MAP[note.icon as IconType] : FileText;
+            return <IconComponent className={className} />;
+
         case constants.vscode.tab.tabTypes.workspace:
-            return Box; // Workspace icon (Box for ws.workspaces)
+            return <Box className={className} />;
+
         default:
-            return FileText;
+            return <FileText className={className} />;
     }
 }
 
@@ -131,9 +151,9 @@ export function TabBar() {
     };
 
     useEffect(() => {
-        // update breadcrumbs 
+        // update breadcrumbs
         if (currentWorkspace && openTabs.length > 0 && allKeywords.length > 0) {
-            const newTabs = openTabs.map(tab => {
+            const newTabs = openTabs.map((tab) => {
                 if (tab.type === constants.vscode.tab.tabTypes.note) {
                     const breadcrumb = generateBreadcrumbForTab(tab.data, tab.type);
                     return { ...tab, breadcrumb };
@@ -148,7 +168,6 @@ export function TabBar() {
     const renderTab = (tab: any, isPinned: boolean = false) => {
         const isDeleted = !!tab.data.deletedAt;
         const isHardDeleted = !!(tab.data as any).isHardDeleted;
-        const TabIcon = getTabIcon(tab.type);
 
         return (
             <button
@@ -165,17 +184,7 @@ export function TabBar() {
                     }
                 `}
             >
-                <TabIcon
-                    className={`w-4 h-4 ${
-                        isDeleted
-                            ? "text-gray-500"
-                            : tab.type === constants.vscode.tab.tabTypes.note
-                            ? "text-blue-400"
-                            : tab.type === constants.vscode.tab.tabTypes.workspace
-                            ? "text-purple-400"
-                            : "text-gray-400"
-                    } ${activeTabId === tab.id ? "opacity-100" : "opacity-50"}`}
-                />
+                <TabIcon tab={tab} isDeleted={isDeleted} isActive={activeTabId === tab.id} />
 
                 <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>
                     {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}

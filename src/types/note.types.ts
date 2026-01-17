@@ -25,7 +25,7 @@ export const NOTE_TYPES: readonly NoteType[] = ["meeting", "brainstorm", "resear
 /**
  * Note domain model (extends NoteEntity with UI state & business logic)
  * Use this for in-app state management and UI components
- * Backend returns: Id, Name, Description, Tags, Type, StatusCode, CreatedAt, UpdatedAt, DeletedAt
+ * Backend returns: Id, Name, Description, Tags, Type, StatusCode, Icon, Color, CreatedAt, UpdatedAt, DeletedAt
  */
 export interface Note extends Omit<NoteEntity, 'userId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'workspaceLinks'> {
     // Override userId to optional (not always available when transforming from WorkspaceItem)
@@ -35,6 +35,10 @@ export interface Note extends Omit<NoteEntity, 'userId' | 'createdAt' | 'updated
     createdAt: Date;
     updatedAt?: Date;
     deletedAt: Date | null;
+
+    // Visual styling (inherited from NoteEntity, but explicitly listed for clarity)
+    icon?: string; // Icon type for visual display
+    color?: string; // Hex color code for icon
 
     // Business logic fields (not in entity)
     hashtags: string; // Array of Folder objects (note's hashtags)
@@ -54,6 +58,8 @@ export interface NoteDTO {
     hashtags: string; // Array of Folder objects (note's hashtags)
     type?: string; // String type to match backend response
     statusCode?: string; // Note status (foreign key to standard_registries.code)
+    icon?: string; // Icon type for visual display
+    color?: string; // Hex color code for icon
     createdAt: string; // ISO string
     updatedAt?: string; // ISO string
     deletedAt?: string; // ISO string (nullable DateTime from backend)
@@ -69,6 +75,8 @@ export interface CreateNoteDTO {
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
     type?: string;
     statusCode?: string; // Note status
+    icon?: string; // Icon type for visual display
+    color?: string; // Hex color code for icon
 }
 
 // Matches backend UpdateNoteRequest with JsonPropertyName("tags") mapping
@@ -78,6 +86,8 @@ export interface UpdateNoteDTO {
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
     type?: string;
     statusCode?: string; // Note status
+    icon?: string; // Icon type for visual display
+    color?: string; // Hex color code for icon
     isArchived?: boolean;
 }
 
@@ -89,6 +99,8 @@ export interface UpsertNoteDTO {
     tags?: number[]; // Backend field name: Hashtag IDs - backend expects 'tags' in JSON (maps to TagIds property)
     type?: string;
     statusCode?: string; // Note status
+    icon?: string; // Icon type for visual display
+    color?: string; // Hex color code for icon
     isArchived?: boolean;
     deletedAt?: string | null; // ISO string for soft delete, null for restore, undefined for regular update
 }

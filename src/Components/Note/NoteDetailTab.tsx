@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from "@/shared/components";
+import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker } from "@/shared/components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Note } from "../../types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
@@ -21,6 +21,7 @@ import { MarkdownEditorSync } from "@/HeadlessComponents/markdownEditor/Markdown
 import { MarkdownEditorTheme } from "@/HeadlessComponents/markdownEditor/MarkdownEditorTheme";
 import { useMonaco } from "@monaco-editor/react";
 import { Loader2 } from "lucide-react";
+import { IconType } from "@/shared/icons";
 
 export function NoteDetailTab() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -144,7 +145,7 @@ export function NoteDetailTab() {
                     </CardContent>
                 </div>
 
-                {/* Right Column - Metadata */}
+                {/* Right Column - Metadata & Icon */}
                 <div className="border-none">
                     <CardContent className="p-0 space-y-4">
                         <GenericTextField label="Created" value={formatNoteDate(activeNote?.createdAt)} disabled size="small" />
@@ -152,6 +153,23 @@ export function NoteDetailTab() {
                         <GenericTextField label="Updated" value={formatNoteDate(activeNote?.updatedAt)} disabled size="small" />
 
                         <GenericTextField label="Created by" value={activeNote?.createdBy || "-"} disabled size="small" />
+
+                        {/* Icon Picker */}
+                        <IconPicker
+                            value={(activeNote?.icon as IconType) || null}
+                            onChange={(iconType, defaultColor) => {
+                                handleNoteFieldChange("icon", {iconType, defaultColor});
+                            }}
+                            label="Icon"
+                            columns={4}
+                            maxHeight="200px"
+                            height="150px"
+                            showDefaultOption={true}
+                            defaultOptionLabel="Default (Note)"
+                            defaultIconType={IconType.NOTE}
+                            showGroupLabels={true}
+                            disabled={isDisabled}
+                        />
                     </CardContent>
                 </div>
             </div>

@@ -74,6 +74,12 @@ export interface NoteEntity {
   /** Status code (notes.status_code) */
   statusCode?: string;
 
+  /** Icon type for visual display (notes.icon) */
+  icon?: string;
+
+  /** Hex color code for icon (notes.color) */
+  color?: string;
+
   /** Created timestamp (notes.created_at) - ISO string from API */
   createdAt: string;
 

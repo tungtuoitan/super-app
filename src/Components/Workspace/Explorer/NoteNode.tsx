@@ -1,7 +1,8 @@
 import React, { useCallback } from "react";
 import { NodeApi } from "react-arborist";
-import { FileText, ArrowUpRight } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { ICON_MAP, IconType, ICON_COLORS } from "@/shared/icons";
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
@@ -62,6 +63,10 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
 
     // Extract workspace links from note data
     const workspaceLinks = noteItem.data.workspaceLinks || [];
+
+    // Extract icon and color from note data
+    const noteIcon = noteItem.data.icon as IconType | undefined;
+    const noteColor = noteItem.data.color;
 
     // Handle workspace navigation with highlight
     const handleWorkspaceNavigation = useCallback(
@@ -207,6 +212,8 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                 hashtags: "",
                 type: "idea",
                 statusCode: noteItem.data.statusCode,
+                icon: noteItem.data.icon,
+                color: noteItem.data.color,
                 createdAt: new Date(noteItem.data.createdAt),
                 updatedAt: noteItem.data.updatedAt ? new Date(noteItem.data.updatedAt) : undefined,
                 createdBy: "You",
@@ -263,10 +270,26 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                 {/* Spacer for alignment with folder chevrons */}
                 <div className="w-4" />
 
-                {/* Note Icon with Shortcut Indicator */}
-                <div className="mr-2 flex items-center relative">
-                    <FileText className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-blue-400"}`} />
-                    {/* <ArrowUpRight className={`w-2 h-2 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-gray-400"} absolute -bottom-0 -left-2`} /> */}
+                {/* Note Icon */}
+                <div className="mr-2 flex items-center">
+                    {noteIcon && ICON_MAP[noteIcon] ? (
+                        // Custom icon from database
+                        (() => {
+                            const CustomIcon = ICON_MAP[noteIcon];
+                            return (
+                                <CustomIcon
+                                    className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                                    style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: noteColor || ICON_COLORS.BLUE } : {}}
+                                />
+                            );
+                        })()
+                    ) : (
+                        // Default note icon
+                        <FileText
+                            className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                            style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: noteColor || ICON_COLORS.BLUE } : {}}
+                        />
+                    )}
                 </div>
 
                 {/* Note Info */}

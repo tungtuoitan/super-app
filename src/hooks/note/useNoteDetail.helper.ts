@@ -58,7 +58,19 @@ export const useNoteDetailHelper = () => {
             _value = _value.charAt(0).toUpperCase() + _value.slice(1);
         }
 
-        const updated = { ...activeNote, [field]: _value };
+        if (field === 'icon') {
+            // Handle icon selection
+            const _value = value.iconType;
+            const defaultColor = value.defaultColor;
+        }
+        let updated = { ...activeNote, [field]: _value };
+
+        //* Special
+        if (field === 'icon') {
+            updated = { ...activeNote, icon: value.iconType, color: value.defaultColor };
+        }
+        
+
         console.log("[Helper] Updated note:", { field, newValue: typeof _value === "string" ? _value.substring(0, 50) : _value });
 
         // Update tab data directly (hasUnsavedChanges will be auto-calculated in NoteEditorPanel)
@@ -107,40 +119,10 @@ export const useNoteDetailHelper = () => {
                     description: activeNote.description,
                     type: activeNote.type,
                     statusCode: activeNote.statusCode, // Include status code
+                    icon: activeNote.icon, // Include icon type
+                    color: activeNote.color, // Include icon color
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
                 };
-
-                // ============================================================
-                // Step 3.5: Auto-insert external keywords if any found in description
-                // ============================================================
-                // if (activeNote.description) {
-                //     const externalLinks = extractExternalLinks(activeNote.description);
-
-                //     if (externalLinks.length > 0) {
-                //         // Filter out links that already exist in allKeywords
-                //         const newExternalLinks = externalLinks.filter(link => {
-                //             return !allKeywords.some(k => k.type === 'external' && k.link === link.url);
-                //         });
-
-                //         // If there are new external links, upsert them
-                //         if (newExternalLinks.length > 0) {
-                //             try {
-                //                 const upsertRequests = newExternalLinks.map(link => ({
-                //                     name: link.name,
-                //                     link: link.url,
-                //                 }));
-
-                //                 await keywordService._upsertExternalKeywords(token, upsertRequests);
-
-                //                 // Reload keywords to update allKeywords state
-                //                 loadKeywords();
-                //             } catch (err) {
-                //                 // Log error but don't block note save
-                //                 console.error("Failed to insert external keywords:", err);
-                //             }
-                //         }
-                //     }
-                // }
 
                 // ============================================================
                 // Step 4: Call batch API to upsert note

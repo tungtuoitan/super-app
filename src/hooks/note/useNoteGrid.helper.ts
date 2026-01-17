@@ -100,6 +100,8 @@ export const useNoteGridHelper = () => {
                         name: note.name,
                         description: note.description,
                         type: note.type,
+                        icon: note.icon,
+                        color: note.color,
                         deletedAt: deletedAt, // Set or clear soft delete timestamp
                         statusCode: note.statusCode,
                     };

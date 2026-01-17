@@ -58,7 +58,7 @@ export const useFolderDialogHelper = () => {
     const resetForm = () => {
         setNewFolderName("");
         setDescription("");
-        setColor(constants.color[2].value); // Reset to default color
+        setColor(constants.color[0].value); // Reset to default color
         setIcon(null);
         setErrors({});
         setIsSubmitting(false);
@@ -228,7 +228,7 @@ export const useFolderDialogHelper = () => {
             const folderData = (folder as any).data || folder;
             setNewFolderName(folderData.name || "");
             setDescription(folderData.description || "");
-            setColor(folderData.color || constants.color[2].value);
+            setColor(folderData.color || constants.color[0].value);
             setIcon(folderData.icon || null);
         }
 

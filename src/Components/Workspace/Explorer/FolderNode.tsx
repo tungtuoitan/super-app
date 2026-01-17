@@ -1,6 +1,6 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
-import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers } from "lucide-react";
+import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers, Dot, Circle, ChevronUp } from "lucide-react";
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
@@ -203,9 +203,11 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
                         e.preventDefault();
                         node.toggle();
                     }}
-                    className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
+                    disabled={!hasChildren}
+                    // className={`p-0.5 text-editor-fg`}
+                    className={`p-0.5 ${hasChildren ? "" : "opacity-50"} text-editor-fg`}
                 >
-                    {hasChildren ? node.isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" /> : <div className="w-3 h-3" />}
+                    {hasChildren ? node.isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                 </button>
 
                 {/* Folder Icon */}
@@ -219,7 +221,7 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
                             const CustomIcon = ICON_MAP[folderIcon];
                             return (
                                 <CustomIcon
-                                    className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                                    className={`w-4 h-4 ${node.isOpen ? "rotate-[20deg]" : ""} ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
                                     style={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? { color: folderColor || "#75beff" } : {}}
                                 />
                             );

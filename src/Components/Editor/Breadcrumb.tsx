@@ -79,10 +79,18 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                                 })()
                             )}
                             {item.type === "note" && (
-                                <FileText
-                                    className="w-3.5 h-3.5"
-                                    style={{ color: item.isNew ? "#a78bfa" : (disable ? "#4FC3F7" : "#75beff") }}
-                                />
+                                (() => {
+                                    // Use custom icon if available, otherwise default to FileText
+                                    const IconComponent = item.icon && ICON_MAP[item.icon as IconType]
+                                        ? ICON_MAP[item.icon as IconType]
+                                        : FileText;
+                                    return (
+                                        <IconComponent
+                                            className="w-3.5 h-3.5"
+                                            style={{ color: item.isNew ? "#a78bfa" : (item.color || (disable ? "#4FC3F7" : "#75beff")) }}
+                                        />
+                                    );
+                                })()
                             )}
 
                             {/* Name */}

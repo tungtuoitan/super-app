@@ -20,6 +20,8 @@ export const transformANote = (dto: NoteDTO): Note => {
         description: dto.description,
         hashtags: dto.hashtags, // Map 'hashtags' from backend to 'hashtags' in domain model
         type: dto.type,
+        icon: dto.icon,
+        color: dto.color,
         createdAt: new Date(dto.createdAt),
         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
