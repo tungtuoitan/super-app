@@ -126,44 +126,70 @@ export function findKeywordForFolder(
 }
 
 /**
- * Enrich breadcrumb items with folder colors and icons
+ * Enrich breadcrumb items with folder and note colors and icons
  * Prioritizes allKeywords (source of truth) over workspaceFlatData
  *
  * @param breadcrumbs - Base breadcrumb items
  * @param allKeywords - All keywords with color/icon info (preferred source)
- * @returns Breadcrumb items with folder colors and icons populated
+ * @returns Breadcrumb items with folder and note colors and icons populated
  */
 export function enrichBreadcrumbWithColors(
     breadcrumbs: BreadcrumbItem[],
     allKeywords?: Keyword[]
 ): BreadcrumbItem[] {
     return breadcrumbs.map(item => {
-        // Only enrich folders
-        if (item.type !== 'folder') {
+        // Only enrich folders and notes
+        if (item.type !== 'folder' && item.type !== 'note') {
             return item;
         }
 
-        // Extract folder workspace item ID from link
-        // Example: "w77/f183" -> 183
-        const folderMatch = item.link.match(/\/f(\d+)$/);
-        if (!folderMatch) {
-            return item;
-        }
+        if (item.type === 'folder') {
+            // Extract folder workspace item ID from link
+            // Example: "w77/f183" -> 183
+            const folderMatch = item.link.match(/\/f(\d+)$/);
+            if (!folderMatch) {
+                return item;
+            }
 
-        const folderWorkspaceItemId = parseInt(folderMatch[1], 10);
+            const folderWorkspaceItemId = parseInt(folderMatch[1], 10);
 
-        // Priority 1: Get color and icon from allKeywords (source of truth, triggers useEffect)
-        if (allKeywords && allKeywords.length > 0) {
-            const folderKeyword = allKeywords.find(
-                k => k.type === 'folder' && k.workspaceItemId === folderWorkspaceItemId
-            );
+            // Get color and icon from allKeywords (source of truth)
+            if (allKeywords && allKeywords.length > 0) {
+                const folderKeyword = allKeywords.find(
+                    k => k.type === 'folder' && k.workspaceItemId === folderWorkspaceItemId
+                );
 
-            if (folderKeyword) {
-                return {
-                    ...item,
-                    color: folderKeyword.color || item.color,
-                    icon: folderKeyword.icon || item.icon,
-                };
+                if (folderKeyword) {
+                    return {
+                        ...item,
+                        color: folderKeyword.color || item.color,
+                        icon: folderKeyword.icon || item.icon,
+                    };
+                }
+            }
+        } else if (item.type === 'note') {
+            // Extract note workspace item ID from link
+            // Example: "w77/f183/n185" -> 185 or "w77/n185" -> 185
+            const noteMatch = item.link.match(/\/n(\d+)$/);
+            if (!noteMatch) {
+                return item;
+            }
+
+            const noteWorkspaceItemId = parseInt(noteMatch[1], 10);
+
+            // Get color and icon from allKeywords (source of truth)
+            if (allKeywords && allKeywords.length > 0) {
+                const noteKeyword = allKeywords.find(
+                    k => k.type === 'note' && k.workspaceItemId === noteWorkspaceItemId
+                );
+
+                if (noteKeyword) {
+                    return {
+                        ...item,
+                        color: noteKeyword.color || item.color,
+                        icon: noteKeyword.icon || item.icon,
+                    };
+                }
             }
         }
 
@@ -252,6 +278,8 @@ export function buildBreadcrumbFromTree(
                 type: 'note',
                 name: item.data.name,
                 link: `w${workspaceId}/n${item.id}`,
+                color: item.data.color,
+                icon: item.data.icon,
                 isNew: item.data.id < 0,
             });
         }

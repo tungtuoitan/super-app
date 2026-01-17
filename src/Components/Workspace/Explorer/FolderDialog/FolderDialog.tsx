@@ -43,14 +43,14 @@ export function FolderDialog() {
     }, [isFolderDialogOpen, mode]);
 
     // Auto-select icon based on folder name (only in create mode and only for folders)
-    useEffect(() => {
-        if (mode === "create" && itemType === constants.workspace.itemTypes.folder && !hasManuallySelectedIcon.current) {
-            const matchedIcon = findBestIconMatch(newFolderName);
-            setIcon(matchedIcon);
-            // Also set the color based on the matched icon's default color
-            setColor(getIconDefaultColor(matchedIcon));
-        }
-    }, [newFolderName, mode, itemType, setIcon, setColor]);
+    // useEffect(() => {
+    //     if (mode === "create" && itemType === constants.workspace.itemTypes.folder && !hasManuallySelectedIcon.current) {
+    //         const matchedIcon = findBestIconMatch(newFolderName);
+    //         setIcon(matchedIcon);
+    //         // Also set the color based on the matched icon's default color
+    //         setColor(getIconDefaultColor(matchedIcon));
+    //     }
+    // }, [newFolderName, mode, itemType, setIcon, setColor]);
 
     // Derived values
     const parentFolderId = parentFolder?.id;
