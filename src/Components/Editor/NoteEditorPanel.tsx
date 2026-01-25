@@ -4,7 +4,7 @@
  * Toolbar is now shared in VSEditorArea
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { NoteDetailContent } from "../Note/NoteDetailContent";
@@ -15,7 +15,9 @@ interface NoteEditorPanelProps {
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
     const { setOpenTabs, openTabs } = useEditorTabsStore();
-    const contentRef = React.useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const isRestoringScrollRef = useRef(false);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Sync hasUnsavedChanges with noteHasChanges
     //* khi tạo Panel mới thì thêm cái này vào.
@@ -32,19 +34,49 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
         );
     }, [tab.id, tab.data]);
 
-    // Restore scroll position when tab becomes active
+    // Restore scroll position ONLY when switching tabs (tab.id changes)
     useEffect(() => {
-        const viewState = openTabs.find((t: BaseTab) => t.id === tab.id)?.viewState;
-        if (contentRef.current && viewState?.scrollTop !== undefined) {
-            contentRef.current.scrollTop = viewState.scrollTop;
-        }
-    }, [tab.id, openTabs]);
+        const currentTab = openTabs.find((t: BaseTab) => t.id === tab.id);
+        const scrollTop = currentTab?.viewState?.scrollTop;
 
-    // Save scroll position when scrolling
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        if (contentRef.current && scrollTop !== undefined) {
+            isRestoringScrollRef.current = true;
+            contentRef.current.scrollTop = scrollTop;
+
+            // Reset flag after scroll restoration completes
+            requestAnimationFrame(() => {
+                isRestoringScrollRef.current = false;
+            });
+        }
+    }, [tab.id]); // Only depend on tab.id, not openTabs
+
+    // Save scroll position when scrolling (debounced)
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+        // Skip if we're restoring scroll position
+        if (isRestoringScrollRef.current) return;
+
         const scrollTop = e.currentTarget.scrollTop;
-        setOpenTabs((prev: BaseTab[]) => prev.map((t) => (t.id === tab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t)));
-    };
+
+        // Debounce: clear previous timeout and set new one
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+        }
+
+        scrollTimeoutRef.current = setTimeout(() => {
+            setOpenTabs((prev: BaseTab[]) =>
+                prev.map((t) => (t.id === tab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t))
+            );
+        }, 100); // Save after 100ms of no scrolling
+    }, [tab.id, setOpenTabs]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <div className="w-full h-[100vh] flex flex-col overflow-hidden bg-[#f6f6f6]">
