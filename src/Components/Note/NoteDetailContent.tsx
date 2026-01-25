@@ -9,12 +9,9 @@ import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCom
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Note } from "../../types/note.types";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
-import { formatNoteDate } from "@/utils/note.utils";
 import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
 import { useEditorTabsStore, useGeneralStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { MarkdownEditor } from "../Editor/MarkdownEditor";
 import { MarkdownEditorSync } from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync";
@@ -91,7 +88,7 @@ export function NoteDetailContent() {
     }
     return (
         <div className="h-full">
-            <CardContent className="p-0 h-full">
+            <CardContent className="p-0 h-full bred">
                 {/* //* khi nào load đủ data thì mới render, không thì UI=loading, nếu không thì sẽ hiển thị sai*/}
                 {$miRef.current && <MarkdownEditorSync />}
                 {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />}

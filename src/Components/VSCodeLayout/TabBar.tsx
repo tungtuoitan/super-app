@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { X, FileText, Folder, Box, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
@@ -74,6 +74,12 @@ export function TabBar() {
 
     // Enable keyboard shortcuts
     useTabKeyboardShortcuts();
+
+    // Drag and drop state
+    const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
+    const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
+    const [dragOverPosition, setDragOverPosition] = useState<"left" | "right" | null>(null);
+    const dragCounterRef = useRef(0);
 
     // Separate pinned and unpinned tabs
     const pinnedTabs = openTabs.filter((tab) => tab.isPinned);
@@ -159,6 +165,158 @@ export function TabBar() {
         showContextMenu(event, "tab", { tabId });
     };
 
+    // Drag and drop handlers
+    const handleDragStart = (e: React.DragEvent, tabId: string, isPinned: boolean) => {
+        setDraggedTabId(tabId);
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", tabId);
+        e.dataTransfer.setData("isPinned", isPinned.toString());
+
+        // Add dragging class for visual feedback
+        if (e.currentTarget instanceof HTMLElement) {
+            e.currentTarget.style.opacity = "0.5";
+        }
+    };
+
+    const handleDragEnd = (e: React.DragEvent) => {
+        setDraggedTabId(null);
+        setDragOverTabId(null);
+        setDragOverPosition(null);
+        dragCounterRef.current = 0;
+
+        if (e.currentTarget instanceof HTMLElement) {
+            e.currentTarget.style.opacity = "1";
+        }
+    };
+
+    const handleDragEnter = (e: React.DragEvent, tabId: string) => {
+        e.preventDefault();
+        dragCounterRef.current++;
+        if (tabId !== draggedTabId) {
+            setDragOverTabId(tabId);
+        }
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        dragCounterRef.current--;
+        if (dragCounterRef.current === 0) {
+            setDragOverTabId(null);
+            setDragOverPosition(null);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent, tabId: string) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+
+        if (tabId === draggedTabId) return;
+
+        // Determine drop position based on mouse position
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const midX = rect.left + rect.width / 2;
+        const position = e.clientX < midX ? "left" : "right";
+
+        setDragOverTabId(tabId);
+        setDragOverPosition(position);
+    };
+
+    const handleDrop = (e: React.DragEvent, targetTabId: string, targetIsPinned: boolean) => {
+        e.preventDefault();
+
+        const sourceTabId = e.dataTransfer.getData("text/plain");
+
+        if (!sourceTabId || sourceTabId === targetTabId) {
+            setDraggedTabId(null);
+            setDragOverTabId(null);
+            setDragOverPosition(null);
+            return;
+        }
+
+        const sourceIndex = openTabs.findIndex(t => t.id === sourceTabId);
+        const targetIndex = openTabs.findIndex(t => t.id === targetTabId);
+
+        if (sourceIndex === -1 || targetIndex === -1) return;
+
+        const sourceTab = openTabs[sourceIndex];
+        const sourceIsPinned = sourceTab.isPinned;
+
+        // Calculate new position based on drop position
+        const newTabs = [...openTabs];
+        const [removed] = newTabs.splice(sourceIndex, 1);
+
+        // Update isPinned based on target group
+        const updatedTab = { ...removed, isPinned: targetIsPinned };
+
+        let insertIndex = targetIndex;
+        if (sourceIndex < targetIndex) {
+            insertIndex = dragOverPosition === "right" ? targetIndex : targetIndex - 1;
+        } else {
+            insertIndex = dragOverPosition === "right" ? targetIndex + 1 : targetIndex;
+        }
+
+        // Ensure pinned tabs stay at the beginning
+        if (targetIsPinned && !sourceIsPinned) {
+            // Moving unpinned to pinned: insert in pinned section
+            const lastPinnedIndex = newTabs.filter(t => t.isPinned).length;
+            insertIndex = Math.min(insertIndex, lastPinnedIndex);
+        } else if (!targetIsPinned && sourceIsPinned) {
+            // Moving pinned to unpinned: insert after all pinned tabs
+            const pinnedCount = newTabs.filter(t => t.isPinned).length;
+            insertIndex = Math.max(insertIndex, pinnedCount);
+        }
+
+        newTabs.splice(insertIndex, 0, updatedTab);
+        setOpenTabs(newTabs);
+
+        // Save pinned state to localStorage
+        savePinnedState(newTabs);
+
+        setDraggedTabId(null);
+        setDragOverTabId(null);
+        setDragOverPosition(null);
+    };
+
+    // Save pinned state to localStorage
+    const savePinnedState = (tabs: BaseTab[]) => {
+        const pinnedState: Record<string, boolean> = {};
+        tabs.forEach(tab => {
+            pinnedState[tab.id] = !!tab.isPinned;
+        });
+        localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
+    };
+
+    // Load pinned state from localStorage and apply to tabs
+    useEffect(() => {
+        const savedState = localStorage.getItem("tabPinnedState");
+        if (savedState && openTabs.length > 0) {
+            try {
+                const pinnedState: Record<string, boolean> = JSON.parse(savedState);
+                let hasChanges = false;
+
+                const updatedTabs = openTabs.map(tab => {
+                    if (pinnedState[tab.id] !== undefined && tab.isPinned !== pinnedState[tab.id]) {
+                        hasChanges = true;
+                        return { ...tab, isPinned: pinnedState[tab.id] };
+                    }
+                    return tab;
+                });
+
+                if (hasChanges) {
+                    // Sort: pinned tabs first
+                    updatedTabs.sort((a, b) => {
+                        if (a.isPinned && !b.isPinned) return -1;
+                        if (!a.isPinned && b.isPinned) return 1;
+                        return 0;
+                    });
+                    setOpenTabs(updatedTabs);
+                }
+            } catch (error) {
+                console.error("Failed to parse pinned state from localStorage:", error);
+            }
+        }
+    }, [openTabs.length]);
+
     useEffect(() => {
         // update breadcrumbs
         if (currentWorkspace && openTabs.length > 0 && allKeywords.length > 0) {
@@ -177,15 +335,26 @@ export function TabBar() {
     const renderTab = (tab: any, isPinned: boolean = false) => {
         const isDeleted = !!tab.data.deletedAt;
         const isHardDeleted = !!(tab.data as any).isHardDeleted;
+        const isDragging = draggedTabId === tab.id;
+        const isDropTarget = dragOverTabId === tab.id && !isDragging;
 
         return (
             <button
                 key={tab.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, tab.id, isPinned)}
+                onDragEnd={handleDragEnd}
+                onDragEnter={(e) => handleDragEnter(e, tab.id)}
+                onDragLeave={handleDragLeave}
+                onDragOver={(e) => handleDragOver(e, tab.id)}
+                onDrop={(e) => handleDrop(e, tab.id, isPinned)}
                 onClick={() => updateActiveTab(tab.id)}
                 onContextMenu={(e) => handleTabRightClick(e, tab.id)}
                 className={`
                     group h-[35px] pl-3 pr-1.5 flex items-center gap-2
-                    border-r border-b
+                    border-r border-b relative
+                    transition-all duration-150
+                    ${isDragging ? "opacity-50" : ""}
                     ${
                         activeTabId === tab.id
                             ? `bg-editor-bg text-editor-fg border-b-transparent border-t-2 ${isInCurrentModule(tab) ? "border-t-blue-500" : "border-t-gray-400"}`
@@ -193,6 +362,13 @@ export function TabBar() {
                     }
                 `}
             >
+                {/* Drop indicator */}
+                {isDropTarget && dragOverPosition === "left" && (
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
+                )}
+                {isDropTarget && dragOverPosition === "right" && (
+                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
+                )}
                 <TabIcon tab={tab} isDeleted={isDeleted} isActive={activeTabId === tab.id} />
 
                 <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>
