@@ -20,15 +20,34 @@ export const useTabBarMenuHelper = () => {
     const contextTab = openTabs.find((tab) => tab.id === contextTabId);
     const isPinned = contextTab?.isPinned || false;
 
+    // Save pinned state to localStorage
+    const savePinnedStateToStorage = (tabs: typeof openTabs) => {
+        const pinnedState: Record<string, boolean> = {};
+        tabs.forEach(tab => {
+            pinnedState[tab.id] = !!tab.isPinned;
+        });
+        localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
+    };
+
     /**
      * Pin the context tab
      */
     const pinTab = () => {
         if (!contextTabId) return;
 
-        setOpenTabs((prevTabs) =>
-            prevTabs.map((tab) => (tab.id === contextTabId ? { ...tab, isPinned: true } : tab))
+        const newTabs = openTabs.map((tab) =>
+            tab.id === contextTabId ? { ...tab, isPinned: true } : tab
         );
+
+        // Sort: pinned tabs first
+        newTabs.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            return 0;
+        });
+
+        setOpenTabs(newTabs);
+        savePinnedStateToStorage(newTabs);
         setIsContextMenuOpen(false);
     };
 
@@ -38,9 +57,19 @@ export const useTabBarMenuHelper = () => {
     const unpinTab = () => {
         if (!contextTabId) return;
 
-        setOpenTabs((prevTabs) =>
-            prevTabs.map((tab) => (tab.id === contextTabId ? { ...tab, isPinned: false } : tab))
+        const newTabs = openTabs.map((tab) =>
+            tab.id === contextTabId ? { ...tab, isPinned: false } : tab
         );
+
+        // Sort: pinned tabs first
+        newTabs.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            return 0;
+        });
+
+        setOpenTabs(newTabs);
+        savePinnedStateToStorage(newTabs);
         setIsContextMenuOpen(false);
     };
 
