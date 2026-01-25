@@ -38,14 +38,28 @@ export const useTabKeyboardShortcuts = () => {
                 ctrlKPressedRef.current = false;
 
                 if (activeTabId) {
-                    setOpenTabs((prevTabs) =>
-                        prevTabs.map((tab) => {
-                            if (tab.id === activeTabId) {
-                                return { ...tab, isPinned: !tab.isPinned };
-                            }
-                            return tab;
-                        })
-                    );
+                    const newTabs = openTabs.map((tab) => {
+                        if (tab.id === activeTabId) {
+                            return { ...tab, isPinned: !tab.isPinned };
+                        }
+                        return tab;
+                    });
+
+                    // Sort: pinned tabs first
+                    newTabs.sort((a, b) => {
+                        if (a.isPinned && !b.isPinned) return -1;
+                        if (!a.isPinned && b.isPinned) return 1;
+                        return 0;
+                    });
+
+                    setOpenTabs(newTabs);
+
+                    // Save pinned state to localStorage
+                    const pinnedState: Record<string, boolean> = {};
+                    newTabs.forEach(tab => {
+                        pinnedState[tab.id] = !!tab.isPinned;
+                    });
+                    localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
                 }
                 return;
             }
