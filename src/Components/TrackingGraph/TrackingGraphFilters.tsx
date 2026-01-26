@@ -10,10 +10,10 @@ import { Button } from "@/Components/ui/button";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { Checkbox } from "@/Components/ui/checkbox";
-import { Check, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Check, X, ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getLineColor } from "@/utils/tracking-parser.utils";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const MONTH_NAMES = [
     "January", "February", "March", "April", "May", "June",
@@ -35,8 +35,30 @@ export function TrackingGraphFilters() {
         isGroupPartiallySelected,
     } = useTrackingGraphHelper();
 
-    // Track collapsed groups
+    // Track collapsed groups - default all collapsed except "thái độ"
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+    const initializedRef = useRef(false);
+
+    // Initialize: collapse all groups except "thái độ", and select all items in "thái độ"
+    useEffect(() => {
+        if (initializedRef.current || groupedItems.length === 0) return;
+        initializedRef.current = true;
+
+        // Collapse all groups except "thái độ" (case insensitive)
+        const toCollapse = groupedItems
+            .filter((g) => g.section.toLowerCase() !== "thái độ")
+            .map((g) => g.section);
+        setCollapsedGroups(new Set(toCollapse));
+
+        // Select all items in "thái độ" group
+        const thaiDoGroup = groupedItems.find(
+            (g) => g.section.toLowerCase() === "thái độ"
+        );
+        if (thaiDoGroup) {
+            const thaiDoKeys = thaiDoGroup.items.map((item) => item.key);
+            updateFilter("selectedItems", thaiDoKeys);
+        }
+    }, [groupedItems]);
 
     const toggleGroupCollapse = (section: string) => {
         setCollapsedGroups((prev) => {
@@ -48,6 +70,20 @@ export function TrackingGraphFilters() {
             }
             return next;
         });
+    };
+
+    // Check if all groups are collapsed
+    const allCollapsed = groupedItems.length > 0 &&
+        groupedItems.every((g) => collapsedGroups.has(g.section));
+
+    const toggleCollapseAll = () => {
+        if (allCollapsed) {
+            // Expand all
+            setCollapsedGroups(new Set());
+        } else {
+            // Collapse all
+            setCollapsedGroups(new Set(groupedItems.map((g) => g.section)));
+        }
     };
 
     return (
@@ -110,10 +146,17 @@ export function TrackingGraphFilters() {
         </div>
 
         {/* Right: Item selection */}
-        <div className="flex items-center gap-3 whitespace-nowrap">
-            {/* <span className="text-sm text-muted-foreground">
-                Items ({filters.selectedItems.length}/{uniqueItems.length})
-            </span> */}
+        <div className="flex items-center gap-2 whitespace-nowrap">
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleCollapseAll}
+                className="h-7 px-2 text-xs"
+                title={allCollapsed ? "Expand all groups" : "Collapse all groups"}
+            >
+                <ChevronsUpDown className="w-3 h-3 mr-1" />
+                {allCollapsed ? "Expand" : "Collapse"}
+            </Button>
 
             <Button
                 variant="ghost"
