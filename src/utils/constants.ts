@@ -28,6 +28,7 @@ export const constants = {
             tabTypes: {
                 note: "note",
                 workspace: "workspace",
+                trackingGraph: "trackingGraph",
             } as const,
         },
         viewTypes: {

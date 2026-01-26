@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { X, FileText, Folder, Box, Pin } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { X, FileText, Folder, Box, Pin, BarChart3 } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -15,6 +15,7 @@ import { useTabKeyboardShortcuts } from "@/hooks/vsCode/useTabKeyboardShortcuts"
 import { BaseTab } from "@/types/editor/tab.types";
 import { ICON_MAP, IconType } from "@/shared/icons";
 import { Note } from "@/types/note.types";
+import { Ws } from "@/types/workspace.types";
 
 type TabIconProps = {
     tab: BaseTab;
@@ -33,6 +34,8 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
       ? note?.color ?? "#60a5fa" // blue-400
       : tab.type === constants.vscode.tab.tabTypes.workspace
       ? "#a78bfa" // purple-400
+      : tab.type === constants.vscode.tab.tabTypes.trackingGraph
+      ? "#22c55e" // green-500
       : "#9ca3af";
 
   const className = `w-4 h-4 ${isActive ? "opacity-100" : "opacity-50"}`;
@@ -49,6 +52,9 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
 
     case constants.vscode.tab.tabTypes.workspace:
       return <Box className={className} style={{ color: iconColor }} />;
+
+    case constants.vscode.tab.tabTypes.trackingGraph:
+      return <BarChart3 className={className} style={{ color: iconColor }} />;
 
     default:
       return <FileText className={className} style={{ color: iconColor }} />;
@@ -322,7 +328,7 @@ export function TabBar() {
         if (currentWorkspace && openTabs.length > 0 && allKeywords.length > 0) {
             const newTabs = openTabs.map((tab) => {
                 if (tab.type === constants.vscode.tab.tabTypes.note) {
-                    const breadcrumb = generateBreadcrumbForTab(tab.data, tab.type);
+                    const breadcrumb = generateBreadcrumbForTab(tab.data as Note | Ws, tab.type);
                     return { ...tab, breadcrumb };
                 }
                 return tab;

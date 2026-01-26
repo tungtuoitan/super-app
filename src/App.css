@@ -111,3 +111,8 @@ display: none ;
     position: relative;
     margin-top: -2px;
 }
+
+
+.recharts-surface:focus {
+    outline: none !important;
+}
