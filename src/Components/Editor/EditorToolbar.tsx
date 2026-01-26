@@ -52,7 +52,7 @@ export function EditorToolbar() {
             {/* Action Buttons */}
             <TooltipProvider>
                 <div className="flex gap-1">
-                    {activeTab?.data.deletedAt && !(activeTab.data as any).isHardDeleted ? (
+                    {(activeTab?.data as any)?.deletedAt && !(activeTab?.data as any).isHardDeleted ? (
                         // Show Restore button for soft deleted items only
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -70,7 +70,7 @@ export function EditorToolbar() {
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>
-                                    Restore {activeTab.type === constants.vscode.tab.tabTypes.note ? constants.vscode.displayNames.note : constants.vscode.displayNames.workspace}
+                                    Restore {activeTab?.type === constants.vscode.tab.tabTypes.note ? constants.vscode.displayNames.note : constants.vscode.displayNames.workspace}
                                 </p>
                             </TooltipContent>
                         </Tooltip>
@@ -108,7 +108,7 @@ export function EditorToolbar() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={commonCancel}
-                                        disabled={!activeTab?.hasUnsavedChanges || !!activeTab?.data.deletedAt}
+                                        disabled={!activeTab?.hasUnsavedChanges || !!(activeTab?.data as any)?.deletedAt}
                                         className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                     >
                                         <RotateCcw className="h-[18px] w-[18px]" />
@@ -117,7 +117,7 @@ export function EditorToolbar() {
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>
-                                    {activeTab?.data.deletedAt
+                                    {(activeTab?.data as any)?.deletedAt
                                         ? `Cannot edit deleted ${activeTab.type === constants.vscode.tab.tabTypes.note ? constants.vscode.displayNames.note : constants.vscode.displayNames.workspace}`
                                         : "Discard Changes"}
                                 </p>

@@ -45,3 +45,6 @@ export type { CommandPaletteContextData } from "./commandPalette/useCommandPalet
 
 export { ConsoleStore, ConsoleProvider, useConsoleStore } from "./console/useConsole.store";
 export type { ConsoleContextData, ConsoleMessage, ConsoleMessageType } from "./console/useConsole.store";
+
+export { TrackingGraphStore, TrackingGraphProvider, useTrackingGraphStore } from "./tracking/TrackingGraph.store";
+export type { TrackingGraphContextData } from "./tracking/TrackingGraph.store";

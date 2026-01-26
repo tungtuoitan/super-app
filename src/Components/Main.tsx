@@ -27,6 +27,7 @@ import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.store";
 import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
+import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
 
 /**
  * Main application layout component.
@@ -72,8 +73,9 @@ export function Main() {
                                                                                     <NoteDetailProvider>
                                                                                         <NoteGridProvider>
                                                                                             <EditorTabProvider>
-                                                                                                <EditorProvider>
-                                                                                                    <EditorToolbarProvider>
+                                                                                                <TrackingGraphProvider>
+                                                                                                    <EditorProvider>
+                                                                                                        <EditorToolbarProvider>
                                                                                                         <DialogProvider>
                                                                                                         <OrchestratorContextMenuStoreProvider>
                                                                                                             <ConfirmationPopoverProvider>
@@ -88,8 +90,9 @@ export function Main() {
                                                                                                             </ConfirmationPopoverProvider>
                                                                                                         </OrchestratorContextMenuStoreProvider>
                                                                                                         </DialogProvider>
-                                                                                                    </EditorToolbarProvider>
-                                                                                                </EditorProvider>
+                                                                                                        </EditorToolbarProvider>
+                                                                                                    </EditorProvider>
+                                                                                                </TrackingGraphProvider>
                                                                                             </EditorTabProvider>
                                                                                         </NoteGridProvider>
                                                                                     </NoteDetailProvider>

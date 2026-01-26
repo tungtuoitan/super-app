@@ -8,12 +8,14 @@ import {
     FileText as NoteIcon,
     AlertTriangle as HardDeleteIcon,
     RotateCcw as RestoreIcon,
+    BarChart3 as TrackingIcon,
 } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useWorkspaceFolderMenuHelper } from "@/shared/contexts/helpers/useWorkspaceFolderMenu.helper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { useTrackingGraphHelper } from "@/hooks/tracking/useTrackingGraph.helper";
 
 /**
  * WorkspaceFolderNodeMenu
@@ -29,6 +31,7 @@ export function WorkspaceFolderNodeMenu() {
     const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
     const { createFolder, editFolder, dhr_items, createNewNote, openAddExistingNotePopup } = useWorkspaceFolderMenuHelper();
     const _TREESTATUS = useTreeStatusHelper();
+    const { openTrackingGraphTab } = useTrackingGraphHelper();
 
     // Calculate derived values
     const entityId = contextData?.entityId
@@ -73,6 +76,25 @@ export function WorkspaceFolderNodeMenu() {
                     <MenuItem onClick={() => openAddExistingNotePopup(contextData)} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple}>
                         <AddIcon className="w-4 h-4 mr-2" />
                         Existing Note
+                    </MenuItem>
+
+                    <MenuDivider />
+
+                    {/* Open Tracking Graph */}
+                    <MenuItem
+                        onClick={() => {
+                            if (contextData && currentWorkspace) {
+                                openTrackingGraphTab(
+                                    contextData.entityId,
+                                    contextData.data?.name || "Folder",
+                                    currentWorkspace.id
+                                );
+                            }
+                        }}
+                        disabled={_TREESTATUS.selectedItemStatuses.isMultiple}
+                    >
+                        <TrackingIcon className="w-4 h-4 mr-2" />
+                        Open Tracking Graph
                     </MenuItem>
 
                     <MenuDivider />
