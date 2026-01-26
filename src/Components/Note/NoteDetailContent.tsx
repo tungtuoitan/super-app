@@ -88,7 +88,7 @@ export function NoteDetailContent() {
     }
     return (
         <div className="h-full">
-            <CardContent className="p-0 h-full bred">
+            <CardContent className="p-0 h-full">
                 {/* //* khi nào load đủ data thì mới render, không thì UI=loading, nếu không thì sẽ hiển thị sai*/}
                 {$miRef.current && <MarkdownEditorSync />}
                 {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />}
