@@ -3,7 +3,7 @@
  * Handles Google OAuth redirect with authorization code
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthCallbackStore } from "@/store/index";
 import { useAuthHelper } from "@/hooks/useAuth.helpers";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
@@ -12,7 +12,16 @@ import { AlertCircle, Loader2 } from "lucide-react";
 export function AuthCallback() {
     const { callbackError, isProcessing } = useAuthCallbackStore();
     const { handleOAuthCallback, navigateToHome } = useAuthHelper();
+
+    // Prevent double execution in React StrictMode
+    const hasProcessed = useRef(false);
+
     useEffect(() => {
+        if (hasProcessed.current) {
+            return;
+        }
+        hasProcessed.current = true;
+
         handleOAuthCallback();
     }, []);
 
