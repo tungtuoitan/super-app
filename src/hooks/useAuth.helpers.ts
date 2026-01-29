@@ -13,7 +13,8 @@ import { constants } from "@/utils/constants";
 import type { LoginRequest, ExchangeTokenResponse } from "@/types/index";
 import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
 import { useLocation, useNavigate } from "react-router-dom";
-import { extractAuthCodeFromUrl, extractOAuthError } from "@/utils/googleOAuth";
+import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl } from "@/utils/googleOAuth";
+import { retrieveAndClearPkceValues, validateState } from "@/utils/pkce.utils";
 import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
@@ -145,15 +146,17 @@ export function useAuthHelper() {
 
     /**
      * Login with Google authorization code
-     * Exchanges code for JWT token
+     * Exchanges code for JWT token with PKCE support
+     * @param code Authorization code from Google
+     * @param codeVerifier PKCE code verifier (optional for backward compatibility)
      */
-    const loginWithGoogleCode = async (code: string): Promise<void> => {
+    const loginWithGoogleCode = async (code: string, codeVerifier?: string): Promise<void> => {
         setLoginLoading(true);
         setLoginError(null);
         setError(null);
 
         try {
-            const response = await authApi.googleLogin(code);
+            const response = await authApi.googleLogin(code, codeVerifier);
 
             if (!response.success || !response.user) {
                 throw new Error(response.error || "Google login failed");
@@ -196,7 +199,7 @@ export function useAuthHelper() {
     };
 
     /**
-     * Handle OAuth callback for Google authentication
+     * Handle OAuth callback for Google authentication with PKCE validation
      */
     const handleOAuthCallback = async (): Promise<void> => {
         try {
@@ -208,8 +211,9 @@ export function useAuthHelper() {
                 return;
             }
 
-            // Extract authorization code
+            // Extract authorization code and state from URL
             const code = extractAuthCodeFromUrl(window.location.search);
+            const returnedState = extractStateFromUrl(window.location.search);
 
             if (!code) {
                 setCallbackError("No authorization code received from Google");
@@ -217,8 +221,18 @@ export function useAuthHelper() {
                 return;
             }
 
-            // Exchange code for JWT token
-            await loginWithGoogleCode(code);
+            // Retrieve and clear PKCE values from sessionStorage
+            const { codeVerifier, state: storedState } = retrieveAndClearPkceValues();
+
+            // Validate state parameter (CSRF protection)
+            if (!validateState(returnedState, storedState)) {
+                setCallbackError("Invalid state parameter - possible CSRF attack");
+                setIsProcessing(false);
+                return;
+            }
+
+            // Exchange code for JWT token with PKCE code verifier
+            await loginWithGoogleCode(code, codeVerifier || undefined);
 
             // Navigate to home page on success
             navigate("/", { replace: true });
