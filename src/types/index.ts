@@ -63,6 +63,8 @@ export interface UserData {
 
 export interface GoogleCodeRequest {
     code: string;
+    /** PKCE code verifier - optional for backward compatibility */
+    codeVerifier?: string;
 }
 
 export interface ExchangeTokenResponse {

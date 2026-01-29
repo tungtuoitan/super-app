@@ -40,15 +40,16 @@ export const authApi = {
     },
 
     /**
-     * Google OAuth login
+     * Google OAuth login with PKCE support
      * Exchange Google authorization code for JWT token
      * POST /api/auth/google/login
      *
      * @param code Google authorization code
+     * @param codeVerifier PKCE code verifier (optional for backward compatibility)
      * @returns Auth response with JWT token and user data or rejects with response
      */
-    async googleLogin(code: string): Promise<AuthResponse> {
-        const request: GoogleCodeRequest = { code };
+    async googleLogin(code: string, codeVerifier?: string): Promise<AuthResponse> {
+        const request: GoogleCodeRequest = { code, codeVerifier };
 
         const headers = new Headers();
         headers.append("Content-Type", "application/json");
