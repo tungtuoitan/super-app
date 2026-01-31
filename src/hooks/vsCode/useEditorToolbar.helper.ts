@@ -26,6 +26,8 @@ import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 import { useWorkspaceLoader } from "../workspace";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
 import { useConsoleHelper } from "../console/useConsole.helper";
+import { useProjectDetailHelper } from "../project/useProjectDetail.helper";
+import { Project } from "@/store/project/useProject.store";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -45,6 +47,9 @@ export const useEditorToolbarHelper = () => {
     const { upsertWorkspace } = useWsDetailHelper();
     const { loadWorkspaces } = useWsGridHelper();
 
+    // Project-specific
+    const { upsertProject } = useProjectDetailHelper();
+
     // WorkspaceTree-specific
     const { moduleName } = useGridControlStore();
     const { currentWorkspace } = useWorkspaceStore();
@@ -60,6 +65,9 @@ export const useEditorToolbarHelper = () => {
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             const wsData = activeTab.data as Ws;
             return wsData?.deletedAt ? "Deleted" : "Existing";
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.project) {
+            const projectData = activeTab.data as Project;
+            return projectData?.deletedAt ? "Deleted" : "Existing";
         }
 
         return "Existing";
@@ -75,6 +83,9 @@ export const useEditorToolbarHelper = () => {
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             const wsData = activeTab.data as Ws;
             return wsData?.id || null;
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.project) {
+            const projectData = activeTab.data as Project;
+            return projectData?.id || null;
         }
 
         return null;
@@ -90,13 +101,17 @@ export const useEditorToolbarHelper = () => {
 
         try {
             // STEP 3: Route to Appropriate Handler Based on Module + Tab Type
-            // REGULAR HANDLERS (Note from NoteGrid, Workspace, etc.)
+            // REGULAR HANDLERS (Note from NoteGrid, Workspace, Project, etc.)
             switch (activeTab.type) {
                 case constants.vscode.tab.tabTypes.workspace:
                     // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
                     await upsertWorkspace(activeTab.id);
                     loadWorkspaces();
                     loadKeywords();
+                    break;
+                case constants.vscode.tab.tabTypes.project:
+                    // PROJECT HANDLER: Delegate to Project Upsert Logic (upsertProject already reloads projects)
+                    await upsertProject(activeTab.id);
                     break;
                 case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
                     const data = activeTab.data as Note;
@@ -118,7 +133,7 @@ export const useEditorToolbarHelper = () => {
                         await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
                         loadKeywords();
                     } else {
-                        console.error("⚠️ Unexpected case in upsertOrchestraitor");
+                        console.error("Unexpected case in upsertOrchestraitor");
                     }
                     break;
                 default:

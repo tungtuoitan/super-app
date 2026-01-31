@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { X, FileText, Folder, Box, Pin, BarChart3 } from "lucide-react";
+import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -34,6 +34,8 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
       ? note?.color ?? "#60a5fa" // blue-400
       : tab.type === constants.vscode.tab.tabTypes.workspace
       ? "#a78bfa" // purple-400
+      : tab.type === constants.vscode.tab.tabTypes.project
+      ? "#f97316" // orange-500
       : tab.type === constants.vscode.tab.tabTypes.trackingGraph
       ? "#22c55e" // green-500
       : "#9ca3af";
@@ -52,6 +54,9 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
 
     case constants.vscode.tab.tabTypes.workspace:
       return <Box className={className} style={{ color: iconColor }} />;
+
+    case constants.vscode.tab.tabTypes.project:
+      return <Cuboid className={className} style={{ color: iconColor }} />;
 
     case constants.vscode.tab.tabTypes.trackingGraph:
       return <BarChart3 className={className} style={{ color: iconColor }} />;

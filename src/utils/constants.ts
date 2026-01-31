@@ -16,11 +16,13 @@ export const constants = {
             workspace: "/workspace",
             ws: "/ws",
             notes: "/notes",
+            project: "/project",
         } as const,
         views: {
             workspace: "workspace",
             ws: "ws",
             note: "note",
+            project: "project",
         } as const,
     },
     vscode: {
@@ -29,6 +31,7 @@ export const constants = {
                 note: "note",
                 workspace: "workspace",
                 trackingGraph: "trackingGraph",
+                project: "project",
             } as const,
         },
         viewTypes: {
@@ -36,6 +39,7 @@ export const constants = {
             ws: "ws",
             note: "note",
             notes: "notes",
+            project: "project",
         } as const,
         displayNames: {
             note: "Note",
@@ -44,10 +48,12 @@ export const constants = {
             file: "File",
             folder: "Folder",
             notes: "Notes",
+            project: "Projects",
         } as const,
         tabTitles: {
             unsavedNote: "Unsaved Note",
             unsavedWorkspace: "Unsaved Workspace",
+            unsavedProject: "Unsaved Project",
             unknownTab: "Unknown Tab",
         } as const,
     },
@@ -92,6 +98,7 @@ export const constants = {
             folder: "folder",
             noteGrid: "note-grid",
             workspaceGrid: "workspace-grid",
+            projectGrid: "project-grid",
             tab: "tab",
         } as const,
     },
@@ -135,6 +142,17 @@ export const constants = {
         workspace: "Workspace",
         ws: "Ws",
         task: "Task",
+        project: "Project",
+    } as const,
+
+    // Project status colors (GitHub-style)
+    projectStatus: {
+        colors: {
+            "open": { bg: "#238636", text: "#ffffff" },           // Green (GitHub open)
+            "in_progress": { bg: "#d29922", text: "#ffffff" },    // Yellow (GitHub in progress)
+            "completed": { bg: "#8957e5", text: "#ffffff" },      // Purple (GitHub completed/merged)
+        } as Record<string, { bg: string; text: string }>,
+        default: { bg: "#6e7681", text: "#ffffff" },              // Gray
     } as const,
     filters: {
         // Filter view keys
@@ -339,4 +357,4 @@ export const constants = {
 } as const;
 
 // Type exports
-export type ActivityBarView = typeof constants.navigation.views.workspace | typeof constants.navigation.views.ws | typeof constants.navigation.views.note;
+export type ActivityBarView = typeof constants.navigation.views.workspace | typeof constants.navigation.views.ws | typeof constants.navigation.views.note | typeof constants.navigation.views.project;
