@@ -5,10 +5,10 @@
  */
 
 import React, { useEffect, useMemo } from "react";
-import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor } from "@/shared/components";
+import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateTimePicker } from "@/shared/components";
 import { CardContent } from "@/Components/ui/card";
 import { ScrollArea } from "@/Components/ui/scroll-area";
-import { FileText, Calendar } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Task } from "@/store/task/useTask.store";
 import { useGeneralStore } from "@/store/general/General.store";
 import { useEditorTabsStore } from "@/store/index";
@@ -16,28 +16,19 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 
 /**
- * Get task status colors
+ * Get task status colors from constants
  */
 const getTaskStatusColors = (status: string) => {
-    const colors: Record<string, { bg: string; text: string }> = {
-        open: { bg: "#238636", text: "#ffffff" },
-        in_progress: { bg: "#d29922", text: "#ffffff" },
-        completed: { bg: "#8957e5", text: "#ffffff" },
-    };
-    return colors[status] || { bg: "#6e7681", text: "#ffffff" };
+    const colors = constants.optionColor.taskStatus.colors[status];
+    return colors || constants.optionColor.taskStatus.default;
 };
 
 /**
- * Get task priority colors
+ * Get task priority colors from constants
  */
 const getTaskPriorityColors = (priority: string) => {
-    const colors: Record<string, { bg: string; text: string }> = {
-        low: { bg: "#6e7681", text: "#ffffff" },
-        medium: { bg: "#d29922", text: "#ffffff" },
-        high: { bg: "#da3633", text: "#ffffff" },
-        urgent: { bg: "#8957e5", text: "#ffffff" },
-    };
-    return colors[priority] || { bg: "#6e7681", text: "#ffffff" };
+    const colors = constants.optionColor.taskPriority.colors[priority];
+    return colors || constants.optionColor.taskPriority.default;
 };
 
 interface TaskDetailContentProps {
@@ -183,35 +174,21 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
 
                             {/* Date row */}
                             <div className="flex gap-4">
-                                <div className="flex-1 space-y-2">
-                                    <label className="text-sm font-medium flex items-center gap-2">
-                                        <Calendar className="h-4 w-4" />
-                                        Start Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={formatDateForInput(selectedTask.startDate)}
-                                        onChange={(e) => {
-                                            const date = e.target.value ? new Date(e.target.value) : null;
-                                            handleFieldChange("startDate", date);
-                                        }}
-                                        className="w-full px-3 py-2 text-sm border rounded-md bg-background"
+                                <div className="flex-1">
+                                    <DateTimePicker
+                                        label="Start Date"
+                                        value={selectedTask.startDate}
+                                        onChange={(date) => handleFieldChange("startDate", date)}
+                                        placeholder="Pick start date..."
                                         disabled={isDeleted}
                                     />
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <label className="text-sm font-medium flex items-center gap-2">
-                                        <Calendar className="h-4 w-4" />
-                                        End Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={formatDateForInput(selectedTask.endDate)}
-                                        onChange={(e) => {
-                                            const date = e.target.value ? new Date(e.target.value) : null;
-                                            handleFieldChange("endDate", date);
-                                        }}
-                                        className="w-full px-3 py-2 text-sm border rounded-md bg-background"
+                                <div className="flex-1">
+                                    <DateTimePicker
+                                        label="End Date"
+                                        value={selectedTask.endDate}
+                                        onChange={(date) => handleFieldChange("endDate", date)}
+                                        placeholder="Pick end date..."
                                         disabled={isDeleted}
                                     />
                                 </div>

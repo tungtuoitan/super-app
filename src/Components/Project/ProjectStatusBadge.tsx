@@ -15,8 +15,8 @@ interface ProjectStatusBadgeProps {
  * Get status colors from constants
  */
 export const getProjectStatusColors = (status: string) => {
-    const colors = constants.projectStatus.colors[status];
-    return colors || constants.projectStatus.default;
+    const colors = constants.optionColor.projectStatus.colors[status];
+    return colors || constants.optionColor.projectStatus.default;
 };
 
 export function ProjectStatusBadge({ status, label, size = "md" }: ProjectStatusBadgeProps) {

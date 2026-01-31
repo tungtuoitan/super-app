@@ -224,7 +224,9 @@ export const useTaskGridHelper = () => {
                 _console.error("Unauthorized. Please login again.");
             }
         } finally {
-            setTaskGridIsLoading(false);
+            setTimeout(() => {
+                setTaskGridIsLoading(false);
+            }, 100);
         }
     };
 

@@ -15,7 +15,7 @@ import { useTaskGridHelper } from "@/hooks/task/useTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
 import { useGeneralStore } from "@/store/general/General.store";
 import { useTaskTabHelper } from "@/hooks/task/useTaskTab.helper";
-import { StatusAutoComplete, IStatusOption } from "@/shared/components";
+import { StatusAutoComplete, IStatusOption, DateTimePicker } from "@/shared/components";
 import { taskService } from "@/services/task.service";
 import {constants} from "@/utils/constants";
 
@@ -24,28 +24,19 @@ interface TaskListProps {
 }
 
 /**
- * Get task status colors
+ * Get task status colors from constants
  */
 const getTaskStatusColors = (status: string) => {
-    const colors: Record<string, { bg: string; text: string }> = {
-        open: { bg: "#238636", text: "#ffffff" },
-        in_progress: { bg: "#d29922", text: "#ffffff" },
-        completed: { bg: "#8957e5", text: "#ffffff" },
-    };
-    return colors[status] || { bg: "#6e7681", text: "#ffffff" };
+    const colors = constants.optionColor.taskStatus.colors[status];
+    return colors || constants.optionColor.taskStatus.default;
 };
 
 /**
- * Get task priority colors
+ * Get task priority colors from constants
  */
 const getTaskPriorityColors = (priority: string) => {
-    const colors: Record<string, { bg: string; text: string }> = {
-        low: { bg: "#6e7681", text: "#ffffff" },
-        medium: { bg: "#d29922", text: "#ffffff" },
-        high: { bg: "#da3633", text: "#ffffff" },
-        urgent: { bg: "#8957e5", text: "#ffffff" },
-    };
-    return colors[priority] || { bg: "#6e7681", text: "#ffffff" };
+    const colors = constants.optionColor.taskPriority.colors[priority];
+    return colors || constants.optionColor.taskPriority.default;
 };
 
 /**
@@ -136,6 +127,53 @@ export function TaskList({ projectId }: TaskListProps) {
                 }
             } catch (error) {
                 console.error("Failed to update task:", error);
+            } finally {
+                setTaskGridIsLoading(false);
+            }
+        },
+        [$user.userToken, loadTasks, projectId, setTaskGridIsLoading]
+    );
+
+    // Handle inline date update
+    const handleInlineDateUpdate = useCallback(
+        async (task: Task, field: "startDate" | "endDate", newValue: Date | null) => {
+            // Check if value actually changed
+            const currentValue = task[field];
+            const isSame = (currentValue === null && newValue === null) ||
+                (currentValue && newValue && currentValue.getTime() === newValue.getTime());
+            if (isSame) return;
+
+            try {
+                setTaskGridIsLoading(true);
+
+                // Prepare upsert data
+                const upsertData = {
+                    id: task.id,
+                    projectId: task.projectId,
+                    parentTaskId: task.parentTaskId,
+                    type: task.type,
+                    title: task.title,
+                    note: task.note,
+                    status: task.status,
+                    priority: task.priority,
+                    startDate: field === "startDate"
+                        ? (newValue ? newValue.toISOString() : null)
+                        : (task.startDate ? task.startDate.toISOString() : null),
+                    endDate: field === "endDate"
+                        ? (newValue ? newValue.toISOString() : null)
+                        : (task.endDate ? task.endDate.toISOString() : null),
+                    orderIndex: task.orderIndex,
+                };
+
+                // Call API to update
+                const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
+
+                if (result.success) {
+                    // Reload tasks to get fresh data
+                    await loadTasks(projectId);
+                }
+            } catch (error) {
+                console.error("Failed to update task date:", error);
             } finally {
                 setTaskGridIsLoading(false);
             }
@@ -252,17 +290,18 @@ export function TaskList({ projectId }: TaskListProps) {
             {
                 accessorKey: "startDate",
                 header: () => <div className="text-left text-sm">Start Date</div>,
-                size: 120,
-                cell: ({ getValue }) => {
-                    const startDate = getValue() as Date | null;
-                    if (!startDate) return <div className="px-2 text-muted-foreground">—</div>;
+                size: 140,
+                cell: ({ row }) => {
+                    const task = row.original;
                     return (
-                        <div className="text-sm px-2">
-                            {new Intl.DateTimeFormat("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                            }).format(startDate)}
+                        <div className="px-1" onClick={(e) => e.stopPropagation()}>
+                            <DateTimePicker
+                                value={task.startDate}
+                                onChange={(date) => handleInlineDateUpdate(task, "startDate", date)}
+                                placeholder="—"
+                                disabled={!!task.deletedAt}
+                                showTime={true}
+                            />
                         </div>
                     );
                 },
@@ -270,23 +309,24 @@ export function TaskList({ projectId }: TaskListProps) {
             {
                 accessorKey: "endDate",
                 header: () => <div className="text-left text-sm">End Date</div>,
-                size: 120,
-                cell: ({ getValue }) => {
-                    const endDate = getValue() as Date | null;
-                    if (!endDate) return <div className="px-2 text-muted-foreground">—</div>;
+                size: 140,
+                cell: ({ row }) => {
+                    const task = row.original;
                     return (
-                        <div className="text-sm px-2">
-                            {new Intl.DateTimeFormat("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                            }).format(endDate)}
+                        <div className="px-1" onClick={(e) => e.stopPropagation()}>
+                            <DateTimePicker
+                                value={task.endDate}
+                                onChange={(date) => handleInlineDateUpdate(task, "endDate", date)}
+                                placeholder="—"
+                                disabled={!!task.deletedAt}
+                                showTime={true}
+                            />
                         </div>
                     );
                 },
             },
         ];
-    }, [statusOptions, priorityOptions, handleInlineUpdate]);
+    }, [statusOptions, priorityOptions, handleInlineUpdate, handleInlineDateUpdate]);
 
     // Filter tasks by projectId
     const filteredTasks = useMemo(() => {
@@ -341,7 +381,7 @@ export function TaskList({ projectId }: TaskListProps) {
         <div ref={taskContainerRef} className="w-full h-full bg-background flex flex-col relative">
             {/* Loading Overlay */}
             {taskGridIsLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
+                <div className="absolute inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-10">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
             )}
@@ -386,7 +426,7 @@ export function TaskList({ projectId }: TaskListProps) {
                         {table.getRowModel().rows.length === 0 ? (
                             <tr>
                                 <td colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                                    No tasks found. Right-click to create a new task.
+                                    {/* No tasks found. Right-click to create a new task. k dùng text này, nếu dùng thì khi chuyển đổi tab thì sẽ bị chớp, gây khó chịu*/} 
                                 </td>
                             </tr>
                         ) : (

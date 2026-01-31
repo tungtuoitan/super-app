@@ -1,13 +1,14 @@
 /**
  * Project Detail Content Component
  * Contains TabBar with: TaskList, TodayList, Kanban, Timeline
- * Currently only TaskList is implemented
  */
 
 import React, { useState } from "react";
 import { ListTodo, CalendarDays, Columns, GanttChartSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskList } from "./TaskList";
+import { TaskKanbanView } from "./TaskKanbanView";
+import { TaskTimelineView } from "./TaskTimelineView";
 import { TaskProvider } from "@/store/task/useTask.store";
 
 type TabType = "taskList" | "todayList" | "kanban" | "timeline";
@@ -22,8 +23,8 @@ interface TabConfig {
 const TABS: TabConfig[] = [
     { id: "taskList", label: "Task List", icon: <ListTodo className="h-4 w-4" /> },
     { id: "todayList", label: "Today", icon: <CalendarDays className="h-4 w-4" />, disabled: true },
-    { id: "kanban", label: "Kanban", icon: <Columns className="h-4 w-4" />, disabled: true },
-    { id: "timeline", label: "Timeline", icon: <GanttChartSquare className="h-4 w-4" />, disabled: true },
+    { id: "kanban", label: "Kanban", icon: <Columns className="h-4 w-4" /> },
+    { id: "timeline", label: "Timeline", icon: <GanttChartSquare className="h-4 w-4" /> },
 ];
 
 interface ProjectDetailContentProps {
@@ -53,15 +54,15 @@ export function ProjectDetailContent({ projectId }: ProjectDetailContentProps) {
                 );
             case "kanban":
                 return (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                        <p>Kanban Board - Coming Soon</p>
-                    </div>
+                    <TaskProvider>
+                        <TaskKanbanView projectId={projectId} />
+                    </TaskProvider>
                 );
             case "timeline":
                 return (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                        <p>Timeline View - Coming Soon</p>
-                    </div>
+                    <TaskProvider>
+                        <TaskTimelineView projectId={projectId} />
+                    </TaskProvider>
                 );
             default:
                 return null;
