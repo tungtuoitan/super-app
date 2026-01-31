@@ -162,11 +162,11 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
     // Container width style
     const containerStyle: CSSProperties = {
         ...style,
-        width: width || "auto",
+        width: width || "100%",
     };
 
     return (
-        <div className={cn("inline-block", className)} style={containerStyle}>
+        <div className={cn("inline-block w-full block", className)} style={containerStyle}>
             {inputProps.label && (
                 <Label
                     htmlFor={id}
@@ -181,7 +181,7 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
                 </Label>
             )}
 
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={setOpen} >
                 <PopoverTrigger asChild>
                     <Button
                         id={id}
@@ -190,7 +190,7 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
                         aria-expanded={open}
                         disabled={disabled}
                         className={cn(
-                            "justify-start gap-2 px-2 w-[200px]",
+                            "justify-between gap-2 flex px-2 w-full bg-[#22252A70]",
                             sizeClasses.button,
                             !selectedValue && "text-muted-foreground",
                             inputProps.error && "border-destructive focus-visible:ring-destructive"

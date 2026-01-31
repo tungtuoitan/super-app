@@ -1,0 +1,94 @@
+/**
+ * Task Tab Helper
+ * Helper functions for managing task editor tabs
+ */
+
+import { Task } from "@/store/task/useTask.store";
+import { BaseTab } from "@/types/editor/tab.types";
+import { useEditorTabsStore } from "../../store";
+import { constants } from "@/utils/constants";
+import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+
+export const useTaskTabHelper = () => {
+    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { updateActiveTab } = useEditorTabHelper();
+    const { setNewTabAnd } = useEditorTabHelper();
+
+    /**
+     * Open task in editor tab (within TabBar of ProjectDetailContent)
+     * If tab already exists, activate it; otherwise create new tab
+     */
+    const openTaskTab = (task: Task) => {
+        // Check if tab already exists for this task
+        const existingTab = openTabs.find(
+            (tab) => tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === task.id
+        );
+
+        if (existingTab) {
+            // Tab already exists, just activate it
+            updateActiveTab(existingTab.id);
+        } else {
+            // Create new task tab
+            const newTab: BaseTab = {
+                id: `task-tab-${task.id}-${Date.now()}`,
+                type: constants.vscode.tab.tabTypes.task,
+                data: task,
+                data0: task,
+                title: task.title || constants.vscode.tabTitles.unsavedTask,
+                hasUnsavedChanges: false,
+            };
+
+            const newTabs = [...openTabs, newTab];
+            setOpenTabs(newTabs);
+            updateActiveTab(newTab.id, newTabs);
+        }
+    };
+
+    /**
+     * Close task tab
+     */
+    const closeTaskTab = (tabId: string) => {
+        setOpenTabs((prev) => {
+            const newTabs = prev.filter((t) => t.id !== tabId);
+
+            // If closing active tab, switch to another tab
+            if (activeTabId === tabId) {
+                if (newTabs.length > 0) {
+                    // Switch to the last tab
+                    const lastTab = newTabs[newTabs.length - 1];
+                    setNewTabAnd(lastTab.id);
+                } else {
+                    setNewTabAnd(null);
+                }
+            }
+
+            return newTabs;
+        });
+    };
+
+    /**
+     * Update task in all tabs
+     * When task is updated, sync it across all open tabs
+     */
+    const updateTaskInTabs = (taskId: number, updatedTask: Partial<Task>) => {
+        setOpenTabs((prev) =>
+            prev.map((tab) => {
+                if (tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === taskId) {
+                    const taskData = tab.data as Task;
+                    return {
+                        ...tab,
+                        data: { ...taskData, ...updatedTask },
+                        title: updatedTask.title || tab.title,
+                    };
+                }
+                return tab;
+            })
+        );
+    };
+
+    return {
+        openTaskTab,
+        closeTaskTab,
+        updateTaskInTabs,
+    };
+};

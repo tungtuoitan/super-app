@@ -116,3 +116,20 @@ display: none ;
 .recharts-surface:focus {
     outline: none !important;
 }
+
+
+
+/* -- Rich Text Editor -- */
+
+.task-item label {
+    margin-top: 9px !important;
+}
+
+.ProseMirror .task-item > label input[type="checkbox"]:checked {
+  background-color: #000000; /* xám nhạt (gray-200) */
+  border-color: #353535;   /*  xám viền (gray-400) */
+}
+
+.ProseMirror .task-item > label input[type="checkbox"]:hover {
+  border-color: #353535;   /*  xám viền (gray-400) */
+}

@@ -6,6 +6,7 @@ import { WorkspaceChildNodeMenu } from "./menus/WorkspaceChildNodeMenu";
 import { NoteGridMenu } from "./menus/NoteGridMenu";
 import { WsGridMenu } from "./menus/WsGridMenu";
 import { ProjectGridMenu } from "./menus/ProjectGridMenu";
+import { TaskGridMenu } from "./menus/TaskGridMenu";
 import { TabBarMenu } from "./menus/TabBarMenu";
 import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
@@ -45,6 +46,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case "project-grid":
                 return <ProjectGridMenu />;
+
+            case "task-grid":
+                return <TaskGridMenu />;
 
             case "tab":
                 return <TabBarMenu />;

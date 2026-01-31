@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid } from "lucide-react";
+import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid, CheckSquare } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -23,49 +23,48 @@ type TabIconProps = {
     isActive?: boolean;
 };
 
-
 function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
-  const note = tab.data0 as Note | undefined;
+    const note = tab.data0 as Note | undefined;
 
-  const iconColor =
-    isDeleted
-      ? "#9ca3af" // gray-400
-      : tab.type === constants.vscode.tab.tabTypes.note
-      ? note?.color ?? "#60a5fa" // blue-400
-      : tab.type === constants.vscode.tab.tabTypes.workspace
-      ? "#a78bfa" // purple-400
-      : tab.type === constants.vscode.tab.tabTypes.project
-      ? "#f97316" // orange-500
-      : tab.type === constants.vscode.tab.tabTypes.trackingGraph
-      ? "#22c55e" // green-500
-      : "#9ca3af";
+    const iconColor = isDeleted
+        ? "#9ca3af" // gray-400
+        : tab.type === constants.vscode.tab.tabTypes.note
+          ? (note?.color ?? "#60a5fa") // blue-400
+          : tab.type === constants.vscode.tab.tabTypes.workspace
+            ? "#a78bfa" // purple-400
+            : tab.type === constants.vscode.tab.tabTypes.project
+              ? "#f97316" // orange-500
+              : tab.type === constants.vscode.tab.tabTypes.task
+                ? "#10b981" // emerald-500
+                : tab.type === constants.vscode.tab.tabTypes.trackingGraph
+                  ? "#22c55e" // green-500
+                  : "#9ca3af";
 
-  const className = `w-4 h-4 ${isActive ? "opacity-100" : "opacity-50"}`;
+    const className = `w-4 h-4 ${isActive ? "opacity-100" : "opacity-50"}`;
 
-  switch (tab.type) {
-    case constants.vscode.tab.tabTypes.note: {
-      const IconComponent =
-        note?.icon && ICON_MAP[note.icon as IconType]
-          ? ICON_MAP[note.icon as IconType]
-          : FileText;
+    switch (tab.type) {
+        case constants.vscode.tab.tabTypes.note: {
+            const IconComponent = note?.icon && ICON_MAP[note.icon as IconType] ? ICON_MAP[note.icon as IconType] : FileText;
 
-      return <IconComponent className={className} style={{ color: iconColor }} />;
+            return <IconComponent className={className} style={{ color: iconColor }} />;
+        }
+
+        case constants.vscode.tab.tabTypes.workspace:
+            return <Box className={className} style={{ color: iconColor }} />;
+
+        case constants.vscode.tab.tabTypes.project:
+            return <Cuboid className={className} style={{ color: iconColor }} />;
+
+        case constants.vscode.tab.tabTypes.task:
+            return <CheckSquare className={className} style={{ color: iconColor }} />;
+
+        case constants.vscode.tab.tabTypes.trackingGraph:
+            return <BarChart3 className={className} style={{ color: iconColor }} />;
+
+        default:
+            return <FileText className={className} style={{ color: iconColor }} />;
     }
-
-    case constants.vscode.tab.tabTypes.workspace:
-      return <Box className={className} style={{ color: iconColor }} />;
-
-    case constants.vscode.tab.tabTypes.project:
-      return <Cuboid className={className} style={{ color: iconColor }} />;
-
-    case constants.vscode.tab.tabTypes.trackingGraph:
-      return <BarChart3 className={className} style={{ color: iconColor }} />;
-
-    default:
-      return <FileText className={className} style={{ color: iconColor }} />;
-  }
 }
-
 
 /**
  * TabBar - VS Code style tab bar component
@@ -244,8 +243,8 @@ export function TabBar() {
             return;
         }
 
-        const sourceIndex = openTabs.findIndex(t => t.id === sourceTabId);
-        const targetIndex = openTabs.findIndex(t => t.id === targetTabId);
+        const sourceIndex = openTabs.findIndex((t) => t.id === sourceTabId);
+        const targetIndex = openTabs.findIndex((t) => t.id === targetTabId);
 
         if (sourceIndex === -1 || targetIndex === -1) return;
 
@@ -269,11 +268,11 @@ export function TabBar() {
         // Ensure pinned tabs stay at the beginning
         if (targetIsPinned && !sourceIsPinned) {
             // Moving unpinned to pinned: insert in pinned section
-            const lastPinnedIndex = newTabs.filter(t => t.isPinned).length;
+            const lastPinnedIndex = newTabs.filter((t) => t.isPinned).length;
             insertIndex = Math.min(insertIndex, lastPinnedIndex);
         } else if (!targetIsPinned && sourceIsPinned) {
             // Moving pinned to unpinned: insert after all pinned tabs
-            const pinnedCount = newTabs.filter(t => t.isPinned).length;
+            const pinnedCount = newTabs.filter((t) => t.isPinned).length;
             insertIndex = Math.max(insertIndex, pinnedCount);
         }
 
@@ -291,7 +290,7 @@ export function TabBar() {
     // Save pinned state to localStorage
     const savePinnedState = (tabs: BaseTab[]) => {
         const pinnedState: Record<string, boolean> = {};
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
             pinnedState[tab.id] = !!tab.isPinned;
         });
         localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
@@ -305,7 +304,7 @@ export function TabBar() {
                 const pinnedState: Record<string, boolean> = JSON.parse(savedState);
                 let hasChanges = false;
 
-                const updatedTabs = openTabs.map(tab => {
+                const updatedTabs = openTabs.map((tab) => {
                     if (pinnedState[tab.id] !== undefined && tab.isPinned !== pinnedState[tab.id]) {
                         hasChanges = true;
                         return { ...tab, isPinned: pinnedState[tab.id] };
@@ -374,12 +373,8 @@ export function TabBar() {
                 `}
             >
                 {/* Drop indicator */}
-                {isDropTarget && dragOverPosition === "left" && (
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
-                )}
-                {isDropTarget && dragOverPosition === "right" && (
-                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
-                )}
+                {isDropTarget && dragOverPosition === "left" && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />}
+                {isDropTarget && dragOverPosition === "right" && <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />}
                 <TabIcon tab={tab} isDeleted={isDeleted} isActive={activeTabId === tab.id} />
 
                 <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>

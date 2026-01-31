@@ -32,6 +32,7 @@ export const constants = {
                 workspace: "workspace",
                 trackingGraph: "trackingGraph",
                 project: "project",
+                task: "task",
             } as const,
         },
         viewTypes: {
@@ -54,6 +55,7 @@ export const constants = {
             unsavedNote: "Unsaved Note",
             unsavedWorkspace: "Unsaved Workspace",
             unsavedProject: "Unsaved Project",
+            unsavedTask: "Unsaved Task",
             unknownTab: "Unknown Tab",
         } as const,
     },
@@ -99,6 +101,7 @@ export const constants = {
             noteGrid: "note-grid",
             workspaceGrid: "workspace-grid",
             projectGrid: "project-grid",
+            taskGrid: "task-grid",
             tab: "tab",
         } as const,
     },
@@ -148,12 +151,30 @@ export const constants = {
     // Project status colors (GitHub-style)
     projectStatus: {
         colors: {
-            "open": { bg: "#238636", text: "#ffffff" },           // Green (GitHub open)
-            "in_progress": { bg: "#d29922", text: "#ffffff" },    // Yellow (GitHub in progress)
-            "completed": { bg: "#8957e5", text: "#ffffff" },      // Purple (GitHub completed/merged)
+            open: { bg: "#238636", text: "#ffffff" }, // Green (GitHub open)
+            in_progress: { bg: "#d29922", text: "#ffffff" }, // Yellow (GitHub in progress)
+            completed: { bg: "#8957e5", text: "#ffffff" }, // Purple (GitHub completed/merged)
         } as Record<string, { bg: string; text: string }>,
-        default: { bg: "#6e7681", text: "#ffffff" },              // Gray
+        default: { bg: "#6e7681", text: "#ffffff" }, // Gray
     } as const,
+    optionOrder: {
+        projectStatuses: {
+            "Open": 1,
+            "In Progress": 2,
+            "Completed": 3,
+        } as Record<string, number>,
+        taskStatuses: {
+            "Open": 1,
+            "In Progress": 2,
+            "Completed": 3,
+        } as Record<string, number>,
+                taskPriorities: {
+            "Low": 1,
+            "Medium": 2,
+            "High": 3,
+            "Urgent": 4,
+        } as Record<string, number>,
+    },
     filters: {
         // Filter view keys
         views: {
@@ -309,7 +330,7 @@ export const constants = {
                     parameterHints: {
                         enabled: true,
                     },
-                } as _monaco.editor.IStandaloneEditorConstructionOptions),
+                }) as _monaco.editor.IStandaloneEditorConstructionOptions,
         },
     } as const,
 
@@ -335,7 +356,7 @@ export const constants = {
     } as const,
     color: [
         // Material Design Icons for VS Code color palette
-        { value: "#90A4AE", label: "Grey" },           // Default
+        { value: "#90A4AE", label: "Grey" }, // Default
         { value: "#42A5F5", label: "Blue" },
         { value: "#29B6F6", label: "Light Blue" },
         { value: "#26C6DA", label: "Cyan" },
@@ -353,8 +374,12 @@ export const constants = {
         { value: "#7E57C2", label: "Deep Purple" },
         { value: "#5C6BC0", label: "Indigo" },
         { value: "#8D6E63", label: "Brown" },
-    ]
+    ],
 } as const;
 
 // Type exports
-export type ActivityBarView = typeof constants.navigation.views.workspace | typeof constants.navigation.views.ws | typeof constants.navigation.views.note | typeof constants.navigation.views.project;
+export type ActivityBarView =
+    | typeof constants.navigation.views.workspace
+    | typeof constants.navigation.views.ws
+    | typeof constants.navigation.views.note
+    | typeof constants.navigation.views.project;

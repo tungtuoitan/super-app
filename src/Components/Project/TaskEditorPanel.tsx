@@ -1,28 +1,27 @@
 /**
- * Project Editor Panel
- * Editor panel for project tabs in VSCodeLayout
- * Toolbar is now shared in VSEditorArea
+ * Task Editor Panel
+ * Editor panel for task tabs in VSCodeLayout
  */
 
 import React, { useEffect } from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
-import { ProjectDetailContent } from "./ProjectDetailContent";
-import { Project } from "@/store/project/useProject.store";
+import { TaskDetailContent } from "./TaskDetailContent";
+import { Task } from "@/store/task/useTask.store";
 
-interface ProjectEditorPanelProps {
+interface TaskEditorPanelProps {
     tab: BaseTab;
 }
 
-export function ProjectEditorPanel({ tab }: ProjectEditorPanelProps) {
+export function TaskEditorPanel({ tab }: TaskEditorPanelProps) {
     const { setOpenTabs, openTabs } = useEditorTabsStore();
 
     const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Get project from tab data
-    const project = tab.data as Project;
+    // Get task from tab data
+    const task = tab.data as Task;
 
-    // Sync hasUnsavedChanges with projectHasChanges
+    // Sync hasUnsavedChanges
     useEffect(() => {
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((t) =>
@@ -31,8 +30,8 @@ export function ProjectEditorPanel({ tab }: ProjectEditorPanelProps) {
                           ...t,
                           hasUnsavedChanges: tab.data && tab.data0 ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0) : false,
                       }
-                    : t
-            )
+                    : t,
+            ),
         );
     }, [tab.id, tab.data]);
 
@@ -53,8 +52,8 @@ export function ProjectEditorPanel({ tab }: ProjectEditorPanelProps) {
     return (
         <div className="w-full h-full flex flex-col overflow-hidden bg-background">
             {/* Content */}
-            <div ref={contentRef} onScroll={handleScroll} className="flex-1 overflow-hidden bg-background">
-                <ProjectDetailContent projectId={project.id} />
+            <div ref={contentRef} onScroll={handleScroll} className="flex-1 overflow-auto bg-background">
+                <TaskDetailContent taskTabId={tab.id} />
             </div>
         </div>
     );

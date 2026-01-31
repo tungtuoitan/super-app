@@ -28,6 +28,8 @@ import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegist
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { useProjectDetailHelper } from "../project/useProjectDetail.helper";
 import { Project } from "@/store/project/useProject.store";
+import { useTaskDetailHelper } from "../task/useTaskDetail.helper";
+import { Task } from "@/store/task/useTask.store";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -50,6 +52,9 @@ export const useEditorToolbarHelper = () => {
     // Project-specific
     const { upsertProject } = useProjectDetailHelper();
 
+    // Task-specific
+    const { upsertTask } = useTaskDetailHelper();
+
     // WorkspaceTree-specific
     const { moduleName } = useGridControlStore();
     const { currentWorkspace } = useWorkspaceStore();
@@ -68,6 +73,9 @@ export const useEditorToolbarHelper = () => {
         } else if (activeTab.type === constants.vscode.tab.tabTypes.project) {
             const projectData = activeTab.data as Project;
             return projectData?.deletedAt ? "Deleted" : "Existing";
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.task) {
+            const taskData = activeTab.data as Task;
+            return taskData?.deletedAt ? "Deleted" : "Existing";
         }
 
         return "Existing";
@@ -86,6 +94,9 @@ export const useEditorToolbarHelper = () => {
         } else if (activeTab.type === constants.vscode.tab.tabTypes.project) {
             const projectData = activeTab.data as Project;
             return projectData?.id || null;
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.task) {
+            const taskData = activeTab.data as Task;
+            return taskData?.id || null;
         }
 
         return null;
@@ -112,6 +123,10 @@ export const useEditorToolbarHelper = () => {
                 case constants.vscode.tab.tabTypes.project:
                     // PROJECT HANDLER: Delegate to Project Upsert Logic (upsertProject already reloads projects)
                     await upsertProject(activeTab.id);
+                    break;
+                case constants.vscode.tab.tabTypes.task:
+                    // TASK HANDLER: Delegate to Task Upsert Logic
+                    await upsertTask(activeTab.id);
                     break;
                 case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
                     const data = activeTab.data as Note;
@@ -154,7 +169,7 @@ export const useEditorToolbarHelper = () => {
             // STEP 5: Reset Saving State
             setIsSaving(false);
         }
-    }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, _treeEditor, $user, setIsSaving]);
+    }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, upsertProject, upsertTask, _treeEditor, $user, setIsSaving]);
 
     // Handle Cancel - routes to appropriate reset logic
     const commonCancel = useCallback(() => {
@@ -166,8 +181,8 @@ export const useEditorToolbarHelper = () => {
                 prev.map((tab) =>
                     tab.id === activeTab.id
                         ? { ...tab, data: tab.data0 } // hasUnsavedChanges will be auto-calculated
-                        : tab
-                )
+                        : tab,
+                ),
             );
             _console.info("Changes discarded");
         }
