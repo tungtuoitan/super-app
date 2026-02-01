@@ -9,7 +9,6 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
-import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
@@ -29,10 +28,13 @@ import {
     Loader2,
     ListChecks,
 } from "lucide-react";
-import { fileService } from "@/services/file.service";
+import { fileService, UploadContext } from "@/services/file.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { FileAttachment } from "./FileAttachmentExtension";
+import { ProxyImage } from "./ProxyImageExtension";
+import { useProxyImageLoader } from "./useProxyImageLoader";
 import "./RichTextEditor.css";
+import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 
 interface RichTextEditorProps {
     value: string;
@@ -41,6 +43,10 @@ interface RichTextEditorProps {
     disabled?: boolean;
     className?: string;
     minHeight?: string;
+    /** Upload context: "project" or "workspace" */
+    uploadContext?: UploadContext;
+    /** Upload context ID: project_id or workspace_id */
+    uploadContextId?: number;
 }
 
 interface ToolbarButtonProps {
@@ -74,11 +80,14 @@ export function RichTextEditor({
     disabled = false,
     className,
     minHeight = "200px",
+    uploadContext,
+    uploadContextId,
 }: RichTextEditorProps) {
     const { $user } = useAuthStore();
     const [isUploading, setIsUploading] = React.useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
+    const _console = useConsoleHelper();
 
     const editor = useEditor({
         extensions: [
@@ -91,7 +100,7 @@ export function RichTextEditor({
                 placeholder,
             }),
             Underline,
-            Image.configure({
+            ProxyImage.configure({
                 HTMLAttributes: {
                     class: "rich-text-image",
                 },
@@ -118,9 +127,17 @@ export function RichTextEditor({
         content: value,
         editable: !disabled,
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
+            // Get HTML and clean blob URLs before saving
+            // Blob URLs are session-specific and won't work after reload
+            // Images with data-file-id will be reloaded via proxy
+            let html = editor.getHTML();
+            html = html.replace(/src="blob:[^"]*"/g, 'src=""');
+            onChange(html);
         },
     });
+
+    // Load images with data-file-id via proxy
+    useProxyImageLoader({ editor, token: $user.userToken || null });
 
     // Handle image upload
     const handleImageUpload = useCallback(
@@ -130,20 +147,49 @@ export function RichTextEditor({
             try {
                 setIsUploading(true);
 
-                // Upload to server
-                const result = await fileService._uploadImage($user.userToken, file);
+                // Upload to server with context
+                const result = await fileService._uploadImage(
+                    $user.userToken,
+                    file,
+                    uploadContext,
+                    uploadContextId
+                );
 
                 if (result.success && result.data) {
-                    // Insert image into editor
-                    editor.chain().focus().setImage({ src: result.data.url }).run();
+                    // Get blob URL for immediate display
+                    let imageUrl = "";
+                    const fileId = result.data.fileId;
+
+                    if (fileId) {
+                        // Fetch as blob for secure display
+                        const blobUrl = await fileService._getFileBlobUrl($user.userToken, fileId);
+                        if (blobUrl) {
+                            imageUrl = blobUrl;
+                        }
+                    }
+
+                    // Insert image into editor with fileId for future loading
+                    // The fileId is stored in data-file-id attribute for re-loading when content is loaded
+                    editor.chain().focus().setImage({
+                        src: imageUrl,
+                        // @ts-expect-error - custom attribute for ProxyImage extension
+                        "data-file-id": fileId?.toString() || null,
+                    }).run();
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error("Failed to upload image:", error);
+                // Handle insufficient storage error (507)
+                if (error instanceof Response && error.status === 507) {
+                    const errorData = await error.json();
+                    _console.error(`Không đủ dung lượng Google Drive: ${errorData.message || ""}`);
+                } else {
+                    _console.error(`Upload ảnh thất bại: ${error instanceof Error ? error.message : String(error)}`);
+                }
             } finally {
                 setIsUploading(false);
             }
         },
-        [editor, $user.userToken]
+        [editor, $user.userToken, uploadContext, uploadContextId]
     );
 
     // Handle file attachment upload
@@ -160,8 +206,13 @@ export function RichTextEditor({
                     return;
                 }
 
-                // Upload as attachment
-                const result = await fileService._uploadAttachment($user.userToken, file);
+                // Upload as attachment with context
+                const result = await fileService._uploadAttachment(
+                    $user.userToken,
+                    file,
+                    uploadContext,
+                    uploadContextId
+                );
 
                 if (result.success && result.data) {
                     // Insert file attachment into editor
@@ -177,13 +228,20 @@ export function RichTextEditor({
                         })
                         .run();
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error("Failed to upload file:", error);
+                // Handle insufficient storage error (507)
+                if (error instanceof Response && error.status === 507) {
+                    const errorData = await error.json();
+                    _console.error(`Không đủ dung lượng Google Drive: ${errorData.message || ""}`);
+                } else {
+                    _console.error(`Upload file thất bại: ${error instanceof Error ? error.message : String(error)}`);
+                }
             } finally {
                 setIsUploading(false);
             }
         },
-        [editor, $user.userToken, handleImageUpload]
+        [editor, $user.userToken, handleImageUpload, uploadContext, uploadContextId]
     );
 
     // Handle paste event for images
@@ -238,8 +296,16 @@ export function RichTextEditor({
     }, [editor, handleFileUpload]);
 
     // Sync content when value changes externally
+    // Compare cleaned versions to avoid overwriting blob URLs with empty src
     useEffect(() => {
-        if (editor && value !== editor.getHTML()) {
+        if (!editor) return;
+
+        const cleanBlobUrls = (html: string) => html.replace(/src="blob:[^"]*"/g, 'src=""');
+        const currentClean = cleanBlobUrls(editor.getHTML());
+        const valueClean = cleanBlobUrls(value);
+
+        // Only update if the actual content (excluding blob URLs) is different
+        if (currentClean !== valueClean) {
             editor.commands.setContent(value);
         }
     }, [value, editor]);

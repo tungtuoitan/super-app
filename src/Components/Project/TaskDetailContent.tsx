@@ -301,15 +301,19 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                     <FileText className="h-4 w-4" />
                                     Note
                                 </label>
-                                <RichTextEditor
-                                    key={`note-${taskKey}`}
-                                    value={selectedTask.note || ""}
-                                    onChange={(value) => handleFieldChange("note", value)}
-                                    placeholder="Enter task notes..."
-                                    // minHeight="200px"
-                                    className="h-[580px] text-left"
-                                    disabled={isDeleted}
-                                />
+                                <div className="h-[580px] overflow-y-auto">
+                                    <RichTextEditor
+                                        key={`note-${taskKey}`}
+                                        value={selectedTask.note || ""}
+                                        onChange={(value) => handleFieldChange("note", value)}
+                                        placeholder="Enter task notes..."
+                                        minHeight="580px"
+                                        className="text-left"
+                                        disabled={isDeleted}
+                                        uploadContext="project"
+                                        uploadContextId={selectedTask.projectId}
+                                    />
+                                </div>
                             </div>
                         </CardContent>
                     </div>
