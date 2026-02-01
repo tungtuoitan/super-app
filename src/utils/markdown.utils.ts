@@ -2,7 +2,6 @@ import { useEffect, useRef, useCallback } from "react";
 import type * as _monaco from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
 import "@/styles/keywords.css";
-import {EnqueueSnackbar} from "notistack";
 import {Keyword} from "@/types/keyword.types";
 
 /**

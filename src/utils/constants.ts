@@ -16,11 +16,13 @@ export const constants = {
             workspace: "/workspace",
             ws: "/ws",
             notes: "/notes",
+            project: "/project",
         } as const,
         views: {
             workspace: "workspace",
             ws: "ws",
             note: "note",
+            project: "project",
         } as const,
     },
     vscode: {
@@ -29,6 +31,9 @@ export const constants = {
                 note: "note",
                 workspace: "workspace",
                 trackingGraph: "trackingGraph",
+                project: "project",
+                multiProject: "multiProject",
+                task: "task",
             } as const,
         },
         viewTypes: {
@@ -36,6 +41,7 @@ export const constants = {
             ws: "ws",
             note: "note",
             notes: "notes",
+            project: "project",
         } as const,
         displayNames: {
             note: "Note",
@@ -44,10 +50,13 @@ export const constants = {
             file: "File",
             folder: "Folder",
             notes: "Notes",
+            project: "Projects",
         } as const,
         tabTitles: {
             unsavedNote: "Unsaved Note",
             unsavedWorkspace: "Unsaved Workspace",
+            unsavedProject: "Unsaved Project",
+            unsavedTask: "Unsaved Task",
             unknownTab: "Unknown Tab",
         } as const,
     },
@@ -92,6 +101,8 @@ export const constants = {
             folder: "folder",
             noteGrid: "note-grid",
             workspaceGrid: "workspace-grid",
+            projectGrid: "project-grid",
+            taskGrid: "task-grid",
             tab: "tab",
         } as const,
     },
@@ -135,7 +146,65 @@ export const constants = {
         workspace: "Workspace",
         ws: "Ws",
         task: "Task",
+        project: "Project",
     } as const,
+
+    // Status and Priority colors (GitHub-style)
+    optionColor: {
+        projectStatus: {
+            colors: {
+                open: { bg: "#238636", text: "#ffffff" }, // Green (GitHub open)
+                in_progress: { bg: "#d29922", text: "#ffffff" }, // Yellow (GitHub in progress)
+                completed: { bg: "#8957e5", text: "#ffffff" }, // Purple (GitHub completed/merged)
+                on_hold: { bg: "#6e7681", text: "#ffffff" }, // Gray (GitHub on hold)
+                cancelled: { bg: "#d73a49", text: "#ffffff" }, // Red (GitHub closed)
+            } as Record<string, { bg: string; text: string }>,
+            default: { bg: "#6e7681", text: "#ffffff" }, // Gray
+        } as const,
+
+        taskStatus: {
+            colors: {
+                open: { bg: "#238636", text: "#ffffff" }, // Green
+                in_progress: { bg: "#d29922", text: "#ffffff" }, // Yellow
+                completed: { bg: "#8957e5", text: "#ffffff" }, // Purple
+                on_hold: { bg: "#6e7681", text: "#ffffff" }, // Gray
+                cancelled: { bg: "#d73a49", text: "#ffffff" }, // Red
+            } as Record<string, { bg: string; text: string }>,
+            default: { bg: "#6e7681", text: "#ffffff" }, // Gray
+        } as const,
+
+        taskPriority: {
+            colors: {
+                low: { bg: "#6e7681", text: "#ffffff" }, // Gray
+                medium: { bg: "#d29922", text: "#ffffff" }, // Yellow
+                high: { bg: "#da3633", text: "#ffffff" }, // Red
+                urgent: { bg: "#8957e5", text: "#ffffff" }, // Purple
+            } as Record<string, { bg: string; text: string }>,
+            default: { bg: "#6e7681", text: "#ffffff" }, // Gray
+        } as const,
+    },
+    optionOrder: {
+        projectStatuses: {
+            "Open": 1,
+            "In Progress": 2,
+            "Completed": 3,
+            "On Hold": 4,
+            "Cancelled": 5,
+        } as Record<string, number>,
+        taskStatuses: {
+            "Open": 1,
+            "In Progress": 2,
+            "Completed": 3,
+            "On Hold": 4,
+            "Cancelled": 5,
+        } as Record<string, number>,
+                taskPriorities: {
+            "Low": 1,
+            "Medium": 2,
+            "High": 3,
+            "Urgent": 4,
+        } as Record<string, number>,
+    },
     filters: {
         // Filter view keys
         views: {
@@ -291,7 +360,7 @@ export const constants = {
                     parameterHints: {
                         enabled: true,
                     },
-                } as _monaco.editor.IStandaloneEditorConstructionOptions),
+                }) as _monaco.editor.IStandaloneEditorConstructionOptions,
         },
     } as const,
 
@@ -317,7 +386,7 @@ export const constants = {
     } as const,
     color: [
         // Material Design Icons for VS Code color palette
-        { value: "#90A4AE", label: "Grey" },           // Default
+        { value: "#90A4AE", label: "Grey" }, // Default
         { value: "#42A5F5", label: "Blue" },
         { value: "#29B6F6", label: "Light Blue" },
         { value: "#26C6DA", label: "Cyan" },
@@ -335,8 +404,12 @@ export const constants = {
         { value: "#7E57C2", label: "Deep Purple" },
         { value: "#5C6BC0", label: "Indigo" },
         { value: "#8D6E63", label: "Brown" },
-    ]
+    ],
 } as const;
 
 // Type exports
-export type ActivityBarView = typeof constants.navigation.views.workspace | typeof constants.navigation.views.ws | typeof constants.navigation.views.note;
+export type ActivityBarView =
+    | typeof constants.navigation.views.workspace
+    | typeof constants.navigation.views.ws
+    | typeof constants.navigation.views.note
+    | typeof constants.navigation.views.project;

@@ -19,6 +19,8 @@ import { NoteGridProvider } from "@/store/note/useNoteGrid.store";
 import { NavProvider } from "@/contexts/NavigationContext";
 import { WsProvider } from "@/store/ws/useWs.store";
 import { WsDetailProvider } from "@/store/ws/useWsDetail.store";
+import { ProjectProvider } from "@/store/project/useProject.store";
+import { ProjectDetailProvider } from "@/store/project/useProjectDetail.store";
 import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";
 import { AuthGuard } from "@/Components/Auth/AuthGuard";
@@ -70,6 +72,8 @@ export function Main() {
                                                                         <MovingTreeProvider>
                                                                             <WsProvider>
                                                                                 <WsDetailProvider>
+                                                                                    <ProjectProvider>
+                                                                                    <ProjectDetailProvider>
                                                                                     <NoteDetailProvider>
                                                                                         <NoteGridProvider>
                                                                                             <EditorTabProvider>
@@ -96,6 +100,8 @@ export function Main() {
                                                                                             </EditorTabProvider>
                                                                                         </NoteGridProvider>
                                                                                     </NoteDetailProvider>
+                                                                                    </ProjectDetailProvider>
+                                                                                    </ProjectProvider>
                                                                                 </WsDetailProvider>
                                                                             </WsProvider>
                                                                         </MovingTreeProvider>

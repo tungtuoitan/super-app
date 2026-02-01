@@ -29,9 +29,13 @@ export function UnsavedTabsTooltip({
     const { openTabs } = useEditorTabsStore();
     // const { currentWorkspace } = useWorkspaceStore();
 
-    // Check if there are unsaved tabs
+    // Check if there are unsaved tabs (exclude multiProject tabs which don't have id)
     const hasUnsavedTabs = useMemo(() => {
-        return openTabs.some((tab) => tab.data.id < 0);
+        return openTabs.some((tab) => {
+            // MultiProject tabs don't have an id property
+            if (tab.type === "multiProject") return false;
+            return (tab.data as { id: number }).id < 0;
+        });
     }, [openTabs]);
 
 

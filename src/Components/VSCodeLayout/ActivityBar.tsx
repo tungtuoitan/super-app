@@ -1,20 +1,18 @@
-import { Folder, FileText, Settings, Boxes, UserCircle } from "lucide-react";
+import { Folder, FileText, Settings, Boxes, UserCircle, Cuboid } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { SettingsDialog } from "./SettingsDialog";
 import { AccountsDialog } from "./AccountsDialog";
 import { constants } from "@/utils/constants";
-import { useActivityBarStore, useEditorTabsStore, useWorkspaceStore } from "@/store/index";
+import { useActivityBarStore } from "@/store/index";
 import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
-import { UnsavedTabsTooltip } from "./UnsavedTabsTooltip";
-import {hasNewTabsInCurrentWorkspace} from "@/hooks/vsCode/useNewTabs.helper";
-import {useGridControlStore} from "@/store/grid/useGridControl.store";
 
 const activityModules = [
     { id: constants.vscode.viewTypes.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
     { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
     { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
+    { id: constants.vscode.viewTypes.project, icon: Cuboid, label: constants.vscode.displayNames.project },
 ];
 
 export function ActivityBar() {

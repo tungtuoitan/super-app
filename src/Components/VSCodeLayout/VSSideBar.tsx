@@ -8,6 +8,7 @@ import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
 import { WsView } from "./WsView";
+import { ProjectView } from "./ProjectView";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { Console } from "./Console";
 
@@ -68,6 +69,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                                     {activeView === constants.vscode.viewTypes.ws && <WsView />}
                                     {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
                                     {activeView === constants.vscode.viewTypes.note && <NotesView />}
+                                    {activeView === constants.vscode.viewTypes.project && <ProjectView />}
                                 </div>
                             </div>
                         </Panel>
@@ -106,6 +108,8 @@ function getViewTitle(view: ActivityBarView): string {
             return "Ws";
         case constants.vscode.viewTypes.note:
             return constants.vscode.displayNames.notes;
+        case constants.vscode.viewTypes.project:
+            return constants.vscode.displayNames.project;
         default:
             return "View";
     }
