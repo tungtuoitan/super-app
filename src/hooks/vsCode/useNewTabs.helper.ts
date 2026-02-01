@@ -10,7 +10,11 @@ import type { WorkspaceDTO } from "@/types/workspace-dto.types";
 /**
  * Check if any tab has unsaved changes and belongs to current workspace
  */
-export const hasNewTabsInCurrentWorkspace = (openTabs: BaseTab[],moduleName: string): boolean => {
-    return moduleName === constants.modules.workspace && openTabs.some((tab) => tab.data.id < 0);
+export const hasNewTabsInCurrentWorkspace = (openTabs: BaseTab[], moduleName: string): boolean => {
+    return moduleName === constants.modules.workspace && openTabs.some((tab) => {
+        // MultiProject tabs don't have an id property
+        if (tab.type === "multiProject") return false;
+        return (tab.data as { id: number }).id < 0;
+    });
 };
 

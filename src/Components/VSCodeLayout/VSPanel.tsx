@@ -11,6 +11,7 @@ import { useConsoleStore } from "@/store/console/useConsole.store";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { NoteDetailTab } from "../Note/NoteDetailTab";
+import { ProjectDetailTab } from "../Project/ProjectDetailTab";
 
 interface VSPanelProps {
     onClose: () => void;
@@ -105,6 +106,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     {/* Panel Content */}
                     <div className={`flex-1 overflow-auto ${activeTabb === "moving" || activeTabb === "console" ? "" : "p-3"}`}>
                         {activeTabb === "noteDetail" && activeTab?.type === constants.vscode.tab.tabTypes.note && <NoteDetailTab />}
+                        {activeTabb === "noteDetail" && activeTab?.type === constants.vscode.tab.tabTypes.project && <ProjectDetailTab />}
                         {activeTabb === "properties" && <PropertiesTab />}
                         {activeTabb === "moving" && <MovingTab />}
                         {activeTabb === "console" && isMobile && <ConsoleTab />}

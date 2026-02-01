@@ -60,6 +60,7 @@ export default function MainNav() {
                             <Route path={constants.navigation.path.ws} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.workspace} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.notes} element={<VSCodeLayout />} />
+                            <Route path={constants.navigation.path.project} element={<VSCodeLayout />} />
                             <Route path="/auth/callback" element={<AuthCallback />} />
                         </Routes>
                     </div>

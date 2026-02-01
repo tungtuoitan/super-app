@@ -26,6 +26,10 @@ import { useNoteDetailHelper } from "../note/useNoteDetail.helper";
 import { useWorkspaceLoader } from "../workspace";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
 import { useConsoleHelper } from "../console/useConsole.helper";
+import { useProjectDetailHelper } from "../project/useProjectDetail.helper";
+import { Project } from "@/store/project/useProject.store";
+import { useTaskDetailHelper } from "../task/useTaskDetail.helper";
+import { Task } from "@/store/task/useTask.store";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -45,6 +49,12 @@ export const useEditorToolbarHelper = () => {
     const { upsertWorkspace } = useWsDetailHelper();
     const { loadWorkspaces } = useWsGridHelper();
 
+    // Project-specific
+    const { upsertProject } = useProjectDetailHelper();
+
+    // Task-specific
+    const { upsertTask } = useTaskDetailHelper();
+
     // WorkspaceTree-specific
     const { moduleName } = useGridControlStore();
     const { currentWorkspace } = useWorkspaceStore();
@@ -60,6 +70,12 @@ export const useEditorToolbarHelper = () => {
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             const wsData = activeTab.data as Ws;
             return wsData?.deletedAt ? "Deleted" : "Existing";
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.project) {
+            const projectData = activeTab.data as Project;
+            return projectData?.deletedAt ? "Deleted" : "Existing";
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.task) {
+            const taskData = activeTab.data as Task;
+            return taskData?.deletedAt ? "Deleted" : "Existing";
         }
 
         return "Existing";
@@ -75,6 +91,12 @@ export const useEditorToolbarHelper = () => {
         } else if (activeTab.type === constants.vscode.tab.tabTypes.workspace) {
             const wsData = activeTab.data as Ws;
             return wsData?.id || null;
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.project) {
+            const projectData = activeTab.data as Project;
+            return projectData?.id || null;
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.task) {
+            const taskData = activeTab.data as Task;
+            return taskData?.id || null;
         }
 
         return null;
@@ -90,13 +112,21 @@ export const useEditorToolbarHelper = () => {
 
         try {
             // STEP 3: Route to Appropriate Handler Based on Module + Tab Type
-            // REGULAR HANDLERS (Note from NoteGrid, Workspace, etc.)
+            // REGULAR HANDLERS (Note from NoteGrid, Workspace, Project, etc.)
             switch (activeTab.type) {
                 case constants.vscode.tab.tabTypes.workspace:
                     // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
                     await upsertWorkspace(activeTab.id);
                     loadWorkspaces();
                     loadKeywords();
+                    break;
+                case constants.vscode.tab.tabTypes.project:
+                    // PROJECT HANDLER: Delegate to Project Upsert Logic (upsertProject already reloads projects)
+                    await upsertProject(activeTab.id);
+                    break;
+                case constants.vscode.tab.tabTypes.task:
+                    // TASK HANDLER: Delegate to Task Upsert Logic
+                    await upsertTask(activeTab.id);
                     break;
                 case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
                     const data = activeTab.data as Note;
@@ -114,11 +144,11 @@ export const useEditorToolbarHelper = () => {
                         //* thêm các entity type khác ở đây
                     }
                     // CREATE new entity + workspace_item - use workspace API
-                    else if (workspaceItem.id < 0 && activeTab.data.id < 0) {
+                    else if (workspaceItem.id < 0 && (activeTab.data as { id: number }).id < 0) {
                         await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
                         loadKeywords();
                     } else {
-                        console.error("⚠️ Unexpected case in upsertOrchestraitor");
+                        console.error("Unexpected case in upsertOrchestraitor");
                     }
                     break;
                 default:
@@ -139,7 +169,7 @@ export const useEditorToolbarHelper = () => {
             // STEP 5: Reset Saving State
             setIsSaving(false);
         }
-    }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, _treeEditor, $user, setIsSaving]);
+    }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, upsertProject, upsertTask, _treeEditor, $user, setIsSaving]);
 
     // Handle Cancel - routes to appropriate reset logic
     const commonCancel = useCallback(() => {
@@ -151,8 +181,8 @@ export const useEditorToolbarHelper = () => {
                 prev.map((tab) =>
                     tab.id === activeTab.id
                         ? { ...tab, data: tab.data0 } // hasUnsavedChanges will be auto-calculated
-                        : tab
-                )
+                        : tab,
+                ),
             );
             _console.info("Changes discarded");
         }

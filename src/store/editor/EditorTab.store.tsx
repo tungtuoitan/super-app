@@ -4,7 +4,7 @@
  * Supports multiple tab types: Note, etc.
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback, RefObject, useRef } from "react";
+import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback, RefObject, useRef, MutableRefObject } from "react";
 import type { BaseTab, TabViewState } from "../../types/editor/tab.types";
 
 export interface EditorTabContextData {
@@ -17,6 +17,13 @@ export interface EditorTabContextData {
     isLoadingTabs: boolean;
     setIsLoadingTabs: Dispatch<SetStateAction<boolean>>;
     editorAreaRef?: RefObject<HTMLDivElement>;
+    draggedTabId: string | null;
+    setDraggedTabId: Dispatch<SetStateAction<string | null>>;
+    dragOverTabId: string | null;
+    setDragOverTabId: Dispatch<SetStateAction<string | null>>;
+    dragOverPosition: "left" | "right" | null;
+    setDragOverPosition: Dispatch<SetStateAction<"left" | "right" | null>>;
+    dragCounterRef: MutableRefObject<number>;
 }
 
 export const editorTabContextDefaultValue: EditorTabContextData = {
@@ -29,6 +36,14 @@ export const editorTabContextDefaultValue: EditorTabContextData = {
     isLoadingTabs: false,
     setIsLoadingTabs: () => {},
     editorAreaRef: undefined,
+    draggedTabId: null,
+    setDraggedTabId: () => {},
+    dragOverTabId: null,
+    setDragOverTabId: () => {},
+    dragOverPosition: null,
+    setDragOverPosition: () => {},
+    dragCounterRef: { current: 0 },
+
 };
 
 export const EditorTabStore = createContext<EditorTabContextData>(editorTabContextDefaultValue);
@@ -41,6 +56,10 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [confirmCloseTabId, setConfirmCloseTabId] = useState<string | null>(null);
     const [isLoadingTabs, setIsLoadingTabs] = useState<boolean>(false);
     const editorAreaRef = useRef<HTMLDivElement>(null);
+    const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
+    const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
+    const [dragOverPosition, setDragOverPosition] = useState<"left" | "right" | null>(null);
+    const dragCounterRef = useRef(0);
 
     return (
         <EditorTabStore.Provider
@@ -54,6 +73,14 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 isLoadingTabs,
                 setIsLoadingTabs,
                 editorAreaRef,
+                draggedTabId,
+                setDraggedTabId,
+                dragOverTabId,
+                setDragOverTabId,
+                dragOverPosition,
+                setDragOverPosition,
+                dragCounterRef
+
             }}
         >
             {children}

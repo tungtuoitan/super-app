@@ -475,7 +475,7 @@ export const useEditorTabHelper = () => {
         setActiveTabId(newActiveTabId);
         const newTab = openTabs.find((tab: BaseTab) => tab.id === newActiveTabId);
         if (newTab && newTab.type === constants.vscode.tab.tabTypes.note) {
-            const noteId = newTab.data.id;
+            const noteId = (newTab.data as { id: number }).id;
             const item: WorkspaceItemV2 | undefined = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteId);
             if (item && item.id) {
                 setSelectedItemIds([item.id]);
@@ -526,8 +526,11 @@ export const useEditorTabHelper = () => {
      * @param deletedNoteIds - Array of note IDs that were deleted
      */
     const processTabAfterDelete = (deletedIds: number[], type: string) => {
-        // 1. Remove tabs with deleted noteIds
-        const newTabs = openTabs.filter((tab) => !(tab.type === type && deletedIds.includes(tab.data.id)));
+        // 1. Remove tabs with deleted noteIds (multiProject tabs don't have id)
+        const newTabs = openTabs.filter((tab) => {
+            if (tab.type === "multiProject") return true; // Keep multiProject tabs
+            return !(tab.type === type && deletedIds.includes((tab.data as { id: number }).id));
+        });
         setOpenTabs(newTabs);
 
         // 2. Clean navigation history - remove entries with deleted noteIds
