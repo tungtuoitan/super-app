@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid, CheckSquare } from "lucide-react";
+import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid, CheckSquare, Layers } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -28,7 +28,9 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
             ? "#a78bfa" // purple-400
             : tab.type === constants.vscode.tab.tabTypes.project
               ? "#f97316" // orange-500
-              : tab.type === constants.vscode.tab.tabTypes.task
+              : tab.type === constants.vscode.tab.tabTypes.multiProject
+                ? "#f97316" // orange-500 (same as project)
+                : tab.type === constants.vscode.tab.tabTypes.task
                 ? "#10b981" // emerald-500
                 : tab.type === constants.vscode.tab.tabTypes.trackingGraph
                   ? "#22c55e" // green-500
@@ -48,6 +50,9 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
 
         case constants.vscode.tab.tabTypes.project:
             return <Cuboid className={className} style={{ color: iconColor }} />;
+
+        case constants.vscode.tab.tabTypes.multiProject:
+            return <Layers className={className} style={{ color: iconColor }} />;
 
         case constants.vscode.tab.tabTypes.task:
             return <CheckSquare className={className} style={{ color: iconColor }} />;

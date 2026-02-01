@@ -21,6 +21,7 @@ import { Project, useProjectStore } from "@/store/project/useProject.store";
 import { useProjectGridHelper } from "@/hooks/project/useProjectGrid.helper";
 import { useProjectTabHelper } from "@/hooks/project/useProjectTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { RowSelectionState } from "@tanstack/react-table";
 import { useAuthStore } from "@/store/index";
 import { useGeneralStore } from "@/store/general/General.store";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
@@ -47,7 +48,7 @@ export function ProjectGrid() {
     } = useProjectStore();
 
     const { loadProjects, openProjectContextMenu } = useProjectGridHelper();
-    const { openProjectTab } = useProjectTabHelper();
+    const { updateMultiProjectTabIfOpen, openMultiProjectTab } = useProjectTabHelper();
     const { searchQuery } = useGridControlStore();
     const { $user } = useAuthStore();
     const { registriesByType,registries } = useGeneralStore();
@@ -56,7 +57,25 @@ export function ProjectGrid() {
     const getStatusLabel = (statusCode: string) => {
         const projectStatuses = registriesByType["project_status"] || [];
         const status = projectStatuses.find((s) => s.code === statusCode);
-        return status?.description || statusCode; 
+        return status?.description || statusCode;
+    };
+
+    // Handle row selection change - updates multi-project tab (opens if not exists, activates if not active)
+    const handleRowSelectionChange = (updaterOrValue: RowSelectionState | ((old: RowSelectionState) => RowSelectionState)) => {
+        // Get new selection value
+        const newSelection = typeof updaterOrValue === "function"
+            ? updaterOrValue(projectGridRowSelection)
+            : updaterOrValue;
+
+        // Update store
+        setProjectGridRowSelection(newSelection);
+
+        // Get selected projects and open/update multi-project tab
+        const selectedIds = Object.keys(newSelection).map((id) => parseInt(id));
+        const selectedProjects = projects.filter((p) => selectedIds.includes(p.id));
+
+        // Open multi-project tab (creates if not exists, activates if not active, updates data)
+        openMultiProjectTab(selectedProjects);
     };
 
     // Define columns for the data table
@@ -173,7 +192,7 @@ export function ProjectGrid() {
         getFilteredRowModel: getFilteredRowModel(),
         onSortingChange: setProjectGridSorting,
         onPaginationChange: setProjectGridPagination,
-        onRowSelectionChange: setProjectGridRowSelection,
+        onRowSelectionChange: handleRowSelectionChange,
         onColumnFiltersChange: setProjectGridColumnFilters,
         state: {
             sorting: projectGridSorting,
@@ -262,8 +281,8 @@ export function ProjectGrid() {
                                     row.original.deletedAt ? "opacity-60" : ""
                                 }`}
                                 onClick={() => {
-                                    // Open project detail tab
-                                    openProjectTab(row.original);
+                                    // Toggle row selection (checkbox)
+                                    row.toggleSelected(!row.getIsSelected());
                                 }}
                                 onContextMenu={(e) => {
                                     e.stopPropagation();

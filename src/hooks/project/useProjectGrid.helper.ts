@@ -41,7 +41,7 @@ export const useProjectGridHelper = () => {
     } = useProjectStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const _console = useConsoleHelper();
-    const { openProjectTab } = useProjectTabHelper();
+    const { openProjectTab, openMultiProjectTab } = useProjectTabHelper();
     const { setShouldFocusProjectName } = useProjectDetailStore();
 
     // Create new project (temporary with negative ID) and open tab
@@ -160,6 +160,16 @@ export const useProjectGridHelper = () => {
             onSoftDelete: () => __deleteRestore_Projects(selectedIds, "soft-delete"),
             onRestore: () => __deleteRestore_Projects(selectedIds, "restore"),
             onAddProject: __createNewProject,
+            onOpenMultiProjectView: () => {
+                if (selectedProjects.length > 1) {
+                    openMultiProjectTab(selectedProjects);
+                }
+            },
+            onOpenProjectView: () => {
+                if (selectedProjects.length === 1) {
+                    openProjectTab(selectedProjects[0]);
+                }
+            },
         });
     };
 

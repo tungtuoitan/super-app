@@ -32,6 +32,7 @@ export const constants = {
                 workspace: "workspace",
                 trackingGraph: "trackingGraph",
                 project: "project",
+                multiProject: "multiProject",
                 task: "task",
             } as const,
         },

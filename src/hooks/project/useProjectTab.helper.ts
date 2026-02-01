@@ -4,7 +4,7 @@
  */
 
 import { Project } from "@/store/project/useProject.store";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "../../store";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
@@ -84,8 +84,98 @@ export const useProjectTabHelper = () => {
         );
     };
 
+    /**
+     * Open multiple projects in a combined view tab (singleton)
+     * Only one multi-project tab can exist at a time
+     * If tab exists, activate and update its data; otherwise create new tab
+     * If no projects selected, close the tab
+     */
+    const openMultiProjectTab = (projects: Project[]) => {
+        // Check if multi-project tab already exists (singleton)
+        const existingTab = openTabs.find((tab) => tab.type === constants.vscode.tab.tabTypes.multiProject);
+
+        // No projects selected - close tab if exists
+        if (projects.length === 0) {
+            if (existingTab) {
+                setOpenTabs((prev) => prev.filter((tab) => tab.type !== constants.vscode.tab.tabTypes.multiProject));
+            }
+            return;
+        }
+
+        const projectIds = projects.map((p) => p.id);
+
+        if (existingTab) {
+            // Tab exists - update its data and activate it
+            const tabData: MultiProjectTabData = {
+                projectIds,
+                projects,
+            };
+
+            setOpenTabs((prev) =>
+                prev.map((tab) =>
+                    tab.type === constants.vscode.tab.tabTypes.multiProject
+                        ? { ...tab, data: tabData, data0: tabData }
+                        : tab
+                )
+            );
+            updateActiveTab(existingTab.id);
+        } else {
+            // Create new multi-project tab
+            const tabData: MultiProjectTabData = {
+                projectIds,
+                projects,
+            };
+
+            const newTab: BaseTab = {
+                id: `multi-project-tab-${Date.now()}`,
+                type: constants.vscode.tab.tabTypes.multiProject,
+                data: tabData,
+                data0: tabData,
+                title: "Multiple-Projects",
+                hasUnsavedChanges: false,
+            };
+
+            const newTabs = [...openTabs, newTab];
+            setOpenTabs(newTabs);
+            updateActiveTab(newTab.id, newTabs);
+        }
+    };
+
+    /**
+     * Update multi-project tab data when selection changes
+     * Called when user clicks to select/deselect projects
+     */
+    const updateMultiProjectTabIfOpen = (projects: Project[]) => {
+        const existingTab = openTabs.find((tab) => tab.type === constants.vscode.tab.tabTypes.multiProject);
+
+        if (!existingTab) return; // No multi-project tab open, do nothing
+
+        if (projects.length === 0) {
+            // No projects selected - close the tab
+            setOpenTabs((prev) => prev.filter((tab) => tab.type !== constants.vscode.tab.tabTypes.multiProject));
+            return;
+        }
+
+        // Update tab data
+        const projectIds = projects.map((p) => p.id);
+        const tabData: MultiProjectTabData = {
+            projectIds,
+            projects,
+        };
+
+        setOpenTabs((prev) =>
+            prev.map((tab) =>
+                tab.type === constants.vscode.tab.tabTypes.multiProject
+                    ? { ...tab, data: tabData, data0: tabData }
+                    : tab
+            )
+        );
+    };
+
     return {
         openProjectTab,
+        openMultiProjectTab,
+        updateMultiProjectTabIfOpen,
         closeProjectTab,
         updateProjectInTabs,
     };

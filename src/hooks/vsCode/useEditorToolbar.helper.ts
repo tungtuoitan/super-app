@@ -144,7 +144,7 @@ export const useEditorToolbarHelper = () => {
                         //* thêm các entity type khác ở đây
                     }
                     // CREATE new entity + workspace_item - use workspace API
-                    else if (workspaceItem.id < 0 && activeTab.data.id < 0) {
+                    else if (workspaceItem.id < 0 && (activeTab.data as { id: number }).id < 0) {
                         await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
                         loadKeywords();
                     } else {
