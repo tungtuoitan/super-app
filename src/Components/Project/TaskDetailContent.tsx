@@ -4,16 +4,18 @@
  * Used within ProjectDetailContent TabBar when a task tab is active
  */
 
-import React, { useEffect, useMemo } from "react";
-import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateTimePicker } from "@/shared/components";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateTimePicker, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
 import { CardContent } from "@/Components/ui/card";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 import { FileText } from "lucide-react";
 import { Task } from "@/store/task/useTask.store";
+import { useProjectStore } from "@/store/project/useProject.store";
 import { useGeneralStore } from "@/store/general/General.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabsStore, useAuthStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
+import { taskService, TaskDTO } from "@/services/task.service";
 
 /**
  * Get task status colors from constants
@@ -42,10 +44,16 @@ interface TaskDetailContentProps {
 export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     const { registriesByType } = useGeneralStore();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { projects } = useProjectStore();
+    const { $user } = useAuthStore();
 
     // Find the task tab by ID
     const taskTab = openTabs.find((tab) => tab.id === taskTabId && tab.type === constants.vscode.tab.tabTypes.task);
     const selectedTask = taskTab ? (taskTab.data as Task) : undefined;
+
+    // State for parent task options (loaded separately)
+    const [parentTaskOptions, setParentTaskOptions] = useState<IAutoCompleteOptions[]>([]);
+    const [isLoadingParentTasks, setIsLoadingParentTasks] = useState(false);
 
     const [taskKey, setTaskKey] = React.useState(0);
 
@@ -96,6 +104,88 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     // Create current priority value for autocomplete
     const currentPriorityValue: IStatusOption | null = priorityOptions.find((option) => option.code === selectedTask?.priority) || null;
 
+    // Get project options for autocomplete (disable completed/cancelled projects)
+    const projectOptions: IAutoCompleteOptions[] = useMemo(() => {
+        return projects
+            .filter((p) => !p.deletedAt) // Only active projects
+            .map((p) => ({
+                id: p.id,
+                label: p.name,
+                desc: p.name,
+                // Disable completed and cancelled projects
+                isActive: p.status !== "completed" && p.status !== "cancelled",
+            }));
+    }, [projects]);
+
+    // Get current project value for autocomplete
+    const currentProjectValue: IAutoCompleteOptions | null = useMemo(() => {
+        if (!selectedTask?.projectId) return null;
+        const project = projects.find((p) => p.id === selectedTask.projectId);
+        if (!project) return null;
+        return {
+            id: project.id,
+            label: project.name,
+            desc: project.name,
+            isActive: project.status !== "completed" && project.status !== "cancelled",
+        };
+    }, [selectedTask?.projectId, projects]);
+
+    // Load parent task options when project changes
+    const loadParentTaskOptions = useCallback(async (projectId: number, currentTaskId: number) => {
+        if (!projectId || projectId < 0 || !$user.userToken) {
+            setParentTaskOptions([]);
+            return;
+        }
+
+        setIsLoadingParentTasks(true);
+        try {
+            const result = await taskService._getTasks($user.userToken, {
+                projectIds: String(projectId),
+                deletedAt: "null",
+            });
+
+            if (result.success && result.data) {
+                const options: IAutoCompleteOptions[] = result.data
+                    .filter((t: TaskDTO) => t.id !== currentTaskId && t.id > 0)
+                    .map((t: TaskDTO) => ({
+                        id: t.id,
+                        label: t.title || `Task #${t.id}`,
+                        desc: t.title || `Task #${t.id}`,
+                        isActive: true,
+                    }));
+                setParentTaskOptions(options);
+            }
+        } catch (error) {
+            console.error("Failed to load parent task options:", error);
+            setParentTaskOptions([]);
+        } finally {
+            setIsLoadingParentTasks(false);
+        }
+    }, [$user.userToken]);
+
+    // Load parent task options when project changes or component mounts
+    useEffect(() => {
+        if (selectedTask?.projectId && selectedTask.projectId > 0) {
+            loadParentTaskOptions(selectedTask.projectId, selectedTask.id);
+        } else {
+            setParentTaskOptions([]);
+        }
+    }, [selectedTask?.projectId, selectedTask?.id, loadParentTaskOptions]);
+
+    // Get current parent task value for autocomplete
+    const currentParentTaskValue: IAutoCompleteOptions | null = useMemo(() => {
+        if (!selectedTask?.parentTaskId) return null;
+        const parentTask = parentTaskOptions.find((t) => t.id === selectedTask.parentTaskId);
+        if (parentTask) return parentTask;
+        // If not found in options, create a placeholder
+        return {
+            id: selectedTask.parentTaskId,
+            label: `Task #${selectedTask.parentTaskId}`,
+            desc: `Task #${selectedTask.parentTaskId}`,
+            isActive: true,
+        };
+    }, [selectedTask?.parentTaskId, parentTaskOptions]);
+
     // Handler for field changes - updates the tab data
     const handleFieldChange = (field: keyof Task, value: any) => {
         if (!taskTab || !selectedTask) return;
@@ -126,6 +216,23 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
         }
     };
 
+    const handleProjectChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
+        if (newValue) {
+            const newProjectId = newValue.id as number;
+            handleFieldChange("projectId", newProjectId);
+            // Clear parent task when project changes
+            handleFieldChange("parentTaskId", null);
+            // Reload parent task options for new project
+            if (selectedTask) {
+                loadParentTaskOptions(newProjectId, selectedTask.id);
+            }
+        }
+    };
+
+    const handleParentTaskChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
+        handleFieldChange("parentTaskId", newValue ? (newValue.id as number) : null);
+    };
+
     if (!selectedTask) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -144,12 +251,6 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
             hour: "2-digit",
             minute: "2-digit",
         }).format(date);
-    };
-
-    // Format date for input
-    const formatDateForInput = (date: Date | null | undefined): string => {
-        if (!date) return "";
-        return date.toISOString().split("T")[0];
     };
 
     return (
@@ -215,39 +316,59 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
 
                     {/* Right Column - Metadata (1/3 width) */}
                     <div className="flex-1 min-w-0">
-                        <CardContent className="space-y-7">
-                            {/* Status and Priority row */}
-                            <div className="flex">
-                                <StatusAutoComplete
-                                    value={currentStatusValue}
-                                    onChange={handleStatusChange}
-                                    options={statusOptions}
-                                    inputProps={{
-                                        name: "status",
-                                        label: "Status",
-                                    }}
-                                    disabled={isDeleted}
-                                    placeholder="Select status..."
-                                />
-                            </div>
-                            <div className="flex relative top-[-10px]">
-                                <StatusAutoComplete
-                                    value={currentPriorityValue}
-                                    onChange={handlePriorityChange}
-                                    options={priorityOptions}
-                                    inputProps={{
-                                        name: "priority",
-                                        label: "Priority",
-                                    }}
-                                    disabled={isDeleted}
-                                    placeholder="Select priority..."
-                                />
-                            </div>
-                            <div className="flex gap-4">
-                            </div>
-                            <GenericTextField label="Task ID" value={selectedTask.id > 0 ? selectedTask.id.toString() : "New (Unsaved)"} disabled size="small" />
+                        <CardContent className="space-y-4">
+                            {/* Status */}
+                            <StatusAutoComplete
+                                value={currentStatusValue}
+                                onChange={handleStatusChange}
+                                options={statusOptions}
+                                inputProps={{
+                                    name: "status",
+                                    label: "Status",
+                                }}
+                                disabled={isDeleted}
+                                placeholder="Select status..."
+                            />
 
-                            <GenericTextField label="Project ID" value={selectedTask.projectId.toString()} disabled size="small" />
+                            {/* Priority */}
+                            <StatusAutoComplete
+                                value={currentPriorityValue}
+                                onChange={handlePriorityChange}
+                                options={priorityOptions}
+                                inputProps={{
+                                    name: "priority",
+                                    label: "Priority",
+                                }}
+                                disabled={isDeleted}
+                                placeholder="Select priority..."
+                            />
+
+                            {/* Project Selection */}
+                            <GenericAutoComplete
+                                value={currentProjectValue}
+                                onChange={handleProjectChange}
+                                allOptions={projectOptions}
+                                inputProps={{
+                                    name: "project",
+                                    label: "Project",
+                                }}
+                                disabled={isDeleted}
+                                disableClearable
+                            />
+
+                            {/* Parent Task Selection */}
+                            <GenericAutoComplete
+                                value={currentParentTaskValue}
+                                onChange={handleParentTaskChange}
+                                allOptions={parentTaskOptions}
+                                inputProps={{
+                                    name: "parentTask",
+                                    label: "Parent Task (Subtask of)",
+                                }}
+                                disabled={isDeleted || isLoadingParentTasks}
+                            />
+
+                            <GenericTextField label="Task ID" value={selectedTask.id > 0 ? selectedTask.id.toString() : "New (Unsaved)"} disabled size="small" />
 
                             <GenericTextField label="Created At" value={formatDate(selectedTask.createdAt)} disabled size="small" />
 

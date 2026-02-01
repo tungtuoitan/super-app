@@ -1,6 +1,6 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
-import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon } from "lucide-react";
+import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, GitBranch as SubTaskIcon } from "lucide-react";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
@@ -10,6 +10,7 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
  *
  * Features:
  * - Add new task
+ * - Add subtask (when hovering over a persisted task)
  * - Delete selected tasks (soft delete) - only shown if tasks are NOT deleted
  * - Restore - only shown if tasks ARE deleted
  */
@@ -25,6 +26,10 @@ export function TaskGridMenu() {
     const anySelectedDeleted =
         contextData?.selectedTasks?.some((t: any) => t.deletedAt !== null && t.deletedAt !== undefined) ?? false;
 
+    // Get hovered task for subtask creation (only persisted tasks with id > 0)
+    const hoveredTask = contextData?.hoveredTask;
+    const canAddSubTask = hoveredTask && hoveredTask.id > 0 && !hoveredTask.deletedAt;
+
     return (
         <>
             {/* Add Task */}
@@ -32,6 +37,14 @@ export function TaskGridMenu() {
                 <AddIcon className="w-4 h-4 mr-2" />
                 Add Task
             </MenuItem>
+
+            {/* Add Subtask - only show when hovering over a persisted task */}
+            {canAddSubTask && (
+                <MenuItem onClick={() => executeDirectly({ callback: () => contextData?.onAddSubTask?.(hoveredTask.id) })}>
+                    <SubTaskIcon className="w-4 h-4 mr-2" />
+                    Add Subtask
+                </MenuItem>
+            )}
 
             <MenuDivider />
 

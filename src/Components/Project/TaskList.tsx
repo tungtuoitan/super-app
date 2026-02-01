@@ -17,7 +17,8 @@ import { useGeneralStore } from "@/store/general/General.store";
 import { useTaskTabHelper } from "@/hooks/task/useTaskTab.helper";
 import { StatusAutoComplete, IStatusOption, DateTimePicker } from "@/shared/components";
 import { taskService } from "@/services/task.service";
-import {constants} from "@/utils/constants";
+import { constants } from "@/utils/constants";
+import { toLocalISOString } from "@/utils/date.utils";
 
 interface TaskListProps {
     projectId: number;
@@ -38,6 +39,97 @@ const getTaskPriorityColors = (priority: string) => {
     const colors = constants.optionColor.taskPriority.colors[priority];
     return colors || constants.optionColor.taskPriority.default;
 };
+
+/**
+ * Memoized Status Cell to prevent re-render when context menu opens
+ */
+const StatusCell = React.memo(function StatusCell({
+    task,
+    statusOptions,
+    onUpdate,
+}: {
+    task: Task;
+    statusOptions: IStatusOption[];
+    onUpdate: (task: Task, field: "status" | "priority", value: string) => void;
+}) {
+    const currentValue = statusOptions.find((opt) => opt.code === task.status) || null;
+
+    return (
+        <div className="px-1" onClick={(e) => e.stopPropagation()}>
+            <StatusAutoComplete
+                value={currentValue}
+                onChange={(_, newValue) => {
+                    if (newValue) {
+                        onUpdate(task, "status", newValue.code);
+                    }
+                }}
+                options={statusOptions}
+                inputProps={{ name: "status" }}
+                size="tiny"
+                disabled={!!task.deletedAt}
+                disableClearable
+            />
+        </div>
+    );
+});
+
+/**
+ * Memoized Priority Cell to prevent re-render when context menu opens
+ */
+const PriorityCell = React.memo(function PriorityCell({
+    task,
+    priorityOptions,
+    onUpdate,
+}: {
+    task: Task;
+    priorityOptions: IStatusOption[];
+    onUpdate: (task: Task, field: "status" | "priority", value: string) => void;
+}) {
+    const currentValue = priorityOptions.find((opt) => opt.code === task.priority) || null;
+
+    return (
+        <div className="px-1" onClick={(e) => e.stopPropagation()}>
+            <StatusAutoComplete
+                value={currentValue}
+                onChange={(_, newValue) => {
+                    if (newValue) {
+                        onUpdate(task, "priority", newValue.code);
+                    }
+                }}
+                options={priorityOptions}
+                inputProps={{ name: "priority" }}
+                size="tiny"
+                disabled={!!task.deletedAt}
+                disableClearable
+            />
+        </div>
+    );
+});
+
+/**
+ * Memoized Date Cell to prevent re-render when context menu opens
+ */
+const DateCell = React.memo(function DateCell({
+    task,
+    field,
+    onUpdate,
+}: {
+    task: Task;
+    field: "startDate" | "endDate";
+    onUpdate: (task: Task, field: "startDate" | "endDate", value: Date | null) => void;
+}) {
+    return (
+        <div className="px-1" onClick={(e) => e.stopPropagation()}>
+            <DateTimePicker
+                value={task[field]}
+                onChange={(date) => onUpdate(task, field, date)}
+                placeholder="—"
+                disabled={!!task.deletedAt}
+                showTime={true}
+            />
+        </div>
+    );
+});
 
 /**
  * TaskList - task grid with table display
@@ -103,7 +195,7 @@ export function TaskList({ projectId }: TaskListProps) {
             try {
                 setTaskGridIsLoading(true);
 
-                // Prepare upsert data
+                // Prepare upsert data - use toLocalISOString to preserve local time
                 const upsertData = {
                     id: task.id,
                     projectId: task.projectId,
@@ -113,8 +205,8 @@ export function TaskList({ projectId }: TaskListProps) {
                     note: task.note,
                     status: field === "status" ? newValue : task.status,
                     priority: field === "priority" ? newValue : task.priority,
-                    startDate: task.startDate ? task.startDate.toISOString() : null,
-                    endDate: task.endDate ? task.endDate.toISOString() : null,
+                    startDate: toLocalISOString(task.startDate),
+                    endDate: toLocalISOString(task.endDate),
                     orderIndex: task.orderIndex,
                 };
 
@@ -146,7 +238,7 @@ export function TaskList({ projectId }: TaskListProps) {
             try {
                 setTaskGridIsLoading(true);
 
-                // Prepare upsert data
+                // Prepare upsert data - use toLocalISOString to preserve local time
                 const upsertData = {
                     id: task.id,
                     projectId: task.projectId,
@@ -157,11 +249,11 @@ export function TaskList({ projectId }: TaskListProps) {
                     status: task.status,
                     priority: task.priority,
                     startDate: field === "startDate"
-                        ? (newValue ? newValue.toISOString() : null)
-                        : (task.startDate ? task.startDate.toISOString() : null),
+                        ? toLocalISOString(newValue)
+                        : toLocalISOString(task.startDate),
                     endDate: field === "endDate"
-                        ? (newValue ? newValue.toISOString() : null)
-                        : (task.endDate ? task.endDate.toISOString() : null),
+                        ? toLocalISOString(newValue)
+                        : toLocalISOString(task.endDate),
                     orderIndex: task.orderIndex,
                 };
 
@@ -237,93 +329,49 @@ export function TaskList({ projectId }: TaskListProps) {
                 accessorKey: "status",
                 header: () => <div className="text-left text-sm">Status</div>,
                 size: 140,
-                cell: ({ row }) => {
-                    const task = row.original;
-                    const currentValue = statusOptions.find((opt) => opt.code === task.status) || null;
-
-                    return (
-                        <div className="px-1" onClick={(e) => e.stopPropagation()}>
-                            <StatusAutoComplete
-                                value={currentValue}
-                                onChange={(_, newValue) => {
-                                    if (newValue) {
-                                        handleInlineUpdate(task, "status", newValue.code);
-                                    }
-                                }}
-                                options={statusOptions}
-                                inputProps={{ name: "status" }}
-                                size="tiny"
-                                disabled={!!task.deletedAt}
-                                disableClearable
-                            />
-                        </div>
-                    );
-                },
+                cell: ({ row }) => (
+                    <StatusCell
+                        task={row.original}
+                        statusOptions={statusOptions}
+                        onUpdate={handleInlineUpdate}
+                    />
+                ),
             },
             {
                 accessorKey: "priority",
                 header: () => <div className="text-left text-sm">Priority</div>,
                 size: 140,
-                cell: ({ row }) => {
-                    const task = row.original;
-                    const currentValue = priorityOptions.find((opt) => opt.code === task.priority) || null;
-
-                    return (
-                        <div className="px-1" onClick={(e) => e.stopPropagation()}>
-                            <StatusAutoComplete
-                                value={currentValue}
-                                onChange={(_, newValue) => {
-                                    if (newValue) {
-                                        handleInlineUpdate(task, "priority", newValue.code);
-                                    }
-                                }}
-                                options={priorityOptions}
-                                inputProps={{ name: "priority" }}
-                                size="tiny"
-                                disabled={!!task.deletedAt}
-                                disableClearable
-                            />
-                        </div>
-                    );
-                },
+                cell: ({ row }) => (
+                    <PriorityCell
+                        task={row.original}
+                        priorityOptions={priorityOptions}
+                        onUpdate={handleInlineUpdate}
+                    />
+                ),
             },
             {
                 accessorKey: "startDate",
                 header: () => <div className="text-left text-sm">Start Date</div>,
                 size: 140,
-                cell: ({ row }) => {
-                    const task = row.original;
-                    return (
-                        <div className="px-1" onClick={(e) => e.stopPropagation()}>
-                            <DateTimePicker
-                                value={task.startDate}
-                                onChange={(date) => handleInlineDateUpdate(task, "startDate", date)}
-                                placeholder="—"
-                                disabled={!!task.deletedAt}
-                                showTime={true}
-                            />
-                        </div>
-                    );
-                },
+                cell: ({ row }) => (
+                    <DateCell
+                        task={row.original}
+                        field="startDate"
+                        onUpdate={handleInlineDateUpdate}
+                    />
+                ),
             },
             {
                 accessorKey: "endDate",
                 header: () => <div className="text-left text-sm">End Date</div>,
                 size: 140,
-                cell: ({ row }) => {
-                    const task = row.original;
-                    return (
-                        <div className="px-1" onClick={(e) => e.stopPropagation()}>
-                            <DateTimePicker
-                                value={task.endDate}
-                                onChange={(date) => handleInlineDateUpdate(task, "endDate", date)}
-                                placeholder="—"
-                                disabled={!!task.deletedAt}
-                                showTime={true}
-                            />
-                        </div>
-                    );
-                },
+                cell: ({ row }) => (
+                    <DateCell
+                        task={row.original}
+                        field="endDate"
+                        onUpdate={handleInlineDateUpdate}
+                    />
+                ),
             },
         ];
     }, [statusOptions, priorityOptions, handleInlineUpdate, handleInlineDateUpdate]);

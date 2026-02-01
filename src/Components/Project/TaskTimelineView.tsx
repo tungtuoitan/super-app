@@ -18,6 +18,7 @@ import { taskService } from "@/services/task.service";
 import { storageService } from "@/services/storage.service";
 import { cn } from "@/lib/utils";
 import { constants } from "@/utils/constants";
+import { toLocalISOString } from "@/utils/date.utils";
 
 interface TaskTimelineViewProps {
     projectId: number;
@@ -546,8 +547,8 @@ export function TaskTimelineView({ projectId }: TaskTimelineViewProps) {
                     note: task.note,
                     status: task.status,
                     priority: task.priority,
-                    startDate: startDate ? startDate.toISOString() : null,
-                    endDate: endDate ? endDate.toISOString() : null,
+                    startDate: toLocalISOString(startDate),
+                    endDate: toLocalISOString(endDate),
                     orderIndex: task.orderIndex,
                 };
 

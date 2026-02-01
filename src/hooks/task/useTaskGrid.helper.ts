@@ -11,9 +11,11 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useConsoleHelper } from "../console/useConsole.helper";
+import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
+ * Uses parseAsLocalDate to treat backend UTC as local time
  */
 const transformTaskData = (dtos: TaskDTO[]): Task[] => {
     return dtos.map((dto) => ({
@@ -25,12 +27,12 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         note: dto.note,
         status: dto.status,
         priority: dto.priority,
-        startDate: dto.startDate ? new Date(dto.startDate) : null,
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
+        startDate: parseAsLocalDate(dto.startDate),
+        endDate: parseAsLocalDate(dto.endDate),
         orderIndex: dto.orderIndex,
-        createdAt: new Date(dto.createdAt),
-        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
-        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+        updatedAt: parseAsLocalDate(dto.updatedAt),
+        deletedAt: parseAsLocalDate(dto.deletedAt),
     }));
 };
 
@@ -45,7 +47,7 @@ export const useTaskGridHelper = () => {
      * Create new task (temporary with negative ID)
      * Returns the created task
      */
-    const createNewTask = (projectId: number): Task | null => {
+    const createNewTask = (projectId: number, parentTaskId?: number | null): Task | null => {
         if (!projectId || projectId < 0) {
             _console.error("No valid project available to create task");
             return null;
@@ -59,7 +61,7 @@ export const useTaskGridHelper = () => {
         const newTask: Task = {
             id: tempId,
             projectId: projectId,
-            parentTaskId: null,
+            parentTaskId: parentTaskId || null,
             type: "task",
             title: "",
             note: "",
@@ -75,9 +77,21 @@ export const useTaskGridHelper = () => {
 
         // Insert at the beginning of tasks array
         setTasks([newTask, ...tasks]);
-        _console.success(`Created new task`);
+        _console.success(parentTaskId ? `Created new subtask` : `Created new task`);
 
         return newTask;
+    };
+
+    /**
+     * Create new subtask (temporary with negative ID)
+     * Returns the created subtask
+     */
+    const createSubTask = (projectId: number, parentTaskId: number): Task | null => {
+        if (!parentTaskId || parentTaskId < 0) {
+            _console.error("No valid parent task to create subtask");
+            return null;
+        }
+        return createNewTask(projectId, parentTaskId);
     };
 
     /**
@@ -101,7 +115,7 @@ export const useTaskGridHelper = () => {
 
             // Handle persisted tasks - call API
             if (persistedTaskIds.length > 0) {
-                const deletedAt = type === "soft-delete" ? new Date().toISOString() : null;
+                const deletedAt = type === "soft-delete" ? toLocalISOString(new Date()) : null;
 
                 const batchRequests = persistedTaskIds.map((id) => {
                     const task = tasks.find((t) => t.id === id);
@@ -118,8 +132,8 @@ export const useTaskGridHelper = () => {
                         note: task.note,
                         status: task.status,
                         priority: task.priority,
-                        startDate: task.startDate?.toISOString() || null,
-                        endDate: task.endDate?.toISOString() || null,
+                        startDate: toLocalISOString(task.startDate),
+                        endDate: toLocalISOString(task.endDate),
                         orderIndex: task.orderIndex,
                         deletedAt: deletedAt,
                     };
@@ -173,9 +187,13 @@ export const useTaskGridHelper = () => {
 
         const selectedTasks = tasks.filter((t) => selectedIds.includes(t.id));
 
+        // Get the hovered task for subtask creation (only if single task hovered)
+        const hoveredTask = row ? tasks.find((t) => t.id === parseInt(row.id)) : null;
+
         showContextMenu(event, "task-grid", {
             selectedTasks,
             selectedIds,
+            hoveredTask, // Pass hovered task for subtask creation
             onSoftDelete: () => deleteRestoreTasks(selectedIds, "soft-delete", projectId),
             onRestore: () => deleteRestoreTasks(selectedIds, "restore", projectId),
             onAddTask: () => {
@@ -183,6 +201,14 @@ export const useTaskGridHelper = () => {
                     const newTask = createNewTask(projectId);
                     if (newTask && onTaskCreated) {
                         onTaskCreated(newTask);
+                    }
+                }
+            },
+            onAddSubTask: (parentTaskId: number) => {
+                if (projectId && parentTaskId > 0) {
+                    const newSubTask = createSubTask(projectId, parentTaskId);
+                    if (newSubTask && onTaskCreated) {
+                        onTaskCreated(newSubTask);
                     }
                 }
             },
@@ -246,10 +272,10 @@ export const useTaskGridHelper = () => {
                 note: task.note,
                 status: task.status,
                 priority: task.priority,
-                startDate: task.startDate?.toISOString() || null,
-                endDate: task.endDate?.toISOString() || null,
+                startDate: toLocalISOString(task.startDate),
+                endDate: toLocalISOString(task.endDate),
                 orderIndex: task.orderIndex,
-                deletedAt: task.deletedAt?.toISOString() || null,
+                deletedAt: toLocalISOString(task.deletedAt),
             };
 
             const result = await taskService._upsertTaskBatch(token, [request]);
@@ -274,6 +300,7 @@ export const useTaskGridHelper = () => {
         openTaskContextMenu,
         loadTasks,
         createNewTask,
+        createSubTask,
         deleteRestoreTasks,
         saveTask,
     };

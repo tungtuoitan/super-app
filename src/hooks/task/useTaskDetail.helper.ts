@@ -11,9 +11,11 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { useConsoleHelper } from "../console/useConsole.helper";
+import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
+ * Uses parseAsLocalDate to treat backend UTC as local time
  */
 export const transformTaskData = (dtos: TaskDTO[]): Task[] => {
     return dtos.map((dto) => ({
@@ -25,12 +27,12 @@ export const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         note: dto.note,
         status: dto.status,
         priority: dto.priority,
-        startDate: dto.startDate ? new Date(dto.startDate) : null,
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
+        startDate: parseAsLocalDate(dto.startDate),
+        endDate: parseAsLocalDate(dto.endDate),
         orderIndex: dto.orderIndex,
-        createdAt: new Date(dto.createdAt),
-        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
-        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+        updatedAt: parseAsLocalDate(dto.updatedAt),
+        deletedAt: parseAsLocalDate(dto.deletedAt),
     }));
 };
 
@@ -91,7 +93,7 @@ export const useTaskDetailHelper = () => {
 
             try {
                 // ============================================================
-                // Step 3: Prepare upsert data
+                // Step 3: Prepare upsert data - use toLocalISOString to preserve local time
                 // ============================================================
                 const upsertData = {
                     id: isCreateMode ? 0 : selectedTask.id, // Always use 0 for create
@@ -102,10 +104,10 @@ export const useTaskDetailHelper = () => {
                     note: selectedTask.note,
                     status: selectedTask.status || "open",
                     priority: selectedTask.priority || "low",
-                    startDate: selectedTask.startDate ? selectedTask.startDate.toISOString() : null,
-                    endDate: selectedTask.endDate ? selectedTask.endDate.toISOString() : null,
+                    startDate: toLocalISOString(selectedTask.startDate),
+                    endDate: toLocalISOString(selectedTask.endDate),
                     orderIndex: selectedTask.orderIndex || 0,
-                    deletedAt: isRestoreMode ? null : selectedTask.deletedAt ? selectedTask.deletedAt.toISOString() : undefined,
+                    deletedAt: isRestoreMode ? null : toLocalISOString(selectedTask.deletedAt),
                 };
 
                 // ============================================================
@@ -125,7 +127,7 @@ export const useTaskDetailHelper = () => {
                     throw new Error("Failed to save task: No data returned from server");
                 }
 
-                // Transform DTO to domain model
+                // Transform DTO to domain model using parseAsLocalDate
                 const transformedTask: Task = {
                     id: savedTask.id,
                     projectId: savedTask.projectId,
@@ -135,12 +137,12 @@ export const useTaskDetailHelper = () => {
                     note: savedTask.note,
                     status: savedTask.status,
                     priority: savedTask.priority,
-                    startDate: savedTask.startDate ? new Date(savedTask.startDate) : null,
-                    endDate: savedTask.endDate ? new Date(savedTask.endDate) : null,
+                    startDate: parseAsLocalDate(savedTask.startDate),
+                    endDate: parseAsLocalDate(savedTask.endDate),
                     orderIndex: savedTask.orderIndex,
-                    createdAt: new Date(savedTask.createdAt),
-                    updatedAt: savedTask.updatedAt ? new Date(savedTask.updatedAt) : null,
-                    deletedAt: savedTask.deletedAt ? new Date(savedTask.deletedAt) : null,
+                    createdAt: parseAsLocalDate(savedTask.createdAt) || new Date(),
+                    updatedAt: parseAsLocalDate(savedTask.updatedAt),
+                    deletedAt: parseAsLocalDate(savedTask.deletedAt),
                 };
 
                 // ============================================================

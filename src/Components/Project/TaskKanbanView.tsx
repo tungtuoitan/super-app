@@ -17,6 +17,7 @@ import { useGeneralStore } from "@/store/general/General.store";
 import { taskService } from "@/services/task.service";
 import { cn } from "@/lib/utils";
 import { constants } from "@/utils/constants";
+import { toLocalISOString } from "@/utils/date.utils";
 
 interface TaskKanbanViewProps {
     projectId: number;
@@ -266,8 +267,8 @@ export function TaskKanbanView({ projectId }: TaskKanbanViewProps) {
                     note: task.note,
                     status: newStatus, // Use the new status from drop target
                     priority: task.priority,
-                    startDate: task.startDate ? task.startDate.toISOString() : null,
-                    endDate: task.endDate ? task.endDate.toISOString() : null,
+                    startDate: toLocalISOString(task.startDate),
+                    endDate: toLocalISOString(task.endDate),
                     orderIndex: task.orderIndex,
                 };
 
