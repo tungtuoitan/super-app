@@ -29,7 +29,8 @@ const getRedirectUri = (): string => {
 export const GOOGLE_OAUTH_CONFIG = {
   clientId: envConfig.REACT_APP_GOOGLE_CLIENT_ID || "887853390661-j2bepobhb90k357d0k5p1atqd2k8oe6l.apps.googleusercontent.com",
   redirectUri: getRedirectUri(),
-  scope: "openid profile email",
+  // Include drive.file scope for uploading files to user's Google Drive
+  scope: "openid profile email https://www.googleapis.com/auth/drive.file",
   responseType: "code",
   authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
 } as const;

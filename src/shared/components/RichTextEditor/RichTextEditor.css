@@ -1,0 +1,323 @@
+/**
+ * Rich Text Editor Styles
+ * Styles for Tiptap editor
+ */
+
+/* Editor container */
+.ProseMirror {
+    outline: none;
+    min-height: inherit;
+}
+
+/* Placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+    height: 0;
+    opacity: 0.5;
+}
+
+/* Typography */
+.ProseMirror h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.ProseMirror h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.ProseMirror p {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Lists */
+.ProseMirror ul,
+.ProseMirror ol {
+    padding-left: 1.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.ProseMirror ul {
+    list-style-type: disc;
+}
+
+.ProseMirror ol {
+    list-style-type: decimal;
+}
+
+.ProseMirror li {
+    margin-top: 0.125rem;
+    margin-bottom: 0.125rem;
+}
+
+/* Code */
+.ProseMirror code {
+    background-color: hsl(var(--muted));
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.ProseMirror pre {
+    background-color: hsl(var(--muted));
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    overflow-x: auto;
+}
+
+.ProseMirror pre code {
+    background: none;
+    padding: 0;
+}
+
+/* Blockquote */
+.ProseMirror blockquote {
+    border-left: 3px solid hsl(var(--border));
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: hsl(var(--muted-foreground));
+}
+
+/* Links */
+.ProseMirror a,
+.ProseMirror .rich-text-link {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.ProseMirror a:hover,
+.ProseMirror .rich-text-link:hover {
+    opacity: 0.8;
+}
+
+/* Focus state */
+.ProseMirror:focus {
+    outline: none;
+}
+
+/* Images */
+.ProseMirror .rich-text-image,
+.ProseMirror img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.375rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.ProseMirror .rich-text-image:hover,
+.ProseMirror img:hover {
+    opacity: 0.9;
+}
+
+.ProseMirror .rich-text-image.ProseMirror-selectednode,
+.ProseMirror img.ProseMirror-selectednode {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+}
+
+/* Image Resize */
+.ProseMirror .image-resizer {
+    display: inline-block;
+    position: relative;
+    margin: 0.5rem 0;
+}
+
+.ProseMirror .image-resizer img {
+    display: block;
+    margin: 0;
+}
+
+.ProseMirror .image-resizer .resize-trigger {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 12px;
+    height: 12px;
+    background: hsl(var(--primary));
+    border: 2px solid hsl(var(--background));
+    border-radius: 50%;
+    cursor: se-resize;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.ProseMirror .image-resizer:hover .resize-trigger,
+.ProseMirror .image-resizer.resizing .resize-trigger {
+    opacity: 1;
+}
+
+.ProseMirror .image-resizer.ProseMirror-selectednode {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+}
+
+.ProseMirror .image-resizer.ProseMirror-selectednode .resize-trigger {
+    opacity: 1;
+}
+
+/* File Attachment */
+.ProseMirror .file-attachment {
+    display: inline-block;
+    margin: 0.5rem 0;
+    max-width: 100%;
+}
+
+.ProseMirror .file-attachment-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: hsl(var(--muted));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.375rem;
+    text-decoration: none;
+    color: hsl(var(--foreground));
+    transition: all 0.2s;
+    max-width: 100%;
+}
+
+.ProseMirror .file-attachment-link:hover {
+    background-color: hsl(var(--muted) / 0.8);
+    border-color: hsl(var(--primary) / 0.5);
+}
+
+.ProseMirror .file-attachment-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.ProseMirror .file-attachment-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.ProseMirror .file-attachment-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(var(--primary));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ProseMirror .file-attachment-size {
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+}
+
+.ProseMirror .file-attachment.ProseMirror-selectednode .file-attachment-link {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+}
+
+/* Drag and drop indicator */
+.ProseMirror.ProseMirror-focused {
+    position: relative;
+}
+
+/* Drop zone styling */
+.ProseMirror[data-drop-active="true"] {
+    background-color: hsl(var(--primary) / 0.05);
+}
+
+/* Task List (Checklist) - GitHub style */
+.ProseMirror ul.task-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.ProseMirror .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.ProseMirror .task-item > label {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.125rem;
+}
+
+.ProseMirror .task-item > label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border: 1.5px solid hsl(var(--border));
+    border-radius: 0.25rem;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.ProseMirror .task-item > label input[type="checkbox"]:hover {
+    border-color: hsl(var(--primary));
+    background-color: hsl(var(--primary) / 0.1);
+}
+
+.ProseMirror .task-item > label input[type="checkbox"]:checked {
+    background-color: hsl(var(--primary));
+    border-color: hsl(var(--primary));
+}
+
+.ProseMirror .task-item > label input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.ProseMirror .task-item > div {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Strikethrough for completed items */
+.ProseMirror .task-item[data-checked="true"] > div {
+    text-decoration: line-through;
+    color: hsl(var(--muted-foreground));
+}
+
+/* Nested task lists */
+.ProseMirror .task-item .task-list {
+    margin-top: 0.25rem;
+    margin-left: 0;
+}
+
+/* Focus state for checkbox */
+.ProseMirror .task-item > label input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+}

@@ -23,3 +23,5 @@ export { CloseNotiBtn } from "./CloseNotiBtn";
 export { IconPicker, IconDisplay, IconWithLabel, type IconPickerProps, type IconDisplayProps, type IconWithLabelProps } from "./IconPicker";
 
 export { FolderIconWithBadge, FolderFilled, FolderOpenFilled, type FolderIconWithBadgeProps } from "./FolderIconWithBadge";
+
+export { StatusAutoComplete, type StatusAutoCompleteProps, type IStatusOption } from "./StatusAutoComplete";

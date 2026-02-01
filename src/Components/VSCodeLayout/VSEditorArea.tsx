@@ -5,6 +5,9 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { WsEditorPanel } from "@/Components/Workspace";
 import { TrackingGraphPanel } from "@/Components/TrackingGraph";
+import { ProjectEditorPanel } from "@/Components/Project/ProjectEditorPanel";
+import { MultiProjectEditorPanel } from "@/Components/Project/MultiProjectEditorPanel";
+import { TaskEditorPanel } from "@/Components/Project/TaskEditorPanel";
 import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
@@ -81,6 +84,9 @@ export function VSEditorArea() {
                     <>
                         {activeTab.type === constants.vscode.tab.tabTypes.note && <NoteEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.workspace && <WsEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.project && <ProjectEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.multiProject && <MultiProjectEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.task && <TaskEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.trackingGraph && <TrackingGraphPanel tab={activeTab} />}
                     </>
                 ) : (
