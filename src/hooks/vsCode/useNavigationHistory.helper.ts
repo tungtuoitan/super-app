@@ -15,14 +15,19 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useWsStore } from "@/store/ws/useWs.store";
+import { useProjectStore, Project } from "@/store/project/useProject.store";
+import { useTaskStore, Task } from "@/store/task/useTask.store";
 import { Note, NoteDTO } from "@/types/note.types";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
 import { constants } from "@/utils/index";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { noteService } from "@/services/note.service";
 import { wsService, WsDTO } from "@/services/ws.service";
+import { projectService, ProjectDTO } from "@/services/project.service";
+import { taskService, TaskDTO } from "@/services/task.service";
 import { transformNotes } from "@/utils/note.utils";
 import { transformWs } from "@/utils/ws.utils";
+import { parseAsLocalDate } from "@/utils/date.utils";
 import type * as _monaco from "monaco-editor";
 
 export const STORAGE_KEY_PREFIX = "navigation_history_";
@@ -30,6 +35,45 @@ export const MAX_PAST_SIZE = 200; // Limit for Past stack
 export const SCROLL_DISTANCE_THRESHOLD = 100; // px - minimum scroll distance to consider "different position"
 export const EDITOR_LINE_DISTANCE_THRESHOLD = 5; // lines - minimum line distance for editor position changes (VS Code behavior)
 export const MD_SCROLL_DISTANCE_THRESHOLD = 50; // px - minimum Monaco scroll distance to consider "different position"
+
+/**
+ * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
+ */
+const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
+    return dtos.map((dto) => ({
+        id: dto.id,
+        name: dto.name,
+        description: dto.description,
+        status: dto.status,
+        startDate: dto.startDate ? new Date(dto.startDate) : null,
+        endDate: dto.endDate ? new Date(dto.endDate) : null,
+        createdAt: new Date(dto.createdAt),
+        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
+        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+    }));
+};
+
+/**
+ * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
+ */
+const transformTaskData = (dtos: TaskDTO[]): Task[] => {
+    return dtos.map((dto) => ({
+        id: dto.id,
+        projectId: dto.projectId,
+        parentTaskId: dto.parentTaskId,
+        type: dto.type,
+        title: dto.title,
+        note: dto.note,
+        status: dto.status,
+        priority: dto.priority,
+        startDate: parseAsLocalDate(dto.startDate),
+        endDate: parseAsLocalDate(dto.endDate),
+        orderIndex: dto.orderIndex,
+        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+        updatedAt: parseAsLocalDate(dto.updatedAt),
+        deletedAt: parseAsLocalDate(dto.deletedAt),
+    }));
+};
 
 /**
  * Map of tab types to their scroll element IDs
@@ -68,6 +112,8 @@ export const useNavigationHistoryHelper = () => {
     const { $user } = useAuthStore();
     const { notes } = useNoteGridStore();
     const { workspaces } = useWsStore();
+    const { projects } = useProjectStore();
+    const { tasks } = useTaskStore();
 
     // Track if we're currently navigating (to prevent tracking during restore)
     const isNavigatingRef = useRef(false);
@@ -355,7 +401,7 @@ export const useNavigationHistoryHelper = () => {
         if (!activeTabId || !activeTab) return;
 
         // Extract item data based on tab type
-        let itemId: number | undefined;
+        let itemId: number | string | undefined;
         let tabType: string | undefined;
 
         if (activeTab.type === constants.vscode.tab.tabTypes.note) {
@@ -366,11 +412,24 @@ export const useNavigationHistoryHelper = () => {
             const wsData = activeTab.data as any; // Use Ws type when available
             itemId = wsData.id;
             tabType = 'workspace';
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.project) {
+            const projectData = activeTab.data as Project;
+            itemId = projectData.id;
+            tabType = 'project';
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.task) {
+            const taskData = activeTab.data as Task;
+            itemId = taskData.id;
+            tabType = 'task';
+        } else if (activeTab.type === constants.vscode.tab.tabTypes.multiProject) {
+            const multiProjectData = activeTab.data as MultiProjectTabData;
+            // For multiProject, use comma-separated project IDs as itemId
+            itemId = multiProjectData.projectIds.join(',');
+            tabType = 'multiProject';
         }
         // Add more tab types here as needed (file, folder, etc.)
 
         // Validate item data
-        if (!itemId || !tabType) return;
+        if (itemId === undefined || !tabType) return;
 
         // Don't track temporary items (id < 0)
         // if (itemId < 0) return;
@@ -438,15 +497,93 @@ export const useNavigationHistoryHelper = () => {
     const navigateToEntry = async (entry: HistoryEntry | null) => {
         if (!entry) return;
 
-        // Validate itemId - don't navigate to invalid/temporary items
+        isNavigatingRef.current = true;
+
+        // Handle multiProject type separately (itemId is comma-separated IDs)
+        if (entry.type === 'multiProject') {
+            const projectIds = entry.itemId.split(',').map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
+            if (projectIds.length === 0) {
+                console.warn('Invalid projectIds in multiProject history entry:', entry);
+                isNavigatingRef.current = false;
+                return;
+            }
+
+            // Check if multiProject tab already exists (singleton)
+            let existingTab = openTabs.find(tab => tab.type === constants.vscode.tab.tabTypes.multiProject);
+
+            if (existingTab) {
+                // Update tab data and activate
+                const projectsData = projects.filter(p => projectIds.includes(p.id));
+
+                // If some projects not in grid, fetch from API
+                if (projectsData.length < projectIds.length) {
+                    const missingIds = projectIds.filter(id => !projectsData.find(p => p.id === id));
+                    if (missingIds.length > 0 && $user.userToken) {
+                        try {
+                            const result = await projectService._getProjects($user.userToken, { ids: missingIds.join(',') });
+                            if (result.success && result.data && result.data.length > 0) {
+                                const fetchedProjects = transformProjectData(result.data as ProjectDTO[]);
+                                projectsData.push(...fetchedProjects);
+                            }
+                        } catch (error) {
+                            console.error("[Navigation] Failed to fetch projects:", error);
+                        }
+                    }
+                }
+
+                const tabData: MultiProjectTabData = { projectIds, projects: projectsData };
+                setOpenTabs(prev => prev.map(tab =>
+                    tab.type === constants.vscode.tab.tabTypes.multiProject
+                        ? { ...tab, data: tabData, data0: tabData }
+                        : tab
+                ));
+                setNewTabAnd(existingTab.id);
+            } else {
+                // Create new multiProject tab
+                let projectsData = projects.filter(p => projectIds.includes(p.id));
+
+                // Fetch missing projects from API
+                const missingIds = projectIds.filter(id => !projectsData.find(p => p.id === id));
+                if (missingIds.length > 0 && $user.userToken) {
+                    try {
+                        const result = await projectService._getProjects($user.userToken, { ids: missingIds.join(',') });
+                        if (result.success && result.data && result.data.length > 0) {
+                            const fetchedProjects = transformProjectData(result.data as ProjectDTO[]);
+                            projectsData = [...projectsData, ...fetchedProjects];
+                        }
+                    } catch (error) {
+                        console.error("[Navigation] Failed to fetch projects:", error);
+                    }
+                }
+
+                const tabData: MultiProjectTabData = { projectIds, projects: projectsData };
+                const newTab: BaseTab = {
+                    id: `multi-project-tab-${Date.now()}`,
+                    type: constants.vscode.tab.tabTypes.multiProject,
+                    data: tabData,
+                    data0: tabData,
+                    title: "Multiple-Projects",
+                    hasUnsavedChanges: false,
+                };
+                setOpenTabs(prev => [...prev, newTab]);
+                setNewTabAnd(newTab.id);
+            }
+
+            // Restore positions after DOM updates
+            setTimeout(() => {
+                restoreScrollPositions(entry.scrollPositions);
+                isNavigatingRef.current = false;
+            }, 250);
+            return;
+        }
+
+        // Validate itemId - don't navigate to invalid/temporary items (for single entity types)
         const itemIdNum = parseInt(entry.itemId);
         if (isNaN(itemIdNum) || itemIdNum <= 0) {
             console.warn('Invalid itemId in history entry:', entry);
             isNavigatingRef.current = false;
             return;
         }
-
-        isNavigatingRef.current = true;
 
         // Check if tab exists by entity id (not tabId)
         let existingTab: BaseTab | undefined;
@@ -459,6 +596,16 @@ export const useNavigationHistoryHelper = () => {
             existingTab = openTabs.find(tab =>
                 tab.type === constants.vscode.tab.tabTypes.workspace &&
                 (tab.data as any).id === itemIdNum
+            );
+        } else if (entry.type === 'project') {
+            existingTab = openTabs.find(tab =>
+                tab.type === constants.vscode.tab.tabTypes.project &&
+                (tab.data as Project).id === itemIdNum
+            );
+        } else if (entry.type === 'task') {
+            existingTab = openTabs.find(tab =>
+                tab.type === constants.vscode.tab.tabTypes.task &&
+                (tab.data as Task).id === itemIdNum
             );
         }
 
@@ -536,6 +683,78 @@ export const useNavigationHistoryHelper = () => {
                         data: wsData,
                         data0: wsData,
                         title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
+                        hasUnsavedChanges: false,
+                    };
+                }
+            } else if (entry.type === 'project') {
+                // Try to find in grid first
+                let projectData = projects.find((p) => p.id === itemIdNum);
+
+                // If not in grid, fetch from API
+                if (!projectData) {
+                    if (!$user.userToken) {
+                        console.error("[Navigation] No auth token found");
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+
+                    try {
+                        const result = await projectService._getProjects($user.userToken, { ids: itemIdNum.toString() });
+                        if (result.success && result.data && result.data.length > 0) {
+                            const fetchedProjects = transformProjectData(result.data as ProjectDTO[]);
+                            projectData = fetchedProjects[0];
+                        }
+                    } catch (error) {
+                        console.error("[Navigation] Failed to fetch project:", error);
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+                }
+
+                if (projectData) {
+                    newTab = {
+                        id: `project-tab-${projectData.id}-${Date.now()}`,
+                        type: constants.vscode.tab.tabTypes.project,
+                        data: projectData,
+                        data0: projectData,
+                        title: projectData.name || constants.vscode.tabTitles.unsavedProject,
+                        hasUnsavedChanges: false,
+                    };
+                }
+            } else if (entry.type === 'task') {
+                // Try to find in store first
+                let taskData = tasks.find((t) => t.id === itemIdNum);
+
+                // If not in store, fetch from API
+                if (!taskData) {
+                    if (!$user.userToken) {
+                        console.error("[Navigation] No auth token found");
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+
+                    try {
+                        // Task API doesn't support fetching by task ID directly,
+                        // so we need to fetch all tasks and find the one we need
+                        const result = await taskService._getTasks($user.userToken, {});
+                        if (result.success && result.data && result.data.length > 0) {
+                            const fetchedTasks = transformTaskData(result.data as TaskDTO[]);
+                            taskData = fetchedTasks.find(t => t.id === itemIdNum);
+                        }
+                    } catch (error) {
+                        console.error("[Navigation] Failed to fetch task:", error);
+                        isNavigatingRef.current = false;
+                        return;
+                    }
+                }
+
+                if (taskData) {
+                    newTab = {
+                        id: `task-tab-${taskData.id}-${Date.now()}`,
+                        type: constants.vscode.tab.tabTypes.task,
+                        data: taskData,
+                        data0: taskData,
+                        title: taskData.title || constants.vscode.tabTitles.unsavedTask,
                         hasUnsavedChanges: false,
                     };
                 }
