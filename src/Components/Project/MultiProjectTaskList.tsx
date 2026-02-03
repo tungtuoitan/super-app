@@ -17,7 +17,7 @@ import { useMultiProjectTaskGridHelper } from "@/hooks/project/useMultiProjectTa
 import { useAuthStore } from "@/store/index";
 import { useGeneralStore } from "@/store/general/General.store";
 import { useTaskTabHelper } from "@/hooks/task/useTaskTab.helper";
-import { StatusAutoComplete, IStatusOption, DateTimePicker } from "@/shared/components";
+import { StatusAutoComplete, IStatusOption, DateRangePicker } from "@/shared/components";
 import { taskService } from "@/services/task.service";
 import { constants } from "@/utils/constants";
 import { toLocalISOString } from "@/utils/date.utils";
@@ -203,33 +203,35 @@ const PriorityCell = React.memo(function PriorityCell({
 });
 
 /**
- * Memoized Date Cell with date constraints
+ * Memoized Date Range Cell with date constraints
  * - For subtasks: constrained by parent task dates
  * - For tasks: constrained by project dates
  */
-const DateCell = React.memo(function DateCell({
+const DateRangeCell = React.memo(function DateRangeCell({
     task,
-    field,
-    onUpdate,
+    onStartDateUpdate,
+    onEndDateUpdate,
     minDate,
     maxDate,
     disabledReason,
 }: {
     task: Task;
-    field: "startDate" | "endDate";
-    onUpdate: (task: Task, field: "startDate" | "endDate", value: Date | null) => void;
+    onStartDateUpdate: (task: Task, field: "startDate", value: Date | null) => void;
+    onEndDateUpdate: (task: Task, field: "endDate", value: Date | null) => void;
     minDate?: Date | null;
     maxDate?: Date | null;
     disabledReason?: string;
 }) {
     return (
         <div className="px-1" onClick={(e) => e.stopPropagation()}>
-            <DateTimePicker
-                value={task[field]}
-                onChange={(date) => onUpdate(task, field, date)}
+            <DateRangePicker
+                startDate={task.startDate}
+                endDate={task.endDate}
+                onStartDateChange={(date) => onStartDateUpdate(task, "startDate", date)}
+                onEndDateChange={(date) => onEndDateUpdate(task, "endDate", date)}
                 placeholder="—"
                 disabled={!!task.deletedAt || !!disabledReason}
-                showTime={true}
+                showTime={false}
                 minDate={minDate}
                 maxDate={maxDate}
                 disabledReason={disabledReason}
@@ -662,7 +664,7 @@ export function MultiProjectTaskList({ projectIds, projects }: MultiProjectTaskL
      * - Task: constrained by project dates only (warning shown if subtasks fall outside)
      */
     const getDateConstraints = useCallback(
-        (task: Task, field: "startDate" | "endDate"): { minDate?: Date | null; maxDate?: Date | null; disabledReason?: string } => {
+        (task: Task): { minDate?: Date | null; maxDate?: Date | null; disabledReason?: string } => {
             // If task is a subtask, constrain by parent task dates
             if (task.parentTaskId) {
                 const parentTask = tasks.find((t) => t.id === task.parentTaskId);
@@ -767,34 +769,16 @@ export function MultiProjectTaskList({ projectIds, projects }: MultiProjectTaskL
                 cell: ({ row }) => <PriorityCell task={row.original} priorityOptions={priorityOptions} onUpdate={handleInlineUpdate} />,
             },
             {
-                accessorKey: "startDate",
-                header: () => <div className="text-left text-sm">Start Date</div>,
-                size: 140,
+                id: "dateRange",
+                header: () => <div className="text-left text-sm">Date Range</div>,
+                size: 200,
                 cell: ({ row }) => {
-                    const constraints = getDateConstraints(row.original, "startDate");
+                    const constraints = getDateConstraints(row.original);
                     return (
-                        <DateCell
+                        <DateRangeCell
                             task={row.original}
-                            field="startDate"
-                            onUpdate={handleInlineDateUpdate}
-                            minDate={constraints.minDate}
-                            maxDate={constraints.maxDate}
-                            disabledReason={constraints.disabledReason}
-                        />
-                    );
-                },
-            },
-            {
-                accessorKey: "endDate",
-                header: () => <div className="text-left text-sm">End Date</div>,
-                size: 140,
-                cell: ({ row }) => {
-                    const constraints = getDateConstraints(row.original, "endDate");
-                    return (
-                        <DateCell
-                            task={row.original}
-                            field="endDate"
-                            onUpdate={handleInlineDateUpdate}
+                            onStartDateUpdate={handleInlineDateUpdate}
+                            onEndDateUpdate={handleInlineDateUpdate}
                             minDate={constraints.minDate}
                             maxDate={constraints.maxDate}
                             disabledReason={constraints.disabledReason}
