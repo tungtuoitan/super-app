@@ -15,13 +15,11 @@ import {
 } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/Components/ui/button";
-import { Checkbox } from "@/Components/ui/checkbox";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { Project, useProjectStore } from "@/store/project/useProject.store";
 import { useProjectGridHelper } from "@/hooks/project/useProjectGrid.helper";
 import { useProjectTabHelper } from "@/hooks/project/useProjectTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import { RowSelectionState } from "@tanstack/react-table";
 import { useAuthStore } from "@/store/index";
 import { useGeneralStore } from "@/store/general/General.store";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
@@ -39,8 +37,6 @@ export function ProjectGrid() {
         setProjectGridSorting,
         projectGridPagination,
         setProjectGridPagination,
-        projectGridRowSelection,
-        setProjectGridRowSelection,
         projectGridColumnFilters,
         setProjectGridColumnFilters,
         containerRef,
@@ -48,7 +44,7 @@ export function ProjectGrid() {
     } = useProjectStore();
 
     const { loadProjects, openProjectContextMenu } = useProjectGridHelper();
-    const { updateMultiProjectTabIfOpen, openMultiProjectTab } = useProjectTabHelper();
+    const { openProjectTab } = useProjectTabHelper();
     const { searchQuery } = useGridControlStore();
     const { $user } = useAuthStore();
     const { registriesByType,registries } = useGeneralStore();
@@ -60,57 +56,14 @@ export function ProjectGrid() {
         return status?.description || statusCode;
     };
 
-    // Handle row selection change - updates multi-project tab (opens if not exists, activates if not active)
-    const handleRowSelectionChange = (updaterOrValue: RowSelectionState | ((old: RowSelectionState) => RowSelectionState)) => {
-        // Get new selection value
-        const newSelection = typeof updaterOrValue === "function"
-            ? updaterOrValue(projectGridRowSelection)
-            : updaterOrValue;
-
-        // Update store
-        setProjectGridRowSelection(newSelection);
-
-        // Get selected projects and open/update multi-project tab
-        const selectedIds = Object.keys(newSelection).map((id) => parseInt(id));
-        const selectedProjects = projects.filter((p) => selectedIds.includes(p.id));
-
-        // Open multi-project tab (creates if not exists, activates if not active, updates data)
-        openMultiProjectTab(selectedProjects);
-    };
-
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Project>[]>(() => {
         return [
             {
-                id: "select",
-                header: ({ table }) => (
-                    <div className="flex items-center justify-center">
-                        <Checkbox
-                            checked={table.getIsAllPageRowsSelected()}
-                            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                            aria-label="Select all"
-                        />
-                    </div>
-                ),
-                cell: ({ row }) => (
-                    <div className="flex items-center justify-center">
-                        <Checkbox
-                            checked={row.getIsSelected()}
-                            onCheckedChange={(value) => row.toggleSelected(!!value)}
-                            aria-label="Select row"
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                    </div>
-                ),
-                size: 20,
-                enableSorting: false,
-                enableHiding: false,
-            },
-            {
                 accessorKey: "id",
-                header: () => <div className="text-left text-sm">ID</div>,
+                header: () => <div className="text-left text-sm ml-2">ID</div>,
                 size: 20,
-                cell: ({ getValue }) => <div className="text-left text-sm">{getValue() as number}</div>,
+                cell: ({ getValue }) => <div className="text-left text-sm ml-3">{getValue() as number}</div>,
             },
             {
                 accessorKey: "name",
@@ -192,16 +145,13 @@ export function ProjectGrid() {
         getFilteredRowModel: getFilteredRowModel(),
         onSortingChange: setProjectGridSorting,
         onPaginationChange: setProjectGridPagination,
-        onRowSelectionChange: handleRowSelectionChange,
         onColumnFiltersChange: setProjectGridColumnFilters,
         state: {
             sorting: projectGridSorting,
             pagination: projectGridPagination,
-            rowSelection: projectGridRowSelection,
             columnFilters: projectGridColumnFilters,
         },
         getRowId: (row) => String(row.id),
-        enableRowSelection: true,
     });
 
     // Update container width on resize
@@ -281,8 +231,8 @@ export function ProjectGrid() {
                                     row.original.deletedAt ? "opacity-60" : ""
                                 }`}
                                 onClick={() => {
-                                    // Toggle row selection (checkbox)
-                                    row.toggleSelected(!row.getIsSelected());
+                                    // Open project tab when clicking row
+                                    openProjectTab(row.original);
                                 }}
                                 onContextMenu={(e) => {
                                     e.stopPropagation();

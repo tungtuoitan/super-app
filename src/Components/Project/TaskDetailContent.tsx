@@ -356,8 +356,8 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 label="Date Range"
                                 startDate={selectedTask.startDate}
                                 endDate={selectedTask.endDate}
-                                onStartDateChange={(date) => handleFieldChange("startDate", date)}
-                                onEndDateChange={(date) => handleFieldChange("endDate", date)}
+                                onStartDateChange={(date: Date|null) => handleFieldChange("startDate", date)}
+                                onEndDateChange={(date: Date|null) => handleFieldChange("endDate", date)}
                                 placeholder="Pick date range..."
                                 disabled={isDisabled || !!dateConstraints.disabledReason}
                                 minDate={dateConstraints.minDate}
