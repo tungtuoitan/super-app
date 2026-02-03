@@ -151,13 +151,14 @@ export const constants = {
 
     // Status and Priority colors (GitHub-style)
     optionColor: {
+        // Project Status: Blue/Teal theme to differentiate from Tasks
         projectStatus: {
             colors: {
-                active: { bg: "#d29922", text: "#ffffff" }, // Yellow (GitHub in progress)
-                completed: { bg: "#8957e5", text: "#ffffff" }, // Purple (GitHub completed/merged)
-                dropped: { bg: "#6e7681", text: "#ffffff" }, // Gray (GitHub on hold)
+                active: { bg: "#0969da", text: "#ffffff" }, // Blue (active, in progress)
+                completed: { bg: "#1a7f64", text: "#ffffff" }, // Teal (completed/done)
+                dropped: { bg: "#57606a", text: "#ffffff" }, // Slate gray (dropped/cancelled)
             } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#6e7681", text: "#ffffff" }, // Gray
+            default: { bg: "#57606a", text: "#ffffff" }, // Slate gray
         } as const,
 
         taskStatus: {

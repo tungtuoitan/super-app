@@ -127,7 +127,17 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
 
     return (
         <ScrollArea className="h-full w-full">
-            <div className="px-6 py-2 mx-auto h-full pt-8">
+            <div className="px-6 py-2 mx-auto h-full pt-4">
+                {/* Project Header - Large uppercase name */}
+                <div className="mb-6 pb-4 border-b border-primary/20">
+                    <h1 className="text-2xl font-bold uppercase tracking-wide text-primary">
+                        {selectedProject.name || "Untitled Project"}
+                    </h1>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
+                        Project ID: {selectedProject.id > 0 ? selectedProject.id : "New"}
+                    </p>
+                </div>
+
                 {/* Two-column layout: Details (2/3) | Metadata (1/3) */}
                 <div className="flex gap-6">
                     {/* Left Column - Project Details (2/3 width) */}
@@ -139,7 +149,7 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                 <div className="flex-[2]">
                                     <GenericTextField
                                         ref={projectNameRef}
-                                        label="Project Name"
+                                        label="PROJECT NAME"
                                         value={selectedProject.name}
                                         onChange={(e) => {
                                             const value = e.target.value.slice(0, 50); // Max 50 chars
@@ -153,13 +163,14 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                         error={!!nameError}
                                         helperText={nameError || `${selectedProject.name?.length || 0}/50`}
                                         maxLength={50}
+                                        className="uppercase"
                                     />
                                 </div>
 
                                 {/* Due Date */}
                                 <div className="flex-1">
                                     <DateRangePicker
-                                        label="Due Date"
+                                        label="DUE DATE"
                                         startDate={selectedProject.startDate}
                                         endDate={selectedProject.endDate}
                                         onStartDateChange={handleStartDateChange}
@@ -173,7 +184,7 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                             {/* Description - RichText Editor */}
                             <div className="space-y-2 text-left">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm text-left font-medium">
+                                    <label className="text-xs text-left font-semibold uppercase tracking-wider text-muted-foreground">
                                         Description
                                     </label>
                                 </div>
