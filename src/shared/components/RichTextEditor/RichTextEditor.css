@@ -321,3 +321,19 @@
     outline: none;
     box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
 }
+
+/* Bubble Menu (Floating Toolbar) */
+.tippy-box[data-theme~='bubble-menu'] {
+    background-color: hsl(var(--popover));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.tippy-box[data-theme~='bubble-menu'] .tippy-arrow {
+    color: hsl(var(--popover));
+}
+
+.tippy-box[data-theme~='bubble-menu'] .tippy-arrow::before {
+    border-top-color: hsl(var(--border));
+}
