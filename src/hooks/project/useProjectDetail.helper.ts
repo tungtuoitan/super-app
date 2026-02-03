@@ -21,6 +21,8 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         name: dto.name,
         description: dto.description,
         status: dto.status,
+        startDate: dto.startDate ? new Date(dto.startDate) : null,
+        endDate: dto.endDate ? new Date(dto.endDate) : null,
         createdAt: new Date(dto.createdAt),
         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
@@ -121,6 +123,8 @@ export const useProjectDetailHelper = () => {
                     name: selectedProject.name,
                     description: selectedProject.description,
                     status: selectedProject.status,
+                    startDate: selectedProject.startDate ? selectedProject.startDate.toISOString() : null,
+                    endDate: selectedProject.endDate ? selectedProject.endDate.toISOString() : null,
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
                 };
 
@@ -147,6 +151,8 @@ export const useProjectDetailHelper = () => {
                     name: savedProject.name,
                     description: savedProject.description,
                     status: savedProject.status,
+                    startDate: savedProject.startDate ? new Date(savedProject.startDate) : null,
+                    endDate: savedProject.endDate ? new Date(savedProject.endDate) : null,
                     createdAt: new Date(savedProject.createdAt),
                     updatedAt: savedProject.updatedAt ? new Date(savedProject.updatedAt) : null,
                     deletedAt: savedProject.deletedAt ? new Date(savedProject.deletedAt) : null,
