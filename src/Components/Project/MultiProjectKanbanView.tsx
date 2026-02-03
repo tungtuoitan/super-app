@@ -73,7 +73,7 @@ function DraggableTaskCard({ task, onClick, isSubtask = false }: DraggableTaskCa
                 "group bg-card border rounded-md cursor-grab hover:border-primary/50 transition-all",
                 isDragging && "opacity-50 shadow-lg cursor-grabbing",
                 task.deletedAt && "opacity-60",
-                isSubtask ? "p-2 opacity-80 ml-3 border-l-2 border-l-muted-foreground/30" : "p-3"
+                isSubtask ? "p-2 opacity-80 ml-8 border-l-2 border-l-muted-foreground/30" : "p-3"
             )}
             onClick={onClick}
         >

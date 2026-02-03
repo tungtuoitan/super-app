@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateTimePicker, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
+import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateRangePicker, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
 import { CardContent } from "@/Components/ui/card";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 import { FileText, AlertCircle } from "lucide-react";
@@ -351,33 +351,20 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 disabled={isDisabled}
                             />
 
-                            {/* Date row */}
-                            <div className="flex gap-4">
-                                <div className="flex-1">
-                                    <DateTimePicker
-                                        label="Start Date"
-                                        value={selectedTask.startDate}
-                                        onChange={(date) => handleFieldChange("startDate", date)}
-                                        placeholder="Pick start date..."
-                                        disabled={isDisabled || !!dateConstraints.disabledReason}
-                                        minDate={dateConstraints.minDate}
-                                        maxDate={dateConstraints.maxDate}
-                                        disabledReason={dateConstraints.disabledReason}
-                                    />
-                                </div>
-                                <div className="flex-1">
-                                    <DateTimePicker
-                                        label="End Date"
-                                        value={selectedTask.endDate}
-                                        onChange={(date) => handleFieldChange("endDate", date)}
-                                        placeholder="Pick end date..."
-                                        disabled={isDisabled || !!dateConstraints.disabledReason}
-                                        minDate={dateConstraints.minDate}
-                                        maxDate={dateConstraints.maxDate}
-                                        disabledReason={dateConstraints.disabledReason}
-                                    />
-                                </div>
-                            </div>
+                            {/* Date range */}
+                            <DateRangePicker
+                                label="Date Range"
+                                startDate={selectedTask.startDate}
+                                endDate={selectedTask.endDate}
+                                onStartDateChange={(date) => handleFieldChange("startDate", date)}
+                                onEndDateChange={(date) => handleFieldChange("endDate", date)}
+                                placeholder="Pick date range..."
+                                disabled={isDisabled || !!dateConstraints.disabledReason}
+                                minDate={dateConstraints.minDate}
+                                maxDate={dateConstraints.maxDate}
+                                disabledReason={dateConstraints.disabledReason}
+                                showTime={false}
+                            />
 
                             {/* Note - Rich Text Editor */}
                             <div className="space-y-2">

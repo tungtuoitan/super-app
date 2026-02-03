@@ -241,13 +241,16 @@ export function DateTimePicker({
         if (maxDate) {
             modifiers.constraintEnd = (date: Date) => isSameDay(date, maxDate);
         }
+        // Today modifier (only when not selected)
+        modifiers.todayHighlight = (date: Date) => isToday(date) && (!selectedDate || !isSameDay(date, selectedDate));
         return modifiers;
-    }, [minDate, maxDate]);
+    }, [minDate, maxDate, selectedDate]);
 
     // Custom class names for modifiers
     const modifiersClassNames = useMemo(() => ({
         constraintStart: "constraint-start-date",
         constraintEnd: "constraint-end-date",
+        todayHighlight: "today-highlight",
     }), []);
 
     // Filter quick options based on min/max dates
@@ -370,6 +373,16 @@ export function DateTimePicker({
                                 }
                                 .calendar-with-indicators .constraint-start-date.constraint-end-date::after {
                                     left: calc(50% + 4px);
+                                }
+                                /* Today highlight - yellow circle (only when not selected) */
+                                .calendar-with-indicators .today-highlight {
+                                    background-color: #fef08a !important;
+                                    color: #854d0e !important;
+                                    border-radius: 9999px !important;
+                                    font-weight: 600 !important;
+                                }
+                                .calendar-with-indicators .today-highlight:hover {
+                                    background-color: #fde047 !important;
                                 }
                             `}</style>
                             <Calendar
