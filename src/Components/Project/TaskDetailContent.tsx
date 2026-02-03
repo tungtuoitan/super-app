@@ -372,7 +372,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                     <FileText className="h-4 w-4" />
                                     Note
                                 </label>
-                                <div className="h-[580px] overflow-y-auto">
+                                <div className="h-[580px] overflow-y-auto border rounded-md">
                                     <RichTextEditor
                                         key={`note-${taskKey}`}
                                         value={selectedTask.note || ""}

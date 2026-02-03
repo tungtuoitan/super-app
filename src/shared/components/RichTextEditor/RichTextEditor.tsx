@@ -4,7 +4,7 @@
  * Supports bold, italic, underline, lists, headings, images, and file attachments
  */
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -12,6 +12,7 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import { TextStyle, Color } from "@tiptap/extension-text-style";
 import { cn } from "@/lib/utils";
 import {
     Bold,
@@ -21,12 +22,12 @@ import {
     ListOrdered,
     Heading1,
     Heading2,
-    Undo,
-    Redo,
     ImageIcon,
     Paperclip,
     Loader2,
     ListChecks,
+    Palette,
+    ChevronDown,
 } from "lucide-react";
 import { fileService, UploadContext } from "@/services/file.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
@@ -73,6 +74,19 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ onClick, isActive, disabl
     </button>
 );
 
+// Basic text colors
+const TEXT_COLORS = [
+    { name: "Default", color: null },
+    { name: "Red", color: "#ef4444" },
+    { name: "Orange", color: "#f97316" },
+    { name: "Yellow", color: "#eab308" },
+    { name: "Green", color: "#22c55e" },
+    { name: "Blue", color: "#3b82f6" },
+    { name: "Purple", color: "#a855f7" },
+    { name: "Pink", color: "#ec4899" },
+    { name: "Gray", color: "#6b7280" },
+];
+
 export function RichTextEditor({
     value,
     onChange,
@@ -84,9 +98,14 @@ export function RichTextEditor({
     uploadContextId,
 }: RichTextEditorProps) {
     const { $user } = useAuthStore();
-    const [isUploading, setIsUploading] = React.useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [showBubbleMenu, setShowBubbleMenu] = useState(false);
+    const [bubbleMenuPosition, setBubbleMenuPosition] = useState({ top: 0, left: 0 });
+    const [showColorPicker, setShowColorPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
+    const bubbleMenuRef = useRef<HTMLDivElement>(null);
+    const editorContainerRef = useRef<HTMLDivElement>(null);
     const _console = useConsoleHelper();
 
     const editor = useEditor({
@@ -100,6 +119,8 @@ export function RichTextEditor({
                 placeholder,
             }),
             Underline,
+            TextStyle,
+            Color,
             ProxyImage.configure({
                 HTMLAttributes: {
                     class: "rich-text-image",
@@ -317,6 +338,62 @@ export function RichTextEditor({
         }
     }, [disabled, editor]);
 
+    // Track text selection for bubble menu
+    useEffect(() => {
+        if (!editor || disabled) return;
+
+        const updateBubbleMenu = () => {
+            const { from, to, empty } = editor.state.selection;
+
+            // Hide if no selection or selection is collapsed
+            if (empty || from === to) {
+                setShowBubbleMenu(false);
+                setShowColorPicker(false);
+                return;
+            }
+
+            // Get selection coordinates
+            const { view } = editor;
+            const start = view.coordsAtPos(from);
+            const end = view.coordsAtPos(to);
+
+            // Calculate position (center above/below selection)
+            const containerRect = editorContainerRef.current?.getBoundingClientRect();
+            if (!containerRect) return;
+
+            const menuWidth = bubbleMenuRef.current?.offsetWidth || 350;
+            const menuHeight = 40;
+            const left = Math.max(10, Math.min(
+                (start.left + end.left) / 2 - containerRect.left - menuWidth / 2,
+                containerRect.width - menuWidth - 10
+            ));
+
+            // If selection is near top, show below; otherwise show above
+            const spaceAbove = start.top - containerRect.top;
+            const top = spaceAbove < menuHeight + 10
+                ? end.bottom - containerRect.top + 8  // Show below
+                : start.top - containerRect.top - menuHeight - 8;  // Show above
+
+            setBubbleMenuPosition({ top, left });
+            setShowBubbleMenu(true);
+        };
+
+        editor.on('selectionUpdate', updateBubbleMenu);
+        editor.on('blur', () => {
+            // Delay hiding to allow clicking on bubble menu buttons
+            setTimeout(() => {
+                if (!bubbleMenuRef.current?.contains(document.activeElement)) {
+                    setShowBubbleMenu(false);
+                    setShowColorPicker(false);
+                }
+            }, 150);
+        });
+
+        return () => {
+            editor.off('selectionUpdate', updateBubbleMenu);
+        };
+    }, [editor, disabled]);
+
     // Handle image input change
     const handleImageInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -346,7 +423,10 @@ export function RichTextEditor({
     }
 
     return (
-        <div className={cn("border rounded-md overflow-hidden bg-background", disabled && "opacity-60", className)}>
+        <div
+            ref={editorContainerRef}
+            className={cn("overflow-hidden bg-background relative", disabled && "opacity-60", className)}
+        >
             {/* Hidden file inputs */}
             <input
                 ref={imageInputRef}
@@ -363,127 +443,167 @@ export function RichTextEditor({
                 className="hidden"
             />
 
-            {/* Toolbar */}
-            <div className="flex items-center gap-0.5 p-1 border-b bg-muted/30 flex-wrap">
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleBold().run()}
-                    isActive={editor.isActive("bold")}
-                    disabled={disabled}
-                    title="Bold (Ctrl+B)"
+            {/* Floating Bubble Menu - appears when text is selected */}
+            {showBubbleMenu && (
+                <div
+                    ref={bubbleMenuRef}
+                    className="absolute z-50 flex items-center gap-0.5 p-1 bg-popover border border-border rounded-lg shadow-lg animate-in fade-in-0 zoom-in-95 duration-100"
+                    style={{
+                        top: bubbleMenuPosition.top,
+                        left: bubbleMenuPosition.left,
+                    }}
+                    onMouseDown={(e) => e.preventDefault()}
                 >
-                    <Bold className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleBold().run()}
+                        isActive={editor.isActive("bold")}
+                        disabled={disabled}
+                        title="Bold (Ctrl+B)"
+                    >
+                        <Bold className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleItalic().run()}
-                    isActive={editor.isActive("italic")}
-                    disabled={disabled}
-                    title="Italic (Ctrl+I)"
-                >
-                    <Italic className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleItalic().run()}
+                        isActive={editor.isActive("italic")}
+                        disabled={disabled}
+                        title="Italic (Ctrl+I)"
+                    >
+                        <Italic className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleUnderline().run()}
-                    isActive={editor.isActive("underline")}
-                    disabled={disabled}
-                    title="Underline (Ctrl+U)"
-                >
-                    <UnderlineIcon className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleUnderline().run()}
+                        isActive={editor.isActive("underline")}
+                        disabled={disabled}
+                        title="Underline (Ctrl+U)"
+                    >
+                        <UnderlineIcon className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <div className="w-px h-5 bg-border mx-1" />
+                    <div className="w-px h-5 bg-border mx-0.5" />
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                    isActive={editor.isActive("heading", { level: 1 })}
-                    disabled={disabled}
-                    title="Heading 1"
-                >
-                    <Heading1 className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                        isActive={editor.isActive("heading", { level: 1 })}
+                        disabled={disabled}
+                        title="Heading 1"
+                    >
+                        <Heading1 className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                    isActive={editor.isActive("heading", { level: 2 })}
-                    disabled={disabled}
-                    title="Heading 2"
-                >
-                    <Heading2 className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                        isActive={editor.isActive("heading", { level: 2 })}
+                        disabled={disabled}
+                        title="Heading 2"
+                    >
+                        <Heading2 className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <div className="w-px h-5 bg-border mx-1" />
+                    <div className="w-px h-5 bg-border mx-0.5" />
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleBulletList().run()}
-                    isActive={editor.isActive("bulletList")}
-                    disabled={disabled}
-                    title="Bullet List"
-                >
-                    <List className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleBulletList().run()}
+                        isActive={editor.isActive("bulletList")}
+                        disabled={disabled}
+                        title="Bullet List"
+                    >
+                        <List className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                    isActive={editor.isActive("orderedList")}
-                    disabled={disabled}
-                    title="Ordered List"
-                >
-                    <ListOrdered className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                        isActive={editor.isActive("orderedList")}
+                        disabled={disabled}
+                        title="Ordered List"
+                    >
+                        <ListOrdered className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleTaskList().run()}
-                    isActive={editor.isActive("taskList")}
-                    disabled={disabled}
-                    title="Checklist"
-                >
-                    <ListChecks className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleTaskList().run()}
+                        isActive={editor.isActive("taskList")}
+                        disabled={disabled}
+                        title="Checklist"
+                    >
+                        <ListChecks className="h-4 w-4" />
+                    </ToolbarButton>
 
-                <div className="w-px h-5 bg-border mx-1" />
+                    <div className="w-px h-5 bg-border mx-0.5" />
 
-                <ToolbarButton
-                    onClick={() => imageInputRef.current?.click()}
-                    disabled={disabled || isUploading}
-                    title="Insert Image"
-                >
-                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-                </ToolbarButton>
+                    {/* Color Picker */}
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setShowColorPicker(!showColorPicker)}
+                            disabled={disabled}
+                            title="Text Color"
+                            className={cn(
+                                "p-1.5 rounded hover:bg-muted transition-colors flex items-center gap-0.5",
+                                showColorPicker && "bg-muted",
+                                disabled && "opacity-50 cursor-not-allowed"
+                            )}
+                        >
+                            <Palette className="h-4 w-4" />
+                            <ChevronDown className="h-3 w-3" />
+                        </button>
+                        {showColorPicker && (
+                            <div
+                                className="absolute top-full w-72 left-0 mt-1 p-1.5 bg-popover border border-border rounded-lg shadow-lg flex  gap-1 z-10"
+                                onMouseDown={(e) => e.preventDefault()}
+                            >
+                                {TEXT_COLORS.map((item) => (
+                                    <button
+                                        key={item.name}
+                                        type="button"
+                                        onClick={() => {
+                                            if (item.color) {
+                                                editor.chain().focus().setColor(item.color).run();
+                                            } else {
+                                                editor.chain().focus().unsetColor().run();
+                                            }
+                                            setShowColorPicker(false);
+                                        }}
+                                        title={item.name}
+                                        className={cn(
+                                            "w-6 h-6 rounded border border-border hover:scale-110 transition-transform",
+                                            !item.color && "bg-foreground"
+                                        )}
+                                        style={item.color ? { backgroundColor: item.color } : undefined}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                <ToolbarButton
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={disabled || isUploading}
-                    title="Attach File"
-                >
-                    <Paperclip className="h-4 w-4" />
-                </ToolbarButton>
+                    <div className="w-px h-5 bg-border mx-0.5" />
 
-                <div className="w-px h-5 bg-border mx-1" />
+                    <ToolbarButton
+                        onClick={() => imageInputRef.current?.click()}
+                        disabled={disabled || isUploading}
+                        title="Insert Image"
+                    >
+                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+                    </ToolbarButton>
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().undo().run()}
-                    disabled={disabled || !editor.can().undo()}
-                    title="Undo (Ctrl+Z)"
-                >
-                    <Undo className="h-4 w-4" />
-                </ToolbarButton>
+                    <ToolbarButton
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={disabled || isUploading}
+                        title="Attach File"
+                    >
+                        <Paperclip className="h-4 w-4" />
+                    </ToolbarButton>
+                </div>
+            )}
 
-                <ToolbarButton
-                    onClick={() => editor.chain().focus().redo().run()}
-                    disabled={disabled || !editor.can().redo()}
-                    title="Redo (Ctrl+Y)"
-                >
-                    <Redo className="h-4 w-4" />
-                </ToolbarButton>
-
-                {isUploading && (
-                    <span className="ml-2 text-xs text-muted-foreground flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Uploading...
-                    </span>
-                )}
-            </div>
+            {/* Upload indicator */}
+            {isUploading && (
+                <div className="flex items-center gap-1 px-3 py-1 border-b bg-muted/30 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Uploading...
+                </div>
+            )}
 
             {/* Editor Content */}
             <EditorContent
