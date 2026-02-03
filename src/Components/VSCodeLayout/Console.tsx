@@ -62,8 +62,8 @@ function ConsoleMessage({ id, type, message, timestamp, onRemove }: ConsoleMessa
         switch (type) {
             case "error":
                 return "text-red-400";
-            // case "warning":
-            //     return "text-yellow-400/80";
+            case "warning":
+                return "text-yellow-400/80";
             // case "info":
             //     return "text-blue-400/80";
             // case "success":

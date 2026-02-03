@@ -4,14 +4,16 @@
  * Smart relative date display: today, tomorrow, Mon, Next Mon, 21/3
  */
 
-import React, { useState, useEffect } from "react";
-import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek } from "date-fns";
+import React, { useState, useEffect, useMemo } from "react";
+import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, Clock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/Components/ui/button";
 import { Calendar } from "@/Components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
 import { Label } from "@/Components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import type { Matcher } from "react-day-picker";
 
 interface DateTimePickerProps {
     value: Date | null | undefined;
@@ -21,6 +23,9 @@ interface DateTimePickerProps {
     disabled?: boolean;
     className?: string;
     showTime?: boolean;
+    minDate?: Date | null;
+    maxDate?: Date | null;
+    disabledReason?: string;
 }
 
 /**
@@ -116,6 +121,9 @@ export function DateTimePicker({
     disabled = false,
     className,
     showTime = true,
+    minDate,
+    maxDate,
+    disabledReason,
 }: DateTimePickerProps) {
     const [open, setOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(value || undefined);
@@ -210,6 +218,49 @@ export function DateTimePicker({
         ? formatSmartDate(value, showTime && hasTimeSelected)
         : null;
 
+    // Check if a date is within the allowed range
+    const isDateDisabled = (date: Date): boolean => {
+        const day = startOfDay(date);
+        if (minDate && isBefore(day, startOfDay(minDate))) return true;
+        if (maxDate && isAfter(day, startOfDay(maxDate))) return true;
+        return false;
+    };
+
+    // Create disabled matcher for Calendar component
+    const disabledMatcher = useMemo((): Matcher | undefined => {
+        if (!minDate && !maxDate) return undefined;
+        return (date: Date) => isDateDisabled(date);
+    }, [minDate, maxDate]);
+
+    // Create modifiers for constraint dates (minDate/maxDate indicators)
+    const calendarModifiers = useMemo(() => {
+        const modifiers: Record<string, Matcher> = {};
+        if (minDate) {
+            modifiers.constraintStart = (date: Date) => isSameDay(date, minDate);
+        }
+        if (maxDate) {
+            modifiers.constraintEnd = (date: Date) => isSameDay(date, maxDate);
+        }
+        return modifiers;
+    }, [minDate, maxDate]);
+
+    // Custom class names for modifiers
+    const modifiersClassNames = useMemo(() => ({
+        constraintStart: "constraint-start-date",
+        constraintEnd: "constraint-end-date",
+    }), []);
+
+    // Filter quick options based on min/max dates
+    const filteredQuickOptions = useMemo(() => {
+        return QUICK_OPTIONS.filter((option) => {
+            const date = option.getValue();
+            return !isDateDisabled(date);
+        });
+    }, [minDate, maxDate]);
+
+    // Check if picker should be fully disabled due to constraints
+    const isConstraintDisabled = disabled || (disabledReason !== undefined && disabledReason !== null);
+
     return (
         <div className={cn("space-y-2", className)}>
             {label && (
@@ -220,27 +271,40 @@ export function DateTimePicker({
             )}
 
             <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="outline"
-                        disabled={disabled}
-                        className={cn(
-                            "w-full justify-start text-left font-normal h-10",
-                            !value && "text-muted-foreground"
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="w-full">
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        disabled={isConstraintDisabled}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal h-10",
+                                            !value && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        <span className={cn(smartDate?.isToday && "text-yellow-500 font-medium")}>
+                                            {smartDate?.text || placeholder}
+                                        </span>
+                                        {value && !isConstraintDisabled && (
+                                            <X
+                                                className="ml-auto h-4 w-4 opacity-50 hover:opacity-100"
+                                                onClick={handleClear}
+                                            />
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                            </span>
+                        </TooltipTrigger>
+                        {disabledReason && (
+                            <TooltipContent>
+                                <p>{disabledReason}</p>
+                            </TooltipContent>
                         )}
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        <span className={cn(smartDate?.isToday && "text-yellow-500 font-medium")}>
-                            {smartDate?.text || placeholder}
-                        </span>
-                        {value && !disabled && (
-                            <X
-                                className="ml-auto h-4 w-4 opacity-50 hover:opacity-100"
-                                onClick={handleClear}
-                            />
-                        )}
-                    </Button>
-                </PopoverTrigger>
+                    </Tooltip>
+                </TooltipProvider>
 
                 <PopoverContent className="w-auto p-0" align="start">
                     <div className="flex">
@@ -249,7 +313,7 @@ export function DateTimePicker({
                             <p className="text-xs font-medium text-muted-foreground px-2 py-1">
                                 Quick select
                             </p>
-                            {QUICK_OPTIONS.map((option) => (
+                            {filteredQuickOptions.map((option) => (
                                 <Button
                                     key={option.label}
                                     variant="ghost"
@@ -260,16 +324,83 @@ export function DateTimePicker({
                                     {option.label}
                                 </Button>
                             ))}
+                            {filteredQuickOptions.length === 0 && (
+                                <p className="text-xs text-muted-foreground px-2 py-1 italic">
+                                    No quick options available
+                                </p>
+                            )}
                         </div>
 
                         {/* Calendar */}
-                        <div>
+                        <div className="calendar-with-indicators">
+                            <style>{`
+                                .calendar-with-indicators .constraint-start-date {
+                                    position: relative;
+                                }
+                                .calendar-with-indicators .constraint-start-date::before {
+                                    content: '';
+                                    position: absolute;
+                                    bottom: 2px;
+                                    left: 50%;
+                                    transform: translateX(-50%);
+                                    width: 4px;
+                                    height: 4px;
+                                    border-radius: 50%;
+                                    background-color: #22c55e;
+                                    z-index: 10;
+                                }
+                                .calendar-with-indicators .constraint-end-date {
+                                    position: relative;
+                                }
+                                .calendar-with-indicators .constraint-end-date::after {
+                                    content: '';
+                                    position: absolute;
+                                    bottom: 2px;
+                                    left: 50%;
+                                    transform: translateX(-50%);
+                                    width: 4px;
+                                    height: 4px;
+                                    border-radius: 50%;
+                                    background-color: #ef4444;
+                                    z-index: 10;
+                                }
+                                /* When both start and end are on same date */
+                                .calendar-with-indicators .constraint-start-date.constraint-end-date::before {
+                                    left: calc(50% - 4px);
+                                }
+                                .calendar-with-indicators .constraint-start-date.constraint-end-date::after {
+                                    left: calc(50% + 4px);
+                                }
+                            `}</style>
                             <Calendar
                                 mode="single"
                                 selected={selectedDate}
                                 onSelect={handleDateSelect}
+                                disabled={disabledMatcher}
+                                modifiers={calendarModifiers}
+                                modifiersClassNames={modifiersClassNames}
+                                classNames={{
+                                    today: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 font-semibold rounded-md",
+                                }}
                                 initialFocus
                             />
+                            {/* Legend for constraint indicators */}
+                            {(minDate || maxDate) && (
+                                <div className="flex items-center justify-center gap-4 px-3 pb-2 text-[10px] text-muted-foreground border-t pt-2">
+                                    {minDate && (
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                                            <span>Start bound</span>
+                                        </div>
+                                    )}
+                                    {maxDate && (
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2 h-2 rounded-full bg-red-500" />
+                                            <span>End bound</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Time picker */}
                             {showTime && (
