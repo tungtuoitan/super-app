@@ -188,16 +188,19 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                         Description
                                     </label>
                                 </div>
-                                <RichTextEditor
-                                    key={`description-${projectKey}`}
-                                    value={selectedProject.description || ""}
-                                    onChange={handleDescriptionChange}
-                                    placeholder="Enter project description..."
-                                    disabled={isDeleted}
-                                    minHeight="300px"
-                                    uploadContext="project"
-                                    uploadContextId={selectedProject.id > 0 ? selectedProject.id : undefined}
-                                />
+                                <div className="border rounded-md overflow-hidden">
+                                    <RichTextEditor
+                                        key={`description-${projectKey}`}
+                                        value={selectedProject.description || ""}
+                                        onChange={handleDescriptionChange}
+                                        placeholder="Enter project description..."
+                                        disabled={isDeleted}
+                                        minHeight="300px"
+                                        uploadContext="project"
+                                        uploadContextId={selectedProject.id > 0 ? selectedProject.id : undefined}
+                                    />
+
+                                </div>
                             </div>
                         </CardContent>
                     </div>
