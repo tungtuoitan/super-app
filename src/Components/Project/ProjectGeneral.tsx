@@ -1,36 +1,43 @@
 /**
  * Project Detail Tab Component
  * Two-column layout: Details (2/3) | Metadata (1/3)
- * Used in VSPanel for editing project details
+ * Used in ProjectDetailContent as the first tab for editing project details
  */
 
 import React, { useEffect, useMemo } from "react";
-import { GenericTextField, StatusAutoComplete, IStatusOption } from "@/shared/components";
+import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor } from "@/shared/components";
+import { DateRangePicker } from "@/shared/components/DateTimePicker";
 import { CardContent } from "@/Components/ui/card";
-import { Textarea } from "@/Components/ui/textarea";
 import { ScrollArea } from "@/Components/ui/scroll-area";
-import { FileText } from "lucide-react";
 import { useProjectDetailStore } from "@/store/project/useProjectDetail.store";
 import { useProjectDetailHelper } from "@/hooks/project/useProjectDetail.helper";
-import { Project } from "@/store/project/useProject.store";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { Project, useProjectStore } from "@/store/project/useProject.store";
 import { useGeneralStore } from "@/store/general/General.store";
 import { getProjectStatusColors } from "./ProjectStatusBadge";
-import {constants} from "@/utils/index";
+import { constants } from "@/utils/index";
+import { useEditorTabsStore } from "@/store/index";
+
+interface ProjectDetailTabProps {
+    projectId: number;
+}
 
 /**
- * ProjectDetailTab
+ * ProjectGeneral
  * Form for editing project details
  */
-export function ProjectDetailTab() {
+export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
     const { projectNameRef, shouldFocusProjectName, setShouldFocusProjectName, nameError, setNameError } = useProjectDetailStore();
     const { handleProjectFieldChange } = useProjectDetailHelper();
-    const { getActiveTab } = useEditorTabHelper();
     const { registriesByType } = useGeneralStore();
+    const { openTabs } = useEditorTabsStore();
 
-    // Get active tab
-    const activeTab = getActiveTab();
-    const selectedProject = activeTab?.data as Project | undefined;
+    // Get project from open tabs (to get latest data with unsaved changes)
+    const selectedProject = useMemo(() => {
+        const projectTab = openTabs.find(
+            (tab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId
+        );
+        return projectTab ? (projectTab.data as Project) : undefined;
+    }, [openTabs, projectId]);
 
     const [projectKey, setProjectKey] = React.useState(0);
     useEffect(() => {
@@ -84,6 +91,20 @@ export function ProjectDetailTab() {
         }
     };
 
+    // Date range handlers
+    const handleStartDateChange = (date: Date | null) => {
+        handleProjectFieldChange("startDate", date);
+    };
+
+    const handleEndDateChange = (date: Date | null) => {
+        handleProjectFieldChange("endDate", date);
+    };
+
+    // Description change handler
+    const handleDescriptionChange = (value: string) => {
+        handleProjectFieldChange("description", value);
+    };
+
     if (!selectedProject) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -106,61 +127,65 @@ export function ProjectDetailTab() {
 
     return (
         <ScrollArea className="h-full w-full">
-            <div className="px-6 py-2 mx-auto h-full">
+            <div className="px-6 py-2 mx-auto h-full pt-8">
                 {/* Two-column layout: Details (2/3) | Metadata (1/3) */}
                 <div className="flex gap-6">
                     {/* Left Column - Project Details (2/3 width) */}
                     <div className="flex-[2] min-w-0">
                         <CardContent className="space-y-4">
-                            {/* Project Status with colored options */}
-                            <div className="w-full flex ">
-                                <StatusAutoComplete
-                                    value={currentStatusValue}
-                                    onChange={handleStatusChange}
-                                    options={statusOptions}
-                                    inputProps={{
-                                        name: "status",
-                                        label: "Status",
-                                    }}
-                                    // size="tiny"
-                                    disabled={isDeleted}
-                                    placeholder="Select status..."
-                                />
+                            {/* Project Name and Due Date on same row */}
+                            <div className="flex gap-4 items-start">
+                                {/* Project Name - takes more space */}
+                                <div className="flex-[2]">
+                                    <GenericTextField
+                                        ref={projectNameRef}
+                                        label="Project Name"
+                                        value={selectedProject.name}
+                                        onChange={(e) => {
+                                            const value = e.target.value.slice(0, 50); // Max 50 chars
+                                            handleFieldChange("name", value);
+                                            if (value && value.trim() !== "") setNameError("");
+                                            else setNameError("Project Name is required");
+                                        }}
+                                        placeholder="Enter project name..."
+                                        size="small"
+                                        disabled={isDeleted}
+                                        error={!!nameError}
+                                        helperText={nameError || `${selectedProject.name?.length || 0}/50`}
+                                        maxLength={50}
+                                    />
+                                </div>
+
+                                {/* Due Date */}
+                                <div className="flex-1">
+                                    <DateRangePicker
+                                        label="Due Date"
+                                        startDate={selectedProject.startDate}
+                                        endDate={selectedProject.endDate}
+                                        onStartDateChange={handleStartDateChange}
+                                        onEndDateChange={handleEndDateChange}
+                                        disabled={isDeleted}
+                                        placeholder="Set due dates..."
+                                    />
+                                </div>
                             </div>
-                            {/* Project Name */}
-                            <GenericTextField
-                                ref={projectNameRef}
-                                label="Project Name"
-                                value={selectedProject.name}
-                                onChange={(e) => {
-                                    const value = e.target.value.slice(0, 50); // Max 50 chars
-                                    handleFieldChange("name", value);
-                                    if (value && value.trim() !== "") setNameError("");
-                                    else setNameError("Project Name is required");
-                                }}
-                                placeholder="Enter project name..."
-                                size="small"
-                                disabled={isDeleted}
-                                error={!!nameError}
-                                helperText={nameError || `${selectedProject.name?.length || 0}/50`}
-                                maxLength={50}
-                            />
 
-                            
-
-                            {/* Description - Takes more space */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium flex items-center gap-2">
-                                    <FileText className="h-4 w-4" />
-                                    Description
-                                </label>
-                                <Textarea
+                            {/* Description - RichText Editor */}
+                            <div className="space-y-2 text-left">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm text-left font-medium">
+                                        Description
+                                    </label>
+                                </div>
+                                <RichTextEditor
                                     key={`description-${projectKey}`}
                                     value={selectedProject.description || ""}
-                                    onChange={(e) => handleFieldChange("description", e.target.value)}
+                                    onChange={handleDescriptionChange}
                                     placeholder="Enter project description..."
-                                    className="min-h-[300px] resize-y"
                                     disabled={isDeleted}
+                                    minHeight="300px"
+                                    uploadContext="project"
+                                    uploadContextId={selectedProject.id > 0 ? selectedProject.id : undefined}
                                 />
                             </div>
                         </CardContent>
@@ -169,6 +194,19 @@ export function ProjectDetailTab() {
                     {/* Right Column - Metadata (1/3 width) */}
                     <div className="flex-1 min-w-0">
                         <CardContent className="space-y-7">
+                            {/* Project Status - moved to right column */}
+                            <StatusAutoComplete
+                                value={currentStatusValue}
+                                onChange={handleStatusChange}
+                                options={statusOptions}
+                                inputProps={{
+                                    name: "status",
+                                    label: "Status",
+                                }}
+                                disabled={isDeleted}
+                                placeholder="Select status..."
+                            />
+
                             <GenericTextField label="Project ID" value={selectedProject.id > 0 ? selectedProject.id.toString() : "New (Unsaved)"} disabled size="small" />
 
                             <GenericTextField label="Created At" value={formatDate(selectedProject.createdAt)} disabled size="small" />

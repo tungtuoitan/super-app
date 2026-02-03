@@ -153,11 +153,9 @@ export const constants = {
     optionColor: {
         projectStatus: {
             colors: {
-                open: { bg: "#238636", text: "#ffffff" }, // Green (GitHub open)
-                in_progress: { bg: "#d29922", text: "#ffffff" }, // Yellow (GitHub in progress)
+                active: { bg: "#d29922", text: "#ffffff" }, // Yellow (GitHub in progress)
                 completed: { bg: "#8957e5", text: "#ffffff" }, // Purple (GitHub completed/merged)
-                on_hold: { bg: "#6e7681", text: "#ffffff" }, // Gray (GitHub on hold)
-                cancelled: { bg: "#d73a49", text: "#ffffff" }, // Red (GitHub closed)
+                dropped: { bg: "#6e7681", text: "#ffffff" }, // Gray (GitHub on hold)
             } as Record<string, { bg: string; text: string }>,
             default: { bg: "#6e7681", text: "#ffffff" }, // Gray
         } as const,
@@ -178,7 +176,7 @@ export const constants = {
                 low: { bg: "#6e7681", text: "#ffffff" }, // Gray
                 medium: { bg: "#d29922", text: "#ffffff" }, // Yellow
                 high: { bg: "#da3633", text: "#ffffff" }, // Red
-                urgent: { bg: "#8957e5", text: "#ffffff" }, // Purple
+                urgent: { bg: "rgb(255, 0, 0)", text: "#ffffff" }, // Purple
             } as Record<string, { bg: string; text: string }>,
             default: { bg: "#6e7681", text: "#ffffff" }, // Gray
         } as const,

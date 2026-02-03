@@ -1,6 +1,6 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
-import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, Layers as MultiProjectIcon, FolderOpen as OpenIcon } from "lucide-react";
+import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, Layers as MultiProjectIcon } from "lucide-react";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
@@ -33,21 +33,11 @@ export function ProjectGridMenu() {
                 Add Project
             </MenuItem>
 
-            {/* Open Project View - only show when exactly 1 project selected */}
-            {/* {projectGridSelectedCount === 1 && !anySelectedDeleted && (
-                <MenuItem onClick={() => executeDirectly({ callback: contextData?.onOpenProjectView! })}>
-                    <OpenIcon className="w-4 h-4 mr-2" />
-                    Open Project View
-                </MenuItem>
-            )} */}
-
-            {/* Open Multiple Projects view - only show when 2+ projects selected */}
-            {projectGridSelectedCount > 1 && !anySelectedDeleted && (
-                <MenuItem onClick={() => executeDirectly({ callback: contextData?.onOpenMultiProjectView! })}>
-                    <MultiProjectIcon className="w-4 h-4 mr-2" />
-                    Open Multiple Projects view
-                </MenuItem>
-            )}
+            {/* Open Multiple Projects view - always available */}
+            <MenuItem onClick={() => executeDirectly({ callback: contextData?.onOpenMultiProjectView! })}>
+                <MultiProjectIcon className="w-4 h-4 mr-2" />
+                Open Multiple Projects
+            </MenuItem>
 
             <MenuDivider />
 
