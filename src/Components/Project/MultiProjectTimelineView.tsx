@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useCallback, useRef, useState, useEffect } from "react";
-import { Loader2, ZoomIn, ZoomOut, Calendar } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, Calendar, CornerDownRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 import { Button } from "@/Components/ui/button";
@@ -19,6 +19,7 @@ import { storageService } from "@/services/storage.service";
 import { cn } from "@/lib/utils";
 import { constants } from "@/utils/constants";
 import { toLocalISOString } from "@/utils/date.utils";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 interface MultiProjectTimelineViewProps {
     projectIds: number[];
@@ -37,6 +38,8 @@ const TASK_BAR_HEIGHT = 28;
 const MIN_BAR_WIDTH = 20;
 const EXTEND_DAYS = 14;
 const TASK_BAR_COLOR = "#24366E";
+const SUBTASK_BAR_COLOR = "#6e7681";
+const SUBTASK_BAR_HEIGHT = 20;
 
 const WEEKEND_STRIPE_BG = `repeating-linear-gradient(
     45deg,
@@ -90,9 +93,14 @@ interface TaskBarProps {
     dayWidth: number;
     onDateChange: (taskId: number, startDate: Date | null, endDate: Date | null) => void;
     onTaskClick: (task: Task) => void;
+    isSubtask?: boolean;
+    parentTask?: Task | null;
+    project?: Project | null;
+    allTasks?: Task[];
+    onValidationError?: (message: string) => void;
 }
 
-function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick }: TaskBarProps) {
+function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isSubtask = false, parentTask, project, allTasks = [], onValidationError }: TaskBarProps) {
     const barRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [hasDragged, setHasDragged] = useState(false);
@@ -141,6 +149,59 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick }: T
         setOriginalWidth(currentWidth);
     };
 
+    // Calculate constraint boundaries (in pixels from timeline start)
+    // For subtasks: constrained by parent task dates
+    // For tasks: constrained by project dates only (warning shown if subtasks fall outside)
+    const constraintBounds = useMemo(() => {
+        let outerMinDate: Date | null = null;
+        let outerMaxDate: Date | null = null;
+
+        if (isSubtask && parentTask) {
+            outerMinDate = parentTask.startDate || null;
+            outerMaxDate = parentTask.endDate || null;
+        } else {
+            if (project) {
+                outerMinDate = project.startDate || null;
+                outerMaxDate = project.endDate || null;
+            }
+        }
+
+        const minLeft = outerMinDate
+            ? Math.floor((outerMinDate.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24)) * dayWidth
+            : null;
+        const maxRight = outerMaxDate
+            ? (Math.floor((outerMaxDate.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24)) + 1) * dayWidth
+            : null;
+
+        return { minLeft, maxRight };
+    }, [isSubtask, parentTask, project, timelineStart, dayWidth]);
+
+    // Check if any subtasks fall outside a given date range
+    const getSubtasksOutsideRange = useCallback(
+        (newStartDate: Date | null, newEndDate: Date | null): string[] => {
+            if (isSubtask) return []; // Subtasks don't have subtasks
+
+            const subtasks = allTasks.filter((t) => t.parentTaskId === task.id);
+            const outsideSubtasks: string[] = [];
+
+            subtasks.forEach((subtask) => {
+                let isOutside = false;
+                if (newStartDate && subtask.startDate && subtask.startDate < newStartDate) {
+                    isOutside = true;
+                }
+                if (newEndDate && subtask.endDate && subtask.endDate > newEndDate) {
+                    isOutside = true;
+                }
+                if (isOutside) {
+                    outsideSubtasks.push(subtask.title || `Subtask #${subtask.id}`);
+                }
+            });
+
+            return outsideSubtasks;
+        },
+        [isSubtask, allTasks, task.id]
+    );
+
     useEffect(() => {
         if (!isDragging) return;
 
@@ -151,16 +212,42 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick }: T
             const daysDelta = Math.round(deltaX / dayWidth);
 
             if (dragType === "move") {
-                setCurrentLeft(originalLeft + daysDelta * dayWidth);
+                let newLeft = originalLeft + daysDelta * dayWidth;
+                let newRight = newLeft + originalWidth;
+
+                // Apply outer constraints for move
+                if (constraintBounds.minLeft !== null && newLeft < constraintBounds.minLeft) {
+                    newLeft = constraintBounds.minLeft;
+                }
+                if (constraintBounds.maxRight !== null && newRight > constraintBounds.maxRight) {
+                    newLeft = constraintBounds.maxRight - originalWidth;
+                }
+
+                setCurrentLeft(newLeft);
             } else if (dragType === "resize-left") {
-                const newLeft = originalLeft + daysDelta * dayWidth;
-                const newWidth = originalWidth - daysDelta * dayWidth;
+                let newLeft = originalLeft + daysDelta * dayWidth;
+                let newWidth = originalWidth - daysDelta * dayWidth;
+
+                // Apply outer constraint (cannot go before project/parent start)
+                if (constraintBounds.minLeft !== null && newLeft < constraintBounds.minLeft) {
+                    const adjustment = constraintBounds.minLeft - newLeft;
+                    newLeft = constraintBounds.minLeft;
+                    newWidth = newWidth - adjustment;
+                }
+
                 if (newWidth >= MIN_BAR_WIDTH) {
                     setCurrentLeft(newLeft);
                     setCurrentWidth(newWidth);
                 }
             } else if (dragType === "resize-right") {
-                const newWidth = originalWidth + daysDelta * dayWidth;
+                let newWidth = originalWidth + daysDelta * dayWidth;
+                const newRight = currentLeft + newWidth;
+
+                // Apply outer constraint (cannot go after project/parent end)
+                if (constraintBounds.maxRight !== null && newRight > constraintBounds.maxRight) {
+                    newWidth = constraintBounds.maxRight - currentLeft;
+                }
+
                 if (newWidth >= MIN_BAR_WIDTH) setCurrentWidth(newWidth);
             }
         };
@@ -186,6 +273,16 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick }: T
                     newEndDate.setDate(newEndDate.getDate() + daysDeltaWidth);
                 }
 
+                // Check if any subtasks fall outside the new range and warn
+                if (!isSubtask) {
+                    const outsideSubtasks = getSubtasksOutsideRange(newStartDate, newEndDate);
+                    if (outsideSubtasks.length > 0 && onValidationError) {
+                        onValidationError(
+                            `Warning: ${outsideSubtasks.length} subtask(s) fall outside the new date range: ${outsideSubtasks.join(", ")}. Please update them manually.`
+                        );
+                    }
+                }
+
                 onDateChange(task.id, newStartDate, newEndDate);
             } else {
                 setCurrentLeft(left);
@@ -203,15 +300,23 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick }: T
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [isDragging, dragType, dragStartX, originalLeft, originalWidth, currentLeft, currentWidth, left, width, task, onDateChange, onTaskClick, hasDragged, dayWidth]);
+    }, [isDragging, dragType, dragStartX, originalLeft, originalWidth, currentLeft, currentWidth, left, width, task, onDateChange, onTaskClick, hasDragged, dayWidth, constraintBounds, isSubtask, getSubtasksOutsideRange, onValidationError]);
+
+    // Subtask-specific dimensions
+    const barHeight = isSubtask ? SUBTASK_BAR_HEIGHT : TASK_BAR_HEIGHT;
+    const barColor = isSubtask ? SUBTASK_BAR_COLOR : TASK_BAR_COLOR;
 
     if (!hasValidDates) {
         return (
             <div
-                className="absolute flex items-center h-[28px] px-2 text-xs text-muted-foreground italic cursor-pointer hover:text-foreground"
-                style={{ top: 4, left: 4 }}
+                className={cn(
+                    "absolute flex items-center px-2 text-muted-foreground italic cursor-pointer hover:text-foreground",
+                    isSubtask ? "h-[20px] text-[10px]" : "h-[28px] text-xs"
+                )}
+                style={{ top: 4, left: isSubtask ? 20 : 4 }}
                 onClick={() => onTaskClick(task)}
             >
+                {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" />}
                 <span className="truncate">{task.title || "Untitled"}</span>
                 <span className="ml-1 text-muted-foreground/60">(no dates)</span>
             </div>
@@ -229,9 +334,9 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick }: T
             style={{
                 left: currentLeft,
                 width: currentWidth,
-                height: TASK_BAR_HEIGHT,
-                top: (ROW_HEIGHT - TASK_BAR_HEIGHT) / 2,
-                backgroundColor: TASK_BAR_COLOR,
+                height: barHeight,
+                top: (ROW_HEIGHT - barHeight) / 2,
+                backgroundColor: barColor,
                 borderLeft: `3px solid ${statusColors.bg}`,
             }}
         >
@@ -244,7 +349,11 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick }: T
                 className="flex-1 flex items-center px-2 overflow-visible cursor-grab active:cursor-grabbing"
                 onMouseDown={(e) => handleMouseDown(e, "move")}
             >
-                <span className="text-xs font-medium text-white whitespace-nowrap" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
+                {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 text-white/70 flex-shrink-0" />}
+                <span
+                    className={cn("font-medium text-white whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")}
+                    style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                >
                     {task.title || "Untitled"}
                 </span>
             </div>
@@ -262,6 +371,7 @@ export function MultiProjectTimelineView({ projectIds, projects }: MultiProjectT
     const { loadTasksForProjects } = useMultiProjectTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
     const { $user } = useAuthStore();
+    const _console = useConsoleHelper();
 
     const timelineScrollRef = useRef<HTMLDivElement>(null);
     const [timelineRange, setTimelineRange] = useState<{ start: Date; end: Date } | null>(null);
@@ -278,15 +388,43 @@ export function MultiProjectTimelineView({ projectIds, projects }: MultiProjectT
         storageService.set(STORAGE_KEY_ZOOM, dayWidth);
     }, [dayWidth]);
 
+    // Filter tasks by projectIds and sort with subtasks under parents
     const filteredTasks = useMemo(() => {
-        return tasks
-            .filter((task) => projectIds.includes(task.projectId) && !task.deletedAt)
-            .sort((a, b) => {
-                if (a.startDate && b.startDate) return a.startDate.getTime() - b.startDate.getTime();
-                if (a.startDate) return -1;
-                if (b.startDate) return 1;
-                return (a.title || "").localeCompare(b.title || "");
-            });
+        const projectTasks = tasks.filter((task) => projectIds.includes(task.projectId) && !task.deletedAt);
+
+        // Separate parent tasks and subtasks
+        const parentTasks = projectTasks.filter((t) => !t.parentTaskId);
+        const subtasks = projectTasks.filter((t) => t.parentTaskId);
+
+        // Sort parent tasks by startDate
+        parentTasks.sort((a, b) => {
+            if (a.startDate && b.startDate) return a.startDate.getTime() - b.startDate.getTime();
+            if (a.startDate) return -1;
+            if (b.startDate) return 1;
+            return (a.title || "").localeCompare(b.title || "");
+        });
+
+        // Build result with subtasks after their parents
+        const result: Task[] = [];
+        parentTasks.forEach((parent) => {
+            result.push(parent);
+            const childTasks = subtasks
+                .filter((s) => s.parentTaskId === parent.id)
+                .sort((a, b) => {
+                    if (a.startDate && b.startDate) return a.startDate.getTime() - b.startDate.getTime();
+                    if (a.startDate) return -1;
+                    if (b.startDate) return 1;
+                    return (a.title || "").localeCompare(b.title || "");
+                });
+            result.push(...childTasks);
+        });
+
+        // Add orphaned subtasks at the end
+        const usedSubtaskIds = new Set(result.filter((t) => t.parentTaskId).map((t) => t.id));
+        const orphanedSubtasks = subtasks.filter((s) => !usedSubtaskIds.has(s.id));
+        result.push(...orphanedSubtasks);
+
+        return result;
     }, [tasks, projectIds]);
 
     useEffect(() => {
@@ -496,21 +634,28 @@ export function MultiProjectTimelineView({ projectIds, projects }: MultiProjectT
                     </div>
 
                     <ScrollArea className="h-[calc(100%-60px)]">
-                        {filteredTasks.map((task) => (
-                            <div
-                                key={task.id}
-                                className={cn(
-                                    "flex items-center px-3 cursor-pointer border-b border-transparent",
-                                    hoveredTaskId === task.id && "bg-muted/50"
-                                )}
-                                style={{ height: ROW_HEIGHT }}
-                                onClick={() => openTaskTab(task)}
-                                onMouseEnter={() => setHoveredTaskId(task.id)}
-                                onMouseLeave={() => setHoveredTaskId(null)}
-                            >
-                                <span className="text-sm truncate">{task.title || "Untitled"}</span>
-                            </div>
-                        ))}
+                        {filteredTasks.map((task) => {
+                            const isSubtask = !!task.parentTaskId;
+                            return (
+                                <div
+                                    key={task.id}
+                                    className={cn(
+                                        "flex items-center cursor-pointer border-b border-transparent",
+                                        hoveredTaskId === task.id && "bg-muted/50",
+                                        isSubtask ? "px-2 bg-muted/10" : "px-3"
+                                    )}
+                                    style={{ height: ROW_HEIGHT }}
+                                    onClick={() => openTaskTab(task)}
+                                    onMouseEnter={() => setHoveredTaskId(task.id)}
+                                    onMouseLeave={() => setHoveredTaskId(null)}
+                                >
+                                    {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground mr-1 flex-shrink-0" />}
+                                    <span className={cn("truncate", isSubtask ? "text-xs" : "text-sm")}>
+                                        {task.title || "Untitled"}
+                                    </span>
+                                </div>
+                            );
+                        })}
                         {filteredTasks.length === 0 && (
                             <div className="flex items-center justify-center h-24 text-muted-foreground text-sm">No tasks</div>
                         )}
@@ -586,23 +731,39 @@ export function MultiProjectTimelineView({ projectIds, projects }: MultiProjectT
 
                         {/* Timeline Rows */}
                         <div style={{ position: "relative" }}>
-                            {filteredTasks.map((task) => (
-                                <div
-                                    key={task.id}
-                                    className={cn("relative", hoveredTaskId === task.id && "bg-muted/40")}
-                                    style={{ height: ROW_HEIGHT }}
-                                    onMouseEnter={() => setHoveredTaskId(task.id)}
-                                    onMouseLeave={() => setHoveredTaskId(null)}
-                                >
-                                    <TaskBar
-                                        task={task}
-                                        timelineStart={timelineStart}
-                                        dayWidth={dayWidth}
-                                        onDateChange={handleDateChange}
-                                        onTaskClick={openTaskTab}
-                                    />
-                                </div>
-                            ))}
+                            {filteredTasks.map((task) => {
+                                const isSubtask = !!task.parentTaskId;
+                                const parentTask = isSubtask
+                                    ? filteredTasks.find((t) => t.id === task.parentTaskId) || null
+                                    : null;
+                                const taskProject = projects.find((p) => p.id === task.projectId) || null;
+                                return (
+                                    <div
+                                        key={task.id}
+                                        className={cn(
+                                            "relative",
+                                            hoveredTaskId === task.id && "bg-muted/40",
+                                            isSubtask && "bg-muted/10"
+                                        )}
+                                        style={{ height: ROW_HEIGHT }}
+                                        onMouseEnter={() => setHoveredTaskId(task.id)}
+                                        onMouseLeave={() => setHoveredTaskId(null)}
+                                    >
+                                        <TaskBar
+                                            task={task}
+                                            timelineStart={timelineStart}
+                                            dayWidth={dayWidth}
+                                            onDateChange={handleDateChange}
+                                            onTaskClick={openTaskTab}
+                                            isSubtask={isSubtask}
+                                            parentTask={parentTask}
+                                            project={taskProject}
+                                            allTasks={filteredTasks}
+                                            onValidationError={(msg) => _console.warning(msg)}
+                                        />
+                                    </div>
+                                );
+                            })}
 
                             {filteredTasks.length === 0 && (
                                 <div className="flex items-center justify-center h-24 text-muted-foreground text-sm">No tasks with dates</div>

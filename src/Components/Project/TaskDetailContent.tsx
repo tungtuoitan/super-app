@@ -8,14 +8,15 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateTimePicker, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
 import { CardContent } from "@/Components/ui/card";
 import { ScrollArea } from "@/Components/ui/scroll-area";
-import { FileText } from "lucide-react";
-import { Task } from "@/store/task/useTask.store";
+import { FileText, AlertCircle } from "lucide-react";
+import { Task, useTaskStore } from "@/store/task/useTask.store";
 import { useProjectStore } from "@/store/project/useProject.store";
 import { useGeneralStore } from "@/store/general/General.store";
 import { useEditorTabsStore, useAuthStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { taskService, TaskDTO } from "@/services/task.service";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
 
 /**
  * Get task status colors from constants
@@ -46,6 +47,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { projects } = useProjectStore();
     const { $user } = useAuthStore();
+    const { tasks } = useTaskStore();
 
     // Find the task tab by ID
     const taskTab = openTabs.find((tab) => tab.id === taskTabId && tab.type === constants.vscode.tab.tabTypes.task);
@@ -65,6 +67,53 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
 
     // Check if task is inactive (soft deleted)
     const isDeleted = selectedTask?.deletedAt !== null && selectedTask?.deletedAt !== undefined;
+
+    // Get current project
+    const currentProject = useMemo(() => {
+        if (!selectedTask?.projectId) return null;
+        return projects.find((p) => p.id === selectedTask.projectId) || null;
+    }, [selectedTask?.projectId, projects]);
+
+    // Check if project is completed or cancelled (all fields should be disabled)
+    const isProjectInactive = currentProject?.status === "completed" || currentProject?.status === "cancelled";
+
+    // Combined disabled state
+    const isDisabled = isDeleted || isProjectInactive;
+
+    // Get parent task (if this is a subtask)
+    const parentTask = useMemo(() => {
+        if (!selectedTask?.parentTaskId) return null;
+        return tasks.find((t) => t.id === selectedTask.parentTaskId) || null;
+    }, [selectedTask?.parentTaskId, tasks]);
+
+    // Calculate date constraints
+    const dateConstraints = useMemo(() => {
+        // For subtasks: constrained by parent task dates
+        if (selectedTask?.parentTaskId && parentTask) {
+            return {
+                minDate: parentTask.startDate || null,
+                maxDate: parentTask.endDate || null,
+                disabledReason: (!parentTask.startDate && !parentTask.endDate)
+                    ? "Parent task has no dates set"
+                    : undefined,
+            };
+        }
+        // For regular tasks: constrained by project dates
+        if (currentProject) {
+            return {
+                minDate: currentProject.startDate || null,
+                maxDate: currentProject.endDate || null,
+                disabledReason: undefined,
+            };
+        }
+        return { minDate: null, maxDate: null, disabledReason: undefined };
+    }, [selectedTask?.parentTaskId, parentTask, currentProject]);
+
+    // Check if this task has subtasks (used to filter parent task options)
+    const hasSubtasks = useMemo(() => {
+        if (!selectedTask) return false;
+        return tasks.some((t) => t.parentTaskId === selectedTask.id);
+    }, [selectedTask, tasks]);
 
     // Get status options from registriesByType with colors
     const statusOptions: IStatusOption[] = useMemo(() => {
@@ -131,6 +180,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     }, [selectedTask?.projectId, projects]);
 
     // Load parent task options when project changes
+    // Filter out: current task, subtasks (depth=1), and tasks that already have subtasks
     const loadParentTaskOptions = useCallback(async (projectId: number, currentTaskId: number) => {
         if (!projectId || projectId < 0 || !$user.userToken) {
             setParentTaskOptions([]);
@@ -145,8 +195,26 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
             });
 
             if (result.success && result.data) {
+                // Get list of task IDs that have subtasks
+                const taskIdsWithSubtasks = new Set<number>();
+                result.data.forEach((t: TaskDTO) => {
+                    if (t.parentTaskId) {
+                        taskIdsWithSubtasks.add(t.parentTaskId);
+                    }
+                });
+
                 const options: IAutoCompleteOptions[] = result.data
-                    .filter((t: TaskDTO) => t.id !== currentTaskId && t.id > 0)
+                    .filter((t: TaskDTO) => {
+                        // Exclude current task
+                        if (t.id === currentTaskId) return false;
+                        // Only include saved tasks (id > 0)
+                        if (t.id <= 0) return false;
+                        // Exclude tasks that are already subtasks (cannot be a parent - depth=1)
+                        if (t.parentTaskId) return false;
+                        // If current task has subtasks, it cannot become a subtask of another task
+                        // (This is handled elsewhere, but included for clarity)
+                        return true;
+                    })
                     .map((t: TaskDTO) => ({
                         id: t.id,
                         label: t.title || `Task #${t.id}`,
@@ -256,12 +324,22 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     return (
         <ScrollArea className="h-full w-full">
             <div className="px-6 py-4 mx-auto h-full">
+                {/* Project inactive alert */}
+                {isProjectInactive && (
+                    <Alert variant="default" className="mb-4 border-yellow-500/50 bg-yellow-500/10">
+                        <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        <AlertDescription className="text-yellow-500">
+                            This task belongs to a {currentProject?.status} project. Editing is disabled.
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 {/* Two-column layout: Details (2/3) | Metadata (1/3) */}
                 <div className="flex">
                     {/* Left Column - Task Details (2/3 width) */}
                     <div className="flex-[3] min-w-0">
                         <CardContent className="space-y-4">
-                            
+
 
                             {/* Task Title */}
                             <GenericTextField
@@ -270,7 +348,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 onChange={(e) => handleFieldChange("title", e.target.value)}
                                 placeholder="Enter task title..."
                                 size="small"
-                                disabled={isDeleted}
+                                disabled={isDisabled}
                             />
 
                             {/* Date row */}
@@ -281,7 +359,10 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                         value={selectedTask.startDate}
                                         onChange={(date) => handleFieldChange("startDate", date)}
                                         placeholder="Pick start date..."
-                                        disabled={isDeleted}
+                                        disabled={isDisabled || !!dateConstraints.disabledReason}
+                                        minDate={dateConstraints.minDate}
+                                        maxDate={dateConstraints.maxDate}
+                                        disabledReason={dateConstraints.disabledReason}
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -290,7 +371,10 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                         value={selectedTask.endDate}
                                         onChange={(date) => handleFieldChange("endDate", date)}
                                         placeholder="Pick end date..."
-                                        disabled={isDeleted}
+                                        disabled={isDisabled || !!dateConstraints.disabledReason}
+                                        minDate={dateConstraints.minDate}
+                                        maxDate={dateConstraints.maxDate}
+                                        disabledReason={dateConstraints.disabledReason}
                                     />
                                 </div>
                             </div>
@@ -309,7 +393,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                         placeholder="Enter task notes..."
                                         minHeight="580px"
                                         className="text-left"
-                                        disabled={isDeleted}
+                                        disabled={isDisabled}
                                         uploadContext="project"
                                         uploadContextId={selectedTask.projectId}
                                     />
@@ -330,7 +414,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                     name: "status",
                                     label: "Status",
                                 }}
-                                disabled={isDeleted}
+                                disabled={isDisabled}
                                 placeholder="Select status..."
                             />
 
@@ -343,7 +427,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                     name: "priority",
                                     label: "Priority",
                                 }}
-                                disabled={isDeleted}
+                                disabled={isDisabled}
                                 placeholder="Select priority..."
                             />
 
@@ -356,20 +440,20 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                     name: "project",
                                     label: "Project",
                                 }}
-                                disabled={isDeleted}
+                                disabled={isDisabled}
                                 disableClearable
                             />
 
-                            {/* Parent Task Selection */}
+                            {/* Parent Task Selection - disabled if task has subtasks (depth=1 constraint) */}
                             <GenericAutoComplete
                                 value={currentParentTaskValue}
                                 onChange={handleParentTaskChange}
                                 allOptions={parentTaskOptions}
                                 inputProps={{
                                     name: "parentTask",
-                                    label: "Parent Task (Subtask of)",
+                                    label: hasSubtasks ? "Parent Task (Has subtasks - cannot be subtask)" : "Parent Task (Subtask of)",
                                 }}
-                                disabled={isDeleted || isLoadingParentTasks}
+                                disabled={isDisabled || isLoadingParentTasks || hasSubtasks}
                             />
 
                             <GenericTextField label="Task ID" value={selectedTask.id > 0 ? selectedTask.id.toString() : "New (Unsaved)"} disabled size="small" />

@@ -14,6 +14,8 @@ export interface ProjectDTO {
     name: string;
     description?: string | null;
     status: string;
+    startDate?: string | null;
+    endDate?: string | null;
     createdAt: string;
     updatedAt?: string | null;
     deletedAt?: string | null;
@@ -84,6 +86,8 @@ const _upsertProjectBatch = async (
         name: string;
         description?: string | null;
         status?: string;
+        startDate?: string | null;
+        endDate?: string | null;
         deletedAt?: string | null;
     }>
 ): Promise<ResultOptions<ProjectDTO>> => {

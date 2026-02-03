@@ -190,6 +190,39 @@ export const useTaskGridHelper = () => {
         // Get the hovered task for subtask creation (only if single task hovered)
         const hoveredTask = row ? tasks.find((t) => t.id === parseInt(row.id)) : null;
 
+        // Determine the parent task ID for subtask creation:
+        // - If hovering a subtask, use its parent task ID
+        // - If hovering a parent task, use that task's ID
+        // - Task with subtasks cannot become a subtask (depth=1)
+        const getParentTaskIdForSubtask = (): number | null => {
+            if (!hoveredTask) return null;
+            if (hoveredTask.id <= 0) return null; // Cannot create subtask for unsaved task
+
+            // If hovering a subtask, create subtask for its parent
+            if (hoveredTask.parentTaskId) {
+                return hoveredTask.parentTaskId;
+            }
+
+            // Check if hovered task already has subtasks (depth=1 constraint)
+            const hasSubtasks = tasks.some((t) => t.parentTaskId === hoveredTask.id);
+            if (hasSubtasks) {
+                // Task with subtasks can still have more subtasks added
+                return hoveredTask.id;
+            }
+
+            // Regular parent task
+            return hoveredTask.id;
+        };
+
+        // Check if task can be parent (for disabling menu option)
+        const canBeParent = (taskId: number): boolean => {
+            const task = tasks.find((t) => t.id === taskId);
+            if (!task || task.id <= 0) return false;
+            // A subtask cannot be a parent (depth=1)
+            if (task.parentTaskId) return false;
+            return true;
+        };
+
         showContextMenu(event, "task-grid", {
             selectedTasks,
             selectedIds,
@@ -205,8 +238,16 @@ export const useTaskGridHelper = () => {
                 }
             },
             onAddSubTask: (parentTaskId: number) => {
-                if (projectId && parentTaskId > 0) {
-                    const newSubTask = createSubTask(projectId, parentTaskId);
+                // Use the smart parent task ID calculation
+                const actualParentId = parentTaskId || getParentTaskIdForSubtask();
+                if (projectId && actualParentId && actualParentId > 0 && canBeParent(actualParentId)) {
+                    const newSubTask = createSubTask(projectId, actualParentId);
+                    if (newSubTask && onTaskCreated) {
+                        onTaskCreated(newSubTask);
+                    }
+                } else if (hoveredTask?.parentTaskId) {
+                    // If clicking on a subtask, create subtask for the parent
+                    const newSubTask = createSubTask(projectId!, hoveredTask.parentTaskId);
                     if (newSubTask && onTaskCreated) {
                         onTaskCreated(newSubTask);
                     }
