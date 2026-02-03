@@ -11,22 +11,27 @@ import { useEditorTabsStore } from "@/store/index";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { useWsStore } from "@/store/ws/useWs.store";
+import { useProjectStore, Project } from "@/store/project/useProject.store";
+import { useTaskStore, Task } from "@/store/task/useTask.store";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
 import { Note, NoteDTO } from "@/types/note.types";
 import { Ws } from "@/types/workspace.types";
 import { noteService } from "@/services/note.service";
 import { wsService, WsDTO } from "@/services/ws.service";
+import { projectService, ProjectDTO } from "@/services/project.service";
+import { taskService, TaskDTO } from "@/services/task.service";
 import { transformNotes } from "@/utils/note.utils";
 import { transformWs } from "@/utils/ws.utils";
+import { parseAsLocalDate } from "@/utils/date.utils";
 import {useEditorTabHelper} from "@/hooks/index";
 
 // Storage types
 export interface TabStorage {
     tabId: string;
-    type: string; 
-    dataId: number;
+    type: string;
+    dataId: number | string; // number for single entity, string for comma-separated IDs (multiProject)
     index: number;
 }
 
@@ -40,11 +45,47 @@ export const getStorageKey = (userId: number | null | undefined): string | null 
     return `opentabs_${userId}`;
 };
 
+// Transform functions
+const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
+    return dtos.map((dto) => ({
+        id: dto.id,
+        name: dto.name,
+        description: dto.description,
+        status: dto.status,
+        startDate: dto.startDate ? new Date(dto.startDate) : null,
+        endDate: dto.endDate ? new Date(dto.endDate) : null,
+        createdAt: new Date(dto.createdAt),
+        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
+        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+    }));
+};
+
+const transformTaskData = (dtos: TaskDTO[]): Task[] => {
+    return dtos.map((dto) => ({
+        id: dto.id,
+        projectId: dto.projectId,
+        parentTaskId: dto.parentTaskId,
+        type: dto.type,
+        title: dto.title,
+        note: dto.note,
+        status: dto.status,
+        priority: dto.priority,
+        startDate: parseAsLocalDate(dto.startDate),
+        endDate: parseAsLocalDate(dto.endDate),
+        orderIndex: dto.orderIndex,
+        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+        updatedAt: parseAsLocalDate(dto.updatedAt),
+        deletedAt: parseAsLocalDate(dto.deletedAt),
+    }));
+};
+
 export const OpenTabsSync = () => {
     const { openTabs, setOpenTabs, setActiveTabId, isLoadingTabs, setIsLoadingTabs } = useEditorTabsStore();
     const { $user } = useAuthStore();
     const { notes } = useNoteGridStore();
     const { workspaces } = useWsStore();
+    const { projects } = useProjectStore();
+    const { tasks } = useTaskStore();
     const { present } = useNavigationHistoryStore();
     const { setNewTabAnd } = useEditorTabHelper();
 
@@ -80,16 +121,21 @@ export const OpenTabsSync = () => {
                 // Separate by type
                 const noteTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.note);
                 const wsTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.workspace);
+                const projectTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.project);
+                const taskTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.task);
+                const multiProjectTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.multiProject);
 
                 // Collect missing IDs
                 const missingNoteIds: number[] = [];
                 const missingWsIds: number[] = [];
+                const missingProjectIds: number[] = [];
+                const missingTaskIds: number[] = [];
 
                 // Check which notes are missing from grid
                 for (const tab of noteTabs) {
                     const existsInGrid = notes.find((n) => n.id === tab.dataId);
                     if (!existsInGrid) {
-                        missingNoteIds.push(tab.dataId);
+                        missingNoteIds.push(tab.dataId as number);
                     }
                 }
 
@@ -97,13 +143,42 @@ export const OpenTabsSync = () => {
                 for (const tab of wsTabs) {
                     const existsInGrid = workspaces.find((w) => w.id === tab.dataId);
                     if (!existsInGrid) {
-                        missingWsIds.push(tab.dataId);
+                        missingWsIds.push(tab.dataId as number);
                     }
+                }
+
+                // Check which projects are missing from store
+                for (const tab of projectTabs) {
+                    const existsInStore = projects.find((p) => p.id === tab.dataId);
+                    if (!existsInStore) {
+                        missingProjectIds.push(tab.dataId as number);
+                    }
+                }
+
+                // Check which tasks are missing from store
+                for (const tab of taskTabs) {
+                    const existsInStore = tasks.find((t) => t.id === tab.dataId);
+                    if (!existsInStore) {
+                        missingTaskIds.push(tab.dataId as number);
+                    }
+                }
+
+                // Collect all project IDs needed for multiProject tabs
+                const multiProjectIds = new Set<number>();
+                for (const tab of multiProjectTabs) {
+                    const ids = (tab.dataId as string).split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+                    ids.forEach(id => {
+                        if (!projects.find(p => p.id === id)) {
+                            multiProjectIds.add(id);
+                        }
+                    });
                 }
 
                 // Fetch missing data from API using services
                 let fetchedNotes: Note[] = [];
                 let fetchedWs: Ws[] = [];
+                let fetchedProjects: Project[] = [];
+                let fetchedTasks: Task[] = [];
 
                 if (!$user.userToken) {
                     console.error("No auth token found");
@@ -137,8 +212,40 @@ export const OpenTabsSync = () => {
                     }
                 }
 
+                // Fetch missing projects (including for multiProject tabs)
+                const allMissingProjectIds = [...new Set([...missingProjectIds, ...multiProjectIds])];
+                if (allMissingProjectIds.length > 0) {
+                    const idsString = allMissingProjectIds.join(",");
+                    try {
+                        const result = await projectService._getProjects($user.userToken, { ids: idsString });
+                        if (result.success && result.data) {
+                            fetchedProjects = transformProjectData(result.data as ProjectDTO[]);
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch projects by ids:", error);
+                    }
+                }
+
+                // Fetch missing tasks
+                if (missingTaskIds.length > 0) {
+                    try {
+                        // Task API doesn't support fetching by task ID directly,
+                        // so we fetch all tasks and filter
+                        const result = await taskService._getTasks($user.userToken, {});
+                        if (result.success && result.data) {
+                            const allTasks = transformTaskData(result.data as TaskDTO[]);
+                            fetchedTasks = allTasks.filter(t => missingTaskIds.includes(t.id));
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch tasks:", error);
+                    }
+                }
+
                 // Now restore tabs with all data available
                 const restoredTabs: BaseTab[] = [];
+
+                // Helper to get all available projects (from store + fetched)
+                const getAllProjects = () => [...projects, ...fetchedProjects];
 
                 for (const tabStorage of sortedTabs) {
                     if (tabStorage.type === constants.vscode.tab.tabTypes.note) {
@@ -175,6 +282,61 @@ export const OpenTabsSync = () => {
                                 hasUnsavedChanges: false,
                             });
                         }
+                    } else if (tabStorage.type === constants.vscode.tab.tabTypes.project) {
+                        // Try store first, then fetched data
+                        let projectData = projects.find((p) => p.id === tabStorage.dataId);
+                        if (!projectData) {
+                            projectData = fetchedProjects.find((p) => p.id === tabStorage.dataId);
+                        }
+
+                        if (projectData) {
+                            restoredTabs.push({
+                                id: tabStorage.tabId,
+                                type: constants.vscode.tab.tabTypes.project,
+                                data: projectData,
+                                data0: projectData,
+                                title: projectData.name || constants.vscode.tabTitles.unsavedProject,
+                                hasUnsavedChanges: false,
+                            });
+                        }
+                    } else if (tabStorage.type === constants.vscode.tab.tabTypes.task) {
+                        // Try store first, then fetched data
+                        let taskData = tasks.find((t) => t.id === tabStorage.dataId);
+                        if (!taskData) {
+                            taskData = fetchedTasks.find((t) => t.id === tabStorage.dataId);
+                        }
+
+                        if (taskData) {
+                            restoredTabs.push({
+                                id: tabStorage.tabId,
+                                type: constants.vscode.tab.tabTypes.task,
+                                data: taskData,
+                                data0: taskData,
+                                title: taskData.title || constants.vscode.tabTitles.unsavedTask,
+                                hasUnsavedChanges: false,
+                            });
+                        }
+                    } else if (tabStorage.type === constants.vscode.tab.tabTypes.multiProject) {
+                        // Parse project IDs from comma-separated string
+                        const projectIds = (tabStorage.dataId as string).split(',').map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
+                        const allProjects = getAllProjects();
+                        const projectsData = projectIds.map(id => allProjects.find(p => p.id === id)).filter(Boolean) as Project[];
+
+                        // Only restore if we have at least some projects
+                        if (projectsData.length > 0) {
+                            const tabData: MultiProjectTabData = {
+                                projectIds,
+                                projects: projectsData,
+                            };
+                            restoredTabs.push({
+                                id: tabStorage.tabId,
+                                type: constants.vscode.tab.tabTypes.multiProject,
+                                data: tabData,
+                                data0: tabData,
+                                title: "Multiple-Projects",
+                                hasUnsavedChanges: false,
+                            });
+                        }
                     }
                 }
 
@@ -189,6 +351,14 @@ export const OpenTabsSync = () => {
                             return (tab.data as Note).id === parseInt(present.itemId);
                         } else if (tab.type === constants.vscode.tab.tabTypes.workspace && present.type === 'workspace') {
                             return (tab.data as Ws).id === parseInt(present.itemId);
+                        } else if (tab.type === constants.vscode.tab.tabTypes.project && present.type === 'project') {
+                            return (tab.data as Project).id === parseInt(present.itemId);
+                        } else if (tab.type === constants.vscode.tab.tabTypes.task && present.type === 'task') {
+                            return (tab.data as Task).id === parseInt(present.itemId);
+                        } else if (tab.type === constants.vscode.tab.tabTypes.multiProject && present.type === 'multiProject') {
+                            // For multiProject, compare project IDs
+                            const tabData = tab.data as MultiProjectTabData;
+                            return tabData.projectIds.join(',') === present.itemId;
                         }
                         return false;
                     });
@@ -221,22 +391,36 @@ export const OpenTabsSync = () => {
         if (!storageKey || openTabs.length === 0 || isLoadingTabs) return;
 
         try {
-            const tabsToSave: TabStorage[] = openTabs.map((tab, index) => {
-                let dataId: number = 0;
+            const tabsToSave: TabStorage[] = openTabs
+                .map((tab, index) => {
+                    let dataId: number | string = 0;
 
-                if (tab.type === constants.vscode.tab.tabTypes.note) {
-                    dataId = (tab.data as Note).id;
-                } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
-                    dataId = (tab.data as Ws).id;
-                }
+                    if (tab.type === constants.vscode.tab.tabTypes.note) {
+                        dataId = (tab.data as Note).id;
+                    } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+                        dataId = (tab.data as Ws).id;
+                    } else if (tab.type === constants.vscode.tab.tabTypes.project) {
+                        dataId = (tab.data as Project).id;
+                    } else if (tab.type === constants.vscode.tab.tabTypes.task) {
+                        dataId = (tab.data as Task).id;
+                    } else if (tab.type === constants.vscode.tab.tabTypes.multiProject) {
+                        // Store as comma-separated project IDs string
+                        dataId = (tab.data as MultiProjectTabData).projectIds.join(',');
+                    }
 
-                return {
-                    tabId: tab.id,
-                    type: tab.type,
-                    dataId: dataId,
-                    index: index,
-                };
-            });
+                    // Skip tabs with invalid dataId (temp tabs with negative IDs)
+                    if (typeof dataId === 'number' && dataId <= 0) {
+                        return null;
+                    }
+
+                    return {
+                        tabId: tab.id,
+                        type: tab.type,
+                        dataId: dataId,
+                        index: index,
+                    };
+                })
+                .filter(Boolean) as TabStorage[];
 
             const data: OpenTabsStorage = {
                 tabs: tabsToSave,
