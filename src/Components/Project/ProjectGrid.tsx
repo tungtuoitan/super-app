@@ -61,16 +61,16 @@ export function ProjectGrid() {
         return [
             {
                 accessorKey: "id",
-                header: () => <div className="text-left text-sm ml-2">ID</div>,
+                header: () => <div className="text-left text-sm font-semibold ml-2">ID</div>,
                 size: 20,
-                cell: ({ getValue }) => <div className="text-left text-sm ml-3">{getValue() as number}</div>,
+                cell: ({ getValue }) => <div className="text-left text-sm font-medium ml-3">{getValue() as number}</div>,
             },
             {
                 accessorKey: "name",
-                header: () => <div className="text-left text-sm">Project Name</div>,
+                header: () => <div className="text-left text-sm font-semibold">PROJECT NAME</div>,
                 size: 200,
                 cell: ({ getValue }) => (
-                    <div className="text-sm text-primary text-left cursor-pointer hover:text-primary/80 px-2">
+                    <div className="text-sm font-semibold text-primary text-left cursor-pointer hover:text-primary/80 px-2 uppercase tracking-wide">
                         {(getValue() as string) || "—"}
                     </div>
                 ),
@@ -211,7 +211,7 @@ export function ProjectGrid() {
                                 {headerGroup.headers.map((header) => (
                                     <th
                                         key={header.id}
-                                        className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground"
+                                        className="h-[44px] px-1 text-left align-middle font-semibold text-muted-foreground uppercase tracking-wider text-xs"
                                         style={{ width: header.getSize() }}
                                     >
                                         {header.isPlaceholder
@@ -227,7 +227,7 @@ export function ProjectGrid() {
                             <tr
                                 key={row.id}
                                 data-row
-                                className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${
+                                className={`border-b h-[48px] cursor-pointer hover:bg-muted/50 transition-colors ${
                                     row.original.deletedAt ? "opacity-60" : ""
                                 }`}
                                 onClick={() => {
@@ -250,10 +250,10 @@ export function ProjectGrid() {
                 </table>
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-1 bg-background">
-                <div className="flex-1 text-sm text-left text-muted-foreground">
-                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} total)
+            {/* Pagination - Project style */}
+            <div className="flex items-center justify-between px-4 py-2 bg-background border-t-2 border-primary/20">
+                <div className="flex-1 text-xs text-left text-muted-foreground font-semibold uppercase tracking-wide">
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} Projects)
                 </div>
 
                 <div className="flex items-center gap-2">

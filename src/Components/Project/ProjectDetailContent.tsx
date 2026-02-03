@@ -22,10 +22,10 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-    { id: "general", label: "General", icon: <Settings className="h-4 w-4" /> },
-    { id: "taskList", label: "Task List", icon: <ListTodo className="h-4 w-4" /> },
-    { id: "kanban", label: "Kanban", icon: <Columns className="h-4 w-4" /> },
-    { id: "timeline", label: "Timeline", icon: <GanttChartSquare className="h-4 w-4" /> },
+    { id: "general", label: "GENERAL", icon: <Settings className="h-4 w-4" /> },
+    { id: "taskList", label: "TASKS", icon: <ListTodo className="h-4 w-4" /> },
+    { id: "kanban", label: "KANBAN", icon: <Columns className="h-4 w-4" /> },
+    { id: "timeline", label: "TIMELINE", icon: <GanttChartSquare className="h-4 w-4" /> },
 ];
 
 interface ProjectDetailContentProps {
@@ -68,19 +68,19 @@ export function ProjectDetailContent({ projectId }: ProjectDetailContentProps) {
 
     return (
         <div className="flex flex-col h-full w-full bg-background">
-            {/* TabBar */}
-            <div className="flex border-b bg-muted/30">
+            {/* TabBar - Project style with uppercase labels */}
+            <div className="flex border-b-2 border-primary/20 bg-muted/20">
                 {TABS.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => !tab.disabled && setActiveTab(tab.id)}
                         disabled={tab.disabled}
                         className={cn(
-                            "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
-                            "border-b-2 -mb-[1px]",
+                            "flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
+                            "border-b-3 -mb-[2px]",
                             activeTab === tab.id
-                                ? "border-primary text-primary"
-                                : "border-transparent text-muted-foreground hover:text-foreground",
+                                ? "border-primary text-primary bg-primary/5"
+                                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
                             tab.disabled && "opacity-50 cursor-not-allowed"
                         )}
                     >

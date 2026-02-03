@@ -25,18 +25,18 @@ interface MultiProjectProTimelineViewProps {
     projects: Project[];
 }
 
-// Constants
+// Constants - Project rows are larger than Task rows for visual differentiation
 const STORAGE_KEY_ZOOM = "pro_timeline_day_width";
 const DEFAULT_DAY_WIDTH = 40;
 const MIN_DAY_WIDTH = 20;
 const MAX_DAY_WIDTH = 80;
 const ZOOM_STEP = 10;
-const ROW_HEIGHT = 40;
+const ROW_HEIGHT = 52; // Larger than Task timeline (40px)
 const HEADER_HEIGHT = 60;
-const PROJECT_BAR_HEIGHT = 32;
+const PROJECT_BAR_HEIGHT = 40; // Larger than Task bars (32px)
 const MIN_BAR_WIDTH = 20;
 const EXTEND_DAYS = 14;
-const PROJECT_BAR_COLOR = "#1e3a5f";
+const PROJECT_BAR_COLOR = "#0c4a6e"; // Darker blue to match project theme
 
 const WEEKEND_STRIPE_BG = `repeating-linear-gradient(
     45deg,
@@ -238,12 +238,12 @@ function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onProjectC
             />
 
             <div
-                className="flex-1 flex items-center px-2 overflow-visible cursor-grab active:cursor-grabbing"
+                className="flex-1 flex items-center px-3 overflow-visible cursor-grab active:cursor-grabbing"
                 onMouseDown={(e) => handleMouseDown(e, "move")}
             >
                 <span
-                    className="font-medium text-white whitespace-nowrap text-sm"
-                    style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                    className="font-bold text-white whitespace-nowrap text-sm uppercase tracking-wide"
+                    style={{ textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}
                 >
                     {project.name || "Untitled"}
                 </span>
@@ -486,8 +486,8 @@ export function MultiProjectProTimelineView({ projectIds, projects }: MultiProje
 
             <div className="flex-1 overflow-hidden flex">
                 {/* Project List (Left Panel) */}
-                <div className="w-[250px] flex-shrink-0 border-r bg-muted/30">
-                    <div className="border-b bg-muted/50 flex items-center px-3 font-medium text-sm" style={{ height: HEADER_HEIGHT }}>
+                <div className="w-[280px] flex-shrink-0 border-r bg-muted/30">
+                    <div className="border-b bg-muted/50 flex items-center px-3 font-bold text-xs uppercase tracking-wider" style={{ height: HEADER_HEIGHT }}>
                         Projects
                     </div>
 
@@ -498,7 +498,7 @@ export function MultiProjectProTimelineView({ projectIds, projects }: MultiProje
                                 <div
                                     key={project.id}
                                     className={cn(
-                                        "flex items-center gap-2 cursor-pointer border-b border-transparent px-3",
+                                        "flex items-center gap-3 cursor-pointer border-b border-transparent px-3",
                                         hoveredProjectId === project.id && "bg-muted/50"
                                     )}
                                     style={{ height: ROW_HEIGHT }}
@@ -506,12 +506,12 @@ export function MultiProjectProTimelineView({ projectIds, projects }: MultiProje
                                     onMouseEnter={() => setHoveredProjectId(project.id)}
                                     onMouseLeave={() => setHoveredProjectId(null)}
                                 >
-                                    {/* Status dot */}
+                                    {/* Status indicator bar */}
                                     <span
-                                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                        className="w-1 h-6 rounded-sm flex-shrink-0"
                                         style={{ backgroundColor: statusColors.bg }}
                                     />
-                                    <span className="truncate text-sm">
+                                    <span className="truncate text-sm font-semibold uppercase tracking-wide">
                                         {project.name || "Untitled"}
                                     </span>
                                 </div>
@@ -623,10 +623,10 @@ export function MultiProjectProTimelineView({ projectIds, projects }: MultiProje
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-1 bg-background border-t">
-                <div className="text-sm text-muted-foreground">
-                    {filteredProjects.length} project{filteredProjects.length !== 1 ? "s" : ""}
+            {/* Footer - Project style */}
+            <div className="flex items-center justify-between px-4 py-2 bg-background border-t-2 border-primary/20">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    {filteredProjects.length} Project{filteredProjects.length !== 1 ? "s" : ""}
                 </div>
 
                 <div className="flex items-center gap-2">
