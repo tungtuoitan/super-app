@@ -27,10 +27,10 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-    { id: "proTimeline", label: "ProTimeline", icon: <CalendarRange className="h-4 w-4" /> },
-    { id: "taskList", label: "Task List", icon: <ListTodo className="h-4 w-4" /> },
-    { id: "kanban", label: "Kanban", icon: <Columns className="h-4 w-4" /> },
-    { id: "timeline", label: "Timeline", icon: <GanttChartSquare className="h-4 w-4" /> },
+    { id: "proTimeline", label: "PROJECT TIMELINE", icon: <CalendarRange className="h-4 w-4" /> },
+    { id: "taskList", label: "ALL TASKS", icon: <ListTodo className="h-4 w-4" /> },
+    { id: "kanban", label: "KANBAN", icon: <Columns className="h-4 w-4" /> },
+    { id: "timeline", label: "TASK TIMELINE", icon: <GanttChartSquare className="h-4 w-4" /> },
 ];
 
 interface MultiProjectDetailContentProps {
@@ -55,21 +55,21 @@ function ProjectChip({ project, isSelected, onToggle }: ProjectChipProps) {
         <button
             onClick={() => onToggle(project.id)}
             className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all",
-                "border cursor-pointer whitespace-nowrap",
+                "inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all uppercase tracking-wide",
+                "border-2 cursor-pointer whitespace-nowrap",
                 isSelected
-                    ? "bg-primary/10 border-primary text-primary"
-                    : "bg-muted/50 border-transparent text-muted-foreground hover:bg-muted"
+                    ? "bg-primary/15 border-primary text-primary"
+                    : "bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:border-muted-foreground/30"
             )}
         >
-            {/* Status color dot */}
+            {/* Status color indicator bar */}
             <span
-                className="w-2 h-2 rounded-full flex-shrink-0"
+                className="w-1 h-4 rounded-sm flex-shrink-0"
                 style={{ backgroundColor: statusColors.bg }}
             />
             <span className="truncate max-w-[150px]">{project.name}</span>
             {isSelected && (
-                <X className="h-3 w-3 flex-shrink-0 opacity-60 hover:opacity-100" />
+                <X className="h-3.5 w-3.5 flex-shrink-0 opacity-60 hover:opacity-100" />
             )}
         </button>
     );
@@ -178,12 +178,12 @@ export function MultiProjectDetailContent({ projectIds, projects }: MultiProject
 
     return (
         <div className="flex flex-col h-full w-full bg-background">
-            {/* Project Selector Chips */}
-            <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/20">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">Projects:</span>
+            {/* Project Selector Chips - Project style header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b-2 border-primary/20 bg-muted/10">
+                <span className="text-xs font-bold text-muted-foreground whitespace-nowrap uppercase tracking-wider">Select Projects:</span>
 
                 <ScrollArea className="flex-1 whitespace-nowrap">
-                    <div className="flex items-center gap-1.5 pb-1">
+                    <div className="flex items-center gap-2 pb-1">
                         {availableProjects.map((project) => (
                             <ProjectChip
                                 key={project.id}
@@ -197,24 +197,24 @@ export function MultiProjectDetailContent({ projectIds, projects }: MultiProject
                 </ScrollArea>
 
                 {/* Quick actions */}
-                <div className="flex items-center gap-1 flex-shrink-0 border-l pl-2">
+                <div className="flex items-center gap-1 flex-shrink-0 border-l-2 border-primary/20 pl-3">
                     <button
                         onClick={handleSelectAllActive}
-                        className="text-xs px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
+                        className="text-xs font-semibold px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors uppercase tracking-wide"
                         title="Select all active projects"
                     >
                         Active
                     </button>
                     <button
                         onClick={handleSelectAll}
-                        className="text-xs px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
+                        className="text-xs font-semibold px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors uppercase tracking-wide"
                         title="Select all projects"
                     >
                         All
                     </button>
                     <button
                         onClick={handleClearAll}
-                        className="text-xs px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
+                        className="text-xs font-semibold px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors uppercase tracking-wide"
                         title="Clear selection"
                     >
                         Clear
@@ -222,19 +222,19 @@ export function MultiProjectDetailContent({ projectIds, projects }: MultiProject
                 </div>
             </div>
 
-            {/* TabBar */}
-            <div className="flex border-b bg-muted/30">
+            {/* TabBar - Project style with uppercase labels */}
+            <div className="flex border-b-2 border-primary/20 bg-muted/20">
                 {TABS.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => !tab.disabled && setActiveTab(tab.id)}
                         disabled={tab.disabled}
                         className={cn(
-                            "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
-                            "border-b-2 -mb-[1px]",
+                            "flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
+                            "border-b-3 -mb-[2px]",
                             activeTab === tab.id
-                                ? "border-primary text-primary"
-                                : "border-transparent text-muted-foreground hover:text-foreground",
+                                ? "border-primary text-primary bg-primary/5"
+                                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
                             tab.disabled && "opacity-50 cursor-not-allowed"
                         )}
                     >
@@ -244,8 +244,8 @@ export function MultiProjectDetailContent({ projectIds, projects }: MultiProject
                 ))}
 
                 {/* Selected count indicator */}
-                <div className="ml-auto flex items-center px-3 text-xs text-muted-foreground">
-                    {filteredProjectIds.length} of {availableProjects.length} projects selected
+                <div className="ml-auto flex items-center px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    {filteredProjectIds.length} / {availableProjects.length} Projects
                 </div>
             </div>
 

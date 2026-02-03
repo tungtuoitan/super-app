@@ -322,8 +322,8 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     };
 
     return (
-        <ScrollArea className="h-full w-full">
-            <div className="px-6 py-4 mx-auto h-full">
+        <ScrollArea className="h-full w-full ">
+            <div className="px-6 py-4 mx-auto h-full ">
                 {/* Project inactive alert */}
                 {isProjectInactive && (
                     <Alert variant="default" className="mb-4 border-yellow-500/50 bg-yellow-500/10">
