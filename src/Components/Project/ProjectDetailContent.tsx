@@ -4,14 +4,15 @@
  */
 
 import React, { useState } from "react";
-import { ListTodo, CalendarDays, Columns, GanttChartSquare } from "lucide-react";
+import { ListTodo, Columns, GanttChartSquare, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskList } from "./TaskList";
 import { TaskKanbanView } from "./TaskKanbanView";
 import { TaskTimelineView } from "./TaskTimelineView";
 import { TaskProvider } from "@/store/task/useTask.store";
+import { ProjectGeneral } from "./ProjectGeneral";
 
-type TabType = "taskList" | "todayList" | "kanban" | "timeline";
+type TabType = "general" | "taskList" | "kanban" | "timeline";
 
 interface TabConfig {
     id: TabType;
@@ -21,8 +22,8 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
+    { id: "general", label: "General", icon: <Settings className="h-4 w-4" /> },
     { id: "taskList", label: "Task List", icon: <ListTodo className="h-4 w-4" /> },
-    { id: "todayList", label: "Today", icon: <CalendarDays className="h-4 w-4" />, disabled: true },
     { id: "kanban", label: "Kanban", icon: <Columns className="h-4 w-4" /> },
     { id: "timeline", label: "Timeline", icon: <GanttChartSquare className="h-4 w-4" /> },
 ];
@@ -36,21 +37,17 @@ interface ProjectDetailContentProps {
  * Main content area with tab navigation for different project views
  */
 export function ProjectDetailContent({ projectId }: ProjectDetailContentProps) {
-    const [activeTab, setActiveTab] = useState<TabType>("taskList");
+    const [activeTab, setActiveTab] = useState<TabType>("general");
 
     const renderTabContent = () => {
         switch (activeTab) {
+            case "general":
+                return <ProjectGeneral projectId={projectId} />;
             case "taskList":
                 return (
                     <TaskProvider>
                         <TaskList projectId={projectId} />
                     </TaskProvider>
-                );
-            case "todayList":
-                return (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                        <p>Today List - Coming Soon</p>
-                    </div>
                 );
             case "kanban":
                 return (

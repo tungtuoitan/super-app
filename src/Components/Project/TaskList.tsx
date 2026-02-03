@@ -226,8 +226,8 @@ const DateRangeCell = React.memo(function DateRangeCell({
             <DateRangePicker
                 startDate={task.startDate}
                 endDate={task.endDate}
-                onStartDateChange={(date) => onStartDateUpdate(task, "startDate", date)}
-                onEndDateChange={(date) => onEndDateUpdate(task, "endDate", date)}
+                onStartDateChange={(date: Date|null) => onStartDateUpdate(task, "startDate", date)}
+                onEndDateChange={(date: Date|null) => onEndDateUpdate(task, "endDate", date)}
                 placeholder="—"
                 disabled={!!task.deletedAt || !!disabledReason}
                 showTime={false}

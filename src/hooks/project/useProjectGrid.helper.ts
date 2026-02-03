@@ -165,9 +165,9 @@ export const useProjectGridHelper = () => {
             onRestore: () => __deleteRestore_Projects(selectedIds, "restore"),
             onAddProject: __createNewProject,
             onOpenMultiProjectView: () => {
-                if (selectedProjects.length > 1) {
-                    openMultiProjectTab(selectedProjects);
-                }
+                // Open multi-project tab - it will use its own chip selector to choose projects
+                // Default will be all active projects (handled in MultiProjectDetailContent)
+                openMultiProjectTab([]);
             },
             onOpenProjectView: () => {
                 if (selectedProjects.length === 1) {

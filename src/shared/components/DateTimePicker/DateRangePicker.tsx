@@ -121,9 +121,9 @@ export function DateRangePicker({
 
     // Debug wrapper for setOpen
     const setOpen = (value: boolean) => {
-        console.log("[DateRangePicker] setOpen called:", value, "keepOpenRef:", keepOpenRef.current);
+        // console.log("[DateRangePicker] setOpen called:", value, "keepOpenRef:", keepOpenRef.current);
         if (!value && keepOpenRef.current) {
-            console.log("[DateRangePicker] Blocked close due to keepOpenRef");
+            // console.log("[DateRangePicker] Blocked close due to keepOpenRef");
             return; // Block close if we're in the middle of selecting
         }
         setOpenState(value);
@@ -201,7 +201,7 @@ export function DateRangePicker({
     // Handle single date selection from calendar - we control the logic
     // Popup stays open, only closes when user clicks outside
     const handleDateSelect = (date: Date | undefined) => {
-        console.log("[DateRangePicker] handleDateSelect called:", date);
+        // console.log("[DateRangePicker] handleDateSelect called:", date);
         if (!date) return;
 
         // Keep popup open during selection
@@ -412,7 +412,7 @@ export function DateRangePicker({
         <div className={cn("space-y-2", className)}>
             {label && (
                 <Label className="text-sm font-medium flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4" />
+                    {/* <CalendarIcon className="h-4 w-4" /> */}
                     {label}
                 </Label>
             )}
@@ -420,7 +420,7 @@ export function DateRangePicker({
             <Popover
                 open={open}
                 onOpenChange={(newOpen) => {
-                    console.log("[DateRangePicker] Popover onOpenChange:", newOpen, "keepOpenRef:", keepOpenRef.current);
+                    // console.log("[DateRangePicker] Popover onOpenChange:", newOpen, "keepOpenRef:", keepOpenRef.current);
                     if (newOpen) {
                         setOpen(true);
                     } else if (!keepOpenRef.current) {
@@ -499,27 +499,27 @@ export function DateRangePicker({
                     className="w-auto p-0"
                     align="start"
                     onCloseAutoFocus={(e) => {
-                        console.log("[DateRangePicker] onCloseAutoFocus");
+                        // console.log("[DateRangePicker] onCloseAutoFocus");
                         e.preventDefault();
                     }}
                     onOpenAutoFocus={(e) => {
-                        console.log("[DateRangePicker] onOpenAutoFocus");
+                        // console.log("[DateRangePicker] onOpenAutoFocus");
                         e.preventDefault();
                     }}
                     onFocusOutside={(e) => {
-                        console.log("[DateRangePicker] onFocusOutside", e);
+                        // console.log("[DateRangePicker] onFocusOutside", e);
                         e.preventDefault();
                     }}
                     onPointerDownOutside={(e) => {
-                        console.log("[DateRangePicker] onPointerDownOutside", e);
+                        // console.log("[DateRangePicker] onPointerDownOutside", e);
                         setOpen(false);
                     }}
                     onInteractOutside={(e) => {
-                        console.log("[DateRangePicker] onInteractOutside", e);
+                        // console.log("[DateRangePicker] onInteractOutside", e);
                         e.preventDefault();
                     }}
                     onEscapeKeyDown={() => {
-                        console.log("[DateRangePicker] onEscapeKeyDown");
+                        // console.log("[DateRangePicker] onEscapeKeyDown");
                         setOpen(false);
                     }}
                 >
