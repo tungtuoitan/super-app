@@ -12,9 +12,11 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "@/store/project/useProjectDetail.store";
+import { parseAsLocalDate } from "@/utils/date.utils";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
+ * Uses parseAsLocalDate to treat backend UTC as local time
  */
 const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
     return dtos.map((dto) => ({
@@ -22,11 +24,11 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         name: dto.name,
         description: dto.description,
         status: dto.status,
-        startDate: dto.startDate ? new Date(dto.startDate) : null,
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
-        createdAt: new Date(dto.createdAt),
-        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
-        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+        startDate: parseAsLocalDate(dto.startDate),
+        endDate: parseAsLocalDate(dto.endDate),
+        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+        updatedAt: parseAsLocalDate(dto.updatedAt),
+        deletedAt: parseAsLocalDate(dto.deletedAt),
     }));
 };
 
