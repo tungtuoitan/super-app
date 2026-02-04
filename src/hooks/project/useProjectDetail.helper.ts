@@ -11,9 +11,11 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { useConsoleHelper } from "../console/useConsole.helper";
+import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
+ * Uses parseAsLocalDate to treat backend UTC as local time
  */
 const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
     return dtos.map((dto) => ({
@@ -21,11 +23,11 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         name: dto.name,
         description: dto.description,
         status: dto.status,
-        startDate: dto.startDate ? new Date(dto.startDate) : null,
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
-        createdAt: new Date(dto.createdAt),
-        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
-        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+        startDate: parseAsLocalDate(dto.startDate),
+        endDate: parseAsLocalDate(dto.endDate),
+        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+        updatedAt: parseAsLocalDate(dto.updatedAt),
+        deletedAt: parseAsLocalDate(dto.deletedAt),
     }));
 };
 
@@ -116,15 +118,15 @@ export const useProjectDetailHelper = () => {
 
             try {
                 // ============================================================
-                // Step 3: Prepare upsert data
+                // Step 3: Prepare upsert data - use toLocalISOString to preserve local time
                 // ============================================================
                 const upsertData = {
                     id: isCreateMode ? 0 : selectedProject.id, // Always use 0 for create
                     name: selectedProject.name,
                     description: selectedProject.description,
                     status: selectedProject.status,
-                    startDate: selectedProject.startDate ? selectedProject.startDate.toISOString() : null,
-                    endDate: selectedProject.endDate ? selectedProject.endDate.toISOString() : null,
+                    startDate: toLocalISOString(selectedProject.startDate),
+                    endDate: toLocalISOString(selectedProject.endDate),
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
                 };
 
@@ -145,17 +147,17 @@ export const useProjectDetailHelper = () => {
                     throw new Error("Failed to save project: No data returned from server");
                 }
 
-                // Transform DTO to domain model
+                // Transform DTO to domain model using parseAsLocalDate
                 const transformedProject: Project = {
                     id: savedProject.id,
                     name: savedProject.name,
                     description: savedProject.description,
                     status: savedProject.status,
-                    startDate: savedProject.startDate ? new Date(savedProject.startDate) : null,
-                    endDate: savedProject.endDate ? new Date(savedProject.endDate) : null,
-                    createdAt: new Date(savedProject.createdAt),
-                    updatedAt: savedProject.updatedAt ? new Date(savedProject.updatedAt) : null,
-                    deletedAt: savedProject.deletedAt ? new Date(savedProject.deletedAt) : null,
+                    startDate: parseAsLocalDate(savedProject.startDate),
+                    endDate: parseAsLocalDate(savedProject.endDate),
+                    createdAt: parseAsLocalDate(savedProject.createdAt) || new Date(),
+                    updatedAt: parseAsLocalDate(savedProject.updatedAt),
+                    deletedAt: parseAsLocalDate(savedProject.deletedAt),
                 };
 
                 // ============================================================
