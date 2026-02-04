@@ -3,7 +3,7 @@
  * Contains TabBar with: TaskList, TodayList, Kanban, Timeline
  */
 
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import { ListTodo, Columns, GanttChartSquare, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskList } from "./TaskList";
@@ -11,6 +11,7 @@ import { TaskKanbanView } from "./TaskKanbanView";
 import { TaskTimelineView } from "./TaskTimelineView";
 import { TaskProvider } from "@/store/task/useTask.store";
 import { ProjectGeneral } from "./ProjectGeneral";
+import { useEditorTabsStore } from "@/store/index";
 
 type TabType = "general" | "taskList" | "kanban" | "timeline";
 
@@ -30,14 +31,30 @@ const TABS: TabConfig[] = [
 
 interface ProjectDetailContentProps {
     projectId: number;
+    tabId: string; // The editor tab ID to persist inner tab state
 }
 
 /**
  * ProjectDetailContent
  * Main content area with tab navigation for different project views
  */
-export function ProjectDetailContent({ projectId }: ProjectDetailContentProps) {
-    const [activeTab, setActiveTab] = useState<TabType>("general");
+export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentProps) {
+    const { openTabs, setOpenTabs } = useEditorTabsStore();
+
+    // Get active inner tab from editor tab metadata, default to "general"
+    const currentTab = openTabs.find((t) => t.id === tabId);
+    const activeTab: TabType = (currentTab?.metadata?.innerTab as TabType) || "general";
+
+    // Update inner tab in editor tab metadata
+    const setActiveTab = useCallback((newTab: TabType) => {
+        setOpenTabs((prev) =>
+            prev.map((t) =>
+                t.id === tabId
+                    ? { ...t, metadata: { ...t.metadata, innerTab: newTab } }
+                    : t
+            )
+        );
+    }, [tabId, setOpenTabs]);
 
     const renderTabContent = () => {
         switch (activeTab) {

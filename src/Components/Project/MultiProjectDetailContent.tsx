@@ -5,7 +5,7 @@
  * Uses chip selector to choose which projects to display (instead of grid checkboxes)
  */
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useCallback } from "react";
 import { ListTodo, Columns, GanttChartSquare, X, CalendarRange } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MultiProjectTaskList } from "./MultiProjectTaskList";
@@ -16,6 +16,7 @@ import { TaskProvider } from "@/store/task/useTask.store";
 import { Project, useProjectStore } from "@/store/project/useProject.store";
 import { getProjectStatusColors } from "./ProjectStatusBadge";
 import { ScrollArea, ScrollBar } from "@/Components/ui/scroll-area";
+import { useEditorTabsStore } from "@/store/index";
 
 type TabType = "taskList" | "kanban" | "proTimeline" | "timeline";
 
@@ -36,6 +37,7 @@ const TABS: TabConfig[] = [
 interface MultiProjectDetailContentProps {
     projectIds: number[];
     projects: Project[];
+    tabId: string; // The editor tab ID to persist inner tab state
 }
 
 /**
@@ -79,24 +81,53 @@ function ProjectChip({ project, isSelected, onToggle }: ProjectChipProps) {
  * MultiProjectDetailContent
  * Main content area with tab navigation for combined project views
  */
-export function MultiProjectDetailContent({ projectIds, projects }: MultiProjectDetailContentProps) {
-    const [activeTab, setActiveTab] = useState<TabType>("proTimeline");
+export function MultiProjectDetailContent({ projectIds, projects, tabId }: MultiProjectDetailContentProps) {
+    const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { projects: allProjects } = useProjectStore();
 
-    // Selected project IDs state - default to all active projects
-    const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>(() => {
+    // Get active inner tab from editor tab metadata, default to "proTimeline"
+    const currentTab = openTabs.find((t) => t.id === tabId);
+    const activeTab: TabType = (currentTab?.metadata?.innerTab as TabType) || "proTimeline";
+
+    // Update inner tab in editor tab metadata
+    const setActiveTab = useCallback((newTab: TabType) => {
+        setOpenTabs((prev) =>
+            prev.map((t) =>
+                t.id === tabId
+                    ? { ...t, metadata: { ...t.metadata, innerTab: newTab } }
+                    : t
+            )
+        );
+    }, [tabId, setOpenTabs]);
+
+    // Get selected project IDs from editor tab metadata
+    const selectedProjectIds: number[] = useMemo(() => {
+        const saved = currentTab?.metadata?.selectedProjectIds as number[] | undefined;
+        if (saved && saved.length > 0) return saved;
         // Default: select all projects with status = "active" (active)
         const activeProjects = allProjects.filter(p => p.status === "active" && !p.deletedAt);
         return activeProjects.map(p => p.id);
-    });
+    }, [currentTab?.metadata?.selectedProjectIds, allProjects]);
 
-    // Re-initialize when allProjects changes (first load)
+    // Update selected project IDs in editor tab metadata
+    const setSelectedProjectIds = useCallback((updater: number[] | ((prev: number[]) => number[])) => {
+        setOpenTabs((prev) =>
+            prev.map((t) => {
+                if (t.id !== tabId) return t;
+                const currentSelected = (t.metadata?.selectedProjectIds as number[]) || [];
+                const newSelected = typeof updater === "function" ? updater(currentSelected) : updater;
+                return { ...t, metadata: { ...t.metadata, selectedProjectIds: newSelected } };
+            })
+        );
+    }, [tabId, setOpenTabs]);
+
+    // Initialize selected projects on first load if not set
     useEffect(() => {
-        if (allProjects.length > 0 && selectedProjectIds.length === 0) {
+        if (allProjects.length > 0 && !currentTab?.metadata?.selectedProjectIds) {
             const activeProjects = allProjects.filter(p => p.status === "active" && !p.deletedAt);
             setSelectedProjectIds(activeProjects.map(p => p.id));
         }
-    }, [allProjects]);
+    }, [allProjects, currentTab?.metadata?.selectedProjectIds, setSelectedProjectIds]);
 
     // All available projects (from store, not from tab props)
     const availableProjects = useMemo(() => {

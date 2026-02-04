@@ -36,7 +36,20 @@ const HEADER_HEIGHT = 60;
 const PROJECT_BAR_HEIGHT = 40; // Larger than Task bars (32px)
 const MIN_BAR_WIDTH = 20;
 const EXTEND_DAYS = 14;
-const PROJECT_BAR_COLOR = "#0c4a6e"; // Darker blue to match project theme
+/**
+ * Get project bar colors from constants.timelinePro based on status
+ */
+const getProjectBarColors = (status: string) => {
+    const colors = constants.optionColor.timelinePro.colors[status];
+    return colors || constants.optionColor.timelinePro.default;
+};
+
+/**
+ * Check if project status is non-draggable (dropped, completed, cancelled)
+ */
+const isStatusNonDraggable = (status: string): boolean => {
+    return ["dropped", "completed", "cancelled"].includes(status);
+};
 
 const WEEKEND_STRIPE_BG = `repeating-linear-gradient(
     45deg,
@@ -123,8 +136,11 @@ function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onProjectC
         setCurrentWidth(width);
     }, [left, width]);
 
+    // Check if dragging is disabled
+    const isDragDisabled = project.deletedAt || isStatusNonDraggable(project.status || "");
+
     const handleMouseDown = (e: React.MouseEvent, type: "move" | "resize-left" | "resize-right") => {
-        if (project.deletedAt) return;
+        if (isDragDisabled) return;
         e.preventDefault();
         e.stopPropagation();
 
@@ -215,44 +231,60 @@ function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onProjectC
         );
     }
 
+    // Get bar colors based on status
+    const projectBarColors = getProjectBarColors(project.status || "");
+
     return (
         <div
             ref={barRef}
             className={cn(
-                "absolute flex items-center rounded-md cursor-pointer transition-shadow group",
+                "absolute flex items-center rounded-md transition-shadow group",
+                isDragDisabled ? "cursor-default" : "cursor-pointer",
                 isDragging && "shadow-lg z-10",
-                project.deletedAt && "opacity-50"
+                (project.deletedAt || isDragDisabled) && "opacity-60"
             )}
             style={{
                 left: currentLeft,
                 width: currentWidth,
                 height: PROJECT_BAR_HEIGHT,
                 top: (ROW_HEIGHT - PROJECT_BAR_HEIGHT) / 2,
-                backgroundColor: PROJECT_BAR_COLOR,
+                backgroundColor: projectBarColors.bg,
                 borderLeft: `4px solid ${statusColors.bg}`,
             }}
         >
-            <div
-                className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
-                onMouseDown={(e) => handleMouseDown(e, "resize-left")}
-            />
+            {/* Left resize handle - only show if draggable */}
+            {!isDragDisabled && (
+                <div
+                    className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
+                    onMouseDown={(e) => handleMouseDown(e, "resize-left")}
+                />
+            )}
 
             <div
-                className="flex-1 flex items-center px-3 overflow-visible cursor-grab active:cursor-grabbing"
+                className={cn(
+                    "flex-1 flex items-center px-3 overflow-visible",
+                    !isDragDisabled && "cursor-grab active:cursor-grabbing"
+                )}
                 onMouseDown={(e) => handleMouseDown(e, "move")}
             >
                 <span
-                    className="font-bold text-white whitespace-nowrap text-sm uppercase tracking-wide"
-                    style={{ textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}
+                    className="font-bold whitespace-nowrap text-sm uppercase tracking-wide"
+                    style={{
+                        color: projectBarColors.text,
+                        textShadow: "0 1px 2px rgba(0,0,0,0.4)"
+                    }}
                 >
                     {project.name || "Untitled"}
                 </span>
             </div>
 
-            <div
-                className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
-                onMouseDown={(e) => handleMouseDown(e, "resize-right")}
-            />
+            {/* Right resize handle - only show if draggable */}
+            {!isDragDisabled && (
+                <div
+                    className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
+                    onMouseDown={(e) => handleMouseDown(e, "resize-right")}
+                />
+            )}
         </div>
     );
 }

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
-import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, isSameDay } from "date-fns";
+import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, isSameDay, differenceInDays } from "date-fns";
 import { Calendar as CalendarIcon, Clock, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/Components/ui/button";
@@ -16,9 +16,64 @@ import { Label } from "@/Components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import type { Matcher, DateRange } from "react-day-picker";
 
+/**
+ * Date warning result for limit checking
+ */
+interface DateWarningResult {
+    hasWarning: boolean;
+    warningMessage: string | null;
+    taskDurationDays: number | null;
+}
+
+/**
+ * Check if dates exceed limits
+ */
+function checkDateWarning(
+    startDate: Date | null | undefined,
+    endDate: Date | null | undefined,
+    limitStartDate: Date | null | undefined,
+    limitEndDate: Date | null | undefined
+): DateWarningResult {
+    const result: DateWarningResult = {
+        hasWarning: false,
+        warningMessage: null,
+        taskDurationDays: null,
+    };
+
+    // Calculate duration
+    if (startDate && endDate) {
+        result.taskDurationDays = differenceInDays(endDate, startDate) + 1;
+    }
+
+    const issues: string[] = [];
+
+    if (limitStartDate && startDate && startDate < limitStartDate) {
+        issues.push("starts before limit");
+    }
+    if (limitEndDate && endDate && endDate > limitEndDate) {
+        issues.push("ends after limit");
+    }
+
+    if (issues.length > 0) {
+        result.hasWarning = true;
+        result.warningMessage = `Date ${issues.join(" and ")}`;
+    }
+
+    return result;
+}
+
+/**
+ * Format task duration for display
+ */
+function formatTaskDuration(days: number | null): string {
+    if (days === null) return "No dates set";
+    if (days === 1) return "1 day";
+    return `${days} days`;
+}
+
 type SelectionMode = "start" | "end";
 
-interface DateRangePickerProps {
+export interface DateRangePickerProps {
     startDate: Date | null | undefined;
     endDate: Date | null | undefined;
     onStartDateChange: (date: Date | null) => void;
@@ -31,6 +86,10 @@ interface DateRangePickerProps {
     minDate?: Date | null;
     maxDate?: Date | null;
     disabledReason?: string;
+    /** Limit start date to highlight as visual reference (project/parent start) */
+    limitStartDate?: Date | null;
+    /** Limit end date to highlight as visual reference (project/parent end) */
+    limitEndDate?: Date | null;
 }
 
 /**
@@ -112,6 +171,8 @@ export function DateRangePicker({
     minDate,
     maxDate,
     disabledReason,
+    limitStartDate,
+    limitEndDate,
 }: DateRangePickerProps) {
     const [open, setOpenState] = useState(false);
     const [selectionMode, setSelectionMode] = useState<SelectionMode>("start");
@@ -378,8 +439,16 @@ export function DateRangePicker({
                 return day > start && day < end;
             };
         }
+        // Limit start date modifier (project/parent start)
+        if (limitStartDate) {
+            modifiers.limitStart = (date: Date) => isSameDay(date, limitStartDate);
+        }
+        // Limit end date modifier (project/parent end)
+        if (limitEndDate) {
+            modifiers.limitEnd = (date: Date) => isSameDay(date, limitEndDate);
+        }
         return modifiers;
-    }, [startDate, endDate]);
+    }, [startDate, endDate, limitStartDate, limitEndDate]);
 
     // Custom class names for modifiers
     const modifiersClassNames = useMemo(() => ({
@@ -387,6 +456,8 @@ export function DateRangePicker({
         rangeStart: "range-start",
         rangeEnd: "range-end",
         rangeMiddle: "range-middle",
+        limitStart: "limit-start",
+        limitEnd: "limit-end",
     }), []);
 
     // Filter quick options based on min/max dates
@@ -407,6 +478,11 @@ export function DateRangePicker({
     // Check if today is selected
     const isStartToday = startDate && isToday(startDate);
     const isEndToday = endDate && isToday(endDate);
+
+    // Calculate date warning
+    const dateWarning = useMemo(() => {
+        return checkDateWarning(startDate, endDate, limitStartDate, limitEndDate);
+    }, [startDate, endDate, limitStartDate, limitEndDate]);
 
     return (
         <div className={cn("space-y-2", className)}>
@@ -443,7 +519,29 @@ export function DateRangePicker({
                                             !startDate && !endDate && "text-muted-foreground"
                                         )}
                                     >
-                                        <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                        {/* Calendar icon with warning tooltip */}
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <span className="mr-2 flex-shrink-0 cursor-help" onClick={(e) => e.stopPropagation()}>
+                                                        <CalendarIcon className={cn(
+                                                            "h-4 w-4",
+                                                            dateWarning.hasWarning ? "text-orange-500" : ""
+                                                        )} />
+                                                    </span>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    {dateWarning.hasWarning ? (
+                                                        <div className="space-y-1">
+                                                            <p className="text-orange-500 font-medium">{dateWarning.warningMessage}</p>
+                                                            <p className="text-xs text-muted-foreground">{formatTaskDuration(dateWarning.taskDurationDays)}</p>
+                                                        </div>
+                                                    ) : (
+                                                        <p>{formatTaskDuration(dateWarning.taskDurationDays)}</p>
+                                                    )}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
 
                                         {/* Date display with clickable parts */}
                                         <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -615,6 +713,52 @@ export function DateRangePicker({
                                     border-radius: 50%;
                                     background-color: #eab308;
                                     z-index: 10;
+                                }
+
+                                /* Limit start date = arrow indicator below date (project/parent boundary) */
+                                .calendar-green-red-range .limit-start {
+                                    position: relative;
+                                }
+                                .calendar-green-red-range .limit-start::before {
+                                    content: '>>';
+                                    position: absolute;
+                                    bottom: -1px;
+                                    left: 50%;
+                                    transform: translateX(-50%);
+                                    font-size: 12px;
+                                    color: #f97316;
+                                    pointer-events: none;
+                                    z-index: 10;
+                                    line-height: 1;
+                                }
+
+                                /* Limit end date = arrow indicator below date (project/parent boundary) */
+                                .calendar-green-red-range .limit-end {
+                                    position: relative;
+                                }
+                                .calendar-green-red-range .limit-end::before {
+                                    content: '<<';
+                                    position: absolute;
+                                    bottom: -1px;
+                                    left: 50%;
+                                    transform: translateX(-50%);
+                                    font-size: 12px;
+                                    color: #f97316;
+                                    pointer-events: none;
+                                    z-index: 10;
+                                    line-height: 1;
+                                }
+
+                                /* When today marker and limit are on same date, hide today marker */
+                                .calendar-green-red-range .today-marker.limit-start::after,
+                                .calendar-green-red-range .today-marker.limit-end::after {
+                                    display: none;
+                                }
+
+                                /* When limit start and end are on same date, show both arrows */
+                                .calendar-green-red-range .limit-start.limit-end::before {
+                                    content: '><';
+                                    font-size: 10px;
                                 }
                             `}</style>
 
