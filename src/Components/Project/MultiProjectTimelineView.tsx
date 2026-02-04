@@ -37,9 +37,24 @@ const HEADER_HEIGHT = 60;
 const TASK_BAR_HEIGHT = 28;
 const MIN_BAR_WIDTH = 20;
 const EXTEND_DAYS = 14;
-const TASK_BAR_COLOR = "#24366E";
-const SUBTASK_BAR_COLOR = "#6e7681";
 const SUBTASK_BAR_HEIGHT = 20;
+
+/**
+ * Get task bar colors from constants.timelineTask based on status
+ */
+const getTaskBarColors = (status: string) => {
+    const colors = constants.optionColor.timelineTask.colors[status];
+    console.log("getTaskBarColors", status, colors);
+    return colors || constants.optionColor.timelineTask.default;
+    
+};
+
+/**
+ * Check if task status is non-draggable (dropped, completed, cancelled)
+ */
+const isStatusNonDraggable = (status: string): boolean => {
+    return ["dropped", "completed", "cancelled"].includes(status);
+};
 
 const WEEKEND_STRIPE_BG = `repeating-linear-gradient(
     45deg,
@@ -136,8 +151,11 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isS
         setCurrentWidth(width);
     }, [left, width]);
 
+    // Check if dragging is disabled
+    const isDragDisabled = task.deletedAt || isStatusNonDraggable(task.status);
+
     const handleMouseDown = (e: React.MouseEvent, type: "move" | "resize-left" | "resize-right") => {
-        if (task.deletedAt) return;
+        if (isDragDisabled) return;
         e.preventDefault();
         e.stopPropagation();
 
@@ -302,9 +320,14 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isS
         };
     }, [isDragging, dragType, dragStartX, originalLeft, originalWidth, currentLeft, currentWidth, left, width, task, onDateChange, onTaskClick, hasDragged, dayWidth, constraintBounds, isSubtask, getSubtasksOutsideRange, onValidationError]);
 
-    // Subtask-specific dimensions
+    // Get bar colors based on status
+    const taskBarColors = getTaskBarColors(task.status);
+
+    // Subtask-specific dimensions - subtasks use slightly muted version
     const barHeight = isSubtask ? SUBTASK_BAR_HEIGHT : TASK_BAR_HEIGHT;
-    const barColor = isSubtask ? SUBTASK_BAR_COLOR : TASK_BAR_COLOR;
+    const barColor = isSubtask
+        ? `${taskBarColors.bg}cc` // Add transparency for subtasks
+        : taskBarColors.bg;
 
     if (!hasValidDates) {
         return (
@@ -327,9 +350,10 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isS
         <div
             ref={barRef}
             className={cn(
-                "absolute flex items-center rounded-md cursor-pointer transition-shadow group",
+                "absolute flex items-center rounded-md transition-shadow group",
+                isDragDisabled ? "cursor-default" : "cursor-pointer",
                 isDragging && "shadow-lg z-10",
-                task.deletedAt && "opacity-50"
+                (task.deletedAt || isDragDisabled) && "opacity-60"
             )}
             style={{
                 left: currentLeft,
@@ -340,28 +364,37 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isS
                 borderLeft: `3px solid ${statusColors.bg}`,
             }}
         >
-            <div
-                className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
-                onMouseDown={(e) => handleMouseDown(e, "resize-left")}
-            />
+            {/* Left resize handle - only show if draggable */}
+            {!isDragDisabled && (
+                <div
+                    className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
+                    onMouseDown={(e) => handleMouseDown(e, "resize-left")}
+                />
+            )}
 
             <div
-                className="flex-1 flex items-center px-2 overflow-visible cursor-grab active:cursor-grabbing"
+                className={cn(
+                    "flex-1 flex items-center px-2 overflow-visible",
+                    !isDragDisabled && "cursor-grab active:cursor-grabbing"
+                )}
                 onMouseDown={(e) => handleMouseDown(e, "move")}
             >
-                {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 text-white/70 flex-shrink-0" />}
+                {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" style={{ color: `${taskBarColors.text}b3` }} />}
                 <span
-                    className={cn("font-medium text-white whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")}
-                    style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                    className={cn("font-medium whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")}
+                    style={{ color: taskBarColors.text, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
                 >
                     {task.title || "Untitled"}
                 </span>
             </div>
 
-            <div
-                className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
-                onMouseDown={(e) => handleMouseDown(e, "resize-right")}
-            />
+            {/* Right resize handle - only show if draggable */}
+            {!isDragDisabled && (
+                <div
+                    className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20"
+                    onMouseDown={(e) => handleMouseDown(e, "resize-right")}
+                />
+            )}
         </div>
     );
 }

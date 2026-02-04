@@ -37,7 +37,7 @@ export function MultiProjectEditorPanel({ tab }: MultiProjectEditorPanelProps) {
     return (
         <div className="w-full h-full flex flex-col overflow-hidden bg-background">
             <div ref={contentRef} onScroll={handleScroll} className="flex-1 overflow-hidden bg-background">
-                <MultiProjectDetailContent projectIds={multiProjectData.projectIds} projects={multiProjectData.projects} />
+                <MultiProjectDetailContent projectIds={multiProjectData.projectIds} projects={multiProjectData.projects} tabId={tab.id} />
             </div>
         </div>
     );

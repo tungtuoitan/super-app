@@ -24,6 +24,12 @@ export interface TaskDTO {
     createdAt: string;
     updatedAt?: string | null;
     deletedAt?: string | null;
+
+    // Limit dates from backend for warning display
+    projectStartDate?: string | null;
+    projectEndDate?: string | null;
+    parentStartDate?: string | null; // Only present if task is a subtask
+    parentEndDate?: string | null;
 }
 
 /**

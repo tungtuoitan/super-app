@@ -202,24 +202,19 @@ const PriorityCell = React.memo(function PriorityCell({
 });
 
 /**
- * Memoized Date Range Cell with date constraints
- * - For subtasks: constrained by parent task dates
- * - For tasks: constrained by project dates
+ * Memoized Date Range Cell with optional limit dates
+ * Warning icon is now built into DateRangePicker component
+ * - For subtasks: limit dates from parent task (optional - user can select outside)
+ * - For tasks: limit dates from project (optional - user can select outside)
  */
 const DateRangeCell = React.memo(function DateRangeCell({
     task,
     onStartDateUpdate,
     onEndDateUpdate,
-    minDate,
-    maxDate,
-    disabledReason,
 }: {
     task: Task;
     onStartDateUpdate: (task: Task, field: "startDate", value: Date | null) => void;
     onEndDateUpdate: (task: Task, field: "endDate", value: Date | null) => void;
-    minDate?: Date | null;
-    maxDate?: Date | null;
-    disabledReason?: string;
 }) {
     return (
         <div className="px-1" onClick={(e) => e.stopPropagation()}>
@@ -229,11 +224,10 @@ const DateRangeCell = React.memo(function DateRangeCell({
                 onStartDateChange={(date: Date|null) => onStartDateUpdate(task, "startDate", date)}
                 onEndDateChange={(date: Date|null) => onEndDateUpdate(task, "endDate", date)}
                 placeholder="—"
-                disabled={!!task.deletedAt || !!disabledReason}
+                disabled={!!task.deletedAt}
                 showTime={false}
-                minDate={minDate}
-                maxDate={maxDate}
-                disabledReason={disabledReason}
+                limitStartDate={task.parentTaskId ? task.parentStartDate : task.projectStartDate}
+                limitEndDate={task.parentTaskId ? task.parentEndDate : task.projectEndDate}
             />
         </div>
     );
@@ -663,39 +657,6 @@ export function TaskList({ projectId }: TaskListProps) {
         [_console]
     );
 
-    /**
-     * Get date constraints for a task
-     * - Subtask: constrained by parent task dates
-     * - Task: constrained by project dates only (warning shown if subtasks fall outside)
-     */
-    const getDateConstraints = useCallback(
-        (task: Task): { minDate?: Date | null; maxDate?: Date | null; disabledReason?: string } => {
-            // If task is a subtask, constrain by parent task dates
-            if (task.parentTaskId) {
-                const parentTask = tasks.find((t) => t.id === task.parentTaskId);
-                if (parentTask) {
-                    // If parent task has no dates, disable subtask dates
-                    if (!parentTask.startDate && !parentTask.endDate) {
-                        return {
-                            disabledReason: "Parent task has no dates set",
-                        };
-                    }
-                    return {
-                        minDate: parentTask.startDate,
-                        maxDate: parentTask.endDate,
-                    };
-                }
-            }
-
-            // For regular tasks (parent tasks), only constrain by project dates
-            // Subtask overflow will trigger a warning instead of hard constraint
-            return {
-                minDate: currentProject?.startDate || null,
-                maxDate: currentProject?.endDate || null,
-            };
-        },
-        [tasks, currentProject]
-    );
 
     // Define columns for the data table
     const columns = useMemo<ColumnDef<Task>[]>(() => {
@@ -775,21 +736,17 @@ export function TaskList({ projectId }: TaskListProps) {
                 header: () => <div className="text-left text-sm">Date Range</div>,
                 size: 200,
                 cell: ({ row }) => {
-                    const constraints = getDateConstraints(row.original);
                     return (
                         <DateRangeCell
                             task={row.original}
                             onStartDateUpdate={handleInlineDateUpdate}
                             onEndDateUpdate={handleInlineDateUpdate}
-                            minDate={constraints.minDate}
-                            maxDate={constraints.maxDate}
-                            disabledReason={constraints.disabledReason}
                         />
                     );
                 },
             },
         ];
-    }, [statusOptions, priorityOptions, handleInlineUpdate, handleInlineDateUpdate, getDateConstraints]);
+    }, [statusOptions, priorityOptions, handleInlineUpdate, handleInlineDateUpdate]);
 
     // Filter tasks by projectId
     const filteredTasks = useMemo(() => {

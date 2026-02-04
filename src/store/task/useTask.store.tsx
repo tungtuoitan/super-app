@@ -21,6 +21,12 @@ export interface Task {
     createdAt: Date;
     updatedAt?: Date | null;
     deletedAt?: Date | null;
+
+    // Limit dates for warning display (parsed from backend)
+    projectStartDate?: Date | null;
+    projectEndDate?: Date | null;
+    parentStartDate?: Date | null; // Only present if task is a subtask
+    parentEndDate?: Date | null;
 }
 
 export interface TaskPaginationState {

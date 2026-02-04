@@ -58,6 +58,8 @@ export interface BaseTab {
     viewState?: TabViewState;
     isPinned?: boolean;
     breadcrumb?: BreadcrumbItem[];
+    /** Generic metadata for storing UI state (inner tabs, selections, etc.) */
+    metadata?: Record<string, unknown>;
 }
 
 export interface EditorState {

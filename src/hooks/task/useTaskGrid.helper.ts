@@ -33,6 +33,11 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
+        // Limit dates for warning display
+        projectStartDate: parseAsLocalDate(dto.projectStartDate),
+        projectEndDate: parseAsLocalDate(dto.projectEndDate),
+        parentStartDate: parseAsLocalDate(dto.parentStartDate),
+        parentEndDate: parseAsLocalDate(dto.parentEndDate),
     }));
 };
 

@@ -160,16 +160,34 @@ export const constants = {
             } as Record<string, { bg: string; text: string }>,
             default: { bg: "#57606a", text: "#ffffff" }, // Slate gray
         } as const,
+        timelinePro: {
+            colors: {
+                active:    { bg: "#1E3A8A", text: "#E5E7EB" }, // Deep Navy Blue
+                completed: { bg: "#1F5E4B", text: "#E5E7EB" }, // Dark Teal Green
+                dropped:   { bg: "#374151", text: "#E5E7EB" }, // Dark Slate Gray
+            } as Record<string, { bg: string; text: string }>,
+            default: { bg: "#374151", text: "#E5E7EB" }, // Dark Slate Gray
+        } as const,
 
         taskStatus: {
             colors: {
-                open: { bg: "#238636", text: "#ffffff" }, // Green
-                in_progress: { bg: "#d29922", text: "#ffffff" }, // Yellow
-                completed: { bg: "#8957e5", text: "#ffffff" }, // Purple
-                on_hold: { bg: "#6e7681", text: "#ffffff" }, // Gray
-                cancelled: { bg: "#d73a49", text: "#ffffff" }, // Red
+                open: { bg: "#1f6f43", text: "#ffffff" }, // Dark Green
+                in_progress: { bg: "#52400c", text: "#ffffff" }, // Dark Mustard
+                completed: { bg: "#6f42c1", text: "#ffffff" }, // Muted Purple
+                on_hold: { bg: "#4b5563", text: "#ffffff" }, // Dark Gray
+                cancelled: { bg: "#a63636", text: "#ffffff" }, // Dark Red
             } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#6e7681", text: "#ffffff" }, // Gray
+            default: { bg: "#4b5563", text: "#ffffff" }, // Dark Gray
+        } as const,
+        timelineTask: {
+            colors: {
+                open: { bg: "#09331c", text: "#E5E7EB" }, // Muted Navy Blue
+                in_progress: { bg: "#6e560b", text: "#E5E7EB" }, // Slate Indigo
+                completed: { bg: "#311a5e", text: "#E5E7EB" }, // Deep Blue Purple
+                on_hold: { bg: "#2B2F45", text: "#E5E7EB" }, // Charcoal Indigo
+                cancelled: { bg: "#4A2E3A", text: "#E5E7EB" }, // Muted Wine Red
+            } as Record<string, { bg: string; text: string }>,
+            default: { bg: "#2b3038", text: "#E5E7EB" }, // Base reference color
         } as const,
 
         taskPriority: {
@@ -184,24 +202,24 @@ export const constants = {
     },
     optionOrder: {
         projectStatuses: {
-            "Open": 1,
+            Open: 1,
             "In Progress": 2,
-            "Completed": 3,
+            Completed: 3,
             "On Hold": 4,
-            "Cancelled": 5,
+            Cancelled: 5,
         } as Record<string, number>,
         taskStatuses: {
-            "Open": 1,
+            Open: 1,
             "In Progress": 2,
-            "Completed": 3,
+            Completed: 3,
             "On Hold": 4,
-            "Cancelled": 5,
+            Cancelled: 5,
         } as Record<string, number>,
-                taskPriorities: {
-            "Low": 1,
-            "Medium": 2,
-            "High": 3,
-            "Urgent": 4,
+        taskPriorities: {
+            Low: 1,
+            Medium: 2,
+            High: 3,
+            Urgent: 4,
         } as Record<string, number>,
     },
     filters: {
