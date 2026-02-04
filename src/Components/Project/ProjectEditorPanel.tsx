@@ -54,7 +54,7 @@ export function ProjectEditorPanel({ tab }: ProjectEditorPanelProps) {
         <div className="w-full h-full flex flex-col overflow-hidden bg-background">
             {/* Content */}
             <div ref={contentRef} onScroll={handleScroll} className="flex-1 overflow-hidden bg-background">
-                <ProjectDetailContent projectId={project.id} />
+                <ProjectDetailContent projectId={project.id} tabId={tab.id} />
             </div>
         </div>
     );

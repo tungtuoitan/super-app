@@ -86,28 +86,21 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
         return tasks.find((t) => t.id === selectedTask.parentTaskId) || null;
     }, [selectedTask?.parentTaskId, tasks]);
 
-    // Calculate date constraints
-    const dateConstraints = useMemo(() => {
-        // For subtasks: constrained by parent task dates
-        if (selectedTask?.parentTaskId && parentTask) {
+    // Calculate limit dates for visual reference (optional - does not block selection)
+    const limitDates = useMemo(() => {
+        // For subtasks: limit is parent task dates
+        if (selectedTask?.parentTaskId) {
             return {
-                minDate: parentTask.startDate || null,
-                maxDate: parentTask.endDate || null,
-                disabledReason: (!parentTask.startDate && !parentTask.endDate)
-                    ? "Parent task has no dates set"
-                    : undefined,
+                limitStartDate: selectedTask.parentStartDate || null,
+                limitEndDate: selectedTask.parentEndDate || null,
             };
         }
-        // For regular tasks: constrained by project dates
-        if (currentProject) {
-            return {
-                minDate: currentProject.startDate || null,
-                maxDate: currentProject.endDate || null,
-                disabledReason: undefined,
-            };
-        }
-        return { minDate: null, maxDate: null, disabledReason: undefined };
-    }, [selectedTask?.parentTaskId, parentTask, currentProject]);
+        // For regular tasks: limit is project dates
+        return {
+            limitStartDate: selectedTask?.projectStartDate || null,
+            limitEndDate: selectedTask?.projectEndDate || null,
+        };
+    }, [selectedTask?.parentTaskId, selectedTask?.parentStartDate, selectedTask?.parentEndDate, selectedTask?.projectStartDate, selectedTask?.projectEndDate]);
 
     // Check if this task has subtasks (used to filter parent task options)
     const hasSubtasks = useMemo(() => {
@@ -339,32 +332,35 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                     {/* Left Column - Task Details (2/3 width) */}
                     <div className="flex-[3] min-w-0">
                         <CardContent className="space-y-4">
-
-
-                            {/* Task Title */}
-                            <GenericTextField
-                                label="Title"
-                                value={selectedTask.title}
-                                onChange={(e) => handleFieldChange("title", e.target.value)}
-                                placeholder="Enter task title..."
-                                size="small"
-                                disabled={isDisabled}
-                            />
-
-                            {/* Date range */}
-                            <DateRangePicker
-                                label="Date Range"
-                                startDate={selectedTask.startDate}
-                                endDate={selectedTask.endDate}
-                                onStartDateChange={(date: Date|null) => handleFieldChange("startDate", date)}
-                                onEndDateChange={(date: Date|null) => handleFieldChange("endDate", date)}
-                                placeholder="Pick date range..."
-                                disabled={isDisabled || !!dateConstraints.disabledReason}
-                                minDate={dateConstraints.minDate}
-                                maxDate={dateConstraints.maxDate}
-                                disabledReason={dateConstraints.disabledReason}
-                                showTime={false}
-                            />
+                            <div className="flex gap-4 items-start">
+                                <div className="flex-[2]">
+                                    {/* Task Title */}
+                                    <GenericTextField
+                                        label="Title"
+                                        value={selectedTask.title}
+                                        onChange={(e) => handleFieldChange("title", e.target.value)}
+                                        placeholder="Enter task title..."
+                                        size="small"
+                                        disabled={isDisabled}
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    {/* Date range - warning icon is built into DateRangePicker */}
+                                    <DateRangePicker
+                                        label="Date Range"
+                                        startDate={selectedTask.startDate}
+                                        endDate={selectedTask.endDate}
+                                        onStartDateChange={(date: Date|null) => handleFieldChange("startDate", date)}
+                                        onEndDateChange={(date: Date|null) => handleFieldChange("endDate", date)}
+                                        placeholder="Pick date range..."
+                                        disabled={isDisabled}
+                                        showTime={false}
+                                        className="w-full"
+                                        limitStartDate={limitDates.limitStartDate}
+                                        limitEndDate={limitDates.limitEndDate}
+                                    />
+                                </div>
+                            </div>
 
                             {/* Note - Rich Text Editor */}
                             <div className="space-y-2">
@@ -372,7 +368,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                     <FileText className="h-4 w-4" />
                                     Note
                                 </label>
-                                <div className="h-[580px] overflow-y-auto border rounded-md">
+                                <div className="h-[660px] overflow-y-auto border rounded-md">
                                     <RichTextEditor
                                         key={`note-${taskKey}`}
                                         value={selectedTask.note || ""}
