@@ -228,6 +228,7 @@ export const constants = {
             noteGrid: "noteGrid",
             wsGrid: "wsGrid",
             workspace: "workspace",
+            projectGrid: "projectGrid",
         } as const,
 
         // Default filter values for each view
@@ -244,6 +245,9 @@ export const constants = {
                 statusCode: "active",
                 deletedAt: "null",
             },
+            projectGrid: {
+                statusCode: "active",
+            },
         } as const,
 
         // Filter field configurations
@@ -252,7 +256,7 @@ export const constants = {
                 {
                     key: "statusCode",
                     label: "Status",
-                    type: "radio",
+                    type: "checkbox",
                     standardRegistryType: "noteStatus",
                     defaultValue: "active",
                 },
@@ -273,7 +277,7 @@ export const constants = {
                 {
                     key: "statusCode",
                     label: "Status",
-                    type: "radio",
+                    type: "checkbox",
                     standardRegistryType: "workspaceStatus",
                     defaultValue: "active",
                 },
@@ -294,7 +298,7 @@ export const constants = {
                 {
                     key: "statusCode",
                     label: "Status",
-                    type: "radio",
+                    type: "checkbox",
                     standardRegistryType: "noteStatus", // Reuse noteStatus registry (notes/files have status, folders don't)
                     defaultValue: "active",
                 },
@@ -303,6 +307,15 @@ export const constants = {
                     label: "Deleted Status",
                     type: "checkbox",
                     defaultValue: "null",
+                },
+            ],
+            projectGrid: [
+                {
+                    key: "statusCode",
+                    label: "Status",
+                    type: "checkbox",
+                    standardRegistryType: "project_status",
+                    defaultValue: "active",
                 },
             ],
         } as const,

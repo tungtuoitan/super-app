@@ -29,7 +29,7 @@ const _getProjects = async (
     token: string,
     params?: {
         searchText?: string;
-        status?: string;
+        status?: string; // Comma-separated status codes: "active,completed"
         deletedAt?: string; // "null" or "notNull"
         ids?: string; // Comma-separated IDs: "1,2,3"
     }

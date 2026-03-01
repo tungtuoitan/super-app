@@ -185,9 +185,21 @@ export const useProjectGridHelper = () => {
             setProjectGridIsLoading(true);
             const token = $user.userToken;
 
-            const filterParams = {
-                deletedAt: "null", // Only active projects by default
+            const projectGridFilters = $user.filters?.projectGrid;
+
+            const filterParams: {
+                deletedAt?: string;
+                status?: string;
+            } = {
+                deletedAt: "null", // Only active (non-deleted) projects
             };
+
+            if (projectGridFilters?.statusCode) {
+                filterParams.status = projectGridFilters.statusCode;
+            }
+            // if (projectGridFilters?.deletedAt) {
+            //     filterParams.deletedAt = projectGridFilters.deletedAt;
+            // }
 
             const result = await projectService._getProjects(token, filterParams);
 

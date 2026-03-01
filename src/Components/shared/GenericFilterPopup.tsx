@@ -225,30 +225,37 @@ export function GenericFilterPopup() {
     };
 
     /**
-     * Main field router - Decides which render function to use
+     * Render fields for a specific filterViewKey using switch
      */
-    const renderFieldOrchestrator = (group: FilterFieldConfig) => {
-        // 1. Standard registry fields (Status) - Radio or Checkbox
-        if ((group.type === "checkbox" || group.type === "radio") && group.standardRegistryType) {
-            return renderStandardRegistryField(group);
-        }
+    const renderFieldsByView = () => {
+        const groups = filterViewKey ? (constants.filters.groups as any)[filterViewKey] as readonly FilterFieldConfig[] : [];
 
-        // 2. DeletedAt with Radio (noteGrid, wsGrid)
-        if (group.type === "radio" && group.key === "deletedAt") {
-            return renderDeletedAtRadio(group);
-        }
+        switch (filterViewKey) {
+            case "noteGrid":
+            case "wsGrid":
+                return groups.map((group) => {
+                    if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
+                    if (group.type === "radio" && group.key === "deletedAt") return renderDeletedAtRadio(group);
+                    if (group.type === "dateRange") return renderDateRange(group);
+                    return null;
+                });
 
-        // 3. DeletedAt with Checkbox (workspace) - Must include "Existing"
-        if (group.type === "checkbox" && group.key === "deletedAt") {
-            return renderDeletedAtCheckbox(group);
-        }
+            case "workspace":
+                return groups.map((group) => {
+                    if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
+                    if (group.type === "checkbox" && group.key === "deletedAt") return renderDeletedAtCheckbox(group);
+                    return null;
+                });
 
-        // 4. Date range slider (createdAt)
-        if (group.type === "dateRange") {
-            return renderDateRange(group);
-        }
+            case "projectGrid":
+                return groups.map((group) => {
+                    if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
+                    return null;
+                });
 
-        return null;
+            default:
+                return null;
+        }
     };
 
     // Check if UI filters differ from default filters
@@ -287,9 +294,6 @@ export function GenericFilterPopup() {
     if (!filterViewKey) {
         return null;
     }
-
-    // Get field configurations for this view
-    const groups = (constants.filters.groups as any)[filterViewKey] as readonly FilterFieldConfig[];
 
     return (
         <Popover open={open} onOpenChange={togglePopup}>
@@ -334,7 +338,7 @@ export function GenericFilterPopup() {
 
                     {/* Filter Fields */}
                     <div className="space-y-4 max-h-96 overflow-y-auto overflow-x-hidden">
-                        {groups.map((group) => renderFieldOrchestrator(group))}
+                        {renderFieldsByView()}
                     </div>
                 </div>
             </PopoverContent>

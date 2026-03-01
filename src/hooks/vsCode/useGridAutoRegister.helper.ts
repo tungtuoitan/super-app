@@ -37,6 +37,11 @@ export const useGridAutoRegisterHelper = () => {
                     name: constants.modules.note,
                     filterViewKey: constants.filters.views.noteGrid as keyof import("@/types/common.types").UserFilters,
                 };
+            case "/project":
+                return {
+                    name: constants.modules.project,
+                    filterViewKey: constants.filters.views.projectGrid as keyof import("@/types/common.types").UserFilters,
+                };
             default:
                 return null;
         }
