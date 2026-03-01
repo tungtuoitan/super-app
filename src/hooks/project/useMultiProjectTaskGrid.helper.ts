@@ -11,6 +11,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
+import { constants } from "@/utils/constants";
 
 /**
  * Transform task DTOs to domain models
@@ -252,9 +253,12 @@ export const useMultiProjectTaskGridHelper = () => {
                 return;
             }
 
+            const taskGridFilters = $user.filters?.taskGrid || constants.filters.defaults.taskGrid;
             const filterParams = {
                 projectIds: validProjectIds.join(","),
                 deletedAt: "null",
+                status: taskGridFilters.status,
+                priority: taskGridFilters.priority,
             };
 
             const result = await taskService._getTasks(token, filterParams);

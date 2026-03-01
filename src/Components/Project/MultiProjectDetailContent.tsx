@@ -17,6 +17,7 @@ import { Project, useProjectStore } from "@/store/project/useProject.store";
 import { getProjectStatusColors } from "./ProjectStatusBadge";
 import { ScrollArea, ScrollBar } from "@/Components/ui/scroll-area";
 import { useEditorTabsStore } from "@/store/index";
+import { TaskFilterPopup } from "./TaskFilterPopup";
 
 type TabType = "taskList" | "kanban" | "proTimeline" | "timeline";
 
@@ -254,29 +255,36 @@ export function MultiProjectDetailContent({ projectIds, projects, tabId }: Multi
             </div>
 
             {/* TabBar - Project style with uppercase labels */}
-            <div className="flex border-b-2 border-primary/20 bg-muted/20">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => !tab.disabled && setActiveTab(tab.id)}
-                        disabled={tab.disabled}
-                        className={cn(
-                            "flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
-                            "border-b-3 -mb-[2px]",
-                            activeTab === tab.id
-                                ? "border-primary text-primary bg-primary/5"
-                                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                            tab.disabled && "opacity-50 cursor-not-allowed"
-                        )}
-                    >
-                        {tab.icon}
-                        {tab.label}
-                    </button>
-                ))}
+            <div className="flex items-center border-b-2 border-primary/20 bg-muted/20">
+                <div className="flex flex-1">
+                    {TABS.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => !tab.disabled && setActiveTab(tab.id)}
+                            disabled={tab.disabled}
+                            className={cn(
+                                "flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
+                                "border-b-3 -mb-[2px]",
+                                activeTab === tab.id
+                                    ? "border-primary text-primary bg-primary/5"
+                                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                                tab.disabled && "opacity-50 cursor-not-allowed"
+                            )}
+                        >
+                            {tab.icon}
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
 
-                {/* Selected count indicator */}
-                <div className="ml-auto flex items-center px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    {filteredProjectIds.length} / {availableProjects.length} Projects
+                {/* Right side actions */}
+                <div className="flex items-center gap-1 px-2">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mr-1">
+                        {filteredProjectIds.length} / {availableProjects.length} Projects
+                    </span>
+                    {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline") && (
+                        <TaskFilterPopup />
+                    )}
                 </div>
             </div>
 
