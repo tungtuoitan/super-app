@@ -14,7 +14,7 @@ import { constants } from "@/utils/constants";
 import type * as _monaco from "monaco-editor";
 
 export function MarkdownEditorViewStateSync() {
-    const { editorRef } = useNoteDetailStore();
+    const { editorRef, editorMountCount } = useNoteDetailStore();
     const { activeTabId, setOpenTabs } = useEditorTabsStore();
     const { isLoadingTab, setIsLoadingTab } = useEditorStore();
     const { getActiveTab } = useEditorTabHelper();
@@ -105,6 +105,7 @@ export function MarkdownEditorViewStateSync() {
             try {
                 // Only restore scroll position (no cursor/focus)
                 if (viewState.editorScrollPosition) {
+                    // console.log("activeTabId.scroll position:", activeTab.title, viewState.editorScrollPosition);
                     editor.setScrollPosition(
                         {
                             scrollTop: viewState.editorScrollPosition.scrollTop,
@@ -127,6 +128,36 @@ export function MarkdownEditorViewStateSync() {
         return () => clearTimeout(restoreTimer);
     }, [activeTabId]);
 
+    // Restore when editor is freshly mounted from a non-note tab (editorMountCount changes).
+    // For note→note switches, MarkdownEditorSync restores scroll directly after setValue.
+    // At this point editorRef.current is the new instance but layout hasn't run yet → need one rAF
+    useEffect(() => {
+        if (editorMountCount === 0) return; // skip initial render
+
+        const editor = editorRef.current;
+        const activeTab = getActiveTab();
+
+        if (!editor || (editor as any)._isDisposed || !activeTab) return;
+        if (activeTab.type !== constants.vscode.tab.tabTypes.note) return;
+
+        const scrollToRestore = activeTab.viewState?.editorScrollPosition;
+        // console.log("editor mounted, restoring scroll:", activeTab.title,scrollToRestore);
+        if (!scrollToRestore || (scrollToRestore.scrollTop === 0 && scrollToRestore.scrollLeft === 0)) return;
+        setIsLoadingTab(true)
+        
+        isRestoringRef.current = true;
+        requestAnimationFrame(() => {
+            if (editor && !(editor as any)._isDisposed) {
+                editor.setScrollPosition(
+                    { scrollTop: scrollToRestore.scrollTop, scrollLeft: scrollToRestore.scrollLeft },
+                    1
+                );
+            }
+            isRestoringRef.current = false;
+            setIsLoadingTab(false);
+        });
+    }, [editorMountCount]);
+
     // Also save position periodically when user scrolls/moves cursor
     useEffect(() => {
         const editor = editorRef.current;
@@ -138,11 +169,12 @@ export function MarkdownEditorViewStateSync() {
 
         // Save on scroll
         const scrollDisposable = editor.onDidScrollChange(() => {
-            if (isRestoringRef.current) return; // Don't save during restore
+            if (isRestoringRef.current) return;
 
             try {
                 const scrollTop = editor.getScrollTop();
                 const scrollLeft = editor.getScrollLeft();
+                // console.log("save position:", activeTab.title, scrollTop);
 
                 setOpenTabs((prev) =>
                     prev.map((tab) =>
@@ -170,7 +202,7 @@ export function MarkdownEditorViewStateSync() {
         return () => {
             scrollDisposable.dispose();
         };
-    }, [activeTabId]);
+    }, [activeTabId,editorMountCount]);
 
     return null;
 }

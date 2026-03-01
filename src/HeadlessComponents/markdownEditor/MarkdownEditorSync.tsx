@@ -67,7 +67,8 @@ export function MarkdownEditorSync() {
         }
 
         // Check if this is a tab switch (different note ID)
-        const isTabSwitch = prevNoteIdRef.current !== null && prevNoteIdRef.current !== activeNote?.id;
+        // prevNoteIdRef.current === null means first mount (coming from non-note tab) — treat as tab switch
+        const isTabSwitch = prevNoteIdRef.current !== activeNote?.id;
         prevNoteIdRef.current = activeNote?.id ?? null;
 
         try {
@@ -83,22 +84,26 @@ export function MarkdownEditorSync() {
 
                 editor.setValue(displayDesc??"");
 
-                // Only restore position/scroll if NOT switching tabs
-                // When switching tabs, MarkdownEditorViewStateSync will handle restoration
                 if (!isTabSwitch) {
                     // Restore cursor position if possible
                     if (currentPosition) {
                         editor.setPosition(currentPosition);
                     }
-
                     // Restore scroll position (CRITICAL: setValue resets scroll to 0)
                     editor.setScrollPosition({
                         scrollTop: currentScrollTop,
                         scrollLeft: currentScrollLeft,
                     }, 1); // ScrollType.Immediate
+                } else {
+                    // Tab switch: restore saved scroll position from viewState immediately after setValue
+                    const savedScroll = activeTab?.viewState?.editorScrollPosition;
+                    if (savedScroll) {
+                        editor.setScrollPosition({
+                            scrollTop: savedScroll.scrollTop,
+                            scrollLeft: savedScroll.scrollLeft,
+                        }, 1);
+                    }
                 }
-                // When switching tabs, leave at scroll 0 temporarily
-                // MarkdownEditorViewStateSync will restore correct scroll shortly
             }
         } catch (error) {
             console.warn("[Monaco] Value sync error (editor may be disposed):", error);
