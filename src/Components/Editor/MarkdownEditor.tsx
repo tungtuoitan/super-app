@@ -39,7 +39,7 @@ export function MarkdownEditor() {
     const { getItemStatus } = useTreeStatusHelper();
     const { isLoadingTab } = useEditorStore();
     // const $mi = useMonaco(); // Monaco instance
-    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef, isMounted, setIsMounted } = useNoteDetailStore();
+    const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef, isMounted, setIsMounted, editorMountCount, setEditorMountCount } = useNoteDetailStore();
     const _console = useConsoleHelper();
 
     // Get active tab and note
@@ -94,6 +94,7 @@ export function MarkdownEditor() {
     const handleEditorDidMount = (editor: _monaco.editor.IStandaloneCodeEditor) => {
         editorRef.current = editor;
         setIsMounted(true);
+        setEditorMountCount((c) => c + 1);
 
         // Setup providers
         const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);

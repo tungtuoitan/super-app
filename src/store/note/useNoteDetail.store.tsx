@@ -28,6 +28,8 @@ export interface NoteDetailContextData {
     $miRef: any;
     isMounted: boolean;
     setIsMounted: Dispatch<SetStateAction<boolean>>;
+    editorMountCount: number;
+    setEditorMountCount: Dispatch<SetStateAction<number>>;
 }
 
 export const noteDetailContextDefaultValue: NoteDetailContextData = {
@@ -50,6 +52,8 @@ export const noteDetailContextDefaultValue: NoteDetailContextData = {
     $miRef: null,
     isMounted: false,
     setIsMounted: () => {},
+    editorMountCount: 0,
+    setEditorMountCount: () => {},
 };
 
 const NoteDetailContext = createContext<NoteDetailContextData>(noteDetailContextDefaultValue);
@@ -73,6 +77,7 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     // const $miRef = useRef<any>(useMonaco()); // khởi tạo ở đây vẫn bị null
     const $miRef = useRef<any>(null);
     const [isMounted, setIsMounted] = useState(false);
+    const [editorMountCount, setEditorMountCount] = useState(0);
 
     return (
         <NoteDetailContext.Provider
@@ -96,6 +101,8 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 $miRef,
                 isMounted,
                 setIsMounted,
+                editorMountCount,
+                setEditorMountCount,
             }}
         >
             {children}

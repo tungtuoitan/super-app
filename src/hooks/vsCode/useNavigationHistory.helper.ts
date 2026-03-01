@@ -781,6 +781,7 @@ export const useNavigationHistoryHelper = () => {
                 const editor = editorRef.current;
                 if (editor && !(editor as any)._isDisposed) {
                     // If no position data, set cursor to end of first line
+                    // console.log('entry to restore editor position:', entry.mdScrollPos);
                     const positionToRestore = entry.mdPos || { lineNumber: 1, column: 1000 };
                     restoreEditorPosition(editor, positionToRestore, entry.mdScrollPos);
                 }
