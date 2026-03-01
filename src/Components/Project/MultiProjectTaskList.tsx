@@ -829,7 +829,7 @@ export function MultiProjectTaskList({ projectIds, projects }: MultiProjectTaskL
     useEffect(() => {
         if (!$user.userId || projectIds.length === 0) return;
         loadTasksForProjects(projectIds);
-    }, [$user.userId, projectIds]);
+    }, [$user.userId, projectIds, $user.filters?.taskGrid]);
 
     return (
         <div ref={taskContainerRef} className="w-full h-full bg-background flex flex-col relative">
