@@ -328,7 +328,7 @@ export function MultiProjectKanbanView({ projectIds, projects }: MultiProjectKan
         if ($user.userId && projectIds.length > 0) {
             loadTasksForProjects(projectIds);
         }
-    }, [$user.userId, projectIds]);
+    }, [$user.userId, projectIds, $user.filters?.taskGrid]);
 
     return (
         <div className="w-full h-full flex flex-col relative">

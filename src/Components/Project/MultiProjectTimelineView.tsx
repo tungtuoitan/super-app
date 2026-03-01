@@ -634,7 +634,7 @@ export function MultiProjectTimelineView({ projectIds, projects }: MultiProjectT
 
     useEffect(() => {
         if ($user.userId && projectIds.length > 0) loadTasksForProjects(projectIds);
-    }, [$user.userId, projectIds]);
+    }, [$user.userId, projectIds, $user.filters?.taskGrid]);
 
     useEffect(() => {
         checkTodayVisibility();
