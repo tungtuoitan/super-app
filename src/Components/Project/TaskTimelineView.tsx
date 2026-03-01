@@ -769,12 +769,12 @@ export function TaskTimelineView({ projectId }: TaskTimelineViewProps) {
         [filteredTasks, currentProject, $user.userToken, loadTasks, projectId, setTaskGridIsLoading, _console]
     );
 
-    // Load tasks on mount
+    // Load tasks on mount or when task filters change
     useEffect(() => {
         if ($user.userId) {
             loadTasks(projectId);
         }
-    }, [$user.userId, projectId]);
+    }, [$user.userId, projectId, $user.filters?.taskGrid]);
 
     // Check today visibility on mount and when dayWidth changes
     useEffect(() => {

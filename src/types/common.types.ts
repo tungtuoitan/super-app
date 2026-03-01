@@ -85,6 +85,8 @@ export interface ViewFilter {
     createdAt?: FilterValue; // e.g., "2024-01-01,2024-12-31"
     updatedAt?: FilterValue; // e.g., "2024-01-01,2024-12-31"
     deletedAt?: FilterValue; // e.g., "null" or "notNull"
+    status?: FilterValue; // task status, e.g., "open,in_progress"
+    priority?: FilterValue; // task priority, e.g., "low,medium,high"
 }
 
 /**
@@ -96,6 +98,7 @@ export interface UserFilters {
     wsGrid?: ViewFilter;
     workspace?: ViewFilter;
     projectGrid?: ViewFilter;
+    taskGrid?: ViewFilter;
 }
 
 /**

@@ -12,6 +12,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
+import { constants } from "@/utils/constants";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
@@ -269,8 +270,13 @@ export const useTaskGridHelper = () => {
             setTaskGridIsLoading(true);
             const token = $user.userToken;
 
-            const filterParams: { projectIds?: string; deletedAt?: string } = {
+            // Read task filters from userProfile (persisted), fall back to defaults
+            const taskGridFilters = $user.filters?.taskGrid || constants.filters.defaults.taskGrid;
+
+            const filterParams: { projectIds?: string; deletedAt?: string; status?: string; priority?: string } = {
                 deletedAt: "null", // Only active tasks by default
+                status: taskGridFilters.status,
+                priority: taskGridFilters.priority,
             };
 
             // Filter by project ID if provided
