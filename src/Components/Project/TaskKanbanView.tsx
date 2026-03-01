@@ -381,12 +381,12 @@ export function TaskKanbanView({ projectId }: TaskKanbanViewProps) {
         [tasks, filteredTasks, $user.userToken, loadTasks, projectId, setTaskGridIsLoading]
     );
 
-    // Load tasks on mount
+    // Load tasks on mount or when task filters change
     React.useEffect(() => {
         if ($user.userId) {
             loadTasks(projectId);
         }
-    }, [$user.userId, projectId]);
+    }, [$user.userId, projectId, $user.filters?.taskGrid]);
 
     return (
         <div className="w-full h-full flex flex-col relative">

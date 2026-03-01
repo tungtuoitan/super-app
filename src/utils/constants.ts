@@ -248,7 +248,33 @@ export const constants = {
             projectGrid: {
                 statusCode: "active",
             },
+
+            
+            taskGrid: {
+                status: "open,in_progress",
+                priority: "low,medium,high",
+            },
         } as const,
+
+        // Default task filter values (local-only, not persisted to userProfile)
+        taskDefaults: {
+            status: "open,in_progress",
+            priority: "low,medium,high",
+        } as const,
+
+        // Task filter field configurations
+        taskGroups: [
+            {
+                key: "status",
+                label: "Status",
+                standardRegistryType: "task_status",
+            },
+            {
+                key: "priority",
+                label: "Priority",
+                standardRegistryType: "task_priority",
+            },
+        ] as const,
 
         // Filter field configurations
         groups: {
@@ -316,6 +342,22 @@ export const constants = {
                     type: "checkbox",
                     standardRegistryType: "project_status",
                     defaultValue: "active",
+                },
+            ],
+            taskGrid: [
+                {
+                    key: "status",
+                    label: "Status",
+                    type: "checkbox",
+                    standardRegistryType: "task_status",
+                    defaultValue: "open,in_progress",
+                },
+                {
+                    key: "priority",
+                    label: "Priority",
+                    type: "checkbox",
+                    standardRegistryType: "task_priority",
+                    defaultValue: "low,medium,high",
                 },
             ],
         } as const,

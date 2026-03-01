@@ -828,11 +828,11 @@ export function TaskList({ projectId }: TaskListProps) {
         return () => resizeObserver.disconnect();
     }, []);
 
-    // Load data when user is ready
+    // Load data when user is ready or task filters change
     useEffect(() => {
         if (!$user.userId) return;
         loadTasks(projectId);
-    }, [$user.userId, projectId]);
+    }, [$user.userId, projectId, $user.filters?.taskGrid]);
 
     return (
         <div ref={taskContainerRef} className="w-full h-full bg-background flex flex-col relative">

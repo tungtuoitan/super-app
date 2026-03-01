@@ -11,6 +11,7 @@ import { TaskKanbanView } from "./TaskKanbanView";
 import { TaskTimelineView } from "./TaskTimelineView";
 import { TaskProvider } from "@/store/task/useTask.store";
 import { ProjectGeneral } from "./ProjectGeneral";
+import { TaskFilterPopup } from "./TaskFilterPopup";
 import { useEditorTabsStore } from "@/store/index";
 
 type TabType = "general" | "taskList" | "kanban" | "timeline";
@@ -61,56 +62,56 @@ export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentP
             case "general":
                 return <ProjectGeneral projectId={projectId} />;
             case "taskList":
-                return (
-                    <TaskProvider>
-                        <TaskList projectId={projectId} />
-                    </TaskProvider>
-                );
+                return <TaskList projectId={projectId} />;
             case "kanban":
-                return (
-                    <TaskProvider>
-                        <TaskKanbanView projectId={projectId} />
-                    </TaskProvider>
-                );
+                return <TaskKanbanView projectId={projectId} />;
             case "timeline":
-                return (
-                    <TaskProvider>
-                        <TaskTimelineView projectId={projectId} />
-                    </TaskProvider>
-                );
+                return <TaskTimelineView projectId={projectId} />;
             default:
                 return null;
         }
     };
 
+    const showTaskFilter = activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline";
+
     return (
         <div className="flex flex-col h-full w-full bg-background">
-            {/* TabBar - Project style with uppercase labels */}
-            <div className="flex border-b-2 border-primary/20 bg-muted/20">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => !tab.disabled && setActiveTab(tab.id)}
-                        disabled={tab.disabled}
-                        className={cn(
-                            "flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
-                            "border-b-3 -mb-[2px]",
-                            activeTab === tab.id
-                                ? "border-primary text-primary bg-primary/5"
-                                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                            tab.disabled && "opacity-50 cursor-not-allowed"
-                        )}
-                    >
-                        {tab.icon}
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            <TaskProvider>
+                {/* TabBar - Project style with uppercase labels */}
+                <div className="flex items-center border-b-2 border-primary/20 bg-muted/20">
+                    <div className="flex flex-1">
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => !tab.disabled && setActiveTab(tab.id)}
+                                disabled={tab.disabled}
+                                className={cn(
+                                    "flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
+                                    "border-b-3 -mb-[2px]",
+                                    activeTab === tab.id
+                                        ? "border-primary text-primary bg-primary/5"
+                                        : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                                    tab.disabled && "opacity-50 cursor-not-allowed"
+                                )}
+                            >
+                                {tab.icon}
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                    {/* Right side actions */}
+                    {showTaskFilter && (
+                        <div className="flex items-center pr-2">
+                            <TaskFilterPopup />
+                        </div>
+                    )}
+                </div>
 
-            {/* Tab Content */}
-            <div className="flex-1 overflow-hidden">
-                {renderTabContent()}
-            </div>
+                {/* Tab Content */}
+                <div className="flex-1 overflow-hidden">
+                    {renderTabContent()}
+                </div>
+            </TaskProvider>
         </div>
     );
 }
