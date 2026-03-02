@@ -4,11 +4,11 @@
  * Used within ProjectDetailContent TabBar when a task tab is active
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateRangePicker, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
 import { CardContent } from "@/Components/ui/card";
 import { ScrollArea } from "@/Components/ui/scroll-area";
-import { FileText, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus } from "lucide-react";
 import { Task, useTaskStore } from "@/store/task/useTask.store";
 import { useProjectStore } from "@/store/project/useProject.store";
 import { useGeneralStore } from "@/store/general/General.store";
@@ -17,6 +17,12 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { taskService, TaskDTO } from "@/services/task.service";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { useTaskWorkspaceItemHelper } from "@/hooks/task/useTaskWorkspaceItem.helper";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { noteService } from "@/services/note.service";
+import { Note } from "@/types/note.types";
+import { parseAsLocalDate } from "@/utils/date.utils";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 
 /**
  * Get task status colors from constants
@@ -247,6 +253,100 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
         };
     }, [selectedTask?.parentTaskId, parentTaskOptions]);
 
+    // Linked notes (workspace items)
+    const { linkedNotes, isLoading: isLoadingLinkedNotes, loadLinkedNotes, linkNote, unlinkNote, loadLinkableNotes, createTaskNote } = useTaskWorkspaceItemHelper();
+    const { openTab } = useEditorTabHelper();
+    const { showConfirmation } = useConfirmationPopoverHelper();
+
+    // State for link note autocomplete
+    const [linkableNoteOptions, setLinkableNoteOptions] = useState<IAutoCompleteOptions[]>([]);
+    const [showLinkNoteInput, setShowLinkNoteInput] = useState(false);
+
+    // Load linked notes when task changes
+    useEffect(() => {
+        if (selectedTask?.id && selectedTask.id > 0) {
+            loadLinkedNotes(selectedTask.id);
+        }
+    }, [selectedTask?.id, loadLinkedNotes]);
+
+    // Open a linked note in editor tab
+    const handleOpenLinkedNote = useCallback(async (noteId: number) => {
+        if (noteId <= 0) return;
+        try {
+            const token = $user.userToken;
+            const result = await noteService._getNoteById(token, noteId);
+            if (result.success && result.object) {
+                const dto = result.object;
+                const note: Note = {
+                    id: dto.id,
+                    name: dto.name,
+                    description: dto.description || "",
+                    hashtags: dto.hashtags || "",
+                    type: dto.type,
+                    statusCode: dto.statusCode,
+                    icon: dto.icon,
+                    color: dto.color,
+                    createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+                    updatedAt: parseAsLocalDate(dto.updatedAt) ?? undefined,
+                    deletedAt: parseAsLocalDate(dto.deletedAt),
+                    workspaceLinks: dto.workspaceLinks,
+                };
+                openTab(note, constants.vscode.tab.tabTypes.note);
+            }
+        } catch (error) {
+            console.error("Failed to open linked note:", error);
+        }
+    }, [$user.userToken, openTab]);
+
+    // Show link note dropdown and load options
+    const handleShowLinkNote = useCallback(async () => {
+        setShowLinkNoteInput(true);
+        const linkable = await loadLinkableNotes();
+        // Filter out notes already linked
+        const alreadyLinkedIds = new Set(linkedNotes.map((ln) => ln.workspaceItemId));
+        const options: IAutoCompleteOptions[] = linkable
+            .filter((n) => !alreadyLinkedIds.has(n.workspaceItemId))
+            .map((n) => ({
+                id: n.workspaceItemId,
+                label: n.name,
+                desc: n.name,
+            }));
+        setLinkableNoteOptions(options);
+    }, [loadLinkableNotes, linkedNotes]);
+
+    // Link selected note to task
+    const handleLinkNote = useCallback(async (_event: React.SyntheticEvent, value: IAutoCompleteOptions | null) => {
+        if (!value || !selectedTask) return;
+        const workspaceItemId = value.id as number;
+        await linkNote(selectedTask.id, workspaceItemId, 3);
+        setShowLinkNoteInput(false);
+        setLinkableNoteOptions([]);
+    }, [selectedTask, linkNote]);
+
+    // Unlink note with confirmation popup
+    const handleUnlinkNote = useCallback((event: React.MouseEvent, linkId: number, noteName: string) => {
+        if (!selectedTask) return;
+        showConfirmation({
+            title: noteName,
+            subtitle: "This will remove the link between this note and the task.",
+            confirmText: "Unlink",
+            cancelText: "Cancel",
+            confirmColor: "destructive",
+            cancelColor: "outline",
+            anchorEl: event.currentTarget as HTMLElement,
+            onConfirm: async () => {
+                await unlinkNote(selectedTask.id, linkId);
+            },
+        });
+    }, [selectedTask, unlinkNote, showConfirmation]);
+
+    // Create a new note for this task and open it in an editor tab
+    const handleCreateTaskNote = useCallback(() => {
+        if (!selectedTask) return;
+        const projectWorkspaceId = currentProject?.workspaceId ?? null;
+        createTaskNote(selectedTask, projectWorkspaceId);
+    }, [selectedTask, currentProject, createTaskNote]);
+
     // Handler for field changes - updates the tab data
     const handleFieldChange = (field: keyof Task, value: any) => {
         if (!taskTab || !selectedTask) return;
@@ -438,6 +538,90 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 }}
                                 disabled={isDisabled || isLoadingParentTasks || hasSubtasks}
                             />
+
+                            {/* Linked Notes Section */}
+                            {selectedTask.id > 0 && (
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium flex items-center gap-2">
+                                        <Link2 className="h-4 w-4" />
+                                        Linked Notes
+                                        {isLoadingLinkedNotes && <Loader2 className="h-3 w-3 animate-spin" />}
+                                        {!isDisabled && !showLinkNoteInput && (
+                                            <span className="ml-auto flex items-center gap-0.5">
+                                                <button
+                                                    onClick={handleCreateTaskNote}
+                                                    className="p-0.5 rounded hover:bg-muted transition-colors"
+                                                    title="Create new note for this task"
+                                                >
+                                                    <FilePlus className="h-3.5 w-3.5" />
+                                                </button>
+                                                <button
+                                                    onClick={handleShowLinkNote}
+                                                    className="p-0.5 rounded hover:bg-muted transition-colors"
+                                                    title="Link an existing note"
+                                                >
+                                                    <Plus className="h-3.5 w-3.5" />
+                                                </button>
+                                            </span>
+                                        )}
+                                    </label>
+                                    {showLinkNoteInput && (
+                                        <div className="flex items-start gap-1">
+                                            <div className="flex-1">
+                                                <GenericAutoComplete
+                                                    value={null}
+                                                    onChange={handleLinkNote}
+                                                    allOptions={linkableNoteOptions}
+                                                    inputProps={{
+                                                        name: "linkNote",
+                                                        label: "",
+                                                    }}
+                                                    size="small"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => { setShowLinkNoteInput(false); setLinkableNoteOptions([]); }}
+                                                className="mt-1 p-1 rounded hover:bg-muted transition-colors"
+                                                title="Cancel"
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
+                                    )}
+                                    {linkedNotes.length > 0 ? (
+                                        <div className="space-y-1">
+                                            {linkedNotes.map((ln) => (
+                                                <div
+                                                    key={ln.linkId}
+                                                    className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted group"
+                                                >
+                                                    <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                                    <span
+                                                        className="flex-1 text-left truncate cursor-pointer hover:text-primary hover:underline"
+                                                        onClick={() => handleOpenLinkedNote(ln.noteId)}
+                                                        title={ln.name}
+                                                    >
+                                                        {ln.name.length > 26 ? ln.name.slice(0, 26) + "..." : ln.name}
+                                                    </span>
+                                                    {!isDisabled && (
+                                                        <button
+                                                            onClick={(e) => handleUnlinkNote(e, ln.linkId, ln.name)}
+                                                            className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity"
+                                                            title="Unlink note"
+                                                        >
+                                                            <X className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        !isLoadingLinkedNotes && !showLinkNoteInput && (
+                                            <p className="text-xs text-muted-foreground">No linked notes</p>
+                                        )
+                                    )}
+                                </div>
+                            )}
 
                             <GenericTextField label="Task ID" value={selectedTask.id > 0 ? selectedTask.id.toString() : "New (Unsaved)"} disabled size="small" />
 

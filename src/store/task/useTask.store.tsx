@@ -5,6 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
+import {LinkedNote} from "@/hooks/task/useTaskWorkspaceItem.helper";
 
 export interface Task {
     id: number;
@@ -54,6 +55,10 @@ export interface TaskContextData {
     taskContainerRef: RefObject<HTMLDivElement>;
     taskContainerWidth: number;
     setTaskContainerWidth: Dispatch<SetStateAction<number>>;
+    linkedNotes: LinkedNote[];
+     setLinkedNotes: Dispatch<SetStateAction<LinkedNote[]>>;
+     isLoadingLinkedNotes: boolean;
+     setIsLoadingLinkedNotes: Dispatch<SetStateAction<boolean>>;
 }
 
 export const taskContextDefaultValue: TaskContextData = {
@@ -76,6 +81,10 @@ export const taskContextDefaultValue: TaskContextData = {
     setTaskGridRowSelection: () => {},
     setTaskGridColumnFilters: () => {},
     setTaskContainerWidth: () => {},
+    linkedNotes: [],
+    setLinkedNotes: () => {},
+    isLoadingLinkedNotes: false,
+    setIsLoadingLinkedNotes: () => {},
 };
 
 export const TaskStore = createContext<TaskContextData>(taskContextDefaultValue);
@@ -93,6 +102,9 @@ export const TaskProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
     const [taskGridColumnFilters, setTaskGridColumnFilters] = useState<ColumnFiltersState>([]);
     const taskContainerRef = useRef<HTMLDivElement>(null);
     const [taskContainerWidth, setTaskContainerWidth] = useState<number>(0);
+
+    const [linkedNotes, setLinkedNotes] = useState<LinkedNote[]>([]);
+    const [isLoadingLinkedNotes, setIsLoadingLinkedNotes] = useState(false);
 
     return (
         <TaskStore.Provider
@@ -116,6 +128,10 @@ export const TaskProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
                 taskContainerRef,
                 taskContainerWidth,
                 setTaskContainerWidth,
+                linkedNotes,
+                setLinkedNotes,
+                isLoadingLinkedNotes,
+                setIsLoadingLinkedNotes,
             }}
         >
             {children}

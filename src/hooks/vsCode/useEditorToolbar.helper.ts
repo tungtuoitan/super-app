@@ -30,6 +30,8 @@ import { useProjectDetailHelper } from "../project/useProjectDetail.helper";
 import { Project } from "@/store/project/useProject.store";
 import { useTaskDetailHelper } from "../task/useTaskDetail.helper";
 import { Task } from "@/store/task/useTask.store";
+import { workspaceService } from "@/services/workspace.service";
+import { taskWorkspaceItemService } from "@/services/taskWorkspaceItem.service";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -102,6 +104,104 @@ export const useEditorToolbarHelper = () => {
         return null;
     })();
 
+    /**
+     * After a task-created note is saved, create the workspace folder (if needed)
+     * and add the note as a workspace item under that folder. Also link it to the task.
+     *
+     * Logic:
+     * - Check if the task (T) already has a linked folder (itemType=2) via taskWorkspaceItemService
+     * - If yes: use that folder's workspaceItemId as parentId for the note
+     * - If no: create a new folder (name = savedNote.name), then link it to T
+     * - Then add the note under that folder, and link the note to T
+     */
+    const _createTaskNoteWorkspaceItem = async (savedNote: Note, taskId: number, projectWorkspaceId: number, activeTab: BaseTab) => {
+        try {
+            const token = $user.userToken ?? "";
+
+            // Step 1: Check if T already has a linked folder (itemType=2)
+            const taskWsItemsRes = await taskWorkspaceItemService._getTaskWorkspaceItems(token, taskId);
+            const existingFolderLink = taskWsItemsRes.data?.find((item) => item.itemType === 2);
+
+            let parentWorkspaceItemId: number | null = null;
+
+            if (existingFolderLink) {
+                // T already has a linked folder — use it directly
+                parentWorkspaceItemId = existingFolderLink.workspaceItemId;
+            } else {
+                // No linked folder — Create Folder
+                const folderName = activeTab.metadata?.taskTitle ? `${activeTab.metadata.taskTitle}` : "Untitled";
+
+                const createFolderRes = await workspaceService._upsertWorkspaceItems(token, projectWorkspaceId, [
+                    {
+                        action: WorkspaceItemAction.Create,
+                        entityType: 2,
+                        parentId: null,
+                        folderData: { name: folderName },
+                    },
+                ]);
+
+                if (!createFolderRes.success) {
+                    _console.error("Failed to create task folder in workspace");
+                    return;
+                }
+
+                // Re-fetch tree to get the new folder's workspace_items.id
+                const treeRes = await workspaceService._getWorkspaceTreeV2(token, projectWorkspaceId);
+                if (!treeRes.success || !treeRes.object) {
+                    _console.error("Failed to load project workspace after folder creation");
+                    return;
+                }
+
+                const newFolderWsItem = treeRes.object.flatData?.find((item) => item.entityType === 2 && (item.data as any)?.name === folderName);
+
+                if (!newFolderWsItem) {
+                    _console.error("Could not find newly created folder in workspace tree");
+                    return;
+                }
+
+                parentWorkspaceItemId = newFolderWsItem.id;
+
+                // Link the new folder to T
+                await taskWorkspaceItemService._linkTaskWorkspaceItem(token, taskId, {
+                    workspaceItemId: newFolderWsItem.id,
+                    itemType: 2,
+                });
+            }
+
+            // Step 2: Add Note to Folder
+            await workspaceService._upsertWorkspaceItems(token, projectWorkspaceId, [
+                {
+                    action: WorkspaceItemAction.Add,
+                    entityType: 3,
+                    entityId: savedNote.id,
+                    parentId: parentWorkspaceItemId,
+                },
+            ]);
+
+            // Step 3: Link Note to Task
+            const treeRes2 = await workspaceService._getWorkspaceTreeV2(token, projectWorkspaceId);
+            if (treeRes2.success && treeRes2.object) {
+                const noteWsItem = treeRes2.object.flatData?.find((item) => item.entityType === 3 && item.entityId === savedNote.id);
+                if (noteWsItem) {
+                    await taskWorkspaceItemService._linkTaskWorkspaceItem(token, taskId, {
+                        workspaceItemId: noteWsItem.id,
+                        itemType: 3,
+                    });
+                }
+            }
+
+            _console.success("Note linked to task workspace");
+        } catch (error) {
+            console.error("Failed to create task note workspace item:", error);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                _console.error("Unauthorized. Please login again.");
+            } else {
+                _console.error(`Failed to link note to workspace: ${errorMessage}`);
+            }
+        }
+    };
+
     // Handle Upsert - orchestrator for all entity types (create/update/soft delete/restore)
     const upsertOrchestraitor = useCallback(async () => {
         // STEP 1: Validate Active Tab
@@ -140,6 +240,12 @@ export const useEditorToolbarHelper = () => {
                                 throw new Error("Failed to update note");
                             }
                             loadKeywords();
+
+                            // POST-SAVE: If note was created from a task, create workspace folder+item
+                            const taskMeta = activeTab.metadata;
+                            if (taskMeta?.taskId && taskMeta?.projectWorkspaceId && data.id < 0) {
+                                await _createTaskNoteWorkspaceItem(savedNote, taskMeta.taskId as number, taskMeta.projectWorkspaceId as number, activeTab);
+                            }
                         }
                         //* thêm các entity type khác ở đây
                     }

@@ -57,6 +57,7 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         createdAt: new Date(dto.createdAt),
         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+        workspaceId: dto.workspaceId,
     }));
 };
 

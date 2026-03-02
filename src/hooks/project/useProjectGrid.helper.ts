@@ -29,6 +29,7 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
+        workspaceId: dto.workspaceId,
     }));
 };
 
@@ -60,7 +61,7 @@ export const useProjectGridHelper = () => {
             id: tempId,
             name: name,
             description: "",
-            status: "open",
+            status: "active",
             startDate: null,
             endDate: null,
             createdAt: new Date(),

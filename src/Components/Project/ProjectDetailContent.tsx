@@ -3,8 +3,8 @@
  * Contains TabBar with: TaskList, TodayList, Kanban, Timeline
  */
 
-import React, { useCallback } from "react";
-import { ListTodo, Columns, GanttChartSquare, Settings } from "lucide-react";
+import React, { useCallback, useMemo } from "react";
+import { ListTodo, Columns, GanttChartSquare, Settings, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskList } from "./TaskList";
 import { TaskKanbanView } from "./TaskKanbanView";
@@ -13,6 +13,12 @@ import { TaskProvider } from "@/store/task/useTask.store";
 import { ProjectGeneral } from "./ProjectGeneral";
 import { TaskFilterPopup } from "./TaskFilterPopup";
 import { useEditorTabsStore } from "@/store/index";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useNavigationStore } from "@/contexts/NavigationContext";
+import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
+import { constants } from "@/utils/index";
+import { Project } from "@/store/project/useProject.store";
+import { Button } from "@/Components/ui/button";
 
 type TabType = "general" | "taskList" | "kanban" | "timeline";
 
@@ -41,10 +47,29 @@ interface ProjectDetailContentProps {
  */
 export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentProps) {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { setSelectedWorkspaceId } = useWorkspaceStore();
+    const { navigateToView } = useNavigationStore();
+    const { saveNewsBeforeNavigate } = useWorkspaceHelper();
 
     // Get active inner tab from editor tab metadata, default to "general"
     const currentTab = openTabs.find((t) => t.id === tabId);
     const activeTab: TabType = (currentTab?.metadata?.innerTab as TabType) || "general";
+
+    // Get project data from the open tab
+    const selectedProject = useMemo(() => {
+        const projectTab = openTabs.find(
+            (tab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId
+        );
+        return projectTab ? (projectTab.data as Project) : undefined;
+    }, [openTabs, projectId]);
+
+    // Navigate to workspace view for this project
+    const handleOpenWorkspace = useCallback(async () => {
+        if (!selectedProject?.workspaceId) return;
+        await saveNewsBeforeNavigate();
+        setSelectedWorkspaceId(selectedProject.workspaceId);
+        navigateToView(constants.navigation.views.workspace);
+    }, [selectedProject?.workspaceId, saveNewsBeforeNavigate, setSelectedWorkspaceId, navigateToView]);
 
     // Update inner tab in editor tab metadata
     const setActiveTab = useCallback((newTab: TabType) => {
@@ -100,11 +125,21 @@ export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentP
                         ))}
                     </div>
                     {/* Right side actions */}
-                    {showTaskFilter && (
-                        <div className="flex items-center pr-2">
-                            <TaskFilterPopup />
-                        </div>
-                    )}
+                    <div className="flex items-center gap-1 pr-2">
+                        {showTaskFilter && <TaskFilterPopup />}
+                        {selectedProject?.workspaceId && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleOpenWorkspace}
+                                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                                title="Open project workspace"
+                            >
+                                <FolderOpen className="h-4 w-4 mr-1" />
+                                Workspace
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Tab Content */}
