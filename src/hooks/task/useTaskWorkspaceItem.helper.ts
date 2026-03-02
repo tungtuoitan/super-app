@@ -40,7 +40,9 @@ export const useTaskWorkspaceItemHelper = () => {
     const { registries } = useGeneralStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
-    const { setLinkedNotes, setIsLoadingLinkedNotes, linkedNotes, isLoadingLinkedNotes } = useTaskStore();
+
+    const [linkedNotes, setLinkedNotes] = useState<LinkedNote[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     /**
      * Load linked workspace items for a task, then resolve note details
@@ -51,7 +53,7 @@ export const useTaskWorkspaceItemHelper = () => {
             return;
         }
 
-        setIsLoadingLinkedNotes(true);
+        setIsLoading(true);
         try {
             const token = $user.userToken;
             const result = await taskWorkspaceItemService._getTaskWorkspaceItems(token, taskId);
@@ -111,7 +113,7 @@ export const useTaskWorkspaceItemHelper = () => {
             console.error("Failed to load linked notes:", error);
             setLinkedNotes([]);
         } finally {
-            setIsLoadingLinkedNotes(false);
+            setIsLoading(false);
         }
     }, [$user.userToken]);
 
@@ -250,6 +252,8 @@ export const useTaskWorkspaceItemHelper = () => {
     }, [$user, registries, openTabs, setOpenTabs, setActiveTabId, setShouldFocusNoteName]);
 
     return {
+        linkedNotes,
+        isLoading,
         loadLinkedNotes,
         linkNote,
         unlinkNote,
