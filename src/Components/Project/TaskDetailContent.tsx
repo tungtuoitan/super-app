@@ -53,7 +53,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { projects } = useProjectStore();
     const { $user } = useAuthStore();
-    const { tasks } = useTaskStore();
+    const { tasks, linkedNotes, isLoadingLinkedNotes } = useTaskStore();
 
     // Find the task tab by ID
     const taskTab = openTabs.find((tab) => tab.id === taskTabId && tab.type === constants.vscode.tab.tabTypes.task);
@@ -254,7 +254,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     }, [selectedTask?.parentTaskId, parentTaskOptions]);
 
     // Linked notes (workspace items)
-    const { linkedNotes, isLoading: isLoadingLinkedNotes, loadLinkedNotes, linkNote, unlinkNote, loadLinkableNotes, createTaskNote } = useTaskWorkspaceItemHelper();
+    const { loadLinkedNotes, linkNote, unlinkNote, loadLinkableNotes, createTaskNote } = useTaskWorkspaceItemHelper();
     const { openTab } = useEditorTabHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
 
