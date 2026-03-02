@@ -34,6 +34,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
+        folderWorkspaceItemId: dto.folderWorkspaceItemId,
         // Limit dates for warning display
         projectStartDate: parseAsLocalDate(dto.projectStartDate),
         projectEndDate: parseAsLocalDate(dto.projectEndDate),

@@ -77,6 +77,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
+        folderWorkspaceItemId: dto.folderWorkspaceItemId,
     }));
 };
 

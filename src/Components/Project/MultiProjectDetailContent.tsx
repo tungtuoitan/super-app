@@ -12,7 +12,6 @@ import { MultiProjectTaskList } from "./MultiProjectTaskList";
 import { MultiProjectKanbanView } from "./MultiProjectKanbanView";
 import { MultiProjectTimelineView } from "./MultiProjectTimelineView";
 import { MultiProjectProTimelineView } from "./MultiProjectProTimelineView";
-import { TaskProvider } from "@/store/task/useTask.store";
 import { Project, useProjectStore } from "@/store/project/useProject.store";
 import { getProjectStatusColors } from "./ProjectStatusBadge";
 import { ScrollArea, ScrollBar } from "@/Components/ui/scroll-area";
@@ -183,15 +182,11 @@ export function MultiProjectDetailContent({ projectIds, projects, tabId }: Multi
         switch (activeTab) {
             case "taskList":
                 return (
-                    <TaskProvider>
-                        <MultiProjectTaskList projectIds={filteredProjectIds} projects={filteredProjects} />
-                    </TaskProvider>
+                    <MultiProjectTaskList projectIds={filteredProjectIds} projects={filteredProjects} />
                 );
             case "kanban":
                 return (
-                    <TaskProvider>
-                        <MultiProjectKanbanView projectIds={filteredProjectIds} projects={filteredProjects} />
-                    </TaskProvider>
+                    <MultiProjectKanbanView projectIds={filteredProjectIds} projects={filteredProjects} />
                 );
             case "proTimeline":
                 return (
@@ -199,9 +194,7 @@ export function MultiProjectDetailContent({ projectIds, projects, tabId }: Multi
                 );
             case "timeline":
                 return (
-                    <TaskProvider>
-                        <MultiProjectTimelineView projectIds={filteredProjectIds} projects={filteredProjects} />
-                    </TaskProvider>
+                    <MultiProjectTimelineView projectIds={filteredProjectIds} projects={filteredProjects} />
                 );
             default:
                 return null;

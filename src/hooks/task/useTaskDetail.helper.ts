@@ -33,6 +33,7 @@ export const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
+        folderWorkspaceItemId: dto.folderWorkspaceItemId,
         // Limit dates for warning display
         projectStartDate: parseAsLocalDate(dto.projectStartDate),
         projectEndDate: parseAsLocalDate(dto.projectEndDate),
@@ -101,7 +102,7 @@ export const useTaskDetailHelper = () => {
                 // Step 3: Prepare upsert data - use toLocalISOString to preserve local time
                 // ============================================================
                 const upsertData = {
-                    id: isCreateMode ? 0 : selectedTask.id, // Always use 0 for create
+                    id: isCreateMode ? 0 : selectedTask.id,
                     projectId: selectedTask.projectId,
                     parentTaskId: selectedTask.parentTaskId,
                     type: selectedTask.type || "task",
@@ -113,6 +114,7 @@ export const useTaskDetailHelper = () => {
                     endDate: toLocalISOString(selectedTask.endDate),
                     orderIndex: selectedTask.orderIndex || 0,
                     deletedAt: isRestoreMode ? null : toLocalISOString(selectedTask.deletedAt),
+                    folderWorkspaceItemId: selectedTask.folderWorkspaceItemId,
                 };
 
                 // ============================================================
@@ -148,6 +150,7 @@ export const useTaskDetailHelper = () => {
                     createdAt: parseAsLocalDate(savedTask.createdAt) || new Date(),
                     updatedAt: parseAsLocalDate(savedTask.updatedAt),
                     deletedAt: parseAsLocalDate(savedTask.deletedAt),
+                    folderWorkspaceItemId: savedTask.folderWorkspaceItemId,
                 };
 
                 // ============================================================
