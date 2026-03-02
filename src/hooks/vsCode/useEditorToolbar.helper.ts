@@ -4,7 +4,7 @@
  * Routes to appropriate service helpers based on active tab type
  */
 
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { Note } from "@/types/note.types";
@@ -31,7 +31,11 @@ import { Project } from "@/store/project/useProject.store";
 import { useTaskDetailHelper } from "../task/useTaskDetail.helper";
 import { Task } from "@/store/task/useTask.store";
 import { workspaceService } from "@/services/workspace.service";
-import { taskWorkspaceItemService } from "@/services/taskWorkspaceItem.service";
+import { taskService } from "@/services/task.service";
+import { projectService, ProjectDTO } from "@/services/project.service";
+import { useProjectStore } from "@/store/project/useProject.store";
+import { useTaskStore } from "@/store/task/useTask.store";
+import { parseAsLocalDate } from "@/utils/date.utils";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -61,6 +65,14 @@ export const useEditorToolbarHelper = () => {
     const { moduleName } = useGridControlStore();
     const { currentWorkspace } = useWorkspaceStore();
     const { loadKeywords } = useStandardRegistryHelper();
+    const { projects, setProjects } = useProjectStore();
+    const { tasks, setTasks } = useTaskStore();
+
+    // Refs to always have latest values inside useCallback closures
+    const tasksRef = useRef(tasks);
+    const projectsRef = useRef(projects);
+    useEffect(() => { tasksRef.current = tasks; }, [tasks]);
+    useEffect(() => { projectsRef.current = projects; }, [projects]);
 
     // Get status text based on tab type and deletion state
     const _deleteStatusText = (() => {
@@ -105,99 +117,214 @@ export const useEditorToolbarHelper = () => {
     })();
 
     /**
-     * After a task-created note is saved, create the workspace folder (if needed)
-     * and add the note as a workspace item under that folder. Also link it to the task.
-     *
-     * Logic:
-     * - Check if the task (T) already has a linked folder (itemType=2) via taskWorkspaceItemService
-     * - If yes: use that folder's workspaceItemId as parentId for the note
-     * - If no: create a new folder (name = savedNote.name), then link it to T
-     * - Then add the note under that folder, and link the note to T
+     * After a new task is saved:
+     * 1. Ensure project has a workspace (create if not)
+     * 2. Create a folder named after the task in that workspace
+     * 3. Update task.folderWorkspaceItemId in DB and local store
      */
-    const _createTaskNoteWorkspaceItem = async (savedNote: Note, taskId: number, projectWorkspaceId: number, activeTab: BaseTab) => {
+    const _createTaskFolder = async (savedTask: Task) => {
         try {
             const token = $user.userToken ?? "";
 
-            // Step 1: Check if T already has a linked folder (itemType=2)
-            const taskWsItemsRes = await taskWorkspaceItemService._getTaskWorkspaceItems(token, taskId);
-            const existingFolderLink = taskWsItemsRes.data?.find((item) => item.itemType === 2);
-
-            let parentWorkspaceItemId: number | null = null;
-
-            if (existingFolderLink) {
-                // T already has a linked folder — use it directly
-                parentWorkspaceItemId = existingFolderLink.workspaceItemId;
-            } else {
-                // No linked folder — Create Folder
-                const folderName = activeTab.metadata?.taskTitle ? `${activeTab.metadata.taskTitle}` : "Untitled";
-
-                const createFolderRes = await workspaceService._upsertWorkspaceItems(token, projectWorkspaceId, [
-                    {
-                        action: WorkspaceItemAction.Create,
-                        entityType: 2,
-                        parentId: null,
-                        folderData: { name: folderName },
-                    },
-                ]);
-
-                if (!createFolderRes.success) {
-                    _console.error("Failed to create task folder in workspace");
-                    return;
+            // --- Ensure project has a workspace ---
+            let project = projectsRef.current.find((p) => p.id === savedTask.projectId);
+            if (!project) {
+                const result = await projectService._getProjects(token, { ids: savedTask.projectId.toString() });
+                if (result.success && result.data && result.data.length > 0) {
+                    const fetched: Project[] = (result.data as ProjectDTO[]).map((dto) => ({
+                        id: dto.id,
+                        name: dto.name,
+                        description: dto.description,
+                        status: dto.status,
+                        startDate: parseAsLocalDate(dto.startDate),
+                        endDate: parseAsLocalDate(dto.endDate),
+                        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+                        updatedAt: parseAsLocalDate(dto.updatedAt),
+                        deletedAt: parseAsLocalDate(dto.deletedAt),
+                        workspaceId: dto.workspaceId,
+                    }));
+                    setProjects((prev) => {
+                        const ids = new Set(prev.map((p) => p.id));
+                        return [...prev, ...fetched.filter((p) => !ids.has(p.id))];
+                    });
+                    project = fetched.find((p) => p.id === savedTask.projectId);
                 }
-
-                // Re-fetch tree to get the new folder's workspace_items.id
-                const treeRes = await workspaceService._getWorkspaceTreeV2(token, projectWorkspaceId);
-                if (!treeRes.success || !treeRes.object) {
-                    _console.error("Failed to load project workspace after folder creation");
-                    return;
-                }
-
-                const newFolderWsItem = treeRes.object.flatData?.find((item) => item.entityType === 2 && (item.data as any)?.name === folderName);
-
-                if (!newFolderWsItem) {
-                    _console.error("Could not find newly created folder in workspace tree");
-                    return;
-                }
-
-                parentWorkspaceItemId = newFolderWsItem.id;
-
-                // Link the new folder to T
-                await taskWorkspaceItemService._linkTaskWorkspaceItem(token, taskId, {
-                    workspaceItemId: newFolderWsItem.id,
-                    itemType: 2,
-                });
+            }
+            if (!project) {
+                _console.error("Project not found — cannot create task folder");
+                return;
             }
 
-            // Step 2: Add Note to Folder
-            await workspaceService._upsertWorkspaceItems(token, projectWorkspaceId, [
+            let workspaceId = project.workspaceId;
+
+            if (!workspaceId) {
+                const updatedProjectResult = await projectService._upsertProjectBatch(token, [{
+                    id: project.id,
+                    name: project.name,
+                    description: project.description,
+                    status: project.status,
+                    startDate: project.startDate ? project.startDate.toISOString() : null,
+                    endDate: project.endDate ? project.endDate.toISOString() : null,
+                    deletedAt: project.deletedAt ? project.deletedAt.toISOString() : null,
+                    workspaceId: null,
+                }]);
+
+                if (!updatedProjectResult.success || !updatedProjectResult.data?.[0]?.workspaceId) {
+                    _console.error("Failed to create workspace for project");
+                    return;
+                }
+
+                workspaceId = updatedProjectResult.data[0].workspaceId!;
+                setProjects((prev) => prev.map((p) =>
+                    p.id === project!.id ? { ...p, workspaceId } : p
+                ));
+            }
+
+            if (!workspaceId) return;
+            const resolvedWorkspaceId = workspaceId as number;
+
+            // --- Create folder named after task ---
+            const folderName = savedTask.title || "Untitled";
+            const createFolderRes = await workspaceService._upsertWorkspaceItems(token, resolvedWorkspaceId, [
                 {
-                    action: WorkspaceItemAction.Add,
-                    entityType: 3,
-                    entityId: savedNote.id,
-                    parentId: parentWorkspaceItemId,
+                    action: WorkspaceItemAction.Create,
+                    entityType: 2,
+                    parentId: null,
+                    folderData: { name: folderName },
                 },
             ]);
 
-            // Step 3: Link Note to Task
-            const treeRes2 = await workspaceService._getWorkspaceTreeV2(token, projectWorkspaceId);
-            if (treeRes2.success && treeRes2.object) {
-                const noteWsItem = treeRes2.object.flatData?.find((item) => item.entityType === 3 && item.entityId === savedNote.id);
-                if (noteWsItem) {
-                    await taskWorkspaceItemService._linkTaskWorkspaceItem(token, taskId, {
-                        workspaceItemId: noteWsItem.id,
-                        itemType: 3,
-                    });
-                }
+            if (!createFolderRes.success) {
+                _console.error("Failed to create task folder in workspace");
+                return;
             }
 
-            _console.success("Note linked to task workspace");
+            // Fetch tree to get new folder's workspace_items.id
+            const treeRes = await workspaceService._getWorkspaceTreeV2(token, resolvedWorkspaceId);
+            if (!treeRes.success || !treeRes.object) {
+                _console.error("Failed to load workspace tree after folder creation");
+                return;
+            }
+
+            const newFolderWsItem = treeRes.object.flatData?.find(
+                (item) => item.entityType === 2 && (item.data as any)?.name === folderName
+            );
+
+            if (!newFolderWsItem) {
+                _console.error("Could not find newly created folder in workspace tree");
+                return;
+            }
+
+            const folderWorkspaceItemId = newFolderWsItem.id;
+
+            // --- Update task with folderWorkspaceItemId ---
+            const updatedTaskResult = await taskService._upsertTaskBatch(token, [{
+                id: savedTask.id,
+                projectId: savedTask.projectId,
+                parentTaskId: savedTask.parentTaskId,
+                type: savedTask.type,
+                title: savedTask.title,
+                note: savedTask.note,
+                status: savedTask.status,
+                priority: savedTask.priority,
+                startDate: savedTask.startDate ? savedTask.startDate.toISOString() : null,
+                endDate: savedTask.endDate ? savedTask.endDate.toISOString() : null,
+                orderIndex: savedTask.orderIndex,
+                deletedAt: savedTask.deletedAt ? savedTask.deletedAt.toISOString() : null,
+                folderWorkspaceItemId,
+            }]);
+
+            if (updatedTaskResult.success && updatedTaskResult.data?.[0]) {
+                setTasks((prev) => prev.map((t) =>
+                    t.id === savedTask.id ? { ...t, folderWorkspaceItemId } : t
+                ));
+                // Also update the open tab's data so TaskDetailContent sees the new folderWorkspaceItemId
+                setOpenTabs((prev) => prev.map((tab) => {
+                    if (tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === savedTask.id) {
+                        return { ...tab, data: { ...tab.data as Task, folderWorkspaceItemId }, data0: { ...tab.data0 as Task, folderWorkspaceItemId } };
+                    }
+                    return tab;
+                }));
+            }
         } catch (error) {
-            console.error("Failed to create task note workspace item:", error);
+            console.error("Failed to create task folder:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
                 _console.error("Unauthorized. Please login again.");
             } else {
-                _console.error(`Failed to link note to workspace: ${errorMessage}`);
+                _console.error(`Failed to create task folder: ${errorMessage}`);
+            }
+        }
+    };
+
+    /**
+     * After a task-created note is saved:
+     * Add note to the task's workspace folder (folderWorkspaceItemId from tab metadata).
+     */
+    const _addNoteToTaskFolder = async (savedNote: Note, activeTab: BaseTab) => {
+        try {
+            const token = $user.userToken ?? "";
+
+            const folderWorkspaceItemId = activeTab.metadata?.folderWorkspaceItemId as number | null | undefined;
+            if (!folderWorkspaceItemId) {
+                _console.error("Task has no folder — folder should have been created when the task was saved");
+                return;
+            }
+
+            // Resolve workspaceId via task → project
+            const taskId = activeTab.metadata?.taskId as number;
+            const task = tasksRef.current.find((t) => t.id === taskId)
+                ?? (activeTab.metadata?.taskSnapshot as Task | undefined) ?? null;
+            if (!task) {
+                _console.error("Task not found");
+                return;
+            }
+
+            let project = projectsRef.current.find((p) => p.id === task.projectId);
+            if (!project) {
+                const result = await projectService._getProjects(token, { ids: task.projectId.toString() });
+                if (result.success && result.data && result.data.length > 0) {
+                    const fetched: Project[] = (result.data as ProjectDTO[]).map((dto) => ({
+                        id: dto.id,
+                        name: dto.name,
+                        description: dto.description,
+                        status: dto.status,
+                        startDate: parseAsLocalDate(dto.startDate),
+                        endDate: parseAsLocalDate(dto.endDate),
+                        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+                        updatedAt: parseAsLocalDate(dto.updatedAt),
+                        deletedAt: parseAsLocalDate(dto.deletedAt),
+                        workspaceId: dto.workspaceId,
+                    }));
+                    setProjects((prev) => {
+                        const ids = new Set(prev.map((p) => p.id));
+                        return [...prev, ...fetched.filter((p) => !ids.has(p.id))];
+                    });
+                    project = fetched.find((p) => p.id === task.projectId);
+                }
+            }
+            if (!project?.workspaceId) {
+                _console.error("Project workspace not found");
+                return;
+            }
+
+            await workspaceService._upsertWorkspaceItems(token, project.workspaceId as number, [
+                {
+                    action: WorkspaceItemAction.Add,
+                    entityType: 3,
+                    entityId: savedNote.id,
+                    parentId: folderWorkspaceItemId,
+                },
+            ]);
+
+            _console.success("Note saved to task folder");
+        } catch (error) {
+            console.error("Failed to add note to task folder:", error);
+            const errorMessage = await parseApiError(error);
+            if (isUnauthorizedError(error)) {
+                _console.error("Unauthorized. Please login again.");
+            } else {
+                _console.error(`Failed to add note to task folder: ${errorMessage}`);
             }
         }
     };
@@ -224,10 +351,16 @@ export const useEditorToolbarHelper = () => {
                     // PROJECT HANDLER: Delegate to Project Upsert Logic (upsertProject already reloads projects)
                     await upsertProject(activeTab.id);
                     break;
-                case constants.vscode.tab.tabTypes.task:
+                case constants.vscode.tab.tabTypes.task: {
                     // TASK HANDLER: Delegate to Task Upsert Logic
-                    await upsertTask(activeTab.id);
+                    const isNewTask = (activeTab.data as Task).id <= 0;
+                    const savedTask = await upsertTask(activeTab.id);
+                    // After creating a new task, auto-create its workspace folder
+                    if (isNewTask && savedTask) {
+                        await _createTaskFolder(savedTask);
+                    }
                     break;
+                }
                 case constants.vscode.tab.tabTypes.note: //* thêm các entity type khác ở đây
                     const data = activeTab.data as Note;
                     const workspaceItem = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === data.id);
@@ -239,12 +372,13 @@ export const useEditorToolbarHelper = () => {
                             if (!savedNote) {
                                 throw new Error("Failed to update note");
                             }
-                            loadKeywords();
 
-                            // POST-SAVE: If note was created from a task, create workspace folder+item
+                            // POST-SAVE: If note was created from a task, add it to the task's folder
                             const taskMeta = activeTab.metadata;
-                            if (taskMeta?.taskId && taskMeta?.projectWorkspaceId && data.id < 0) {
-                                await _createTaskNoteWorkspaceItem(savedNote, taskMeta.taskId as number, taskMeta.projectWorkspaceId as number, activeTab);
+                            if (taskMeta?.taskId && taskMeta?.folderWorkspaceItemId && data.id < 0) {
+                                await _addNoteToTaskFolder(savedNote, activeTab);
+                            } else {
+                                loadKeywords();
                             }
                         }
                         //* thêm các entity type khác ở đây

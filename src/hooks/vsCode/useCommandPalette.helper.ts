@@ -12,7 +12,7 @@ import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
 
 export const useCommandPaletteHelper = () => {
     const { allKeywords } = useGeneralStore();
-    const { setIsOpen, setSearchQuery, setSelectedIndex } = useCommandPaletteStore();
+    const { setIsOpen, setSearchQuery, setSelectedIndex, setOnLinkKeyword } = useCommandPaletteStore();
     const { navigateLink } = useKeywordNavigationHelper();
 
     // Helper: Remove name (last part) from longLink
@@ -122,6 +122,7 @@ export const useCommandPaletteHelper = () => {
         setIsOpen(false);
         setSearchQuery("");
         setSelectedIndex(0);
+        setOnLinkKeyword(null);
     };
 
     // Handle keyword selection with close callback
@@ -134,11 +135,23 @@ export const useCommandPaletteHelper = () => {
         close();
     };
 
+    /**
+     * Open the palette in "link" mode.
+     * Each row will show a Link button; clicking it calls onLink(keyword) and closes.
+     */
+    const openForLink = (onLink: (keyword: Keyword) => void) => {
+        setOnLinkKeyword(() => onLink);
+        setSearchQuery("");
+        setSelectedIndex(0);
+        setIsOpen(true);
+    };
+
     return {
         // Functions only (no state, no setters, no useEffect)
         getFilteredKeywords,
         getKeywordIcon,
         handleSelectKeyword,
         close,
+        openForLink,
     };
 };

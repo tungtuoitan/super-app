@@ -4,6 +4,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
+import { Keyword } from "@/types/keyword.types";
 
 export interface CommandPaletteContextData {
     // Visibility state
@@ -21,6 +22,10 @@ export interface CommandPaletteContextData {
     // Refs for DOM elements
     inputRef: RefObject<HTMLInputElement>;
     listRef: RefObject<HTMLDivElement>;
+
+    // Optional link callback - when set, palette shows Link buttons instead of navigating on row click
+    onLinkKeyword: ((keyword: Keyword) => void) | null;
+    setOnLinkKeyword: Dispatch<SetStateAction<((keyword: Keyword) => void) | null>>;
 }
 
 export const commandPaletteContextDefaultValue: CommandPaletteContextData = {
@@ -32,6 +37,8 @@ export const commandPaletteContextDefaultValue: CommandPaletteContextData = {
     setSelectedIndex: () => {},
     inputRef: { current: null },
     listRef: { current: null },
+    onLinkKeyword: null,
+    setOnLinkKeyword: () => {},
 };
 
 export const CommandPaletteStore = createContext<CommandPaletteContextData>(commandPaletteContextDefaultValue);
@@ -42,6 +49,7 @@ export const CommandPaletteProvider: React.FC<React.PropsWithChildren<unknown>> 
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
+    const [onLinkKeyword, setOnLinkKeyword] = useState<((keyword: Keyword) => void) | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +64,8 @@ export const CommandPaletteProvider: React.FC<React.PropsWithChildren<unknown>> 
                 setSelectedIndex,
                 inputRef,
                 listRef,
+                onLinkKeyword,
+                setOnLinkKeyword,
             }}
         >
             {children}

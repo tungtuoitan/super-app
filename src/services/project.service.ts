@@ -90,6 +90,7 @@ const _upsertProjectBatch = async (
         startDate?: string | null;
         endDate?: string | null;
         deletedAt?: string | null;
+        workspaceId?: number | null;
     }>
 ): Promise<ResultOptions<ProjectDTO>> => {
     const headers = new Headers();

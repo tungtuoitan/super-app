@@ -21,6 +21,7 @@ import { WsProvider } from "@/store/ws/useWs.store";
 import { WsDetailProvider } from "@/store/ws/useWsDetail.store";
 import { ProjectProvider } from "@/store/project/useProject.store";
 import { ProjectDetailProvider } from "@/store/project/useProjectDetail.store";
+import { TaskProvider } from "@/store/task/useTask.store";
 import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";
 import { AuthGuard } from "@/Components/Auth/AuthGuard";
@@ -74,6 +75,7 @@ export function Main() {
                                                                                 <WsDetailProvider>
                                                                                     <ProjectProvider>
                                                                                     <ProjectDetailProvider>
+                                                                                    <TaskProvider>
                                                                                     <NoteDetailProvider>
                                                                                         <NoteGridProvider>
                                                                                             <EditorTabProvider>
@@ -100,6 +102,7 @@ export function Main() {
                                                                                             </EditorTabProvider>
                                                                                         </NoteGridProvider>
                                                                                     </NoteDetailProvider>
+                                                                                    </TaskProvider>
                                                                                     </ProjectDetailProvider>
                                                                                     </ProjectProvider>
                                                                                 </WsDetailProvider>

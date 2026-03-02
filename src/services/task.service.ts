@@ -25,6 +25,9 @@ export interface TaskDTO {
     updatedAt?: string | null;
     deletedAt?: string | null;
 
+    // Workspace folder linked to this task
+    folderWorkspaceItemId?: number | null;
+
     // Limit dates from backend for warning display
     projectStartDate?: string | null;
     projectEndDate?: string | null;
@@ -105,6 +108,7 @@ const _upsertTaskBatch = async (
         endDate?: string | null;
         orderIndex?: number;
         deletedAt?: string | null;
+        folderWorkspaceItemId?: number | null;
     }>
 ): Promise<ResultOptions<TaskDTO>> => {
     const headers = new Headers();
