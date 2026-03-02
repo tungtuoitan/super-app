@@ -23,6 +23,9 @@ export interface Task {
     updatedAt?: Date | null;
     deletedAt?: Date | null;
 
+    // Workspace folder linked to this task (set when first note is created)
+    folderWorkspaceItemId?: number | null;
+
     // Limit dates for warning display (parsed from backend)
     projectStartDate?: Date | null;
     projectEndDate?: Date | null;

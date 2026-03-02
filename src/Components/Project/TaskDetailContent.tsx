@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { GenericTextField, StatusAutoComplete, IStatusOption, RichTextEditor, DateRangePicker, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
 import { CardContent } from "@/Components/ui/card";
 import { ScrollArea } from "@/Components/ui/scroll-area";
-import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus } from "lucide-react";
+import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon } from "lucide-react";
 import { Task, useTaskStore } from "@/store/task/useTask.store";
 import { useProjectStore } from "@/store/project/useProject.store";
 import { useGeneralStore } from "@/store/general/General.store";
@@ -256,7 +256,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     // Linked Keywords
     const { linkedKeywords, isLoadingLinkedKeywords, loadLinkedKeywords, linkKeyword, unlinkKeyword } = useTaskLinkedKeywordsHelper();
     const { openForLink, getKeywordIcon } = useCommandPaletteHelper();
-    const { createTaskNote } = useTaskWorkspaceItemHelper();
+    const { folderItems, isLoadingFolderItems, loadFolderItems, openFolderItem, createTaskNote } = useTaskWorkspaceItemHelper();
     const { navigateLink } = useKeywordNavigationHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
 
@@ -266,6 +266,13 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
             loadLinkedKeywords(selectedTask.id);
         }
     }, [selectedTask?.id, loadLinkedKeywords]);
+
+    // Load folder items (notes/files in task's workspace folder) when task or project workspace changes
+    useEffect(() => {
+        if (selectedTask?.id && selectedTask.id > 0 && selectedTask.folderWorkspaceItemId && currentProject?.workspaceId) {
+            loadFolderItems(selectedTask, currentProject.workspaceId);
+        }
+    }, [selectedTask?.id, selectedTask?.folderWorkspaceItemId, currentProject?.workspaceId, loadFolderItems]);
 
     // Open CommandPalette in link mode
     const handleOpenLinkPalette = useCallback(() => {
@@ -489,6 +496,47 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 disabled={isDisabled || isLoadingParentTasks || hasSubtasks}
                             />
 
+                            {/* Inner List — Notes/files in task's workspace folder */}
+                            {selectedTask.id > 0 && selectedTask.folderWorkspaceItemId && (
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium flex items-center gap-2">
+                                        <FileText className="h-4 w-4" />
+                                        Notes
+                                        {isLoadingFolderItems && <Loader2 className="h-3 w-3 animate-spin" />}
+                                        {!isDisabled && (
+                                            <button
+                                                onClick={() => createTaskNote(selectedTask)}
+                                                className="ml-auto p-0.5 rounded hover:bg-muted transition-colors"
+                                                title="Create note"
+                                            >
+                                                <FilePlus className="h-3.5 w-3.5" />
+                                            </button>
+                                        )}
+                                    </label>
+                                    {folderItems.length > 0 ? (
+                                        <div className="space-y-1">
+                                            {folderItems.map((item) => (
+                                                <div
+                                                    key={item.workspaceItemId}
+                                                    className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted cursor-pointer"
+                                                    onClick={() => openFolderItem(item)}
+                                                    title={item.name}
+                                                >
+                                                    <FileIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                                    <span className="flex-1 truncate hover:text-primary hover:underline">
+                                                        {item.name.length > 26 ? item.name.slice(0, 26) + "..." : item.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        !isLoadingFolderItems && (
+                                            <p className="text-xs text-muted-foreground">No notes yet</p>
+                                        )
+                                    )}
+                                </div>
+                            )}
+
                             {/* Linked Keywords Section */}
                             {selectedTask.id > 0 && (
                                 <div className="space-y-2">
@@ -498,13 +546,15 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                         {isLoadingLinkedKeywords && <Loader2 className="h-3 w-3 animate-spin" />}
                                         {!isDisabled && (
                                             <div className="ml-auto flex items-center gap-1">
-                                                <button
-                                                    onClick={() => createTaskNote(selectedTask, currentProject?.workspaceId)}
-                                                    className="p-0.5 rounded hover:bg-muted transition-colors"
-                                                    title="Create note"
-                                                >
-                                                    <FilePlus className="h-3.5 w-3.5" />
-                                                </button>
+                                                {!selectedTask.folderWorkspaceItemId && (
+                                                    <button
+                                                        onClick={() => createTaskNote(selectedTask)}
+                                                        className="p-0.5 rounded hover:bg-muted transition-colors"
+                                                        title="Create note"
+                                                    >
+                                                        <FilePlus className="h-3.5 w-3.5" />
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={handleOpenLinkPalette}
                                                     className="p-0.5 rounded hover:bg-muted transition-colors"

@@ -23,6 +23,7 @@ export interface LinkedKeyword {
     longLink: string;
     icon?: string;
     color?: string;
+    workspaceItemId?: number; // for folder/note/file keywords
 }
 
 export const useTaskLinkedKeywordsHelper = () => {
@@ -67,6 +68,7 @@ export const useTaskLinkedKeywordsHelper = () => {
                     longLink: kw?.longLink ?? "",
                     icon: kw?.icon,
                     color: kw?.color,
+                    workspaceItemId: kw?.workspaceItemId,
                 };
             });
 
