@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { TaskList } from "./TaskList";
 import { TaskKanbanView } from "./TaskKanbanView";
 import { TaskTimelineView } from "./TaskTimelineView";
-import { TaskProvider } from "@/store/task/useTask.store";
 import { ProjectGeneral } from "./ProjectGeneral";
 import { TaskFilterPopup } from "./TaskFilterPopup";
 import { useEditorTabsStore } from "@/store/index";
@@ -101,8 +100,7 @@ export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentP
 
     return (
         <div className="flex flex-col h-full w-full bg-background">
-            <TaskProvider>
-                {/* TabBar - Project style with uppercase labels */}
+            {/* TabBar - Project style with uppercase labels */}
                 <div className="flex items-center border-b-2 border-primary/20 bg-muted/20">
                     <div className="flex flex-1">
                         {TABS.map((tab) => (
@@ -146,7 +144,6 @@ export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentP
                 <div className="flex-1 overflow-hidden">
                     {renderTabContent()}
                 </div>
-            </TaskProvider>
         </div>
     );
 }
