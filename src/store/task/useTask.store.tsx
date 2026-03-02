@@ -5,7 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
-import {LinkedNote} from "@/hooks/task/useTaskWorkspaceItem.helper";
+import {LinkedKeyword} from "@/hooks/task/useTaskLinkedKeywords.helper";
 
 export interface Task {
     id: number;
@@ -55,8 +55,8 @@ export interface TaskContextData {
     taskContainerRef: RefObject<HTMLDivElement>;
     taskContainerWidth: number;
     setTaskContainerWidth: Dispatch<SetStateAction<number>>;
-    linkedNotes: LinkedNote[];
-     setLinkedNotes: Dispatch<SetStateAction<LinkedNote[]>>;
+    linkedNotes: LinkedKeyword[];
+     setLinkedNotes: Dispatch<SetStateAction<LinkedKeyword[]>>;
      isLoadingLinkedNotes: boolean;
      setIsLoadingLinkedNotes: Dispatch<SetStateAction<boolean>>;
 }
@@ -103,7 +103,7 @@ export const TaskProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
     const taskContainerRef = useRef<HTMLDivElement>(null);
     const [taskContainerWidth, setTaskContainerWidth] = useState<number>(0);
 
-    const [linkedNotes, setLinkedNotes] = useState<LinkedNote[]>([]);
+    const [linkedNotes, setLinkedNotes] = useState<LinkedKeyword[]>([]);
     const [isLoadingLinkedNotes, setIsLoadingLinkedNotes] = useState(false);
 
     return (

@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Search, Link2 } from "lucide-react";
 import { useCommandPaletteStore } from "@/store/commandPalette/useCommandPalette.store";
 import { useCommandPaletteHelper } from "@/hooks/index";
 import { HighlightedText } from "./HighlightedText";
@@ -12,7 +12,7 @@ import { CommandPaletteKeyDown } from "@/HeadlessComponents/vsCode/CommandPalett
 import {useGeneralStore} from "@/store/general/General.store";
 
 export function CommandPalette() {
-    const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef } = useCommandPaletteStore();
+    const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, getKeywordIcon, close } = useCommandPaletteHelper();
     const { allKeywords } = useGeneralStore();
 
@@ -46,6 +46,8 @@ export function CommandPalette() {
 
     if (!isOpen) return null;
 
+    const isLinkMode = onLinkKeyword !== null;
+
     return (
         <>
             <CommandPaletteKeyDown />
@@ -63,13 +65,16 @@ export function CommandPalette() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search keywords (workspace, folder, note, heading, external)..."
+                            placeholder={isLinkMode ? "Search keyword to link..." : "Search keywords (workspace, folder, note, heading, external)..."}
                             className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
                         />
                         {searchQuery && (
                             <button onClick={() => setSearchQuery("")} className="text-gray-400 hover:text-white ml-2">
                                 ✕
                             </button>
+                        )}
+                        {isLinkMode && (
+                            <span className="ml-3 text-xs text-blue-400 border border-blue-400/50 rounded px-2 py-0.5">Link mode</span>
                         )}
                     </div>
 
@@ -89,11 +94,12 @@ export function CommandPalette() {
                                     <div
                                         key={`${keyword.id}-${keyword.link}`}
                                         data-index={index}
-                                        onClick={() => !isDisabled && handleSelectKeyword(keyword)}
+                                        onClick={() => !isDisabled && !isLinkMode && handleSelectKeyword(keyword)}
                                         className={`
-                                            px-4 py-1.5 cursor-pointer flex items-center gap-3
+                                            group px-4 py-1.5 cursor-pointer flex items-center gap-3
                                             ${isSelected ? "bg-[#44475A] hover:bg-[#44475A]" : "hover:bg-[#2A2D2E]"}
                                             ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
+                                            ${isLinkMode ? "cursor-default" : ""}
                                         `}
                                     >
                                         {/* Icon Column */}
@@ -123,6 +129,22 @@ export function CommandPalette() {
                                             )}
                                             {isDisabled && <span className="text-xs text-red-400 bg-red-900/30 px-2 py-0.5 rounded flex-shrink-0">Deleted</span>}
                                         </div>
+
+                                        {/* Link button (link mode only, visible on hover) */}
+                                        {isLinkMode && !isDisabled && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onLinkKeyword!(keyword);
+                                                    close();
+                                                }}
+                                                className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded text-xs text-blue-400 border border-blue-400/40 hover:bg-blue-400/10 transition-colors opacity-0 group-hover:opacity-100"
+                                                title="Link this keyword"
+                                            >
+                                                <Link2 className="w-3 h-3" />
+                                                Link
+                                            </button>
+                                        )}
                                     </div>
                                 );
                             })
@@ -133,7 +155,7 @@ export function CommandPalette() {
                     <div className="px-4 py-2 bg-[#1E1E1E] border-t border-[#3E3E42] flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center gap-4">
                             <span>↑↓ Navigate</span>
-                            <span>Enter Select</span>
+                            {isLinkMode ? <span>Click Link button to link</span> : <span>Enter Select</span>}
                             <span>Esc Close</span>
                         </div>
                         <span>{filteredKeywords.length} items</span>
