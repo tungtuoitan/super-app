@@ -16,6 +16,7 @@ export interface Project {
     createdAt: Date;
     updatedAt?: Date | null;
     deletedAt?: Date | null;
+    workspaceId?: number | null;
 }
 
 export interface PaginationState {
