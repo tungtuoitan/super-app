@@ -501,7 +501,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium flex items-center gap-2">
                                         <FileText className="h-4 w-4" />
-                                        Notes
+                                        Inner List
                                         {isLoadingFolderItems && <Loader2 className="h-3 w-3 animate-spin" />}
                                         {!isDisabled && (
                                             <button
@@ -523,7 +523,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                                     title={item.name}
                                                 >
                                                     <FileIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                                    <span className="flex-1 truncate hover:text-primary hover:underline">
+                                                    <span className="flex-1 truncate hover:text-primary hover:underline text-left">
                                                         {item.name.length > 26 ? item.name.slice(0, 26) + "..." : item.name}
                                                     </span>
                                                 </div>
