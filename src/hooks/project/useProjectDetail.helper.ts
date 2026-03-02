@@ -28,6 +28,7 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
+        workspaceId: dto.workspaceId,
     }));
 };
 
@@ -158,6 +159,7 @@ export const useProjectDetailHelper = () => {
                     createdAt: parseAsLocalDate(savedProject.createdAt) || new Date(),
                     updatedAt: parseAsLocalDate(savedProject.updatedAt),
                     deletedAt: parseAsLocalDate(savedProject.deletedAt),
+                    workspaceId: savedProject.workspaceId,
                 };
 
                 // ============================================================

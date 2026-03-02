@@ -19,6 +19,7 @@ export interface ProjectDTO {
     createdAt: string;
     updatedAt?: string | null;
     deletedAt?: string | null;
+    workspaceId?: number | null;
 }
 
 /**
