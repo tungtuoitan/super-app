@@ -11,9 +11,6 @@ export const authApi = {
     /**
      * Login with username and password
      * POST /api/auth/login
-     *
-     * @param credentials User login credentials (username and password)
-     * @returns Login response with token and user data or rejects with response
      */
     async login(credentials: LoginRequest): Promise<LoginResponse> {
         const formData = new FormData();
@@ -23,17 +20,15 @@ export const authApi = {
         const headers = new Headers();
         headers.append("Accept-Language", getLocaleLanguage());
 
-        const options = {
+        const res = await window.fetch(`${config.api.baseURL}/api/auth/login`, {
             method: "POST",
-            headers: headers,
+            headers,
             body: formData,
-        };
-
-        const res = await window.fetch(`${config.api.baseURL}/api/auth/login`, options);
+            credentials: "include",
+        });
 
         if (res.ok) {
-            const result = (await res.json()) as LoginResponse;
-            return result;
+            return (await res.json()) as LoginResponse;
         } else {
             return Promise.reject(res);
         }
@@ -41,12 +36,7 @@ export const authApi = {
 
     /**
      * Google OAuth login with PKCE support
-     * Exchange Google authorization code for JWT token
      * POST /api/auth/google/login
-     *
-     * @param code Google authorization code
-     * @param codeVerifier PKCE code verifier (required)
-     * @returns Auth response with JWT token and user data or rejects with response
      */
     async googleLogin(code: string, codeVerifier: string): Promise<AuthResponse> {
         const request: GoogleCodeRequest = { code, codeVerifier };
@@ -55,19 +45,45 @@ export const authApi = {
         headers.append("Content-Type", "application/json");
         headers.append("Accept-Language", getLocaleLanguage());
 
-        const options = {
+        const res = await window.fetch(`${config.api.baseURL}/api/auth/google/login`, {
             method: "POST",
-            headers: headers,
+            headers,
             body: JSON.stringify(request),
-        };
-
-        const res = await window.fetch(`${config.api.baseURL}/api/auth/google/login`, options);
+            credentials: "include",
+        });
 
         if (res.ok) {
-            const result = (await res.json()) as AuthResponse;
-            return result;
+            return (await res.json()) as AuthResponse;
         } else {
             return Promise.reject(res);
         }
+    },
+
+    /**
+     * Refresh access token using HttpOnly cookie refresh token
+     * POST /api/auth/refresh
+     */
+    async refreshToken(): Promise<AuthResponse> {
+        const res = await window.fetch(`${config.api.baseURL}/api/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+        });
+
+        if (res.ok) {
+            return (await res.json()) as AuthResponse;
+        } else {
+            return Promise.reject(res);
+        }
+    },
+
+    /**
+     * Logout - revoke refresh token and clear cookie
+     * POST /api/auth/logout
+     */
+    async logout(): Promise<void> {
+        await window.fetch(`${config.api.baseURL}/api/auth/logout`, {
+            method: "POST",
+            credentials: "include",
+        });
     },
 };
