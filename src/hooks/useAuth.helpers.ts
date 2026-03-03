@@ -51,9 +51,6 @@ export function useAuthHelper() {
             const loginRequest: LoginRequest = { username, password };
             const response = await authApi.login(loginRequest);
 
-            // Save token to localStorage
-            // storageService.setString(STORAGE_KEYS.USER_TOKEN, response.token);
-
             // Update auth store (never store passwords)
             set$User({
                 userId: response.userId || null,
@@ -102,10 +99,6 @@ export function useAuthHelper() {
         // Clear any errors
         setError(null);
         setLoginError(null);
-
-        // Remove token and profile from storage
-        storageService.remove(STORAGE_KEYS.USER_TOKEN);
-        storageService.remove(STORAGE_KEYS.USER_PROFILE);
     };
 
     /**
@@ -142,15 +135,10 @@ export function useAuthHelper() {
                 filters: parsedFilters,
             };
 
-            // In dev environment, save to localStorage
-            if (envConfig.NODE_ENV === constants.environments.development) {
-                storageService.setString(STORAGE_KEYS.USER_TOKEN, response.user.token);
-                storageService.set(STORAGE_KEYS.USER_PROFILE, userProfile);
-            }
+            storageService.set(STORAGE_KEYS.USER_PROFILE, userProfile);
 
             // Update auth store with full user info including filters
             set$User(userProfile as User);
-
             setIsAuthenticated(true);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Google login failed";
@@ -220,34 +208,6 @@ export function useAuthHelper() {
         navigate("/", { replace: true });
     };
 
-    const initAuthFromStorageToken = (): boolean => {
-        if (envConfig.NODE_ENV === constants.environments.development) {
-            const token = storageService.getString(STORAGE_KEYS.USER_TOKEN);
-            const userProfile = storageService.get(STORAGE_KEYS.USER_PROFILE);
-
-            if (token && userProfile) {
-                // Restore full auth state from stored token and profile
-                const _userProfile = userProfile as User;
-                if(!_userProfile.filters) {
-                    _userProfile.filters = constants.filters.defaults;
-                }
-                set$User(_userProfile);
-                setIsAuthenticated(true);
-                return true;
-            } else if (token) {
-                // Fallback: if only token exists (old behavior)
-                set$User((prev) => ({
-                    ...prev,
-                    userToken: token,
-                    filters: constants.filters.defaults,
-                }));
-                setIsAuthenticated(true);
-                return true;
-            }
-        }
-
-        return false;
-    };
 
     /**
      * Update user filter preferences
@@ -285,10 +245,7 @@ export function useAuthHelper() {
             };
             set$User(updatedUser);
 
-            // In dev environment, update localStorage with new filters
-            if (envConfig.NODE_ENV === constants.environments.development) {
                 storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
-            }
         } catch (err) {
             const errorMessage = await parseApiError(err);
             _console.error(`Failed to update filters: ${errorMessage}`);
@@ -302,7 +259,6 @@ export function useAuthHelper() {
         loginWithGoogleCode,
         handleOAuthCallback,
         navigateToHome,
-        initAuthFromStorageToken,
         upsertUserFilters,
     };
 }

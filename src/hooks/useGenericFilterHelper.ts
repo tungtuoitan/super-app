@@ -72,9 +72,9 @@ export function useGenericFilterHelper() {
             setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || (constants.filters.defaults[filterViewKey] as ViewFilter));
 
             // In dev environment, update localStorage with new filters
-            if (envConfig.NODE_ENV === constants.environments.development) {
+            // if (envConfig.NODE_ENV === constants.environments.development) {
                 storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
-            }
+            // }
         } catch (err) {
             const errorMessage = await parseApiError(err);
             _console.error(`Failed to update filters: ${errorMessage}`);
