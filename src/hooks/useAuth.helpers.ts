@@ -22,6 +22,19 @@ import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
 import {useConsoleHelper} from "./console/useConsole.helper";
 
+const DEFAULT_USER: User = {
+    userId: null,
+    userName: "",
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    picture: "",
+    authType: undefined,
+    userToken: "",
+    filters: {},
+};
+
 /**
  * Auth helper hook for authentication operations
  * NO PARAMETERS - Access state via useAuthStore
@@ -40,6 +53,31 @@ export function useAuthHelper() {
     const { setCallbackError, setIsProcessing } = useAuthCallbackStore();
 
     /**
+     * Attempt to restore session from cached profile + HttpOnly cookie refresh token
+     * Called on app mount. Sets user profile immediately for UI, then verifies with backend.
+     */
+    const initAuthFromStorageToken = async (): Promise<boolean> => {
+        const cached = storageService.get<User>(STORAGE_KEYS.USER_PROFILE);
+        if (!cached) return false;
+
+        // Show name/avatar immediately while refresh is in-flight
+        set$User({ ...cached, userToken: "" });
+
+        try {
+            const response = await authApi.refreshToken();
+            if (!response.success || !response.user) return false;
+
+            set$User({ ...cached, userToken: response.user.token });
+            setIsAuthenticated(true);
+            return true;
+        } catch {
+            storageService.remove(STORAGE_KEYS.USER_PROFILE);
+            set$User(DEFAULT_USER);
+            return false;
+        }
+    };
+
+    /**
      * Login with username and password
      */
     const login = async (username: string, password: string): Promise<void> => {
@@ -51,23 +89,25 @@ export function useAuthHelper() {
             const loginRequest: LoginRequest = { username, password };
             const response = await authApi.login(loginRequest);
 
-            // Update auth store (never store passwords)
-            set$User({
+            const userProfile: User = {
                 userId: response.userId || null,
                 userName: response.username || username,
-                email: "", // Email not provided in login response
-                password: "", // Never store actual passwords
+                email: "",
+                password: "",
                 userToken: response.token,
                 authType: "local",
-            });
+            };
 
+            // Save profile without token for F5 restore
+            storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
+
+            set$User(userProfile);
             setIsAuthenticated(true);
         } catch (err) {
             const errorMessage = await parseApiError(err);
             setLoginError(errorMessage);
             setError(errorMessage);
 
-            // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
                 _console.error("Unauthorized. Please login again.");
             }
@@ -79,33 +119,21 @@ export function useAuthHelper() {
     };
 
     /**
-     * Logout user and clean up auth state
+     * Logout user - revoke refresh token, clear cookie, clean up auth state
      */
-    const logout = (): void => {
-        // Clear auth store state
-        set$User({
-            userId: null,
-            userName: "",
-            email: "",
-            firstName: "",
-            lastName: "",
-            picture: "",
-            authType: undefined,
-            userToken: "",
-            filters: undefined,
-        });
-        setIsAuthenticated(false);
+    const logout = async (): Promise<void> => {
+        try { await authApi.logout(); } catch {}
 
-        // Clear any errors
+        set$User(DEFAULT_USER);
+        setIsAuthenticated(false);
         setError(null);
         setLoginError(null);
+        storageService.remove(STORAGE_KEYS.USER_PROFILE);
     };
 
     /**
      * Login with Google authorization code
      * Exchanges code for JWT token with PKCE
-     * @param code Authorization code from Google
-     * @param codeVerifier PKCE code verifier (required)
      */
     const loginWithGoogleCode = async (code: string, codeVerifier: string): Promise<void> => {
         setLoginLoading(true);
@@ -119,11 +147,8 @@ export function useAuthHelper() {
                 throw new Error(response.error || "Google login failed");
             }
 
-
-            // Parse filters if they exist
             const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : constants.filters.defaults;
-            // Prepare user profile object
-            const userProfile = {
+            const userProfile: User = {
                 userId: response.user.id,
                 userName: response.user.email || "",
                 email: response.user.email || "",
@@ -135,10 +160,10 @@ export function useAuthHelper() {
                 filters: parsedFilters,
             };
 
-            storageService.set(STORAGE_KEYS.USER_PROFILE, userProfile);
+            // Save profile without token for F5 restore
+            storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
 
-            // Update auth store with full user info including filters
-            set$User(userProfile as User);
+            set$User(userProfile);
             setIsAuthenticated(true);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Google login failed";
@@ -155,7 +180,6 @@ export function useAuthHelper() {
      */
     const handleOAuthCallback = async (): Promise<void> => {
         try {
-            // Check for OAuth error
             const oauthError = extractOAuthError(window.location.search);
             if (oauthError) {
                 setCallbackError(`Authentication cancelled or failed: ${oauthError}`);
@@ -163,7 +187,6 @@ export function useAuthHelper() {
                 return;
             }
 
-            // Extract authorization code and state from URL
             const code = extractAuthCodeFromUrl(window.location.search);
             const returnedState = extractStateFromUrl(window.location.search);
 
@@ -173,10 +196,8 @@ export function useAuthHelper() {
                 return;
             }
 
-            // Retrieve and clear PKCE values from sessionStorage
             const { codeVerifier, state: storedState } = retrieveAndClearPkceValues();
 
-            // Validate state parameter (CSRF protection)
             if (!validateState(returnedState, storedState)) {
                 setCallbackError("Invalid state parameter - possible CSRF attack");
                 setIsProcessing(false);
@@ -189,10 +210,7 @@ export function useAuthHelper() {
                 return;
             }
 
-            // Exchange code for JWT token with PKCE code verifier
             await loginWithGoogleCode(code, codeVerifier);
-
-            // Navigate to home page on success
             navigate("/", { replace: true });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Authentication failed";
@@ -208,15 +226,11 @@ export function useAuthHelper() {
         navigate("/", { replace: true });
     };
 
-
     /**
      * Update user filter preferences
-     * Syncs filter changes to backend and updates local state
-     * Uses UpsertUserProfile endpoint with only filters field populated
      */
     const upsertUserFilters = async (): Promise<void> => {
         try {
-            // Get token from user state
             const token = $user.userToken;
             if (!token) {
                 throw new Error("User not authenticated");
@@ -224,28 +238,23 @@ export function useAuthHelper() {
             const newUserFilters: UserFilters = $user.filters || {};
             newUserFilters[filterViewKey as keyof UserFilters] = uiFilters;
 
-            // Merge existing filters with new filters
-
-            // Prepare payload: only filters field, other fields are undefined (won't be updated)
             const payload: UpdateUserProfileRequest = {
-                filters: JSON.stringify(newUserFilters), // Convert UserFilters object to JSON string
+                filters: JSON.stringify(newUserFilters),
             };
 
-            // Update backend - will upsert profile if not exists
             const result = await userProfileService._upsertUserProfile(token, payload);
             const newFilters = result.object?.filters;
             if (!result.success) {
                 throw new Error(result.message || "Failed to update user filters");
             }
 
-            // Update local state
             const updatedUser: typeof $user = {
                 ...$user,
                 filters: newFilters ? JSON.parse(newFilters) : constants.filters.defaults,
             };
             set$User(updatedUser);
 
-                storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
+            storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
         } catch (err) {
             const errorMessage = await parseApiError(err);
             _console.error(`Failed to update filters: ${errorMessage}`);
@@ -260,5 +269,6 @@ export function useAuthHelper() {
         handleOAuthCallback,
         navigateToHome,
         upsertUserFilters,
+        initAuthFromStorageToken,
     };
 }
