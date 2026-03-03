@@ -175,7 +175,7 @@ export function WsGrid() {
         if (!$user.userId || !$user.filters) return;
         loadWorkspaces();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [$user.userId, $user.filters?.wsGrid, wsGridPagination.pageIndex, wsGridPagination.pageSize]);
+    }, [$user.userId, $user.userToken, $user.filters?.wsGrid, wsGridPagination.pageIndex, wsGridPagination.pageSize]);
 
 
     // Update GridControl when wsGridColumnFilters change - no longer needed for backend filtering

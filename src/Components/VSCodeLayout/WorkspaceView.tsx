@@ -27,12 +27,12 @@ export function WorkspaceView() {
     useEffect(() => {
         if (!$user.userId) return;
         loadAllWorkspaces();
-    }, [$user.userId]);
+    }, [$user.userId, $user.userToken]);
 
     useEffect(() => {
         if (!$user.userId || !$user.filters || selectedWorkspaceId === null) return;
         loadTree();
-    }, [$user.userId, $user.filters, selectedWorkspaceId]);
+    }, [$user.userId, $user.userToken, $user.filters, selectedWorkspaceId]);
 
     // Convert workspaces to autocomplete options
     const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => ({

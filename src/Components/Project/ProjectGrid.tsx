@@ -173,7 +173,7 @@ export function ProjectGrid() {
         if (!$user.userId) return;
         loadProjects();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [$user.userId, $user.filters?.projectGrid, projectGridPagination.pageIndex, projectGridPagination.pageSize]);
+    }, [$user.userId,$user.userToken, $user.filters?.projectGrid, projectGridPagination.pageIndex, projectGridPagination.pageSize]);
 
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
