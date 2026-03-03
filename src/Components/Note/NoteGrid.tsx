@@ -50,7 +50,7 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
         }
         // Load with current pagination state from store
         loadNotes();
-    }, [$user.userId, $user.filters, filterViewKey, noteGridPagination.pageIndex, noteGridPagination.pageSize, searchQuery]);
+    }, [$user.userId, $user.userToken, $user.filters, filterViewKey, noteGridPagination.pageIndex, noteGridPagination.pageSize, searchQuery]);
 
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
