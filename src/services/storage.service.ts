@@ -112,6 +112,5 @@ export const storageService = {
 export const STORAGE_KEYS = {
     USER_TOKEN: "userToken",
     USER_PROFILE: "userProfile",
-    OAUTH_STATE: "oauth_state",
     ACCESS_TOKEN: "access_token",
 } as const;

@@ -10,9 +10,9 @@ import { authApi } from "@/services/auth.service";
 import { userProfileService } from "@/services/userProfile.service";
 import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
-import type { LoginRequest, ExchangeTokenResponse } from "@/types/index";
+import type { LoginRequest } from "@/types/index";
 import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl } from "@/utils/googleOAuth";
 import { retrieveAndClearPkceValues, validateState } from "@/utils/pkce.utils";
 import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
@@ -33,7 +33,7 @@ import {useConsoleHelper} from "./console/useConsole.helper";
 export function useAuthHelper() {
     const _console = useConsoleHelper();
     // Get state setters from AuthStore
-    const { $user, set$User, setIsAuthenticated, setLoginLoading, setLoginError, setTokenExchangeLoading, setTokenExchangeError, setError } = useAuthStore();
+    const { $user, set$User, setIsAuthenticated, setLoginLoading, setLoginError, setError } = useAuthStore();
     const { uiFilters, setUIFilters, filterViewKey } = useGridControlStore();
     // Navigation and callback store for OAuth flows
     const navigate = useNavigate();
@@ -102,7 +102,6 @@ export function useAuthHelper() {
         // Clear any errors
         setError(null);
         setLoginError(null);
-        setTokenExchangeError(null);
 
         // Remove token and profile from storage
         storageService.remove(STORAGE_KEYS.USER_TOKEN);
@@ -110,47 +109,12 @@ export function useAuthHelper() {
     };
 
     /**
-     * Exchange authorization code for token
-     */
-    const exchangeToken = async (code: string): Promise<ExchangeTokenResponse> => {
-        setTokenExchangeLoading(true);
-        setTokenExchangeError(null);
-        setError(null);
-
-        try {
-            const response = await authApi.exchangeCodeForToken(code);
-
-            // Save token to localStorage
-            if (response.access_token) {
-                // storageService.setString(STORAGE_KEYS.USER_TOKEN, response.access_token);
-
-                // Update auth store
-                set$User((prev) => ({
-                    ...prev,
-                    userToken: response.access_token,
-                }));
-
-                setIsAuthenticated(true);
-            }
-
-            return response;
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : "Token exchange failed";
-            setTokenExchangeError(errorMessage);
-            setError(errorMessage);
-            throw err;
-        } finally {
-            setTokenExchangeLoading(false);
-        }
-    };
-
-    /**
      * Login with Google authorization code
-     * Exchanges code for JWT token with PKCE support
+     * Exchanges code for JWT token with PKCE
      * @param code Authorization code from Google
-     * @param codeVerifier PKCE code verifier (optional for backward compatibility)
+     * @param codeVerifier PKCE code verifier (required)
      */
-    const loginWithGoogleCode = async (code: string, codeVerifier?: string): Promise<void> => {
+    const loginWithGoogleCode = async (code: string, codeVerifier: string): Promise<void> => {
         setLoginLoading(true);
         setLoginError(null);
         setError(null);
@@ -231,8 +195,14 @@ export function useAuthHelper() {
                 return;
             }
 
+            if (!codeVerifier) {
+                setCallbackError("Missing PKCE code verifier");
+                setIsProcessing(false);
+                return;
+            }
+
             // Exchange code for JWT token with PKCE code verifier
-            await loginWithGoogleCode(code, codeVerifier || undefined);
+            await loginWithGoogleCode(code, codeVerifier);
 
             // Navigate to home page on success
             navigate("/", { replace: true });
@@ -329,7 +299,6 @@ export function useAuthHelper() {
     return {
         login,
         logout,
-        exchangeToken,
         loginWithGoogleCode,
         handleOAuthCallback,
         navigateToHome,
