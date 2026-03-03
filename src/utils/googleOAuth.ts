@@ -27,7 +27,11 @@ const getRedirectUri = (): string => {
 };
 
 export const GOOGLE_OAUTH_CONFIG = {
-  clientId: envConfig.REACT_APP_GOOGLE_CLIENT_ID || "887853390661-j2bepobhb90k357d0k5p1atqd2k8oe6l.apps.googleusercontent.com",
+  clientId: (() => {
+    const id = envConfig.REACT_APP_GOOGLE_CLIENT_ID;
+    if (!id) throw new Error("REACT_APP_GOOGLE_CLIENT_ID is not configured");
+    return id;
+  })(),
   redirectUri: getRedirectUri(),
   // Include drive.file scope for uploading files to user's Google Drive
   scope: "openid profile email https://www.googleapis.com/auth/drive.file",

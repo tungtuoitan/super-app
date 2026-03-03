@@ -5,7 +5,7 @@
 
 import { config } from "@/config/app.config";
 import { getLocaleLanguage } from "@/utils/locale";
-import type { LoginRequest, LoginResponse, ExchangeTokenResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
+import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
 
 export const authApi = {
     /**
@@ -45,10 +45,10 @@ export const authApi = {
      * POST /api/auth/google/login
      *
      * @param code Google authorization code
-     * @param codeVerifier PKCE code verifier (optional for backward compatibility)
+     * @param codeVerifier PKCE code verifier (required)
      * @returns Auth response with JWT token and user data or rejects with response
      */
-    async googleLogin(code: string, codeVerifier?: string): Promise<AuthResponse> {
+    async googleLogin(code: string, codeVerifier: string): Promise<AuthResponse> {
         const request: GoogleCodeRequest = { code, codeVerifier };
 
         const headers = new Headers();
@@ -65,34 +65,6 @@ export const authApi = {
 
         if (res.ok) {
             const result = (await res.json()) as AuthResponse;
-            return result;
-        } else {
-            return Promise.reject(res);
-        }
-    },
-
-    /**
-     * Exchange authorization code for token
-     * POST /api/auth/exchange-token
-     *
-     * @param code Authorization code from OAuth provider
-     * @returns Token exchange response or rejects with response
-     */
-    async exchangeCodeForToken(code: string): Promise<ExchangeTokenResponse> {
-        const headers = new Headers();
-        headers.append("Content-Type", "application/json");
-        headers.append("Accept-Language", getLocaleLanguage());
-
-        const options = {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({ code }),
-        };
-
-        const res = await window.fetch(`${config.api.baseURL}/api/auth/exchange-token`, options);
-
-        if (res.ok) {
-            const result = (await res.json()) as ExchangeTokenResponse;
             return result;
         } else {
             return Promise.reject(res);
