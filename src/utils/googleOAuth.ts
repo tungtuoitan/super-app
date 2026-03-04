@@ -6,6 +6,7 @@
 import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
 import { generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "@/utils/pkce.utils";
+import { diagnosticService } from "@/services/diagnostic.service";
 
 /**
  * Get redirect URI based on environment
@@ -46,6 +47,8 @@ export async function initiateGoogleLogin(): Promise<void> {
 
     // Store PKCE values for callback validation
     storePkceValues(codeVerifier, state);
+
+    diagnosticService.log({ category: "auth", event: "google-initiate", data: { redirectUri: GOOGLE_OAUTH_CONFIG.redirectUri } });
 
     // Build auth URL with PKCE parameters
     const params = new URLSearchParams({

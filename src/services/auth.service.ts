@@ -6,6 +6,8 @@
 import { config } from "@/config/app.config";
 import { getLocaleLanguage } from "@/utils/locale";
 import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
+import { GOOGLE_OAUTH_CONFIG } from "@/utils/googleOAuth";
+import { diagnosticService } from "@/services/diagnostic.service";
 
 export const authApi = {
     /**
@@ -39,6 +41,7 @@ export const authApi = {
      * POST /api/auth/google/login
      */
     async googleLogin(code: string, codeVerifier: string): Promise<AuthResponse> {
+        diagnosticService.log({ category: "auth", event: "google-callback", data: { codeLength: code.length, codeVerifierLength: codeVerifier?.length, redirectUri: GOOGLE_OAUTH_CONFIG.redirectUri } });
         const request: GoogleCodeRequest = { code, codeVerifier };
 
         const headers = new Headers();
@@ -64,14 +67,18 @@ export const authApi = {
      * POST /api/auth/refresh
      */
     async refreshToken(): Promise<AuthResponse> {
+        console.log("[authApi.refreshToken] Calling /api/auth/refresh...");
         const res = await window.fetch(`${config.api.baseURL}/api/auth/refresh`, {
             method: "POST",
             credentials: "include",
         });
 
+        console.log("[authApi.refreshToken] Response status:", res.status);
         if (res.ok) {
             return (await res.json()) as AuthResponse;
         } else {
+            console.log("[authApi.refreshToken] Failed with status:", res.status, res.statusText);
+            diagnosticService.log({ category: "auth", event: "refresh-http-failed", data: { status: res.status, statusText: res.statusText } });
             return Promise.reject(res);
         }
     },

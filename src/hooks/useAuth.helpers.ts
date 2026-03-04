@@ -21,6 +21,7 @@ import { useSnackbar } from "notistack";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
 import {useConsoleHelper} from "./console/useConsole.helper";
+import { diagnosticService } from "@/services/diagnostic.service";
 
 const DEFAULT_USER: User = {
     userId: null,
@@ -58,19 +59,28 @@ export function useAuthHelper() {
      */
     const initAuthFromStorageToken = async (): Promise<boolean> => {
         const cached = storageService.get<User>(STORAGE_KEYS.USER_PROFILE);
-        if (!cached) return false;
+        if (!cached) {
+            console.log("[initAuthFromStorageToken] No cached profile found");
+            return false;
+        }
 
         // Show name/avatar immediately while refresh is in-flight
         set$User({ ...cached, userToken: "" });
+        console.log("[initAuthFromStorageToken] Cached profile found, attempting refresh...");
 
         try {
             const response = await authApi.refreshToken();
+            console.log("[initAuthFromStorageToken] refreshToken response:", { success: response.success, hasToken: !!response.user?.token, error: (response as any).error });
             if (!response.success || !response.user) return false;
 
             set$User({ ...cached, userToken: response.user.token });
             setIsAuthenticated(true);
+            console.log("[initAuthFromStorageToken] Session restored successfully");
             return true;
-        } catch {
+        } catch (err) {
+            const errMsg = err instanceof Error ? err.message : String(err);
+            console.log("[initAuthFromStorageToken] Refresh failed:", err);
+            diagnosticService.log({ category: "auth", event: "init-refresh-failed", data: { error: errMsg } });
             storageService.remove(STORAGE_KEYS.USER_PROFILE);
             set$User(DEFAULT_USER);
             return false;

@@ -5,6 +5,7 @@
  */
 
 import { authApi } from "@/services/auth.service";
+import { diagnosticService } from "@/services/diagnostic.service";
 
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
@@ -39,27 +40,43 @@ export async function apiFetch(
     }
 
     // --- 401: try silent refresh ---
+    const hasToken = !!token;
+    console.log("[apiFetch] 401 received for:", url, "| isRefreshing:", isRefreshing, "| hasToken:", hasToken);
+    diagnosticService.log({ category: "auth", event: "401-received", data: { url, isRefreshing, hasToken } });
+
     try {
         if (!isRefreshing) {
             isRefreshing = true;
+            console.log("[apiFetch] Starting token refresh...");
             refreshPromise = authApi
                 .refreshToken()
                 .then((r) => {
-                    if (!r.success || !r.user?.token) throw new Error("Refresh failed");
+                    console.log("[apiFetch] refreshToken response:", { success: r.success, hasToken: !!r.user?.token, error: r.error });
+                    if (!r.success || !r.user?.token) {
+                        diagnosticService.log({ category: "auth", event: "refresh-response-invalid", data: { success: r.success, hasToken: !!r.user?.token, error: r.error } });
+                        throw new Error("Refresh failed");
+                    }
                     return r.user.token;
                 })
                 .finally(() => {
                     isRefreshing = false;
                 });
+        } else {
+            console.log("[apiFetch] Refresh already in progress, waiting...");
         }
 
         const newToken = await refreshPromise!;
+        console.log("[apiFetch] Refresh succeeded, retrying:", url);
+        diagnosticService.log({ category: "auth", event: "token-refresh-success", data: { url } });
         setToken(newToken);
 
         const retryHeaders = new Headers(options.headers);
         retryHeaders.set("Authorization", `Bearer ${newToken}`);
         return window.fetch(url, { ...options, headers: retryHeaders, credentials: "include" });
-    } catch {
+    } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.log("[apiFetch] Refresh FAILED:", err, "| url:", url);
+        diagnosticService.log({ category: "auth", event: "token-refresh-failed", data: { url, error: errMsg } });
         refreshPromise = null;
         isRefreshing = false;
         onAuthFailed();
