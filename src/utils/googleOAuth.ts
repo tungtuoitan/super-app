@@ -12,19 +12,14 @@ import { generateCodeVerifier, generateCodeChallenge, generateState, storePkceVa
  * Auto-detects production URL or uses env variable override
  */
 const getRedirectUri = (): string => {
-  // Allow env variable override for custom domains
-  if (envConfig.REACT_APP_GOOGLE_REDIRECT_URI && envConfig.REACT_APP_ENVIRONMENT === constants.environments.production) {
+if (envConfig.REACT_APP_GOOGLE_REDIRECT_URI) {
     return envConfig.REACT_APP_GOOGLE_REDIRECT_URI;
-  }
+}
 
-  // Auto-detect based on current origin (works for localhost and production)
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}/auth/callback`;
-  }
-
-  // Fallback for SSR/build time
-  return "http://localhost:3000/auth/callback";
+// Fallback chỉ cho local dev
+return "http://localhost:3000/auth/callback";
 };
+
 
 export const GOOGLE_OAUTH_CONFIG = {
   clientId: (() => {
