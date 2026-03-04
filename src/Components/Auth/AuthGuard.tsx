@@ -14,18 +14,26 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { useActivityBarStore } from "@/store/activityBar/ActivityBar.store";
 import { useStandardRegistryHelper } from "@/hooks/index";
 import { useAuthHelper } from "@/hooks/useAuth.helpers";
+import { configureApiClient } from "@/services/apiClient";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, $user, set$User } = useAuthStore();
     const { setAccountsOpen } = useActivityBarStore();
     const { loadStandardRegistries, loadKeywords } = useStandardRegistryHelper();
     const { initAuthFromStorageToken, logout } = useAuthHelper();
 
+    // Configure apiFetch singleton with token callbacks from AuthStore
+    useEffect(() => {
+        configureApiClient({
+            getToken: () => $user.userToken,
+            setToken: (token) => set$User((prev) => ({ ...prev, userToken: token })),
+            onAuthFailed: logout,
+        });
+    }, [$user.userToken]);
+
     // On mount: try to restore session from HttpOnly cookie + cached profile
     useEffect(() => {
-        initAuthFromStorageToken().then((restored) => {
-            // if (!restored) setAccountsOpen(true);
-        });
+        initAuthFromStorageToken();
     }, []);
 
     // Listen for 401 events dispatched by apiClient interceptor

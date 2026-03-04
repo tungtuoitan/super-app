@@ -1,9 +1,9 @@
 /**
  * TargetKeyword Service - API communication for linking keywords to target entities
- * Uses native fetch API
  */
 
 import { config } from "@/config/app.config";
+import { apiFetch } from "@/services/apiClient";
 import { ResultOptions } from "../types";
 
 export interface TargetKeywordDTO {
@@ -15,76 +15,45 @@ export interface TargetKeywordDTO {
 
 export type TargetKeywordTargetType = "TASK" | "NOTE" | "PROJECT" | "WORKSPACE" | "FOLDER";
 
-/**
- * Get all keywords linked to a target entity
- */
 const _getTargetKeywords = async (
-    token: string,
+    _token: string,
     targetId: number,
     targetType: TargetKeywordTargetType
 ): Promise<ResultOptions<TargetKeywordDTO>> => {
-    const headers = new Headers();
-    headers.append("Authorization", `Bearer ${token}`);
-
-    const res = await window.fetch(
+    const res = await apiFetch(
         `${config.api.baseURL}/api/keyword/target-keywords?targetId=${targetId}&targetType=${targetType}`,
-        { method: "GET", headers }
+        { method: "GET" }
     );
 
-    if (res.ok) {
-        return (await res.json()) as ResultOptions<TargetKeywordDTO>;
-    } else {
-        return Promise.reject(res);
-    }
+    if (res.ok) return (await res.json()) as ResultOptions<TargetKeywordDTO>;
+    return Promise.reject(res);
 };
 
-/**
- * Link a keyword to a target entity
- */
 const _linkTargetKeyword = async (
-    token: string,
+    _token: string,
     data: { targetId: number; targetType: TargetKeywordTargetType; keywordId: number }
 ): Promise<ResultOptions<TargetKeywordDTO>> => {
-    const headers = new Headers();
-    headers.append("Authorization", `Bearer ${token}`);
-    headers.append("Content-Type", "application/json");
+    const res = await apiFetch(`${config.api.baseURL}/api/keyword/target-keywords`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
 
-    const res = await window.fetch(
-        `${config.api.baseURL}/api/keyword/target-keywords`,
-        {
-            method: "POST",
-            headers,
-            body: JSON.stringify(data),
-        }
-    );
-
-    if (res.ok) {
-        return (await res.json()) as ResultOptions<TargetKeywordDTO>;
-    } else {
-        return Promise.reject(res);
-    }
+    if (res.ok) return (await res.json()) as ResultOptions<TargetKeywordDTO>;
+    return Promise.reject(res);
 };
 
-/**
- * Unlink a keyword from a target entity
- */
 const _unlinkTargetKeyword = async (
-    token: string,
+    _token: string,
     id: number
 ): Promise<ResultOptions<TargetKeywordDTO>> => {
-    const headers = new Headers();
-    headers.append("Authorization", `Bearer ${token}`);
-
-    const res = await window.fetch(
+    const res = await apiFetch(
         `${config.api.baseURL}/api/keyword/target-keywords/${id}`,
-        { method: "DELETE", headers }
+        { method: "DELETE" }
     );
 
-    if (res.ok) {
-        return (await res.json()) as ResultOptions<TargetKeywordDTO>;
-    } else {
-        return Promise.reject(res);
-    }
+    if (res.ok) return (await res.json()) as ResultOptions<TargetKeywordDTO>;
+    return Promise.reject(res);
 };
 
 export const targetKeywordService = {
