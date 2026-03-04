@@ -1,69 +1,38 @@
 /**
  * Standard Registry Service - API communication for standard registry operations
- * Uses native fetch API without TanStack Query
  */
 
 import { config } from "@/config/app.config";
+import { apiFetch } from "@/services/apiClient";
 import type { ResultOptions } from "@/types/common.types";
 import type { StandardRegistryDTO } from "@/types/standardRegistry.types";
 
-/**
- * Get all standard registry entries with optional type filtering
- * GET /api/StandardRegistry/getStandardRegistryByType
- *
- * @param token - Authentication token
- * @param params - Optional query parameters for filtering
- * @returns Array of standard registry entries or rejects with response
- */
 const _getStandardRegistries = async (
-    token: string,
+    _token: string,
     params?: {
-        type?: string; // Optional - filter by type. If not provided, returns all registries
-        showAll?: boolean; // Include inactive items
+        type?: string;
+        showAll?: boolean;
     }
 ) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    // Build query string
     const queryParams = new URLSearchParams();
-    if (params?.type) {
-        queryParams.append("type", params.type);
-    }
-    if (params?.showAll !== undefined) {
-        queryParams.append("showAll", String(params.showAll));
-    }
+    if (params?.type) queryParams.append("type", params.type);
+    if (params?.showAll !== undefined) queryParams.append("showAll", String(params.showAll));
 
     const queryString = queryParams.toString();
     const url = queryString
         ? `${config.api.baseURL}/api/StandardRegistry/getStandardRegistryByType?${queryString}`
         : `${config.api.baseURL}/api/StandardRegistry/getStandardRegistryByType`;
 
-    const options = {
-        method: "GET",
-        headers: headers,
-    };
-
-    const res = await window.fetch(url, options);
+    const res = await apiFetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
 
     if (res.ok) {
         // Backend returns array directly (not wrapped in ResultOptions)
         const data = (await res.json()) as StandardRegistryDTO[];
-        return {
-            success: true,
-            data: data,
-        } as ResultOptions<StandardRegistryDTO>;
-    } else {
-        return Promise.reject(res);
+        return { success: true, data } as ResultOptions<StandardRegistryDTO>;
     }
+    return Promise.reject(res);
 };
 
-/**
- * Public API exports
- */
 export const standardRegistryService = {
     _getStandardRegistries,
 };

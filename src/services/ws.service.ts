@@ -4,6 +4,7 @@
  */
 
 import { config } from "@/config/app.config";
+import { apiFetch } from "@/services/apiClient";
 import {ResultOptions} from "../types";
 
 
@@ -29,7 +30,7 @@ export interface WsDTO {
  * @returns Array of workspaces or rejects with response
  */
 const _getWs = async (
-    token: string,
+    _token: string,
     params?: {
         getAll?: boolean;
         searchText?: string;
@@ -41,12 +42,6 @@ const _getWs = async (
         ids?: string; // Comma-separated IDs: "1,2,3"
     },
 ) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
     // Build query string
     const queryParams = new URLSearchParams();
     if (params?.getAll !== undefined) {
@@ -75,12 +70,7 @@ const _getWs = async (
     const queryString = queryParams.toString();
     const url = queryString ? `${config.api.baseURL}/api/ws?${queryString}` : `${config.api.baseURL}/api/ws`;
 
-    const options = {
-        method: "GET",
-        headers: headers,
-    };
-
-    const res = await window.fetch(url, options);
+    const res = await apiFetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
 
     if (res.ok) {
         const result = (await res.json()) as ResultOptions<WsDTO>;
@@ -98,19 +88,8 @@ const _getWs = async (
  * @param id - The workspace ID to retrieve
  * @returns Workspace details or rejects with response
  */
-const _getWsById = async (token: string, id: number) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    const options = {
-        method: "GET",
-        headers: headers,
-    };
-
-    const res = await window.fetch(`${config.api.baseURL}/api/ws/${id}`, options);
+const _getWsById = async (_token: string, id: number) => {
+    const res = await apiFetch(`${config.api.baseURL}/api/ws/${id}`, { method: "GET", headers: { "Content-Type": "application/json" } });
 
     if (res.ok) {
         const result = (await res.json()) as ResultOptions<WsDTO>;
@@ -136,7 +115,7 @@ const _getWsById = async (token: string, id: number) => {
  * @returns Batch operation results or rejects with response
  */
 const _upsertWsBatch = async (
-    token: string,
+    _token: string,
     requests: Array<{
         id?: number | null;
         name: string;
@@ -145,19 +124,11 @@ const _upsertWsBatch = async (
         deletedAt?: string | null;
     }>,
 ) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    const options = {
+    const res = await apiFetch(`${config.api.baseURL}/api/ws/batch`, {
         method: "POST",
-        headers: headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requests),
-    };
-
-    const res = await window.fetch(`${config.api.baseURL}/api/ws/batch`, options);
+    });
 
     if (res.ok) {
         const result = (await res.json()) as ResultOptions;
@@ -176,21 +147,11 @@ const _upsertWsBatch = async (
  * @param id - Single workspace ID or comma-separated IDs (e.g., "1,2,3")
  * @returns void or rejects with response
  */
-const _deleteWs = async (token: string, id: number | string) => {
-    const headers = new Headers();
-    const bearer = `Bearer ${token}`;
-
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
-
-    const options = {
+const _deleteWs = async (_token: string, id: number | string) => {
+    const res = await apiFetch(`${config.api.baseURL}/api/ws/${id}`, {
         method: "DELETE",
-        headers: headers,
-    };
-
-    const url = `${config.api.baseURL}/api/ws/${id}`;
-
-    const res = await window.fetch(url, options);
+        headers: { "Content-Type": "application/json" },
+    });
 
     if (res.ok) {
         const result = (await res.json()) as ResultOptions;
