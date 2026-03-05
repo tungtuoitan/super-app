@@ -190,7 +190,7 @@ export function FolderDialog() {
                                         size="small"
                                         error={!!errors.name || isDuplicateName}
                                         helperText={errors.name || (isDuplicateName ? `A ${itemLabel.toLowerCase()} with this name already exists in this location` : "")}
-                                        maxLength={30}
+                                        maxLength={50}
                                     />
                                 </div>
                                 <div className="folder-name-suggestion">
