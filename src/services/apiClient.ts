@@ -28,6 +28,43 @@ function isAuthEndpoint(input: RequestInfo | URL): boolean {
     return AUTH_ENDPOINTS.some((e) => url.includes(e));
 }
 
+function buildRefreshPromise(): Promise<string> {
+    return authApi
+        .refreshToken()
+        .then((r) => {
+            if (!r.success || !r.user?.token) {
+                debugLog.log("apiClient", "refresh-response-invalid", { success: r.success, hasToken: !!r.user?.token });
+                throw new Error("Refresh failed");
+            }
+            debugLog.log("apiClient", "refresh-success");
+            return r.user.token;
+        })
+        .catch((err) => {
+            debugLog.log("apiClient", "refresh-fetch-error", { error: String(err) });
+            debugLog.flush();
+            throw err;
+        })
+        .finally(() => {
+            isRefreshing = false;
+            refreshPromise = null;
+        });
+}
+
+/**
+ * Shared refresh lock used by both the 401 interceptor and initAuthFromStorageToken.
+ * Guarantees only one /api/auth/refresh call is in-flight at a time.
+ */
+export function acquireRefreshToken(): Promise<string> {
+    if (!isRefreshing) {
+        isRefreshing = true;
+        refreshPromise = buildRefreshPromise();
+        debugLog.log("apiClient", "refresh-lock-acquired");
+    } else {
+        debugLog.log("apiClient", "refresh-lock-queued");
+    }
+    return refreshPromise!;
+}
+
 /**
  * Configure the API client with token callbacks.
  * Must be called once inside a component that has access to AuthStore.
@@ -64,32 +101,7 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
     debugLog.log("apiClient", "401-intercepted", { url, isRefreshing, hasRefreshPromise: !!refreshPromise });
 
     try {
-        if (!isRefreshing) {
-            isRefreshing = true;
-            refreshPromise = authApi
-                .refreshToken()
-                .then((r) => {
-                    if (!r.success || !r.user?.token) {
-                        debugLog.log("apiClient", "refresh-response-invalid", { success: r.success, hasToken: !!r.user?.token });
-                        throw new Error("Refresh failed");
-                    }
-                    debugLog.log("apiClient", "refresh-success");
-                    return r.user.token;
-                })
-                .catch((err) => {
-                    debugLog.log("apiClient", "refresh-fetch-error", { error: String(err) });
-                    debugLog.flush();
-                    throw err;
-                })
-                .finally(() => {
-                    isRefreshing = false;
-                    refreshPromise = null; // reset so next 401 triggers a fresh refresh
-                });
-        } else {
-            debugLog.log("apiClient", "refresh-queued", { url });
-        }
-
-        const newToken = await refreshPromise!;
+        const newToken = await acquireRefreshToken();
         setToken(newToken);
 
         const retryHeaders = new Headers(options.headers);
