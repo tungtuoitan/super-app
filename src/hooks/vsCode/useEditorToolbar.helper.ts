@@ -156,36 +156,11 @@ export const useEditorToolbarHelper = () => {
             }
 
             let workspaceId = project.workspaceId;
-
-            if (!workspaceId) {
-                const updatedProjectResult = await projectService._upsertProjectBatch(token, [{
-                    id: project.id,
-                    name: project.name,
-                    description: project.description,
-                    status: project.status,
-                    startDate: project.startDate ? project.startDate.toISOString() : null,
-                    endDate: project.endDate ? project.endDate.toISOString() : null,
-                    deletedAt: project.deletedAt ? project.deletedAt.toISOString() : null,
-                    workspaceId: null,
-                }]);
-
-                if (!updatedProjectResult.success || !updatedProjectResult.data?.[0]?.workspaceId) {
-                    _console.error("Failed to create workspace for project");
-                    return;
-                }
-
-                workspaceId = updatedProjectResult.data[0].workspaceId!;
-                setProjects((prev) => prev.map((p) =>
-                    p.id === project!.id ? { ...p, workspaceId } : p
-                ));
-            }
-
             if (!workspaceId) return;
-            const resolvedWorkspaceId = workspaceId as number;
 
             // --- Create folder named after task ---
             const folderName = savedTask.title || "Untitled";
-            const createFolderRes = await workspaceService._upsertWorkspaceItems(token, resolvedWorkspaceId, [
+            const createFolderRes = await workspaceService._upsertWorkspaceItems(token, workspaceId, [
                 {
                     action: WorkspaceItemAction.Create,
                     entityType: 2,
@@ -200,7 +175,7 @@ export const useEditorToolbarHelper = () => {
             }
 
             // Fetch tree to get new folder's workspace_items.id
-            const treeRes = await workspaceService._getWorkspaceTreeV2(token, resolvedWorkspaceId);
+            const treeRes = await workspaceService._getWorkspaceTreeV2(token, workspaceId);
             if (!treeRes.success || !treeRes.object) {
                 _console.error("Failed to load workspace tree after folder creation");
                 return;
