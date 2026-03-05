@@ -5,7 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
-export type ConsoleMessageType = "error" | "warning" | "info" | "success";
+export type ConsoleMessageType = "error" | "warning" | "info" | "success" | "special-success";
 
 export interface ConsoleMessage {
     id: string;

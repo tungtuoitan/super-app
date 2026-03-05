@@ -54,6 +54,7 @@ export const useConsoleHelper = () => {
     const warning = useCallback((message: string) => addMessage(message, "warning"), [addMessage]);
     const info = useCallback((message: string) => addMessage(message, "info"), [addMessage]);
     const success = useCallback((message: string) => addMessage(message, "success"), [addMessage]);
+    const specialSuccess = useCallback((message: string) => addMessage(message, "special-success"), [addMessage]);
 
     return {
         messages,
@@ -64,5 +65,6 @@ export const useConsoleHelper = () => {
         warning,
         info,
         success,
+        specialSuccess,
     };
 };
