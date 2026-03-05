@@ -458,6 +458,9 @@ export interface WsResponse {
 
     /** When last updated */
     updatedAt?: string;
+
+    /** When soft-deleted (null if active) */
+    deletedAt?: string | null;
 }
 
 /**
