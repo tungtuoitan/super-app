@@ -103,6 +103,7 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
     try {
         const newToken = await acquireRefreshToken();
         setToken(newToken);
+        window.dispatchEvent(new Event("auth:special-success"));
 
         const retryHeaders = new Headers(options.headers);
         retryHeaders.set("Authorization", `Bearer ${newToken}`);
