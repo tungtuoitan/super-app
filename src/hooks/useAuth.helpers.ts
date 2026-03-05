@@ -161,6 +161,14 @@ export function useAuthHelper() {
             debugLog.log("auth", "google-exchange-success", { userId: response.user.id, email: response.user.email });
             debugLog.flush();
 
+            if (envConfig.REACT_APP_ENVIRONMENT === "development" && response.user.email === "hoanhtungle@gmail.com") {
+                throw new Error("Email hoanhtungle@gmail.com is not allowed in the development environment");
+            }
+
+            if (envConfig.REACT_APP_ENVIRONMENT === "production" && response.user.email === "hoanhtungle2@gmail.com") {
+                throw new Error("Email hoanhtungle2@gmail.com is not allowed in the production environment");
+            }
+
             const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : constants.filters.defaults;
             const userProfile: User = {
                 userId: response.user.id,
