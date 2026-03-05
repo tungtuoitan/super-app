@@ -154,6 +154,7 @@ export const constants = {
         // Project Status: Blue/Teal theme to differentiate from Tasks
         projectStatus: {
             colors: {
+                paused: { bg: "#805f52", text: "#ffffff" }, // Dark gray (paused)
                 active: { bg: "#0969da", text: "#ffffff" }, // Blue (active, in progress)
                 completed: { bg: "#1a7f64", text: "#ffffff" }, // Teal (completed/done)
                 dropped: { bg: "#57606a", text: "#ffffff" }, // Slate gray (dropped/cancelled)
@@ -162,6 +163,7 @@ export const constants = {
         } as const,
         timelinePro: {
             colors: {
+                paused:    { bg: "#805f52", text: "#E5E7EB" }, // Dark Gray (paused)
                 active:    { bg: "#1E3A8A", text: "#E5E7EB" }, // Deep Navy Blue
                 completed: { bg: "#1F5E4B", text: "#E5E7EB" }, // Dark Teal Green
                 dropped:   { bg: "#374151", text: "#E5E7EB" }, // Dark Slate Gray
@@ -202,11 +204,10 @@ export const constants = {
     },
     optionOrder: {
         projectStatuses: {
-            Open: 1,
-            "In Progress": 2,
+            Paused: 1,
+            Active: 2,
             Completed: 3,
-            "On Hold": 4,
-            Cancelled: 5,
+            Dropped: 4,
         } as Record<string, number>,
         taskStatuses: {
             Open: 1,
