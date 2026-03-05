@@ -7,6 +7,7 @@
 import { useAuthStore, User } from "@/store/auth/Auth.store";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { authApi } from "@/services/auth.service";
+import { acquireRefreshToken } from "@/services/apiClient";
 import { userProfileService } from "@/services/userProfile.service";
 import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
@@ -65,13 +66,14 @@ export function useAuthHelper() {
         set$User({ ...cached, userToken: "" });
 
         try {
-            const response = await authApi.refreshToken();
-            if (!response.success || !response.user) return false;
-
-            set$User({ ...cached, userToken: response.user.token });
+            // Use shared lock so concurrent 401 interceptors don't trigger a second /refresh call
+            const newToken = await acquireRefreshToken();
+            set$User({ ...cached, userToken: newToken });
             setIsAuthenticated(true);
+            debugLog.log("auth", "init-from-storage-ok");
             return true;
         } catch {
+            debugLog.log("auth", "init-from-storage-failed");
             storageService.remove(STORAGE_KEYS.USER_PROFILE);
             set$User(DEFAULT_USER);
             return false;
