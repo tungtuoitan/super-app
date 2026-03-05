@@ -128,7 +128,8 @@ export const useProjectDetailHelper = () => {
                     status: selectedProject.status,
                     startDate: toLocalISOString(selectedProject.startDate),
                     endDate: toLocalISOString(selectedProject.endDate),
-                    deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
+                    deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch,
+                    workspaceId: selectedProject.workspaceId,
                 };
 
                 // ============================================================
