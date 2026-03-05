@@ -9,6 +9,7 @@
  */
 
 import { authApi } from "@/services/auth.service";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 type ApiClientConfig = {
     getToken: () => string;
@@ -60,18 +61,32 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
     }
 
     // --- 401: try silent refresh ---
+    debugLog.log("apiClient", "401-intercepted", { url, isRefreshing, hasRefreshPromise: !!refreshPromise });
+
     try {
         if (!isRefreshing) {
             isRefreshing = true;
             refreshPromise = authApi
                 .refreshToken()
                 .then((r) => {
-                    if (!r.success || !r.user?.token) throw new Error("Refresh failed");
+                    if (!r.success || !r.user?.token) {
+                        debugLog.log("apiClient", "refresh-response-invalid", { success: r.success, hasToken: !!r.user?.token });
+                        throw new Error("Refresh failed");
+                    }
+                    debugLog.log("apiClient", "refresh-success");
                     return r.user.token;
+                })
+                .catch((err) => {
+                    debugLog.log("apiClient", "refresh-fetch-error", { error: String(err) });
+                    debugLog.flush();
+                    throw err;
                 })
                 .finally(() => {
                     isRefreshing = false;
+                    refreshPromise = null; // reset so next 401 triggers a fresh refresh
                 });
+        } else {
+            debugLog.log("apiClient", "refresh-queued", { url });
         }
 
         const newToken = await refreshPromise!;
@@ -79,12 +94,16 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
 
         const retryHeaders = new Headers(options.headers);
         retryHeaders.set("Authorization", `Bearer ${newToken}`);
+        debugLog.log("apiClient", "retry-with-new-token", { url });
         return window.fetch(url, { ...options, headers: retryHeaders, credentials: "include" });
     } catch {
         refreshPromise = null;
         isRefreshing = false;
+        debugLog.log("apiClient", "auth-failed-dispatching-event", { url });
+        debugLog.flush();
         onAuthFailed();
         window.dispatchEvent(new Event("auth:unauthorized"));
         return response;
     }
 }
+

@@ -75,14 +75,24 @@ export const authApi = {
      * POST /api/auth/refresh
      */
     async refreshToken(): Promise<AuthResponse> {
+        debugLog.log("auth", "refresh-token-start", { url: `${config.api.baseURL}/api/auth/refresh` });
+
         const res = await window.fetch(`${config.api.baseURL}/api/auth/refresh`, {
             method: "POST",
             credentials: "include",
         });
 
+        debugLog.log("auth", "refresh-token-response", { status: res.status, ok: res.ok });
+
         if (res.ok) {
-            return (await res.json()) as AuthResponse;
+            const data = (await res.json()) as AuthResponse;
+            debugLog.log("auth", "refresh-token-ok", { success: data.success, hasUser: !!data.user, hasToken: !!data.user?.token });
+            return data;
         } else {
+            let errorBody: unknown;
+            try { errorBody = await res.clone().json(); } catch { errorBody = await res.clone().text(); }
+            debugLog.log("auth", "refresh-token-error", { status: res.status, body: errorBody });
+            debugLog.flush();
             return Promise.reject(res);
         }
     },
