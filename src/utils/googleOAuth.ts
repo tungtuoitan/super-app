@@ -6,6 +6,7 @@
 import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
 import { generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "@/utils/pkce.utils";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 /**
  * Get redirect URI based on environment
@@ -61,6 +62,16 @@ export async function initiateGoogleLogin(): Promise<void> {
     });
 
     const authUrl = `${GOOGLE_OAUTH_CONFIG.authUrl}?${params.toString()}`;
+
+    debugLog.log("auth", "google-login-initiate", {
+        redirectUri: GOOGLE_OAUTH_CONFIG.redirectUri,
+        envRedirectUri: envConfig.REACT_APP_GOOGLE_REDIRECT_URI,
+        windowOrigin: window.location.origin,
+        windowHref: window.location.href,
+        authUrl,
+    });
+    // flush ngay lập tức trước khi navigate ra khỏi app
+    await debugLog.flush();
 
     // Redirect to Google OAuth
     window.location.href = authUrl;
