@@ -6,6 +6,7 @@
 import { config } from "@/config/app.config";
 import { getLocaleLanguage } from "@/utils/locale";
 import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 export const authApi = {
     /**
@@ -55,6 +56,16 @@ export const authApi = {
         if (res.ok) {
             return (await res.json()) as AuthResponse;
         } else {
+            // clone trước khi đọc body vì Response chỉ đọc được 1 lần
+            let errorBody: unknown;
+            try { errorBody = await res.clone().json(); } catch { errorBody = await res.clone().text(); }
+            debugLog.log("auth", "google-login-http-error", {
+                status: res.status,
+                statusText: res.statusText,
+                body: errorBody,
+                url: res.url,
+            });
+            debugLog.flush();
             return Promise.reject(res);
         }
     },

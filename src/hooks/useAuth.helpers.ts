@@ -13,7 +13,7 @@ import { constants } from "@/utils/constants";
 import type { LoginRequest } from "@/types/index";
 import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
 import { useNavigate } from "react-router-dom";
-import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl } from "@/utils/googleOAuth";
+import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl, GOOGLE_OAUTH_CONFIG } from "@/utils/googleOAuth";
 import { retrieveAndClearPkceValues, validateState } from "@/utils/pkce.utils";
 import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -21,6 +21,7 @@ import { useSnackbar } from "notistack";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
 import {useConsoleHelper} from "./console/useConsole.helper";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 const DEFAULT_USER: User = {
     userId: null,
@@ -140,12 +141,23 @@ export function useAuthHelper() {
         setLoginError(null);
         setError(null);
 
+        debugLog.log("auth", "google-exchange-start", {
+            codeLength: code.length,
+            hasVerifier: !!codeVerifier,
+            redirectUri: GOOGLE_OAUTH_CONFIG.redirectUri,
+        });
+
         try {
             const response = await authApi.googleLogin(code, codeVerifier);
 
             if (!response.success || !response.user) {
+                debugLog.log("auth", "google-exchange-failed", { error: response.error, success: response.success });
+                debugLog.flush();
                 throw new Error(response.error || "Google login failed");
             }
+
+            debugLog.log("auth", "google-exchange-success", { userId: response.user.id, email: response.user.email });
+            debugLog.flush();
 
             const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : constants.filters.defaults;
             const userProfile: User = {
@@ -167,6 +179,8 @@ export function useAuthHelper() {
             setIsAuthenticated(true);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Google login failed";
+            debugLog.log("auth", "google-exchange-exception", { error: errorMessage });
+            debugLog.flush();
             setLoginError(errorMessage);
             setError(errorMessage);
             throw err;
@@ -181,7 +195,19 @@ export function useAuthHelper() {
     const handleOAuthCallback = async (): Promise<void> => {
         try {
             const oauthError = extractOAuthError(window.location.search);
+
+            debugLog.log("auth", "oauth-callback-start", {
+                windowOrigin: window.location.origin,
+                windowHref: window.location.href,
+                search: window.location.search,
+                configuredRedirectUri: GOOGLE_OAUTH_CONFIG.redirectUri,
+                envRedirectUri: envConfig.REACT_APP_GOOGLE_REDIRECT_URI,
+                oauthError: oauthError ?? undefined,
+            });
+
             if (oauthError) {
+                debugLog.log("auth", "oauth-callback-error-from-google", { oauthError });
+                debugLog.flush();
                 setCallbackError(`Authentication cancelled or failed: ${oauthError}`);
                 setIsProcessing(false);
                 return;
@@ -191,6 +217,8 @@ export function useAuthHelper() {
             const returnedState = extractStateFromUrl(window.location.search);
 
             if (!code) {
+                debugLog.log("auth", "oauth-callback-no-code", { search: window.location.search });
+                debugLog.flush();
                 setCallbackError("No authorization code received from Google");
                 setIsProcessing(false);
                 return;
@@ -198,13 +226,24 @@ export function useAuthHelper() {
 
             const { codeVerifier, state: storedState } = retrieveAndClearPkceValues();
 
+            debugLog.log("auth", "oauth-callback-pkce-check", {
+                returnedState,
+                storedState,
+                hasCodeVerifier: !!codeVerifier,
+                stateMatch: returnedState === storedState,
+            });
+
             if (!validateState(returnedState, storedState)) {
+                debugLog.log("auth", "oauth-callback-state-mismatch", { returnedState, storedState });
+                debugLog.flush();
                 setCallbackError("Invalid state parameter - possible CSRF attack");
                 setIsProcessing(false);
                 return;
             }
 
             if (!codeVerifier) {
+                debugLog.log("auth", "oauth-callback-missing-verifier");
+                debugLog.flush();
                 setCallbackError("Missing PKCE code verifier");
                 setIsProcessing(false);
                 return;
@@ -214,6 +253,8 @@ export function useAuthHelper() {
             navigate("/", { replace: true });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Authentication failed";
+            debugLog.log("auth", "oauth-callback-exception", { error: errorMessage });
+            debugLog.flush();
             setCallbackError(errorMessage);
             setIsProcessing(false);
         }
