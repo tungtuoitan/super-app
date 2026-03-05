@@ -35,12 +35,16 @@ export function WorkspaceView() {
     }, [$user.userId, $user.userToken, $user.filters, selectedWorkspaceId]);
 
     // Convert workspaces to autocomplete options
-    const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => ({
-        id: ws.id.toString(),
-        label: ws.name,
-        desc: ws.description || ws.name,
-        active: true,
-    }));
+    const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => {
+        const isDeleted = !!ws.deletedAt;
+        return {
+            id: ws.id.toString(),
+            label: ws.name,
+            desc: ws.description || ws.name,
+            active: !isDeleted,
+            longDesc: isDeleted ? "(deleted)" : undefined,
+        };
+    });
 
     // Handle workspace selection change
     const handleWorkspaceChange = async (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {

@@ -153,7 +153,7 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                         value={selectedProject.name}
                                         onChange={(e) => {
                                             const value = e.target.value.slice(0, 50); // Max 50 chars
-                                            handleFieldChange("name", value);
+                                            handleFieldChange("name", value.toUpperCase()); // Store as uppercase
                                             if (value && value.trim() !== "") setNameError("");
                                             else setNameError("Project Name is required");
                                         }}
