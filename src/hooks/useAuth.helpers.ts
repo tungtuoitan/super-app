@@ -23,6 +23,7 @@ import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
 import {useConsoleHelper} from "./console/useConsole.helper";
 import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 
 const DEFAULT_USER: User = {
     userId: null,
@@ -59,21 +60,32 @@ export function useAuthHelper() {
      * Called on app mount. Sets user profile immediately for UI, then verifies with backend.
      */
     const initAuthFromStorageToken = async (): Promise<boolean> => {
+        const device = getDeviceFingerprint();
         const cached = storageService.get<User>(STORAGE_KEYS.USER_PROFILE);
-        if (!cached) return false;
 
-        // Show name/avatar immediately while refresh is in-flight
+        debugLog.log("auth", "init-from-storage-start", {
+            hasCachedProfile: !!cached,
+            cachedEmail: cached?.email ?? null,
+            device,
+        });
+
+        if (!cached) {
+            debugLog.log("auth", "init-from-storage-skip", { reason: "no-cached-profile", device });
+            return false;
+        }
+
         set$User({ ...cached, userToken: "" });
 
         try {
-            // Use shared lock so concurrent 401 interceptors don't trigger a second /refresh call
             const newToken = await acquireRefreshToken();
             set$User({ ...cached, userToken: newToken });
             setIsAuthenticated(true);
-            debugLog.log("auth", "init-from-storage-ok");
+            debugLog.log("auth", "init-from-storage-ok", { email: cached.email, device });
+            debugLog.flush();
             return true;
         } catch {
-            debugLog.log("auth", "init-from-storage-failed");
+            debugLog.log("auth", "init-from-storage-failed", { email: cached.email, device });
+            debugLog.flush();
             storageService.remove(STORAGE_KEYS.USER_PROFILE);
             set$User(DEFAULT_USER);
             return false;
@@ -84,9 +96,12 @@ export function useAuthHelper() {
      * Login with username and password
      */
     const login = async (username: string, password: string): Promise<void> => {
+        const device = getDeviceFingerprint();
         setLoginLoading(true);
         setLoginError(null);
         setError(null);
+
+        debugLog.log("auth", "local-login-attempt", { username, device });
 
         try {
             const loginRequest: LoginRequest = { username, password };
@@ -101,20 +116,19 @@ export function useAuthHelper() {
                 authType: "local",
             };
 
-            // Save profile without token for F5 restore
             storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
-
             set$User(userProfile);
             setIsAuthenticated(true);
+
+            debugLog.log("auth", "local-login-store-updated", { userId: userProfile.userId, device });
+            debugLog.flush();
         } catch (err) {
             const errorMessage = await parseApiError(err);
+            debugLog.log("auth", "local-login-store-error", { error: errorMessage, device });
+            debugLog.flush();
             setLoginError(errorMessage);
             setError(errorMessage);
-
-            if (isUnauthorizedError(err)) {
-                _console.error("Unauthorized. Please login again.");
-            }
-
+            if (isUnauthorizedError(err)) _console.error("Unauthorized. Please login again.");
             throw err;
         } finally {
             setLoginLoading(false);
@@ -125,6 +139,11 @@ export function useAuthHelper() {
      * Logout user - revoke refresh token, clear cookie, clean up auth state
      */
     const logout = async (): Promise<void> => {
+        const device = getDeviceFingerprint();
+        const userId = $user.userId;
+        const email  = $user.email;
+        debugLog.log("auth", "logout-start", { userId, email, device });
+
         try { await authApi.logout(); } catch {}
 
         set$User(DEFAULT_USER);
@@ -132,6 +151,9 @@ export function useAuthHelper() {
         setError(null);
         setLoginError(null);
         storageService.remove(STORAGE_KEYS.USER_PROFILE);
+
+        debugLog.log("auth", "logout-complete", { userId, email, device });
+        debugLog.flush();
     };
 
     /**
@@ -139,6 +161,7 @@ export function useAuthHelper() {
      * Exchanges code for JWT token with PKCE
      */
     const loginWithGoogleCode = async (code: string, codeVerifier: string): Promise<void> => {
+        const device = getDeviceFingerprint();
         setLoginLoading(true);
         setLoginError(null);
         setError(null);
@@ -147,18 +170,19 @@ export function useAuthHelper() {
             codeLength: code.length,
             hasVerifier: !!codeVerifier,
             redirectUri: GOOGLE_OAUTH_CONFIG.redirectUri,
+            device,
         });
 
         try {
             const response = await authApi.googleLogin(code, codeVerifier);
 
             if (!response.success || !response.user) {
-                debugLog.log("auth", "google-exchange-failed", { error: response.error, success: response.success });
+                debugLog.log("auth", "google-exchange-failed", { error: response.error, success: response.success, device });
                 debugLog.flush();
                 throw new Error(response.error || "Google login failed");
             }
 
-            debugLog.log("auth", "google-exchange-success", { userId: response.user.id, email: response.user.email });
+            debugLog.log("auth", "google-exchange-success", { userId: response.user.id, email: response.user.email, device });
             debugLog.flush();
 
             if (envConfig.REACT_APP_ENVIRONMENT === "development" && response.user.email === "hoanhtungle@gmail.com") {
@@ -182,14 +206,12 @@ export function useAuthHelper() {
                 filters: parsedFilters,
             };
 
-            // Save profile without token for F5 restore
             storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
-
             set$User(userProfile);
             setIsAuthenticated(true);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Google login failed";
-            debugLog.log("auth", "google-exchange-exception", { error: errorMessage });
+            debugLog.log("auth", "google-exchange-exception", { error: errorMessage, device });
             debugLog.flush();
             setLoginError(errorMessage);
             setError(errorMessage);
