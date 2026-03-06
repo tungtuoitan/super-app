@@ -20,9 +20,9 @@ export function updateDecorations(
         return;
     }
 
-    // Highlight _allKeywords in [name]nameIndex format (new format)
-    // If keyword is in allKeywords, it will be decorated (including headings)
-    // If heading text is NOT in allKeywords, it won't match and won't be decorated
+    // Highlight _allKeywords in [name] format (REMOVED nameIndex)
+    // If keyword is in allKeywords, it will be decorated
+    // Headings are no longer tracked as keywords
     _allKeywords.forEach((kw, kwIndex) => {
         // Match keyword pattern: [name]number (e.g., [w1]2)
         const regex = new RegExp(escapeRegex(kw.text), "gi");
@@ -217,11 +217,12 @@ function getKeywordMatchTarget(kw: KeywordWithDetails): string {
 
 /**
  * HELPER: Kiểm tra keyword type có phải là heading không
+ * REMOVED: heading types no longer used
  */
-function isHeadingType(type: string): boolean {
-    return type === "h1" || type === "h2" || type === "h3" ||
-           type === "h4" || type === "h5" || type === "h6";
-}
+// function isHeadingType(type: string): boolean {
+//     return type === "h1" || type === "h2" || type === "h3" ||
+//            type === "h4" || type === "h5" || type === "h6";
+// }
 
 /**
  * HELPER: Xác định icon cho từng keyword type trong autocomplete dropdown
@@ -235,13 +236,14 @@ function getCompletionItemKind($mi: Monaco, keywordType: string): any {
         case "note":
         case "file":
             return $mi.languages.CompletionItemKind.File;
-        case "h1":
-        case "h2":
-        case "h3":
-        case "h4":
-        case "h5":
-        case "h6":
-            return $mi.languages.CompletionItemKind.Unit;
+        // REMOVED: heading types no longer used
+        // case "h1":
+        // case "h2":
+        // case "h3":
+        // case "h4":
+        // case "h5":
+        // case "h6":
+        //     return $mi.languages.CompletionItemKind.Unit;
         case "external":
             return $mi.languages.CompletionItemKind.Reference;
         default:
@@ -259,21 +261,20 @@ function getCompletionItemKind($mi: Monaco, keywordType: string): any {
  *   Ví dụ: "see w1" + Tab → "[w1]1", "see note1" + Tab → "[note1]2"
  */
 function determineInsertText(kw: KeywordWithDetails, isInHeading: boolean): string {
-    // Nếu keyword không có name/nameIndex → dùng text mặc định
-    if (!kw.name || kw.nameIndex === undefined) {
+    // Nếu keyword không có name → dùng text mặc định
+    if (!kw.name) {
         return kw.text;
     }
 
     // QUAN TRỌNG: Nếu đang gõ trong dòng heading → LUÔN insert plain name
-    // (bất kể keyword type là note, workspace, heading, folder, ...)
-    // Lý do: Trong heading không nên có format [name]nameIndex, chỉ có plain text
     if (isInHeading) {
         return kw.name;
     }
 
-    // Nếu gõ ngoài dòng heading → insert full format [name]nameIndex
-    // Đây là cách reference đến keyword
-    return `[${kw.name}]${kw.nameIndex}`;
+    // Nếu gõ ngoài dòng heading → insert format [name]
+    // REMOVED: nameIndex no longer used
+    // return `[${kw.name}]${kw.nameIndex}`;
+    return `[${kw.name}]`;
 }
 
 /**
@@ -526,7 +527,7 @@ export function setupDefinitionProvider($mi: Monaco | null, editor: _monaco.edit
 
             // Check each keyword to see if cursor is within keyword pattern
             for (const kw of _allKeywords) {
-                // Match keyword pattern (kw.text already includes [name][nameIndex])
+                // Match keyword pattern (kw.text includes [name], REMOVED nameIndex)
                 const pattern = escapeRegex(kw.text);
                 const regex = new RegExp(pattern, "gi");
 
@@ -745,27 +746,28 @@ export function extractExternalLinks(text: string): Array<{ name: string; url: s
 }
 
 /**
- * Convert original version (with keyword IDs) to display version (with [name][nameIndex])
+ * Convert original version (with keyword IDs) to display version (with [name])
  * Original: [[123]] (keyword ID with double brackets)
- * Display: [Introduction][1]
+ * Display: [Introduction]
  *
  * @param text - Original markdown with [[id]] format
- * @param allKeywords - All keywords with id, name, nameIndex
- * @returns Display text with [name][nameIndex]
+ * @param allKeywords - All keywords with id, name
+ * @returns Display text with [name]
  */
-export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string|null {
+export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex?: number }>): string|null {
     if (!allKeywords || allKeywords.length === 0) {
         return null; //* khi nào có keywords thì mới convert và display UI, còn k thì để null, UI = loading
     }
     // Build a map of keyword id -> display format
     const keywordMap = new Map<number, string>();
     allKeywords.forEach((kw) => {
-        // New format: [name]nameIndex (always show nameIndex, even if it's 1)
-        const displayText = `[${kw.name}]${kw.nameIndex}`;
+        // REMOVED: nameIndex no longer used in display format
+        // const displayText = `[${kw.name}]${kw.nameIndex}`;
+        const displayText = `[${kw.name}]`;
         keywordMap.set(kw.id, displayText);
     });
 
-    // Replace [[id]] with [name]nameIndex
+    // Replace [[id]] with [name]
     const result = text.replace(/\[\[(\d+)\]\]/g, (match, idStr) => {
         const id = parseInt(idStr, 10);
         const displayText = keywordMap.get(id);
@@ -777,35 +779,37 @@ export function convertToDisplayVersion(text: string, allKeywords: Array<{ id: n
         return null;
     }
 
-    
+
     return result;
 }
 
 /**
- * Convert display version (with [name][nameIndex]) to original version (with keyword IDs)
- * Display: [Introduction][1]
+ * Convert display version (with [name]) to original version (with keyword IDs)
+ * Display: [Introduction]
  * Original: [[123]] (keyword ID with double brackets)
  *
- * @param text - Display text with [name][nameIndex] format
- * @param allKeywords - All keywords with id, name, nameIndex
+ * @param text - Display text with [name] format
+ * @param allKeywords - All keywords with id, name
  * @returns Original markdown with [[id]] format
  */
-export function convertToOriginalVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex: number }>): string|null {
+export function convertToOriginalVersion(text: string, allKeywords: Array<{ id: number; name: string; nameIndex?: number }>): string|null {
     if (!allKeywords || allKeywords.length === 0) return null
 
-    // Build map for lookup: [name]nameIndex -> id
+    // Build map for lookup: [name] -> id
     const keywordIdMap = new Map<string, number>();
 
     allKeywords.forEach((kw) => {
-        // New format: [name]nameIndex (e.g., [w1]2)
-        const key = `[${kw.name}]${kw.nameIndex}`.toLowerCase();
+        // REMOVED: nameIndex no longer used in key
+        // const key = `[${kw.name}]${kw.nameIndex}`.toLowerCase();
+        const key = `[${kw.name}]`.toLowerCase();
         keywordIdMap.set(key, kw.id);
     });
 
-    // Replace [name]nameIndex with [[id]]
-    // Pattern: [name]123 where name can contain any chars except ]
-    const result = text.replace(/\[([^\]]+)\](\d+)/g, (match, name, nameIndex) => {
-        const key = `[${name}]${nameIndex}`.toLowerCase();
+    // Replace [name] with [[id]]
+    // Pattern: [name] where name can contain any chars except ]
+    const result = text.replace(/\[([^\]]+)\]/g, (match, name) => {
+        // REMOVED: old pattern matched [name]number - now just [name]
+        const key = `[${name}]`.toLowerCase();
         const id = keywordIdMap.get(key);
         return id !== undefined ? `[[${id}]]` : match;
     });
@@ -900,8 +904,9 @@ export function setupLinkProvider(
 
             // Find all keyword patterns
             _allKeywords.forEach((kw) => {
-                // Match keyword pattern (kw.text already includes [name][nameIndex])
-                const displayName = `[${kw.name}]${kw.nameIndex}`;
+                // Match keyword pattern [name] (REMOVED nameIndex)
+                // const displayName = `[${kw.name}]${kw.nameIndex}`;
+                const displayName = `[${kw.name}]`;
                 const regex = new RegExp(escapeRegex(displayName), "gi");
                 let match;
 
@@ -964,8 +969,9 @@ export function setupLinkProvider(
         let foundMatch = false;
 
         for (const kw of _allKeywords) {
-            const displayName = `[${kw.name}]${kw.nameIndex}`;
-            // Match keyword pattern: [name]nameIndex
+            // Match keyword pattern [name] (REMOVED nameIndex)
+            // const displayName = `[${kw.name}]${kw.nameIndex}`;
+            const displayName = `[${kw.name}]`;
             const regex = new RegExp(escapeRegex(displayName), "gi");
             let match;
 
@@ -1028,7 +1034,7 @@ export function setupHoverProvider($mi: Monaco | null, editor: _monaco.editor.IS
 
             // Check each keyword to see if cursor is within keyword pattern
             for (const kw of allKeywordAndHeadings) {
-                // Match keyword pattern (kw.text already includes [name][nameIndex])
+                // Match keyword pattern (kw.text includes [name], REMOVED nameIndex)
                 const pattern = escapeRegex(kw.text);
                 const regex = new RegExp(pattern, "gi");
 

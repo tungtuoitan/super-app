@@ -130,7 +130,7 @@ export const useKeywordNavigationHelper = () => {
                 }
 
                 // Handle note/heading links
-                if ((parsed.type === "note" || parsed.type === "heading") && parsed.noteWorkspaceItemId) {
+                if ((parsed.type === "note" /*|| parsed.type === "heading" REMOVED*/) && parsed.noteWorkspaceItemId) {
                     // Try to find note in target workspace (after potential switch)
                     const noteInWorkspace = findNoteInWorkspace(targetWorkspace, parsed.workspaceId!, parsed.noteWorkspaceItemId);
 
@@ -167,15 +167,16 @@ export const useKeywordNavigationHelper = () => {
                         }
 
                         // If heading, scroll to it after a small delay
-                        if (parsed.type === "heading" && parsed.headingPath) {
-                            const anchor = getHeadingAnchor(parsed.headingPath);
-                            setTimeout(() => {
-                                const element = document.getElementById(anchor);
-                                if (element) {
-                                    element.scrollIntoView({ behavior: "smooth", block: "start" });
-                                }
-                            }, 300);
-                        }
+                        // REMOVED: heading navigation no longer supported
+                        // if (parsed.type === "heading" && parsed.headingPath) {
+                        //     const anchor = getHeadingAnchor(parsed.headingPath);
+                        //     setTimeout(() => {
+                        //         const element = document.getElementById(anchor);
+                        //         if (element) {
+                        //             element.scrollIntoView({ behavior: "smooth", block: "start" });
+                        //         }
+                        //     }, 300);
+                        // }
                     } else {
                         // Not found in current workspace, fetch from API using workspaceItemIds
                         const token = $user.userToken;
@@ -203,15 +204,16 @@ export const useKeywordNavigationHelper = () => {
                             openTab(note, constants.vscode.tab.tabTypes.note);
 
                             // If heading, scroll to it
-                            if (parsed.type === "heading" && parsed.headingPath) {
-                                const anchor = getHeadingAnchor(parsed.headingPath);
-                                setTimeout(() => {
-                                    const element = document.getElementById(anchor);
-                                    if (element) {
-                                        element.scrollIntoView({ behavior: "smooth", block: "start" });
-                                    }
-                                }, 300);
-                            }
+                            // REMOVED: heading navigation no longer supported
+                            // if (parsed.type === "heading" && parsed.headingPath) {
+                            //     const anchor = getHeadingAnchor(parsed.headingPath);
+                            //     setTimeout(() => {
+                            //         const element = document.getElementById(anchor);
+                            //         if (element) {
+                            //             element.scrollIntoView({ behavior: "smooth", block: "start" });
+                            //         }
+                            //     }, 300);
+                            // }
                         } else {
                             _console.warning("Note not found");
                         }

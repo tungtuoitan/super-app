@@ -99,18 +99,19 @@ export const useCommandPaletteHelper = () => {
                 return FileText;
             case "file":
                 return FileText;
-            case "h1":
-                return "H1";
-            case "h2":
-                return "H2";
-            case "h3":
-                return "H3";
-            case "h4":
-                return "H4";
-            case "h5":
-                return "H5";
-            case "h6":
-                return "H6";
+            // REMOVED: heading types no longer used
+            // case "h1":
+            //     return "H1";
+            // case "h2":
+            //     return "H2";
+            // case "h3":
+            //     return "H3";
+            // case "h4":
+            //     return "H4";
+            // case "h5":
+            //     return "H5";
+            // case "h6":
+            //     return "H6";
             case "external":
                 return Link;
             default:
