@@ -26,14 +26,15 @@ export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
             // Don't filter hardDeleted keywords - they should still be rendered/styled
             // But autocomplete will skip them
             .map((k) => ({
-                // New format: [name]nameIndex (always show nameIndex, even if it's 1)
-                text: `[${k.name}]${k.nameIndex}`,
+                // REMOVED: nameIndex no longer in keyword
+                // text: `[${k.name}]${k.nameIndex}`,
+                text: `[${k.name}]`,
                 type: k.type,
                 link: k.link,
                 longLink: k.longLink,
                 name: k.name,
-                nameIndex: k.nameIndex,
-                hardDeletedAt: k.hardDeletedAt, // Pass through for autocomplete filtering
+                // nameIndex: k.nameIndex, // REMOVED
+                hardDeletedAt: k.hardDeletedAt,
             }));
     }, [allKeywords]);
 

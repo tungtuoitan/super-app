@@ -8,12 +8,12 @@ export type KeywordType =
   | 'folder'
   | 'note'
   | 'file'
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'h4'
-  | 'h5'
-  | 'h6'
+  // | 'h1' // REMOVED: heading keywords no longer used
+  // | 'h2'
+  // | 'h3'
+  // | 'h4'
+  // | 'h5'
+  // | 'h6'
   | 'external';
 
 export interface Keyword {
@@ -31,8 +31,9 @@ export interface Keyword {
   /**
    * Name index for handling duplicate names
    * Default: 1, increments for each duplicate name
+   * @deprecated REMOVED: nameIndex no longer used
    */
-  nameIndex: number;
+  // nameIndex: number;
 
   /**
    * Unique identifier link
