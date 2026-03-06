@@ -16,6 +16,8 @@ import { useStandardRegistryHelper } from "@/hooks/index";
 import { useAuthHelper } from "@/hooks/useAuth.helpers";
 import { configureApiClient } from "@/services/apiClient";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, $user, set$User } = useAuthStore();
@@ -35,16 +37,25 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // On mount: try to restore session from HttpOnly cookie + cached profile
     useEffect(() => {
-        initAuthFromStorageToken();
+        const device = getDeviceFingerprint();
+        debugLog.log("auth", "authguard-mount", { device, isAuthenticated });
+        initAuthFromStorageToken().then((restored) => {
+            debugLog.log("auth", "authguard-init-done", { restored, device });
+            debugLog.flush();
+        });
     }, []);
 
     // Listen for 401 events dispatched by apiClient interceptor
     useEffect(() => {
         const handleUnauthorized = () => {
+            const device = getDeviceFingerprint();
+            debugLog.log("auth", "authguard-unauthorized-event", { device });
+            debugLog.flush();
             logout();
-            // setAccountsOpen(true);
         };
         const handleRefreshSuccess = () => {
+            const device = getDeviceFingerprint();
+            debugLog.log("auth", "authguard-refresh-success-event", { device });
             _console.specialSuccess("Token refreshed successfully.");
         };
         window.addEventListener("auth:unauthorized", handleUnauthorized);
