@@ -10,6 +10,7 @@ import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/typ
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { toLocalISOString } from "@/utils/date.utils";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 function transformTrack(dto: LifeLogTrackDTO): LifeLogTrack {
     return {
@@ -51,16 +52,24 @@ export function useLifeLogTrackHelper() {
     }, [token, setTracks, setIsLoading, setError]);
 
     const upsertTrack = useCallback(async (data: UpsertLifeLogTrackDTO): Promise<LifeLogTrack | null> => {
-        if (!token) return null;
+        if (!token) {
+            debugLog.log("lifelog", "upsertTrack:noToken", {});
+            return null;
+        }
+        debugLog.log("lifelog", "upsertTrack:start", { id: data.id, name: data.name, emoji: data.emoji ?? null, color: data.color ?? null, isSensitive: data.isSensitive });
         try {
             const result = await lifeLogService._upsertTracks(token, [data]);
             if (result.success && result.data?.[0]) {
                 const saved = transformTrack(result.data[0]);
+                debugLog.log("lifelog", "upsertTrack:success", { savedId: saved.id, name: saved.name });
                 await loadTracks();
                 return saved;
             }
+            debugLog.log("lifelog", "upsertTrack:noData", { success: result.success, message: result.message });
             return null;
         } catch (err) {
+            debugLog.log("lifelog", "upsertTrack:catch", { error: String(err) });
+            await debugLog.flush();
             enqueueSnackbar("Failed to save track", { variant: "error" });
             console.error(err);
             return null;
@@ -70,7 +79,11 @@ export function useLifeLogTrackHelper() {
     const deleteTrack = useCallback(async (id: number) => {
         if (!token) return;
         const existing = tracks.find((t) => t.id === id);
-        if (!existing) return;
+        if (!existing) {
+            debugLog.log("lifelog", "deleteTrack:notFound", { id });
+            return;
+        }
+        debugLog.log("lifelog", "deleteTrack:start", { id, name: existing.name });
         try {
             await lifeLogService._upsertTracks(token, [{
                 id: existing.id,
@@ -81,8 +94,11 @@ export function useLifeLogTrackHelper() {
                 color: existing.color,
                 deletedAt: toLocalISOString(new Date()) ?? undefined,
             }]);
+            debugLog.log("lifelog", "deleteTrack:success", { id });
             await loadTracks();
         } catch (err) {
+            debugLog.log("lifelog", "deleteTrack:catch", { id, error: String(err) });
+            await debugLog.flush();
             enqueueSnackbar("Failed to delete track", { variant: "error" });
             console.error(err);
         }

@@ -8,9 +8,11 @@ import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 
 export function useLifeLogTabHelper() {
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { setLogs, setTracks } = useLifeLogStore();
 
     const openLogTab = useCallback((log: LifeLogLog) => {
         const existing = openTabs.find(
@@ -33,6 +35,37 @@ export function useLifeLogTabHelper() {
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
     }, [openTabs, setOpenTabs, setActiveTabId]);
 
+    /** Create temp log (negative ID), push to store, open tab — no API call */
+    const openNewLogTab = useCallback(() => {
+        const tempId = -Date.now();
+        const now = new Date();
+        const tempLog: LifeLogLog = {
+            id: tempId,
+            type: "note",
+            title: "",
+            description: undefined,
+            isSensitive: false,
+            location: undefined,
+            trackId: undefined,
+            occurAt: now,
+            createdAt: now,
+            updatedAt: undefined,
+            deletedAt: null,
+        };
+        setLogs((prev) => [tempLog, ...prev]);
+        const newTab: BaseTab = {
+            id: `lifelog-tab-${tempId}`,
+            type: constants.vscode.tab.tabTypes.lifeLog,
+            data: tempLog,
+            data0: tempLog,
+            title: "New Log",
+            hasUnsavedChanges: true,
+        };
+        setOpenTabs((prev) => [...prev, newTab]);
+        setActiveTabId(newTab.id);
+        window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
+    }, [setLogs, setOpenTabs, setActiveTabId]);
+
     const openTrackTab = useCallback((track: LifeLogTrack) => {
         const existing = openTabs.find(
             (t) => t.type === constants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === track.id
@@ -53,6 +86,35 @@ export function useLifeLogTabHelper() {
         }
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
     }, [openTabs, setOpenTabs, setActiveTabId]);
+
+    /** Create temp track (negative ID), push to store, open tab — no API call */
+    const openNewTrackTab = useCallback(() => {
+        const tempId = -Date.now();
+        const now = new Date();
+        const tempTrack: LifeLogTrack = {
+            id: tempId,
+            name: "New Track",
+            description: undefined,
+            emoji: undefined,
+            color: undefined,
+            isSensitive: false,
+            createdAt: now,
+            updatedAt: undefined,
+            deletedAt: null,
+        };
+        setTracks((prev) => [tempTrack, ...prev]);
+        const newTab: BaseTab = {
+            id: `lifelog-track-tab-${tempId}`,
+            type: constants.vscode.tab.tabTypes.lifeLogTrack,
+            data: tempTrack,
+            data0: tempTrack,
+            title: "New Track",
+            hasUnsavedChanges: true,
+        };
+        setOpenTabs((prev) => [...prev, newTab]);
+        setActiveTabId(newTab.id);
+        window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
+    }, [setTracks, setOpenTabs, setActiveTabId]);
 
     const openGraphTab = useCallback(() => {
         const existing = openTabs.find((t) => t.type === constants.vscode.tab.tabTypes.lifeLogGraph);
@@ -89,5 +151,5 @@ export function useLifeLogTabHelper() {
         );
     }, [setOpenTabs]);
 
-    return { openLogTab, openTrackTab, openGraphTab, closeLogTab, updateLogInTabs };
+    return { openLogTab, openNewLogTab, openTrackTab, openNewTrackTab, openGraphTab, closeLogTab, updateLogInTabs };
 }

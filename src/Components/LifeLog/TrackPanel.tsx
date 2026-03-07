@@ -10,27 +10,20 @@ import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
 import { TrackItem } from "./TrackItem";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
-import { TRACK_COLORS } from "./trackColors";
 
 export function TrackPanel() {
     const { tracks, logs } = useLifeLogStore();
-    const { loadTracks, upsertTrack } = useLifeLogTrackHelper();
-    const { openGraphTab, openTrackTab } = useLifeLogTabHelper();
+    const { loadTracks } = useLifeLogTrackHelper();
+    const { openGraphTab, openNewTrackTab } = useLifeLogTabHelper();
     const { isMobile } = useMobileStore();
 
     useEffect(() => {
         loadTracks();
     }, [loadTracks]);
 
-    const handleAddTrack = useCallback(async () => {
-        const saved = await upsertTrack({
-            id: 0,
-            name: "New Track",
-            color: TRACK_COLORS[0].hex,
-            isSensitive: false,
-        });
-        if (saved) openTrackTab(saved);
-    }, [upsertTrack, openTrackTab]);
+    const handleAddTrack = useCallback(() => {
+        openNewTrackTab();
+    }, [openNewTrackTab]);
 
     const sortedTracks = useMemo(() => {
         const active = tracks.filter((t) => !t.deletedAt);
