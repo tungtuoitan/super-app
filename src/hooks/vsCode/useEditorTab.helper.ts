@@ -18,6 +18,8 @@ import {
     buildBreadcrumbFromTree,
     BreadcrumbItem,
 } from "@/utils/breadcrumb.utils";
+import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -27,6 +29,7 @@ export const useEditorTabHelper = () => {
     const { moduleName } = useGridControlStore();
     const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
     const { allKeywords } = useGeneralStore();
+    const { setLogs, setTracks } = useLifeLogStore();
 
     /**
      * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
@@ -347,6 +350,16 @@ export const useEditorTabHelper = () => {
             }
 
             // Additional workspace-specific cleanup can go here...
+        } else if (tab.type === constants.vscode.tab.tabTypes.lifeLog) {
+            const logData = tab.data as LifeLogLog;
+            if (logData.id < 0) {
+                setLogs((prev) => prev.filter((l) => l.id !== logData.id));
+            }
+        } else if (tab.type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+            const trackData = tab.data as LifeLogTrack;
+            if (trackData.id < 0) {
+                setTracks((prev) => prev.filter((t) => t.id !== trackData.id));
+            }
         }
         // Add more tab type cleanup handlers here in the future...
 

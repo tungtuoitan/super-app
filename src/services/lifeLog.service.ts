@@ -5,6 +5,7 @@
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { LifeLogTrackDTO, LifeLogLogDTO, UpsertLifeLogTrackDTO, UpsertLifeLogLogDTO } from "@/types/lifeLog.types";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 interface ResultOptions<T = unknown> {
     success: boolean;
@@ -33,12 +34,29 @@ const _getTracks = async (
 };
 
 const _upsertTracks = async (_token: string, requests: UpsertLifeLogTrackDTO[]) => {
+    debugLog.log("lifelog", "upsertTracks:request", {
+        count: requests.length,
+        tracks: requests.map(r => ({ id: r.id, name: r.name, emoji: r.emoji, color: r.color, isSensitive: r.isSensitive, deletedAt: r.deletedAt ?? null })),
+    });
     const res = await apiFetch(`${base()}/tracks/batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requests),
     });
-    if (res.ok) return (await res.json()) as ResultOptions<LifeLogTrackDTO>;
+    if (res.ok) {
+        const json = (await res.json()) as ResultOptions<LifeLogTrackDTO>;
+        debugLog.log("lifelog", "upsertTracks:response", {
+            success: json.success,
+            message: json.message,
+            count: json.data?.length ?? 0,
+            ids: json.data?.map((t) => t.id),
+        });
+        await debugLog.flush();
+        return json;
+    }
+    const errText = await res.text().catch(() => "");
+    debugLog.log("lifelog", "upsertTracks:error", { status: res.status, statusText: res.statusText, body: errText });
+    await debugLog.flush();
     return Promise.reject(res);
 };
 
@@ -75,6 +93,10 @@ const _getLogs = async (
 };
 
 const _upsertLogs = async (_token: string, requests: UpsertLifeLogLogDTO[]) => {
+    debugLog.log("lifelog", "upsertLogs:request", {
+        count: requests.length,
+        logs: requests.map(r => ({ id: r.id, type: r.type, trackId: r.trackId ?? null, title: r.title ?? null, isSensitive: r.isSensitive, occurAt: r.occurAt ?? null, deletedAt: r.deletedAt ?? null })),
+    });
     const res = await apiFetch(`${base()}/logs/batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,8 +104,18 @@ const _upsertLogs = async (_token: string, requests: UpsertLifeLogLogDTO[]) => {
     });
     if (res.ok) {
         const json = (await res.json()) as ResultOptions<LifeLogLogDTO>;
+        debugLog.log("lifelog", "upsertLogs:response", {
+            success: json.success,
+            message: json.message,
+            count: json.data?.length ?? 0,
+            ids: json.data?.map((l) => l.id),
+        });
+        await debugLog.flush();
         return json;
     }
+    const errText = await res.text().catch(() => "");
+    debugLog.log("lifelog", "upsertLogs:error", { status: res.status, statusText: res.statusText, body: errText });
+    await debugLog.flush();
     return Promise.reject(res);
 };
 
