@@ -42,6 +42,11 @@ export const useGridAutoRegisterHelper = () => {
                     name: constants.modules.project,
                     filterViewKey: constants.filters.views.projectGrid as keyof import("@/types/common.types").UserFilters,
                 };
+            case "/lifelog":
+                return {
+                    name: "LifeLog",
+                    filterViewKey: null,
+                };
             default:
                 return null;
         }

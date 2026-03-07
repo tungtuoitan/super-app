@@ -9,6 +9,7 @@ import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
 import { WsView } from "./WsView";
 import { ProjectView } from "./ProjectView";
+import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { Console } from "./Console";
 
@@ -61,7 +62,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                                 {/* Header */}
                                 <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                     <span>{getViewTitle(activeView)}</span>
-                                    <GridControlBar />
+                                    <GridControlBar hideFilter={activeView === constants.vscode.viewTypes.lifeLog} />
                                 </div>
 
                                 {/* Content */}
@@ -70,6 +71,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                                     {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
                                     {activeView === constants.vscode.viewTypes.note && <NotesView />}
                                     {activeView === constants.vscode.viewTypes.project && <ProjectView />}
+                                    {activeView === constants.vscode.viewTypes.lifeLog && <LifeLogView />}
                                 </div>
                             </div>
                         </Panel>
@@ -110,6 +112,8 @@ function getViewTitle(view: ActivityBarView): string {
             return constants.vscode.displayNames.notes;
         case constants.vscode.viewTypes.project:
             return constants.vscode.displayNames.project;
+        case constants.vscode.viewTypes.lifeLog:
+            return constants.vscode.displayNames.lifeLog;
         default:
             return "View";
     }

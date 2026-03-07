@@ -11,7 +11,7 @@ import { GenericFilterPopup } from "./GenericFilterPopup";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 
-export function GridControlBar() {
+export function GridControlBar({ hideFilter }: { hideFilter?: boolean } = {}) {
     const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useGridControlStore();
     const { isMobile } = useMobileStore();
     const [inputValue, setInputValue] = useState(searchQuery);
@@ -58,7 +58,7 @@ export function GridControlBar() {
             </div>
 
             {/* Filter Popup */}
-            <GenericFilterPopup />
+            {!hideFilter && <GenericFilterPopup />}
         </div>
     );
 }

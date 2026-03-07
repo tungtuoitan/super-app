@@ -10,6 +10,35 @@ import { ICON_MAP, IconType } from "@/shared/icons";
 import { Note } from "@/types/note.types";
 import { Ws } from "@/types/workspace.types";
 import { useTabBarHelper } from "@/hooks/vsCode/useTabBarHelper";
+import { useMobileStore } from "@/store/mobile/Mobile.store";
+import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { LogTypeIcon } from "@/Components/LifeLog/LogTypeIcon";
+import { TrackIconDisplay } from "@/Components/LifeLog/TrackIconDisplay";
+import type { LifeLogLog } from "@/types/lifeLog.types";
+
+function LifeLogTabIcon({ tab, className }: { tab: BaseTab; className: string }) {
+    const { tracks } = useLifeLogStore();
+
+    if (tab.type === constants.vscode.tab.tabTypes.lifeLogGraph) {
+        return <BarChart3 className={className} style={{ color: "#6366f1" }} />;
+    }
+
+    if (tab.type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+        const track = tab.data as LifeLogLog & { emoji?: string; color?: string };
+        return <TrackIconDisplay value={track.emoji} trackColor={track.color} size="sm" />;
+    }
+
+    const log = tab.data as LifeLogLog;
+    const track = log.trackId ? tracks.find((t) => t.id === log.trackId) : undefined;
+
+    if (log.type === "track") {
+        return <TrackIconDisplay value={track?.emoji} trackColor={track?.color} size="sm" />;
+    }
+    if (!log.type) {
+        return <FileText className={className} style={{ color: "#9ca3af" }} />;
+    }
+    return <LogTypeIcon type={log.type} className={className} />;
+}
 
 type TabIconProps = {
     tab: BaseTab;
@@ -60,6 +89,11 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
         case constants.vscode.tab.tabTypes.trackingGraph:
             return <BarChart3 className={className} style={{ color: iconColor }} />;
 
+        case constants.vscode.tab.tabTypes.lifeLog:
+        case constants.vscode.tab.tabTypes.lifeLogGraph:
+        case constants.vscode.tab.tabTypes.lifeLogTrack:
+            return <LifeLogTabIcon tab={tab} className={className} />;
+
         default:
             return <FileText className={className} style={{ color: iconColor }} />;
     }
@@ -88,6 +122,7 @@ export function TabBar() {
     const { allKeywords } = useGeneralStore();
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();
+    const {isMobile} = useMobileStore();
 
     // Enable keyboard shortcuts
     useTabKeyboardShortcuts();
@@ -206,7 +241,7 @@ export function TabBar() {
     };
 
     return (
-        <div className="min-h-[35px] flex items-start border-b border-editor-border  bg-editor-sidebar">
+        <div className={`min-h-[35px] flex items-start border-b ${isMobile ? "bg-black" : "bg-editor-sidebar"}`}>
             {isLoadingTabs ? (
                 <div className="px-4 w-full h-[35px] flex items-center gap-2">
                     <div className="h-4 w-24 bg-muted/20 animate-pulse rounded"></div>
