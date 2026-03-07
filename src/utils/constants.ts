@@ -17,12 +17,14 @@ export const constants = {
             ws: "/ws",
             notes: "/notes",
             project: "/project",
+            lifeLog: "/lifelog",
         } as const,
         views: {
             workspace: "workspace",
             ws: "ws",
             note: "note",
             project: "project",
+            lifeLog: "lifeLog",
         } as const,
     },
     vscode: {
@@ -34,6 +36,9 @@ export const constants = {
                 project: "project",
                 multiProject: "multiProject",
                 task: "task",
+                lifeLog: "lifeLog",
+                lifeLogGraph: "lifeLogGraph",
+                lifeLogTrack: "lifeLogTrack",
             } as const,
         },
         viewTypes: {
@@ -42,6 +47,7 @@ export const constants = {
             note: "note",
             notes: "notes",
             project: "project",
+            lifeLog: "lifeLog",
         } as const,
         displayNames: {
             note: "Note",
@@ -51,6 +57,7 @@ export const constants = {
             folder: "Folder",
             notes: "Notes",
             project: "Projects",
+            lifeLog: "LifeLog",
         } as const,
         tabTitles: {
             unsavedNote: "Unsaved Note",
@@ -104,6 +111,8 @@ export const constants = {
             projectGrid: "project-grid",
             taskGrid: "task-grid",
             tab: "tab",
+            lifeLogLog: "lifelog-log",
+            lifeLogTrack: "lifelog-track",
         } as const,
     },
 
@@ -485,4 +494,5 @@ export type ActivityBarView =
     | typeof constants.navigation.views.workspace
     | typeof constants.navigation.views.ws
     | typeof constants.navigation.views.note
-    | typeof constants.navigation.views.project;
+    | typeof constants.navigation.views.project
+    | typeof constants.navigation.views.lifeLog;

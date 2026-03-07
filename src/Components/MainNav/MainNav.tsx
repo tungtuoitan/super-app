@@ -8,6 +8,7 @@ import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { NavigationKeyboardShortcuts } from "@/Components/VSCodeLayout/NavigationKeyboardShortcuts";
 import { DebugPanel } from "@/Components/DebugPanel";
+import {useMobileStore} from "@/store/mobile/Mobile.store";
 
 /**
  * Main navigation component.
@@ -29,6 +30,8 @@ import { DebugPanel } from "@/Components/DebugPanel";
 export default function MainNav() {
     const { bodyWrapperRef } = useNavigationStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { isMobile } = useMobileStore();
+    
 
     const handleGlobalRightClick = (e: React.MouseEvent) => {
         e.preventDefault(); // Always disable default context menu
@@ -52,15 +55,16 @@ export default function MainNav() {
                 tabIndex={0} // Enable keyboard navigation
                 style={{ height: "100%", width: "100vw" }}
             >
-                <TopNav />
-                <div className="side-tabs height-[calc(100%-36px)]">
-                    <div id="bodyWrapper" ref={bodyWrapperRef} className="w-full h-[calc(100vh-36px)]">
+                {isMobile ? null : <TopNav />}
+                <div className={`side-tabs height-[100%]`}>
+                    <div id="bodyWrapper" ref={bodyWrapperRef} className={`w-full ${isMobile ? 'h-screen': 'h-[calc(100vh-36px)]'}`}>
                         <Routes>
-                            <Route path={constants.navigation.path.home} element={<Navigate to={constants.navigation.path.workspace} replace />} />
+                            <Route path={constants.navigation.path.home} element={<Navigate to={constants.navigation.path.lifeLog} replace />} />
                             <Route path={constants.navigation.path.ws} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.workspace} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.notes} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.project} element={<VSCodeLayout />} />
+                            <Route path={constants.navigation.path.lifeLog} element={<VSCodeLayout />} />
                             <Route path="/auth/callback" element={<AuthCallback />} />
                         </Routes>
                     </div>
