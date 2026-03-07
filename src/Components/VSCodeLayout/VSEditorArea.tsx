@@ -79,7 +79,8 @@ export function VSEditorArea() {
             <TabBar />
 
             {/* Shared Toolbar - not shown for tracking graph or lifelog tabs */}
-            {activeTab && activeTab.type !== constants.vscode.tab.tabTypes.trackingGraph && activeTab.type !== constants.vscode.tab.tabTypes.lifeLogGraph && activeTab.type !== constants.vscode.tab.tabTypes.lifeLogTrack && <EditorToolbar />}
+            {activeTab && 
+            activeTab.type !== constants.vscode.tab.tabTypes.trackingGraph && <EditorToolbar />}
 
             {/* Main content area */}
             <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">

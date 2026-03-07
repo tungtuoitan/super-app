@@ -10,13 +10,12 @@ import { LogItem } from "./LogItem";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
-import { toLocalISOString } from "@/utils/date.utils";
 import type { LifeLogLog } from "@/types/lifeLog.types";
 
 export function LogList() {
     const { logs, tracks, isLoading } = useLifeLogStore();
-    const { loadLogs, createLog, deleteLog } = useLifeLogLogHelper();
-    const { openLogTab } = useLifeLogTabHelper();
+    const { loadLogs, deleteLog } = useLifeLogLogHelper();
+    const { openLogTab, openNewLogTab } = useLifeLogTabHelper();
     const { searchQuery } = useGridControlStore();
     const { isMobile } = useMobileStore();
 
@@ -24,16 +23,9 @@ export function LogList() {
         loadLogs();
     }, [loadLogs]);
 
-    const handleAddLog = useCallback(async () => {
-        const saved = await createLog({
-            id: 0,
-            type: "note",
-            title: "",
-            isSensitive: false,
-            occurAt: toLocalISOString(new Date()) ?? undefined,
-        });
-        if (saved) openLogTab(saved);
-    }, [createLog, openLogTab]);
+    const handleAddLog = useCallback(() => {
+        openNewLogTab();
+    }, [openNewLogTab]);
 
     const activeLogs = logs.filter((l) => !l.deletedAt);
     const filtered = searchQuery.trim()
