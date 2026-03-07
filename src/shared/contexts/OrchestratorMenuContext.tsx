@@ -8,6 +8,8 @@ import { WsGridMenu } from "./menus/WsGridMenu";
 import { ProjectGridMenu } from "./menus/ProjectGridMenu";
 import { TaskGridMenu } from "./menus/TaskGridMenu";
 import { TabBarMenu } from "./menus/TabBarMenu";
+import { LogListMenu } from "./menus/LogListMenu";
+import { TrackPanelMenu } from "./menus/TrackPanelMenu";
 import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
@@ -52,6 +54,12 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case "tab":
                 return <TabBarMenu />;
+
+            case constants.contextMenu.contextMenuTypes.lifeLogLog:
+                return <LogListMenu />;
+
+            case constants.contextMenu.contextMenuTypes.lifeLogTrack:
+                return <TrackPanelMenu />;
 
             default:
                 return (

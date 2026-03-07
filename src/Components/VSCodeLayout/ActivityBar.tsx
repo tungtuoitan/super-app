@@ -1,4 +1,4 @@
-import { Folder, FileText, Settings, Boxes, UserCircle, Cuboid } from "lucide-react";
+import { Folder, FileText, Settings, Boxes, UserCircle, Cuboid, Feather, Footprints, AudioWaveform, Spline, RulerDimensionLine, Ruler, Clover, Shell } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { SettingsDialog } from "./SettingsDialog";
 import { AccountsDialog } from "./AccountsDialog";
@@ -13,13 +13,87 @@ const activityModules = [
     { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
     { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
     { id: constants.vscode.viewTypes.project, icon: Cuboid, label: constants.vscode.displayNames.project },
+    { id: constants.vscode.viewTypes.lifeLog, icon: Shell, label: constants.vscode.displayNames.lifeLog },
 ];
 
-export function ActivityBar() {
+interface ActivityBarProps {
+    horizontal?: boolean;
+}
+
+export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { setAccountsOpen, setSettingsOpen } = useActivityBarStore();
     const { handleActivityClick } = useActivityBarHelper();
     const { activeView } = useNavigationStore();
     const { isAuthenticated } = useAuthStore();
+
+    if (horizontal) {
+        return (
+            <>
+                <div className="w-full h-12 bg-editor-activitybar flex flex-row items-center border-b border-editor-border px-1">
+                    {/* Activity icons */}
+                    <div className="flex flex-row flex-1">
+                        <TooltipProvider>
+                            {activityModules.map((activity) => {
+                                const Icon = activity.icon;
+                                const isActive = activeView === activity.id;
+
+                                return (
+                                    <button
+                                        key={activity.id}
+                                        onClick={() => handleActivityClick(activity.id)}
+                                        className={`w-12 h-12 rounded-none transition-colors border-transparent ${
+                                            isActive ? "text-editor-white border-editor-active" : "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
+                                        }`}
+                                    >
+                                        <Icon className="w-6 h-6 mx-auto" />
+                                    </button>
+                                );
+                            })}
+                        </TooltipProvider>
+                    </div>
+
+                    {/* Accounts + Settings on the right */}
+                    <div className="flex flex-row">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setAccountsOpen(true)}
+                                        className={`w-12 h-12 rounded-none hover:text-white hover:bg-transparent transition-colors ${
+                                            isAuthenticated ? "text-[#6a6a6a]" : "text-red-500"
+                                        }`}
+                                    >
+                                        <UserCircle className="w-6 h-6 mx-auto" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">
+                                    <p>Accounts</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setSettingsOpen(true)}
+                                        className="w-12 h-12 rounded-none text-[#6a6a6a] hover:text-white hover:bg-transparent transition-colors"
+                                    >
+                                        <Settings className="w-6 h-6 mx-auto" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">
+                                    <p>Settings</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                </div>
+
+                <AccountsDialog />
+                <SettingsDialog />
+            </>
+        );
+    }
 
     return (
         <>
@@ -33,6 +107,7 @@ export function ActivityBar() {
 
                             return (
                                 <button
+                                    key={activity.id}
                                     onClick={() => handleActivityClick(activity.id)}
                                     className={`w-12 h-12 rounded-none transition-colors border-transparent ${
                                         isActive ? "text-editor-white border-editor-active": "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"

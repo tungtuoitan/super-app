@@ -8,7 +8,10 @@ import { TrackingGraphPanel } from "@/Components/TrackingGraph";
 import { ProjectEditorPanel } from "@/Components/Project/ProjectEditorPanel";
 import { MultiProjectEditorPanel } from "@/Components/Project/MultiProjectEditorPanel";
 import { TaskEditorPanel } from "@/Components/Project/TaskEditorPanel";
-import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
+import { LogEditorPanel } from "@/Components/LifeLog/LogEditorPanel";
+import { LifeLogGraphPanel } from "@/Components/LifeLog/LifeLogGraphPanel";
+import { TrackEditorPanel } from "@/Components/LifeLog/TrackEditorPanel";
+import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
 import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";
@@ -17,6 +20,7 @@ import { TrackTabNavigation } from "@/HeadlessComponents/vsCode/TrackTabNavigati
 import { NavigationHistorySync } from "@/HeadlessComponents/vsCode/NavigationHistorySync";
 import { TabBar } from "./TabBar";
 import {Note} from "@/types/index";
+import {useMobileStore} from "@/store/mobile/Mobile.store";
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -74,8 +78,8 @@ export function VSEditorArea() {
             {/* Tab bar */}
             <TabBar />
 
-            {/* Shared Toolbar - not shown for tracking graph tabs */}
-            {activeTab && activeTab.type !== constants.vscode.tab.tabTypes.trackingGraph && <EditorToolbar />}
+            {/* Shared Toolbar - not shown for tracking graph or lifelog tabs */}
+            {activeTab && activeTab.type !== constants.vscode.tab.tabTypes.trackingGraph && activeTab.type !== constants.vscode.tab.tabTypes.lifeLogGraph && activeTab.type !== constants.vscode.tab.tabTypes.lifeLogTrack && <EditorToolbar />}
 
             {/* Main content area */}
             <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">
@@ -88,6 +92,9 @@ export function VSEditorArea() {
                         {activeTab.type === constants.vscode.tab.tabTypes.multiProject && <MultiProjectEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.task && <TaskEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.trackingGraph && <TrackingGraphPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.lifeLog && <LogEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.lifeLogGraph && <LifeLogGraphPanel />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.lifeLogTrack && <TrackEditorPanel tab={activeTab} />}
                     </>
                 ) : (
                     // Welcome/empty state

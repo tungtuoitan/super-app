@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Panel, PanelGroup } from "react-resizable-panels";
+import { useEffect, useRef } from "react";
+import { Panel, PanelGroup, type ImperativePanelHandle } from "react-resizable-panels";
 import { ActivityBar } from "./ActivityBar";
 import { VSCodeResizeHandle } from "./VSCodeResizeHandle";
 import { VSSideBar } from "./VSSideBar";
@@ -12,6 +12,13 @@ import { useGridAutoRegisterHelper } from "@/hooks/vsCode/useGridAutoRegister.he
 import { useLocation } from "react-router-dom";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { CheckIsMobile } from "@/hooks/CheckIsMobile";
+import { constants, type ActivityBarView } from "@/utils/constants";
+import { WsView } from "./WsView";
+import { WorkspaceView } from "./WorkspaceView";
+import { ProjectView } from "./ProjectView";
+import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
+import { NoteGrid } from "@/Components/Note/NoteGrid";
+import { GridControlBar } from "@/Components/shared/GridControlBar";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -50,6 +57,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const location = useLocation();
     const { isMobile } = useMobileStore();
     const { isSideBarVisible, setIsSideBarVisible, isPanelVisible, setIsPanelVisible } = useActivityBarStore();
+    const mobileEditorRef = useRef<ImperativePanelHandle>(null);
 
     // Auto-register grid based on current URL
     const { getGridConfigFromPath, registerGrid } = useGridAutoRegisterHelper();
@@ -57,6 +65,52 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     useEffect(() => {
         registerGrid();
     }, [location.pathname]);
+
+    // Expand editor panel when any lifelog tab opens (if editor is too small)
+    useEffect(() => {
+        const handler = () => {
+            if (isMobile) {
+                const panel = mobileEditorRef.current;
+                if (panel && panel.getSize() < 50) panel.resize(75);
+            } 
+        };
+        window.addEventListener("lifelog-tab-opened", handler);
+        return () => window.removeEventListener("lifelog-tab-opened", handler);
+    }, [isMobile]);
+
+    if (isMobile) {
+        return (
+            <div
+                className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
+                style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
+            >
+                <CheckIsMobile />
+                {/* Mobile: ActivityBar on top as horizontal bar */}
+                <ActivityBar horizontal />
+
+                {/* Mobile: VSSideBar top, VSEditorArea bottom - resizable */}
+                <PanelGroup direction="vertical" autoSaveId="mobile-layout-vertical" className="flex-1">
+                    <Panel id="mobile-sidebar" defaultSize={40} minSize={15}>
+                        <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col">
+                            <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
+                                <span>{activeView}</span>
+                                {activeView === constants.vscode.viewTypes.lifeLog && (
+                                    <GridControlBar hideFilter />
+                                )}
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                                <MobileSideBarContent activeView={activeView} />
+                            </div>
+                        </div>
+                    </Panel>
+                    <VSCodeResizeHandle direction="vertical" id="mobile-split-resize" />
+                    <Panel id="mobile-editor" ref={mobileEditorRef} defaultSize={60} minSize={15}>
+                        <VSEditorArea />
+                    </Panel>
+                </PanelGroup>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -69,33 +123,26 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
             <CheckIsMobile />
             {/* Main content area with resizable panels */}
             <div className="flex-1 flex overflow-hidden">
-                {/* Activity Bar - Fixed width, no resize - Hidden on mobile unless toggled */}
-                {(!isMobile || isSideBarVisible) && <ActivityBar />}
+                {/* Activity Bar - Fixed width, no resize */}
+                
+                <ActivityBar />
 
                 {/* Horizontal PanelGroup: SideBar | Editor+Panel */}
                 <PanelGroup direction="horizontal" autoSaveId="notes-layout-horizontal" className="flex-1">
-                    {/* Side Bar - Always rendered to allow resize handle interaction */}
-                    {(!isMobile || isSideBarVisible) && (
-                        <>
-                            <VSSideBar activeView={activeView} />
-                            {/* Resize handle - Always visible to allow re-expanding */}
-                            <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
-                        </>
-                    )}
+                    {/* Side Bar */}
+                    <>
+                        <VSSideBar activeView={activeView} />
+                        <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
+                    </>
 
                     {/* Main content: Editor + Panel (Vertical split) */}
-                    <Panel id="main-content" minSize={isMobile ? 20 : 50}>
+                    <Panel id="main-content" minSize={50}>
                         <PanelGroup direction="vertical" autoSaveId="notes-layout-vertical">
-                            {/* Editor Area - NoteGrid (Future: react-mosaic) */}
-                            <Panel id="editor-area" defaultSize={isMobile ? 150 : 70} minSize={30}>
+                            <Panel id="editor-area" defaultSize={70} minSize={30}>
                                 <VSEditorArea />
                             </Panel>
-
-                            {/* Resize handle between editor and panel - Hidden on mobile */}
-                            {!isMobile && <VSCodeResizeHandle direction="vertical" id="panel-resize" />}
-
+                            <VSCodeResizeHandle direction="vertical" id="panel-resize" />
                             <VSPanel onClose={() => setIsPanelVisible(false)} />
-                            {/* {!isMobile && <VSPanel onClose={() => setIsPanelVisible(false)} />} */}
                         </PanelGroup>
                     </Panel>
                 </PanelGroup>
@@ -124,3 +171,15 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
  * - Double-click resize handle to reset to default size
  * - Panel sizes auto-save and persist across sessions
  */
+
+function MobileSideBarContent({ activeView }: { activeView: ActivityBarView }) {
+    return (
+        <div className="h-full overflow-hidden">
+            {activeView === constants.vscode.viewTypes.ws && <WsView />}
+            {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
+            {activeView === constants.vscode.viewTypes.note && <NoteGrid source={constants.modules.note} />}
+            {activeView === constants.vscode.viewTypes.project && <ProjectView />}
+            {activeView === constants.vscode.viewTypes.lifeLog && <LifeLogView />}
+        </div>
+    );
+}

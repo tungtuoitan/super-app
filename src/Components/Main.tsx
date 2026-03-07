@@ -31,6 +31,7 @@ import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.stor
 import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
+import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
 
 /**
  * Main application layout component.
@@ -76,6 +77,7 @@ export function Main() {
                                                                                     <ProjectProvider>
                                                                                     <ProjectDetailProvider>
                                                                                     <TaskProvider>
+                                                                                    <LifeLogProvider>
                                                                                     <NoteDetailProvider>
                                                                                         <NoteGridProvider>
                                                                                             <EditorTabProvider>
@@ -102,6 +104,7 @@ export function Main() {
                                                                                             </EditorTabProvider>
                                                                                         </NoteGridProvider>
                                                                                     </NoteDetailProvider>
+                                                                                    </LifeLogProvider>
                                                                                     </TaskProvider>
                                                                                     </ProjectDetailProvider>
                                                                                     </ProjectProvider>
