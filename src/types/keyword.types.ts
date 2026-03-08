@@ -1,6 +1,5 @@
 /**
  * Keyword types for markdown editor
- * Includes both internal (workspace/folder/note/file/heading) and external keywords
  */
 
 export type KeywordType =
@@ -8,115 +7,52 @@ export type KeywordType =
   | 'folder'
   | 'note'
   | 'file'
-  // | 'h1' // REMOVED: heading keywords no longer used
-  // | 'h2'
-  // | 'h3'
-  // | 'h4'
-  // | 'h5'
-  // | 'h6'
-  | 'external';
+  | 'external'
+  | 'project'
+  | 'task'
+  | 'log'
+  | 'track';
 
 export interface Keyword {
-  /**
-   * Database ID
-   */
   id: number;
-
-  /**
-   * Display name of the keyword
-   * Example: "Introduction", "Tổng quan/Học hành/Toán"
-   */
   name: string;
 
   /**
-   * Name index for handling duplicate names
-   * Default: 1, increments for each duplicate name
-   * @deprecated REMOVED: nameIndex no longer used
-   */
-  // nameIndex: number;
-
-  /**
-   * Unique identifier link
+   * Short link stored in DB.
    * Format:
-   * - Workspace: "w-[workspaceId]"
-   * - Folder: "w-[workspaceId]/f-[workspaceItemId]"
-   * - Note: "w-[workspaceId]/f-[folderId]/n-[noteWorkspaceItemId]"
-   *         or "w-[workspaceId]/n-[noteWorkspaceItemId]"
-   * - File: "w-[workspaceId]/f-[folderId]/file-[fileWorkspaceItemId]"
-   * - Heading: "w-[workspaceId]/n-[noteId]/h1-Title1/h2-Title2"
-   * - External: "https://example.com/..."
+   * - Workspace:  sa/w{workspaceId}
+   * - Folder:     sa/w{workspaceId}/f{workspaceItemId}
+   * - Note:       sa/w{workspaceId}/f{folderId}/n{workspaceItemId}
+   * - Project:    sa/p{projectId}
+   * - Task:       sa/p{projectId}/t{taskId}
+   * - Log:        sa/l{logId}
+   * - Track:      sa/tr{trackId}
+   * - External:   https://...
    */
   link: string;
 
   /**
-   * Human-readable long link with nameIndex
-   * Format:
-   * - Workspace: "WorkspaceName[1]"
-   * - Folder: "WorkspaceName[1]/FolderName[2]"
-   * - Note: "WorkspaceName[1]/FolderName[2]/NoteName[3]"
-   * - Heading: "WorkspaceName[1]/NoteName[2]/HeadingPath[3]"
-   * - External: "ExternalName[1]"
+   * Human-readable path, e.g. "Workspace A/Folder B/Note C"
    */
   longLink: string;
 
-  /**
-   * Type of keyword
-   */
   type: KeywordType;
-
-  /**
-   * Optional description
-   */
   description?: string;
-
   hardDeletedAt: Date | null;
 
-  // ===== New fields for folder/note/file keywords =====
-
-  /**
-   * Workspace item ID (workspace_items.id)
-   * Only populated for folder/note/file keywords
-   */
+  /** workspace_items.id — only for folder/note/file */
   workspaceItemId?: number;
 
-  /**
-   * Entity ID (folders.id / notes.id / files.id)
-   * Only populated for folder/note/file keywords
-   */
+  /** folders.id / notes.id / files.id — only for folder/note/file */
   entityId?: number;
 
-  /**
-   * Color for folder/note/file
-   */
   color?: string;
-
-  /**
-   * Icon for folder/note/file
-   */
   icon?: string;
 }
 
-/**
- * Request DTO for upserting external keywords
- */
 export interface UpsertExternalKeywordRequest {
-  /**
-   * Keyword ID (null for insert, value for update)
-   */
   id?: number;
-
-  /**
-   * Display name of the keyword
-   */
   name: string;
-
-  /**
-   * URL link (unique identifier)
-   */
   link: string;
-
-  /**
-   * Optional description
-   */
   description?: string;
 }

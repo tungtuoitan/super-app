@@ -5,116 +5,121 @@
 
 import type { Keyword } from "@/types/keyword.types";
 
-/**
- * Parsed keyword link information
- */
 export interface ParsedKeywordLink {
-    type: "workspace" | "folder" | "note" | "heading" | "external";
+    type: "workspace" | "folder" | "note" | "external" | "project" | "task" | "log" | "track";
+    // workspace / folder / note
     workspaceId?: number;
-    folderId?: number;
-    noteWorkspaceItemId?: number;
-    headingPath?: string[]; // For headings: ["Introduction", "Overview", "Details"]
-    url?: string; // For external links
-    raw: string; // Original link
+    folderId?: number;          // workspace_items.id of the folder
+    noteWorkspaceItemId?: number; // workspace_items.id of the note
+    // project / task
+    projectId?: number;
+    taskId?: number;
+    // log / track
+    logId?: number;
+    trackId?: number;
+    // external
+    url?: string;
+    raw: string;
 }
 
 /**
- * Parse keyword link to extract information
+ * Parse keyword link to extract navigation target.
  *
- * Format examples:
- * - w77 (workspace)
- * - w77/f183 (folder)
- * - w77/f183/f184 (nested folder)
- * - w77/n185 (note)
- * - w77/n186/ (note with trailing slash)
- * - w77/n186/Nhà sản xuất (note with heading)
- * - w77/n187/Wonbin2/ai nữa2 (note with nested headings)
- * - https://google.com (external)
+ * Link formats (sa/ prefix is stripped before parsing):
+ *   sa/w77              → workspace
+ *   sa/w77/f183         → folder
+ *   sa/w77/f183/n25     → note
+ *   sa/p11              → project
+ *   sa/p11/t22          → task
+ *   sa/l01              → log
+ *   sa/tr01             → track
+ *   https://...         → external
  */
 export function parseKeywordLink(keyword: Keyword): ParsedKeywordLink | null {
     const link = keyword.link;
     if (!link) return null;
 
-    // Check if external link (starts with http:// or https://)
+    // External: URL or type=external
     if (keyword.type === "external" || link.startsWith("http://") || link.startsWith("https://")) {
-        return {
-            type: "external",
-            url: link,
-            raw: link,
-        };
+        return { type: "external", url: link, raw: link };
     }
 
-    const parts = link.split("/").filter(p => p.length > 0); // Remove empty parts
+    // Strip sa/ prefix
+    const cleanLink = link.startsWith("sa/") ? link.substring(3) : link;
+    const parts = cleanLink.split("/").filter(p => p.length > 0);
 
-    // Must start with "w{number}"
-    if (!parts[0] || !parts[0].match(/^w\d+$/)) {
-        return null;
-    }
+    if (!parts[0]) return null;
 
-    const result: ParsedKeywordLink = {
-        type: "workspace",
-        raw: link,
-    };
+    // workspace/folder/note: starts with w{number}
+    if (/^w\d+$/.test(parts[0])) {
+        const workspaceId = parseInt(parts[0].substring(1), 10);
+        if (isNaN(workspaceId)) return null;
 
-    // Parse workspace ID from "w123"
-    result.workspaceId = parseInt(parts[0].substring(1), 10);
-    if (isNaN(result.workspaceId)) return null;
+        if (parts.length === 1) {
+            return { type: "workspace", workspaceId, raw: link };
+        }
 
-    // If only workspace, return
-    if (parts.length === 1) {
+        const result: ParsedKeywordLink = { type: "workspace", workspaceId, raw: link };
+
+        for (let i = 1; i < parts.length; i++) {
+            const part = parts[i];
+
+            if (/^f\d+$/.test(part)) {
+                result.type = "folder";
+                result.folderId = parseInt(part.substring(1), 10);
+            } else if (/^n\d+$/.test(part)) {
+                result.type = "note";
+                result.noteWorkspaceItemId = parseInt(part.substring(1), 10);
+                break;
+            } else {
+                break;
+            }
+        }
+
         return result;
     }
 
-    // Parse remaining parts
-    let i = 1;
-    while (i < parts.length) {
-        const part = parts[i];
-
-        // Check if it's a folder (f{number})
-        if (part.match(/^f\d+$/)) {
-            result.type = "folder";
-            result.folderId = parseInt(part.substring(1), 10);
-            i += 1;
-        }
-        // Check if it's a note (n{number})
-        else if (part.match(/^n\d+$/)) {
-            result.type = "note";
-            result.noteWorkspaceItemId = parseInt(part.substring(1), 10);
-            i += 1;
-
-            // After note, remaining parts are headings
-            if (i < parts.length) {
-                result.type = "heading";
-                result.headingPath = parts.slice(i);
-                break;
-            }
-        } else {
-            // Unknown format, stop parsing
-            break;
-        }
+    // track: tr{number} — must check before log (l{number}) to avoid prefix clash
+    if (/^tr\d+$/.test(parts[0])) {
+        const trackId = parseInt(parts[0].substring(2), 10);
+        return isNaN(trackId) ? null : { type: "track", trackId, raw: link };
     }
 
-    return result;
+    // project / task: p{number} or p{number}/t{number}
+    if (/^p\d+$/.test(parts[0])) {
+        const projectId = parseInt(parts[0].substring(1), 10);
+        if (isNaN(projectId)) return null;
+
+        if (parts.length >= 2 && /^t\d+$/.test(parts[1])) {
+            const taskId = parseInt(parts[1].substring(1), 10);
+            return isNaN(taskId) ? null : { type: "task", projectId, taskId, raw: link };
+        }
+
+        return { type: "project", projectId, raw: link };
+    }
+
+    // log: l{number}
+    if (/^l\d+$/.test(parts[0])) {
+        const logId = parseInt(parts[0].substring(1), 10);
+        return isNaN(logId) ? null : { type: "log", logId, raw: link };
+    }
+
+    return null;
 }
 
 /**
- * Find keyword by link in allKeywords array
+ * Find keyword by exact link match.
  */
 export function findKeywordByLink(link: string, allKeywords: Keyword[]): Keyword | null {
-    return allKeywords.find(k => k.link === link) || null;
+    return allKeywords.find(k => k.link === link) ?? null;
 }
 
 /**
- * Get heading anchor from heading path
- * Example: ["Introduction", "Overview"] -> "overview"
- * Example: ["Nhà sản xuất"] -> "nhà-sản-xuất"
+ * Get heading anchor from heading path.
+ * Example: ["Introduction", "Overview"] → "overview"
  */
 export function getHeadingAnchor(headingPath: string[]): string {
     if (!headingPath || headingPath.length === 0) return "";
-
-    // Get last heading title (last item in path)
     const lastTitle = headingPath[headingPath.length - 1];
-
-    // Convert to anchor: lowercase, replace spaces with hyphens
     return lastTitle.toLowerCase().replace(/\s+/g, "-");
 }
