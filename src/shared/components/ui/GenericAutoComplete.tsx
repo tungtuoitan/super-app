@@ -217,11 +217,11 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className={sizeClasses.popover} align="start">
+                <PopoverContent className={sizeClasses.popover} align="start" side="bottom" avoidCollisions sideOffset={4}>
                     <Command className={sizeClasses.command}>
                         <CommandInput placeholder="Search..." />
                         <CommandEmpty>No option found.</CommandEmpty>
-                        <CommandGroup>
+                        <CommandGroup className="max-h-[240px] overflow-y-auto">
                             {allOptions.map((option) => {
                                 const isDisabled = getOptionDisabled?.(option) || option.active === false || option.isActive === false;
                                 const isSelected = selectedValue?.id === option.id;
