@@ -307,10 +307,10 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
         }, linkedIds);
     }, [selectedTask, openForLink, linkKeyword, linkedKeywords, folderItems, allKeywords]);
 
-    // Navigate to linked keyword (same as CommandPalette select)
+    // Navigate to linked keyword — pass current task as openedBy so back button works
     const handleNavigateKeyword = useCallback((keyword: { link: string; longLink: string; name: string; type: any; id: number; hardDeletedAt: null }) => {
-        navigateLink(keyword as any);
-    }, [navigateLink]);
+        navigateLink(keyword as any, { link: `sa/p${selectedTask?.projectId}/t${selectedTask?.id}`, label: selectedTask?.title ?? "" });
+    }, [navigateLink, selectedTask]);
 
     // Unlink keyword with confirmation popup
     const handleUnlinkKeyword = useCallback((event: React.MouseEvent, linkId: number, name: string) => {
