@@ -32,10 +32,13 @@ import type { Project } from "@/store/project/useProject.store";
 import type { Task } from "@/store/task/useTask.store";
 import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
 
+import { targetKeywordService } from "@/services/targetKeyword.service";
+import type { TargetKeywordTargetType } from "@/services/targetKeyword.service";
+
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
     const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
-    const { openTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { openTab, updateActiveTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();
@@ -48,7 +51,7 @@ export const useKeywordNavigationHelper = () => {
     const { logs, tracks } = useLifeLogStore();
 
     const navigateLink = useCallback(
-        async (keyword: Keyword) => {
+        async (keyword: Keyword, openedBy?: { link: string; label: string }) => {
             try {
                 const parsed = parseKeywordLink(keyword);
 
@@ -75,13 +78,16 @@ export const useKeywordNavigationHelper = () => {
                             (tab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === parsed.projectId
                         );
                         if (existingProjectTab) {
+                            if (openedBy) {
+                                setOpenTabs(prev => prev.map(t => t.id === existingProjectTab.id ? { ...t, openedBy } : t));
+                            }
                             updateActiveTab(existingProjectTab.id);
                             return;
                         }
 
                         const project = projects.find((p) => p.id === parsed.projectId);
                         if (project) {
-                            openTab(project, constants.vscode.tab.tabTypes.project);
+                            openTab(project, constants.vscode.tab.tabTypes.project, openedBy);
                             return;
                         }
 
@@ -100,7 +106,7 @@ export const useKeywordNavigationHelper = () => {
                                 deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                                 workspaceId: dto.workspaceId,
                             };
-                            openTab(project, constants.vscode.tab.tabTypes.project);
+                            openTab(project, constants.vscode.tab.tabTypes.project, openedBy);
                         } else {
                             _console.error("Project not found");
                         }
@@ -117,13 +123,16 @@ export const useKeywordNavigationHelper = () => {
                             (tab) => tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === parsed.taskId
                         );
                         if (existingTaskTab) {
+                            if (openedBy) {
+                                setOpenTabs(prev => prev.map(t => t.id === existingTaskTab.id ? { ...t, openedBy } : t));
+                            }
                             updateActiveTab(existingTaskTab.id);
                             return;
                         }
 
                         const task = tasks.find((t) => t.id === parsed.taskId);
                         if (task) {
-                            openTab(task, constants.vscode.tab.tabTypes.task);
+                            openTab(task, constants.vscode.tab.tabTypes.task, openedBy);
                             return;
                         }
                         const result = await taskService._getTaskById($user.userToken, parsed.taskId);
@@ -146,7 +155,7 @@ export const useKeywordNavigationHelper = () => {
                                 deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                                 folderWorkspaceItemId: dto.folderWorkspaceItemId,
                             };
-                            openTab(task, constants.vscode.tab.tabTypes.task);
+                            openTab(task, constants.vscode.tab.tabTypes.task, openedBy);
                         } else {
                             _console.error("Task not found");
                         }
@@ -163,13 +172,16 @@ export const useKeywordNavigationHelper = () => {
                             (tab) => tab.type === constants.vscode.tab.tabTypes.lifeLog && (tab.data as LifeLogLog).id === parsed.logId
                         );
                         if (existingLogTab) {
+                            if (openedBy) {
+                                setOpenTabs(prev => prev.map(t => t.id === existingLogTab.id ? { ...t, openedBy } : t));
+                            }
                             updateActiveTab(existingLogTab.id);
                             return;
                         }
 
                         const log = logs.find((l) => l.id === parsed.logId);
                         if (log) {
-                            openTab(log, constants.vscode.tab.tabTypes.lifeLog);
+                            openTab(log, constants.vscode.tab.tabTypes.lifeLog, openedBy);
                             return;
                         }
                         const result = await lifeLogService._getLogById($user.userToken, parsed.logId);
@@ -189,7 +201,7 @@ export const useKeywordNavigationHelper = () => {
                                 updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
                                 deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                             };
-                            openTab(log, constants.vscode.tab.tabTypes.lifeLog);
+                            openTab(log, constants.vscode.tab.tabTypes.lifeLog, openedBy);
                         } else {
                             _console.error("Log not found");
                         }
@@ -206,13 +218,16 @@ export const useKeywordNavigationHelper = () => {
                             (tab) => tab.type === constants.vscode.tab.tabTypes.lifeLogTrack && (tab.data as LifeLogTrack).id === parsed.trackId
                         );
                         if (existingTrackTab) {
+                            if (openedBy) {
+                                setOpenTabs(prev => prev.map(t => t.id === existingTrackTab.id ? { ...t, openedBy } : t));
+                            }
                             updateActiveTab(existingTrackTab.id);
                             return;
                         }
 
                         const track = tracks.find((t) => t.id === parsed.trackId);
                         if (track) {
-                            openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack);
+                            openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack, openedBy);
                             return;
                         }
                         const result = await lifeLogService._getTrackById($user.userToken, parsed.trackId);
@@ -230,7 +245,7 @@ export const useKeywordNavigationHelper = () => {
                                 updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
                                 deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                             };
-                            openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack);
+                            openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack, openedBy);
                         } else {
                             _console.error("Track not found");
                         }
@@ -311,7 +326,7 @@ export const useKeywordNavigationHelper = () => {
                             userId: noteItem.data.userId,
                         };
 
-                        openTab(note, constants.vscode.tab.tabTypes.note);
+                        openTab(note, constants.vscode.tab.tabTypes.note, openedBy);
                         setSelectedItemIds([noteItem.id]);
                         setLastSelectedItemId(noteItem.id);
 
@@ -345,7 +360,7 @@ export const useKeywordNavigationHelper = () => {
                                 deletedAt: noteData.deletedAt ? new Date(noteData.deletedAt) : null,
                                 userId: noteData.userId,
                             };
-                            openTab(note, constants.vscode.tab.tabTypes.note);
+                            openTab(note, constants.vscode.tab.tabTypes.note, openedBy);
                         } else {
                             _console.warning("Note not found");
                         }

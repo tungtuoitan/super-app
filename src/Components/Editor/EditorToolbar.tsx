@@ -15,6 +15,7 @@ import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
 import { constants } from "@/utils/constants";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
 import { Breadcrumb } from "./Breadcrumb";
+import { BackButton } from "./BackButton";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();
@@ -42,8 +43,11 @@ export function EditorToolbar() {
 
     return (
         <div className="h-6 flex items-center justify-between px-4 bg-black border-b border-white/5 gap-2">
-            {/* Left: Breadcrumb Navigation */}
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Left: Back button + Breadcrumb */}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+                {activeTab?.openedBy && (
+                    <BackButton openedBy={activeTab.openedBy} />
+                )}
                 {activeTab?.breadcrumb && activeTab.breadcrumb.length > 0 && (
                     <Breadcrumb items={activeTab.breadcrumb} />
                 )}

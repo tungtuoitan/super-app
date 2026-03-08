@@ -59,6 +59,8 @@ export interface BaseTab {
     viewState?: TabViewState;
     isPinned?: boolean;
     breadcrumb?: BreadcrumbItem[];
+    /** The keyword link + label of the entity that opened this tab (for back button) */
+    openedBy?: { link: string; label: string };
     /** Generic metadata for storing UI state (inner tabs, selections, etc.) */
     metadata?: Record<string, unknown>;
 }
