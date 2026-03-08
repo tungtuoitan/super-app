@@ -10,10 +10,11 @@ import { useCommandPaletteHelper } from "@/hooks/index";
 import { HighlightedText } from "./HighlightedText";
 import { CommandPaletteKeyDown } from "@/HeadlessComponents/vsCode/CommandPaletteKeyDown";
 import {useGeneralStore} from "@/store/general/General.store";
+import { KeywordIconRenderer } from "./KeywordIconRenderer";
 
 export function CommandPalette() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword } = useCommandPaletteStore();
-    const { getFilteredKeywords, handleSelectKeyword, getKeywordIcon, close } = useCommandPaletteHelper();
+    const { getFilteredKeywords, handleSelectKeyword, close } = useCommandPaletteHelper();
     const { allKeywords } = useGeneralStore();
 
     // Get filtered keywords using helper function
@@ -87,9 +88,6 @@ export function CommandPalette() {
                                 const keyword = match.keyword;
                                 const isDisabled = keyword.hardDeletedAt !== null;
                                 const isSelected = index === selectedIndex;
-                                const icon = getKeywordIcon(keyword.type);
-                                const isHeading = typeof icon === "string";
-
                                 return (
                                     <div
                                         key={`${keyword.id}-${keyword.link}`}
@@ -103,13 +101,12 @@ export function CommandPalette() {
                                         `}
                                     >
                                         {/* Icon Column */}
-                                        {isHeading ? (
-                                            <span className="text-xs font-semibold text-gray-400 w-5 flex-shrink-0">{icon}</span>
-                                        ) : (
-                                            React.createElement(icon as any, {
-                                                className: "w-4 h-4 text-gray-400 flex-shrink-0",
-                                            })
-                                        )}
+                                        <KeywordIconRenderer
+                                            type={keyword.type}
+                                            icon={keyword.icon}
+                                            color={keyword.color}
+                                            className="w-4 h-4 text-gray-400 flex-shrink-0"
+                                        />
 
                                         {/* Name Column */}
                                         <div className="flex-1 min-w-0 flex items-center gap-2">

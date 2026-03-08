@@ -21,6 +21,7 @@ import { useTaskLinkedKeywordsHelper } from "@/hooks/task/useTaskLinkedKeywords.
 import { useTaskWorkspaceItemHelper } from "@/hooks/task/useTaskWorkspaceItem.helper";
 import { useCommandPaletteHelper } from "@/hooks/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { KeywordIconRenderer } from "@/Components/shared/KeywordIconRenderer";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 
@@ -255,7 +256,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
 
     // Linked Keywords
     const { linkedKeywords, isLoadingLinkedKeywords, loadLinkedKeywords, linkKeyword, unlinkKeyword } = useTaskLinkedKeywordsHelper();
-    const { openForLink, getKeywordIcon } = useCommandPaletteHelper();
+    const { openForLink } = useCommandPaletteHelper();
     const { folderItems, isLoadingFolderItems, loadFolderItems, openFolderItem, createTaskNote } = useTaskWorkspaceItemHelper();
     const { navigateLink } = useKeywordNavigationHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
@@ -573,18 +574,17 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                                     return (order[a.type] ?? 6) - (order[b.type] ?? 6);
                                                 })
                                                 .map((lk) => {
-                                                    const icon = getKeywordIcon(lk.type);
-                                                    const isHeading = typeof icon === "string";
                                                     return (
                                                         <div
                                                             key={lk.linkId}
                                                             className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted group"
                                                         >
-                                                            {isHeading ? (
-                                                                <span className="text-xs font-semibold text-muted-foreground w-3.5 shrink-0 text-center">{icon}</span>
-                                                            ) : (
-                                                                React.createElement(icon as any, { className: "h-3.5 w-3.5 text-muted-foreground shrink-0" })
-                                                            )}
+                                                            <KeywordIconRenderer
+                                                                type={lk.type}
+                                                                icon={lk.icon}
+                                                                color={lk.color}
+                                                                className="h-3.5 w-3.5 text-muted-foreground shrink-0"
+                                                            />
                                                             <span
                                                                 className="flex-1 text-left truncate cursor-pointer hover:text-primary hover:underline"
                                                                 onClick={() => handleNavigateKeyword(lk as any)}
