@@ -50,7 +50,7 @@ interface TaskDetailContentProps {
  * Form for editing task details
  */
 export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType, allKeywords } = useGeneralStore();
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { projects } = useProjectStore();
     const { $user } = useAuthStore();
@@ -278,10 +278,18 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     // Open CommandPalette in link mode
     const handleOpenLinkPalette = useCallback(() => {
         if (!selectedTask) return;
+        const linkedIds = new Set(linkedKeywords.map((lk) => lk.keywordId));
+        // Also disable keywords matching inner list items (by workspaceItemId)
+        const folderWsItemIds = new Set(folderItems.map((fi) => fi.workspaceItemId));
+        allKeywords.forEach((kw) => {
+            if (kw.workspaceItemId !== undefined && folderWsItemIds.has(kw.workspaceItemId)) {
+                linkedIds.add(kw.id);
+            }
+        });
         openForLink((keyword) => {
             linkKeyword(selectedTask.id, keyword.id);
-        });
-    }, [selectedTask, openForLink, linkKeyword]);
+        }, linkedIds);
+    }, [selectedTask, openForLink, linkKeyword, linkedKeywords, folderItems, allKeywords]);
 
     // Navigate to linked keyword (same as CommandPalette select)
     const handleNavigateKeyword = useCallback((keyword: { link: string; longLink: string; name: string; type: any; id: number; hardDeletedAt: null }) => {
@@ -391,6 +399,11 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                     <div className="flex-[3] min-w-0">
                         <CardContent className="space-y-4">
                             <div className="flex gap-4 items-start">
+                                {/* Task ID - fixed width */}
+                                <div className="w-[80px] shrink-0">
+                                    <GenericTextField label="ID" value={selectedTask.id > 0 ? selectedTask.id.toString() : "New"} disabled size="small" />
+                                </div>
+
                                 <div className="flex-[2]">
                                     {/* Task Title */}
                                     <GenericTextField
@@ -515,7 +528,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                         )}
                                     </label>
                                     {folderItems.length > 0 ? (
-                                        <div className="space-y-1">
+                                        <div className="space-y-1 max-h-[160px] overflow-y-auto">
                                             {folderItems.map((item) => (
                                                 <div
                                                     key={item.workspaceItemId}
@@ -567,7 +580,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                         )}
                                     </label>
                                     {linkedKeywords.length > 0 ? (
-                                        <div className="space-y-1">
+                                        <div className="space-y-1 max-h-[200px] overflow-y-auto">
                                             {[...linkedKeywords]
                                                 .sort((a, b) => {
                                                     const order: Record<string, number> = { workspace: 0, folder: 1, note: 2, file: 3, h1: 4, h2: 4, h3: 4, h4: 4, h5: 4, h6: 4, external: 5 };
@@ -613,13 +626,11 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 </div>
                             )}
 
-                            <GenericTextField label="Task ID" value={selectedTask.id > 0 ? selectedTask.id.toString() : "New (Unsaved)"} disabled size="small" />
-
-                            <GenericTextField label="Created At" value={formatDate(selectedTask.createdAt)} disabled size="small" />
-
-                            {selectedTask.updatedAt && <GenericTextField label="Updated At" value={formatDate(selectedTask.updatedAt)} disabled size="small" />}
-
-                            {selectedTask.deletedAt && <GenericTextField label="Deleted At" value={formatDate(selectedTask.deletedAt)} disabled size="small" />}
+                            <p className="text-xs text-left text-muted-foreground leading-relaxed">
+                                Created: {formatDate(selectedTask.createdAt)}
+                                {selectedTask.updatedAt && <> · Updated: {formatDate(selectedTask.updatedAt)}</>}
+                                {selectedTask.deletedAt && <> · Deleted: {formatDate(selectedTask.deletedAt)}</>}
+                            </p>
                         </CardContent>
                     </div>
                 </div>

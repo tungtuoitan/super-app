@@ -112,24 +112,33 @@ export function WsDetailContent() {
                             disabled={isDeleted || isHardDeleted}
                         />
 
-                        {/* Workspace Name */}
-                        <GenericTextField
-                            ref={wsNameRef}
-                            label="Workspace Name"
-                            value={selectedWs.name}
-                            onChange={(e) => {
-                                handleFieldChange("name", e.target.value);
-                                if (e.target.value && e.target.value.trim() !== "")
-                                    setNameError("");
-                                else 
-                                    setNameError("Workspace Name is required");
-                            }}
-                            placeholder="Enter workspace name..."
-                            size="small"
-                            disabled={isDeleted || isHardDeleted}
-                            error={!!nameError}
-                            helperText={nameError}
-                        />
+                        {/* Workspace Name with ID */}
+                        <div className="flex gap-4 items-start">
+                            {/* Workspace ID - fixed width */}
+                            <div className="w-[80px] shrink-0">
+                                <GenericTextField label="ID" value={selectedWs.id > 0 ? selectedWs.id.toString() : "New"} disabled size="small" />
+                            </div>
+
+                            <div className="flex-1">
+                                <GenericTextField
+                                    ref={wsNameRef}
+                                    label="Workspace Name"
+                                    value={selectedWs.name}
+                                    onChange={(e) => {
+                                        handleFieldChange("name", e.target.value);
+                                        if (e.target.value && e.target.value.trim() !== "")
+                                            setNameError("");
+                                        else 
+                                            setNameError("Workspace Name is required");
+                                    }}
+                                    placeholder="Enter workspace name..."
+                                    size="small"
+                                    disabled={isDeleted || isHardDeleted}
+                                    error={!!nameError}
+                                    helperText={nameError}
+                                />
+                            </div>
+                        </div>
 
                         {/* Description */}
                         <div className="space-y-2">
@@ -158,15 +167,13 @@ export function WsDetailContent() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        <GenericTextField label="Workspace ID" value={selectedWs.id > 0 ? selectedWs.id.toString() : "New (Unsaved)"} disabled size="small" />
-
                         {selectedWs.userId && <GenericTextField label="User ID" value={selectedWs.userId.toString()} disabled size="small" />}
 
-                        <GenericTextField label="Created At" value={formatDate(selectedWs.createdAt)} disabled size="small" />
-
-                        {selectedWs.updatedAt && <GenericTextField label="Updated At" value={formatDate(selectedWs.updatedAt)} disabled size="small" />}
-
-                        {selectedWs.deletedAt && <GenericTextField label="Deleted At" value={formatDate(selectedWs.deletedAt)} disabled size="small" />}
+                        <p className="text-xs text-left text-muted-foreground leading-relaxed">
+                            Created: {formatDate(selectedWs.createdAt)}
+                            {selectedWs.updatedAt && <> · Updated: {formatDate(selectedWs.updatedAt)}</>}
+                            {selectedWs.deletedAt && <> · Deleted: {formatDate(selectedWs.deletedAt)}</>}
+                        </p>
                     </CardContent>
                 </Card>
             </div>
