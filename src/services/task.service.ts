@@ -86,7 +86,17 @@ const _upsertTaskBatch = async (
     return Promise.reject(res);
 };
 
+const _getTaskById = async (_token: string, id: number): Promise<ResultOptions<TaskDTO>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/task/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) return (await res.json()) as ResultOptions<TaskDTO>;
+    return Promise.reject(res);
+};
+
 export const taskService = {
     _getTasks,
+    _getTaskById,
     _upsertTaskBatch,
 };
