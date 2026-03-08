@@ -22,18 +22,30 @@ import { isValidUrl } from "@/utils/url.utils";
 import { useWorkspaceHelper } from "../workspace/useWorkspaceHelper";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { treeMiniHelper } from "../workspace/tree.miniHelper";
+import { projectService } from "@/services/project.service";
+import { taskService } from "@/services/task.service";
+import { lifeLogService } from "@/services/lifeLog.service";
+import { useProjectStore } from "@/store/project/useProject.store";
+import { useTaskStore } from "@/store/task/useTask.store";
+import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import type { Project } from "@/store/project/useProject.store";
+import type { Task } from "@/store/task/useTask.store";
+import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
     const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
     const { openTabs } = useEditorTabsStore();
-    const { openTab } = useEditorTabHelper();
+    const { openTab, updateActiveTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();
     const _console = useConsoleHelper();
     const { moduleName } = useGridControlStore();
     const { navigateToView } = useNavigationStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
+    const { projects } = useProjectStore();
+    const { tasks } = useTaskStore();
+    const { logs, tracks } = useLifeLogStore();
 
     const navigateLink = useCallback(
         async (keyword: Keyword) => {
@@ -56,43 +68,175 @@ export const useKeywordNavigationHelper = () => {
                     return;
                 }
 
-                // Project navigation
+                // Project — check openTabs, then state, then API
                 if (parsed.type === "project" && parsed.projectId) {
-                    if (moduleName !== constants.modules.project) {
-                        navigateToView(constants.vscode.viewTypes.project);
+                    try {
+                        const existingProjectTab = openTabs.find(
+                            (tab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === parsed.projectId
+                        );
+                        if (existingProjectTab) {
+                            updateActiveTab(existingProjectTab.id);
+                            return;
+                        }
+
+                        const project = projects.find((p) => p.id === parsed.projectId);
+                        if (project) {
+                            openTab(project, constants.vscode.tab.tabTypes.project);
+                            return;
+                        }
+
+                        const result = await projectService._getProjectById($user.userToken, parsed.projectId);
+                        if (result.success && result.data?.[0]) {
+                            const dto = result.data[0];
+                            const project: Project = {
+                                id: dto.id,
+                                name: dto.name,
+                                description: dto.description,
+                                status: dto.status,
+                                startDate: dto.startDate ? new Date(dto.startDate) : null,
+                                endDate: dto.endDate ? new Date(dto.endDate) : null,
+                                createdAt: new Date(dto.createdAt),
+                                updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
+                                deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                                workspaceId: dto.workspaceId,
+                            };
+                            openTab(project, constants.vscode.tab.tabTypes.project);
+                        } else {
+                            _console.error("Project not found");
+                        }
+                    } catch {
+                        _console.error("Failed to load project");
                     }
-                    // TODO: select specific project by parsed.projectId in project store
-                    _console.info(`Navigating to project ${parsed.projectId}`);
                     return;
                 }
 
-                // Task navigation
+                // Task — check openTabs, then state, then API
                 if (parsed.type === "task" && parsed.taskId) {
-                    if (moduleName !== constants.modules.project) {
-                        navigateToView(constants.vscode.viewTypes.project);
+                    try {
+                        const existingTaskTab = openTabs.find(
+                            (tab) => tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === parsed.taskId
+                        );
+                        if (existingTaskTab) {
+                            updateActiveTab(existingTaskTab.id);
+                            return;
+                        }
+
+                        const task = tasks.find((t) => t.id === parsed.taskId);
+                        if (task) {
+                            openTab(task, constants.vscode.tab.tabTypes.task);
+                            return;
+                        }
+                        const result = await taskService._getTaskById($user.userToken, parsed.taskId);
+                        if (result.success && result.data?.[0]) {
+                            const dto = result.data[0];
+                            const task: Task = {
+                                id: dto.id,
+                                projectId: dto.projectId,
+                                parentTaskId: dto.parentTaskId,
+                                type: dto.type,
+                                title: dto.title,
+                                note: dto.note,
+                                status: dto.status,
+                                priority: dto.priority,
+                                startDate: dto.startDate ? new Date(dto.startDate) : null,
+                                endDate: dto.endDate ? new Date(dto.endDate) : null,
+                                orderIndex: dto.orderIndex,
+                                createdAt: new Date(dto.createdAt),
+                                updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
+                                deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                                folderWorkspaceItemId: dto.folderWorkspaceItemId,
+                            };
+                            openTab(task, constants.vscode.tab.tabTypes.task);
+                        } else {
+                            _console.error("Task not found");
+                        }
+                    } catch {
+                        _console.error("Failed to load task");
                     }
-                    // TODO: select project parsed.projectId, then open task parsed.taskId
-                    _console.info(`Navigating to task ${parsed.taskId} in project ${parsed.projectId}`);
                     return;
                 }
 
-                // Log navigation
+                // Log — check openTabs, then state, then API
                 if (parsed.type === "log" && parsed.logId) {
-                    if (moduleName !== constants.modules.lifeLog) {
-                        navigateToView(constants.vscode.viewTypes.lifeLog);
+                    try {
+                        const existingLogTab = openTabs.find(
+                            (tab) => tab.type === constants.vscode.tab.tabTypes.lifeLog && (tab.data as LifeLogLog).id === parsed.logId
+                        );
+                        if (existingLogTab) {
+                            updateActiveTab(existingLogTab.id);
+                            return;
+                        }
+
+                        const log = logs.find((l) => l.id === parsed.logId);
+                        if (log) {
+                            openTab(log, constants.vscode.tab.tabTypes.lifeLog);
+                            return;
+                        }
+                        const result = await lifeLogService._getLogById($user.userToken, parsed.logId);
+                        if (result.success && result.data?.[0]) {
+                            const dto = result.data[0];
+                            const log: LifeLogLog = {
+                                id: dto.id,
+                                userId: dto.userId,
+                                type: dto.type as LifeLogLog["type"],
+                                trackId: dto.trackId ?? undefined,
+                                title: dto.title ?? undefined,
+                                description: dto.description ?? undefined,
+                                isSensitive: dto.isSensitive,
+                                location: dto.location ?? undefined,
+                                occurAt: dto.occurAt ? new Date(dto.occurAt) : undefined,
+                                createdAt: new Date(dto.createdAt),
+                                updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
+                                deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                            };
+                            openTab(log, constants.vscode.tab.tabTypes.lifeLog);
+                        } else {
+                            _console.error("Log not found");
+                        }
+                    } catch {
+                        _console.error("Failed to load log");
                     }
-                    // TODO: select specific log by parsed.logId in log store
-                    _console.info(`Navigating to log ${parsed.logId}`);
                     return;
                 }
 
-                // Track navigation
+                // Track — check openTabs, then state, then API
                 if (parsed.type === "track" && parsed.trackId) {
-                    if (moduleName !== constants.modules.lifeLog) {
-                        navigateToView(constants.vscode.viewTypes.lifeLog);
+                    try {
+                        const existingTrackTab = openTabs.find(
+                            (tab) => tab.type === constants.vscode.tab.tabTypes.lifeLogTrack && (tab.data as LifeLogTrack).id === parsed.trackId
+                        );
+                        if (existingTrackTab) {
+                            updateActiveTab(existingTrackTab.id);
+                            return;
+                        }
+
+                        const track = tracks.find((t) => t.id === parsed.trackId);
+                        if (track) {
+                            openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack);
+                            return;
+                        }
+                        const result = await lifeLogService._getTrackById($user.userToken, parsed.trackId);
+                        if (result.success && result.data?.[0]) {
+                            const dto = result.data[0];
+                            const track: LifeLogTrack = {
+                                id: dto.id,
+                                userId: dto.userId,
+                                name: dto.name,
+                                emoji: dto.emoji,
+                                description: dto.description,
+                                isSensitive: dto.isSensitive,
+                                color: dto.color,
+                                createdAt: new Date(dto.createdAt),
+                                updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
+                                deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                            };
+                            openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack);
+                        } else {
+                            _console.error("Track not found");
+                        }
+                    } catch {
+                        _console.error("Failed to load track");
                     }
-                    // TODO: select specific track by parsed.trackId in log store
-                    _console.info(`Navigating to track ${parsed.trackId}`);
                     return;
                 }
 

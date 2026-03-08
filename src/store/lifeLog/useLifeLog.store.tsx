@@ -20,6 +20,11 @@ export interface LifeLogContextData {
     error: string | null;
     setError: Dispatch<SetStateAction<string | null>>;
 
+    // Navigation selection
+    selectedTrackId: number | null;
+    setSelectedTrackId: Dispatch<SetStateAction<number | null>>;
+    selectedLogId: number | null;
+    setSelectedLogId: Dispatch<SetStateAction<number | null>>;
 }
 
 const LifeLogContext = createContext<LifeLogContextData | null>(null);
@@ -35,6 +40,8 @@ export function LifeLogProvider({ children }: React.PropsWithChildren) {
     const [logs, setLogs] = useState<LifeLogLog[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedTrackId, setSelectedTrackId] = useState<number | null>(null);
+    const [selectedLogId, setSelectedLogId] = useState<number | null>(null);
 
     return (
         <LifeLogContext.Provider value={{
@@ -42,6 +49,8 @@ export function LifeLogProvider({ children }: React.PropsWithChildren) {
             logs, setLogs,
             isLoading, setIsLoading,
             error, setError,
+            selectedTrackId, setSelectedTrackId,
+            selectedLogId, setSelectedLogId,
         }}>
             {children}
         </LifeLogContext.Provider>

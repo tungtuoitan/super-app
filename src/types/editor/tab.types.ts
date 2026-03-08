@@ -8,7 +8,7 @@ import { Ws } from "@/types/workspace.types";
 import { TrackingGraphTabData } from "@/types/tracking.types";
 import { Project } from "@/store/project/useProject.store";
 import { Task } from "@/store/task/useTask.store";
-import { LifeLogLog } from "@/types/lifeLog.types";
+import { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
 import { constants } from "@/utils/constants";
 import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
 
@@ -51,8 +51,8 @@ export interface TabViewState {
 
 export interface BaseTab {
     id: string;
-    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog;
-    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog;
+    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack;
+    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack;
     type: TabType;
     title: string;
     hasUnsavedChanges?: boolean;

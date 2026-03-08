@@ -20,6 +20,8 @@ import {
 } from "@/utils/breadcrumb.utils";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+import type { Project } from "@/store/project/useProject.store";
+import type { Task } from "@/store/task/useTask.store";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
@@ -216,7 +218,7 @@ export const useEditorTabHelper = () => {
     // ================================================================
     // OPEN TAB - Generic handler for multiple tab types
     // ================================================================
-    const openTab = (data: Note | Ws, tabType: string) => {
+    const openTab = (data: Note | Ws | Project | Task | LifeLogLog | LifeLogTrack, tabType: string) => {
         // Auto-detect type based on data structure
         // Note has 'type' field (meeting, brainstorm, etc.), Workspace doesn't
         const type = tabType;
@@ -232,8 +234,19 @@ export const useEditorTabHelper = () => {
         } else if (type === constants.vscode.tab.tabTypes.workspace) {
             const wsData = data as Ws;
             existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === wsData.id);
+        } else if (type === constants.vscode.tab.tabTypes.project) {
+            const d = data as Project;
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === d.id);
+        } else if (type === constants.vscode.tab.tabTypes.task) {
+            const d = data as Task;
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === d.id);
+        } else if (type === constants.vscode.tab.tabTypes.lifeLog) {
+            const d = data as LifeLogLog;
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.lifeLog && (tab.data as LifeLogLog).id === d.id);
+        } else if (type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+            const d = data as LifeLogTrack;
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.lifeLogTrack && (tab.data as LifeLogTrack).id === d.id);
         }
-        // Add more tab types here in the future...
 
         // ===================================
         // 2. Activate existing or create new
@@ -272,8 +285,48 @@ export const useEditorTabHelper = () => {
                     title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
                     hasUnsavedChanges: false,
                 };
+            } else if (type === constants.vscode.tab.tabTypes.project) {
+                const d = data as Project;
+                newTab = {
+                    id: `project-${d.id}-${Date.now()}`,
+                    type: constants.vscode.tab.tabTypes.project,
+                    data: d,
+                    data0: d,
+                    title: d.name,
+                    hasUnsavedChanges: false,
+                };
+            } else if (type === constants.vscode.tab.tabTypes.task) {
+                const d = data as Task;
+                newTab = {
+                    id: `task-${d.id}-${Date.now()}`,
+                    type: constants.vscode.tab.tabTypes.task,
+                    data: d,
+                    data0: d,
+                    title: d.title,
+                    hasUnsavedChanges: false,
+                };
+            } else if (type === constants.vscode.tab.tabTypes.lifeLog) {
+                const d = data as LifeLogLog;
+                newTab = {
+                    id: `lifelog-${d.id}-${Date.now()}`,
+                    type: constants.vscode.tab.tabTypes.lifeLog,
+                    data: d,
+                    data0: d,
+                    title: d.title || `Log ${d.id}`,
+                    hasUnsavedChanges: false,
+                };
+            } else if (type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+                const d = data as LifeLogTrack;
+                newTab = {
+                    id: `lifelogtrack-${d.id}-${Date.now()}`,
+                    type: constants.vscode.tab.tabTypes.lifeLogTrack,
+                    data: d,
+                    data0: d,
+                    title: d.name,
+                    hasUnsavedChanges: false,
+                };
             } else {
-                // Fallback for unknown types (extend this later)
+                // Fallback for unknown types
                 newTab = {
                     id: `unknown-${Date.now()}`,
                     type: type as TabType,

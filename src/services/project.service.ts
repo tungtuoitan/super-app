@@ -68,7 +68,17 @@ const _upsertProjectBatch = async (
     return Promise.reject(res);
 };
 
+const _getProjectById = async (_token: string, id: number): Promise<ResultOptions<ProjectDTO>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/project/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) return (await res.json()) as ResultOptions<ProjectDTO>;
+    return Promise.reject(res);
+};
+
 export const projectService = {
     _getProjects,
+    _getProjectById,
     _upsertProjectBatch,
 };
