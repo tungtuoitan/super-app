@@ -119,9 +119,29 @@ const _upsertLogs = async (_token: string, requests: UpsertLifeLogLogDTO[]) => {
     return Promise.reject(res);
 };
 
+const _getTrackById = async (_token: string, id: number) => {
+    const res = await apiFetch(`${base()}/tracks/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) return (await res.json()) as ResultOptions<LifeLogTrackDTO>;
+    return Promise.reject(res);
+};
+
+const _getLogById = async (_token: string, id: number) => {
+    const res = await apiFetch(`${base()}/logs/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) return (await res.json()) as ResultOptions<LifeLogLogDTO>;
+    return Promise.reject(res);
+};
+
 export const lifeLogService = {
     _getTracks,
+    _getTrackById,
     _upsertTracks,
     _getLogs,
+    _getLogById,
     _upsertLogs,
 };
