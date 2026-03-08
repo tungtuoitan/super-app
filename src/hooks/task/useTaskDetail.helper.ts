@@ -135,6 +135,7 @@ export const useTaskDetailHelper = () => {
                 }
 
                 // Transform DTO to domain model using parseAsLocalDate
+                // Preserve limit dates from the current task (not returned by upsert API)
                 const transformedTask: Task = {
                     id: savedTask.id,
                     projectId: savedTask.projectId,
@@ -151,6 +152,10 @@ export const useTaskDetailHelper = () => {
                     updatedAt: parseAsLocalDate(savedTask.updatedAt),
                     deletedAt: parseAsLocalDate(savedTask.deletedAt),
                     folderWorkspaceItemId: savedTask.folderWorkspaceItemId,
+                    projectStartDate: selectedTask.projectStartDate,
+                    projectEndDate: selectedTask.projectEndDate,
+                    parentStartDate: selectedTask.parentStartDate,
+                    parentEndDate: selectedTask.parentEndDate,
                 };
 
                 // ============================================================
@@ -165,7 +170,8 @@ export const useTaskDetailHelper = () => {
                                     ...tab,
                                     title: transformedTask.title || "Unsaved Task",
                                     data: transformedTask,
-                                    data0: transformedTask, // Update data0 to new saved state
+                                    data0: transformedTask,
+                                    hasUnsavedChanges: false,
                                 };
                             }
                             return tab;

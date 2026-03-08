@@ -57,8 +57,10 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
         }
     }, [shouldFocusProjectName, projectNameRef]);
 
-    // Check if project is inactive (soft deleted)
+    // Check if project is inactive (soft deleted, completed, or dropped)
     const isDeleted = selectedProject?.deletedAt !== null && selectedProject?.deletedAt !== undefined;
+    const isCompleted = selectedProject?.status === "completed" || selectedProject?.status === "dropped";
+    const isDisabled = isDeleted || isCompleted;
 
     const statusOptions: IStatusOption[] = useMemo(() => {
         const projectStatuses = registriesByType["project_status"] || [];
@@ -164,7 +166,7 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                         }}
                                         placeholder="Enter project name..."
                                         size="small"
-                                        disabled={isDeleted}
+                                        disabled={isDisabled}
                                         error={!!nameError}
                                         helperText={nameError || `${selectedProject.name?.length || 0}/50`}
                                         maxLength={50}
@@ -180,7 +182,7 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                         endDate={selectedProject.endDate}
                                         onStartDateChange={handleStartDateChange}
                                         onEndDateChange={handleEndDateChange}
-                                        disabled={isDeleted}
+                                        disabled={isDisabled}
                                         placeholder="Set due dates..."
                                     />
                                 </div>
@@ -199,7 +201,7 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                         value={selectedProject.description || ""}
                                         onChange={handleDescriptionChange}
                                         placeholder="Enter project description..."
-                                        disabled={isDeleted}
+                                        disabled={isDisabled}
                                         minHeight="300px"
                                         uploadContext="project"
                                         uploadContextId={selectedProject.id > 0 ? selectedProject.id : undefined}

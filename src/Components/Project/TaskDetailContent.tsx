@@ -16,6 +16,7 @@ import { useEditorTabsStore, useAuthStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { taskService, TaskDTO } from "@/services/task.service";
+import { projectService } from "@/services/project.service";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { useTaskLinkedKeywordsHelper } from "@/hooks/task/useTaskLinkedKeywords.helper";
 import { useTaskWorkspaceItemHelper } from "@/hooks/task/useTaskWorkspaceItem.helper";
@@ -72,8 +73,9 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
         }
     }, [selectedTask?.id]);
 
-    // Check if task is inactive (soft deleted)
+    // Check if task is inactive (soft deleted, completed, cancelled, or on hold)
     const isDeleted = selectedTask?.deletedAt !== null && selectedTask?.deletedAt !== undefined;
+    const isCompleted = selectedTask?.status === "completed" || selectedTask?.status === "cancelled" || selectedTask?.status === "on_hold";
 
     // Get current project
     const currentProject = useMemo(() => {
@@ -85,7 +87,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     const isProjectInactive = currentProject?.status === "completed" || currentProject?.status === "cancelled";
 
     // Combined disabled state
-    const isDisabled = isDeleted || isProjectInactive;
+    const isDisabled = isDeleted || isCompleted || isProjectInactive;
 
     // Get parent task (if this is a subtask)
     const parentTask = useMemo(() => {
@@ -153,31 +155,45 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     // Create current priority value for autocomplete
     const currentPriorityValue: IStatusOption | null = priorityOptions.find((option) => option.code === selectedTask?.priority) || null;
 
-    // Get project options for autocomplete (disable completed/cancelled projects)
-    const projectOptions: IAutoCompleteOptions[] = useMemo(() => {
-        return projects
-            .filter((p) => !p.deletedAt) // Only active projects
-            .map((p) => ({
-                id: p.id,
-                label: p.name,
-                desc: p.name,
-                // Disable completed and cancelled projects
-                isActive: p.status !== "completed" && p.status !== "cancelled",
-            }));
-    }, [projects]);
+    // Project options - loaded via API (projects store may be incomplete)
+    const [projectOptions, setProjectOptions] = useState<IAutoCompleteOptions[]>([]);
+    const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+
+    const loadProjectOptions = useCallback(async () => {
+        if (!$user.userToken) return;
+        setIsLoadingProjects(true);
+        try {
+            const result = await projectService._getProjects($user.userToken, { deletedAt: "null" });
+            if (result.success && result.data) {
+                const options: IAutoCompleteOptions[] = result.data.map((p: any) => ({
+                    id: p.id,
+                    label: p.name,
+                    desc: p.name,
+                    isActive: p.status !== "completed" && p.status !== "cancelled",
+                }));
+                setProjectOptions(options);
+            }
+        } catch (error) {
+            console.error("Failed to load project options:", error);
+        } finally {
+            setIsLoadingProjects(false);
+        }
+    }, [$user.userToken]);
+
+    useEffect(() => {
+        loadProjectOptions();
+    }, [loadProjectOptions]);
 
     // Get current project value for autocomplete
     const currentProjectValue: IAutoCompleteOptions | null = useMemo(() => {
         if (!selectedTask?.projectId) return null;
-        const project = projects.find((p) => p.id === selectedTask.projectId);
-        if (!project) return null;
-        return {
-            id: project.id,
-            label: project.name,
-            desc: project.name,
-            isActive: project.status !== "completed" && project.status !== "cancelled",
+        return projectOptions.find((p) => p.id === selectedTask.projectId) ?? {
+            id: selectedTask.projectId,
+            label: `Project #${selectedTask.projectId}`,
+            desc: `Project #${selectedTask.projectId}`,
+            isActive: true,
         };
-    }, [selectedTask?.projectId, projects]);
+    }, [selectedTask?.projectId, projectOptions]);
 
     // Load parent task options when project changes
     // Filter out: current task, subtasks (depth=1), and tasks that already have subtasks
@@ -344,15 +360,22 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     };
 
     const handleProjectChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
-        if (newValue) {
+        if (newValue && taskTab && selectedTask) {
             const newProjectId = newValue.id as number;
-            handleFieldChange("projectId", newProjectId);
-            // Clear parent task when project changes
-            handleFieldChange("parentTaskId", null);
-            // Reload parent task options for new project
-            if (selectedTask) {
-                loadParentTaskOptions(newProjectId, selectedTask.id);
-            }
+            // Update both projectId and parentTaskId in a single setOpenTabs call
+            // to avoid the second call overwriting the first (closure stale data issue)
+            setOpenTabs((prev: BaseTab[]) =>
+                prev.map((t) =>
+                    t.id === taskTabId
+                        ? {
+                              ...t,
+                              data: { ...selectedTask, projectId: newProjectId, parentTaskId: null },
+                              hasUnsavedChanges: true,
+                          }
+                        : t,
+                ),
+            );
+            loadParentTaskOptions(newProjectId, selectedTask.id);
         }
     };
 
@@ -468,7 +491,7 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                     name: "status",
                                     label: "Status",
                                 }}
-                                disabled={isDisabled}
+                                disabled={isDeleted}
                                 placeholder="Select status..."
                             />
 
@@ -492,9 +515,9 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 allOptions={projectOptions}
                                 inputProps={{
                                     name: "project",
-                                    label: "Project",
+                                    label: isLoadingProjects ? "Project (loading...)" : "Project",
                                 }}
-                                disabled={isDisabled}
+                                disabled={isDisabled || isLoadingProjects}
                                 disableClearable
                             />
 
