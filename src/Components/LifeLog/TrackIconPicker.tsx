@@ -73,16 +73,24 @@ export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPicker
 
     return (
         <div
+            tabIndex={0}
             className={cn(
-                "relative flex items-center gap-3 rounded-lg border-2 border-dashed px-3 py-3 cursor-pointer transition-colors",
+                "relative flex items-center gap-3 rounded-lg h-[70px] border-2 border-dashed px-3 py-3 cursor-pointer transition-colors outline-none focus:border-primary/50",
                 dragging
                     ? "border-primary bg-primary/10"
                     : "border-border hover:border-primary/50 hover:bg-muted/20"
             )}
-            onClick={() => !hasImage && fileInputRef.current?.click()}
+            onClick={(e) => {
+                if (e.shiftKey) return; // Shift + click → huỷ
+                if (!hasImage) fileInputRef.current?.click();
+            }}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={onDrop}
+            onPaste={(e) => {
+                const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith("image/"));
+                if (item) { const f = item.getAsFile(); if (f) handleFile(f); }
+            }}
         >
             {/* Preview */}
             {hasImage ? (
@@ -104,7 +112,7 @@ export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPicker
                     <span className="text-xs text-muted-foreground">Custom image</span>
                 ) : (
                     <span className="text-xs text-muted-foreground">
-                        Click or drag & drop to upload image
+                        Click, drag & drop, or paste to upload
                     </span>
                 )}
             </div>
