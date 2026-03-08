@@ -619,8 +619,6 @@ export interface UpsertWorkspaceItemRequest {
     /** Entity ID (references existing folder/note/file from entity tables) - Required for: Add */
     entityId?: number;
 
-    /** Copy metadata JSON (optional) */
-    copyInfo?: string | null;
 
     /** User email (set by controller) */
     createdBy?: string;

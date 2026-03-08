@@ -49,8 +49,6 @@ export interface FolderEntity {
   /** Soft delete timestamp (folders.deleted_at) - ISO string from API */
   deletedAt?: string | null;
 
-  /** Copy metadata JSON (folders.copy_info) */
-  copyInfo?: string | null;
 }
 
 /**
@@ -89,8 +87,6 @@ export interface NoteEntity {
   /** Soft delete timestamp (notes.deleted_at) - ISO string from API */
   deletedAt?: string | null;
 
-  /** Copy metadata JSON (notes.copy_info) */
-  copyInfo?: string | null;
 
   /** List of workspaces that link to this note (populated from workspace_items) */
   workspaceLinks?: Array<{
@@ -139,8 +135,6 @@ export interface FileEntity {
   /** Soft delete timestamp (files.deleted_at) - ISO string from API */
   deletedAt?: string | null;
 
-  /** Copy metadata JSON (files.copy_info) */
-  copyInfo?: string | null;
 
   /** Human-readable file size (computed) */
   fileSizeFormatted?: string;
@@ -228,8 +222,6 @@ interface BaseWorkspaceItem {
   /** Soft delete timestamp (workspace_items.deleted_at) */
   deletedAt?: string | null;
 
-  /** Copy metadata JSON (workspace_items.copy_info) */
-  copyInfo?: string | null;
 
   // ============ COMPUTED PROPERTIES ============
 

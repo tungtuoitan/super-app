@@ -1,10 +1,8 @@
 /**
  * Hook for handling keyword navigation in markdown editor
- * Navigates to notes/headings when clicking on keywords
  */
 
 import { useCallback } from "react";
-import { useSnackbar } from "notistack";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -14,22 +12,20 @@ import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 import { noteService } from "@/services/note.service";
-import { parseKeywordLink, getHeadingAnchor } from "@/utils/keyword-link.utils";
+import { parseKeywordLink } from "@/utils/keyword-link.utils";
 import { constants } from "@/utils/constants";
-import { WorkspaceItemAction } from "@/types/workspace.types";
 import { Note } from "@/types/note.types";
 import { WorkspaceNoteItem, WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { WorkspaceDTO } from "@/types/workspace-dto.types";
-import { BaseTab } from "@/types/editor/tab.types";
 import { Keyword } from "@/types/keyword.types";
 import { isValidUrl } from "@/utils/url.utils";
-import {useWorkspaceHelper} from "../workspace/useWorkspaceHelper";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import { useWorkspaceHelper } from "../workspace/useWorkspaceHelper";
+import { useConsoleHelper } from "../console/useConsole.helper";
 import { treeMiniHelper } from "../workspace/tree.miniHelper";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
-    const { currentWorkspace, setSelectedWorkspaceId,selectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
+    const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
     const { openTabs } = useEditorTabsStore();
     const { openTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
@@ -39,13 +35,9 @@ export const useKeywordNavigationHelper = () => {
     const { navigateToView } = useNavigationStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
 
-    /**
-     * Navigate to keyword link (note, heading, external)
-     */
     const navigateLink = useCallback(
         async (keyword: Keyword) => {
             try {
-                // Parse link
                 const parsed = parseKeywordLink(keyword);
 
                 if (!parsed) {
@@ -53,75 +45,103 @@ export const useKeywordNavigationHelper = () => {
                     return;
                 }
 
+                // External links
+                if (parsed.type === "external" && parsed.url) {
+                    const url = parsed.url.startsWith("http") ? parsed.url : `https://${parsed.url}`;
+                    if (isValidUrl(url)) {
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    } else {
+                        _console.error(`Invalid URL: ${url}`);
+                    }
+                    return;
+                }
 
-                // If current module is not workspace, navigate to workspace view first
+                // Project navigation
+                if (parsed.type === "project" && parsed.projectId) {
+                    if (moduleName !== constants.modules.project) {
+                        navigateToView(constants.vscode.viewTypes.project);
+                    }
+                    // TODO: select specific project by parsed.projectId in project store
+                    _console.info(`Navigating to project ${parsed.projectId}`);
+                    return;
+                }
+
+                // Task navigation
+                if (parsed.type === "task" && parsed.taskId) {
+                    if (moduleName !== constants.modules.project) {
+                        navigateToView(constants.vscode.viewTypes.project);
+                    }
+                    // TODO: select project parsed.projectId, then open task parsed.taskId
+                    _console.info(`Navigating to task ${parsed.taskId} in project ${parsed.projectId}`);
+                    return;
+                }
+
+                // Log navigation
+                if (parsed.type === "log" && parsed.logId) {
+                    if (moduleName !== constants.modules.lifeLog) {
+                        navigateToView(constants.vscode.viewTypes.lifeLog);
+                    }
+                    // TODO: select specific log by parsed.logId in log store
+                    _console.info(`Navigating to log ${parsed.logId}`);
+                    return;
+                }
+
+                // Track navigation
+                if (parsed.type === "track" && parsed.trackId) {
+                    if (moduleName !== constants.modules.lifeLog) {
+                        navigateToView(constants.vscode.viewTypes.lifeLog);
+                    }
+                    // TODO: select specific track by parsed.trackId in log store
+                    _console.info(`Navigating to track ${parsed.trackId}`);
+                    return;
+                }
+
+                // Workspace-based navigation (workspace / folder / note)
+                if (!parsed.workspaceId) return;
+
                 if (moduleName !== constants.modules.workspace) {
                     navigateToView(constants.vscode.viewTypes.workspace);
                 }
 
-                // Handle external links
-                if (parsed.type === "external" && parsed.url) {
-                    const _url = parsed.url.startsWith("http") ? parsed.url : `https://${parsed.url}`;
-                    if (isValidUrl(_url)) {
-                        window.open(_url, "_blank", "noopener,noreferrer");
-                        return;
-                    } else {
-                        _console.error(`Invalid URL: ${_url}`);
-                        return;
-                    }
-                }
-
-                // Variable to hold target workspace data after switch
                 let targetWorkspace: WorkspaceDTO | null = currentWorkspace;
 
-                // Save unsaved notes if navigating to different workspace
-                if (parsed.workspaceId && currentWorkspace?.id !== parsed.workspaceId) {
+                if (currentWorkspace?.id !== parsed.workspaceId) {
                     const saveSuccess = await saveNewsBeforeNavigate();
+                    if (!saveSuccess) return;
 
-                    if (!saveSuccess) {
-                        return;
-                    }
-
-                    // Switch to target workspace and load tree directly
                     setSelectedWorkspaceId(parsed.workspaceId);
                     _console.info("Switching workspace...");
 
-                    // Load tree directly with target workspace ID
-                    const loadedWorkspace = await loadTree(undefined, parsed.workspaceId);
-                    if (!loadedWorkspace) {
+                    const loaded = await loadTree(undefined, parsed.workspaceId);
+                    if (!loaded) {
                         _console.error("Failed to load workspace");
                         return;
                     }
-                    targetWorkspace = loadedWorkspace;
+                    targetWorkspace = loaded;
                 }
 
-                // Handle workspace navigation
-                if (parsed.type === "workspace" && parsed.workspaceId) {
+                if (parsed.type === "workspace") {
                     _console.success("Switched workspace successfully");
                     return;
                 }
 
-                // Handle folder links
+                // Folder navigation
                 if (parsed.type === "folder" && parsed.folderId) {
-                    // Try to find folder in target workspace (after potential switch)
-                    const folderInWorkspace = findFolderInWorkspace(targetWorkspace, parsed.workspaceId!, parsed.folderId);
+                    const folderItem = findFolderInWorkspace(targetWorkspace, parsed.workspaceId, parsed.folderId);
 
-                    if (folderInWorkspace) {
-                        // Found folder - select it
-                        setSelectedItemIds([folderInWorkspace.id]);
-                        setLastSelectedItemId(folderInWorkspace.id);
+                    if (folderItem) {
+                        setSelectedItemIds([folderItem.id]);
+                        setLastSelectedItemId(folderItem.id);
 
-                        // Expand only path to folder (collapse everything else)
                         if (_treeRef.current && targetWorkspace?.flatData) {
                             setIsLoadingTreeByOpeningFolder(true);
                             try {
                                 const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
-                                await treeMiniHelper.expandPathToItem(_treeRef, treeData, folderInWorkspace.id);
+                                await treeMiniHelper.expandPathToItem(_treeRef, treeData, folderItem.id);
                             } finally {
                                 setIsLoadingTreeByOpeningFolder(false);
                             }
                         }
-
                         _console.success("Navigated to folder");
                     } else {
                         _console.error("Folder not found in workspace");
@@ -129,64 +149,45 @@ export const useKeywordNavigationHelper = () => {
                     return;
                 }
 
-                // Handle note/heading links
-                if ((parsed.type === "note" /*|| parsed.type === "heading" REMOVED*/) && parsed.noteWorkspaceItemId) {
-                    // Try to find note in target workspace (after potential switch)
-                    const noteInWorkspace = findNoteInWorkspace(targetWorkspace, parsed.workspaceId!, parsed.noteWorkspaceItemId);
+                // Note navigation
+                if (parsed.type === "note" && parsed.noteWorkspaceItemId) {
+                    const noteItem = findNoteInWorkspace(targetWorkspace, parsed.workspaceId, parsed.noteWorkspaceItemId);
 
-                    if (noteInWorkspace) {
-                        // Found in workspace, open tab
+                    if (noteItem) {
                         const note: Note = {
-                            id: noteInWorkspace.data.id,
-                            name: noteInWorkspace.data.name,
-                            description: noteInWorkspace.data.description || "",
+                            id: noteItem.data.id,
+                            name: noteItem.data.name,
+                            description: noteItem.data.description || "",
                             hashtags: "",
-                            statusCode: noteInWorkspace.data.statusCode,
-                            createdAt: new Date(noteInWorkspace.data.createdAt),
-                            updatedAt: noteInWorkspace.data.updatedAt ? new Date(noteInWorkspace.data.updatedAt) : undefined,
+                            statusCode: noteItem.data.statusCode,
+                            createdAt: new Date(noteItem.data.createdAt),
+                            updatedAt: noteItem.data.updatedAt ? new Date(noteItem.data.updatedAt) : undefined,
                             createdBy: $user.userName || "You",
-                            deletedAt: noteInWorkspace.data.deletedAt ? new Date(noteInWorkspace.data.deletedAt) : null,
-                            userId: noteInWorkspace.data.userId,
+                            deletedAt: noteItem.data.deletedAt ? new Date(noteItem.data.deletedAt) : null,
+                            userId: noteItem.data.userId,
                         };
 
                         openTab(note, constants.vscode.tab.tabTypes.note);
+                        setSelectedItemIds([noteItem.id]);
+                        setLastSelectedItemId(noteItem.id);
 
-                        //* Select note in workspace tree and expand only path to it
-                        setSelectedItemIds([noteInWorkspace.id]);
-                        setLastSelectedItemId(noteInWorkspace.id);
-
-                        // Expand only path to note (collapse everything else)
                         if (_treeRef.current && targetWorkspace?.flatData) {
                             setIsLoadingTreeByOpeningFolder(true);
                             try {
                                 const treeData = treeMiniHelper.transformToTreeData(targetWorkspace, "");
-                                await treeMiniHelper.expandPathToItem(_treeRef, treeData, noteInWorkspace.id);
+                                await treeMiniHelper.expandPathToItem(_treeRef, treeData, noteItem.id);
                             } finally {
                                 setIsLoadingTreeByOpeningFolder(false);
                             }
                         }
-
-                        // If heading, scroll to it after a small delay
-                        // REMOVED: heading navigation no longer supported
-                        // if (parsed.type === "heading" && parsed.headingPath) {
-                        //     const anchor = getHeadingAnchor(parsed.headingPath);
-                        //     setTimeout(() => {
-                        //         const element = document.getElementById(anchor);
-                        //         if (element) {
-                        //             element.scrollIntoView({ behavior: "smooth", block: "start" });
-                        //         }
-                        //     }, 300);
-                        // }
                     } else {
-                        // Not found in current workspace, fetch from API using workspaceItemIds
-                        const token = $user.userToken;
-                        const result = await noteService._getNotes(token, {
+                        // Fetch from API by workspaceItemId
+                        const result = await noteService._getNotes($user.userToken, {
                             workspaceItemIds: parsed.noteWorkspaceItemId.toString(),
                         });
 
                         if (result.success && result.data && result.data.length > 0) {
                             const noteData = result.data[0];
-
                             const note: Note = {
                                 id: noteData.id,
                                 name: noteData.name,
@@ -200,20 +201,7 @@ export const useKeywordNavigationHelper = () => {
                                 deletedAt: noteData.deletedAt ? new Date(noteData.deletedAt) : null,
                                 userId: noteData.userId,
                             };
-
                             openTab(note, constants.vscode.tab.tabTypes.note);
-
-                            // If heading, scroll to it
-                            // REMOVED: heading navigation no longer supported
-                            // if (parsed.type === "heading" && parsed.headingPath) {
-                            //     const anchor = getHeadingAnchor(parsed.headingPath);
-                            //     setTimeout(() => {
-                            //         const element = document.getElementById(anchor);
-                            //         if (element) {
-                            //             element.scrollIntoView({ behavior: "smooth", block: "start" });
-                            //         }
-                            //     }, 300);
-                            // }
                         } else {
                             _console.warning("Note not found");
                         }
@@ -241,56 +229,31 @@ export const useKeywordNavigationHelper = () => {
         ]
     );
 
-    return {
-        navigateLink,
-    };
+    return { navigateLink };
 };
 
-/**
- * Find folder in workspace by workspaceId and folderWorkspaceItemId
- */
 export function findFolderInWorkspace(workspace: any, workspaceId: number, folderWorkspaceItemId: number): WorkspaceFolderItem | null {
-    if (!workspace || workspace.id !== workspaceId) {
-        return null;
-    }
-
-    // Search in flatData
+    if (!workspace || workspace.id !== workspaceId) return null;
     const item = workspace.flatData?.find(
-        (item: any) => item.id === folderWorkspaceItemId && item.entityType === 2 // 2 = folder
+        (item: any) => item.id === folderWorkspaceItemId && item.entityType === 2
     );
-
     return item as WorkspaceFolderItem | null;
 }
 
-/**
- * Find note in workspace by workspaceId and noteWorkspaceItemId
- */
 function findNoteInWorkspace(workspace: any, workspaceId: number, noteWorkspaceItemId: number): WorkspaceNoteItem | null {
-    if (!workspace || workspace.id !== workspaceId) {
-        return null;
-    }
-
-    // Search in flatData
+    if (!workspace || workspace.id !== workspaceId) return null;
     const item = workspace.flatData?.find(
-        (item: any) => item.id === noteWorkspaceItemId && item.entityType === 3 // 3 = note
+        (item: any) => item.id === noteWorkspaceItemId && item.entityType === 3
     );
-
     return item as WorkspaceNoteItem | null;
 }
 
-/**
- * Find note in workspace by entity ID (note.id from notes table)
- */
 export function findNoteByEntityId(workspace: any, noteEntityId: number): WorkspaceNoteItem | null {
     if (!workspace || noteEntityId < 0) {
-        // New notes (id < 0) are always considered as belonging to current workspace
         return noteEntityId < 0 ? ({} as WorkspaceNoteItem) : null;
     }
-
-    // Search in flatData by entity ID
     const item = workspace.flatData?.find(
-        (item: any) => item.data?.id === noteEntityId && item.entityType === 3 // 3 = note
+        (item: any) => item.data?.id === noteEntityId && item.entityType === 3
     );
-
     return item as WorkspaceNoteItem | null;
 }
