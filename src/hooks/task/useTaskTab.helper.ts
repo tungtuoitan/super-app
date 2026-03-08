@@ -3,32 +3,43 @@
  * Helper functions for managing task editor tabs
  */
 
-import { Task } from "@/store/task/useTask.store";
+import { Task, useTaskStore } from "@/store/task/useTask.store";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "../../store";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useProjectStore } from "@/store/project/useProject.store";
 
 export const useTaskTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { updateActiveTab } = useEditorTabHelper();
     const { setNewTabAnd } = useEditorTabHelper();
+    const { projects } = useProjectStore();
+    const { tasks } = useTaskStore();
 
     /**
      * Open task in editor tab (within TabBar of ProjectDetailContent)
      * If tab already exists, activate it; otherwise create new tab
      */
-    const openTaskTab = (task: Task) => {
+    const openTaskTab = (task: Task, openedBy?: { link: string; label: string }) => {
         // Check if tab already exists for this task
         const existingTab = openTabs.find(
             (tab) => tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === task.id
         );
 
         if (existingTab) {
-            // Tab already exists, just activate it
             updateActiveTab(existingTab.id);
         } else {
-            // Create new task tab
+            // Derive openedBy from real names in store
+            const resolvedOpenedBy = openedBy ?? (() => {
+                if (task.parentTaskId) {
+                    const parent = tasks.find(t => t.id === task.parentTaskId);
+                    return { link: `sa/p${task.projectId}/t${task.parentTaskId}`, label: parent?.title ?? "Parent Task" };
+                }
+                const project = projects.find(p => p.id === task.projectId);
+                return { link: `sa/p${task.projectId}`, label: project?.name ?? "Project" };
+            })();
+
             const newTab: BaseTab = {
                 id: `task-tab-${task.id}-${Date.now()}`,
                 type: constants.vscode.tab.tabTypes.task,
@@ -36,6 +47,7 @@ export const useTaskTabHelper = () => {
                 data0: task,
                 title: task.title || constants.vscode.tabTitles.unsavedTask,
                 hasUnsavedChanges: false,
+                openedBy: resolvedOpenedBy,
             };
 
             const newTabs = [...openTabs, newTab];

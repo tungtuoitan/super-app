@@ -3,24 +3,43 @@
  * VS Code-style Ctrl+P quick search for keywords
  */
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Search, Link2 } from "lucide-react";
 import { useCommandPaletteStore } from "@/store/commandPalette/useCommandPalette.store";
 import { useCommandPaletteHelper } from "@/hooks/index";
 import { HighlightedText } from "./HighlightedText";
 import { CommandPaletteKeyDown } from "@/HeadlessComponents/vsCode/CommandPaletteKeyDown";
-import {useGeneralStore} from "@/store/general/General.store";
+import { useGeneralStore } from "@/store/general/General.store";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
+import type { Keyword, KeywordType } from "@/types/keyword.types";
+
+const ALL_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];
+
+const TYPE_LABELS: Record<KeywordType, string> = {
+    workspace: "Workspace",
+    folder: "Folder",
+    note: "Note",
+    file: "File",
+    external: "External",
+    project: "Project",
+    task: "Task",
+    log: "Log",
+    track: "Track",
+};
 
 export function CommandPalette() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword, alreadyLinkedIds } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, close } = useCommandPaletteHelper();
     const { allKeywords } = useGeneralStore();
 
+    const [selectedType, setSelectedType] = useState<KeywordType | null>(null);
+
     // Get filtered keywords using helper function
     const filteredKeywords = useMemo(() => {
-        return getFilteredKeywords(searchQuery);
-    }, [searchQuery, allKeywords.length]);
+        const bySearch = getFilteredKeywords(searchQuery) as Array<{ keyword: Keyword; matchedIndices: { name: number[]; link: number[] }; displayLink: string }>;
+        if (!selectedType) return bySearch;
+        return bySearch.filter((m) => m.keyword.type === selectedType);
+    }, [searchQuery, allKeywords.length, selectedType]);
 
     // Reset selection when filtered list changes
     useEffect(() => {
@@ -35,10 +54,14 @@ export function CommandPalette() {
         }
     }, [isOpen, inputRef]);
 
+    // Reset type filter when palette closes
+    useEffect(() => {
+        if (!isOpen) setSelectedType(null);
+    }, [isOpen]);
+
     // Auto-scroll selected item into view
     useEffect(() => {
         if (!listRef.current) return;
-
         const selectedElement = listRef.current.querySelector(`[data-index="${selectedIndex}"]`);
         if (selectedElement) {
             selectedElement.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -48,6 +71,11 @@ export function CommandPalette() {
     if (!isOpen) return null;
 
     const isLinkMode = onLinkKeyword !== null;
+
+    // Only show types that have at least 1 active keyword
+    const activeTypes = ALL_TYPES.filter((t) =>
+        allKeywords.some((k) => k.type === t && k.hardDeletedAt === null)
+    );
 
     return (
         <>
@@ -78,6 +106,30 @@ export function CommandPalette() {
                             <span className="ml-3 text-xs text-blue-400 border border-blue-400/50 rounded px-2 py-0.5">Link mode</span>
                         )}
                     </div>
+
+                    {/* Type Filter Bar */}
+                    {activeTypes.length > 0 && (
+                        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-[#3E3E42] flex-wrap">
+                            {activeTypes.map((type) => (
+                                <button
+                                    key={type}
+                                    onClick={() => setSelectedType(selectedType === type ? null : type)}
+                                    className={`
+                                        flex items-center gap-1 px-2 py-0.5 rounded text-xs transition-colors
+                                        ${selectedType === type
+                                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/50"
+                                            : "text-gray-400 border border-[#3E3E42] hover:border-gray-500 hover:text-gray-200"}
+                                    `}
+                                >
+                                    <KeywordIconRenderer
+                                        type={type}
+                                        className="w-3 h-3"
+                                    />
+                                    {TYPE_LABELS[type]}
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Results List */}
                     <div ref={listRef} className="max-h-[400px] overflow-y-auto">
