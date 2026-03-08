@@ -13,7 +13,7 @@ import {useGeneralStore} from "@/store/general/General.store";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
 
 export function CommandPalette() {
-    const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword } = useCommandPaletteStore();
+    const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword, alreadyLinkedIds } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, close } = useCommandPaletteHelper();
     const { allKeywords } = useGeneralStore();
 
@@ -59,7 +59,7 @@ export function CommandPalette() {
             <div className="fixed top-[100px] left-1/2 -translate-x-1/2 w-[90%] max-w-[640px] z-[100000001]">
                 <div className="bg-[#252526] rounded-lg shadow-2xl border border-[#3E3E42] overflow-hidden">
                     {/* Search Input */}
-                    <div className="flex items-center px-4 py-3 border-b border-[#3E3E42]">
+                    <div className="h-[54px] flex items-center px-4 py-4 border-b border-[#3E3E42]">
                         <Search className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
                         <input
                             ref={inputRef}
@@ -70,7 +70,7 @@ export function CommandPalette() {
                             className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
                         />
                         {searchQuery && (
-                            <button onClick={() => setSearchQuery("")} className="text-gray-400 hover:text-white ml-2">
+                            <button onClick={() => setSearchQuery("")} className="text-gray-400 hover:text-white">
                                 ✕
                             </button>
                         )}
@@ -87,6 +87,7 @@ export function CommandPalette() {
                             filteredKeywords.map((match, index) => {
                                 const keyword = match.keyword;
                                 const isDisabled = keyword.hardDeletedAt !== null;
+                                const isAlreadyLinked = isLinkMode && alreadyLinkedIds.has(keyword.id);
                                 const isSelected = index === selectedIndex;
                                 return (
                                     <div
@@ -97,6 +98,7 @@ export function CommandPalette() {
                                             group px-4 py-1.5 cursor-pointer flex items-center gap-3
                                             ${isSelected ? "bg-[#44475A] hover:bg-[#44475A]" : "hover:bg-[#2A2D2E]"}
                                             ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
+                                            ${isAlreadyLinked ? "opacity-40 cursor-not-allowed" : ""}
                                             ${isLinkMode ? "cursor-default" : ""}
                                         `}
                                     >
@@ -125,10 +127,11 @@ export function CommandPalette() {
                                                 />
                                             )}
                                             {isDisabled && <span className="text-xs text-red-400 bg-red-900/30 px-2 py-0.5 rounded flex-shrink-0">Deleted</span>}
+                                            {isAlreadyLinked && <span className="text-xs text-green-400 bg-green-900/30 px-2 py-0.5 rounded flex-shrink-0">Linked</span>}
                                         </div>
 
                                         {/* Link button (link mode only, visible on hover) */}
-                                        {isLinkMode && !isDisabled && (
+                                        {isLinkMode && !isDisabled && !isAlreadyLinked && (
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();

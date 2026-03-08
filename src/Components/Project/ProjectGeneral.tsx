@@ -145,6 +145,11 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                         <CardContent className="space-y-4">
                             {/* Project Name and Due Date on same row */}
                             <div className="flex gap-4 items-start">
+                                {/* Project ID - fixed width */}
+                                <div className="w-[80px] shrink-0">
+                                    <GenericTextField label="ID" value={selectedProject.id > 0 ? selectedProject.id.toString() : "New"} disabled size="small" />
+                                </div>
+
                                 {/* Project Name - takes more space */}
                                 <div className="flex-[2]">
                                     <GenericTextField
@@ -221,13 +226,11 @@ export function ProjectGeneral({ projectId }: ProjectDetailTabProps) {
                                 placeholder="Select status..."
                             />
 
-                            <GenericTextField label="Project ID" value={selectedProject.id > 0 ? selectedProject.id.toString() : "New (Unsaved)"} disabled size="small" />
-
-                            <GenericTextField label="Created At" value={formatDate(selectedProject.createdAt)} disabled size="small" />
-
-                            {selectedProject.updatedAt && <GenericTextField label="Updated At" value={formatDate(selectedProject.updatedAt)} disabled size="small" />}
-
-                            {selectedProject.deletedAt && <GenericTextField label="Deleted At" value={formatDate(selectedProject.deletedAt)} disabled size="small" />}
+                            <p className="text-xs text-left text-muted-foreground leading-relaxed">
+                                Created: {formatDate(selectedProject.createdAt)}
+                                {selectedProject.updatedAt && <> · Updated: {formatDate(selectedProject.updatedAt)}</>}
+                                {selectedProject.deletedAt && <> · Deleted: {formatDate(selectedProject.deletedAt)}</>}
+                            </p>
                         </CardContent>
                     </div>
                 </div>

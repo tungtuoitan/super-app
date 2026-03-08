@@ -26,6 +26,10 @@ export interface CommandPaletteContextData {
     // Optional link callback - when set, palette shows Link buttons instead of navigating on row click
     onLinkKeyword: ((keyword: Keyword) => void) | null;
     setOnLinkKeyword: Dispatch<SetStateAction<((keyword: Keyword) => void) | null>>;
+
+    // IDs of keywords already linked to the active target (used in link mode to disable already-linked items)
+    alreadyLinkedIds: Set<number>;
+    setAlreadyLinkedIds: Dispatch<SetStateAction<Set<number>>>;
 }
 
 export const commandPaletteContextDefaultValue: CommandPaletteContextData = {
@@ -39,6 +43,8 @@ export const commandPaletteContextDefaultValue: CommandPaletteContextData = {
     listRef: { current: null },
     onLinkKeyword: null,
     setOnLinkKeyword: () => {},
+    alreadyLinkedIds: new Set<number>(),
+    setAlreadyLinkedIds: () => {},
 };
 
 export const CommandPaletteStore = createContext<CommandPaletteContextData>(commandPaletteContextDefaultValue);
@@ -50,6 +56,7 @@ export const CommandPaletteProvider: React.FC<React.PropsWithChildren<unknown>> 
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [onLinkKeyword, setOnLinkKeyword] = useState<((keyword: Keyword) => void) | null>(null);
+    const [alreadyLinkedIds, setAlreadyLinkedIds] = useState<Set<number>>(new Set());
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +73,8 @@ export const CommandPaletteProvider: React.FC<React.PropsWithChildren<unknown>> 
                 listRef,
                 onLinkKeyword,
                 setOnLinkKeyword,
+                alreadyLinkedIds,
+                setAlreadyLinkedIds,
             }}
         >
             {children}
