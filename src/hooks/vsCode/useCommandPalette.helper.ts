@@ -36,12 +36,20 @@ export const useCommandPaletteHelper = () => {
     // Filter keywords based on search query with fuzzy matching (diacritics-insensitive)
     const getFilteredKeywords = (searchQuery: string) => {
         const activeKeywords = allKeywords.filter((k) => k.hardDeletedAt === null);
+
+        const resolveDisplayLink = (keyword: Keyword): string => {
+            if ((keyword.type === "log" || keyword.type === "track") && keyword.description) {
+                return keyword.description;
+            }
+            return getDisplayLink(keyword.longLink, keyword.name);
+        };
+
         if (!searchQuery.trim()) {
             return activeKeywords
                 .map((keyword) => ({
                     keyword,
                     matchedIndices: { name: [], link: [] },
-                    displayLink: getDisplayLink(keyword.longLink, keyword.name),
+                    displayLink: resolveDisplayLink(keyword),
                 }));
         }
 
@@ -59,8 +67,8 @@ export const useCommandPaletteHelper = () => {
         const matches: MatchResult[] = [];
 
         activeKeywords.forEach((keyword) => {
-            // Get display link without name at the end
-            const displayLink = getDisplayLink(keyword.longLink, keyword.name);
+            // Get display link without name at the end (or description for log/track)
+            const displayLink = resolveDisplayLink(keyword);
 
             // Search in both name and displayLink (without diacritics)
             const nameMatch = fuzzyMatchWithDiacritics(keyword.name, searchWords);
