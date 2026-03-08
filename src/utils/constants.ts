@@ -156,6 +156,7 @@ export const constants = {
         ws: "Ws",
         task: "Task",
         project: "Project",
+        lifeLog: "LifeLog"
     } as const,
 
     // Status and Priority colors (GitHub-style)

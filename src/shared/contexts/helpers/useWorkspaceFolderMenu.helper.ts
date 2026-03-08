@@ -186,7 +186,6 @@ export const useWorkspaceFolderMenuHelper = () => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             deletedAt: null,
-            copyInfo: null,
             level: (contextData?.level || 0) + 1,
             position: 0,
             accessType: "owner",
@@ -204,7 +203,6 @@ export const useWorkspaceFolderMenuHelper = () => {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 deletedAt: null,
-                copyInfo: null,
             },
         };
 
