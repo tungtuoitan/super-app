@@ -56,3 +56,27 @@ export interface UpsertExternalKeywordRequest {
   link: string;
   description?: string;
 }
+
+export interface KeywordSyncItem {
+  id: number;
+  type: string;
+  oldName: string;
+  newName: string;
+  oldLink: string;
+  newLink: string;
+  nameChanged: boolean;
+  linkChanged: boolean;
+  description?: string;
+}
+
+export interface KeywordSyncReport {
+  totalKeywords: number;
+  countByType: Record<string, number>;
+  hardDeletedCount: number;
+  nameMismatchCount: number;
+  linkMismatchCount: number;
+  updatedCount: number;
+  createdCount: number;
+  updates: KeywordSyncItem[];
+  created: KeywordSyncItem[];
+}
