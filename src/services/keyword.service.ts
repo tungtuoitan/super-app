@@ -5,7 +5,7 @@
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { ResultOptions } from "@/types/common.types";
-import type { Keyword, UpsertExternalKeywordRequest } from "@/types/keyword.types";
+import type { Keyword, UpsertExternalKeywordRequest, KeywordSyncReport } from "@/types/keyword.types";
 
 const _getKeywords = async (
     _token: string,
@@ -41,7 +41,18 @@ const _upsertExternalKeywords = async (
     return Promise.reject(res);
 };
 
+const _syncKeywords = async (_token: string): Promise<KeywordSyncReport> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/keyword/sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+    });
+
+    if (res.ok) return (await res.json()) as KeywordSyncReport;
+    return Promise.reject(res);
+};
+
 export const keywordService = {
     _getKeywords,
     _upsertExternalKeywords,
+    _syncKeywords,
 };
