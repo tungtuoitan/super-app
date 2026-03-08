@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { useCommandPaletteStore, useGeneralStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { Keyword } from "@/types/keyword.types";
-import { Layers, Folder, FileText, Link, Hash } from "lucide-react";
+import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
 
 export const useCommandPaletteHelper = () => {
@@ -99,19 +99,14 @@ export const useCommandPaletteHelper = () => {
                 return FileText;
             case "file":
                 return FileText;
-            // REMOVED: heading types no longer used
-            // case "h1":
-            //     return "H1";
-            // case "h2":
-            //     return "H2";
-            // case "h3":
-            //     return "H3";
-            // case "h4":
-            //     return "H4";
-            // case "h5":
-            //     return "H5";
-            // case "h6":
-            //     return "H6";
+            case "project":
+                return Cuboid;
+            case "task":
+                return SquareCheckBig;
+            case "log":
+                return ScrollText;
+            case "track":
+                return Shell;
             case "external":
                 return Link;
             default:

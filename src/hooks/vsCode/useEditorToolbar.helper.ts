@@ -329,7 +329,7 @@ export const useEditorToolbarHelper = () => {
                     // WORKSPACE HANDLER: Delegate to Workspace Upsert Logic
                     await upsertWorkspace(activeTab.id);
                     loadWorkspaces();
-                    loadKeywords();
+                    // loadKeywords();
                     break;
                 case constants.vscode.tab.tabTypes.project:
                     // PROJECT HANDLER: Delegate to Project Upsert Logic (upsertProject already reloads projects)
@@ -426,7 +426,7 @@ export const useEditorToolbarHelper = () => {
                             if (taskMeta?.taskId && taskMeta?.folderWorkspaceItemId && data.id < 0) {
                                 await _addNoteToTaskFolder(savedNote, activeTab);
                             } else {
-                                loadKeywords();
+                                // loadKeywords();
                             }
                         }
                         //* thêm các entity type khác ở đây
@@ -434,7 +434,7 @@ export const useEditorToolbarHelper = () => {
                     // CREATE new entity + workspace_item - use workspace API
                     else if (workspaceItem.id < 0 && (activeTab.data as { id: number }).id < 0) {
                         await _treeEditor.upsertWorkspaceItem(WorkspaceItemAction.Create);
-                        loadKeywords();
+                        // loadKeywords();
                     } else {
                         console.error("Unexpected case in upsertOrchestraitor");
                     }
@@ -455,6 +455,7 @@ export const useEditorToolbarHelper = () => {
             }
         } finally {
             // STEP 5: Reset Saving State
+            loadKeywords()
             setIsSaving(false);
         }
     }, [activeTab, moduleName, currentWorkspace, upsertWorkspace, upsertProject, upsertTask, _treeEditor, $user, setIsSaving]);
