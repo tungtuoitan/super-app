@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react";
-import { Task } from "@/store/task/useTask.store";
+import { Task, useTaskStore } from "@/store/task/useTask.store";
 import { taskService, TaskDTO } from "@/services/task.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -46,6 +46,7 @@ export const useTaskDetailHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
+    const { tasks, setTasks } = useTaskStore();
 
     /**
      * Handle task field change - updates task data in tab
@@ -179,6 +180,11 @@ export const useTaskDetailHelper = () => {
                     );
                 }
 
+                // Sync task store so Project tab (TaskList) reflects the updated task
+                setTasks((prev) =>
+                    prev.map((t) => (t.id === transformedTask.id ? transformedTask : t))
+                );
+
                 return transformedTask;
             } catch (error) {
                 console.error("Failed to save task:", error);
@@ -192,7 +198,7 @@ export const useTaskDetailHelper = () => {
                 return null;
             }
         },
-        [openTabs, activeTabId, $user, _console, setOpenTabs],
+        [openTabs, activeTabId, $user, _console, setOpenTabs, setTasks],
     );
 
     return {

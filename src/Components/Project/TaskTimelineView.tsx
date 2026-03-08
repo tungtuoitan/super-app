@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Comp
 import { Task, useTaskStore } from "@/store/task/useTask.store";
 import { useTaskGridHelper } from "@/hooks/task/useTaskGrid.helper";
 import { useTaskTabHelper } from "@/hooks/task/useTaskTab.helper";
-import { useAuthStore } from "@/store/index";
+import { useAuthStore, useEditorTabsStore } from "@/store/index";
 import { taskService } from "@/services/task.service";
 import { storageService } from "@/services/storage.service";
 import { cn } from "@/lib/utils";
@@ -467,6 +467,7 @@ export function TaskTimelineView({ projectId }: TaskTimelineViewProps) {
     const { loadTasks } = useTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
     const { $user } = useAuthStore();
+    const { setOpenTabs } = useEditorTabsStore();
     const { projects } = useProjectStore();
     const _console = useConsoleHelper();
 
@@ -758,6 +759,24 @@ export function TaskTimelineView({ projectId }: TaskTimelineViewProps) {
 
                 if (result.success) {
                     await loadTasks(projectId);
+                    // Sync open task tab if it's open
+                    setOpenTabs((prev) =>
+                        prev.map((tab) => {
+                            if (
+                                tab.type === constants.vscode.tab.tabTypes.task &&
+                                (tab.data as Task).id === taskId
+                            ) {
+                                const updated: Task = {
+                                    ...(tab.data as Task),
+                                    startDate,
+                                    endDate,
+                                    updatedAt: new Date(),
+                                };
+                                return { ...tab, data: updated, data0: updated, hasUnsavedChanges: false };
+                            }
+                            return tab;
+                        })
+                    );
                 }
             } catch (error) {
                 console.error("Failed to update task dates:", error);
@@ -766,7 +785,7 @@ export function TaskTimelineView({ projectId }: TaskTimelineViewProps) {
                 setTaskGridIsLoading(false);
             }
         },
-        [filteredTasks, currentProject, $user.userToken, loadTasks, projectId, setTaskGridIsLoading, _console]
+        [filteredTasks, currentProject, $user.userToken, loadTasks, projectId, setTaskGridIsLoading, _console, setOpenTabs]
     );
 
     // Load tasks on mount or when task filters change
