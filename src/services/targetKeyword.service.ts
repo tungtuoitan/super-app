@@ -56,8 +56,22 @@ const _unlinkTargetKeyword = async (
     return Promise.reject(res);
 };
 
+const _getKeywordTargets = async (
+    _token: string,
+    keywordId: number
+): Promise<ResultOptions<TargetKeywordDTO>> => {
+    const res = await apiFetch(
+        `${config.api.baseURL}/api/keyword/keyword-targets?keywordId=${keywordId}`,
+        { method: "GET" }
+    );
+
+    if (res.ok) return (await res.json()) as ResultOptions<TargetKeywordDTO>;
+    return Promise.reject(res);
+};
+
 export const targetKeywordService = {
     _getTargetKeywords,
+    _getKeywordTargets,
     _linkTargetKeyword,
     _unlinkTargetKeyword,
 };
