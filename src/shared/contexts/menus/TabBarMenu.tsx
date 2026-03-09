@@ -18,23 +18,25 @@ import { useTabBarMenuHelper } from "@/shared/contexts/helpers/useTabBarMenu.hel
  * - Close All But Pinned
  */
 export function TabBarMenu() {
-    const { contextTabId, isPinned, pinTab, unpinTab, closeAllSavedTabs, closeSavedTabsButPinned } = useTabBarMenuHelper();
+    const { contextTabId, isPinned, isChild, pinTab, unpinTab, closeAllSavedTabs, closeSavedTabsButPinned } = useTabBarMenuHelper();
 
     if (!contextTabId) return null;
 
     return (
         <>
-            {/* Pin/Unpin */}
-            {isPinned ? (
-                <MenuItem onClick={unpinTab}>
-                    <UnpinIcon className="w-4 h-4 mr-2" />
-                    Unpin Tab
-                </MenuItem>
-            ) : (
-                <MenuItem onClick={pinTab}>
-                    <PinIcon className="w-4 h-4 mr-2" />
-                    Pin Tab
-                </MenuItem>
+            {/* Pin/Unpin — hidden for group child tabs */}
+            {!isChild && (
+                isPinned ? (
+                    <MenuItem onClick={unpinTab}>
+                        <UnpinIcon className="w-4 h-4 mr-2" />
+                        Unpin Tab
+                    </MenuItem>
+                ) : (
+                    <MenuItem onClick={pinTab}>
+                        <PinIcon className="w-4 h-4 mr-2" />
+                        Pin Tab
+                    </MenuItem>
+                )
             )}
 
             <MenuDivider />
