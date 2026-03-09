@@ -16,6 +16,8 @@ export function TrackPanel() {
     const { loadTracks } = useLifeLogTrackHelper();
     const { openGraphTab, openNewTrackTab } = useLifeLogTabHelper();
     const { isMobile } = useMobileStore();
+    const { openLogTab, openNewLogTab } = useLifeLogTabHelper();
+
 
     useEffect(() => {
         loadTracks();
@@ -38,23 +40,18 @@ export function TrackPanel() {
         <div className="border-b border-border flex-shrink-0 flex items-center" style={{ borderTop: "1px solid rgb(63, 63, 70)" }}>
             {/* Scrollable track list */}
             <div className="flex-1 flex  overflow-x-auto scrollbar-hide items-left min-w-0">
-                 <div className="flex items-center flex-col justify-center pr-1 gap-1 flex-shrink-0 border-l border-border pl-2">
-                    <button
-                        onClick={openGraphTab}
-                        className={`rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-1"}`}
-                        title="Track activity graph"
-                    >
-                        <BarChart2 className={isMobile ? "w-3.5 h-3.5" : "w-3.5 h-3.5"} />
-                    </button>
-                    <button
-                        onClick={() => handleAddTrack()}
-                        className={`rounded border border-border  text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-1"}`}
-                        title="Add track"
-                    >
-                        <Plus className={isMobile ? "w-3.5 h-3.5" : "w-3.5 h-3.5"} />
-                    </button>
+                <button
+                    onClick={() => openNewLogTab()}
+                    className={`flex flex-col justify-center items-center gap-1 rounded-lg border transition-all bg-muted/30 border-border hover:bg-muted/60 hover:border-primary/30 cursor-pointer select-none flex-shrink-0 ${isMobile ? "w-[76px] px-2 py-3" : "w-[60px] px-2 py-2"}`}
+                    title="Add New Log"
+                >
+                    <div className="bg-green-900x border-gray-600 border rounded-[20%] w-7 h-7 flex items-center justify-center">
 
-                 </div>
+                        <Plus className={isMobile ? "w-5 h-5 spin text-muted-foreground" : "w-4 h-4 text-muted-foreground"} />
+                    </div>
+                    <span className="text-[9px] text-center leading-tight text-muted-foreground">New Log</span>
+                </button>
+                 
                 {sortedTracks.length === 0 && (
                     <p className="text-xs text-muted-foreground italic flex-shrink-0">No tracks yet.</p>
                 )}

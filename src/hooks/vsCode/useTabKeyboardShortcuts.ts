@@ -10,6 +10,9 @@
 import { useEffect, useRef } from "react";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { constants } from "@/utils/constants";
+import type { Task } from "@/store/task/useTask.store";
+import type { BaseTab } from "@/types/editor/tab.types";
 
 export const useTabKeyboardShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabsStore();
@@ -38,10 +41,29 @@ export const useTabKeyboardShortcuts = () => {
                 ctrlKPressedRef.current = false;
 
                 if (activeTabId) {
+                    const activeTab = openTabs.find((t) => t.id === activeTabId);
+                    if (!activeTab) return;
+
+                    // Block pin/unpin for group children
+                    const isChild = activeTab.openedBy?.link
+                        ? openTabs.some((t) => {
+                              if (t.type !== constants.vscode.tab.tabTypes.task) return false;
+                              const task = t.data as Task;
+                              return `sa/p${task.projectId}/t${task.id}` === activeTab.openedBy!.link;
+                          })
+                        : false;
+                    if (isChild) return;
+
+                    const newPinned = !activeTab.isPinned;
+                    // If task tab, also toggle children
+                    const groupLink =
+                        activeTab.type === constants.vscode.tab.tabTypes.task
+                            ? `sa/p${(activeTab.data as Task).projectId}/t${(activeTab.data as Task).id}`
+                            : null;
+
                     const newTabs = openTabs.map((tab) => {
-                        if (tab.id === activeTabId) {
-                            return { ...tab, isPinned: !tab.isPinned };
-                        }
+                        if (tab.id === activeTabId) return { ...tab, isPinned: newPinned };
+                        if (groupLink && tab.openedBy?.link === groupLink) return { ...tab, isPinned: newPinned };
                         return tab;
                     });
 

@@ -431,6 +431,11 @@ function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isS
                 />
             )}
 
+            {/* High priority indicator */}
+            {task.priority === "high" && (
+                <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10 pointer-events-none" />
+            )}
+
             {/* Task content - can overflow */}
             <div
                 className={cn(
