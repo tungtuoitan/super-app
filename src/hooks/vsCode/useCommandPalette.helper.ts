@@ -6,14 +6,26 @@
 import { useMemo } from "react";
 import { useCommandPaletteStore, useGeneralStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { useProjectStore } from "@/store/project/useProject.store";
+import { useTaskStore } from "@/store/task/useTask.store";
+import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { Keyword } from "@/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
+import { targetKeywordService } from "@/services/targetKeyword.service";
+import { projectService } from "@/services/project.service";
+import { taskService } from "@/services/task.service";
+import { lifeLogService } from "@/services/lifeLog.service";
 
 export const useCommandPaletteHelper = () => {
     const { allKeywords } = useGeneralStore();
     const { setIsOpen, setSearchQuery, setSelectedIndex, setOnLinkKeyword, setAlreadyLinkedIds } = useCommandPaletteStore();
     const { navigateLink } = useKeywordNavigationHelper();
+    const { $user } = useAuthStore();
+    const { projects } = useProjectStore();
+    const { tasks } = useTaskStore();
+    const { logs, tracks } = useLifeLogStore();
 
     // Helper: Remove name (last part) from longLink
     // Example: "Workspace[1]/Folder[2]/NoteName[3]" -> "Workspace[1]/Folder[2]"
@@ -131,13 +143,77 @@ export const useCommandPaletteHelper = () => {
     };
 
     // Handle keyword selection with close callback
-    const handleSelectKeyword = (keyword: any) => {
-        if (keyword.hardDeletedAt !== null) {
-            return; // Don't navigate to deleted keywords
-        }
+    const handleSelectKeyword = async (keyword: any) => {
+        if (keyword.hardDeletedAt !== null) return;
 
-        navigateLink(keyword);
+        // Resolve openedBy BEFORE navigating so it's available when the tab is created
+        const openedBy = await _resolveOpenedBy(keyword.id);
+
+        navigateLink(keyword, openedBy);
         close();
+    };
+
+    const _resolveOpenedBy = async (keywordId: number): Promise<{ link: string; label: string } | undefined> => {
+        try {
+            const result = await targetKeywordService._getKeywordTargets($user.userToken, keywordId);
+            if (!result.success || !result.data?.length) return undefined;
+
+            const first = result.data[0] as { targetId: number; targetType: string; keywordId: number };
+            const { targetId, targetType } = first;
+
+            // 1. Try allKeywords first (fast path)
+            const ownerKw = allKeywords.find(k => {
+                switch (targetType) {
+                    case "TASK":    return k.type === "task"    && k.link.endsWith(`/t${targetId}`);
+                    case "PROJECT": return k.type === "project" && k.link === `sa/p${targetId}`;
+                    case "NOTE":    return k.type === "note"    && k.entityId === targetId;
+                    case "LOG":     return k.type === "log"     && k.entityId === targetId;
+                    case "TRACK":   return k.type === "track"   && k.entityId === targetId;
+                    case "FOLDER":  return k.type === "folder"  && k.workspaceItemId === targetId;
+                    default:        return false;
+                }
+            });
+            if (ownerKw) return { link: ownerKw.link, label: ownerKw.name };
+
+            // 2. Fallback: check state stores, then fetch from API
+            switch (targetType) {
+                case "PROJECT": {
+                    const fromState = projects.find(p => p.id === targetId);
+                    if (fromState) return { link: `sa/p${targetId}`, label: fromState.name };
+                    const res = await projectService._getProjectById($user.userToken, targetId);
+                    if (res.success && res.data?.[0]) return { link: `sa/p${targetId}`, label: res.data[0].name };
+                    break;
+                }
+                case "TASK": {
+                    const fromState = tasks.find(t => t.id === targetId);
+                    if (fromState) return { link: `sa/p${fromState.projectId}/t${targetId}`, label: fromState.title };
+                    const res = await taskService._getTaskById($user.userToken, targetId);
+                    if (res.success && res.data?.[0]) {
+                        const dto = res.data[0];
+                        return { link: `sa/p${dto.projectId}/t${targetId}`, label: dto.title };
+                    }
+                    break;
+                }
+                case "LOG": {
+                    const fromState = logs.find(l => l.id === targetId);
+                    if (fromState) return { link: `sa/l${targetId}`, label: fromState.title ?? `Log ${targetId}` };
+                    const res = await lifeLogService._getLogById($user.userToken, targetId);
+                    if (res.success && res.data?.[0]) return { link: `sa/l${targetId}`, label: res.data[0].title ?? `Log ${targetId}` };
+                    break;
+                }
+                case "TRACK": {
+                    const fromState = tracks.find(t => t.id === targetId);
+                    if (fromState) return { link: `sa/tr${targetId}`, label: fromState.name };
+                    const res = await lifeLogService._getTrackById($user.userToken, targetId);
+                    if (res.success && res.data?.[0]) return { link: `sa/tr${targetId}`, label: res.data[0].name };
+                    break;
+                }
+            }
+
+            return undefined;
+        } catch {
+            return undefined;
+        }
     };
 
     /**
