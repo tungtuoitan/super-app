@@ -7,6 +7,23 @@
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import { constants } from "@/utils/constants";
+import type { Task } from "@/store/task/useTask.store";
+import type { BaseTab } from "@/types/editor/tab.types";
+
+/** Returns the task group link for a task tab, or null if not a task tab */
+const getTaskGroupLink = (tab: BaseTab): string | null => {
+    if (tab.type !== constants.vscode.tab.tabTypes.task) return null;
+    const task = tab.data as Task;
+    return `sa/p${task.projectId}/t${task.id}`;
+};
+
+/** Returns true if this tab is a child of a task group (its openedBy.link points to a task tab) */
+const isGroupChild = (tab: BaseTab, allTabs: BaseTab[]): boolean => {
+    const link = tab.openedBy?.link;
+    if (!link) return false;
+    return allTabs.some((t) => getTaskGroupLink(t) === link);
+};
 
 export const useTabBarMenuHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
@@ -20,6 +37,9 @@ export const useTabBarMenuHelper = () => {
     const contextTab = openTabs.find((tab) => tab.id === contextTabId);
     const isPinned = contextTab?.isPinned || false;
 
+    // If right-clicked tab is a group child, hide pin/unpin
+    const isChild = contextTab ? isGroupChild(contextTab, openTabs) : false;
+
     // Save pinned state to localStorage
     const savePinnedStateToStorage = (tabs: typeof openTabs) => {
         const pinnedState: Record<string, boolean> = {};
@@ -30,14 +50,19 @@ export const useTabBarMenuHelper = () => {
     };
 
     /**
-     * Pin the context tab
+     * Pin the context tab (and its group children if it's a task tab)
      */
     const pinTab = () => {
         if (!contextTabId) return;
 
-        const newTabs = openTabs.map((tab) =>
-            tab.id === contextTabId ? { ...tab, isPinned: true } : tab
-        );
+        const groupLink = contextTab ? getTaskGroupLink(contextTab) : null;
+
+        const newTabs = openTabs.map((tab) => {
+            if (tab.id === contextTabId) return { ...tab, isPinned: true };
+            // Also pin group children
+            if (groupLink && tab.openedBy?.link === groupLink) return { ...tab, isPinned: true };
+            return tab;
+        });
 
         // Sort: pinned tabs first
         newTabs.sort((a, b) => {
@@ -52,14 +77,19 @@ export const useTabBarMenuHelper = () => {
     };
 
     /**
-     * Unpin the context tab
+     * Unpin the context tab (and its group children if it's a task tab)
      */
     const unpinTab = () => {
         if (!contextTabId) return;
 
-        const newTabs = openTabs.map((tab) =>
-            tab.id === contextTabId ? { ...tab, isPinned: false } : tab
-        );
+        const groupLink = contextTab ? getTaskGroupLink(contextTab) : null;
+
+        const newTabs = openTabs.map((tab) => {
+            if (tab.id === contextTabId) return { ...tab, isPinned: false };
+            // Also unpin group children
+            if (groupLink && tab.openedBy?.link === groupLink) return { ...tab, isPinned: false };
+            return tab;
+        });
 
         // Sort: pinned tabs first
         newTabs.sort((a, b) => {
@@ -96,6 +126,7 @@ export const useTabBarMenuHelper = () => {
     return {
         contextTabId,
         isPinned,
+        isChild,
         pinTab,
         unpinTab,
         closeAllSavedTabs,

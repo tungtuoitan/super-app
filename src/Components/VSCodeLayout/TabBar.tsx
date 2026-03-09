@@ -15,6 +15,7 @@ import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { LogTypeIcon } from "@/Components/LifeLog/LogTypeIcon";
 import { TrackIconDisplay } from "@/Components/LifeLog/TrackIconDisplay";
 import type { LifeLogLog } from "@/types/lifeLog.types";
+import type { Task } from "@/store/task/useTask.store";
 
 function LifeLogTabIcon({ tab, className }: { tab: BaseTab; className: string }) {
     const { tracks } = useLifeLogStore();
@@ -127,9 +128,53 @@ export function TabBar() {
     // Enable keyboard shortcuts
     useTabKeyboardShortcuts();
 
-    // Separate pinned and unpinned tabs
-    const pinnedTabs = openTabs.filter((tab) => tab.isPinned);
-    const unpinnedTabs = openTabs.filter((tab) => !tab.isPinned);
+    /**
+     * Group all tabs (pinned + unpinned) by task ownership.
+     * Each task tab is a group owner; tabs with openedBy.link === "sa/p{pId}/t{tId}"
+     * are its children. Groups render with an emerald stripe regardless of pin state.
+     * Original openTabs order is preserved.
+     */
+    const taskLinkToGroup = new Map<string, { taskTab: BaseTab; children: BaseTab[] }>();
+    openTabs.forEach((tab) => {
+        if (tab.type === constants.vscode.tab.tabTypes.task) {
+            const task = tab.data as Task;
+            const link = `sa/p${task.projectId}/t${task.id}`;
+            taskLinkToGroup.set(link, { taskTab: tab, children: [] });
+        }
+    });
+    openTabs.forEach((tab) => {
+        if (tab.type === constants.vscode.tab.tabTypes.task) return;
+        const link = tab.openedBy?.link;
+        if (link && taskLinkToGroup.has(link)) {
+            taskLinkToGroup.get(link)!.children.push(tab);
+        }
+    });
+    const childTabIds = new Set<string>();
+    taskLinkToGroup.forEach(({ children }) => children.forEach((c) => childTabIds.add(c.id)));
+
+    const renderAllTabs = () =>
+        openTabs.map((tab) => {
+            if (childTabIds.has(tab.id)) return null; // rendered inside group
+            const isPinned = !!tab.isPinned;
+            if (tab.type === constants.vscode.tab.tabTypes.task) {
+                const task = tab.data as Task;
+                const link = `sa/p${task.projectId}/t${task.id}`;
+                const group = taskLinkToGroup.get(link);
+                if (group && group.children.length > 0) {
+                    return (
+                        <div key={tab.id} className="flex items-stretch">
+                            <div className="w-0.5 bg-emerald-500/40 flex-shrink-0" />
+                            <div className="flex flex-wrap">
+                                {renderTab(tab, isPinned)}
+                                {group.children.map((child) => renderTab(child, isPinned))}
+                            </div>
+                            <div className="w-0.5 bg-emerald-500/20 flex-shrink-0" />
+                        </div>
+                    );
+                }
+            }
+            return renderTab(tab, isPinned);
+        });
 
     // Load pinned state from localStorage and apply to tabs
     useEffect(() => {
@@ -250,8 +295,7 @@ export function TabBar() {
                 </div>
             ) : openTabs.length > 0 ? (
                 <div className="flex-1 flex flex-wrap">
-                    {pinnedTabs.map((tab) => renderTab(tab, true))}
-                    {unpinnedTabs.map((tab) => renderTab(tab, false))}
+                    {renderAllTabs()}
                 </div>
             ) : (
                 <div className="px-4 w-full h-[35px] flex items-center">
