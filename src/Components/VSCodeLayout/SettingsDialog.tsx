@@ -7,6 +7,7 @@ import { useActivityBarStore, useAuthStore } from "@/store/index";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 import { keywordService } from "@/services/keyword.service";
 import type { KeywordSyncReport } from "@/types/keyword.types";
+import {useStandardRegistryHelper} from "@/hooks/index";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];
 
@@ -18,6 +19,7 @@ export function SettingsDialog() {
     const [isSyncing, setIsSyncing] = useState(false);
     const [syncReport, setSyncReport] = useState<KeywordSyncReport | null>(null);
     const [syncError, setSyncError] = useState<string | null>(null);
+    const { loadStandardRegistries, loadKeywords } = useStandardRegistryHelper();
 
     useEffect(() => {
         if (!settingsOpen) {
@@ -35,6 +37,7 @@ export function SettingsDialog() {
         } catch {
             setSyncError("Failed to sync keywords. Please try again.");
         } finally {
+            await loadKeywords();
             setIsSyncing(false);
         }
     };
