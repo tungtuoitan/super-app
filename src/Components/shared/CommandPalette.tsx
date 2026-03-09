@@ -11,6 +11,7 @@ import { HighlightedText } from "./HighlightedText";
 import { CommandPaletteKeyDown } from "@/HeadlessComponents/vsCode/CommandPaletteKeyDown";
 import { useGeneralStore } from "@/store/general/General.store";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import type { Keyword, KeywordType } from "@/types/keyword.types";
 
 const ALL_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];
@@ -28,7 +29,7 @@ const TYPE_LABELS: Record<KeywordType, string> = {
 };
 
 export function CommandPalette() {
-    const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword, alreadyLinkedIds } = useCommandPaletteStore();
+    const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword, alreadyLinkedIds, setAlreadyLinkedIds } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, close } = useCommandPaletteHelper();
     const { allKeywords } = useGeneralStore();
 
@@ -163,6 +164,9 @@ export function CommandPalette() {
                                         />
 
                                         {/* Name Column */}
+                                        <TooltipProvider delayDuration={500}>
+                                        <Tooltip>
+                                        <TooltipTrigger asChild>
                                         <div className="flex-1 min-w-0 flex items-center gap-2">
                                             <HighlightedText
                                                 text={keyword.name}
@@ -181,6 +185,13 @@ export function CommandPalette() {
                                             {isDisabled && <span className="text-xs text-red-400 bg-red-900/30 px-2 py-0.5 rounded flex-shrink-0">Deleted</span>}
                                             {isAlreadyLinked && <span className="text-xs text-green-400 bg-green-900/30 px-2 py-0.5 rounded flex-shrink-0">Linked</span>}
                                         </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom" align="start" className="text-left max-w-[360px] space-y-1 text-xs">
+                                            <p className="font-semibold text-white">Name: {keyword.name}</p>
+                                            {keyword.description && <p className="text-gray-300">Description: {keyword.description}</p>}
+                                        </TooltipContent>
+                                        </Tooltip>
+                                        </TooltipProvider>
 
                                         {/* Link button (link mode only, visible on hover) */}
                                         {isLinkMode && !isDisabled && !isAlreadyLinked && (
@@ -188,10 +199,14 @@ export function CommandPalette() {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     onLinkKeyword!(keyword);
-                                                    close();
+                                                    if (e.shiftKey) {
+                                                        setAlreadyLinkedIds(prev => new Set([...prev, keyword.id]));
+                                                    } else {
+                                                        close();
+                                                    }
                                                 }}
                                                 className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded text-xs text-blue-400 border border-blue-400/40 hover:bg-blue-400/10 transition-colors opacity-0 group-hover:opacity-100"
-                                                title="Link this keyword"
+                                                title="Link this keyword (Shift+Click to keep open)"
                                             >
                                                 <Link2 className="w-3 h-3" />
                                                 Link

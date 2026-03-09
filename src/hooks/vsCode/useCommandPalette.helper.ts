@@ -236,5 +236,6 @@ export const useCommandPaletteHelper = () => {
         handleSelectKeyword,
         close,
         openForLink,
+        resolveOpenedBy: _resolveOpenedBy,
     };
 };

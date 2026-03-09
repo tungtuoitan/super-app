@@ -10,6 +10,7 @@
 import { useEffect, useRef } from "react";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
 import { constants } from "@/utils/constants";
 import type { Task } from "@/store/task/useTask.store";
 import type { BaseTab } from "@/types/editor/tab.types";
@@ -17,6 +18,7 @@ import type { BaseTab } from "@/types/editor/tab.types";
 export const useTabKeyboardShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabsStore();
     const { closeTabs } = useEditorTabHelper();
+    const { openNewLogTab } = useLifeLogTabHelper();
     const ctrlKPressedRef = useRef(false);
 
     useEffect(() => {
@@ -97,6 +99,13 @@ export const useTabKeyboardShortcuts = () => {
                 closeTabs(tabIds);
                 return;
             }
+
+            // Ctrl+L - Create new log
+            if (isCtrlOrCmd && event.key.toLowerCase() === "l") {
+                event.preventDefault();
+                openNewLogTab();
+                return;
+            }
         };
 
         window.addEventListener("keydown", handleKeyDown);
@@ -104,5 +113,5 @@ export const useTabKeyboardShortcuts = () => {
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [openTabs, activeTabId, setOpenTabs, closeTabs]);
+    }, [openTabs, activeTabId, setOpenTabs, closeTabs, openNewLogTab]);
 };
