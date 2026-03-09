@@ -4,7 +4,7 @@
  * Displays status info and action buttons based on tab type and state
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Save, RotateCcw, Undo2 } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
@@ -14,15 +14,46 @@ import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
 import { constants } from "@/utils/constants";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
+import { useProjectStore } from "@/store/project/useProject.store";
+import { useAuthStore } from "@/store/auth/Auth.store";
+import { projectService } from "@/services/project.service";
 import { Breadcrumb } from "./Breadcrumb";
 import { BackButton } from "./BackButton";
+import type { Task } from "@/store/task/useTask.store";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorToolbarStore();
+    const { projects } = useProjectStore();
+    const { $user } = useAuthStore();
 
     // Get active tab
     const activeTab = getActiveTab();
+
+    // For task tabs without openedBy, derive back button pointing to their project
+    const [taskProjectOpenedBy, setTaskProjectOpenedBy] = useState<{ link: string; label: string } | undefined>(undefined);
+
+    useEffect(() => {
+        if (activeTab?.type !== constants.vscode.tab.tabTypes.task || activeTab.openedBy) {
+            setTaskProjectOpenedBy(undefined);
+            return;
+        }
+        const task = activeTab.data as Task;
+        const fromStore = projects.find(p => p.id === task.projectId);
+        if (fromStore) {
+            setTaskProjectOpenedBy({ link: `sa/p${task.projectId}`, label: fromStore.name });
+            return;
+        }
+        let cancelled = false;
+        projectService._getProjectById($user.userToken, task.projectId).then(res => {
+            if (!cancelled && res.success && res.data?.[0]) {
+                setTaskProjectOpenedBy({ link: `sa/p${task.projectId}`, label: res.data[0].name });
+            }
+        }).catch(() => {});
+        return () => { cancelled = true; };
+    }, [activeTab?.id, activeTab?.openedBy]);
+
+    const effectiveOpenedBy = activeTab?.openedBy ?? taskProjectOpenedBy;
 
     // Get toolbar actions for active tab
     const { upsertOrchestraitor, commonCancel, _deleteStatusText, _itemId } = useEditorToolbarHelper();
@@ -45,8 +76,8 @@ export function EditorToolbar() {
         <div className="h-6 flex items-center justify-between px-4 bg-black border-b border-white/5 gap-2">
             {/* Left: Back button + Breadcrumb */}
             <div className="flex items-center gap-2 flex-1 min-w-0">
-                {activeTab?.openedBy && (
-                    <BackButton openedBy={activeTab.openedBy} />
+                {effectiveOpenedBy && (
+                    <BackButton openedBy={effectiveOpenedBy} />
                 )}
                 {activeTab?.breadcrumb && activeTab.breadcrumb.length > 0 && (
                     <Breadcrumb items={activeTab.breadcrumb} />
