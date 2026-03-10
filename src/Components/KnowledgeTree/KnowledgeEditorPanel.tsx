@@ -60,7 +60,11 @@ function KnowledgeEditorPanelInner({ knowledgeId }: KnowledgeEditorPanelProps) {
     useEffect(() => {
         if (openAsKnowledgeCardId == null) return;
         const card = cards.find((c) => c.id === openAsKnowledgeCardId);
-        if (card) setBreadcrumbStack((prev) => [...prev, { id: card.id, title: card.title }]);
+        if (card) setBreadcrumbStack((prev) => {
+            // Không push nếu card đó đã là entry cuối cùng
+            if (prev[prev.length - 1]?.id === card.id) return prev;
+            return [...prev, { id: card.id, title: card.title }];
+        });
         setOpenAsKnowledgeCardId(null);
     }, [openAsKnowledgeCardId]);
 

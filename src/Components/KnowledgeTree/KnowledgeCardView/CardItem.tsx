@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
-import { Trash2, Check, GitBranch, Layers } from "lucide-react";
+import { Trash2, GitBranch } from "lucide-react";
 import type { KnowledgeCard } from "@/types/knowledgeTree.types";
 import { useKnowledgeCardStore } from "@/store/kt/KnowledgeCard.store";
 import { useKnowledgeCardHelper, isAncestor } from "@/hooks/kt/useKnowledgeCard.helper";
@@ -39,7 +39,7 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
     const {
         levelMap, parentIds,
         isHighlighted, isDimmed,
-        toggleSelect, selectByKeyword,
+        selectByKeyword,
     } = useKnowledgeCardHelper();
 
     const {
@@ -50,7 +50,6 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
     const level = levelMap.get(card.id) ?? 1;
     const highlighted = isHighlighted(card.id);
     const dimmed = isDimmed(card.id);
-    const hasChildren = parentIds.has(card.id);
     const isEditing = editingCardId === card.id;
     const isPickerOpen = parentPickerCardId === card.id;
     const parentCard = card.parentCardId != null ? cards.find((c) => c.id === card.parentCardId) : null;
@@ -88,60 +87,81 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
             : [...editDraft.linkedCardIds, id]
         );
 
-    // ── edit mode ─────────────────────────────────────────────────────────────
+    // ── edit mode — cùng cấu trúc layout với view mode ───────────────────────
 
     if (isEditing) {
         return (
-            <div className="rounded-lg border border-blue-500/50 bg-zinc-800/80 px-4 py-3.5 flex flex-col gap-2.5"
-                onMouseDown={(e) => e.stopPropagation()}>
-                <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono text-zinc-600 border border-zinc-700 rounded px-1.5 py-0.5">L{level}</span>
+            <div className={`rounded-lg border border-zinc-600 bg-zinc-800/60 flex flex-col ${CARD_HEIGHT}`}
+                onMouseDown={(e) => {
+                    const tag = (e.target as HTMLElement).tagName;
+                    if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "BUTTON") e.stopPropagation();
+                }}>
+
+                {/* header — giống view mode, thêm toggle def */}
+                <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-2 shrink-0">
+                    <span className="text-[10px] font-mono text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5 leading-none">
+                        L{level}
+                    </span>
                     <button onClick={() => setDraft("isDefinition", !editDraft.isDefinition)}
-                        className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors
-                            ${editDraft.isDefinition ? "border-green-600 bg-green-600/10 text-green-400" : "border-zinc-700 text-zinc-500 hover:border-zinc-500"}`}>
-                        <Check className="w-3 h-3" /> Definition
+                        className={`text-[10px] px-1.5 py-0.5 rounded border leading-none transition-colors
+                            ${editDraft.isDefinition
+                                ? "border-green-800 text-green-500 bg-green-900/20"
+                                : "border-zinc-700 text-zinc-600 hover:border-zinc-600 hover:text-zinc-400"}`}>
+                        {editDraft.isDefinition ? "✓ def" : "rel"}
                     </button>
+                    <div className="ml-auto flex items-center gap-1">
+                        <button onMouseDown={(e) => e.stopPropagation()} onClick={() => submitEdit(card, editDraft)}
+                            className="text-[11px] text-zinc-400 hover:text-zinc-100 px-1.5 py-0.5 rounded hover:bg-zinc-700 transition-colors">
+                            Save
+                        </button>
+                        <button onMouseDown={(e) => e.stopPropagation()} onClick={cancelEdit}
+                            className="text-[11px] text-zinc-600 hover:text-zinc-400 px-1.5 py-0.5 rounded transition-colors">
+                            ✕
+                        </button>
+                    </div>
                 </div>
-                <input autoFocus value={editDraft.title} onChange={(e) => setDraft("title", e.target.value)}
-                    placeholder="Title"
-                    className="w-full bg-transparent text-sm font-semibold text-zinc-100 outline-none"
-                    onKeyDown={(e) => { if (e.key === "Escape") cancelEdit(); }}
-                />
-                {editDraft.isDefinition && (
-                    <input value={editDraft.keyword} onChange={(e) => setDraft("keyword", e.target.value)}
-                        placeholder="Keyword cho [[link]] – mặc định dùng title"
-                        className="w-full bg-transparent text-xs text-zinc-500 outline-none border-b border-zinc-700 pb-1"
+
+                {/* title input — cùng vị trí với title view */}
+                <div className="px-4 shrink-0">
+                    <input
+                        autoFocus
+                        value={editDraft.title}
+                        onChange={(e) => setDraft("title", e.target.value)}
+                        placeholder="Title"
+                        className="w-full bg-transparent text-sm font-semibold text-zinc-100 text-left outline-none border-b border-zinc-700 pb-0.5"
+                        onKeyDown={(e) => { if (e.key === "Escape") cancelEdit(); if (e.key === "Enter") submitEdit(card, editDraft); }}
+                    />
+                </div>
+
+                {/* description textarea — cùng vùng scroll với view */}
+                <div className="px-4 pt-2 flex-1 min-h-0 overflow-y-auto">
+                    <AutoResizeTextarea
+                        value={editDraft.description}
+                        onChange={(v) => setDraft("description", v)}
+                        placeholder="Description…"
+                        className="text-xs text-zinc-400 leading-relaxed w-full text-left"
                         onKeyDown={(e) => { if (e.key === "Escape") cancelEdit(); }}
                     />
-                )}
-                <AutoResizeTextarea value={editDraft.description} onChange={(v) => setDraft("description", v)}
-                    placeholder="Description… dùng [[Keyword]] để link"
-                    className="text-sm text-zinc-400 leading-relaxed"
-                    onKeyDown={(e) => { if (e.key === "Escape") cancelEdit(); }}
-                />
-                {!editDraft.isDefinition && (
-                    <div>
-                        <div className="text-[11px] text-zinc-600 mb-1.5">Linked definitions</div>
-                        <div className="flex flex-wrap gap-1.5">
-                            {cards.filter((c) => c.isDefinition).map((c) => (
-                                <button key={c.id} onClick={() => toggleLinked(c.id)}
-                                    className={`text-xs px-2 py-0.5 rounded border transition-colors
-                                        ${editDraft.linkedCardIds.includes(c.id)
-                                            ? "border-blue-500 bg-blue-500/20 text-blue-300"
-                                            : "border-zinc-600 text-zinc-500 hover:border-zinc-500"}`}>
-                                    {c.title}
-                                </button>
-                            ))}
+                    {!editDraft.isDefinition && cards.filter((c) => c.isDefinition).length > 0 && (
+                        <div className="mt-2">
+                            <div className="text-[10px] text-zinc-600 mb-1">Linked</div>
+                            <div className="flex flex-wrap gap-1">
+                                {cards.filter((c) => c.isDefinition).map((c) => (
+                                    <button key={c.id} onClick={() => toggleLinked(c.id)}
+                                        className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors
+                                            ${editDraft.linkedCardIds.includes(c.id)
+                                                ? "border-blue-600 bg-blue-600/20 text-blue-300"
+                                                : "border-zinc-700 text-zinc-500 hover:border-zinc-500"}`}>
+                                        {c.title}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
-                <div className="flex gap-2">
-                    <button onClick={() => submitEdit(card, editDraft)}
-                        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-zinc-700 text-zinc-200 hover:bg-zinc-600">
-                        <Check className="w-3 h-3" /> Save
-                    </button>
-                    <button onClick={cancelEdit} className="text-xs px-2.5 py-1 rounded text-zinc-500 hover:text-zinc-300">Cancel</button>
+                    )}
                 </div>
+
+                {/* footer — cùng vị trí với footer view */}
+                <div className="px-4 pb-3 pt-2 shrink-0 border-t border-zinc-800/60" />
             </div>
         );
     }
@@ -160,7 +180,7 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
         : "border-zinc-700/50 bg-zinc-900 hover:border-zinc-600 hover:bg-zinc-800/60 cursor-grab";
 
     return (
-        <div ref={cardRef} className={`${cardBase} ${cardState}`} onClick={() => toggleSelect(card.id)}>
+        <div ref={cardRef} className={`${cardBase} ${cardState}`} onClick={() => setOpenAsKnowledgeCardId(card.id)}>
             {dropActive && (
                 <div className="absolute inset-0 rounded-lg flex items-center justify-center pointer-events-none z-10">
                     <span className="text-xs text-blue-300 bg-blue-900/80 px-2 py-1 rounded">Drop to set parent</span>
@@ -168,7 +188,7 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
             )}
 
             {/* header */}
-            <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-2 shrink-0">
+            <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-2 shrink-0 h-8">
                 <span className="text-[10px] font-mono text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5 leading-none">
                     L{level}
                 </span>
@@ -215,13 +235,6 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
                         />
                     )}
                 </div>
-                {hasChildren && (
-                    <button onClick={() => setOpenAsKnowledgeCardId(card.id)}
-                        className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-200 px-2 py-0.5 rounded border border-zinc-800 hover:border-zinc-600 transition-colors shrink-0">
-                        <Layers className="w-3 h-3" />
-                        Open
-                    </button>
-                )}
             </div>
         </div>
     );

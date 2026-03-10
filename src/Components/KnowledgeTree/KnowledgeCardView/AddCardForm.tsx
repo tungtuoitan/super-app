@@ -26,7 +26,11 @@ export function AddCardForm() {
         );
 
     return (
-        <div className="rounded-lg border border-blue-500/50 bg-zinc-800/80 flex flex-col h-52 overflow-hidden">
+        <div className="rounded-lg border border-blue-500/50 bg-zinc-800/80 flex flex-col h-52 overflow-hidden"
+            onMouseDown={(e) => {
+                const tag = (e.target as HTMLElement).tagName;
+                if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "BUTTON") e.stopPropagation();
+            }}>
             {/* scrollable content */}
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-3.5 flex flex-col gap-2.5">
                 <div className="flex items-center gap-2">
@@ -42,7 +46,8 @@ export function AddCardForm() {
                     className="w-full bg-transparent text-sm font-semibold text-zinc-100 outline-none shrink-0"
                     onKeyDown={(e) => { if (e.key === "Escape") cancelAddForm(); }}
                 />
-                {isDefinition && (
+                {/* keyword — ẩn tạm, triển khai sau */}
+                {false && isDefinition && (
                     <input value={keyword} onChange={(e) => set("keyword", e.target.value)}
                         placeholder="Keyword cho [[link]] – mặc định dùng title"
                         className="w-full bg-transparent text-xs placeholder:opacity-20 text-zinc-500 outline-none border-b border-zinc-700 pb-1 shrink-0"
@@ -87,11 +92,12 @@ export function AddCardForm() {
 
             {/* footer actions — cố định ở dưới */}
             <div className="shrink-0 flex gap-2 px-4 py-2.5 border-t border-zinc-800/60">
-                <button onClick={(e) => { e.stopPropagation(); submitAddForm(); }}
+                <button onMouseDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); submitAddForm(); }}
                     className="flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-zinc-700 text-zinc-200 hover:bg-zinc-600">
                     <Check className="w-3 h-3" /> Add
                 </button>
-                <button onClick={cancelAddForm} className="text-xs px-2.5 py-1 rounded text-zinc-500 hover:text-zinc-300">Cancel</button>
+                <button onMouseDown={(e) => e.stopPropagation()} onClick={cancelAddForm}
+                    className="text-xs px-2.5 py-1 rounded text-zinc-500 hover:text-zinc-300">Cancel</button>
             </div>
         </div>
     );
