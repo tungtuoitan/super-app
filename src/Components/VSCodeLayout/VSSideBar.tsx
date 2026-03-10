@@ -12,7 +12,7 @@ import { ProjectView } from "./ProjectView";
 import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { Console } from "./Console";
-import {KWorkspaceView} from "./KWorkspaceView";
+import {KWorkspaceView} from "./KView";
 
 interface VSSideBarProps {
     activeView: ActivityBarView;

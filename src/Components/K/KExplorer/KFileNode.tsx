@@ -4,7 +4,7 @@ import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react"
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
-import { KuseTreeHelper2 } from "@/hooks/Kworkspace/KuseTreeHelper2";
+import { KuseTreeHelper2 } from "@/hooks/K/useKTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { WorkspaceFileItem } from "@/types/workspace-v2.types";

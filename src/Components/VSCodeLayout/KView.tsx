@@ -12,9 +12,9 @@ import { FolderDialog } from "../Workspace/Explorer/FolderDialog/FolderDialog";
 import { NoteGridPopup } from "../Workspace/NoteGridPopup";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
-import {KuseWorkspaceHelper} from "@/hooks/Kworkspace/KuseWorkspaceHelper";
-import {useKWorkspaceStore} from "@/store/Kworkspace/KWorkspace.store";
-import {KuseWorkspaceLoader} from "@/hooks/Kworkspace";
+import {KuseWorkspaceHelper} from "@/hooks/K/useKHelper";
+import {useKWorkspaceStore} from "@/store/K/K.store";
+import {KuseWorkspaceLoader} from "@/hooks/K";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection

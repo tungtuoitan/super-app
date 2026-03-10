@@ -6,8 +6,8 @@
 import type { KTreeFolder } from "./Ktree.miniHelper";
 import { treeMiniHelper } from "./Ktree.miniHelper";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { KuseFolderDialogHelper } from "./KuseFolderDialog.helper";
-import { KuseWorkspaceLoader } from "./KuseWorkspace.loader";
+import { KuseFolderDialogHelper } from "./useKFolderDialog.helper";
+import { KuseWorkspaceLoader } from "./useK.loader";
 import { constants } from "@/utils/constants";
 import { workspaceService } from "@/services/workspace.service";
 import type { MoveItemsRequest } from "@/types/workspace.types";

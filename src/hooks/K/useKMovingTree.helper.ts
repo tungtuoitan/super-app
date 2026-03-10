@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import type { WorkspaceDTO } from "@/types/workspace-dto.types";
 import { workspaceService } from "@/services/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
-import { KuseWorkspaceLoader } from "@/hooks/Kworkspace/KuseWorkspace.loader";
+import { KuseWorkspaceLoader } from "@/hooks/K/useK.loader";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";

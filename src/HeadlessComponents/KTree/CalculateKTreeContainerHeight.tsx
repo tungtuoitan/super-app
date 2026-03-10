@@ -1,14 +1,14 @@
 /**
- * CalculateMovingTreeContainerHeight - Headless component for MovingTree
+ * WorkspaceTree - Tree component for Workspace Explorer
  * Tracks container height changes and updates store
  */
 
-import { useEffect } from "react";
-import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
+import React, { useEffect } from "react";
+import { useWorkspaceStore } from "@/store/index";
 
-export function CalculateMovingTreeContainerHeight() {
-    const { treeContainerRef, setContainerHeight,containerHeight } = useMovingTreeStore();
-    
+export function CalculateWorkspaceTreeContainerHeight() { 
+    const { treeContainerRef, setContainerHeight } = useWorkspaceStore();
+
     // Track container height to make Tree component responsive
     useEffect(() => {
         const updateHeight = () => {

@@ -4,11 +4,11 @@
 
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { KMoveItemsRequest, KDeleteItemsRequest, KWorkspaceOperationResult, KWorkspaceWithTreeResponse, KWsResponse, KUpsertWorkspaceItemRequest } from "@/types/Kworkspace.types";
+import type { KMoveItemsRequest, KDeleteItemsRequest, KWorkspaceOperationResult, KWorkspaceWithTreeResponse, KWsResponse, KUpsertWorkspaceItemRequest } from "@/types/K.types";
 import { constants } from "@/utils/constants";
 import _ from "lodash";
 import { ResultOptions } from "../types";
-import type { KWorkspaceDTO } from "@/types/Kworkspace-dto.types";
+import type { KWorkspaceDTO } from "@/types/K-dto.types";
 
 export interface KUpsertFolderRequest {
     id?: number | null;

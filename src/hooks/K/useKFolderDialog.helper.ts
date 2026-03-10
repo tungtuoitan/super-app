@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { workspaceService } from "@/services/workspace.service";
 import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.store";
 import type { Folder } from "@/types/folder.types";
-import { KuseWorkspaceLoader } from "./KuseWorkspace.loader";
+import { KuseWorkspaceLoader } from "./useK.loader";
 import { constants } from "@/utils/constants";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";

@@ -4,7 +4,7 @@ import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { workspaceService } from "@/services/workspace.service";
-import { KuseWorkspaceLoader } from "./KuseWorkspace.loader";
+import { KuseWorkspaceLoader } from "./useK.loader";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import type { UpsertWorkspaceItemRequest } from "@/types/workspace.types";
 import {useConsoleHelper} from "../console/useConsole.helper";

@@ -3,15 +3,15 @@
  * Extracted from VSSideBar for better separation of concerns
  */
 
-import { useKWorkspaceStore } from "@/store/Kworkspace/KWorkspace.store";
+import { useKWorkspaceStore } from "@/store/K/K.store";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useSnackbar } from "notistack";
-import { KuseWorkspaceItemHelper } from "@/hooks/Kworkspace/KuseWorkspaceItemHelper";
+import { KuseWorkspaceItemHelper } from "@/hooks/K/useKItemHelper";
 import { BaseTab } from "@/types/editor/tab.types";
 import { findNoteByEntityId } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { Note } from "@/types/index";
-import { KWorkspaceItemAction } from "@/types/Kworkspace.types";
+import { KWorkspaceItemAction } from "@/types/K.types";
 import {useConsoleHelper} from "../console/useConsole.helper";
 
 /**

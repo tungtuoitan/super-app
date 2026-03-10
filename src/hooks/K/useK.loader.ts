@@ -11,14 +11,14 @@
  * const { KloadAllWorkspaces, selectWorkspace } = KuseWorkspaceLoader();
  */
 
-import { useKWorkspaceStore } from "@/store/Kworkspace/KWorkspace.store";
-import { KWorkspaceService } from "@/services/Kworkspace.service";
+import { useKWorkspaceStore } from "@/store/K/K.store";
+import { KWorkspaceService } from "@/services/K.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useSnackbar } from "notistack";
 import {ResultOptions} from "@/types/common.types";
-import {KWorkspaceDTO} from "@/types/Kworkspace-dto.types";
-import { KWorkspaceItemV2 } from "@/types/Kworkspace-v2.types";
-import {KuseMovingTreeStore} from "@/store/Kworkspace/KMovingTree.store";
+import {KWorkspaceDTO} from "@/types/K-dto.types";
+import { KWorkspaceItemV2 } from "@/types/K-v2.types";
+import {KuseMovingTreeStore} from "@/store/K/KMovingTree.store";
 import {useConsoleHelper} from "../console/useConsole.helper";
 
 export const KuseWorkspaceLoader = () => {

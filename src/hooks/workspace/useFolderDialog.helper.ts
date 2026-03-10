@@ -11,7 +11,7 @@ import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegist
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { treeMiniHelper } from "./tree.miniHelper";
 import { isFolder } from "@/types/workspace-v2.types";
-import {KuseWorkspaceLoader} from "../Kworkspace";
+import {KuseWorkspaceLoader} from "../K";
 
 export const useFolderDialogHelper = () => {
     const _console = useConsoleHelper();

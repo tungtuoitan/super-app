@@ -1,4 +1,4 @@
-import { KWorkspaceItemV2 } from "./Kworkspace-v2.types";
+import { KWorkspaceItemV2 } from "./K-v2.types";
 
 /**
  * Unified KWorkspace DTO

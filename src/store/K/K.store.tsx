@@ -5,9 +5,9 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
-import type { KWsResponse } from "@/types/Kworkspace.types";
-import type { KWorkspaceDTO } from "@/types/Kworkspace-dto.types";
-import type { KTreeFolder } from "@/hooks/Kworkspace/Ktree.miniHelper";
+import type { KWsResponse } from "@/types/K.types";
+import type { KWorkspaceDTO } from "@/types/K-dto.types";
+import type { KTreeFolder } from "@/hooks/K/Ktree.miniHelper";
 
 export interface KWorkspaceContextData {
     // KWorkspace state
