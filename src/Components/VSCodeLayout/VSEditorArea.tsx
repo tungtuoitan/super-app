@@ -92,7 +92,7 @@ export function VSEditorArea() {
             <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">
                 {/* Knowledge tabs — tất cả mount cùng lúc, ẩn/hiện bằng hidden để giữ state riêng từng tab */}
                 {knowledgeTabs.map((tab) => (
-                    <div key={tab.id} hidden={tab.id !== activeTabId} className="flex-1 overflow-hidden flex">
+                    <div key={tab.id} className={`flex-1 overflow-hidden flex ${tab.id !== activeTabId ? "hidden" : ""}`}>
                         <KnowledgeEditorPanel knowledgeId={(tab.data as Knowledge).id} />
                     </div>
                 ))}

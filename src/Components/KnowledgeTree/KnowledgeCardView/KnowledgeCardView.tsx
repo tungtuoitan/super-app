@@ -32,13 +32,12 @@ export function KnowledgeCardView() {
                 </div>
             </div>
 
-            {adding && (
-                <div className="mb-4 max-w-xs" onMouseDown={(e) => e.stopPropagation()}>
-                    <AddCardForm />
-                </div>
-            )}
-
             <div className="grid grid-cols-4 gap-3">
+                {adding && (
+                    <div onMouseDown={(e) => e.stopPropagation()}>
+                        <AddCardForm />
+                    </div>
+                )}
                 {visibleCards.map((card) => (
                     <CardItem key={card.id} card={card} />
                 ))}

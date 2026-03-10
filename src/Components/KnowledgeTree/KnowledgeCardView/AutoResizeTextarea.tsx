@@ -15,7 +15,7 @@ export function AutoResizeTextarea({ value, onChange, placeholder, className, on
         <textarea ref={ref} rows={1} value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder} onKeyDown={onKeyDown}
-            className={`resize-none overflow-hidden bg-transparent outline-none w-full ${className}`}
+            className={`resize-none overflow-hidden bg-transparent placeholder:opacity-20 outline-none w-full ${className}`}
         />
     );
 }
