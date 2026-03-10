@@ -27,6 +27,11 @@ export const useGridAutoRegisterHelper = () => {
                     name: constants.modules.workspace,
                     filterViewKey: constants.filters.views.workspace as keyof import("@/types/common.types").UserFilters,
                 };
+            case "/Kworkspace":
+                return {
+                    name: constants.modules.Kworkspace,
+                    filterViewKey: constants.filters.views.Kworkspace as keyof import("@/types/common.types").UserFilters,
+                };
             case "/ws":
                 return {
                     name: constants.modules.ws,

@@ -20,7 +20,7 @@ export function CalculateWorkspaceTreeContainerHeight() {
                 }
             }
         };
- 
+
         // Initial height with delay to ensure DOM is ready
         setTimeout(updateHeight, 100);
 

@@ -17,6 +17,8 @@ const getViewFromRoute = (pathname: string): ActivityBarView | null => {
         case "/":
         case "/workspace":
             return constants.navigation.views.workspace;
+        case "/Kworkspace":
+            return constants.navigation.views.Kworkspace;
         case "/ws":
             return constants.navigation.views.ws;
         case "/notes":
@@ -37,6 +39,8 @@ const getRouteFromView = (view: ActivityBarView): string => {
     switch (view) {
         case constants.navigation.views.workspace:
             return "/workspace";
+        case constants.navigation.views.Kworkspace:
+            return "/Kworkspace";
         case constants.navigation.views.ws:
             return "/ws";
         case constants.navigation.views.note:

@@ -62,6 +62,7 @@ export default function MainNav() {
                             <Route path={constants.navigation.path.home} element={<Navigate to={constants.navigation.path.lifeLog} replace />} />
                             <Route path={constants.navigation.path.ws} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.workspace} element={<VSCodeLayout />} />
+                            <Route path={constants.navigation.path.Kworkspace} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.notes} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.project} element={<VSCodeLayout />} />
                             <Route path={constants.navigation.path.lifeLog} element={<VSCodeLayout />} />

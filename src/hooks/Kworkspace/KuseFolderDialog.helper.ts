@@ -5,15 +5,15 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { workspaceService } from "@/services/workspace.service";
 import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.store";
 import type { Folder } from "@/types/folder.types";
+import { KuseWorkspaceLoader } from "./KuseWorkspace.loader";
 import { constants } from "@/utils/constants";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
 import { useConsoleHelper } from "../console/useConsole.helper";
-import { treeMiniHelper } from "./tree.miniHelper";
+import { treeMiniHelper } from "./Ktree.miniHelper";
 import { isFolder } from "@/types/workspace-v2.types";
-import {KuseWorkspaceLoader} from "../Kworkspace";
 
-export const useFolderDialogHelper = () => {
+export const KuseFolderDialogHelper = () => {
     const _console = useConsoleHelper();
     const { loadTree } = KuseWorkspaceLoader();
     const { loadKeywords } = useStandardRegistryHelper();
@@ -22,7 +22,7 @@ export const useFolderDialogHelper = () => {
     const {
         mode,
         itemType,
-        setItemType,
+        setItemType, 
         editingFolder,
         parentFolder,
         setParentFolder,
@@ -158,7 +158,7 @@ export const useFolderDialogHelper = () => {
             // After tree reloads, find and select the new folder (only for create mode)
             if (mode === "create" && loadedWorkspace?.flatData) {
                 // Find the newly created folder by name and parentId
-                const newFolder = loadedWorkspace.flatData.find((item:any) =>
+                const newFolder = loadedWorkspace.flatData.find(item =>
                     isFolder(item) &&
                     item.data.name === createdFolderName &&
                     item.parentId === parentId

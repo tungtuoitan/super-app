@@ -14,6 +14,7 @@ export const constants = {
         path: {
             home: "/",
             workspace: "/workspace",
+            Kworkspace: "/Kworkspace",
             ws: "/ws",
             notes: "/notes",
             project: "/project",
@@ -21,6 +22,7 @@ export const constants = {
         } as const,
         views: {
             workspace: "workspace",
+            Kworkspace: "Kworkspace",
             ws: "ws",
             note: "note",
             project: "project",
@@ -43,6 +45,7 @@ export const constants = {
         },
         viewTypes: {
             workspace: "workspace",
+            Kworkspace: "Kworkspace",
             ws: "ws",
             note: "note",
             notes: "notes",
@@ -52,8 +55,9 @@ export const constants = {
         displayNames: {
             note: "Note",
             workspace: "Workspace",
-            ws: "All Workspaces",
+            Kworkspace: "Kworkspace",
             file: "File",
+            ws: "All Workspaces",
             folder: "Folder",
             notes: "Notes",
             project: "Projects",
@@ -153,6 +157,7 @@ export const constants = {
     modules: {
         note: "Note",
         workspace: "Workspace",
+        Kworkspace: "Kworkspace",
         ws: "Ws",
         task: "Task",
         project: "Project",
@@ -239,6 +244,7 @@ export const constants = {
             noteGrid: "noteGrid",
             wsGrid: "wsGrid",
             workspace: "workspace",
+            Kworkspace: "Kworkspace",
             projectGrid: "projectGrid",
         } as const,
 
@@ -253,6 +259,10 @@ export const constants = {
                 deletedAt: "null",
             },
             workspace: {
+                statusCode: "active",
+                deletedAt: "null",
+            },
+            Kworkspace: {
                 statusCode: "active",
                 deletedAt: "null",
             },
@@ -332,6 +342,21 @@ export const constants = {
                 },
             ],
             workspace: [
+                {
+                    key: "statusCode",
+                    label: "Status",
+                    type: "checkbox",
+                    standardRegistryType: "noteStatus", // Reuse noteStatus registry (notes/files have status, folders don't)
+                    defaultValue: "active",
+                },
+                {
+                    key: "deletedAt",
+                    label: "Deleted Status",
+                    type: "checkbox",
+                    defaultValue: "null",
+                },
+            ],
+            Kworkspace: [
                 {
                     key: "statusCode",
                     label: "Status",
@@ -493,6 +518,7 @@ export const constants = {
 // Type exports
 export type ActivityBarView =
     | typeof constants.navigation.views.workspace
+    | typeof constants.navigation.views.Kworkspace
     | typeof constants.navigation.views.ws
     | typeof constants.navigation.views.note
     | typeof constants.navigation.views.project

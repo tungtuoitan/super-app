@@ -15,7 +15,7 @@ export function CalculateMovingTreeContainerHeight() {
             if (treeContainerRef.current) {
                 const height = treeContainerRef.current.clientHeight;
                 // Ensure height is always a valid number
-                if (height && typeof height === "number" && height > 0) {
+                if (height && typeof height === "number" && height > 0) { 
                     setContainerHeight(height);
                 }
             }

@@ -28,7 +28,7 @@ export const useMovingTreeHelper = () => {
         treeContainerRef,
         containerHeight,
         setContainerHeight,
-        setTreeRenderKey,
+        setTreeRenderKey, 
     } = useMovingTreeStore();
 
     const { allWorkspaces, currentWorkspace, selectedItemIds, setSelectedItemIds } = useWorkspaceStore();
