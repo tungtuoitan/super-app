@@ -32,6 +32,7 @@ import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
 import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
+import { KtProvider } from "@/store/kt/useKt.store";
 
 /**
  * Main application layout component.
@@ -78,6 +79,7 @@ export function Main() {
                                                                                     <ProjectDetailProvider>
                                                                                     <TaskProvider>
                                                                                     <LifeLogProvider>
+                                                                                    <KtProvider>
                                                                                     <NoteDetailProvider>
                                                                                         <NoteGridProvider>
                                                                                             <EditorTabProvider>
@@ -104,6 +106,7 @@ export function Main() {
                                                                                             </EditorTabProvider>
                                                                                         </NoteGridProvider>
                                                                                     </NoteDetailProvider>
+                                                                                    </KtProvider>
                                                                                     </LifeLogProvider>
                                                                                     </TaskProvider>
                                                                                     </ProjectDetailProvider>

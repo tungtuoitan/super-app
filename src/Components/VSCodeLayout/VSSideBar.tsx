@@ -10,6 +10,7 @@ import { useActivityBarStore } from "@/store/index";
 import { WsView } from "./WsView";
 import { ProjectView } from "./ProjectView";
 import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
+import { KnowledgeTreeSidebarView } from "@/Components/KnowledgeTree/KnowledgeTreeSidebarView";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { Console } from "./Console";
 
@@ -62,7 +63,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                                 {/* Header */}
                                 <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                     <span>{getViewTitle(activeView)}</span>
-                                    <GridControlBar hideFilter={activeView === constants.vscode.viewTypes.lifeLog} />
+                                    <GridControlBar hideFilter={activeView === constants.vscode.viewTypes.lifeLog || activeView === constants.vscode.viewTypes.knowledgeTree} />
                                 </div>
 
                                 {/* Content */}
@@ -72,6 +73,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                                     {activeView === constants.vscode.viewTypes.note && <NotesView />}
                                     {activeView === constants.vscode.viewTypes.project && <ProjectView />}
                                     {activeView === constants.vscode.viewTypes.lifeLog && <LifeLogView />}
+                                    {activeView === constants.vscode.viewTypes.knowledgeTree && <KnowledgeTreeSidebarView />}
                                 </div>
                             </div>
                         </Panel>
@@ -114,6 +116,8 @@ function getViewTitle(view: ActivityBarView): string {
             return constants.vscode.displayNames.project;
         case constants.vscode.viewTypes.lifeLog:
             return constants.vscode.displayNames.lifeLog;
+        case constants.vscode.viewTypes.knowledgeTree:
+            return constants.vscode.displayNames.knowledgeTree;
         default:
             return "View";
     }

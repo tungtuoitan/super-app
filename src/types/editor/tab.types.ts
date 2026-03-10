@@ -9,10 +9,11 @@ import { TrackingGraphTabData } from "@/types/tracking.types";
 import { Project } from "@/store/project/useProject.store";
 import { Task } from "@/store/task/useTask.store";
 import { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+import { Knowledge } from "@/types/knowledgeTree.types";
 import { constants } from "@/utils/constants";
 import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
 
-export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | typeof constants.vscode.tab.tabTypes.trackingGraph | typeof constants.vscode.tab.tabTypes.project | typeof constants.vscode.tab.tabTypes.multiProject | typeof constants.vscode.tab.tabTypes.task | typeof constants.vscode.tab.tabTypes.lifeLog | typeof constants.vscode.tab.tabTypes.lifeLogGraph | typeof constants.vscode.tab.tabTypes.lifeLogTrack | "folder" | "settings";
+export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | typeof constants.vscode.tab.tabTypes.trackingGraph | typeof constants.vscode.tab.tabTypes.project | typeof constants.vscode.tab.tabTypes.multiProject | typeof constants.vscode.tab.tabTypes.task | typeof constants.vscode.tab.tabTypes.lifeLog | typeof constants.vscode.tab.tabTypes.lifeLogGraph | typeof constants.vscode.tab.tabTypes.lifeLogTrack | typeof constants.vscode.tab.tabTypes.knowledgeTree | "folder" | "settings";
 
 /**
  * Data type for multi-project tab
@@ -51,8 +52,8 @@ export interface TabViewState {
 
 export interface BaseTab {
     id: string;
-    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack;
-    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack;
+    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | Knowledge;
+    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | Knowledge;
     type: TabType;
     title: string;
     hasUnsavedChanges?: boolean;

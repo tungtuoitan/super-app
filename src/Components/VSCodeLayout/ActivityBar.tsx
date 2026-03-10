@@ -1,4 +1,4 @@
-import { Folder, FileText, Settings, Boxes, UserCircle, Cuboid, Feather, Footprints, AudioWaveform, Spline, RulerDimensionLine, Ruler, Clover, Shell } from "lucide-react";
+import { Folder, FileText, Settings, Boxes, UserCircle, Cuboid, Shell, LibraryBig } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { SettingsDialog } from "./SettingsDialog";
 import { AccountsDialog } from "./AccountsDialog";
@@ -12,8 +12,9 @@ const activityModules = [
     { id: constants.vscode.viewTypes.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
     { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
     { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
-    { id: constants.vscode.viewTypes.project, icon: Cuboid, label: constants.vscode.displayNames.project },
+    { id: constants.vscode.viewTypes.project, icon: Cuboid, label: constants.vscode.displayNames.project }, 
     { id: constants.vscode.viewTypes.lifeLog, icon: Shell, label: constants.vscode.displayNames.lifeLog },
+    { id: constants.vscode.viewTypes.knowledgeTree, icon: LibraryBig, label: constants.vscode.displayNames.knowledgeTree },
 ];
 
 interface ActivityBarProps {

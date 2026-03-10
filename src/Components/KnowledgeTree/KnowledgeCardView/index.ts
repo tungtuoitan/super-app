@@ -1,0 +1,1 @@
+export { KnowledgeCardView } from "./KnowledgeCardView";

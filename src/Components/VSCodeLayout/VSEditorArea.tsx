@@ -11,6 +11,8 @@ import { TaskEditorPanel } from "@/Components/Project/TaskEditorPanel";
 import { LogEditorPanel } from "@/Components/LifeLog/LogEditorPanel";
 import { LifeLogGraphPanel } from "@/Components/LifeLog/LifeLogGraphPanel";
 import { TrackEditorPanel } from "@/Components/LifeLog/TrackEditorPanel";
+import { KnowledgeEditorPanel } from "@/Components/KnowledgeTree/KnowledgeEditorPanel";
+import { Knowledge } from "@/types/knowledgeTree.types";
 import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
@@ -36,6 +38,9 @@ export function VSEditorArea() {
 
     // Get active tab
     const activeTab = getActiveTab();
+
+    // knowledge tabs — render tất cả, ẩn bằng hidden để giữ state mỗi tab riêng biệt
+    const knowledgeTabs = openTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.knowledgeTree);
 
     const handleCloseTab = (event: React.MouseEvent, tabId: string) => {
         event.stopPropagation();
@@ -79,13 +84,21 @@ export function VSEditorArea() {
             <TabBar />
 
             {/* Shared Toolbar - not shown for tracking graph or lifelog tabs */}
-            {activeTab && 
-            activeTab.type !== constants.vscode.tab.tabTypes.trackingGraph && <EditorToolbar />}
+            {activeTab &&
+            activeTab.type !== constants.vscode.tab.tabTypes.trackingGraph &&
+            activeTab.type !== constants.vscode.tab.tabTypes.knowledgeTree && <EditorToolbar />}
 
             {/* Main content area */}
             <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">
-                {activeTab ? (
-                    // Render appropriate editor based on tab type
+                {/* Knowledge tabs — tất cả mount cùng lúc, ẩn/hiện bằng hidden để giữ state riêng từng tab */}
+                {knowledgeTabs.map((tab) => (
+                    <div key={tab.id} hidden={tab.id !== activeTabId} className="flex-1 overflow-hidden flex">
+                        <KnowledgeEditorPanel knowledgeId={(tab.data as Knowledge).id} />
+                    </div>
+                ))}
+
+                {/* Các tab khác — render tab đang active */}
+                {activeTab && activeTab.type !== constants.vscode.tab.tabTypes.knowledgeTree ? (
                     <>
                         {activeTab.type === constants.vscode.tab.tabTypes.note && <NoteEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.workspace && <WsEditorPanel tab={activeTab} />}
@@ -97,7 +110,7 @@ export function VSEditorArea() {
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogGraph && <LifeLogGraphPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogTrack && <TrackEditorPanel tab={activeTab} />}
                     </>
-                ) : (
+                ) : !activeTab ? (
                     // Welcome/empty state
                     <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
                         <div className="text-center">
@@ -105,7 +118,7 @@ export function VSEditorArea() {
                             <p className="text-sm">Select a note from the sidebar to view its details</p>
                         </div>
                     </div>
-                )}
+                ) : null}
             </div>
 
             {/* Confirm close dialog */}

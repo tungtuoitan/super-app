@@ -18,6 +18,7 @@ export const constants = {
             notes: "/notes",
             project: "/project",
             lifeLog: "/lifelog",
+            knowledgeTree: "/knowledge",
         } as const,
         views: {
             workspace: "workspace",
@@ -25,6 +26,7 @@ export const constants = {
             note: "note",
             project: "project",
             lifeLog: "lifeLog",
+            knowledgeTree: "knowledgeTree",
         } as const,
     },
     vscode: {
@@ -39,6 +41,7 @@ export const constants = {
                 lifeLog: "lifeLog",
                 lifeLogGraph: "lifeLogGraph",
                 lifeLogTrack: "lifeLogTrack",
+                knowledgeTree: "knowledgeTree",
             } as const,
         },
         viewTypes: {
@@ -48,6 +51,7 @@ export const constants = {
             notes: "notes",
             project: "project",
             lifeLog: "lifeLog",
+            knowledgeTree: "knowledgeTree",
         } as const,
         displayNames: {
             note: "Note",
@@ -58,6 +62,7 @@ export const constants = {
             notes: "Notes",
             project: "Projects",
             lifeLog: "LifeLog",
+            knowledgeTree: "Knowledge",
         } as const,
         tabTitles: {
             unsavedNote: "Unsaved Note",
@@ -496,4 +501,5 @@ export type ActivityBarView =
     | typeof constants.navigation.views.ws
     | typeof constants.navigation.views.note
     | typeof constants.navigation.views.project
-    | typeof constants.navigation.views.lifeLog;
+    | typeof constants.navigation.views.lifeLog
+    | typeof constants.navigation.views.knowledgeTree;
