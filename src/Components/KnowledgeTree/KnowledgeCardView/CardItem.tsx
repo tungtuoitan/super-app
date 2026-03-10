@@ -23,6 +23,21 @@ function renderWithLinks(text: string, onKeywordClick: (kw: string) => void) {
 }
 
 
+// Background tối dần theo level, L3+ thêm opacity 50
+// DÙNG OPACITY
+// function getLevelStyle(level: number): { className: string; style?: React.CSSProperties } {
+//     if (level === 1) return { className: "",            style: { backgroundColor: "#111318" } };
+//     if (level === 2) return { className: "opacity-80",            style: { backgroundColor: "#13151a" } };
+//     if (level === 3) return { className: "opacity-50",            style: { backgroundColor: "#16181D" } };
+//     return             { className: "opacity-50",       style: { backgroundColor: "#1B1D23" } };
+// }
+// DÙNG MÀU
+function getLevelStyle(level: number): { className: string; style?: React.CSSProperties } {
+    if (level === 1) return { className: "",            style: { backgroundColor: "#111318" } };
+    if (level === 2) return { className: "",            style: { backgroundColor: "#14171C" } };
+    if (level === 3) return { className: "",            style: { backgroundColor: "#181A20" } };
+    return             { className: "",       style: { backgroundColor: "#1B1D23" } };
+}
 const DND_TYPE = "KNOWLEDGE_CARD";
 const CARD_HEIGHT = "h-52";
 
@@ -90,8 +105,10 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
     // ── edit mode — cùng cấu trúc layout với view mode ───────────────────────
 
     if (isEditing) {
+        const ls = getLevelStyle(level);
         return (
-            <div className={`rounded-lg border border-zinc-600 bg-zinc-800/60 flex flex-col ${CARD_HEIGHT}`}
+            <div className={`rounded-lg border border-zinc-600 flex flex-col ${CARD_HEIGHT} ${ls.className}`}
+                style={ls.style}
                 onMouseDown={(e) => {
                     const tag = (e.target as HTMLElement).tagName;
                     if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "BUTTON") e.stopPropagation();
@@ -168,19 +185,22 @@ export function CardItem({ card }: { card: KnowledgeCard }) {
 
     // ── view mode ─────────────────────────────────────────────────────────────
 
-    const cardBase = `group relative rounded-lg border flex flex-col ${CARD_HEIGHT} transition-all duration-150`;
+    const ls = getLevelStyle(level);
+    const cardBase = `group relative rounded-lg border flex flex-col ${CARD_HEIGHT} transition-all duration-150 ${ls.className}`;
     const cardState = dropActive
-        ? "border-blue-400 bg-blue-500/10 cursor-copy"
+        ? "border-blue-400 cursor-copy"
         : isDragging
-        ? "border-zinc-700 bg-zinc-900 opacity-40 cursor-grabbing"
+        ? "border-zinc-700 opacity-40 cursor-grabbing"
         : highlighted
-        ? "border-zinc-400 bg-zinc-800 cursor-pointer"
+        ? "border-zinc-400 cursor-pointer"
         : dimmed
-        ? "border-zinc-800 bg-transparent opacity-30 pointer-events-none"
-        : "border-zinc-700/50 bg-zinc-900 hover:border-zinc-600 hover:bg-zinc-800/60 cursor-grab";
+        ? "border-zinc-800 opacity-30 pointer-events-none"
+        : "border-zinc-700/50 hover:border-zinc-600 cursor-grab";
 
     return (
-        <div ref={cardRef} className={`${cardBase} ${cardState}`} onClick={() => setOpenAsKnowledgeCardId(card.id)}>
+        <div ref={cardRef} className={`${cardBase} ${cardState}`}
+            style={ls.style}
+            onClick={() => setOpenAsKnowledgeCardId(card.id)}>
             {dropActive && (
                 <div className="absolute inset-0 rounded-lg flex items-center justify-center pointer-events-none z-10">
                     <span className="text-xs text-blue-300 bg-blue-900/80 px-2 py-1 rounded">Drop to set parent</span>
