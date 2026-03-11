@@ -1,21 +1,21 @@
 import React from "react";
 import { useSnackbar } from "notistack";
-import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useKMovingTreeStore } from "../store/KMovingTree.store";
+import { useKStore } from "../store/K.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import type { WorkspaceDTO } from "@/types/workspace-dto.types";
-import { workspaceService } from "@/services/workspace.service";
-import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
-import { useKLoader } from "@/Components/K/hooks/useK.loader";
+import { KService } from "../service/K.service";
+import { KItemAction, KUpsertWorkspaceItemRequest } from "../types/K.types";
+import { useKLoader } from "./useK.loader";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { useDragDropManager } from "react-dnd";
-import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";
-import { constants } from "@/utils/constants";
-import { SPECIAL_IDS } from "@/utils/temp-id.utils";
-import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import { isFolder as isFolderV2, KItemV2 } from "../types/K-v2.types";
+import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
+import {KWorkspaceDTO} from "../types/K-dto.types";
+import {KtreeMiniHelper} from "./Ktree.miniHelper";
+import {kconstants} from "../utils/K.Constants";
+import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
-export const useMovingTreeHelper = () => {
+export const useKMovingTreeHelper = () => {
     const {
         targetWorkspaceId,
         setTargetWorkspaceId,
@@ -28,10 +28,10 @@ export const useMovingTreeHelper = () => {
         treeContainerRef,
         containerHeight,
         setContainerHeight,
-        setTreeRenderKey,
-    } = useMovingTreeStore();
+        setTreeRenderKey, 
+    } = useKMovingTreeStore();
 
-    const { allWorkspaces, currentWorkspace, selectedItemIds, setSelectedItemIds } = useWorkspaceStore();
+    const { allWorkspaces, currentWorkspace, selectedItemIds, setSelectedItemIds } = useKStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { loadTree } = useKLoader();
@@ -62,9 +62,9 @@ export const useMovingTreeHelper = () => {
         setIsLoadingTargetTree(true);
 
         try {
-            const result = await workspaceService._getWorkspaceTreeV2($user.userToken, targetWorkspaceId);
+            const result = await KService._getWorkspaceTreeV2($user.userToken, targetWorkspaceId);
             if (result.success && result.object) {
-                setTargetWorkspace(result.object as WorkspaceDTO);
+                setTargetWorkspace(result.object as KWorkspaceDTO);
             } else {
                 throw new Error(result.message || "Failed to load target workspace");
             }
@@ -148,7 +148,7 @@ export const useMovingTreeHelper = () => {
         };
     };
 
-    // Handle cross-tree drop from WorkspaceTree
+    // Handle cross-tree drop from KTree
     const dropToMovingTree = async (args: any) => {
         try {
             // STEP 1: Extract dragged item from DnD monitor (for cross-tree drops, args.dragIds is empty)
@@ -171,7 +171,7 @@ export const useMovingTreeHelper = () => {
                     targetId = null;
                 }
                 // Check if parent node is a folder
-                else if (isFolderV2(parentNodeData as unknown as WorkspaceItemV2)) {
+                else if (isFolderV2(parentNodeData as unknown as KItemV2)) {
                     // Drop into folder → use folder's entityId
                     targetId = parentNodeData.id;
                 } else {
@@ -261,7 +261,7 @@ export const useMovingTreeHelper = () => {
                 }
 
                 // STEP 5.1: Prevent dragging root node
-                const hasRootNode = itemIds.includes(constants.workspace.root.workspaceItemId);
+                const hasRootNode = itemIds.includes(kconstants.workspace.root.KworkspaceItemId);
                 if (hasRootNode) {
                     _console.error("Cannot move workspace root node");
                     return;
@@ -271,10 +271,10 @@ export const useMovingTreeHelper = () => {
                 // Example: If selecting folder A and its subfolder B, only move A (B will follow automatically)
 
                 // Build tree data from current workspace for hierarchy checking
-                const currentTreeData = currentWorkspace ? treeMiniHelper.transformToTreeData(currentWorkspace, "") : [];
+                const currentTreeData = currentWorkspace ? KtreeMiniHelper.transformToTreeData(currentWorkspace, "") : [];
 
                 // Filter to get only top-level parent IDs
-                const topLevelItemIds = treeMiniHelper.filterTopLevelParents(itemIds, currentTreeData);
+                const topLevelItemIds = KtreeMiniHelper.filterTopLevelParents(itemIds, currentTreeData);
                 if (topLevelItemIds.length === 0) {
                     _console.error("No valid items to move");
                     return;
@@ -298,15 +298,15 @@ export const useMovingTreeHelper = () => {
                     return;
                 }
 
-                const requests: UpsertWorkspaceItemRequest[] = itemsToMove.map((itemId: number) => ({
-                    action: WorkspaceItemAction.MoveCross,
+                const requests: KUpsertWorkspaceItemRequest[] = itemsToMove.map((itemId: number) => ({
+                    action: KItemAction.MoveCross,
                     id: itemId,
                     workspaceId: targetWorkspaceId,
                     parentId: targetId, // null = root, number = specific folder
                 }));
 
                 // STEP 7: Call batch API
-                const result = await workspaceService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
+                const result = await KService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
 
                 if (result.success) {
                     _console.success(`Moved ${itemsToMove.length} item(s) to target workspace`);
@@ -375,3 +375,4 @@ export const useMovingTreeHelper = () => {
         checkAndHighlightDuplicates,
     };
 };
+

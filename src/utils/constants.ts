@@ -77,12 +77,15 @@ export const constants = {
             workspace: "workspace",
             file: "file",
             folder: "folder",
+            Kfolder: "k-folder",
         } as const,
 
         // Virtual node IDs for workspace root
         root: {
             workspaceItemId: -12345, // workspace_items.id for root node
+            KworkspaceItemId: -12345, // workspace_items.id for root node
             entityId: -12345, // folders.id for root node (same value for simplicity)
+            KentityId: -12345, // folders.id for root node (same value for simplicity)
         },
 
         // Virtual node IDs for drop zone
@@ -117,6 +120,9 @@ export const constants = {
             tab: "tab",
             lifeLogLog: "lifelog-log",
             lifeLogTrack: "lifelog-track",
+            kFolder: "k-folder",
+            kNote: "k-note",
+            kFile: "k-file",
         } as const,
     },
 

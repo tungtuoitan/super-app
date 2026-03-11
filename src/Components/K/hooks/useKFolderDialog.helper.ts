@@ -1,19 +1,19 @@
-import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
-import type { ItemType } from "@/store/workspace/FolderDialog.store";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { KuseFolderDialogStore } from "../store/KFolderDialog.store";
+import type { ItemType } from "../store/KFolderDialog.store";
+import { useKStore } from "../store/K.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { workspaceService } from "@/services/workspace.service";
-import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.store";
-import type { Folder } from "@/types/folder.types";
-import { constants } from "@/utils/constants";
-import { WorkspaceItemAction } from "@/types/workspace.types";
-import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
-import { useConsoleHelper } from "../console/useConsole.helper";
-import { treeMiniHelper } from "./tree.miniHelper";
-import { isFolder } from "@/types/workspace-v2.types";
-import {useKLoader} from "@/Components/K/hooks";
+import { KService } from "../service/K.service";
+import type { FolderDialogFormErrors } from "../store/KFolderDialog.store";
+import { useKLoader } from "./useK.loader";
+import { KItemAction } from "../types/K.types";
+import { useStandardRegistryHelper } from "../../../hooks/standardRegistry/useStandardRegistry.helper";
+import { useConsoleHelper } from "../../../hooks/console/useConsole.helper";
+import { isFolder } from "../types/K-v2.types";
+import {KtreeMiniHelper} from "./Ktree.miniHelper";
+import {kconstants} from "../utils/K.Constants";
+import {Folder} from "../types";
 
-export const useFolderDialogHelper = () => {
+export const KuseFolderDialogHelper = () => {
     const _console = useConsoleHelper();
     const { loadTree } = useKLoader();
     const { loadKeywords } = useStandardRegistryHelper();
@@ -22,7 +22,7 @@ export const useFolderDialogHelper = () => {
     const {
         mode,
         itemType,
-        setItemType,
+        setItemType, 
         editingFolder,
         parentFolder,
         setParentFolder,
@@ -40,10 +40,10 @@ export const useFolderDialogHelper = () => {
         setDescription,
         setColor,
         setIcon,
-    } = useFolderDialogStore();
+    } = KuseFolderDialogStore();
 
     // Workspace state
-    const { currentWorkspace, treeData, _treeRef, setSelectedItemIds, setLastSelectedItemId, setScrollToItem } = useWorkspaceStore();
+    const { currentWorkspace, treeData, _treeRef, setSelectedItemIds, setLastSelectedItemId, setScrollToItem } = useKStore();
 
     // Auth
     const { $user } = useAuthStore();
@@ -58,7 +58,7 @@ export const useFolderDialogHelper = () => {
     const resetForm = () => {
         setNewFolderName("");
         setDescription("");
-        setColor(constants.color[0].value); // Reset to default color
+        setColor(kconstants.color[0].value); // Reset to default color
         setIcon(null);
         setErrors({});
         setIsSubmitting(false);
@@ -109,8 +109,8 @@ export const useFolderDialogHelper = () => {
             // Prepare batch request with action-based API
             if (mode === "edit") {
                 // UPDATE action: update existing folder
-                await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
-                    action: WorkspaceItemAction.UpdateFolder,
+                await KService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
+                    action: KItemAction.UpdateFolder,
                     id: editingFolder!.id,
                     folderData: {
                         name: newFolderName.trim(),
@@ -127,8 +127,8 @@ export const useFolderDialogHelper = () => {
                     ? (parentFolder as any).id
                     : null;
 
-                await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
-                    action: WorkspaceItemAction.Create,
+                await KService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
+                    action: KItemAction.Create,
                     entityType: 2, // Folder
                     parentId: parentWorkspaceItemId, // ✅ Use parent's workspace_items.id (NOT entityId!)
                     folderData: {
@@ -158,7 +158,7 @@ export const useFolderDialogHelper = () => {
             // After tree reloads, find and select the new folder (only for create mode)
             if (mode === "create" && loadedWorkspace?.flatData) {
                 // Find the newly created folder by name and parentId
-                const newFolder = loadedWorkspace.flatData.find((item:any) =>
+                const newFolder = loadedWorkspace.flatData.find(item =>
                     isFolder(item) &&
                     item.data.name === createdFolderName &&
                     item.parentId === parentId
@@ -174,9 +174,9 @@ export const useFolderDialogHelper = () => {
 
                     // Get updated tree data and expand path to the new folder
                     setTimeout(async () => {
-                        const updatedTreeData = treeMiniHelper.transformToTreeData(loadedWorkspace, "");
+                        const updatedTreeData = KtreeMiniHelper.transformToTreeData(loadedWorkspace, "");
                         if (updatedTreeData.length > 0) {
-                            await treeMiniHelper.expandPathToItem(_treeRef, updatedTreeData, newFolderId);
+                            await KtreeMiniHelper.expandPathToItem(_treeRef, updatedTreeData, newFolderId);
                         }
                     }, 100);
                 }
@@ -201,7 +201,7 @@ export const useFolderDialogHelper = () => {
      * @param folder - For edit mode: folder to edit (required). For create mode: unused
      * @param parentFolder - For create mode: parent folder (optional). For edit mode: unused
      */
-    const openFolderDialog = (dialogMode: "create" | "edit", type: ItemType = constants.workspace.itemTypes.folder, folder?: Folder | null, parentFolder?: Folder | null) => {
+    const openFolderDialog = (dialogMode: "create" | "edit", type: ItemType = kconstants.workspace.itemTypes.folder, folder?: Folder | null, parentFolder?: Folder | null) => {
         setMode(dialogMode);
         setItemType(type);
 
@@ -228,7 +228,7 @@ export const useFolderDialogHelper = () => {
             const folderData = (folder as any).data || folder;
             setNewFolderName(folderData.name || "");
             setDescription(folderData.description || "");
-            setColor(folderData.color || constants.color[0].value);
+            setColor(folderData.color || kconstants.color[0].value);
             setIcon(folderData.icon || null);
         }
 
@@ -262,3 +262,5 @@ export const useFolderDialogHelper = () => {
         submitFolder,
     };
 };
+
+
