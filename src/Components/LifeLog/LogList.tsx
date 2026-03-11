@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useCallback } from "react";
-import { Plus, RefreshCw, Loader2, BarChart2 } from "lucide-react";
+import { Plus, RefreshCw, Loader2, BarChart2, PlusCircle, NotebookPen } from "lucide-react";
 import { useLifeLogLogHelper } from "@/hooks/lifeLog/useLifeLogLog.helper";
 import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
 import { LogItem } from "./LogItem";
@@ -48,7 +48,7 @@ export function LogList() {
     }, [openNewTrackTab]);
 
     return (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full overflow-hidden relative">
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-1.5 flex-shrink-0">
                 <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Logs {activeLogs.length > 0 && `(${activeLogs.length})`}</span>
@@ -67,18 +67,39 @@ export function LogList() {
                         >
                         <BarChart2 className={isMobile ? "w-3.5 h-3.5" : "w-3.5 h-3.5"} />
                     </button>
-                    <button
+                    {/* <button
                         onClick={() => handleAddTrack()}
                         className={`rounded border border-border  text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-1"}`}
                         title="Add track"
                         >
                         <Plus className={isMobile ? "w-3.5 h-3.5" : "w-3.5 h-3.5"} />
-                    </button>
+                    </button> */}
                 </div>
             </div>
 
+<div
+  onClick={handleAddLog}
+  className="
+    absolute bottom-4 right-4 border-[rgb(251, 191, 36)]
+    flex items-center justify-center
+    h-12 w-12
+    rounded-2xl
+    bg-background/80
+    backdrop-blur-xl
+    border border-border
+    shadow-lg shadow-black/5
+    hover:bg-accent
+    hover:border-yellow-400/20
+    hover:shadow-xl
+    hover:-translate-y-0.5
+    transition-all duration-200
+    cursor-pointer
+  "
+>
+  <NotebookPen className="w-5 h-5" style={{color: 'rgb(251, 191, 36)'}} />
+</div>
             {/* Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto ">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-24">
                         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
