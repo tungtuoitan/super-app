@@ -40,17 +40,6 @@ export function TrackPanel() {
         <div className="border-b border-border flex-shrink-0 flex items-center" style={{ borderTop: "1px solid rgb(63, 63, 70)" }}>
             {/* Scrollable track list */}
             <div className="flex-1 flex  overflow-x-auto scrollbar-hide items-left min-w-0">
-                <button
-                    onClick={() => openNewLogTab()}
-                    className={`flex flex-col justify-center items-center gap-1 rounded-lg border transition-all bg-muted/30 border-border hover:bg-muted/60 hover:border-primary/30 cursor-pointer select-none flex-shrink-0 ${isMobile ? "w-[76px] px-2 py-3" : "w-[60px] px-2 py-2"}`}
-                    title="Add New Log"
-                >
-                    <div className="bg-green-900x border-gray-600 border rounded-[20%] w-7 h-7 flex items-center justify-center">
-
-                        <Plus className={isMobile ? "w-5 h-5 spin text-muted-foreground" : "w-4 h-4 text-muted-foreground"} />
-                    </div>
-                    <span className="text-[9px] text-center leading-tight text-muted-foreground">New Log</span>
-                </button>
                  
                 {sortedTracks.length === 0 && (
                     <p className="text-xs text-muted-foreground italic flex-shrink-0">No tracks yet.</p>
@@ -58,6 +47,16 @@ export function TrackPanel() {
                 {sortedTracks.map((track) => (
                     <TrackItem key={track.id} track={track} />
                 ))}
+                <button
+                    onClick={() => openNewTrackTab()}
+                    className={`flex flex-col justify-center items-center gap-1 rounded-lg border transition-all bg-muted/30 border-border hover:bg-muted/60 hover:border-primary/30 cursor-pointer select-none flex-shrink-0 ${isMobile ? "w-[76px] px-2 py-3" : "w-[60px] px-2 py-2"}`}
+                    title="Add New Track"
+                >
+                    <div className="bg-green-900x border-gray-600 border rounded-[20%] w-7 h-7 flex items-center justify-center">
+                        <Plus className={isMobile ? "w-5 h-5 spin text-muted-foreground" : "w-4 h-4 text-muted-foreground"} />
+                    </div>
+                    <span className="text-[9px] text-center leading-tight text-muted-foreground">New Track</span>
+                </button>
             </div>
 
             {/* Fixed buttons on the right */}

@@ -86,7 +86,7 @@ export function TrackGeneral({ trackId, tabId }: TrackGeneralProps) {
                     value={track.description ?? ""}
                     onChange={(e) => handleFieldChange("description", e.target.value)}
                     placeholder="Short description..."
-                    rows={2}
+                    rows={6}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground"
                 />
             </div>

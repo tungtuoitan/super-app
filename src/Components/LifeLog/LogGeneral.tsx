@@ -49,7 +49,7 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
             {/* Icon header */}
             {
                 isTrack ? <>
-                <Label className="text-xs text-left text-muted-foreground block">Track Title</Label>
+                <Label className="text-xs text-left text-muted-foreground block mb-[-4px]">Track Title</Label>
                 <div className="flex items-center gap-3">
                     <TrackIconDisplay value={track?.emoji} trackColor={track?.color} size="lg" />
                     <span className="text-sm text-left font-medium text-muted-foreground">
@@ -92,17 +92,28 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
             )}
 
         
+            <div className="flex justify-between">
+                {/* Occur At */}
+                <div className="w-full">
+                    <Label className="text-xs text-left text-muted-foreground mb-1 block">When</Label>
+                    <SingleDatePicker
+                        value={log.occurAt ?? log.createdAt}
+                        onChange={(d) => handleFieldChange("occurAt", d ?? log.createdAt)}
+                        placeholder="Select date"
+                        maxDate={new Date()}
+                        className="w-[90%]"
+                    />
+                </div>
 
-            {/* Occur At */}
-            <div>
-                <Label className="text-xs text-left text-muted-foreground mb-1 block">When</Label>
-                <SingleDatePicker
-                    value={log.occurAt ?? log.createdAt}
-                    onChange={(d) => handleFieldChange("occurAt", d ?? log.createdAt)}
-                    placeholder="Select date"
-                    maxDate={new Date()}
-                    className="w-full"
-                />
+                {/* Sensitive */}
+                <div className="flex items-center gap-2 mt-[18px] relative left-[-16px]">
+                    <Checkbox
+                        id="sensitive-edit"
+                        checked={log.isSensitive}
+                        onCheckedChange={(v: boolean) => handleFieldChange("isSensitive", !!v)}
+                    />
+                    <Label htmlFor="sensitive-edit" className="text-sm cursor-pointer">Sensitive</Label>
+                </div>
             </div>
 
             {/* Description */}
@@ -113,21 +124,12 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
                     onChange={(e) => handleFieldChange("description", e.target.value)}
                     placeholder="Details, thoughts, context..."
                     className="min-h-[120px] resize-none"
+                    rows={9}
                 />
-            </div>
-
-            {/* Sensitive */}
-            <div className="flex items-center gap-2">
-                <Checkbox
-                    id="sensitive-edit"
-                    checked={log.isSensitive}
-                    onCheckedChange={(v: boolean) => handleFieldChange("isSensitive", !!v)}
-                />
-                <Label htmlFor="sensitive-edit" className="text-sm cursor-pointer">Sensitive</Label>
             </div>
 
             {/* Metadata */}
-            <div className="text-xs text-left text-muted-foreground space-y-1 pt-2 border-t border-border">
+            <div className="text-xs text-left text-muted-foreground space-y-1">
                 <div >Created: {format(log.createdAt, "dd/MM/yyyy HH:mm")}</div>
                 {log.location && <div>Location: {log.location}</div>}
             </div>
