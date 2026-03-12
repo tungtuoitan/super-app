@@ -177,7 +177,7 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };
-        showContextMenu(e, constants.workspace.itemTypes.folder, contextData);
+        showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, contextData);
     };
 
     return (

@@ -2,16 +2,16 @@ import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
 import type { ItemType } from "@/store/workspace/FolderDialog.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { workspaceService } from "@/services/workspace.service";
+import { workspaceService } from "@/services/workspace.service"; 
 import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.store";
 import type { Folder } from "@/types/folder.types";
-import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { constants } from "@/utils/constants";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { treeMiniHelper } from "./tree.miniHelper";
 import { isFolder } from "@/types/workspace-v2.types";
+import { useWorkspaceLoader } from "./useWorkspace.loader";
 
 export const useFolderDialogHelper = () => {
     const _console = useConsoleHelper();
@@ -158,7 +158,7 @@ export const useFolderDialogHelper = () => {
             // After tree reloads, find and select the new folder (only for create mode)
             if (mode === "create" && loadedWorkspace?.flatData) {
                 // Find the newly created folder by name and parentId
-                const newFolder = loadedWorkspace.flatData.find(item =>
+                const newFolder = loadedWorkspace.flatData.find((item:any) =>
                     isFolder(item) &&
                     item.data.name === createdFolderName &&
                     item.parentId === parentId

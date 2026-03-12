@@ -11,6 +11,9 @@ import { useConsoleStore } from "@/store/console/useConsole.store";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { NoteDetailTab } from "../Note/NoteDetailTab";
+import {useGridControlStore} from "@/store/grid/useGridControl.store";
+import {kconstants} from "../K/utils/K.Constants";
+import {KMovingTab} from "../K/Components/VSPanel/KMovingTab";
 
 interface VSPanelProps {
     onClose: () => void;
@@ -32,6 +35,8 @@ type PanelTab = "noteDetail" | "properties" | "moving" | "console";
 export function VSPanel({ onClose }: VSPanelProps) {
     const [activeTabb, setActiveTabb] = useState<PanelTab>("noteDetail");
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
+    const { moduleName } = useGridControlStore();
+    console.log('>>>>>>>>> w',moduleName === kconstants.modules.workspace && activeTabb === "moving");
     const { setTargetWorkspace } = useMovingTreeStore();
     const { isMobile } = useMobileStore();
     const changeTab = (tab: PanelTab) => {
@@ -106,7 +111,8 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     <div className={`flex-1 overflow-auto ${activeTabb === "moving" || activeTabb === "console" ? "" : "p-3"}`}>
                         {activeTabb === "noteDetail" && activeTab?.type === constants.vscode.tab.tabTypes.note && <NoteDetailTab />}
                         {/* {activeTabb === "properties" && <PropertiesTab />} */}
-                        {activeTabb === "moving" && <MovingTab />}
+                        {moduleName === kconstants.modules.workspace && activeTabb === "moving" && <MovingTab />}
+                        {moduleName === kconstants.modules.k && activeTabb === "moving" && <KMovingTab />}
                         {activeTabb === "console" && isMobile && <ConsoleTab />}
                     </div>
                 </div>

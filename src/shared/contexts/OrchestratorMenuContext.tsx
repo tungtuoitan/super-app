@@ -14,6 +14,7 @@ import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import {KFolderNodeMenu} from "../../Components/K/contexts/menu/KFolderNodeMenu";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -33,12 +34,15 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
      */
     const renderMenuItems = () => {
         switch (contextType) {
-            case constants.workspace.itemTypes.folder:
+            case constants.contextMenu.contextMenuTypes.folder:
                 return <WorkspaceFolderNodeMenu />;
 
-            case constants.workspace.itemTypes.note:
-            case constants.workspace.itemTypes.file:
+            case constants.contextMenu.contextMenuTypes.note:
+            case constants.contextMenu.contextMenuTypes.file:
                 return <WorkspaceChildNodeMenu />;
+
+            case constants.contextMenu.contextMenuTypes.kNode:
+                return <KFolderNodeMenu />;
 
             case "note-grid":
                 return <NoteGridMenu />;

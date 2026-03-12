@@ -19,7 +19,7 @@ export function CalculateWorkspaceTreeDropZoneHeight({
     treeData,
     containerHeight,
     treeRef,
-    setDropZoneHeight,
+    setDropZoneHeight, 
 }: CalculateWorkspaceTreeDropZoneHeightProps) {
     useEffect(() => {
         const calculateDropZoneHeight = () => {

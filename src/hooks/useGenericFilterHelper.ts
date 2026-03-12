@@ -167,6 +167,11 @@ export function useGenericFilterHelper() {
                     errors[fieldConfig.key] = "Must include Existing";
                 }
             }
+            if (filterViewKey === "k" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
+                if (!filterUtils._hasValue(filterValue, "null")) {
+                    errors[fieldConfig.key] = "Must include Existing";
+                }
+            }
         });
 
         return errors;
