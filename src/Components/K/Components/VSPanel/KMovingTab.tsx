@@ -12,11 +12,11 @@ import React, { useEffect, useMemo } from "react";
 import { Loader2, ArrowRightLeft, CheckCircle2 } from "lucide-react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { useDragDropManager, useDrop } from "react-dnd";
-import {useKStore} from "../K/store/K.store";
-import {useKMovingTreeStore} from "../K/store/KMovingTree.store";
-import {useKMovingTreeHelper} from "../K/hooks/useKMovingTree.helper";
+import {useKStore} from "../../store/K.store";
+import {useKMovingTreeStore} from "../../store/KMovingTree.store";
+import {useKMovingTreeHelper} from "../../hooks/useKMovingTree.helper";
 import {KMovingTree} from "./KMovingTree";
-import {CalculateKMovingTreeContainerHeight} from "../K/HeadlessComponents/CalculateMovingKTreeContainerHeight";
+import {CalculateKMovingTreeContainerHeight} from "../../HeadlessComponents/CalculateMovingKTreeContainerHeight";
 
 export function KMovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useKMovingTreeStore();
@@ -33,7 +33,7 @@ export function KMovingTab() {
     }, [selectedKId]);
 
     // Load target workspace tree when workspace is selected
-    useEffect(() => {
+    useEffect(() => { 
         loadTargetWorkspaceTree();
     }, [targetWorkspaceId]);
 

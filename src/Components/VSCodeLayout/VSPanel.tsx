@@ -13,7 +13,7 @@ import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { NoteDetailTab } from "../Note/NoteDetailTab";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {kconstants} from "../K/utils/K.Constants";
-import {KMovingTab} from "../VSPanel/KMovingTab";
+import {KMovingTab} from "../K/Components/VSPanel/KMovingTab";
 
 interface VSPanelProps {
     onClose: () => void;

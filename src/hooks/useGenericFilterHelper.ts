@@ -167,7 +167,7 @@ export function useGenericFilterHelper() {
                     errors[fieldConfig.key] = "Must include Existing";
                 }
             }
-            if (filterViewKey === "Kworkspace" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
+            if (filterViewKey === "k" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
                 if (!filterUtils._hasValue(filterValue, "null")) {
                     errors[fieldConfig.key] = "Must include Existing";
                 }

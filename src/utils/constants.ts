@@ -19,8 +19,6 @@ export const constants = {
             notes: "/notes",
             project: "/project",
             lifeLog: "/lifelog",
-            // @deprecated — use k
-            Kworkspace: "/k",
         } as const,
         views: {
             workspace: "workspace",
@@ -29,8 +27,6 @@ export const constants = {
             note: "note",
             project: "project",
             lifeLog: "lifeLog",
-            // @deprecated — use k
-            Kworkspace: "k",
         } as const,
     },
     vscode: {
@@ -55,23 +51,18 @@ export const constants = {
             notes: "notes",
             project: "project",
             lifeLog: "lifeLog",
-            // @deprecated — use k
-            Kworkspace: "k",
         } as const,
         displayNames: {
             note: "Note",
             workspace: "Workspace",
             k: "K",
             node: "Node",
+            folder: "Node",
             file: "File",
             ws: "All Workspaces",
             notes: "Notes",
             project: "Projects",
             lifeLog: "LifeLog",
-            // @deprecated — use node
-            folder: "Node",
-            // @deprecated — use k
-            Kworkspace: "K",
         } as const,
         tabTitles: {
             unsavedNote: "Unsaved Note",
@@ -90,17 +81,12 @@ export const constants = {
             workspace: "workspace",
             // @deprecated — use node
             folder: "node",
-            // @deprecated — use node
-            Kfolder: "node",
         } as const,
 
         // Virtual node IDs
         root: {
             workspaceItemId: -12345,
             entityId: -12345,
-            // @deprecated aliases
-            KworkspaceItemId: -12345,
-            KentityId: -12345,
         },
         dropZone: {
             workspaceItemId: -23456,
@@ -127,8 +113,6 @@ export const constants = {
             kNode: "k-node",
             kNote: "k-note",
             kFile: "k-file",
-            // @deprecated — use kNode
-            kFolder: "k-node",
         } as const,
     },
 
@@ -169,8 +153,6 @@ export const constants = {
         task: "Task",
         project: "Project",
         lifeLog: "LifeLog",
-        // @deprecated — use k
-        Kworkspace: "K",
     } as const,
 
     // Status and Priority colors (GitHub-style)
@@ -251,16 +233,12 @@ export const constants = {
             workspace: "workspace",
             k: "k",
             projectGrid: "projectGrid",
-            // @deprecated — use k
-            Kworkspace: "k",
         } as const,
         defaults: {
             noteGrid: { statusCode: "active", deletedAt: "null" },
             wsGrid: { statusCode: "active", deletedAt: "null" },
             workspace: { statusCode: "active", deletedAt: "null" },
             k: { statusCode: "active", deletedAt: "null" },
-            // @deprecated — use k
-            Kworkspace: { statusCode: "active", deletedAt: "null" },
             projectGrid: { statusCode: "active" },
             taskGrid: { status: "open,in_progress", priority: "low,medium,high" },
         } as const,

@@ -6,18 +6,14 @@
 import React, { useEffect, useMemo } from "react";
 import { Tree } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
-import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
-import { FolderNode } from "../Workspace/Explorer/FolderNode";
-import { RootFolderNode } from "../Workspace/Explorer/RootFolderNode";
-import { NoteNode } from "../Workspace/Explorer/NoteNode";
-import { FileNode } from "../Workspace/Explorer/FileNode";
-import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { KtreeMiniHelper, KTreeNode as KTreeFolder } from "../../hooks/Ktree.miniHelper";
+import { KFolderNode } from "../KExplorer/KFolderNode";
+import { KRootFolderNode } from "../KExplorer/KRootFolderNode";
+import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
-import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
-import { useMovingTreeHelper } from "@/hooks/workspace/useMovingTree.helper";
 import { CalculateMovingTreeDropZoneHeight } from "@/HeadlessComponents/workspaceTree/CalculateMovingTreeDropZoneHeight";
-import {useKMovingTreeStore} from "../K/store/KMovingTree.store";
-import {useKMovingTreeHelper} from "../K/hooks/useKMovingTree.helper";
+import {useKMovingTreeStore} from "../../store/KMovingTree.store";
+import {useKMovingTreeHelper} from "../../hooks/useKMovingTree.helper";
 
 export function KMovingTree() {
     const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight, setDropZoneHeight, _treeRef } = useKMovingTreeStore();
@@ -27,11 +23,11 @@ export function KMovingTree() {
     // Transform target workspace data to tree format
     const targetTreeData = useMemo(() => {
         if (!targetWorkspace) return [];
-        const baseTree = treeMiniHelper.transformToTreeData(targetWorkspace, "");
+        const baseTree = KtreeMiniHelper.transformToTreeData(targetWorkspace, "");
 
         // Add invisible drop zone at the end to catch drops to root level
         if (baseTree.length > 0 && targetWorkspace?.id) {
-            const dropZoneNode: TreeFolder = {
+            const dropZoneNode: KTreeFolder = {
                 id: `drop-zone-root-${targetWorkspace.id}`,
                 name: "",
                 data: {
@@ -75,13 +71,13 @@ export function KMovingTree() {
     return (
         <div ref={treeContainerRef} className="h-full pl-4 py-2">
             <CalculateMovingTreeDropZoneHeight
-                treeData={targetTreeData}
+                treeData={targetTreeData as any}
                 containerHeight={containerHeight}
-                treeRef={_treeRef}
+                treeRef={_treeRef as any}
                 setDropZoneHeight={setDropZoneHeight}
             />
             <Tree
-                ref={_treeRef}
+                ref={_treeRef as any}
                 key={treeRenderKey}
                 data={targetTreeData}
                 openByDefault={true}
@@ -146,13 +142,9 @@ export function KMovingTree() {
                     const nodeContent = (() => {
                         if (isFolderV2(node.data.data as unknown as WorkspaceItemV2)) {
                             if (node.level === 0) {
-                                return <RootFolderNode node={node} treeData={targetTreeData} style={style} dragHandle={dragHandle} treeType="targetTree" />;
+                                return <KRootFolderNode node={node} treeData={targetTreeData} style={style} dragHandle={dragHandle} treeType="targetTree" />;
                             }
-                            return <FolderNode node={node} style={style} dragHandle={dragHandle} treeData={targetTreeData} treeType="targetTree" />;
-                        } else if (isNoteV2(node.data.data as unknown as WorkspaceItemV2)) {
-                            return <NoteNode node={node} style={style} dragHandle={dragHandle} treeData={targetTreeData} treeType="targetTree" />;
-                        } else if (isFileV2(node.data.data as unknown as WorkspaceItemV2)) {
-                            return <FileNode node={node} style={style} dragHandle={dragHandle} treeData={targetTreeData} treeType="targetTree" />;
+                            return <KFolderNode node={node} style={style} dragHandle={dragHandle} treeData={targetTreeData} treeType="targetTree" />;
                         }
                         return null;
                     })();
