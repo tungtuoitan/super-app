@@ -1,7 +1,7 @@
 import React, { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import type { TreeApi } from "react-arborist";
-import type { KTreeFolder } from "../hooks/Ktree.miniHelper";
-import {KWorkspaceDTO} from "../types/K-dto.types";
+import type { KTreeNode } from "../hooks/Ktree.miniHelper";
+import {KDTO} from "../types/K-dto.types";
 
 /**
  * MoveToWorkspacePopup Store - Manages state for "Moving" tab in VSPanel
@@ -26,8 +26,8 @@ export interface MovingTreeContextData {
     setIsLoadingTargetTree: Dispatch<SetStateAction<boolean>>;
 
     // Target workspace tree data
-    targetWorkspace: KWorkspaceDTO | null;
-    setTargetWorkspace: Dispatch<SetStateAction<KWorkspaceDTO | null>>;
+    targetWorkspace: KDTO | null;
+    setTargetWorkspace: Dispatch<SetStateAction<KDTO | null>>;
 
     // Tree container ref and height for responsive layout
     treeContainerRef: React.RefObject<HTMLDivElement>;
@@ -35,7 +35,7 @@ export interface MovingTreeContextData {
     setContainerHeight: Dispatch<SetStateAction<number>>;
 
     // Tree instance ref (react-arborist TreeApi)
-    _treeRef: React.RefObject<TreeApi<KTreeFolder>>;
+    _treeRef: React.RefObject<TreeApi<KTreeNode>>;
 
     // Force tree re-render after drop operations
     treeRenderKey: number;
@@ -110,14 +110,14 @@ export const KMovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const [isLoadingTargetTree, setIsLoadingTargetTree] = useState<boolean>(false);
 
     // Target workspace tree data
-    const [targetWorkspace, setTargetWorkspace] = useState<KWorkspaceDTO | null>(null);
+    const [targetWorkspace, setTargetWorkspace] = useState<KDTO | null>(null);
 
     // Tree container ref and height
     const treeContainerRef = React.useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = useState<number>(500);
 
     // Tree instance ref
-    const _treeRef = React.useRef<TreeApi<KTreeFolder>>(null);
+    const _treeRef = React.useRef<TreeApi<KTreeNode>>(null);
 
     // Force tree re-render
     const [treeRenderKey, setTreeRenderKey] = useState<number>(0);

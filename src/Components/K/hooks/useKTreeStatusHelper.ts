@@ -8,7 +8,7 @@ import {KItemV2} from "../types/K-v2.types";
 import { useCallback, useMemo } from "react";
 
 export const useKTreeStatusHelper = () => {
-    const { selectedItemIds, currentWorkspace } = useKStore();
+    const { selectedItemIds, currentK } = useKStore();
 
     const selectedCount = selectedItemIds.length;
 
@@ -29,7 +29,7 @@ export const useKTreeStatusHelper = () => {
             const isDirectlyDeleted = item.deletedAt !== null && item.deletedAt !== undefined;
 
             // Check if any ANCESTOR is deleted (không quan tâm bản thân item)
-            const flatData = currentWorkspace?.flatData;
+            const flatData = currentK?.flatData;
             if (!flatData) {
                 return { hasDeletedAncestor: false, isDirectlyDeleted };
             }
@@ -57,7 +57,7 @@ export const useKTreeStatusHelper = () => {
 
             return { hasDeletedAncestor, isDirectlyDeleted };
         },
-        [currentWorkspace?.flatData]
+        [currentK?.flatData]
     );
 
     /**
@@ -70,10 +70,10 @@ export const useKTreeStatusHelper = () => {
 
         // 2.hasAnyNormalItem: tức deletedAt = null
         const hasAnyNormalItem = (() => {
-            if (!isMultiple || !currentWorkspace?.flatData) return false;
+            if (!isMultiple || !currentK?.flatData) return false;
 
             return selectedItemIds.some((itemId) => {
-                const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
+                const item = currentK.flatData.find((i: any) => i.id === itemId);
                 if (!item) return false;
 
                 const status = getItemStatus(item);
@@ -83,10 +83,10 @@ export const useKTreeStatusHelper = () => {
 
         // 3.hasAnyDeletedItem: Kiểm tra xem có item nào bị deleted (directly deleted hoặc ancestor deleted)
         const hasAnyDeletedItem = (() => {
-            if (!currentWorkspace?.flatData) return false;
+            if (!currentK?.flatData) return false;
 
             return selectedItemIds.some((itemId) => {
-                const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
+                const item = currentK.flatData.find((i: any) => i.id === itemId);
                 if (!item) return false;
 
                 const status = getItemStatus(item);
@@ -97,10 +97,10 @@ export const useKTreeStatusHelper = () => {
 
         // 4.hasDeletedAncestor: Kiểm tra xem có item nào có ancestor bị deleted không
         const hasDeletedAncestor = (() => {
-            if (!currentWorkspace?.flatData) return false;
+            if (!currentK?.flatData) return false;
 
             return selectedItemIds.some((itemId) => {
-                const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
+                const item = currentK.flatData.find((i: any) => i.id === itemId);
                 if (!item) return false;
 
                 const status = getItemStatus(item);
@@ -115,7 +115,7 @@ export const useKTreeStatusHelper = () => {
             hasAnyDeletedItem,
             hasDeletedAncestor,
         };
-    }, [selectedCount, selectedItemIds, currentWorkspace?.flatData, getItemStatus]);
+    }, [selectedCount, selectedItemIds, currentK?.flatData, getItemStatus]);
 
     return {
         selectedItemStatuses,

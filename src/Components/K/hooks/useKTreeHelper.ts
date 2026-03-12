@@ -3,10 +3,10 @@
  * Handles tree operations: drag & drop, refresh, new folder
  */
 
-import type { KTreeFolder } from "./Ktree.miniHelper";
+import type { KTreeNode } from "./Ktree.miniHelper";
 import { KtreeMiniHelper } from "./Ktree.miniHelper";
 import { useKStore } from "../store/K.store";
-import { KuseFolderDialogHelper } from "./useKFolderDialog.helper";
+import { useKNodeDialogHelper } from "./useKFolderDialog.helper";
 import { useKLoader } from "./useK.loader";
 import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";
@@ -19,9 +19,9 @@ import {SPECIAL_IDS} from "../utils/temp-id.utils";
 import {Folder} from "../types";
 
 export const KuseTreeHelper = () => {
-    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace } = useKStore();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();
 
-    const { openFolderDialog } = KuseFolderDialogHelper();
+    const { openNodeDialog } = useKNodeDialogHelper();
     const { loadTree } = useKLoader(); 
     const _console = useConsoleHelper();
     const { $user } = useAuthStore();
@@ -31,10 +31,10 @@ export const KuseTreeHelper = () => {
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
      *
      * KEY CONCEPTS:
-     * - KTreeFolder.id = string version of workspace_items.id (for react-arborist)
-     * - KTreeFolder.data.id = workspace_items.id (workspace item ID)
-     * - KTreeFolder.data.entityId = entity ID (folders.id | notes.id | files.id)
-     * - KTreeFolder.data.parentId = parent workspace_items.id (SELF-REFERENCING, NOT entity ID!)
+     * - KTreeNode.id = string version of workspace_items.id (for react-arborist)
+     * - KTreeNode.data.id = workspace_items.id (workspace item ID)
+     * - KTreeNode.data.entityId = entity ID (folders.id | notes.id | files.id)
+     * - KTreeNode.data.parentId = parent workspace_items.id (SELF-REFERENCING, NOT entity ID!)
      *
      * ALGORITHM:
      * 1. Extract entity IDs from dragged items (for selection tracking)
@@ -43,7 +43,7 @@ export const KuseTreeHelper = () => {
      * 4. Build MOVE batch request with workspace_items.id + new parent workspace_items.id
      * 5. Call API and refresh tree
      */
-    const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }, treeData: KTreeFolder[]) => {
+    const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }, treeData: KTreeNode[]) => {
         try {
             setIsDragging(true);
 
@@ -286,13 +286,13 @@ export const KuseTreeHelper = () => {
             // FLOW 1: UPDATE REAL ITEMS VIA API (ID > 0)
             // -------------------------------------------------------
             if (realItemsNeedUpdate.length > 0) {
-                if (!currentWorkspace?.id) {
+                if (!currentK?.id) {
                     console.error("❌ No workspace ID found");
                     setIsDragging(false);
                     return;
                 }
 
-                const workspaceId = currentWorkspace.id;
+                const workspaceId = currentK.id;
 
                 // ---- Build batch MOVE request for real items ----
                 // For each real workspace item, create a MOVE action with:
@@ -336,7 +336,7 @@ export const KuseTreeHelper = () => {
                         if (!item) return null;
 
                         // Update parentId in virtual item
-                        // Cast to KItemV2 since KTreeFolder.data is KItemV2
+                        // Cast to KItemV2 since KTreeNode.data is KItemV2
                         const updatedData: KItemV2 = {
                             ...(item.data as any),
                             parentId: newParentId ?? null,
@@ -389,14 +389,14 @@ export const KuseTreeHelper = () => {
      * Handle new folder action
      * Opens create dialog with selected folder as parent
      */
-    const addNewFolder = (treeData: KTreeFolder[]) => {
+    const addNewFolder = (treeData: KTreeNode[]) => {
         const parentId = selectedItemIds.length > 0 ? selectedItemIds[0] : undefined;
 
         // Extract folders from treeData
         const folders = KtreeMiniHelper.$traverse(treeData).map((t) => t.data);
-        const parentFolder = parentId ? KtreeMiniHelper.$findFolderById((folders || []) as unknown as Folder[], parentId) : undefined;
+        const parentNode = parentId ? KtreeMiniHelper.$findFolderById((folders || []) as unknown as Folder[], parentId) : undefined;
 
-        openFolderDialog("create", kconstants.workspace.itemTypes.folder, null, parentFolder);
+        openNodeDialog("create", kconstants.workspace.itemTypes.folder, null, parentNode);
     };
 
     return {

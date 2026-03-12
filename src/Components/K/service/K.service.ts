@@ -4,10 +4,11 @@
 
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { KMoveItemsRequest, KDeleteItemsRequest, KWorkspaceOperationResult, KWorkspaceWithTreeResponse, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
+import type { KMoveItemsRequest, KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
+import type { KWithTreeResponseV2 } from "../types/K-v2.types";
 import _ from "lodash";
 import { ResultOptions } from "../../../types";
-import type { KWorkspaceDTO } from "../types/K-dto.types";
+import type { KDTO } from "../types/K-dto.types";
 import {kconstants} from "../utils/K.Constants";
 
 export interface KUpsertFolderRequest {
@@ -29,7 +30,7 @@ const _getAllUserWorkspaces = async (_token: string): Promise<KWsResponse[]> => 
     return Promise.reject(res);
 };
 
-const _getWorkspaceTree = async (_token: string, workspaceId: number): Promise<KWorkspaceWithTreeResponse> => {
+const _getWorkspaceTree = async (_token: string, workspaceId: number): Promise<KWithTreeResponseV2> => {
     const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/tree`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -39,7 +40,7 @@ const _getWorkspaceTree = async (_token: string, workspaceId: number): Promise<K
     return Promise.reject(res);
 };
 
-export interface KWorkspaceTreeParams {
+export interface KTreeParams {
     statusCode?: string;
     deletedAt?: string;
 }
@@ -47,8 +48,8 @@ export interface KWorkspaceTreeParams {
 const _getWorkspaceTreeV2 = async (
     _token: string,
     workspaceId: number,
-    params?: KWorkspaceTreeParams
-): Promise<ResultOptions<KWorkspaceDTO>> => {
+    params?: KTreeParams
+): Promise<ResultOptions<KDTO>> => {
     const queryParams = new URLSearchParams();
     if (params?.statusCode) queryParams.append("statusCode", params.statusCode);
     if (params?.deletedAt) queryParams.append("deletedAt", params.deletedAt);
@@ -58,7 +59,7 @@ const _getWorkspaceTreeV2 = async (
 
     const res = await apiFetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
 
-    if (res.ok) return (await res.json()) as ResultOptions<KWorkspaceDTO>;
+    if (res.ok) return (await res.json()) as ResultOptions<KDTO>;
     return Promise.reject(res);
 };
 
@@ -103,7 +104,7 @@ const _upsertWorkspaceItem = async (
     return Promise.reject(res);
 };
 
-const _deleteWorkspaceItems = async (_token: string, workspaceId: number, data: KDeleteItemsRequest): Promise<KWorkspaceOperationResult> => {
+const _deleteWorkspaceItems = async (_token: string, workspaceId: number, data: KDeleteItemsRequest): Promise<KOperationResult> => {
     const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/items`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -114,7 +115,7 @@ const _deleteWorkspaceItems = async (_token: string, workspaceId: number, data: 
     return Promise.reject(res);
 };
 
-const _upsertFolder = async (_token: string, workspaceId: number, data: KUpsertFolderRequest): Promise<KWorkspaceOperationResult> => {
+const _upsertFolder = async (_token: string, workspaceId: number, data: KUpsertFolderRequest): Promise<KOperationResult> => {
     const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/folders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

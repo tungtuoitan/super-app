@@ -10,7 +10,7 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/compone
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, KItemV2 } from "../types/K-v2.types";
 import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
-import {KWorkspaceDTO} from "../types/K-dto.types";
+import {KDTO} from "../types/K-dto.types";
 import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../utils/K.Constants";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
@@ -31,7 +31,7 @@ export const useKMovingTreeHelper = () => {
         setTreeRenderKey, 
     } = useKMovingTreeStore();
 
-    const { allWorkspaces, currentWorkspace, selectedItemIds, setSelectedItemIds } = useKStore();
+    const { allK, currentK, selectedItemIds, setSelectedItemIds } = useKStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { loadTree } = useKLoader();
@@ -64,7 +64,7 @@ export const useKMovingTreeHelper = () => {
         try {
             const result = await KService._getWorkspaceTreeV2($user.userToken, targetWorkspaceId);
             if (result.success && result.object) {
-                setTargetWorkspace(result.object as KWorkspaceDTO);
+                setTargetWorkspace(result.object as KDTO);
             } else {
                 throw new Error(result.message || "Failed to load target workspace");
             }
@@ -77,10 +77,10 @@ export const useKMovingTreeHelper = () => {
     };
 
     // Check all items for duplicates and update highlights
-    // Logic: Find items in currentWorkspace that also exist in targetWorkspace
+    // Logic: Find items in currentK that also exist in targetWorkspace
     // Result: Highlight those duplicate items in targetTree (not in workspaceTree)
     const checkAndHighlightDuplicates = () => {
-        if (!currentWorkspace || !targetWorkspace) {
+        if (!currentK || !targetWorkspace) {
             setHighlightedDuplicateIds(new Set());
             return;
         }
@@ -94,7 +94,7 @@ export const useKMovingTreeHelper = () => {
 
         // Check all items in current workspace for duplicates
         const duplicateCompositeKeys: string[] = [];
-        currentWorkspace.flatData.forEach((sourceItem) => {
+        currentK.flatData.forEach((sourceItem) => {
             const compositeKey = `${sourceItem.entityType}-${sourceItem.entityId}`;
             const targetItem = targetEntityMap.get(compositeKey);
             if (targetItem) {
@@ -113,7 +113,7 @@ export const useKMovingTreeHelper = () => {
         duplicateCount: number;
         duplicateItems: Array<{ sourceItem: any; targetItem: any }>;
     } => {
-        if (!currentWorkspace || !targetWorkspace) {
+        if (!currentK || !targetWorkspace) {
             return { isDuplicate: false, duplicateCount: 0, duplicateItems: [] };
         }
 
@@ -131,7 +131,7 @@ export const useKMovingTreeHelper = () => {
         // Check each dragging item for duplicates
         const duplicateItems: Array<{ sourceItem: any; targetItem: any }> = [];
         itemIds.forEach((itemId: number) => {
-            const sourceItem = currentWorkspace.flatData.find((i) => i.id === itemId);
+            const sourceItem = currentK.flatData.find((i) => i.id === itemId);
             if (sourceItem) {
                 const compositeKey = `${sourceItem.entityType}-${sourceItem.entityId}`;
                 const targetItem = targetEntityMap.get(compositeKey);
@@ -184,12 +184,12 @@ export const useKMovingTreeHelper = () => {
             }
 
             // STEP 3: Validate workspace selection
-            if (!currentWorkspace?.id || !targetWorkspaceId) {
+            if (!currentK?.id || !targetWorkspaceId) {
                 _console.error("No target workspace selected");
                 return;
             }
 
-            if (currentWorkspace.id === targetWorkspaceId) {
+            if (currentK.id === targetWorkspaceId) {
                 _console.error("Cannot move to the same workspace");
                 return;
             }
@@ -198,7 +198,7 @@ export const useKMovingTreeHelper = () => {
             const { isDuplicate, duplicateCount, duplicateItems } = checkDraggingItemsAreDuplicate(dragItem);
             if (isDuplicate) {
                 // Get target workspace name
-                const targetWorkspaceName = allWorkspaces.find((ws) => ws.id === targetWorkspaceId)?.name || "target workspace";
+                const targetWorkspaceName = allK.find((ws) => ws.id === targetWorkspaceId)?.name || "target workspace";
 
                 // Show detailed message for each duplicate
                 duplicateItems.forEach(({ sourceItem, targetItem }) => {
@@ -250,7 +250,7 @@ export const useKMovingTreeHelper = () => {
                 const unsavedItems = itemIds
                     .filter((id) => id < 0)
                     .map((id) => {
-                        const item = currentWorkspace?.flatData.find((i) => i.id === id);
+                        const item = currentK?.flatData.find((i) => i.id === id);
                         return item?.data?.name || "Untitled";
                     });
 
@@ -271,7 +271,7 @@ export const useKMovingTreeHelper = () => {
                 // Example: If selecting folder A and its subfolder B, only move A (B will follow automatically)
 
                 // Build tree data from current workspace for hierarchy checking
-                const currentTreeData = currentWorkspace ? KtreeMiniHelper.transformToTreeData(currentWorkspace, "") : [];
+                const currentTreeData = currentK ? KtreeMiniHelper.transformToTreeData(currentK, "") : [];
 
                 // Filter to get only top-level parent IDs
                 const topLevelItemIds = KtreeMiniHelper.filterTopLevelParents(itemIds, currentTreeData);
@@ -285,7 +285,7 @@ export const useKMovingTreeHelper = () => {
                 // Only move top-level parents - children will follow automatically
                 // check if any items are already in target workspace
                 const itemsToMove = topLevelItemIds.filter((itemId: number) => {
-                    const item = currentWorkspace?.flatData.find((fd) => fd.id === itemId);
+                    const item = currentK?.flatData.find((fd) => fd.id === itemId);
                     if (item && item.workspaceId === targetWorkspaceId) {
                         console.warn(`Item ${itemId} already in target workspace ${targetWorkspaceId}, skipping`);
                         return false; // Skip this item
@@ -306,7 +306,7 @@ export const useKMovingTreeHelper = () => {
                 }));
 
                 // STEP 7: Call batch API
-                const result = await KService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
+                const result = await KService._upsertWorkspaceItems($user.userToken, currentK.id, requests);
 
                 if (result.success) {
                     _console.success(`Moved ${itemsToMove.length} item(s) to target workspace`);

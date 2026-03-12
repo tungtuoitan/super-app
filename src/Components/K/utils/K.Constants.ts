@@ -14,19 +14,23 @@ export const kconstants = {
         path: {
             home: "/",
             workspace: "/workspace",
-            Kworkspace: "/Kworkspace",
+            k: "/k",
             ws: "/ws",
             notes: "/notes",
             project: "/project",
             lifeLog: "/lifelog",
+            // @deprecated
+            Kworkspace: "/Kworkspace",
         } as const,
         views: {
             workspace: "workspace",
-            Kworkspace: "Kworkspace",
+            k: "k",
             ws: "ws",
             note: "note",
             project: "project",
             lifeLog: "lifeLog",
+            // @deprecated
+            Kworkspace: "Kworkspace",
         } as const,
     },
     vscode: {
@@ -45,23 +49,28 @@ export const kconstants = {
         },
         viewTypes: {
             workspace: "workspace",
-            Kworkspace: "Kworkspace",
+            k: "k",
             ws: "ws",
             note: "note",
             notes: "notes",
             project: "project",
             lifeLog: "lifeLog",
+            // @deprecated
+            Kworkspace: "Kworkspace",
         } as const,
         displayNames: {
             note: "Note",
             workspace: "Workspace",
-            Kworkspace: "Kworkspace",
+            k: "K",
+            node: "Node",
             file: "File",
             ws: "All Workspaces",
-            folder: "Folder",
             notes: "Notes",
             project: "Projects",
             lifeLog: "LifeLog",
+            // @deprecated
+            Kworkspace: "Kworkspace",
+            folder: "Node",
         } as const,
         tabTitles: {
             unsavedNote: "Unsaved Note",
@@ -73,35 +82,28 @@ export const kconstants = {
     },
     workspace: {
         itemTypes: {
+            node: "node",
+            k: "k",
+            // @deprecated — kept for backward compat, remove after Phase 3
+            folder: "node",
             note: "note",
-            workspace: "workspace",
             file: "file",
-            folder: "folder",
+            workspace: "workspace",
         } as const,
 
-        // Virtual node IDs for workspace root
+        // Virtual node IDs
         root: {
-            workspaceItemId: -12345, // workspace_items.id for root node
-            KworkspaceItemId: -12345, // workspace_items.id for root node
-            entityId: -12345, // folders.id for root node (same value for simplicity)
-            KentityId: -12345, // folders.id for root node (same value for simplicity)
+            workspaceItemId: -12345,
+            entityId: -12345,
+            // @deprecated aliases
+            KworkspaceItemId: -12345,
+            KentityId: -12345,
         },
-
-        // Virtual node IDs for drop zone
         dropZone: {
-            workspaceItemId: -23456, // workspace_items.id for drop zone
-            entityId: -23456, // folders.id for drop zone (same value for simplicity)
+            workspaceItemId: -23456,
+            entityId: -23456,
         },
-
-        // Search behavior configuration
         search: {
-            /**
-             * Search mode for tree filtering
-             * - "showAllDescendants": When folder X matches search, show X + all its children/grandchildren
-             * - "exactMatchOnly": When folder X matches search, show only X (hide children unless they also match)
-             *
-             * Default: "showAllDescendants"
-             */
             mode: "showAllDescendants" as "showAllDescendants" | "exactMatchOnly",
         },
     },
@@ -119,7 +121,9 @@ export const kconstants = {
             tab: "tab",
             lifeLogLog: "lifelog-log",
             lifeLogTrack: "lifelog-track",
-            kFolder: "k-folder",
+            kNode: "k-node",
+            // @deprecated aliases — remove after Phase 3
+            kFolder: "k-node",
             kNote: "k-note",
             kFile: "k-file",
         } as const,
@@ -136,18 +140,17 @@ export const kconstants = {
     modules: {
         note: "Note",
         workspace: "Workspace",
-        Kworkspace: "Kworkspace",
+        k: "K",
         ws: "Ws",
         task: "Task",
         project: "Project",
-        lifeLog: "LifeLog"
+        lifeLog: "LifeLog",
+        // @deprecated
+        Kworkspace: "K",
     } as const,
 
-
-
     color: [
-        // Material Design Icons for VS Code color palette
-        { value: "#90A4AE", label: "Grey" }, // Default
+        { value: "#90A4AE", label: "Grey" },
         { value: "#42A5F5", label: "Blue" },
         { value: "#29B6F6", label: "Light Blue" },
         { value: "#26C6DA", label: "Cyan" },

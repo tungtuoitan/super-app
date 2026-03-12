@@ -17,7 +17,7 @@ import {KFolderDialog} from "./KExplorer/KFolderDialog/KFolderDialog";
  */
 export function KView() {
     const { $user } = useAuthStore();
-    const { allWorkspaces, isLoadingWorkspaces, isLoadingTree, isLoadingTreeByOpeningFolder, selectedWorkspaceId, setSelectedWorkspaceId } = useKStore();
+    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId } = useKStore();
     const { loadAllK, loadTree } = useKLoader();
 
     // Load workspaces on mount
@@ -27,12 +27,12 @@ export function KView() {
     }, [$user.userId, $user.userToken]);
 
     useEffect(() => {
-        if (!$user.userId || !$user.filters || selectedWorkspaceId === null) return;
+        if (!$user.userId || !$user.filters || selectedKId === null) return;
         loadTree();
-    }, [$user.userId, $user.userToken, $user.filters, selectedWorkspaceId]);
+    }, [$user.userId, $user.userToken, $user.filters, selectedKId]);
 
     // Convert workspaces to autocomplete options
-    const workspaceOptions: IAutoCompleteOptions[] = allWorkspaces.map((ws) => {
+    const workspaceOptions: IAutoCompleteOptions[] = allK.map((ws) => {
         const isDeleted = !!ws.deletedAt;
         return {
             id: ws.id.toString(),
@@ -48,7 +48,7 @@ export function KView() {
         const newWorkspaceId = newValue?.id ? parseInt(newValue.id.toString()) : null;
 
         // Block change if same workspace
-        if (newWorkspaceId === selectedWorkspaceId) {
+        if (newWorkspaceId === selectedKId) {
             return;
         }
 
@@ -58,7 +58,7 @@ export function KView() {
         //     return;
         // }
 
-        setSelectedWorkspaceId(newWorkspaceId);
+        setSelectedKId(newWorkspaceId);
     };
 
     return (
@@ -68,14 +68,14 @@ export function KView() {
                 <div>
                     <GenericAutoComplete
                         allOptions={workspaceOptions}
-                        value={workspaceOptions.find((option) => option.id === selectedWorkspaceId?.toString()) || null}
+                        value={workspaceOptions.find((option) => option.id === selectedKId?.toString()) || null}
                         onChange={handleWorkspaceChange}
                         inputProps={{
                             name: "workspace",
                             label: "",
                             required: false,
                         }}
-                        disabled={isLoadingWorkspaces || workspaceOptions.length === 0}
+                        disabled={isLoadingK || workspaceOptions.length === 0}
                         size="small"
                     />
                 </div>
@@ -90,7 +90,7 @@ export function KView() {
                 <KFolderDialog />
 
                 {/* Loading Overlay */}
-                {(isLoadingWorkspaces || isLoadingTree || isLoadingTreeByOpeningFolder) && (
+                {(isLoadingK || isLoadingTree || isLoadingTreeByOpeningNode) && (
                     <div className="absolute inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-10">
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     </div>

@@ -9,11 +9,11 @@
 import {useKStore} from "../store/K.store";
 import { useCallback } from "react";
 import type { NodeApi } from "react-arborist";
-import {KTreeFolder} from ".";
+import {KTreeNode} from ".";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const KuseTreeHelper2 = () => {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentWorkspace } = useKStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentK } = useKStore();
     /**
      * Clear all selections
      */
@@ -34,9 +34,9 @@ export const KuseTreeHelper2 = () => {
      * Handle selection change from react-arborist tree
      * Maps node.id to workspace_items.id
      */
-    const handleSelectionChange = (nodes: NodeApi<KTreeFolder>[]) => {
+    const handleSelectionChange = (nodes: NodeApi<KTreeNode>[]) => {
         // Helper to get workspace_items.id from node (V2 structure)
-        const getWorkspaceItemId = (node: NodeApi<KTreeFolder>): number | null => {
+        const getWorkspaceItemId = (node: NodeApi<KTreeNode>): number | null => {
             const itemData = node.data.data;
             return (itemData as any).id; // workspace_items.id
         };
@@ -140,17 +140,17 @@ export const KuseTreeHelper2 = () => {
 
                         let itemsToSelect: number[] = [];
 
-                        if (selectedItemIds.length > 0 && currentWorkspace) {
+                        if (selectedItemIds.length > 0 && currentK) {
                             // Get first selected item's parentId
                             const firstSelectedId = selectedItemIds[0];
-                            const firstSelectedItem = currentWorkspace.flatData.find((item: any) => item.id === firstSelectedId);
+                            const firstSelectedItem = currentK.flatData.find((item: any) => item.id === firstSelectedId);
 
                             if (firstSelectedItem) {
                                 const targetParentId = firstSelectedItem.parentId ?? null;
 
                                 // Find all visible siblings (items with same parentId)
                                 const siblings = allVisibleFolderIds.filter((itemId: number) => {
-                                    const item = currentWorkspace.flatData.find((i: any) => i.id === itemId);
+                                    const item = currentK.flatData.find((i: any) => i.id === itemId);
                                     return item && (item.parentId ?? null) === targetParentId;
                                 });
 
@@ -196,7 +196,7 @@ export const KuseTreeHelper2 = () => {
                     break;
             }
         },
-        [selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace]
+        [selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentK]
     );
 
     const selectItem = (itemsToSelect: number[]) => {

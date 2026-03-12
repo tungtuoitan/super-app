@@ -14,7 +14,7 @@ interface StatusDotProps {
 
 export function KStatusDot({ isUnsaved, isDuplicate, itemType, itemName, targetWorkspaceName, workspaceLinks, onWorkspaceClick }: StatusDotProps) {
     const [showTooltip, setShowTooltip] = useState(false);
-    const {selectedWorkspaceId} = useKStore();
+    const {selectedKId} = useKStore();
 
     // Calculate total workspace links (excluding current workspace if in workspace tree)
     const workspaceLinkCount = workspaceLinks?.length || 0;
@@ -45,12 +45,12 @@ export function KStatusDot({ isUnsaved, isDuplicate, itemType, itemName, targetW
                         key={link.workspaceItemId}
                         onClick={(e) => {
                             e.stopPropagation();
-                            if(link.workspaceId !== selectedWorkspaceId) 
+                            if(link.workspaceId !== selectedKId) 
                                 onWorkspaceClick?.(link.workspaceId, link.workspaceItemId);
                         }}
-                        className={` text-left py-0.5 text-gray-400 ${link.workspaceId === selectedWorkspaceId ? "" : "cursor-pointer hover:text-blue-400 hover:underline"}`}
+                        className={` text-left py-0.5 text-gray-400 ${link.workspaceId === selectedKId ? "" : "cursor-pointer hover:text-blue-400 hover:underline"}`}
                     >
-                        • {link.workspaceName.length > 30 ? link.workspaceName.slice(0, 27) + "..." : link.workspaceName} {link.workspaceId === selectedWorkspaceId ? "(current)" : ""}
+                        • {link.workspaceName.length > 30 ? link.workspaceName.slice(0, 27) + "..." : link.workspaceName} {link.workspaceId === selectedKId ? "(current)" : ""}
                     </div>
                 ))}
             </div>

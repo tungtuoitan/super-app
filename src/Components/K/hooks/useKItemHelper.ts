@@ -16,7 +16,7 @@ export const KuseWorkspaceItemHelper = () => {
     const { getActiveTab } = useEditorTabHelper();
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
     const { $user } = useAuthStore();
-    const { currentWorkspace } = useKStore();
+    const { currentK } = useKStore();
     const { loadTree } = useKLoader();
 
     //* hàm này phục vụ cho save button trong Editor Toolbar và batch save
@@ -46,7 +46,7 @@ export const KuseWorkspaceItemHelper = () => {
                     for (const tab of tabsToProcess) {
                         if(!tab) continue;
                         const noteData = tab.data as Note;
-                        const workspaceItem = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteData.id);
+                        const workspaceItem = currentK?.flatData.find((item) => item.entityType === 3 && item.entityId === noteData.id);
 
                         if (!workspaceItem) {
                             console.warn(`⚠️ Note not found in kworkspace tree: ${noteData.name}`);
@@ -86,7 +86,7 @@ export const KuseWorkspaceItemHelper = () => {
                     // =====================================
                     // Call batch API once for all tabs
                     // =====================================
-                    const result = await KService._upsertWorkspaceItems(token ?? "", currentWorkspace?.id ?? 0, batchRequests);
+                    const result = await KService._upsertWorkspaceItems(token ?? "", currentK?.id ?? 0, batchRequests);
 
                     if (!result.success) {
                         const errorMessage = result.message || "Failed to create notes";
@@ -99,7 +99,7 @@ export const KuseWorkspaceItemHelper = () => {
                     // Remove old temporary workspace items
                     // =====================================
                     const tempWorkspaceItemIds = Array.from(tabWorkspaceItemMap.values()).map((item) => item.tempWorkspaceItemId);
-                    const newFlatData = currentWorkspace?.flatData.filter((item) => !tempWorkspaceItemIds.includes(item.id)) || [];
+                    const newFlatData = currentK?.flatData.filter((item) => !tempWorkspaceItemIds.includes(item.id)) || [];
 
                     // =====================================
                     // Reload tree to get new workspace items
@@ -152,7 +152,7 @@ export const KuseWorkspaceItemHelper = () => {
                     return false;
             }
         },
-        [getActiveTab, currentWorkspace, $user, loadTree, setOpenTabs]
+        [getActiveTab, currentK, $user, loadTree, setOpenTabs]
     );
 
     return {

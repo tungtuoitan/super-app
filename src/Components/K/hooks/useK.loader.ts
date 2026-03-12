@@ -6,7 +6,7 @@
  * @returns {Object} KWorkspace operation functions only (no state)
  * @example
  * // Get state from store
- * const { allWorkspaces, currentWorkspace } = useKStore();
+ * const { allK, currentK } = useKStore();
  * // Get actions from helper
  * const { loadAllK, selectWorkspace } = useKLoader();
  */
@@ -14,7 +14,7 @@
 import { useKStore } from "../store/K.store";
 import { KService } from "../service/K.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import {KWorkspaceDTO} from "../types/K-dto.types";
+import {KDTO} from "../types/K-dto.types";
 import { KItemV2 } from "../types/K-v2.types";
 import {useKMovingTreeStore} from "../store/KMovingTree.store";
 import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
@@ -23,7 +23,7 @@ import {ResultOptions} from "../types";
 export const useKLoader = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { allWorkspaces, setAllWorkspaces, currentWorkspace, setSelectedWorkspaceId, selectedWorkspaceId, setCurrentWorkspace, isLoadingWorkspaces, setIsLoadingWorkspaces, isLoadingTree, setIsLoadingTree } = useKStore();
+    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree } = useKStore();
     const { setTargetWorkspaceId } = useKMovingTreeStore();
 
     /**
@@ -32,19 +32,19 @@ export const useKLoader = () => {
      */
     const loadAllK = async () => {
         try {
-            setIsLoadingWorkspaces(true);
+            setIsLoadingK(true);
 
             const token = $user.userToken;
             const data = await KService._getAllUserWorkspaces(token);
 
-            setAllWorkspaces(data);
+            setAllK(data);
 
             // Set default to first workspace if available and no tree loaded
-            if (data.length > 0 && !currentWorkspace) {
+            if (data.length > 0 && !currentK) {
                 const defaultWorkspaceId = data[0].id;
-                setSelectedWorkspaceId(defaultWorkspaceId);
+                setSelectedKId(defaultWorkspaceId);
                 if(data.length > 1){
-                    setTargetWorkspaceId(data.length > 0 ? data[1].id : null); //* set 1 workspace bất kì miễn khác selectedWorkspaceId
+                    setTargetWorkspaceId(data.length > 0 ? data[1].id : null); //* set 1 workspace bất kì miễn khác selectedKId
                 }
                 // Auto-load tree for default workspace
                 // await loadTree(defaultWorkspaceId);
@@ -55,7 +55,7 @@ export const useKLoader = () => {
             console.error("❌ Failed to load kworkspaces:", error);
             throw error;
         } finally {
-            setIsLoadingWorkspaces(false);
+            setIsLoadingK(false);
         }
     };
 
@@ -71,11 +71,11 @@ export const useKLoader = () => {
      * Filtering happens in transformToTreeData() in Ktree.miniHelper.ts
      *
      * @param calculatedVirtualItems - Optional array of virtual items (ID < 0) to preserve in state
-     * @param targetWorkspaceId - Optional workspace ID to load. If not provided, uses selectedWorkspaceId
+     * @param targetWorkspaceId - Optional workspace ID to load. If not provided, uses selectedKId
      * @returns The loaded workspace data
      */
-    const loadTree = async (calculatedVirtualItems?: KItemV2[], targetWorkspaceId?: number): Promise<KWorkspaceDTO | undefined> => {
-        const workspaceIdToLoad = targetWorkspaceId ?? selectedWorkspaceId;
+    const loadTree = async (calculatedVirtualItems?: KItemV2[], targetWorkspaceId?: number): Promise<KDTO | undefined> => {
+        const workspaceIdToLoad = targetWorkspaceId ?? selectedKId;
 
         if(workspaceIdToLoad == null){
             console.warn("workspaceId is null, cant load tree")
@@ -88,10 +88,10 @@ export const useKLoader = () => {
             const token = $user.userToken;
 
             // Fetch workspace tree with V2 structure (ALL items, no filtering)
-            const result: ResultOptions<KWorkspaceDTO> = await KService._getWorkspaceTreeV2(token, workspaceIdToLoad);
+            const result: ResultOptions<KDTO> = await KService._getWorkspaceTreeV2(token, workspaceIdToLoad);
             if(result && result.success){
                 // Merge data: API data + existing virtual items (ID < 0) + new virtual items
-                const existingVirtualItems = (currentWorkspace?.flatData ?? []).filter((item: KItemV2) => item?.id < 0);
+                const existingVirtualItems = (currentK?.flatData ?? []).filter((item: KItemV2) => item?.id < 0);
                 const mergedVirtualItems = calculatedVirtualItems
                     ? calculatedVirtualItems // Use provided virtual items (updated)
                     : existingVirtualItems; // Keep existing virtual items
@@ -102,9 +102,9 @@ export const useKLoader = () => {
                         ...result.object?.flatData ?? [],
                         ...mergedVirtualItems // KEEP VIRTUAL ITEMS (NEW FILE/NOTE/FOLDER,...)
                     ]
-                } as KWorkspaceDTO;
+                } as KDTO;
 
-                setCurrentWorkspace(newWorkspace);
+                setCurrentK(newWorkspace);
                 return newWorkspace;
             }
 

@@ -5,13 +5,13 @@
 
 import { useEffect } from "react";
 import type { TreeApi } from "react-arborist";
-import {KTreeFolder} from "../hooks";
+import {KTreeNode} from "../hooks";
 import {kconstants} from "../utils/K.Constants";
 
 interface CalculateMovingTreeDropZoneHeightProps {
-    treeData: KTreeFolder[]; 
+    treeData: KTreeNode[]; 
     containerHeight: number;
-    treeRef: React.RefObject<TreeApi<KTreeFolder>>;
+    treeRef: React.RefObject<TreeApi<KTreeNode>>;
     setDropZoneHeight: (height: number) => void;
 }
 

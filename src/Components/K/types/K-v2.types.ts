@@ -1,372 +1,181 @@
 /**
- * Workspace V2 Types
+ * K V2 Types
  *
- * New structure with clear separation:
- * - Root level: workspace_items table properties
- * - data property: Full entity data (FolderData | NoteData | FileData)
+ * Structure:
+ * - Root level: k_items table properties (was workspace_items)
+ * - data property: KNodeData (node entity data)
  *
- * This makes it clear which properties come from workspace_items table
- * and which come from the entity tables (folders/notes/files)
+ * entityType: 2 = node (only supported type)
  */
 
 // ============================================
-// BASE ENTITY TYPES (Pure database entities)
+// NODE ENTITY DATA
 // ============================================
- 
+
 /**
- * Base Folder entity from database (folders table)
- * Pure entity data with ISO string dates
- * Use this for API responses and workspace tree data
+ * Node entity data (maps to folders table — will migrate to k_nodes table)
  */
-export interface FolderEntity {
-  /** Folder ID (folders.id) */
+export interface KNodeData {
+  /** Node ID (folders.id → future: k_nodes.id) */
   id: number;
 
-  /** User ID who owns the folder (folders.user_id) */
+  /** User ID who owns the node */
   userId: number;
 
-  /** Folder name (folders.name) */
+  /** Node name */
   name: string;
 
-  /** Folder description (folders.description) */
+  /** Node description */
   description?: string;
 
-  /** URL slug (folders.slug) */
+  /** URL slug */
   slug?: string;
 
-  /** Hex color code (folders.color) */
+  /** Hex color code */
   color?: string;
 
-  /** Icon emoji or class (folders.icon) */
+  /** Icon emoji or class */
   icon?: string;
 
-  /** Created timestamp (folders.created_at) - ISO string from API */
+  /** Created timestamp - ISO string */
   createdAt: string;
 
-  /** Updated timestamp (folders.updated_at) - ISO string from API */
+  /** Updated timestamp - ISO string */
   updatedAt?: string;
 
-  /** Soft delete timestamp (folders.deleted_at) - ISO string from API */
+  /** Soft delete timestamp - ISO string */
   deletedAt?: string | null;
-
 }
 
-/**
- * Base Note entity from database (notes table)
- * Pure entity data with ISO string dates
- * Use this for API responses and workspace tree data
- */
-export interface NoteEntity {
-  /** Note ID (notes.id) */
-  id: number;
-
-  /** User ID who owns the note (notes.user_id) */
-  userId: number;
-
-  /** Note name/title (notes.name) */
-  name: string;
-
-  /** Note description/content (notes.description) */
-  description?: string;
-
-  /** Status code (notes.status_code) */
-  statusCode?: string;
-
-  /** Icon type for visual display (notes.icon) */
-  icon?: string;
-
-  /** Hex color code for icon (notes.color) */
-  color?: string;
-
-  /** Created timestamp (notes.created_at) - ISO string from API */
-  createdAt: string;
-
-  /** Updated timestamp (notes.updated_at) - ISO string from API */
-  updatedAt?: string;
-
-  /** Soft delete timestamp (notes.deleted_at) - ISO string from API */
-  deletedAt?: string | null;
-
-
-  /** List of workspaces that link to this note (populated from workspace_items) */
-  workspaceLinks?: Array<{
-    workspaceId: number;
-    workspaceName: string;
-    workspaceItemId: number;
-  }>;
-}
-
-/**
- * Base File entity from database (files table)
- * Pure entity data with ISO string dates
- * Use this for API responses and workspace tree data
- */
-export interface FileEntity {
-  /** File ID (files.id) */
-  id: number;
-
-  /** User ID who owns the file (files.user_id) */
-  userId: number;
-
-  /** File name (files.name) */
-  name: string;
-
-  /** File URL (files.url) */
-  url?: string;
-
-  /** File size in bytes (files.file_size) */
-  fileSize?: number;
-
-  /** MIME type (files.mime_type) */
-  mimeType?: string;
-
-  /** File extension (files.extension) */
-  extension?: string;
-
-  /** Status code (files.status_code) */
-  statusCode?: string;
-
-  /** Created timestamp (files.created_at) - ISO string from API */
-  createdAt: string;
-
-  /** Updated timestamp (files.updated_at) - ISO string from API */
-  updatedAt?: string;
-
-  /** Soft delete timestamp (files.deleted_at) - ISO string from API */
-  deletedAt?: string | null;
-
-
-  /** Human-readable file size (computed) */
-  fileSizeFormatted?: string;
-}
+// @deprecated aliases — remove after Phase 3
+/** @deprecated Use KNodeData */
+export type FolderEntity = KNodeData;
+/** @deprecated Use KNodeData */
+export type FolderData = KNodeData;
 
 // ============================================
-// DEPRECATED ALIASES (Backward compatibility)
-// ============================================
-
-/** @deprecated Use FolderEntity instead - will be removed in future version */
-export type FolderData = FolderEntity;
-
-/** @deprecated Use NoteEntity instead - will be removed in future version */
-export type NoteData = NoteEntity;
-
-/** @deprecated Use FileEntity instead - will be removed in future version */
-export type FileData = FileEntity;
-
-// ============================================
-// BASE WORKSPACE ITEM
+// BASE K ITEM
 // ============================================
 
 /**
- * Base workspace item with common workspace_items table properties
+ * Base k item — properties from k_items table (was workspace_items)
  *
- * ID NAMING CONVENTION:
- * - id          = workspace_items.id (workspace item ID in workspace_items table)
- * - workspaceId = workspace_items.workspace_id (which workspace this item belongs to)
- * - parentId    = parent workspace_item ID (parent's workspace_items.id - SELF-REFERENCING)
- * - entityId    = entity ID (folders.id | notes.id | files.id - the actual entity being referenced)
- *
- * RELATIONSHIP:
- * - workspace_items.id is unique per workspace_items row
- * - workspace_items.entity_id references the actual entity (folder/note/file)
- * - workspace_items.parent_id references parent workspace_items.id (SELF-REFERENCING)
- *
- * KEY CHANGE FROM V1:
- * - parent_id NOW references workspace_items.id (NOT entity ID!)
- * - This enables proper multi-workspace support and prevents circular references
+ * ID CONVENTION:
+ * - id          = k_items.id (primary key)
+ * - kId         = k_items.k_id (which K this item belongs to)
+ * - parentId    = parent k_items.id (SELF-REFERENCING, null = root)
+ * - entityId    = entity ID (folders.id → future: k_nodes.id)
  */
-interface BaseWorkspaceItem {
-  // ============ FROM workspace_items TABLE ============
-
-  /**
-   * Workspace item ID (workspace_items.id)
-   * This is the PRIMARY KEY of workspace_items table
-   * Use for: Update, Move, Delete, Restore actions
-   */
+interface BaseKItem {
+  /** k_items.id — primary key */
   id: number;
 
-  /**
-   * Workspace ID (workspace_items.workspace_id)
-   * References workspaces.id - which workspace this item belongs to
-   */
+  /** k_items.workspace_id — which K this belongs to */
   workspaceId: number;
 
-  /**
-   * Parent workspace_item ID (workspace_items.parent_id → workspace_items.id)
-   * SELF-REFERENCING foreign key to workspace_items.id
-   * null = root level item (direct child of workspace)
-   * Example: If parent workspace_item.id=118, then parentId=118
-   */
+  /** parent k_items.id — self-referencing, null = root */
   parentId: number | null;
 
-  /**
-   * Entity type code (workspace_items.entity_type)
-   * 2 = folder, 3 = note, 4 = file
-   */
-  entityType: 2 | 3 | 4;
+  /** entityType: 2 = node */
+  entityType: 2;
 
-  /**
-   * Entity ID (workspace_items.entity_id)
-   * References the actual entity: folders.id | notes.id | files.id
-   * This is the ID of the folder/note/file being referenced
-   * Example: If entityType=2 and entityId=87, this references folders.id=87
-   */
+  /** entity ID (folders.id → future: k_nodes.id) */
   entityId: number;
 
-  /** Created timestamp (workspace_items.created_at) */
+  /** Created timestamp */
   createdAt: string;
 
-  /** Updated timestamp (workspace_items.updated_at) */
+  /** Updated timestamp */
   updatedAt?: string;
 
-  /** Soft delete timestamp (workspace_items.deleted_at) */
+  /** Soft delete timestamp */
   deletedAt?: string | null;
 
-
-  // ============ COMPUTED PROPERTIES ============
-
+  // ── computed ──────────────────────────────
   /** Tree depth level (0 = root) */
   level: number;
 
-  /** Position in current level for sorting */
+  /** Position in current level */
   position: number;
 
-  /** Access type: "owner" or "shared" */
+  /** "owner" or "shared" */
   accessType: "owner" | "shared";
 
   /** True if original, false if copied */
   isOriginal: boolean;
 
-  // ============ UI STATE ============
-
-  /** UI state: expanded/collapsed */
+  // ── UI state ──────────────────────────────
   isExpanded?: boolean;
-
-  /** UI state: selected */
   isSelected?: boolean;
 }
 
 // ============================================
-// DISCRIMINATED UNION TYPES
+// K NODE ITEM
 // ============================================
 
-/** Workspace item containing a folder */
-export interface WorkspaceFolderItem extends BaseWorkspaceItem {
+/** A node item in the K tree */
+export interface KNodeItem extends BaseKItem {
   entityType: 2;
-  data: FolderEntity;
+  data: KNodeData;
 }
 
-/** Workspace item containing a note */
-export interface WorkspaceNoteItem extends BaseWorkspaceItem {
-  entityType: 3;
-  data: NoteEntity;
-}
+/** Union type — currently only KNodeItem (extendable later) */
+export type KItemV2 = KNodeItem;
 
-/** Workspace item containing a file */
-export interface WorkspaceFileItem extends BaseWorkspaceItem {
-  entityType: 4;
-  data: FileEntity;
-}
-
-/**
- * Discriminated union of all workspace item types
- * TypeScript will narrow the type based on entityType property
- */
-export type KItemV2 = WorkspaceFolderItem | WorkspaceNoteItem | WorkspaceFileItem;
+// @deprecated aliases
+/** @deprecated Use KNodeItem */
+export type WorkspaceFolderItem = KNodeItem;
 
 // ============================================
 // TYPE GUARDS
 // ============================================
 
-/** Type guard to check if item is a folder */
-export function isFolder(item: KItemV2): item is WorkspaceFolderItem {
+/** Type guard: is a node (always true for KItemV2, kept for consistency) */
+export function isNode(item: KItemV2): item is KNodeItem {
   return item.entityType === 2;
 }
 
-/** Type guard to check if item is a note */
-export function isNote(item: KItemV2): item is WorkspaceNoteItem {
-  return item.entityType === 3;
+/** Can have children (nodes always can) */
+export function canHaveChildren(item: KItemV2): item is KNodeItem {
+  return item.entityType === 2;
 }
 
-/** Type guard to check if item is a file */
-export function isFile(item: KItemV2): item is WorkspaceFileItem {
-  return item.entityType === 4;
-}
-
-/** Type guard to check if item can have children (folders only) */
-export function canHaveChildren(item: KItemV2): item is WorkspaceFolderItem {
+// @deprecated — kept for backward compat, remove after Phase 3
+/** @deprecated Use isNode */
+export function isFolder(item: KItemV2): item is KNodeItem {
   return item.entityType === 2;
 }
 
 // ============================================
-// WORKSPACE TREE RESPONSE
+// K TREE RESPONSE
 // ============================================
 
 /**
- * Workspace with tree response V2
- * Contains workspace metadata and flat list of items
+ * K with flat item list — used by API response
  */
-export interface WorkspaceWithTreeResponseV2 {
-  /** Workspace ID */
+export interface KWithTreeResponseV2 {
   workspaceId: number;
-
-  /** User ID who owns the workspace */
   userId: number;
-
-  /** Workspace name */
   name: string;
-
-  /** Workspace description */
   description?: string;
-
-  /** Hex color code */
   color?: string;
-
-  /** Icon name or class */
   icon?: string;
-
-  /** Workspace organization type */
   type?: string;
-
-  /** Maximum depth allowed */
   maxDepth?: number;
-
-  /** Whether this is the default workspace */
   isDefault: boolean;
-
-  /** Whether publicly accessible */
   isPublic: boolean;
-
-  /** Whether this is a template */
   isTemplate: boolean;
-
-  /** Whether archived */
   isArchived: boolean;
-
-  /** Total number of folders */
-  folderCount: number;
-
-  /** Total number of notes */
-  noteCount: number;
-
-  /** Total number of files */
-  fileCount: number;
-
-  /** Number of members */
+  /** Total number of nodes */
+  nodeCount: number;
   memberCount: number;
-
-  /** Additional settings as JSON */
   settings?: string;
-
-  /** When created */
   createdAt: string;
-
-  /** When last updated */
   updatedAt?: string;
-
-  /**
-   * FLAT list of workspace items with full entity data
-   * Frontend builds hierarchy using parentId
-   */
+  /** Flat list — frontend builds hierarchy using parentId */
   items: KItemV2[];
 }
+
+// @deprecated alias
+/** @deprecated Use KWithTreeResponseV2 */
+export type WorkspaceWithTreeResponseV2 = KWithTreeResponseV2;

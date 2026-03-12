@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import {useKStore} from "../store/K.store";
 
 export function ScrollToHighlightItem() {
-    const { selectedItemIds, _treeRef, scrollToItem, setScrollToItem, currentWorkspace, setIsLoadingTree, isLoadingTree } = useKStore();
+    const { selectedItemIds, _treeRef, scrollToItem, setScrollToItem, currentK, setIsLoadingTree, isLoadingTree } = useKStore();
     const isScrollingRef = useRef(false);
     const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 

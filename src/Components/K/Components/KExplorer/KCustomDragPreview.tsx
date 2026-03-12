@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon } from "lucide-react";
-import {KTreeFolder, KtreeMiniHelper} from "../../hooks";
+import {KTreeNode, KtreeMiniHelper} from "../../hooks";
 
 /**
  * Custom Drag Preview Component (VS Code style)
@@ -18,7 +18,7 @@ export function KCustomDragPreview({
     id: string | null;
     dragIds: string[];
     isDragging: boolean;
-    treeData: KTreeFolder[];
+    treeData: KTreeNode[];
 }) {
     if (!isDragging || !offset) return null;
 
@@ -35,7 +35,7 @@ export function KCustomDragPreview({
         // Single item: show folder name
         if (itemCount === 1 && id) {
             const allFolders = KtreeMiniHelper.$traverse(treeData);
-            const folder = allFolders.find((t: KTreeFolder) => t.id === id);
+            const folder = allFolders.find((t: KTreeNode) => t.id === id);
             return folder?.name || "Moving...";
         }
 

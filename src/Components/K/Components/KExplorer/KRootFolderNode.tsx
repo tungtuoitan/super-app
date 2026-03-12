@@ -7,14 +7,14 @@ import { useKLoader } from "../../hooks/useK.loader";
 import { FolderItem } from "../../types/K.types";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { KHighlightText } from "./KHighlightText";
-import {KTreeFolder} from "../../hooks";
+import {KTreeNode} from "../../hooks";
 import {kconstants} from "../../utils/K.Constants";
 
 interface RootFolderNodeProps {
-    node: NodeApi<KTreeFolder>;
+    node: NodeApi<KTreeNode>;
     style: React.CSSProperties;
     dragHandle?: any;
-    treeData: KTreeFolder[];
+    treeData: KTreeNode[];
     treeType?: "workspaceTree" | "targetTree";
 }
 

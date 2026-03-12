@@ -1,6 +1,7 @@
 /**
- * Folder Types and Interfaces
- * Domain models and DTOs for the folder feature (workspace navigation)
+ * @deprecated Legacy folder types — not used in KTree V2.
+ * KTree V2 uses KNodeData (K-v2.types.ts) instead.
+ * Will be removed in Phase 3.
  */
 
 import type { FolderEntity } from "@/types/workspace-v2.types";

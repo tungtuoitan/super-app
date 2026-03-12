@@ -8,16 +8,16 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { KHighlightText } from "./KHighlightText";
 import {useKStore} from "../../store/K.store";
 import {useKTreeStatusHelper} from "../../hooks/useKTreeStatusHelper";
-import {KTreeFolder} from "../../hooks";
+import {KTreeNode} from "../../hooks";
 import {kconstants} from "../../utils/K.Constants";
 import {IconType} from "../../shared/icons/icon.types";
 import {ICON_MAP} from "../../shared/icons/icon.config";
 
 interface FolderNodeProps {
-    node: NodeApi<KTreeFolder>;
+    node: NodeApi<KTreeNode>;
     style: React.CSSProperties;
     dragHandle?: any;
-    treeData: KTreeFolder[];
+    treeData: KTreeNode[];
     treeType?: "workspaceTree" | "targetTree";
 }
 
@@ -38,7 +38,7 @@ const FolderOpen2: React.FC<IconProps> = ({ className, color }) => (
 export default Folder2;
 
 export function KFolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FolderNodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef,setScrollToItem } = useKStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, _treeRef,setScrollToItem } = useKStore();
     const { searchQuery } = useGridControlStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useKTreeHelper2();
@@ -174,7 +174,7 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
             return;
         }
 
-        const _currentFolder = currentWorkspace?.flatData.find((f: any) => f.entityId === entityId);
+        const _currentFolder = currentK?.flatData.find((f: any) => f.entityId === entityId);
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };

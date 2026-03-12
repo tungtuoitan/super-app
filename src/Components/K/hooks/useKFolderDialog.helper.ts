@@ -1,9 +1,9 @@
-import { KuseFolderDialogStore } from "../store/KFolderDialog.store";
-import type { ItemType } from "../store/KFolderDialog.store";
+import { useNodeDialogStore } from "../store/KFolderDialog.store";
+import type { NodeItemType } from "../store/KFolderDialog.store";
 import { useKStore } from "../store/K.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { KService } from "../service/K.service";
-import type { FolderDialogFormErrors } from "../store/KFolderDialog.store";
+import type { NodeDialogFormErrors } from "../store/KFolderDialog.store";
 import { useKLoader } from "./useK.loader";
 import { KItemAction } from "../types/K.types";
 import { useStandardRegistryHelper } from "../../../hooks/standardRegistry/useStandardRegistry.helper";
@@ -13,50 +13,50 @@ import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../utils/K.Constants";
 import {Folder} from "../types";
 
-export const KuseFolderDialogHelper = () => {
+export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();
     const { loadTree } = useKLoader();
     const { loadKeywords } = useStandardRegistryHelper();
 
-    // Form state from FolderDialogStore
+    // Form state from NodeDialogStore
     const {
         mode,
         itemType,
         setItemType, 
-        editingFolder,
-        parentFolder,
-        setParentFolder,
-        newFolderName,
+        editingNode,
+        parentNode,
+        setParentNode,
+        newNodeName,
         description,
         color,
         icon,
         setErrors,
         setIsSubmitting,
         setIsLoadingTree,
-        setIsFolderDialogOpen,
+        setIsNodeDialogOpen,
         setMode,
-        setEditingFolder,
-        setNewFolderName,
+        setEditingNode,
+        setNewNodeName,
         setDescription,
         setColor,
         setIcon,
-    } = KuseFolderDialogStore();
+    } = useNodeDialogStore();
 
     // Workspace state
-    const { currentWorkspace, treeData, _treeRef, setSelectedItemIds, setLastSelectedItemId, setScrollToItem } = useKStore();
+    const { currentK, treeData, _treeRef, setSelectedItemIds, setLastSelectedItemId, setScrollToItem } = useKStore();
 
     // Auth
     const { $user } = useAuthStore();
     const token = $user.userToken;
 
     // Computed value
-    const selectedWorkspaceId = currentWorkspace?.id;
+    const selectedKId = currentK?.id;
 
     /**
      * Reset form to initial state
      */
     const resetForm = () => {
-        setNewFolderName("");
+        setNewNodeName("");
         setDescription("");
         setColor(kconstants.color[0].value); // Reset to default color
         setIcon(null);
@@ -64,12 +64,12 @@ export const KuseFolderDialogHelper = () => {
         setIsSubmitting(false);
     };
 
-    const validateNewFolder = (): boolean => {
-        const newErrors: FolderDialogFormErrors = {};
+    const validateNewNode = (): boolean => {
+        const newErrors: NodeDialogFormErrors = {};
 
-        if (!newFolderName.trim()) {
+        if (!newNodeName.trim()) {
             newErrors.name = "Folder name is required";
-        } else if (newFolderName.length > 200) {
+        } else if (newNodeName.length > 200) {
             newErrors.name = "Folder name must be less than 200 characters";
         }
 
@@ -84,22 +84,22 @@ export const KuseFolderDialogHelper = () => {
 
     /**
      * Submit folder (unified for create and edit)
-     * Uses mode from FolderDialogStore to determine create vs edit
+     * Uses mode from NodeDialogStore to determine create vs edit
      */
-    const submitFolder = async () => {
+    const submitNode = async () => {
         // Validate form
-        if (!validateNewFolder()) {
+        if (!validateNewNode()) {
             return;
         }
 
         // Check workspace ID
-        if (!selectedWorkspaceId) {
+        if (!selectedKId) {
             _console.error("No workspace selected");
             return;
         }
 
         // Edit mode validation: check if we have editing folder
-        if (mode === "edit" && (!editingFolder || !editingFolder.id)) {
+        if (mode === "edit" && (!editingNode || !editingNode.id)) {
             _console.error("No folder selected for editing");
             return;
         }
@@ -109,11 +109,11 @@ export const KuseFolderDialogHelper = () => {
             // Prepare batch request with action-based API
             if (mode === "edit") {
                 // UPDATE action: update existing folder
-                await KService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
+                await KService._upsertWorkspaceItems(token, selectedKId, [{
                     action: KItemAction.UpdateFolder,
-                    id: editingFolder!.id,
+                    id: editingNode!.id,
                     folderData: {
-                        name: newFolderName.trim(),
+                        name: newNodeName.trim(),
                         description: description.trim() || undefined,
                         color,
                         icon: icon || undefined,
@@ -123,16 +123,16 @@ export const KuseFolderDialogHelper = () => {
                 // CREATE action: create new folder + workspace_item
                 // IMPORTANT: parentId = parent's workspace_items.id (NOT entityId!)
                 // workspace_items.parent_id is a SELF-REFERENCING FK to workspace_items.id
-                const parentWorkspaceItemId = parentFolder && "id" in parentFolder && (parentFolder as any).id > 0
-                    ? (parentFolder as any).id
+                const parentWorkspaceItemId = parentNode && "id" in parentNode && (parentNode as any).id > 0
+                    ? (parentNode as any).id
                     : null;
 
-                await KService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
+                await KService._upsertWorkspaceItems(token, selectedKId, [{
                     action: KItemAction.Create,
                     entityType: 2, // Folder
                     parentId: parentWorkspaceItemId, // ✅ Use parent's workspace_items.id (NOT entityId!)
                     folderData: {
-                        name: newFolderName.trim(),
+                        name: newNodeName.trim(),
                         description: description.trim() || undefined,
                         color,
                         icon: icon || undefined,
@@ -141,14 +141,14 @@ export const KuseFolderDialogHelper = () => {
             }
 
             // Success message based on mode
-            const successMessage = mode === "edit" ? `Folder "${newFolderName}" updated successfully!` : `Folder "${newFolderName}" created successfully!`;
+            const successMessage = mode === "edit" ? `Folder "${newNodeName}" updated successfully!` : `Folder "${newNodeName}" created successfully!`;
 
             _console.success(successMessage);
 
             // Store the folder name and parent ID for finding the new folder after reload
-            const createdFolderName = newFolderName.trim();
-            const parentId = parentFolder && "id" in parentFolder && (parentFolder as any).id > 0
-                ? (parentFolder as any).id
+            const createdFolderName = newNodeName.trim();
+            const parentId = parentNode && "id" in parentNode && (parentNode as any).id > 0
+                ? (parentNode as any).id
                 : null;
 
             // Reload workspace tree
@@ -183,7 +183,7 @@ export const KuseFolderDialogHelper = () => {
             }
 
             // Close dialog
-            closeFolderDialog();
+            closeNodeDialog();
 
             resetForm();
         } catch (error: any) {
@@ -199,15 +199,15 @@ export const KuseFolderDialogHelper = () => {
      * @param dialogMode - 'create' or 'edit'
      * @param type - Item type: 'folder', 'note', or 'file'
      * @param folder - For edit mode: folder to edit (required). For create mode: unused
-     * @param parentFolder - For create mode: parent folder (optional). For edit mode: unused
+     * @param parentNode - For create mode: parent folder (optional). For edit mode: unused
      */
-    const openFolderDialog = (dialogMode: "create" | "edit", type: ItemType = kconstants.workspace.itemTypes.folder, folder?: Folder | null, parentFolder?: Folder | null) => {
+    const openNodeDialog = (dialogMode: "create" | "edit", type: NodeItemType = kconstants.workspace.itemTypes.folder, folder?: Folder | null, parentNode?: Folder | null) => {
         setMode(dialogMode);
         setItemType(type);
 
         if (dialogMode === "create") {
-            // Create mode: use parentFolder parameter
-            setParentFolder(parentFolder || null);
+            // Create mode: use parentNode parameter
+            setParentNode(parentNode || null);
             resetForm();
         } else {
             // Edit mode: use folder parameter
@@ -221,12 +221,12 @@ export const KuseFolderDialogHelper = () => {
                 id: folder.id || (folder as any).tagId,
             };
 
-            setEditingFolder(editData);
+            setEditingNode(editData);
 
             // Pre-fill form with existing data (with safe fallbacks)
             // Handle WorkspaceItemV2 structure (data property) and legacy Folder structure
             const folderData = (folder as any).data || folder;
-            setNewFolderName(folderData.name || "");
+            setNewNodeName(folderData.name || "");
             setDescription(folderData.description || "");
             setColor(folderData.color || kconstants.color[0].value);
             setIcon(folderData.icon || null);
@@ -236,17 +236,17 @@ export const KuseFolderDialogHelper = () => {
         setErrors({});
 
         // Open dialog
-        setIsFolderDialogOpen(true);
+        setIsNodeDialogOpen(true);
     };
 
     /**
      * Close folder dialog
      */
-    const closeFolderDialog = () => {
-        setIsFolderDialogOpen(false);
+    const closeNodeDialog = () => {
+        setIsNodeDialogOpen(false);
         setTimeout(() => {
             if (mode === "create") {
-                setParentFolder(null);
+                setParentNode(null);
             }
             resetForm();
         }, 200); // Clear after animation
@@ -254,12 +254,12 @@ export const KuseFolderDialogHelper = () => {
 
     return {
         // Dialog actions
-        openFolderDialog,
-        closeFolderDialog,
+        openNodeDialog,
+        closeNodeDialog,
 
         // Validation & Submit (unified)
-        validateNewFolder,
-        submitFolder,
+        validateNewNode,
+        submitNode,
     };
 };
 

@@ -9,13 +9,13 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
-import {buildTreeFromV2Items, filterTopLevelParents, KuseFolderDialogHelper} from "../../hooks";
+import {buildTreeFromV2Items, filterTopLevelParents, useKNodeDialogHelper} from "../../hooks";
 import {useKStore} from "../../store/K.store";
 import {KService} from "../../service/K.service";
-import {ItemType} from "../../store/KFolderDialog.store";
+import {NodeItemType} from "../../store/KFolderDialog.store";
 import {KItemV2} from "../../types/K-v2.types";
 import {KUpsertWorkspaceItemRequest, KItemAction} from "../../types/K.types";
-import {KWorkspaceDTO} from "../../types/K-dto.types";
+import {KDTO} from "../../types/K-dto.types";
 import {kconstants} from "../../utils/K.Constants";
 import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
 import {getConfirmMessage} from "../../utils/confirmation-message.utils";
@@ -28,7 +28,7 @@ import {Folder} from "../../types";
 /**
  * Traverse tree and collect all visible folder IDs in order (for VS Code-like navigation)
  */
-const $getAllVisibleFolderIds = (items: any[]): number[] => {
+const $getAllVisibleNodeIds = (items: any[]): number[] => {
     const result: number[] = [];
 
     function $traverse(nodes: any[]) {
@@ -105,8 +105,8 @@ export const useKFolderMenuHelper = () => {
     const _console = useConsoleHelper();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useKStore();
-    const { openFolderDialog } = KuseFolderDialogHelper();
+    const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentK, setCurrentK } = useKStore();
+    const { openNodeDialog } = useKNodeDialogHelper();
     const { processTabAfterDelete, openTab } = useEditorTabHelper();
 
     const selectedCount = selectedItemIds.length;
@@ -117,12 +117,12 @@ export const useKFolderMenuHelper = () => {
     /**
      * Handle create item action (folder/note/file)
      */
-    const createFolder = (itemType: ItemType, parentTag?: any) => {
+    const createFolder = (itemType: NodeItemType, parentTag?: any) => {
         // ----------------
         // Close context menu and open create dialog
         // ----------------
         setIsContextMenuOpen(false);
-        openFolderDialog("create", itemType, null, parentTag);
+        openNodeDialog("create", itemType, null, parentTag);
     };
 
     /**
@@ -138,8 +138,8 @@ export const useKFolderMenuHelper = () => {
         // Determine item type and open edit dialog
         // ----------------
         if (itemData) {
-            const itemType: ItemType = itemData.type || kconstants.workspace.itemTypes.folder;
-            openFolderDialog("edit", itemType, itemData, null);
+            const itemType: NodeItemType = itemData.type || kconstants.workspace.itemTypes.folder;
+            openNodeDialog("edit", itemType, itemData, null);
         }
     };
 
@@ -160,8 +160,8 @@ export const useKFolderMenuHelper = () => {
         // STEP 2: Find next item to select after deletion (VS Code behavior)
         // ----------------
         let nextFolderIdToSelect: number | null = null;
-        if (currentWorkspace?.flatData) {
-            const allVisibleFolderIds = $getAllVisibleFolderIds(currentWorkspace.flatData);
+        if (currentK?.flatData) {
+            const allVisibleFolderIds = $getAllVisibleNodeIds(currentK.flatData);
             const currentIndex = allVisibleFolderIds.indexOf(folder.id);
 
             if (currentIndex !== -1) {
@@ -195,26 +195,13 @@ export const useKFolderMenuHelper = () => {
         try {
             const token = $user.userToken;
 
-            // Map items with proper type codes (2=folder, 3=note, 4=file)
-            const deleteItems = foldersToDelete.map((f) => {
-                const itemType = (f as any).type;
-                let type: 2 | 3 | 4 = 2; // Default to folder
+            // All items are nodes (entityType=2)
+            const deleteItems = foldersToDelete.map((f) => ({
+                id: f.id!,
+                type: 2 as const,
+            }));
 
-                if (itemType === kconstants.workspace.itemTypes.folder) {
-                    type = 2;
-                } else if (itemType === kconstants.workspace.itemTypes.note) {
-                    type = 3;
-                } else if (itemType === kconstants.workspace.itemTypes.file) {
-                    type = 4;
-                }
-
-                return {
-                    id: f.id!,
-                    type,
-                };
-            });
-
-            const result = await KService._deleteWorkspaceItems(token || "", currentWorkspace?.id || 1, {
+            const result = await KService._deleteWorkspaceItems(token || "", currentK?.id || 1, {
                 items: deleteItems,
                 isHardDelete,
             });
@@ -224,12 +211,12 @@ export const useKFolderMenuHelper = () => {
             // ----------------
             if (result && result.success) {
                 // Remove folders from tree
-                if (currentWorkspace) {
+                if (currentK) {
                     const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                    const updatedItems = $removeItems(currentWorkspace.flatData, idsToRemove);
+                    const updatedItems = $removeItems(currentK.flatData, idsToRemove);
 
-                    setCurrentWorkspace({
-                        ...currentWorkspace,
+                    setCurrentK({
+                        ...currentK,
                         flatData: updatedItems,
                     });
 
@@ -269,7 +256,7 @@ export const useKFolderMenuHelper = () => {
         // ----------------
         // STEP 1: Validate tree data
         // ----------------
-        if (!currentWorkspace?.flatData) {
+        if (!currentK?.flatData) {
             console.error("❌ Cannot delete: no tree data");
             return;
         }
@@ -279,7 +266,7 @@ export const useKFolderMenuHelper = () => {
         // ----------------
         const selectedFolders: Folder[] = [];
         for (const folderId of selectedIds) {
-            const folder = $findFolderById(currentWorkspace.flatData, folderId);
+            const folder = $findFolderById(currentK.flatData, folderId);
             if (folder) {
                 // Check if this is a workspace root node (negative ID)
                 if (folder.id < 0) {
@@ -299,7 +286,7 @@ export const useKFolderMenuHelper = () => {
         // STEP 3: Find next item to select after deletion (VS Code behavior)
         // ----------------
         let nextFolderIdToSelect: number | null = null;
-        const allVisibleFolderIds = $getAllVisibleFolderIds(currentWorkspace.flatData);
+        const allVisibleFolderIds = $getAllVisibleNodeIds(currentK.flatData);
 
         // Find the highest index among selected folders
         const selectedIndices = selectedIds
@@ -344,26 +331,13 @@ export const useKFolderMenuHelper = () => {
         try {
             const token = $user.userToken;
 
-            // Map items with proper type codes (2=folder, 3=note, 4=file)
-            const deleteItems = foldersToDelete.map((f) => {
-                const itemType = (f as any).type;
-                let type: 2 | 3 | 4 = 2;
+            // All items are nodes (entityType=2)
+            const deleteItems = foldersToDelete.map((f) => ({
+                id: f.id!,
+                type: 2 as const,
+            }));
 
-                if (itemType === kconstants.workspace.itemTypes.folder) {
-                    type = 2;
-                } else if (itemType === kconstants.workspace.itemTypes.note) {
-                    type = 3;
-                } else if (itemType === kconstants.workspace.itemTypes.file) {
-                    type = 4;
-                }
-
-                return {
-                    id: f.id!,
-                    type,
-                };
-            });
-
-            const result = await KService._deleteWorkspaceItems(token || "", currentWorkspace?.id || 1, {
+            const result = await KService._deleteWorkspaceItems(token || "", currentK?.id || 1, {
                 items: deleteItems,
                 isHardDelete,
             });
@@ -373,12 +347,12 @@ export const useKFolderMenuHelper = () => {
             // ----------------
             if (result && result.message === "Items deleted successfully") {
                 // Remove folders from tree
-                if (currentWorkspace) {
+                if (currentK) {
                     const idsToRemove = new Set(foldersToDelete.map((f) => f.id!));
-                    const updatedItems = $removeItems(currentWorkspace.flatData, idsToRemove);
+                    const updatedItems = $removeItems(currentK.flatData, idsToRemove);
 
-                    setCurrentWorkspace({
-                        ...currentWorkspace,
+                    setCurrentK({
+                        ...currentK,
                         flatData: updatedItems,
                     });
 
@@ -499,7 +473,7 @@ export const useKFolderMenuHelper = () => {
         }
 
         // ===== STEP 2: Validate tree data =====
-        if (!currentWorkspace?.flatData) {
+        if (!currentK?.flatData) {
             console.error("❌ Cannot delete: no tree data");
             return;
         }
@@ -508,7 +482,7 @@ export const useKFolderMenuHelper = () => {
             const token = $user.userToken;
 
             // ===== STEP 3: Filter to top-level parents only =====
-            const treeData = buildTreeFromV2Items(currentWorkspace.flatData);
+            const treeData = buildTreeFromV2Items(currentK.flatData);
             const topLevelIds = filterTopLevelParents(selectedIds, treeData);
 
             if (topLevelIds.length === 0) {
@@ -519,7 +493,7 @@ export const useKFolderMenuHelper = () => {
             // ===== STEP 4: Find items and skip workspace root =====
             const selectedItems: KItemV2[] = [];
             for (const itemId of topLevelIds) {
-                const item = $findItemById(currentWorkspace.flatData, itemId);
+                const item = $findItemById(currentK.flatData, itemId);
                 if (item && item.id > 0) {
                     // Skip workspace root (negative ID)
                     selectedItems.push(item);
@@ -557,7 +531,7 @@ export const useKFolderMenuHelper = () => {
             });
 
             // ===== STEP 8: Call batch upsert API (giống __deleteRestore_SelectedNotes) =====
-            const result = await KService._upsertWorkspaceItems(token ?? "", currentWorkspace.id, batchRequests);
+            const result = await KService._upsertWorkspaceItems(token ?? "", currentK.id, batchRequests);
 
             if (!result.success) {
                 throw new Error(result.message || "Batch update failed");
@@ -567,26 +541,18 @@ export const useKFolderMenuHelper = () => {
 
             if (type === "soft-delete") {
                 // Clean up open tabs (giống __deleteRestore_SelectedNotes)
-                // In V2: entityType is numeric: 2=folder, 3=note, 4=file
-                const folderIds = itemsToUpdate.filter((item) => item.entityType === 2).map((item) => item.id);
-                const noteIds = itemsToUpdate.filter((item) => item.entityType === 3).map((item) => item.id);
-                const fileIds = itemsToUpdate.filter((item) => item.entityType === 4).map((item) => item.id);
+                // All items are nodes (entityType=2) — note/file no longer supported in KTree
+            const nodeIds = itemsToUpdate.filter((item) => item.entityType === 2).map((item) => item.id);
 
-                if (folderIds.length > 0) {
-                    processTabAfterDelete(folderIds, "folder");
-                }
-                if (noteIds.length > 0) {
-                    processTabAfterDelete(noteIds, "note");
-                }
-                if (fileIds.length > 0) {
-                    processTabAfterDelete(fileIds, "file");
+                if (nodeIds.length > 0) {
+                    processTabAfterDelete(nodeIds, "node");
                 }
             }
 
             // Reload workspace tree (giống __deleteRestore_SelectedNotes: await loadNotes())
-            const res = await KService._getWorkspaceTreeV2(token ?? "", currentWorkspace.id);
+            const res = await KService._getWorkspaceTreeV2(token ?? "", currentK.id);
             if(res && res.success){
-                setCurrentWorkspace(res.object as KWorkspaceDTO);
+                setCurrentK(res.object as KDTO);
                 // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
                 setSelectedItemIds([]);
                 setLastSelectedItemId(null);
@@ -618,7 +584,7 @@ export const useKFolderMenuHelper = () => {
 
         // With V2 flat structure, find all descendants by traversing parentId relationships
         const findDescendants = (parentId: number) => {
-            const children = currentWorkspace?.flatData.filter(i => i.parentId === parentId) || [];
+            const children = currentK?.flatData.filter(i => i.parentId === parentId) || [];
             for (const child of children) {
                 descendants.push(child);
                 // Recursively find descendants of this child

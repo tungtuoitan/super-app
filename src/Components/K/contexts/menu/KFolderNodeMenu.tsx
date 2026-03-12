@@ -26,7 +26,7 @@ import {kconstants} from "../../utils/K.Constants";
  */
 export function KFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
-    const { selectedItemIds, currentWorkspace } = useKStore();
+    const { selectedItemIds, currentK } = useKStore();
     const { createFolder, editFolder, dhr_items } = useKFolderMenuHelper();
     const _TREESTATUS = useKTreeStatusHelper();
 
