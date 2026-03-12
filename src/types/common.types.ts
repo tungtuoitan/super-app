@@ -97,6 +97,7 @@ export interface UserFilters {
     noteGrid?: ViewFilter;
     wsGrid?: ViewFilter;
     workspace?: ViewFilter;
+    k?: ViewFilter;
     projectGrid?: ViewFilter;
     taskGrid?: ViewFilter;
 }
