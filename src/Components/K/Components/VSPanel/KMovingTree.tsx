@@ -30,7 +30,7 @@ export function KMovingTree() {
                 name: "",
                 data: {
                     id: kconstants.workspace.dropZone.workspaceItemId,
-                    workspaceId: targetWorkspace.id,
+                    knowledgeId: targetWorkspace.id,
                     parentId: null,
                     name: "",
                     description: undefined,
@@ -41,8 +41,6 @@ export function KMovingTree() {
                     createdAt: new Date().toISOString(),
                     updatedAt: undefined,
                     deletedAt: null,
-                    accessType: "owner" as const,
-                    isOriginal: true,
                     isExpanded: false,
                     isSelected: false,
                 },

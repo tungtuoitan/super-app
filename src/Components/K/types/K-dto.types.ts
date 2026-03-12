@@ -1,27 +1,23 @@
 import { KItemV2 } from "./K-v2.types";
 
 /**
- * KDTO — unified K workspace DTO
- * Maps to backend KWorkspaceDTO (kws.workspaces + flat list of kws.workspace_items)
+ * KDTO — unified K knowledge DTO
+ * Maps to backend KKnowledgeDTO (k.knowledge + flat list of k.node)
  */
 export interface KDTO {
-    /** kws.workspaces.id */
+    /** k.knowledge.id */
     id: number;
 
     /** Owner user ID */
     userId: number;
 
-    /** Workspace name */
+    /** Knowledge name */
     name: string;
 
-    /** Workspace description */
+    /** Knowledge description */
     description?: string | null;
 
-    /** Hex color */
-    color?: string | null;
-
-    /** Icon */
-    icon?: string | null;
+    statusCode?: string | null;
 
     createdAt: string;
     updatedAt?: string | null;
@@ -29,7 +25,7 @@ export interface KDTO {
 
     /**
      * Flat list of nodes. Frontend builds hierarchy using parentId.
-     * Each item maps to one kws.workspace_items row.
+     * Each item maps to one k.node row.
      */
     flatData: KItemV2[];
 }

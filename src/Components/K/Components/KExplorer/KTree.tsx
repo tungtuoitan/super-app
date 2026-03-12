@@ -40,7 +40,7 @@ export function KTree() {
                 data: {
                     // V2 structure - WorkspaceItemV2
                     id: kconstants.workspace.dropZone.workspaceItemId, // workspace_items.id
-                    workspaceId: currentK.id,
+                    knowledgeId: currentK.id,
                     parentId: null,
                     entityType: 2 as const,
                     entityId: kconstants.workspace.dropZone.entityId, // folders.id (entity ID)

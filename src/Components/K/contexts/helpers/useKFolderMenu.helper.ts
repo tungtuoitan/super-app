@@ -196,7 +196,7 @@ export const useKFolderMenuHelper = () => {
             const token = $user.userToken;
 
             const result = await KService._deleteWorkspaceItems(token || "", currentK?.id || 1, {
-                itemIds: foldersToDelete.map((f) => f.id!),
+                nodeIds: foldersToDelete.map((f) => f.id!),
             });
             // ----------------
             if (result && result.success) {
@@ -321,9 +321,8 @@ export const useKFolderMenuHelper = () => {
         try {
             const token = $user.userToken;
 
-            // All items are nodes (entityType=2)
             const result = await KService._deleteWorkspaceItems(token || "", currentK?.id || 1, {
-                itemIds: foldersToDelete.map((f) => f.id!),
+                nodeIds: foldersToDelete.map((f) => f.id!),
             });
 
             // ----------------

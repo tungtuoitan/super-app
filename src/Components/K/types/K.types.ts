@@ -9,7 +9,7 @@ import { kconstants } from "../utils/K.Constants";
 // ============================================
 
 /**
- * K item action — maps to backend KWorkspaceItemAction enum (case-insensitive)
+ * K node action — maps to backend KNodeAction enum (case-insensitive)
  */
 export enum KItemAction {
     Create    = "create",
@@ -37,12 +37,12 @@ export interface KUpsertNodeData {
 // ============================================
 
 /**
- * Action-based request for K item batch API (POST /{workspaceId}/items/batch)
+ * Action-based request for K node batch API (POST /{knowledgeId}/nodes/batch)
  *
  * CREATE:     action, nodeData required; parentId optional (null = root)
  * UPDATE:     action, id, nodeData required
  * MOVE:       action, id, parentId required
- * MOVECROSS:  action, id, workspaceId required; parentId optional
+ * MOVECROSS:  action, id, knowledgeId required; parentId optional
  * DELETE:     action, id required
  * RESTORE:    action, id required
  */
@@ -50,13 +50,13 @@ export interface KUpsertWorkspaceItemRequest {
     /** Explicit action */
     action: KItemAction;
 
-    /** kws.workspace_items.id — required for Update/Move/MoveCross/Delete/Restore */
+    /** k.node.id — required for Update/Move/MoveCross/Delete/Restore */
     id?: number | null;
 
-    /** Target workspace ID — set from route for most actions; override for MoveCross */
-    workspaceId?: number | null;
+    /** Target knowledge ID — set from route for most actions; override for MoveCross */
+    knowledgeId?: number | null;
 
-    /** Parent kws.workspace_items.id — null = root level */
+    /** Parent k.node.id — null = root level */
     parentId?: number | null;
 
     /** Node data — required for Create and Update */
@@ -64,25 +64,24 @@ export interface KUpsertWorkspaceItemRequest {
 }
 
 // ============================================
-// MOVE REQUEST
-// ============================================
-
-/** Request to move items within or across workspaces (PATCH /{workspaceId}/items/move) */
-export interface KMoveItemsRequest {
-    /** kws.workspace_items.id list to move */
-    itemIds: number[];
-    targetParentId?: number | null;
-    targetWorkspaceId?: number | null;
-}
-
-// ============================================
 // DELETE REQUEST
 // ============================================
 
-/** Request to delete items (DELETE /{workspaceId}/items) */
+/** Request to delete nodes (DELETE /{knowledgeId}/nodes) */
 export interface KDeleteItemsRequest {
-    /** kws.workspace_items.id list to delete */
-    itemIds: number[];
+    /** k.node.id list to delete */
+    nodeIds: number[];
+}
+
+// ============================================
+// MOVE REQUEST (currently unused — handled via batch)
+// ============================================
+
+/** @deprecated Use batch upsert with MoveCross action instead */
+export interface KMoveItemsRequest {
+    nodeIds: number[];
+    targetParentId?: number | null;
+    targetKnowledgeId?: number | null;
 }
 
 // ============================================
@@ -97,10 +96,10 @@ export interface KOperationResult {
 }
 
 // ============================================
-// K LIST ITEM (for workspace selector)
+// K LIST ITEM (for knowledge selector)
 // ============================================
 
-/** K workspace item for list/selector — maps to backend WsResponse */
+/** Knowledge summary — maps to backend KKnowledgeSummary */
 export interface KWsResponse {
     id: number;
     userId: number;
@@ -112,7 +111,7 @@ export interface KWsResponse {
     deletedAt?: string | null;
 }
 
-/** K workspace domain model with Date objects */
+/** K knowledge domain model with Date objects */
 export interface KWs {
     id: number;
     name: string;
@@ -212,3 +211,4 @@ export interface FileItem {
 
 /** @deprecated V1 union — kept for K-mapper.ts backward compat */
 export type KWorkspaceItem = FolderItem | NoteItem | FileItem;
+

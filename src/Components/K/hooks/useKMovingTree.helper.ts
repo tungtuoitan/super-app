@@ -282,8 +282,8 @@ export const useKMovingTreeHelper = () => {
                 // check if any items are already in target workspace
                 const itemsToMove = topLevelItemIds.filter((itemId: number) => {
                     const item = currentK?.flatData.find((fd) => fd.id === itemId);
-                    if (item && item.workspaceId === targetWorkspaceId) {
-                        console.warn(`Item ${itemId} already in target workspace ${targetWorkspaceId}, skipping`);
+                    if (item && item.knowledgeId === targetWorkspaceId) {
+                        console.warn(`Item ${itemId} already in target knowledge ${targetWorkspaceId}, skipping`);
                         return false; // Skip this item
                     }
                     return true;
@@ -297,7 +297,7 @@ export const useKMovingTreeHelper = () => {
                 const requests: KUpsertWorkspaceItemRequest[] = itemsToMove.map((itemId: number) => ({
                     action: KItemAction.MoveCross,
                     id: itemId,
-                    workspaceId: targetWorkspaceId,
+                    knowledgeId: targetWorkspaceId,
                     parentId: targetId, // null = root, number = specific folder
                 }));
 

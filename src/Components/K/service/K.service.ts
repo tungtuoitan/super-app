@@ -1,24 +1,23 @@
 /**
- * KWorkspace Service — API communication for kworkspace operations
+ * K Service — API communication for k knowledge/node operations
  *
- * Endpoints (KWorkspaceController):
- *   GET    /api/kworkspace                        — list all workspaces
- *   GET    /api/kworkspace/{id}/tree/v2           — get workspace tree (flat nodes)
- *   POST   /api/kworkspace/{id}/items/batch       — batch upsert nodes (create/update/move/delete/restore)
- *   PATCH  /api/kworkspace/{id}/items/move        — move nodes (stored proc)
- *   DELETE /api/kworkspace/{id}/items             — delete nodes
+ * Endpoints (KController):
+ *   GET    /api/k                              — list all knowledge bases
+ *   GET    /api/k/{knowledgeId}/tree           — get knowledge tree (flat nodes)
+ *   POST   /api/k/{knowledgeId}/nodes/batch    — batch upsert nodes (create/update/move/delete/restore)
+ *   DELETE /api/k/{knowledgeId}/nodes          — delete nodes (and descendants)
  */
 
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { KMoveItemsRequest, KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
+import type { KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
 import { ResultOptions } from "../../../types";
 import type { KDTO } from "../types/K-dto.types";
 
-// ── Get all workspaces ──────────────────────────────────────────────────────
+// ── Get all knowledge bases ──────────────────────────────────────────────────
 
 const _getAllUserWorkspaces = async (_token: string): Promise<KWsResponse[]> => {
-    const res = await apiFetch(`${config.api.baseURL}/api/kworkspace`, {
+    const res = await apiFetch(`${config.api.baseURL}/api/k`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -27,13 +26,13 @@ const _getAllUserWorkspaces = async (_token: string): Promise<KWsResponse[]> => 
     return Promise.reject(res);
 };
 
-// ── Get workspace tree (flat nodes) ────────────────────────────────────────
+// ── Get knowledge tree (flat nodes) ─────────────────────────────────────────
 
 const _getWorkspaceTreeV2 = async (
     _token: string,
-    workspaceId: number,
+    knowledgeId: number,
 ): Promise<ResultOptions<KDTO>> => {
-    const url = `${config.api.baseURL}/api/kworkspace/${workspaceId}/tree/v2`;
+    const url = `${config.api.baseURL}/api/k/${knowledgeId}/tree`;
     const res = await apiFetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
 
     if (res.ok) return (await res.json()) as ResultOptions<KDTO>;
@@ -44,10 +43,10 @@ const _getWorkspaceTreeV2 = async (
 
 const _upsertWorkspaceItems = async (
     _token: string,
-    workspaceId: number,
+    knowledgeId: number,
     requests: KUpsertWorkspaceItemRequest[]
 ): Promise<ResultOptions> => {
-    const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/items/batch`, {
+    const res = await apiFetch(`${config.api.baseURL}/api/k/${knowledgeId}/nodes/batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requests),
@@ -57,31 +56,14 @@ const _upsertWorkspaceItems = async (
     return Promise.reject(res);
 };
 
-// ── Move nodes (stored proc, same or cross workspace) ──────────────────────
-
-// const _moveItems = async (
-//     _token: string,
-//     workspaceId: number,
-//     data: KMoveItemsRequest
-// ): Promise<ResultOptions> => {
-//     const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/items/move`, {
-//         method: "PATCH",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(data),
-//     });
-
-//     if (res.ok) return await res.json();
-//     return Promise.reject(res);
-// };
-
-// ── Delete nodes ────────────────────────────────────────────────────────────
+// ── Delete nodes ─────────────────────────────────────────────────────────────
 
 const _deleteWorkspaceItems = async (
     _token: string,
-    workspaceId: number,
+    knowledgeId: number,
     data: KDeleteItemsRequest
 ): Promise<KOperationResult> => {
-    const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/items`, {
+    const res = await apiFetch(`${config.api.baseURL}/api/k/${knowledgeId}/nodes`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -91,12 +73,11 @@ const _deleteWorkspaceItems = async (
     return Promise.reject(res);
 };
 
-// ── Export ──────────────────────────────────────────────────────────────────
+// ── Export ───────────────────────────────────────────────────────────────────
 
 export const KService = {
     _getAllUserWorkspaces,
     _getWorkspaceTreeV2,
     _upsertWorkspaceItems,
-    // _moveItems,
     _deleteWorkspaceItems,
 };

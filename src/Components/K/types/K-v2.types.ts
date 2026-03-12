@@ -1,24 +1,24 @@
 /**
- * K V2 Types — flat node structure matching kws.workspace_items
+ * K V2 Types — flat node structure matching k.node table
  * API returns data directly on each item (no entityType/entityId/data nesting).
  */
 
 // ============================================
-// K ITEM (flat node — maps to KWorkspaceItemResponseV2)
+// K ITEM (flat node — maps to KNodeResponse)
 // ============================================
 
 /**
- * Flat K node item — maps directly to kws.workspace_items row
+ * Flat K node item — maps directly to k.node row
  * name/description/color/icon are on the item itself (no separate entity join)
  */
 export interface KItemV2 {
-  /** kws.workspace_items.id */
+  /** k.node.id */
   id: number;
 
-  /** kws.workspace_items.workspace_id */
-  workspaceId: number;
+  /** k.node.knowledge_id */
+  knowledgeId: number;
 
-  /** parent kws.workspace_items.id — self-referencing, null = root */
+  /** parent k.node.id — self-referencing, null = root */
   parentId: number | null;
 
   /** Node name */
@@ -43,10 +43,6 @@ export interface KItemV2 {
   createdAt: string;
   updatedAt?: string | null;
   deletedAt?: string | null;
-
-  // ── Computed ──────────────────────────────
-  accessType: "owner" | "shared";
-  isOriginal: boolean;
 
   // ── UI state ──────────────────────────────
   isExpanded?: boolean;
