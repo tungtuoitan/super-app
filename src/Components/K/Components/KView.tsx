@@ -91,7 +91,7 @@ export function KView() {
 
                 {/* Loading Overlay */}
                 {(isLoadingK || isLoadingTree || isLoadingTreeByOpeningNode) && (
-                    <div className="absolute inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-10">
+                    <div className="absolute inset-0 bg-background__ backdrop-blur-sm__ flex items-center justify-center z-10">
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     </div>
                 )}

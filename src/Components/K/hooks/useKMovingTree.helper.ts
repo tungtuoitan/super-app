@@ -298,7 +298,7 @@ export const useKMovingTreeHelper = () => {
                     action: KItemAction.MoveCross,
                     id: itemId,
                     knowledgeId: targetWorkspaceId,
-                    parentId: targetId, // null = root, number = specific folder
+                    parentId: (targetId ?? 0) > 0 ? targetId : null, // null = root, number = specific folder
                 }));
 
                 // STEP 7: Call batch API
