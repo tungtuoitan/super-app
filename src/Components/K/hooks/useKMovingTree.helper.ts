@@ -85,20 +85,18 @@ export const useKMovingTreeHelper = () => {
             return;
         }
 
-        // Build map of target workspace items with composite key (entityType-entityId)
-        const targetEntityMap = new Map<string, any>();
+        // Build map of target workspace items by id
+        const targetEntityMap = new Map<number, any>();
         targetWorkspace.flatData.forEach((item) => {
-            const compositeKey = `${item.entityType}-${item.entityId}`;
-            targetEntityMap.set(compositeKey, item);
+            targetEntityMap.set(item.id, item);
         });
 
         // Check all items in current workspace for duplicates
         const duplicateCompositeKeys: string[] = [];
         currentK.flatData.forEach((sourceItem) => {
-            const compositeKey = `${sourceItem.entityType}-${sourceItem.entityId}`;
-            const targetItem = targetEntityMap.get(compositeKey);
+            const targetItem = targetEntityMap.get(sourceItem.id);
             if (targetItem) {
-                duplicateCompositeKeys.push(compositeKey);
+                duplicateCompositeKeys.push(`${sourceItem.id}`);
             }
         });
 
@@ -121,11 +119,10 @@ export const useKMovingTreeHelper = () => {
         const draggedNodeIds = draggedItem.dragIds || [draggedItem.id];
         const itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
 
-        // Build map of target workspace items with composite key (entityType-entityId)
-        const targetEntityMap = new Map<string, any>();
+        // Build map of target workspace items by id
+        const targetEntityMap = new Map<number, any>();
         targetWorkspace.flatData.forEach((item) => {
-            const compositeKey = `${item.entityType}-${item.entityId}`;
-            targetEntityMap.set(compositeKey, item);
+            targetEntityMap.set(item.id, item);
         });
 
         // Check each dragging item for duplicates
@@ -133,8 +130,7 @@ export const useKMovingTreeHelper = () => {
         itemIds.forEach((itemId: number) => {
             const sourceItem = currentK.flatData.find((i) => i.id === itemId);
             if (sourceItem) {
-                const compositeKey = `${sourceItem.entityType}-${sourceItem.entityId}`;
-                const targetItem = targetEntityMap.get(compositeKey);
+                const targetItem = targetEntityMap.get(sourceItem.id);
                 if (targetItem) {
                     duplicateItems.push({ sourceItem, targetItem });
                 }
@@ -251,7 +247,7 @@ export const useKMovingTreeHelper = () => {
                     .filter((id) => id < 0)
                     .map((id) => {
                         const item = currentK?.flatData.find((i) => i.id === id);
-                        return item?.data?.name || "Untitled";
+                        return item?.name || "Untitled";
                     });
 
                 if (unsavedItems.length > 0) {

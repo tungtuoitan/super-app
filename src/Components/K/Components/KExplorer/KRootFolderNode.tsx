@@ -27,7 +27,7 @@ export function KRootFolderNode({ node, style, dragHandle, treeData, treeType = 
     const { loadTree } = useKLoader();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
-    const nodeData = node.data.data.data;
+    const nodeData = node.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0; 
 
     // Check if this node is a valid drop target (being dragged over)

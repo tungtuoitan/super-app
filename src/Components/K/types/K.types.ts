@@ -9,61 +9,40 @@ import { kconstants } from "../utils/K.Constants";
 // ============================================
 
 /**
- * K item action — explicit action for batch API
- * Maps to backend KWorkspaceItemAction enum
+ * K item action — maps to backend KWorkspaceItemAction enum (case-insensitive)
  */
 export enum KItemAction {
-    /** Create new node + k_item */
-    Create = "CREATE",
-    /** Add existing entity to K */
-    Add = "ADD",
-    /** Move k_item within same K */
-    Move = "MOVE",
-    /** Move k_item to another K */
-    MoveCross = "MOVECROSS",
-    /** Update node data (name, description, color, icon) */
-    UpdateNode = "UPDATENODE",
-    /** Soft delete k_item */
-    Delete = "DELETE",
-    /** Restore deleted k_item */
-    Restore = "RESTORE",
-
-    // @deprecated — keep for backward compat with backend until Phase 4
-    /** @deprecated Use UpdateNode */
-    UpdateFolder = "UPDATEFOLDER",
+    Create    = "create",
+    Update    = "update",
+    Move      = "move",
+    MoveCross = "movecross",
+    Delete    = "delete",
+    Restore   = "restore",
 }
 
 // ============================================
 // NODE UPSERT DATA
 // ============================================
 
-/** Node entity data for batch upsert */
+/** Node data for Create / Update actions */
 export interface KUpsertNodeData {
-    id?: number;
-    userId?: number;
     name: string;
     description?: string | null;
     color?: string | null;
     icon?: string | null;
-    deletedAt?: string | null;
 }
-
-// @deprecated alias — remove after Phase 4 backend cleanup
-/** @deprecated Use KUpsertNodeData */
-export type KUpsertFolderData = KUpsertNodeData;
 
 // ============================================
 // BATCH UPSERT REQUEST
 // ============================================
 
 /**
- * Action-based request for K item batch operations
+ * Action-based request for K item batch API (POST /{workspaceId}/items/batch)
  *
- * VALIDATION RULES:
- * CREATE:     action, entityType=2, nodeData required; parentId optional (null=root)
+ * CREATE:     action, nodeData required; parentId optional (null = root)
+ * UPDATE:     action, id, nodeData required
  * MOVE:       action, id, parentId required
  * MOVECROSS:  action, id, workspaceId required; parentId optional
- * UPDATENODE: action, id, nodeData required
  * DELETE:     action, id required
  * RESTORE:    action, id required
  */
@@ -71,66 +50,39 @@ export interface KUpsertWorkspaceItemRequest {
     /** Explicit action */
     action: KItemAction;
 
-    /** k_items.id — required for Move, UpdateNode, Delete, Restore */
+    /** kws.workspace_items.id — required for Update/Move/MoveCross/Delete/Restore */
     id?: number | null;
 
-    /** K ID — target for MoveCross, set from route for others */
+    /** Target workspace ID — set from route for most actions; override for MoveCross */
     workspaceId?: number | null;
 
-    /** User ID — set from JWT */
-    userId?: number;
-
-    /** Parent k_items.id (SELF-REFERENCING) */
+    /** Parent kws.workspace_items.id — null = root level */
     parentId?: number | null;
 
-    /** entityType: 2 = node */
-    entityType?: 2;
-
-    /** Entity ID — for Add action */
-    entityId?: number;
-
-    /** User email — set by controller */
-    createdBy?: string;
-
-    /** Node data — required for Create and UpdateNode */
+    /** Node data — required for Create and Update */
     nodeData?: KUpsertNodeData;
-
-    // @deprecated — kept for backward compat with backend until Phase 4
-    /** @deprecated Use nodeData */
-    folderData?: KUpsertNodeData;
 }
 
 // ============================================
-// MOVE / DELETE REQUEST HELPERS
+// MOVE REQUEST
 // ============================================
 
-/** Single item identifier for move */
-export interface KMoveItemIdentifier {
-    /** entityType: 2 = node */
-    type: 2;
-    /** k_items.id */
-    id: number;
-}
-
-/** Request to move multiple k items */
+/** Request to move items within or across workspaces (PATCH /{workspaceId}/items/move) */
 export interface KMoveItemsRequest {
-    items: KMoveItemIdentifier[];
+    /** kws.workspace_items.id list to move */
+    itemIds: number[];
     targetParentId?: number | null;
     targetWorkspaceId?: number | null;
 }
 
-/** Single item for delete */
-export interface DeleteItemRequest {
-    id: number;
-    /** entityType: 2 = node */
-    type: 2;
-}
+// ============================================
+// DELETE REQUEST
+// ============================================
 
-/** Request to delete multiple k items */
+/** Request to delete items (DELETE /{workspaceId}/items) */
 export interface KDeleteItemsRequest {
-    items: DeleteItemRequest[];
-    cascade?: boolean;
-    isHardDelete?: boolean;
+    /** kws.workspace_items.id list to delete */
+    itemIds: number[];
 }
 
 // ============================================
@@ -144,51 +96,49 @@ export interface KOperationResult {
     object?: any;
 }
 
-// @deprecated alias
-/** @deprecated Use KOperationResult */
-export type KWorkspaceOperationResult = KOperationResult;
-
 // ============================================
-// K LIST ITEM (for dropdown/selector)
+// K LIST ITEM (for workspace selector)
 // ============================================
 
-/** K item for list/selector — maps to backend KWsResponse */
+/** K workspace item for list/selector — maps to backend WsResponse */
 export interface KWsResponse {
     id: number;
     userId: number;
     name: string;
     description?: string;
+    statusCode?: string;
     createdAt: string;
     updatedAt?: string;
     deletedAt?: string | null;
 }
 
-/** K domain model with Date objects */
+/** K workspace domain model with Date objects */
 export interface KWs {
     id: number;
     name: string;
     description?: string | null;
     statusCode?: string;
-    hashtags?: string;
     createdAt: Date;
     updatedAt?: Date | null;
     deletedAt: Date | null;
-    isHardDeleted?: boolean;
     userId?: number;
-    createdBy?: string;
 }
 
 // ============================================
-// LEGACY — @deprecated, remove after Phase 3
+// LEGACY — @deprecated, remove after refactor
 // ============================================
 
 /** @deprecated Legacy V1 type — use KItemV2 from K-v2.types */
 export type ChildType = typeof kconstants.workspace.itemTypes.node | typeof kconstants.workspace.itemTypes.k;
 
-// ─── Legacy V1 mapper types (used only by K-mapper.ts) ───────────────────────
-// K is nodes-only; note/file variants are stubs kept for backward compat.
+/** @deprecated V1 metadata stub */
+export interface KFolderMetadata { [key: string]: unknown; }
+/** @deprecated V1 metadata stub */
+export interface KNoteMetadata { [key: string]: unknown; }
+/** @deprecated V1 metadata stub */
+export interface KFileMetadata { [key: string]: unknown; }
 
-/** @deprecated V1 node item — use KNodeItem from K-v2.types */
+/** @deprecated V1 node item — kept for K-mapper.ts backward compat */
 export interface FolderItem {
     id: number;
     type: string;
@@ -260,12 +210,5 @@ export interface FileItem {
     children: never[];
 }
 
-/** @deprecated V1 union — use KItemV2 from K-v2.types */
+/** @deprecated V1 union — kept for K-mapper.ts backward compat */
 export type KWorkspaceItem = FolderItem | NoteItem | FileItem;
-
-/** @deprecated V1 metadata stub */
-export interface KFolderMetadata { [key: string]: unknown; }
-/** @deprecated V1 metadata stub */
-export interface KNoteMetadata { [key: string]: unknown; }
-/** @deprecated V1 metadata stub */
-export interface KFileMetadata { [key: string]: unknown; }

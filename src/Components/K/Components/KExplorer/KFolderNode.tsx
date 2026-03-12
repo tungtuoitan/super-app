@@ -3,7 +3,6 @@ import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers, Dot, Circle, ChevronUp } from "lucide-react";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/useKTreeHelper2";
-import { WorkspaceFolderItem } from "../../types/K-v2.types";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { KHighlightText } from "./KHighlightText";
 import {useKStore} from "../../store/K.store";
@@ -45,17 +44,16 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
     const _TREESTATUS = useKTreeStatusHelper();
 
     // Safe cast: KTree already filters to only render FolderNode for folders
-    const folderItem = node.data.data as unknown as WorkspaceFolderItem;
+    const folderItem = node.data.data;
 
-    // Extract data from V2 structure
+    // Extract data from flat KItemV2 structure
     const KWorkspaceItemId = folderItem.id; // workspace_items.id (unique)
-    const entityId = folderItem.entityId; // folders.id (for API calls, context menu)
-    const folderName = folderItem.data.name;
-    const folderColor = folderItem.data.color;
-    const folderIcon = folderItem.data.icon as IconType | undefined; // Icon type from database
+    const folderName = folderItem.name;
+    const folderColor = folderItem.color;
+    const folderIcon = folderItem.icon as IconType | undefined; // Icon type from database
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isFolderSelected(KWorkspaceItemId); // Use workspace_items.id for selection
-    const isWorkspaceRoot = entityId < 0; // Workspace root node has negative ID
+    const isWorkspaceRoot = folderItem.id < 0; // Workspace root node has negative ID
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -174,7 +172,7 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
             return;
         }
 
-        const _currentFolder = currentK?.flatData.find((f: any) => f.entityId === entityId);
+        const _currentFolder = currentK?.flatData.find((f: any) => f.id === KWorkspaceItemId);
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };

@@ -110,13 +110,9 @@ export const getAllVisibleFolderIds = getAllVisibleNodeIds;
 // ============================================
 
 function sortTreeNodes(nodes: KTreeNode[]): KTreeNode[] {
-    return nodes.sort((a, b) => {
-        const aType = a.data.entityType;
-        const bType = b.data.entityType;
-        if (aType === 2 && bType !== 2) return -1;
-        if (aType !== 2 && bType === 2) return 1;
-        return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), undefined, { numeric: true });
-    });
+    return nodes.sort((a, b) =>
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase(), undefined, { numeric: true })
+    );
 }
 
 function $sortChildrenRecursively(nodes: KTreeNode[]) {
@@ -146,7 +142,7 @@ export function buildTreeFromV2Items(items: KItemV2[]): KTreeNode[] {
     items.forEach((item) => {
         const node: KTreeNode = {
             id: item.id.toString(),
-            name: item.data.name,
+            name: item.name,
             data: item,
             children: [],
         };
@@ -203,30 +199,20 @@ export function transformToTreeData(data: KDTO | null | undefined, searchText: s
             id: kconstants.workspace.root.workspaceItemId,
             workspaceId: data.id,
             parentId: null,
-            entityType: 2,
-            entityId: kconstants.workspace.root.entityId,
+            name: data.name,
+            description: data.description,
+            color: data.color,
+            icon: data.icon,
+            pathIds: "/",
+            pathDepth: 0,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             deletedAt: null,
-            level: 0,
-            position: 0,
             accessType: "owner" as const,
             isOriginal: true,
-            data: {
-                id: kconstants.workspace.root.entityId,
-                userId: data.userId,
-                name: data.name,
-                description: data.description,
-                color: data.color,
-                icon: data.icon,
-                createdAt: data.createdAt,
-                updatedAt: data.updatedAt,
-                deletedAt: null,
-                slug: undefined,
-            },
             isExpanded: true,
             isSelected: false,
-        } as any,
+        },
         children: treeRoots,
     };
 

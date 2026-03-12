@@ -110,9 +110,9 @@ export const useKNodeDialogHelper = () => {
             if (mode === "edit") {
                 // UPDATE action: update existing folder
                 await KService._upsertWorkspaceItems(token, selectedKId, [{
-                    action: KItemAction.UpdateFolder,
+                    action: KItemAction.Update,
                     id: editingNode!.id,
-                    folderData: {
+                    nodeData: {
                         name: newNodeName.trim(),
                         description: description.trim() || undefined,
                         color,
@@ -129,9 +129,8 @@ export const useKNodeDialogHelper = () => {
 
                 await KService._upsertWorkspaceItems(token, selectedKId, [{
                     action: KItemAction.Create,
-                    entityType: 2, // Folder
                     parentId: parentWorkspaceItemId, // ✅ Use parent's workspace_items.id (NOT entityId!)
-                    folderData: {
+                    nodeData: {
                         name: newNodeName.trim(),
                         description: description.trim() || undefined,
                         color,
@@ -160,7 +159,7 @@ export const useKNodeDialogHelper = () => {
                 // Find the newly created folder by name and parentId
                 const newFolder = loadedWorkspace.flatData.find(item =>
                     isFolder(item) &&
-                    item.data.name === createdFolderName &&
+                    item.name === createdFolderName &&
                     item.parentId === parentId
                 );
 

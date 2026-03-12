@@ -195,19 +195,9 @@ export const useKFolderMenuHelper = () => {
         try {
             const token = $user.userToken;
 
-            // All items are nodes (entityType=2)
-            const deleteItems = foldersToDelete.map((f) => ({
-                id: f.id!,
-                type: 2 as const,
-            }));
-
             const result = await KService._deleteWorkspaceItems(token || "", currentK?.id || 1, {
-                items: deleteItems,
-                isHardDelete,
+                itemIds: foldersToDelete.map((f) => f.id!),
             });
-
-            // ----------------
-            // STEP 5: Update UI after successful deletion
             // ----------------
             if (result && result.success) {
                 // Remove folders from tree
@@ -332,14 +322,8 @@ export const useKFolderMenuHelper = () => {
             const token = $user.userToken;
 
             // All items are nodes (entityType=2)
-            const deleteItems = foldersToDelete.map((f) => ({
-                id: f.id!,
-                type: 2 as const,
-            }));
-
             const result = await KService._deleteWorkspaceItems(token || "", currentK?.id || 1, {
-                items: deleteItems,
-                isHardDelete,
+                itemIds: foldersToDelete.map((f) => f.id!),
             });
 
             // ----------------
@@ -540,9 +524,8 @@ export const useKFolderMenuHelper = () => {
             // ===== STEP 9: Post-processing (giống __deleteRestore_SelectedNotes) =====
 
             if (type === "soft-delete") {
-                // Clean up open tabs (giống __deleteRestore_SelectedNotes)
-                // All items are nodes (entityType=2) — note/file no longer supported in KTree
-            const nodeIds = itemsToUpdate.filter((item) => item.entityType === 2).map((item) => item.id);
+                // All items are nodes — close their tabs
+                const nodeIds = itemsToUpdate.map((item) => item.id);
 
                 if (nodeIds.length > 0) {
                     processTabAfterDelete(nodeIds, "node");

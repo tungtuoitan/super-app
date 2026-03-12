@@ -59,7 +59,7 @@ export function KFolderDialog() {
         if (!parentFolderId || !currentK?.flatData || currentK.flatData.length === 0) return null;
 
         // Search for parent folder in the flat list
-        const found = currentK.flatData.find(item => isFolder(item) && item.entityId === parentFolderId);
+        const found = currentK.flatData.find(item => isFolder(item) && item.id === parentFolderId);
         return found || null;
     }, [parentFolderId, currentK]);
 
@@ -77,7 +77,7 @@ export function KFolderDialog() {
                 // Same parent (siblings)
                 item.parentId === parentFolderId &&
                 // When editing, exclude the current folder being edited
-                (mode === "create" || item.entityId !== editingNode?.id)
+                (mode === "create" || item.id !== editingNode?.id)
         );
     };
 
@@ -87,7 +87,7 @@ export function KFolderDialog() {
 
         return siblingFolders().some((folder: KItemV2) => {
             if (isFolder(folder)) {
-                return folder.data.name.toLowerCase() === newNodeName.trim().toLowerCase();
+                return folder.name.toLowerCase() === newNodeName.trim().toLowerCase();
             }
             return false;
         });

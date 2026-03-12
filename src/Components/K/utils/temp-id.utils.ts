@@ -97,7 +97,7 @@ export const collectIdsFromTree = (flatData: KItemV2[]): {
 
     flatData.forEach((item) => {
         // Skip special IDs (root, dropZone) to prevent conflicts
-        const isSpecialId = SPECIAL_IDS.includes(item.id) || SPECIAL_IDS.includes(item.entityId);
+        const isSpecialId = SPECIAL_IDS.includes(item.id);
         if (isSpecialId) {
             return;
         }
@@ -105,17 +105,8 @@ export const collectIdsFromTree = (flatData: KItemV2[]): {
         // Collect workspace_items.id (always present)
         workspaceItemIds.push(item.id);
 
-        // Collect entity IDs based on entity type
-        if (item.entityType === 2) {
-            // Folder
-            folderEntityIds.push(item.entityId);
-        } else if (item.entityType === 3) {
-            // Note
-            noteEntityIds.push(item.entityId);
-        } else if (item.entityType === 4) {
-            // File
-            fileEntityIds.push(item.entityId);
-        }
+        // All K items are nodes — push id to folderEntityIds for backward compat
+        folderEntityIds.push(item.id);
     });
 
     return {

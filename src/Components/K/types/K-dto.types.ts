@@ -1,54 +1,35 @@
 import { KItemV2 } from "./K-v2.types";
 
 /**
- * KDTO — unified K (knowledge) DTO
- * Contains K metadata + flat list of node items
+ * KDTO — unified K workspace DTO
+ * Maps to backend KWorkspaceDTO (kws.workspaces + flat list of kws.workspace_items)
  */
 export interface KDTO {
-    // ── K table properties ────────────────────────────────────────────────────
-
-    /** K ID (workspaces.id → future: k.id) */
+    /** kws.workspaces.id */
     id: number;
 
     /** Owner user ID */
     userId: number;
 
-    /** K name */
+    /** Workspace name */
     name: string;
 
-    /** K description */
-    description?: string;
+    /** Workspace description */
+    description?: string | null;
 
     /** Hex color */
-    color?: string;
+    color?: string | null;
 
     /** Icon */
-    icon?: string;
+    icon?: string | null;
 
-    type?: string;
-    maxDepth?: number;
-    isDefault: boolean;
-    isPublic: boolean;
-    isTemplate: boolean;
-    isArchived: boolean;
-
-    /** Total number of nodes */
-    nodeCount: number;
-
-    memberCount: number;
-    settings?: string;
     createdAt: string;
-    updatedAt?: string;
+    updatedAt?: string | null;
     deletedAt?: string | null;
 
-    // ── Node items ────────────────────────────────────────────────────────────
-
     /**
-     * Flat list of k items — frontend builds hierarchy using parentId
+     * Flat list of nodes. Frontend builds hierarchy using parentId.
+     * Each item maps to one kws.workspace_items row.
      */
     flatData: KItemV2[];
 }
-
-// @deprecated alias — remove after Phase 2 store rename
-/** @deprecated Use KDTO */
-export type KWorkspaceDTO = KDTO;
