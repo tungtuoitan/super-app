@@ -20,7 +20,7 @@ export function CalculateMovingTreeDropZoneHeight({ treeData, containerHeight, t
         const calculateDropZoneHeight = () => {
             const ROW_HEIGHT = 32;
             const tree = treeRef.current;
-
+ 
             if (!tree) {
                 setDropZoneHeight(0);
                 return;

@@ -135,7 +135,7 @@ export function WorkspaceTree() {
         // Get root workspace data
         if (treeData && treeData.length > 0) {
             const rootData = treeData[0].data; // Root is first item in treeData
-            showContextMenu(e, constants.workspace.itemTypes.folder, {
+            showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, {
                 ...rootData,
                 parentId: null,
             });
@@ -235,7 +235,7 @@ export function WorkspaceTree() {
                                             // Show root workspace context menu for drop zone
                                             if (treeData && treeData.length > 0) {
                                                 const rootData = treeData[0].data; // Root is first item
-                                                showContextMenu(e, constants.workspace.itemTypes.folder, {
+                                                showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, {
                                                     ...rootData,
                                                     parentId: null,
                                                 });

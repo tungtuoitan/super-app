@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "
 import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useTreeHelper } from "@/hooks/workspace/useTreeHelper";
-import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
+import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader"; 
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { FolderItem } from "@/types/workspace.types";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -42,7 +42,7 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
         e.preventDefault();
         
         // Show root workspace context menu with Add Folder/Note/File options
-        showContextMenu(e, constants.workspace.itemTypes.folder, {
+        showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, {
             ...node.data.data,
             parentId: null,
         });

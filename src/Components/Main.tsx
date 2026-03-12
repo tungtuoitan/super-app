@@ -11,10 +11,10 @@ import { MovingTreeProvider } from "@/store/workspace/MovingTree.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
-import MainNav from "./MainNav/MainNav";
+import MainNav from "./MainNav/MainNav"; 
 import { DialogProvider, EditorTabProvider, EditorProvider, GeneralProvider, CommandPaletteProvider, ConsoleProvider } from "@/store/index";
 import { EditorToolbarProvider } from "@/store/editor/EditorToolbar.store";
-import { NoteDetailProvider } from "@/store/note/useNoteDetail.store";
+import { NoteDetailProvider } from "@/store/note/useNoteDetail.store"; 
 import { NoteGridProvider } from "@/store/note/useNoteGrid.store";
 import { NavProvider } from "@/contexts/NavigationContext";
 import { WsProvider } from "@/store/ws/useWs.store";
@@ -32,6 +32,9 @@ import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
 import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
+import { KProvider } from "@/Components/K/store/K.store";
+import { KMovingTreeProvider } from "@/Components/K/store/KMovingTree.store";
+import { KFolderDialogProvider } from "@/Components/K/store/KFolderDialog.store";
 
 /**
  * Main application layout component.
@@ -57,7 +60,7 @@ export function Main() {
     return (
         <BrowserRouter>
             <NavProvider>
-                <MobileProvider>
+                <MobileProvider> 
                     <DebugLoggerProvider>
                         <AuthCallbackProvider>
                             <ActivityBarProvider>
@@ -69,50 +72,56 @@ export function Main() {
                                                     <GeneralProvider>
                                                         <CommandPaletteProvider>
                                                             <WorkspaceProvider>
-                                                                <FolderDialogProvider>
-                                                                    <NoteGridPopupProvider>
-                                                                        <MovingTreeProvider>
-                                                                            <WsProvider>
-                                                                                <WsDetailProvider>
-                                                                                    <ProjectProvider>
-                                                                                    <ProjectDetailProvider>
-                                                                                    <TaskProvider>
-                                                                                    <LifeLogProvider>
-                                                                                    <NoteDetailProvider>
-                                                                                        <NoteGridProvider>
-                                                                                            <EditorTabProvider>
-                                                                                                <TrackingGraphProvider>
-                                                                                                    <EditorProvider>
-                                                                                                        <EditorToolbarProvider>
-                                                                                                        <DialogProvider>
-                                                                                                        <OrchestratorContextMenuStoreProvider>
-                                                                                                            <ConfirmationPopoverProvider>
-                                                                                                                <OrchestratorContextMenu>
-                                                                                                                    <AuthGuard>
-                                                                                                                        <GridControlProvider>
-                                                                                                                            <MainNav />
-                                                                                                                        </GridControlProvider>
-                                                                                                                    </AuthGuard>
-                                                                                                                </OrchestratorContextMenu>
-                                                                                                                <ConfirmationPopoverContainer />
-                                                                                                            </ConfirmationPopoverProvider>
-                                                                                                        </OrchestratorContextMenuStoreProvider>
-                                                                                                        </DialogProvider>
-                                                                                                        </EditorToolbarProvider>
-                                                                                                    </EditorProvider>
-                                                                                                </TrackingGraphProvider>
-                                                                                            </EditorTabProvider>
-                                                                                        </NoteGridProvider>
-                                                                                    </NoteDetailProvider>
-                                                                                    </LifeLogProvider>
-                                                                                    </TaskProvider>
-                                                                                    </ProjectDetailProvider>
-                                                                                    </ProjectProvider>
-                                                                                </WsDetailProvider>
-                                                                            </WsProvider>
-                                                                        </MovingTreeProvider>
-                                                                    </NoteGridPopupProvider>
-                                                                </FolderDialogProvider>
+                                                                <KProvider>
+                                                                    <FolderDialogProvider>
+                                                                        <KFolderDialogProvider>
+                                                                            <NoteGridPopupProvider>
+                                                                                    <MovingTreeProvider>
+                                                                                        <KMovingTreeProvider>
+                                                                                            <WsProvider>
+                                                                                                <WsDetailProvider>
+                                                                                                    <ProjectProvider>
+                                                                                                        <ProjectDetailProvider>
+                                                                                                            <TaskProvider>
+                                                                                                                <LifeLogProvider>
+                                                                                                                    <NoteDetailProvider>
+                                                                                                                        <NoteGridProvider>
+                                                                                                                            <EditorTabProvider>
+                                                                                                                                <TrackingGraphProvider>
+                                                                                                                                    <EditorProvider>
+                                                                                                                                        <EditorToolbarProvider>
+                                                                                                                                            <DialogProvider>
+                                                                                                                                                <OrchestratorContextMenuStoreProvider>
+                                                                                                                                                    <ConfirmationPopoverProvider>
+                                                                                                                                                        <OrchestratorContextMenu>
+                                                                                                                                                            <AuthGuard>
+                                                                                                                                                                <GridControlProvider>
+                                                                                                                                                                    <MainNav />
+                                                                                                                                                                </GridControlProvider>
+                                                                                                                                                            </AuthGuard>
+                                                                                                                                                        </OrchestratorContextMenu>
+                                                                                                                                                        <ConfirmationPopoverContainer />
+                                                                                                                                                    </ConfirmationPopoverProvider>
+                                                                                                                                                </OrchestratorContextMenuStoreProvider>
+                                                                                                                                            </DialogProvider>
+                                                                                                                                        </EditorToolbarProvider>
+                                                                                                                                    </EditorProvider>
+                                                                                                                                </TrackingGraphProvider>
+                                                                                                                            </EditorTabProvider>
+                                                                                                                        </NoteGridProvider>
+                                                                                                                    </NoteDetailProvider>
+                                                                                                                </LifeLogProvider>
+                                                                                                            </TaskProvider>
+                                                                                                        </ProjectDetailProvider>
+                                                                                                    </ProjectProvider>
+                                                                                                </WsDetailProvider>
+                                                                                            </WsProvider>
+                                                                                        </KMovingTreeProvider>
+                                                                                    </MovingTreeProvider>
+                                                                            </NoteGridPopupProvider>
+                                                                        </KFolderDialogProvider>
+                                                                    </FolderDialogProvider>
+                                                                </KProvider>
                                                             </WorkspaceProvider>
                                                         </CommandPaletteProvider>
                                                     </GeneralProvider>

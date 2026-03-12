@@ -12,6 +12,7 @@ import { ProjectView } from "./ProjectView";
 import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { Console } from "./Console";
+import {KView} from "../K/Components/KView";
 
 interface VSSideBarProps {
     activeView: ActivityBarView;
@@ -69,6 +70,7 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                                 <div className="flex-1 overflow-hidden">
                                     {activeView === constants.vscode.viewTypes.ws && <WsView />}
                                     {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
+                                    {activeView === constants.vscode.viewTypes.k && <KView />}
                                     {activeView === constants.vscode.viewTypes.note && <NotesView />}
                                     {activeView === constants.vscode.viewTypes.project && <ProjectView />}
                                     {activeView === constants.vscode.viewTypes.lifeLog && <LifeLogView />}
