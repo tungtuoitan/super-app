@@ -184,3 +184,88 @@ export interface KWs {
 
 /** @deprecated Legacy V1 type — use KItemV2 from K-v2.types */
 export type ChildType = typeof kconstants.workspace.itemTypes.node | typeof kconstants.workspace.itemTypes.k;
+
+// ─── Legacy V1 mapper types (used only by K-mapper.ts) ───────────────────────
+// K is nodes-only; note/file variants are stubs kept for backward compat.
+
+/** @deprecated V1 node item — use KNodeItem from K-v2.types */
+export interface FolderItem {
+    id: number;
+    type: string;
+    userId: number;
+    name: string;
+    parentId?: number | null;
+    slug?: string;
+    color?: string;
+    icon?: string;
+    accessType: "owner" | "shared";
+    isOriginal: boolean;
+    level: number;
+    depth: number;
+    position: number;
+    sortOrder: number;
+    isExpanded: boolean;
+    isSelected: boolean;
+    createdAt: string;
+    updatedAt?: string;
+    metadata?: KFolderMetadata;
+    children: FolderItem[];
+}
+
+/** @deprecated V1 stub — K has no notes */
+export interface NoteItem {
+    id: number;
+    type: string;
+    userId: number;
+    name: string;
+    parentId?: number | null;
+    slug?: string;
+    color?: string;
+    icon?: string;
+    accessType: "owner" | "shared";
+    isOriginal: boolean;
+    level: number;
+    depth: number;
+    position: number;
+    sortOrder: number;
+    isExpanded: boolean;
+    isSelected: boolean;
+    createdAt: string;
+    updatedAt?: string;
+    metadata?: KNoteMetadata;
+    children: never[];
+}
+
+/** @deprecated V1 stub — K has no files */
+export interface FileItem {
+    id: number;
+    type: string;
+    userId: number;
+    name: string;
+    parentId?: number | null;
+    slug?: string;
+    color?: string;
+    icon?: string;
+    accessType: "owner" | "shared";
+    isOriginal: boolean;
+    level: number;
+    depth: number;
+    position: number;
+    sortOrder: number;
+    isExpanded: boolean;
+    isSelected: boolean;
+    createdAt: string;
+    updatedAt?: string;
+    metadata?: KFileMetadata;
+    children: never[];
+}
+
+/** @deprecated V1 union — use KItemV2 from K-v2.types */
+export type KWorkspaceItem = FolderItem | NoteItem | FileItem;
+
+/** @deprecated V1 metadata stub */
+export interface KFolderMetadata { [key: string]: unknown; }
+/** @deprecated V1 metadata stub */
+export interface KNoteMetadata { [key: string]: unknown; }
+/** @deprecated V1 metadata stub */
+export interface KFileMetadata { [key: string]: unknown; }

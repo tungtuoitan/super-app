@@ -20,17 +20,17 @@ import {CalculateKMovingTreeContainerHeight} from "../K/HeadlessComponents/Calcu
 
 export function KMovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useKMovingTreeStore();
-    const { allWorkspaces, currentWorkspace, selectedWorkspaceId, selectedItemIds } = useKStore();
+    const { allK, currentK, selectedKId, selectedItemIds } = useKStore();
     const manager = useDragDropManager();
     const { handleWorkspaceChange, loadTargetWorkspaceTree, checkDraggingItemsAreDuplicate, checkAndHighlightDuplicates } = useKMovingTreeHelper();
 
-    // Ensure targetWorkspaceId is not the same as selectedWorkspaceId
+    // Ensure targetWorkspaceId is not the same as selectedKId
     useEffect(() => {
-        if (selectedWorkspaceId === targetWorkspaceId) {
-            setTargetWorkspaceId(allWorkspaces.length > 0 ? (allWorkspaces.find((w) => w.id !== selectedWorkspaceId)?.id as number) : null);
+        if (selectedKId === targetWorkspaceId) {
+            setTargetWorkspaceId(allK.length > 0 ? (allK.find((w) => w.id !== selectedKId)?.id as number) : null);
             setHighlightedDuplicateIds(new Set()); // Clear highlights when switching workspace
         }
-    }, [selectedWorkspaceId]);
+    }, [selectedKId]);
 
     // Load target workspace tree when workspace is selected
     useEffect(() => {
@@ -40,11 +40,11 @@ export function KMovingTab() {
     // Auto-detect and highlight duplicates when targetWorkspace loads or selectedItemIds change
     useEffect(() => {
         checkAndHighlightDuplicates();
-    }, [targetWorkspaceId, selectedWorkspaceId, targetWorkspace, currentWorkspace]);
+    }, [targetWorkspaceId, selectedKId, targetWorkspace, currentK]);
 
     // Filter workspaces (exclude current workspace)
-    const availableWorkspaces: IAutoCompleteOptions[] = allWorkspaces
-        .filter((ws) => ws.id !== currentWorkspace?.id)
+    const availableWorkspaces: IAutoCompleteOptions[] = allK
+        .filter((ws) => ws.id !== currentK?.id)
         .map((ws) => ({
             id: ws.id.toString(),
             label: ws.name,

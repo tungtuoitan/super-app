@@ -178,7 +178,7 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };
-        showContextMenu(e, kconstants.contextMenu.contextMenuTypes.kFolder, contextData);
+        showContextMenu(e, kconstants.contextMenu.contextMenuTypes.kNode, contextData);
     };
 
     return (

@@ -2,7 +2,7 @@ import { useFolderDialogStore } from "@/store/workspace/FolderDialog.store";
 import type { ItemType } from "@/store/workspace/FolderDialog.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { workspaceService } from "@/services/workspace.service";
+import { workspaceService } from "@/services/workspace.service"; 
 import type { FolderDialogFormErrors } from "@/store/workspace/FolderDialog.store";
 import type { Folder } from "@/types/folder.types";
 import { constants } from "@/utils/constants";
@@ -11,11 +11,11 @@ import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegist
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { treeMiniHelper } from "./tree.miniHelper";
 import { isFolder } from "@/types/workspace-v2.types";
-import {useKLoader} from "@/Components/K/hooks";
+import { useWorkspaceLoader } from "./useWorkspace.loader";
 
 export const useFolderDialogHelper = () => {
     const _console = useConsoleHelper();
-    const { loadTree } = useKLoader();
+    const { loadTree } = useWorkspaceLoader();
     const { loadKeywords } = useStandardRegistryHelper();
 
     // Form state from FolderDialogStore

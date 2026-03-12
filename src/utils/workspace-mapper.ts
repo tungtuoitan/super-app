@@ -16,7 +16,7 @@ export type BackendItemType =
     | typeof constants.workspace.itemTypes.file
     | typeof constants.workspace.itemTypes.folder;
 
-/**
+/** 
  * Backend WorkspaceItem response format
  * This matches the structure from backend API
  */
@@ -164,7 +164,7 @@ export function transformBackendItems(items: BackendWorkspaceItem[]): WorkspaceI
  */
 export function transformToBackendItem(item: WorkspaceItem): Partial<BackendWorkspaceItem> {
     return {
-        type: item.type === constants.workspace.itemTypes.folder ? "folder" : item.type,
+        type: (item.type === constants.workspace.itemTypes.folder ? "folder" : item.type) as BackendItemType,
         id: item.id,
         childId: item.id, // Legacy field for backward compatibility
         userId: item.userId,

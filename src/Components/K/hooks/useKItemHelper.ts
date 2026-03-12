@@ -46,7 +46,7 @@ export const KuseWorkspaceItemHelper = () => {
                     for (const tab of tabsToProcess) {
                         if(!tab) continue;
                         const noteData = tab.data as Note;
-                        const workspaceItem = currentK?.flatData.find((item) => item.entityType === 3 && item.entityId === noteData.id);
+                        const workspaceItem = currentK?.flatData.find((item) => item.entityType === 2 && item.entityId === noteData.id);
 
                         if (!workspaceItem) {
                             console.warn(`⚠️ Note not found in kworkspace tree: ${noteData.name}`);
@@ -57,13 +57,12 @@ export const KuseWorkspaceItemHelper = () => {
                         // Build request for this tab
                         const request: KUpsertWorkspaceItemRequest = {
                             action: KItemAction.Create,
-                            entityType: 3, // Note
+                            entityType: 2, // Node
                             parentId: isNumber(workspaceItem.parentId) && SPECIAL_IDS.includes(workspaceItem.parentId) ? null : workspaceItem.parentId ?? null,
-                            noteData: {
+                            nodeData: {
                                 userId: noteData.userId,
                                 name: noteData.name,
                                 description: noteData.description || null,
-                                statusCode: noteData.statusCode || null,
                                 icon: noteData.icon || null,
                                 color: noteData.color || null,
                                 deletedAt: noteData.deletedAt ? noteData.deletedAt.toISOString() : null,
@@ -116,12 +115,12 @@ export const KuseWorkspaceItemHelper = () => {
                                 if (!tabInfo) return tab;
 
                                 // Find corresponding created item in response
-                                const createdItem = result.data?.find((item) => item.entityType === 3);
+                                const createdItem = result.data?.find((item) => item.entityType === 2);
 
                                 if (!createdItem) return tab;
 
                                 // Find workspace item from reloaded data
-                                const workspaceItemFromDB = newWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === createdItem.entityId);
+                                const workspaceItemFromDB = newWorkspace?.flatData.find((item) => item.entityType === 2 && item.entityId === createdItem.entityId);
 
                                 if (!workspaceItemFromDB) return tab;
 

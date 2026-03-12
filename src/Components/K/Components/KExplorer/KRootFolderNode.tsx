@@ -1,10 +1,9 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
-import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
+import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw } from "lucide-react";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper as useKTreeHelper } from "../../hooks/useKTreeHelper";
 import { useKLoader } from "../../hooks/useK.loader";
-import { FolderItem } from "../../types/K.types";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { KHighlightText } from "./KHighlightText";
 import {KTreeNode} from "../../hooks";
@@ -28,7 +27,7 @@ export function KRootFolderNode({ node, style, dragHandle, treeData, treeType = 
     const { loadTree } = useKLoader();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
-    const FolderItem = node.data.data as FolderItem;
+    const nodeData = node.data.data.data;
     const hasChildren = node.data.children && node.data.children.length > 0; 
 
     // Check if this node is a valid drop target (being dragged over)
@@ -39,7 +38,7 @@ export function KRootFolderNode({ node, style, dragHandle, treeData, treeType = 
         e.preventDefault();
         
         // Show root workspace context menu with Add Folder/Note/File options
-        showContextMenu(e, kconstants.workspace.itemTypes.folder, {
+        showContextMenu(e, kconstants.contextMenu.contextMenuTypes.kNode, {
             ...node.data.data,
             parentId: null,
         });
@@ -85,13 +84,13 @@ export function KRootFolderNode({ node, style, dragHandle, treeData, treeType = 
 
             {/* Workspace Icon */}
             <div className="mr-2 flex items-center">
-                <Layers className="w-4 h-4" style={{ color: FolderItem.color || "#75beff" }} />
+                <Layers className="w-4 h-4" style={{ color: nodeData.color || "#75beff" }} />
             </div>
 
             {/* Workspace Name */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
                 <KHighlightText
-                    text={FolderItem.name}
+                    text={nodeData.name}
                     highlight={treeType === "workspaceTree" ? searchQuery : ""}
                     className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate"
                 />

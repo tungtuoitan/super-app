@@ -34,14 +34,14 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
      */
     const renderMenuItems = () => {
         switch (contextType) {
-            case constants.workspace.itemTypes.folder: 
+            case constants.contextMenu.contextMenuTypes.folder:
                 return <WorkspaceFolderNodeMenu />;
 
-            case constants.workspace.itemTypes.note:
-            case constants.workspace.itemTypes.file:
+            case constants.contextMenu.contextMenuTypes.note:
+            case constants.contextMenu.contextMenuTypes.file:
                 return <WorkspaceChildNodeMenu />;
-                
-            case constants.workspace.itemTypes.Kfolder:
+
+            case constants.contextMenu.contextMenuTypes.kNode:
                 return <KFolderNodeMenu />;
 
             case "note-grid":

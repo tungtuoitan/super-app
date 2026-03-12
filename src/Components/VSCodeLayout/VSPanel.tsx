@@ -112,7 +112,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                         {activeTabb === "noteDetail" && activeTab?.type === constants.vscode.tab.tabTypes.note && <NoteDetailTab />}
                         {/* {activeTabb === "properties" && <PropertiesTab />} */}
                         {moduleName === kconstants.modules.workspace && activeTabb === "moving" && <MovingTab />}
-                        {moduleName === kconstants.modules.Kworkspace && activeTabb === "moving" && <KMovingTab />}
+                        {moduleName === kconstants.modules.k && activeTabb === "moving" && <KMovingTab />}
                         {activeTabb === "console" && isMobile && <ConsoleTab />}
                     </div>
                 </div>

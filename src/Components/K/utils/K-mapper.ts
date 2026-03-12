@@ -164,7 +164,7 @@ export function transformBackendItems(items: BackendWorkspaceItem[]): KWorkspace
  */
 export function transformToBackendItem(item: KWorkspaceItem): Partial<BackendWorkspaceItem> {
     return {
-        type: item.type === kconstants.workspace.itemTypes.folder ? "folder" : item.type,
+        type: (item.type === kconstants.workspace.itemTypes.folder ? "folder" : item.type) as BackendItemType,
         id: item.id,
         childId: item.id, // Legacy field for backward compatibility
         userId: item.userId,

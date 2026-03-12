@@ -16,7 +16,6 @@ import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
 import {useStandardRegistryHelper} from "../../../hooks/standardRegistry/useStandardRegistry.helper";
 import {kconstants} from "../utils/K.Constants";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
-import {Folder} from "../types";
 
 export const KuseTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();
@@ -392,11 +391,11 @@ export const KuseTreeHelper = () => {
     const addNewFolder = (treeData: KTreeNode[]) => {
         const parentId = selectedItemIds.length > 0 ? selectedItemIds[0] : undefined;
 
-        // Extract folders from treeData
-        const folders = KtreeMiniHelper.$traverse(treeData).map((t) => t.data);
-        const parentNode = parentId ? KtreeMiniHelper.$findFolderById((folders || []) as unknown as Folder[], parentId) : undefined;
+        // Extract nodes from treeData, find parent node by k_items.id
+        const allNodes = KtreeMiniHelper.$traverse(treeData).map((t) => t.data);
+        const parentNode = parentId ? allNodes.find((n) => n.id === parentId) as unknown as import("../types").Folder | undefined : undefined;
 
-        openNodeDialog("create", kconstants.workspace.itemTypes.folder, null, parentNode);
+        openNodeDialog("create", kconstants.workspace.itemTypes.node, null, parentNode ?? null);
     };
 
     return {
