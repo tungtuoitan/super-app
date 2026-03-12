@@ -59,20 +59,20 @@ const _upsertWorkspaceItems = async (
 
 // ── Move nodes (stored proc, same or cross workspace) ──────────────────────
 
-const _moveItems = async (
-    _token: string,
-    workspaceId: number,
-    data: KMoveItemsRequest
-): Promise<ResultOptions> => {
-    const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/items/move`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
+// const _moveItems = async (
+//     _token: string,
+//     workspaceId: number,
+//     data: KMoveItemsRequest
+// ): Promise<ResultOptions> => {
+//     const res = await apiFetch(`${config.api.baseURL}/api/kworkspace/${workspaceId}/items/move`, {
+//         method: "PATCH",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(data),
+//     });
 
-    if (res.ok) return await res.json();
-    return Promise.reject(res);
-};
+//     if (res.ok) return await res.json();
+//     return Promise.reject(res);
+// };
 
 // ── Delete nodes ────────────────────────────────────────────────────────────
 
@@ -97,6 +97,6 @@ export const KService = {
     _getAllUserWorkspaces,
     _getWorkspaceTreeV2,
     _upsertWorkspaceItems,
-    _moveItems,
+    // _moveItems,
     _deleteWorkspaceItems,
 };

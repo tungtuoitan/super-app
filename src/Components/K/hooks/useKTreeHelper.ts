@@ -119,7 +119,7 @@ export const KuseTreeHelper = () => {
                     if (SPECIAL_IDS.includes(targetItemId)) {
                         newParentId = undefined; // Move to workspace root
                     } else {
-                        const targetNodeData = targetNode.data;
+                        // const targetNodeData = targetNode.data;
 
                         // ---- VALIDATION: Check if all items already have this parent ----
                         const allSameParent = selectedItemIds.every((id: number) => {
@@ -135,16 +135,18 @@ export const KuseTreeHelper = () => {
                             return;
                         }
 
+                        newParentId = targetItemId;
+                        
                         // ---- Check if this is a folder (V2: entityType === 2) ----
-                        const isFolder = "entityType" in targetNodeData && targetNodeData.entityType === 2;
+                        // const isFolder = "entityType" in targetNodeData && targetNodeData.entityType === 2;
 
-                        if (isFolder) {
-                            // ---- Dropping INTO a folder ----
-                            newParentId = targetItemId;
-                        } else {
-                            // ---- Dropping BETWEEN siblings - use their parent ----
-                            newParentId = targetNodeData.parentId ?? undefined;
-                        }
+                        // if (isFolder) {
+                        //     // ---- Dropping INTO a folder ----
+                        //     newParentId = targetItemId;
+                        // } else {
+                        //     // ---- Dropping BETWEEN siblings - use their parent ----
+                        //     newParentId = targetNodeData.parentId ?? undefined;
+                        // }
                     }
                 }
             }
