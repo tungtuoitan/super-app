@@ -3,14 +3,17 @@
  * Extracted from VSSideBar for better separation of concerns
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import {useKStore} from "../store/K.store";
-import {useKLoader} from "../hooks";
-import {KTree} from "./KExplorer/KTree";
-import {KFolderDialog} from "./KExplorer/KFolderDialog/KFolderDialog";
+import { useKStore } from "../store/K.store";
+import { useKLoader } from "../hooks";
+import { useKTabHelper } from "../hooks/useKTab.helper";
+import { KTree } from "./KExplorer/KTree";
+import { KDialog } from "./KExplorer/KDialog/KDialog";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { constants } from "@/utils/constants";
 
 /**
  * Workspace View - KTree for folder navigation with workspace selection
@@ -18,7 +21,9 @@ import {KFolderDialog} from "./KExplorer/KFolderDialog/KFolderDialog";
 export function KView() {
     const { $user } = useAuthStore();
     const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId } = useKStore();
-    const { loadAllK, loadTree } = useKLoader();
+    const { loadAllK, loadTree, softDeleteKnowledge } = useKLoader();
+    const { openNewKnowledgeTab, openKnowledgeTab } = useKTabHelper();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     // Load workspaces on mount
     useEffect(() => {
@@ -31,63 +36,69 @@ export function KView() {
         loadTree();
     }, [$user.userId, $user.userToken, $user.filters, selectedKId]);
 
-    // Convert workspaces to autocomplete options
-    const workspaceOptions: IAutoCompleteOptions[] = allK.map((ws) => {
-        const isDeleted = !!ws.deletedAt;
-        return {
-            id: ws.id.toString(),
-            label: ws.name,
-            desc: ws.description || ws.name,
-            active: !isDeleted,
-            longDesc: isDeleted ? "(deleted)" : undefined,
-        };
-    });
+    // Convert workspaces to autocomplete options (include imageUrl)
+    const workspaceOptions: IAutoCompleteOptions[] = useMemo(
+        () =>
+            allK.map((ws) => ({
+                id: ws.id.toString(),
+                label: ws.name,
+                desc: ws.description || ws.name,
+                active: !ws.deletedAt,
+                longDesc: ws.deletedAt ? "(deleted)" : undefined,
+                imageUrl: ws.imageBase64 || undefined,
+            })),
+        [allK],
+    );
 
     // Handle workspace selection change
     const handleWorkspaceChange = async (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
         const newWorkspaceId = newValue?.id ? parseInt(newValue.id.toString()) : null;
-
-        // Block change if same workspace
-        if (newWorkspaceId === selectedKId) {
-            return;
-        }
-
-        // const saveSuccess = await saveNewsBeforeNavigate();
-
-        // if (!saveSuccess) {
-        //     return;
-        // }
-
+        if (newWorkspaceId === selectedKId) return;
         setSelectedKId(newWorkspaceId);
     };
+
+    // Right-click context menu on the selector area
+    const handleContextMenu = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const selected = selectedKId != null ? allK.find((k) => k.id === selectedKId) : undefined;
+            showContextMenu(e, constants.contextMenu.contextMenuTypes.kKnowledgeSelector, {
+                hasSelected: selected != null,
+                onAdd: () => openNewKnowledgeTab(),
+                onEdit: () => { if (selected) openKnowledgeTab(selected); },
+                onDelete: async () => {
+                    if (selectedKId != null) {
+                        await softDeleteKnowledge(selectedKId);
+                    }
+                },
+            });
+        },
+        [showContextMenu, selectedKId, allK, openNewKnowledgeTab, openKnowledgeTab, softDeleteKnowledge],
+    );
 
     return (
         <div className="h-full overflow-auto flex flex-col">
             {/* Workspace Selector */}
-            <div className="px-3 py-2">
-                <div>
-                    <GenericAutoComplete
-                        allOptions={workspaceOptions}
-                        value={workspaceOptions.find((option) => option.id === selectedKId?.toString()) || null}
-                        onChange={handleWorkspaceChange}
-                        inputProps={{
-                            name: "workspace",
-                            label: "",
-                            required: false,
-                        }}
-                        disabled={isLoadingK || workspaceOptions.length === 0}
-                        size="small"
-                    />
-                </div>
-
-                {/* Filter Popup */}
-                {/* <GenericFilterPopup /> */}
+            <div className="px-3 py-2" onContextMenu={handleContextMenu}>
+                <GenericAutoComplete
+                    allOptions={workspaceOptions}
+                    value={workspaceOptions.find((option) => option.id === selectedKId?.toString()) || null}
+                    onChange={handleWorkspaceChange}
+                    inputProps={{
+                        name: "workspace",
+                        label: "",
+                        required: false,
+                    }}
+                    disabled={isLoadingK || workspaceOptions.length === 0}
+                    size="small"
+                />
             </div>
 
             {/* Workspace Tree */}
             <div className="flex-1 overflow-hidden relative">
                 <KTree />
-                <KFolderDialog />
+                <KDialog />
 
                 {/* Loading Overlay */}
                 {(isLoadingK || isLoadingTree || isLoadingTreeByOpeningNode) && (

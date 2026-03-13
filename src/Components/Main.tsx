@@ -32,9 +32,9 @@ import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
 import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
-import { KProvider } from "@/Components/K/store/K.store";
-import { KMovingTreeProvider } from "@/Components/K/store/KMovingTree.store";
-import { KFolderDialogProvider } from "@/Components/K/store/KFolderDialog.store";
+import {KProvider} from "./K/store/K.store";
+import {KFolderDialogProvider} from "./K/store/KFolderDialog.store";
+import {KMovingTreeProvider} from "./K/store/KMovingTree.store";
 
 /**
  * Main application layout component.

@@ -119,9 +119,65 @@ export const useKLoader = () => {
 
 
 
+    const createKnowledge = async (data: { name: string; description?: string; imageBase64?: string }): Promise<import("../types/K.types").KWsResponse | null> => {
+        try {
+            const token = $user.userToken;
+            const result = await KService._createKnowledge(token, data);
+            if (result?.success && result.object) {
+                const created = result.object as import("../types/K.types").KWsResponse;
+                setAllK((prev) => [...prev, created]);
+                return created;
+            }
+            return null;
+        } catch (error) {
+            console.error("❌ Failed to create knowledge:", error);
+            return null;
+        }
+    };
+
+    const updateKnowledge = async (id: number, data: { name: string; description?: string; imageBase64?: string }): Promise<boolean> => {
+        try {
+            const token = $user.userToken;
+            const result = await KService._updateKnowledge(token, id, data);
+            if (result?.success && result.object) {
+                const updated = result.object as import("../types/K.types").KWsResponse;
+                setAllK((prev) => prev.map((k) => (k.id === id ? { ...k, ...updated } : k)));
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("❌ Failed to update knowledge:", error);
+            return false;
+        }
+    };
+
+    const softDeleteKnowledge = async (id: number): Promise<boolean> => {
+        try {
+            const token = $user.userToken;
+            const result = await KService._softDeleteKnowledge(token, id);
+            if (result?.success) {
+                const now = new Date().toISOString();
+                setAllK((prev) => prev.map((k) => (k.id === id ? { ...k, deletedAt: now } : k)));
+                // If deleting the currently selected knowledge, deselect it
+                if (selectedKId === id) {
+                    const next = allK.find((k) => k.id !== id && !k.deletedAt);
+                    setSelectedKId(next?.id ?? null);
+                }
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("❌ Failed to soft-delete knowledge:", error);
+            return false;
+        }
+    };
+
     return {
         // Actions only - get state directly from useKStore()
         loadAllK,
         loadTree,
+        createKnowledge,
+        updateKnowledge,
+        softDeleteKnowledge,
     };
 };

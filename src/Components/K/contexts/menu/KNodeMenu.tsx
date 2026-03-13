@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import {useKStore} from "../../store/K.store";
-import {useKFolderMenuHelper} from "../helpers/useKFolderMenu.helper";
+import {useKMenuHelper} from "../helpers/useKMenu.helper";
 import {useKTreeStatusHelper} from "../../hooks/useKTreeStatusHelper";
 import {kconstants} from "../../utils/K.Constants";
 
@@ -24,10 +24,10 @@ import {kconstants} from "../../utils/K.Constants";
  * - Edit (rename folder)
  * - Delete / Hard Delete
  */
-export function KFolderNodeMenu() {
+export function KNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
     const { selectedItemIds, currentK } = useKStore();
-    const { createFolder, editFolder, dhr_items } = useKFolderMenuHelper();
+    const { createFolder, editFolder, dhr_items } = useKMenuHelper();
     const _TREESTATUS = useKTreeStatusHelper();
 
     // Calculate derived values
@@ -38,7 +38,7 @@ export function KFolderNodeMenu() {
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
     
     const addMenuItems = [
-        { type: kconstants.workspace.itemTypes.folder, icon: AddIcon, label: "New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: kconstants.workspace.itemTypes.folder, icon: AddIcon, label: "New Card", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
     ];
 
     return (

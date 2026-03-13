@@ -10,11 +10,14 @@ import { TaskGridMenu } from "./menus/TaskGridMenu";
 import { TabBarMenu } from "./menus/TabBarMenu";
 import { LogListMenu } from "./menus/LogListMenu";
 import { TrackPanelMenu } from "./menus/TrackPanelMenu";
+import { KKnowledgeMenu } from "./menus/KKnowledgeMenu";
 import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import {KFolderNodeMenu} from "../../Components/K/contexts/menu/KFolderNodeMenu";
+import {KNodeMenu} from "../../Components/K/contexts/menu/KNodeMenu";
+import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
+import { KNodePanelCardMenu } from "../../Components/K/contexts/menu/KNodePanelCardMenu";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -42,7 +45,13 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
                 return <WorkspaceChildNodeMenu />;
 
             case constants.contextMenu.contextMenuTypes.kNode:
-                return <KFolderNodeMenu />;
+                return <KNodeMenu />;
+
+            case constants.contextMenu.contextMenuTypes.kNodePanelBlank:
+                return <KNodePanelBlankMenu />;
+
+            case constants.contextMenu.contextMenuTypes.kNodePanelCard:
+                return <KNodePanelCardMenu />;
 
             case "note-grid":
                 return <NoteGridMenu />;
@@ -64,6 +73,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case constants.contextMenu.contextMenuTypes.lifeLogTrack:
                 return <TrackPanelMenu />;
+
+            case constants.contextMenu.contextMenuTypes.kKnowledgeSelector:
+                return <KKnowledgeMenu />;
 
             default:
                 return (
