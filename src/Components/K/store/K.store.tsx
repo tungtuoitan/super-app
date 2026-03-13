@@ -52,6 +52,10 @@ export interface KContextData {
     // Navigation highlight
     scrollToItem: boolean;
     setScrollToItem: Dispatch<SetStateAction<boolean>>;
+
+    // Cross-panel hover sync
+    hoveredNodeId: number | null;
+    setHoveredNodeId: Dispatch<SetStateAction<number | null>>;
 }
 
 // @deprecated aliases — remove after all consumers updated
@@ -95,6 +99,9 @@ const kContextDefaultValue: KContextData = {
 
     scrollToItem: false,
     setScrollToItem: () => {},
+
+    hoveredNodeId: null,
+    setHoveredNodeId: () => {},
 };
 
 // @deprecated alias
@@ -130,6 +137,7 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
     const [treeData, setTreeData] = useState<KTreeNode[]>([]);
 
     const [scrollToItem, setScrollToItem] = useState<boolean>(false);
+    const [hoveredNodeId, setHoveredNodeId] = useState<number | null>(null);
 
     return (
         <KStore.Provider
@@ -171,6 +179,9 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
 
                 scrollToItem,
                 setScrollToItem,
+
+                hoveredNodeId,
+                setHoveredNodeId,
             }}
         >
             {children}

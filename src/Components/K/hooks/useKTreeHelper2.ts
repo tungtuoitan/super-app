@@ -26,7 +26,7 @@ export const KuseTreeHelper2 = () => {
      * Check if an item is selected (folder/note/file)
      * @param workspaceItemId - workspace_items.id (unique ID for this workspace item)
      */
-    const isFolderSelected = (workspaceItemId: number) => {
+    const isNodeSelected = (workspaceItemId: number) => {
         return selectedItemIds.includes(workspaceItemId);
     };
 
@@ -217,7 +217,7 @@ export const KuseTreeHelper2 = () => {
     };
 
     return {
-        isFolderSelected,
+        isNodeSelected,
         handleSelectionChange,
         handleKeyDown,
         getVisibleNodeIds,

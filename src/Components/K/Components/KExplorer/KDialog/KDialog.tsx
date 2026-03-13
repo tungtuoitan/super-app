@@ -11,16 +11,17 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/Components/ui/button";
 import { GenericTextField, IconPicker } from "@/shared/components";
 import { useKeyboardShortcut } from "@/shared/hooks";
-import { useNodeDialogStore } from "../../../store/KFolderDialog.store";
-import { useKNodeDialogHelper as useKFolderDialogHelper } from "../../../hooks/useKFolderDialog.helper";
+import { useKNodeDialogHelper as useKFolderDialogHelper } from "../../../hooks/useKNodeDialog.helper";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components/ui/GenericAutoComplete";
 import {useKStore} from "../../../store/K.store";
 import {isFolder, KItemV2} from "../../../types/K-v2.types";
 import {kconstants} from "../../../utils/K.Constants";
 import {getAllIconLabel} from "../../../shared/icons/icon.utils";
-import {IconType} from "@/components/K/shared/icons/icon.types";
+import {IconType} from "../../../shared/icons/icon.types";
+import {useNodeDialogStore} from "../../../store/KFolderDialog.store";
+import { getIconDefaultColor } from "@/shared/icons";
 
-export function KFolderDialog() {
+export function KDialog() {
     // Get state from ExplorerStore
     const { currentK } = useKStore();
 
@@ -38,6 +39,8 @@ export function KFolderDialog() {
     useEffect(() => {
         if (isNodeDialogOpen && mode === "create") {
             hasManuallySelectedIcon.current = false;
+            setIcon(IconType.LIBRARIES);
+            setColor(getIconDefaultColor(IconType.LIBRARIES));
         }
     }, [isNodeDialogOpen, mode]);
 
@@ -241,6 +244,21 @@ export function KFolderDialog() {
                         <Label htmlFor="description">Description</Label>
                         <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" rows={3} maxLength={50} />
                     </div> */}
+
+                    <div className="space-y-1">
+                        <GenericTextField
+                            id="node-description"
+                            name="node-description"
+                            label="Description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Optional description"
+                            size="small"
+                            multiline
+                            rows={2}
+                            maxLength={500}
+                        />
+                    </div>
 
                     {/* Only show color and icon pickers for folders */}
                     {itemType === kconstants.workspace.itemTypes.folder && (

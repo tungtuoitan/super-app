@@ -5,7 +5,7 @@
 
 // Sub-hooks (use directly for specific operations)
 export { useKLoader } from "./useK.loader";
-export { useKNodeDialogHelper } from "./useKFolderDialog.helper";
+export { useKNodeDialogHelper } from "./useKNodeDialog.helper";
 export { KuseTreeHelper2 } from "./useKTreeHelper2";
 export { KuseTreeHelper } from "./useKTreeHelper";
 

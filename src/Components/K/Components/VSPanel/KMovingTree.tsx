@@ -7,8 +7,7 @@ import React, { useMemo } from "react";
 import { Tree } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { KtreeMiniHelper, KTreeNode as KTreeFolder } from "../../hooks/Ktree.miniHelper";
-import { KFolderNode } from "../KExplorer/KFolderNode";
-import { KRootFolderNode } from "../KExplorer/KRootFolderNode";
+import { KNode } from "../KExplorer/KNode";
 import { kconstants } from "../../utils/K.Constants";
 import { useKMovingTreeStore } from "../../store/KMovingTree.store";
 import { useKMovingTreeHelper } from "../../hooks/useKMovingTree.helper";
@@ -88,10 +87,10 @@ export function KMovingTree() {
                     }
 
                     // All K items are nodes — render root differently from children
-                    if (node.level === 0) {
-                        return <KRootFolderNode node={node} treeData={targetTreeData} style={style} dragHandle={dragHandle} treeType="targetTree" />;
-                    }
-                    return <KFolderNode node={node} style={style} dragHandle={dragHandle} treeData={targetTreeData} treeType="targetTree" />;
+                    // if (node.level === 0) {
+                    //     return <KRootNode node={node} treeData={targetTreeData} style={style} dragHandle={dragHandle} treeType="targetTree" />;
+                    // }
+                    return <KNode node={node} style={style} dragHandle={dragHandle} treeData={targetTreeData} treeType="targetTree" />;
                 }}
             </Tree>
         </div>

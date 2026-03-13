@@ -24,11 +24,11 @@ If you need to understand K, read Workspace first — K mirrors its structure wi
 | Workspace | K |
 |---|---|
 | `src/Components/Workspace/Explorer/WorkspaceTree.tsx` | `K/Components/KExplorer/KTree.tsx` |
-| `src/Components/Workspace/Explorer/FolderNode.tsx` | `K/Components/KExplorer/KFolderNode.tsx` |
-| `src/Components/Workspace/Explorer/RootFolderNode.tsx` | `K/Components/KExplorer/KRootFolderNode.tsx` |
-| `src/Components/Workspace/Explorer/FolderDialog/` | `K/Components/KExplorer/KFolderDialog/` |
+| `src/Components/Workspace/Explorer/FolderNode.tsx` | `K/Components/KExplorer/KNode.tsx` |
+| `src/Components/Workspace/Explorer/RootFolderNode.tsx` | `K/Components/KExplorer/KRootNode.tsx` |
+| `src/Components/Workspace/Explorer/FolderDialog/` | `K/Components/KExplorer/KDialog/` |
 | `src/store/workspace/Workspace.store.tsx` | `K/store/K.store.tsx` |
-| `src/store/workspace/FolderDialog.store.tsx` | `K/store/KFolderDialog.store.tsx` |
+| `src/store/workspace/FolderDialog.store.tsx` | `K/store/KDialog.store.tsx` |
 | `src/store/workspace/MovingTree.store.tsx` | `K/store/KMovingTree.store.tsx` |
 | `src/hooks/workspace/tree.miniHelper.ts` | `K/hooks/Ktree.miniHelper.ts` |
 | `src/hooks/workspace/useTreeHelper.ts` | `K/hooks/useKTreeHelper.ts` |
@@ -41,7 +41,7 @@ If you need to understand K, read Workspace first — K mirrors its structure wi
 | `src/utils/workspace-mapper.ts` | `K/utils/K-mapper.ts` |
 | `src/utils/constants.ts` → `workspace.*` | `K/utils/K.Constants.ts` → `kconstants.*` |
 | `src/shared/contexts/helpers/useWorkspaceFolderMenu.helper.ts` | `K/contexts/helpers/useKFolderMenu.helper.ts` |
-| `src/shared/contexts/menus/WorkspaceFolderNodeMenu.tsx` | `K/contexts/menu/KFolderNodeMenu.tsx` |
+| `src/shared/contexts/menus/WorkspaceFolderNodeMenu.tsx` | `K/contexts/menu/KNodeMenu.tsx` |
 | `src/types/workspace-v2.types.ts` | `K/types/K-v2.types.ts` |
 | `src/types/workspace-dto.types.ts` | `K/types/K-dto.types.ts` |
 
@@ -89,7 +89,7 @@ If you need to understand K, read Workspace first — K mirrors its structure wi
 Located in their respective files — all marked `@deprecated`:
 
 - `K.store.tsx`: `KWorkspaceContextData`, `allWorkspaces`, `currentWorkspace`, `isLoadingWorkspaces`
-- `KFolderDialog.store.tsx`: `FolderDialogStore`, `KuseFolderDialogStore`, `KFolderDialogProvider`, `ItemType`
+- `KDialog.store.tsx`: `FolderDialogStore`, `KuseFolderDialogStore`, `KFolderDialogProvider`, `ItemType`
 - `K-v2.types.ts`: `WorkspaceFolderItem`, `FolderEntity`, `FolderData`, `WorkspaceWithTreeResponseV2`, `isFolder()`
 - `K-dto.types.ts`: `KWorkspaceDTO`
 - `K.types.ts`: `KWorkspaceOperationResult`

@@ -7,19 +7,16 @@ import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper } from "../../hooks/useKTreeHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
-import { isFolder as isFolderV2 } from "../../types/K-v2.types";
-import {KCustomDragPreview} from "./KCustomDragPreview";
-import {KRootFolderNode} from "./KRootFolderNode";
-import {KFolderNode} from "./KFolderNode";
-import {KTreeNode, KtreeMiniHelper, KuseTreeHelper2} from "../../hooks";
-import {CalculateKTreeContainerHeight} from "../../HeadlessComponents/CalculateKTreeContainerHeight";
-import {CalculateKTreeDropZoneHeight} from "../../HeadlessComponents/CalculateKTreeDropZoneHeight";
-import {kconstants} from "../../utils/K.Constants";
-import {ScrollToHighlightItem} from "../../HeadlessComponents/ScrollToHighlightItem";
+import { KCustomDragPreview } from "./KCustomDragPreview";
+import { KNode } from "./KNode";
+import { KTreeNode, KtreeMiniHelper, KuseTreeHelper2 } from "../../hooks";
+import { CalculateKTreeContainerHeight } from "../../HeadlessComponents/CalculateKTreeContainerHeight";
+import { CalculateKTreeDropZoneHeight } from "../../HeadlessComponents/CalculateKTreeDropZoneHeight";
+import { kconstants } from "../../utils/K.Constants";
+import { ScrollToHighlightItem } from "../../HeadlessComponents/ScrollToHighlightItem";
 
 export function KTree() {
-    const { isDragging, currentK, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } =
-        useKStore();
+    const { isDragging, currentK, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } = useKStore();
     const { searchQuery } = useGridControlStore();
     const { handleSelectionChange, handleKeyDown } = KuseTreeHelper2();
     const { handleMove } = KuseTreeHelper();
@@ -95,25 +92,15 @@ export function KTree() {
         };
     }, [handleKeyDown, allVisibleFolderIds]);
 
-    // Auto-expand workspace root when workspace loads
-    // Collapses everything, then opens only workspace root to show its direct children
-    // useEffect(() => {
-    //     if (!_treeRef.current || !currentK?.id || treeData.length === 0) return;
-    //     setIsLoadingTree(true);
-
-    //     // Small delay to ensure tree is fully rendered
-    //     const timer = setTimeout(async () => {
-    //         // Get workspace root ID (first node in treeData)
-    //         const rootId = (treeData[0]?.data as any)?.id;
-    //         if (rootId !== undefined) {
-    //             // Expand only path to workspace root (collapse everything else)
-    //             await KtreeMiniHelper.expandPathToItem(_treeRef, treeData, rootId);
-    //         }
-    //         setIsLoadingTree(false);
-    //     }, 100);
-
-    //     return () => clearTimeout(timer);
-    // }, [currentK?.id, treeData.length]); // Re-run when workspace changes or tree loads
+    // Auto-expand workspace root on init — show direct children of root
+    useEffect(() => {
+        if (!_treeRef.current || !currentK?.id || treeData.length === 0) return;
+        const timer = setTimeout(async () => {
+            const rootId = kconstants.workspace.root.workspaceItemId;
+            await KtreeMiniHelper.expandPathToItem(_treeRef, treeData, rootId);
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [currentK?.id]); // Run once per knowledge base switch
 
     // Handle context menu on empty space (treat as root workspace)
     const handleContainerContextMenu = (e: React.MouseEvent) => {
@@ -192,7 +179,7 @@ export function KTree() {
 
                         // Check workspace root and drop zone by ENTITY ID (entityId)
                         // Special IDs: kconstants.workspace.root.entityId = workspace root, kconstants.workspace.dropZone.entityId = drop zone
-                        const isWorkspaceRoot = (item as any).entityId === kconstants.workspace.root.entityId;
+                        // const isWorkspaceRoot = (item as any).entityId === kconstants.workspace.root.entityId;
                         const isDropZone = (item as any).entityId === kconstants.workspace.dropZone.entityId;
 
                         // Render different node types based on item type
@@ -203,7 +190,7 @@ export function KTree() {
                                     // Override height for drop zone to fill remaining space
                                     height: isDropZone ? `${dropZoneHeight}px` : style.height,
                                 }}
-                            >   
+                            >
                                 {isDropZone ? (
                                     // Drop zone at bottom - fills remaining space for easy root-level drops
                                     <div
@@ -240,11 +227,9 @@ export function KTree() {
                                             }
                                         }}
                                     ></div>
-                                ) : isWorkspaceRoot ? (
-                                    <KRootFolderNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} treeType="workspaceTree" />
-                                ) : isFolderV2(item as any) ? (
-                                    <KFolderNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
-                                ) : null}
+                                ) : (
+                                    <KNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
+                                )}
                             </div>
                         );
                     }}
@@ -253,6 +238,3 @@ export function KTree() {
         </>
     );
 }
-
-
-

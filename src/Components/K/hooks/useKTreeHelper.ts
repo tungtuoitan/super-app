@@ -6,7 +6,7 @@
 import type { KTreeNode } from "./Ktree.miniHelper";
 import { KtreeMiniHelper } from "./Ktree.miniHelper";
 import { useKStore } from "../store/K.store";
-import { useKNodeDialogHelper } from "./useKFolderDialog.helper";
+import { useKNodeDialogHelper } from "./useKNodeDialog.helper";
 import { useKLoader } from "./useK.loader";
 import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";

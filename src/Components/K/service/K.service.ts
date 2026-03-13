@@ -26,6 +26,48 @@ const _getAllUserWorkspaces = async (_token: string): Promise<KWsResponse[]> => 
     return Promise.reject(res);
 };
 
+// ── Create knowledge ─────────────────────────────────────────────────────────
+
+const _createKnowledge = async (
+    _token: string,
+    data: { name: string; description?: string; imageBase64?: string }
+): Promise<ResultOptions<KWsResponse>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/k`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    if (res.ok) return await res.json();
+    return Promise.reject(res);
+};
+
+// ── Update knowledge ──────────────────────────────────────────────────────────
+
+const _updateKnowledge = async (
+    _token: string,
+    id: number,
+    data: { name: string; description?: string; imageBase64?: string }
+): Promise<ResultOptions<KWsResponse>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/k/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    if (res.ok) return await res.json();
+    return Promise.reject(res);
+};
+
+// ── Soft delete knowledge ─────────────────────────────────────────────────────
+
+const _softDeleteKnowledge = async (_token: string, id: number): Promise<ResultOptions> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/k/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) return await res.json();
+    return Promise.reject(res);
+};
+
 // ── Get knowledge tree (flat nodes) ─────────────────────────────────────────
 
 const _getWorkspaceTreeV2 = async (
@@ -77,6 +119,9 @@ const _deleteWorkspaceItems = async (
 
 export const KService = {
     _getAllUserWorkspaces,
+    _createKnowledge,
+    _updateKnowledge,
+    _softDeleteKnowledge,
     _getWorkspaceTreeV2,
     _upsertWorkspaceItems,
     _deleteWorkspaceItems,

@@ -11,7 +11,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { constants } from "@/utils/constants";
 import { HighlightText } from "./HighlightText";
 
-interface RootFolderNodeProps {
+interface RootNodeProps {
     node: NodeApi<TreeFolder>;
     style: React.CSSProperties;
     dragHandle?: any;
@@ -23,7 +23,7 @@ interface RootFolderNodeProps {
  * Root Folder Node - Special node for workspace root with action buttons
  * Shows workspace name and provides quick actions: Add Folder, Refresh, Collapse All
  */
-export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: RootFolderNodeProps) {
+export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: RootNodeProps) {
     const { currentWorkspace } = useWorkspaceStore();
     const { searchQuery } = useGridControlStore();
     const { addNewFolder } = useTreeHelper();

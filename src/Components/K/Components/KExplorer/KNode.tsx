@@ -1,6 +1,6 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
-import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers, Dot, Circle, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronRight, LibraryBig, Library } from "lucide-react";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/useKTreeHelper2";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -11,8 +11,9 @@ import {KTreeNode} from "../../hooks";
 import {kconstants} from "../../utils/K.Constants";
 import {IconType} from "../../shared/icons/icon.types";
 import {ICON_MAP} from "../../shared/icons/icon.config";
+import {useKNodeTabHelper} from "../../hooks/useKNodeTabHelper";
 
-interface FolderNodeProps {
+interface NodeProps {
     node: NodeApi<KTreeNode>;
     style: React.CSSProperties;
     dragHandle?: any;
@@ -30,30 +31,27 @@ const Folder2: React.FC<IconProps> = ({ className, color }) => (
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={color} className="icon icon-tabler icons-tabler-filled icon-tabler-folder w-4 h-4"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 3a1 1 0 0 1 .608 .206l.1 .087l2.706 2.707h6.586a3 3 0 0 1 2.995 2.824l.005 .176v8a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-11a3 3 0 0 1 2.824 -2.995l.176 -.005h4z" /></svg>
 );
 
-const FolderOpen2: React.FC<IconProps> = ({ className, color }) => (
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={color} className="icon icon-tabler icons-tabler-filled icon-tabler-folder-open w-4 h-4"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M2 6c0 -.796 .316 -1.558 .879 -2.121c.563 -.563 1.325 -.879 2.121 -.879h4l.099 .005c.229 .023 .444 .124 .608 .288l2.707 2.707h6.586c.796 0 1.558 .316 2.121 .879c.319 .319 .559 .703 .707 1.121l-14.523 0c-.407 0 -.805 .125 -1.14 .356c-.292 .203 -.525 .48 -.674 .801l-.058 .141l-1.379 3.676c-.194 .517 .068 1.093 .585 1.287c.517 .194 1.094 -.068 1.288 -.585l1.134 -3.027c.146 -.39 .519 -.649 .937 -.649h13.002l.217 .012c.216 .024 .426 .082 .624 .173c.054 .025 .107 .053 .159 .083c.199 .115 .377 .263 .525 .439c.188 .222 .325 .482 .403 .762c.077 .28 .092 .573 .045 .859c-.001 .008 -.003 .016 -.005 .024l-.995 5.21c-.131 .686 -.497 1.304 -1.036 1.749c-.47 .389 -1.046 .624 -1.65 .677l-.261 .012h-14.026c-.796 0 -1.558 -.316 -2.121 -.879c-.563 -.563 -.879 -1.325 -.879 -2.121v-11z" /></svg>
-);
-
 export default Folder2;
 
-export function KFolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FolderNodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, _treeRef,setScrollToItem } = useKStore();
+export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: NodeProps) {
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId } = useKStore();
     const { searchQuery } = useGridControlStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isFolderSelected, getVisibleNodeIds } = useKTreeHelper2();
+    const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();
     const _TREESTATUS = useKTreeStatusHelper();
+    const { openKNodeTab } = useKNodeTabHelper();
 
     // Safe cast: KTree already filters to only render FolderNode for folders
-    const folderItem = node.data.data;
+    const nodeItem = node.data.data;
 
     // Extract data from flat KItemV2 structure
-    const KWorkspaceItemId = folderItem.id; // workspace_items.id (unique)
-    const folderName = folderItem.name;
-    const folderColor = folderItem.color;
-    const folderIcon = folderItem.icon as IconType | undefined; // Icon type from database
+    const nodeId = nodeItem.id; // workspace_items.id (unique)
+    const nodeName = nodeItem.name;
+    const nodeColor = nodeItem.color;
+    const nodeIcon = nodeItem.icon as IconType | undefined; // Icon type from database
     const hasChildren = node.data.children && node.data.children.length > 0;
-    const isSelected = isFolderSelected(KWorkspaceItemId); // Use workspace_items.id for selection
-    const isWorkspaceRoot = folderItem.id < 0; // Workspace root node has negative ID
+    const isSelected = isNodeSelected(nodeId); // Use workspace_items.id for selection
+    const isWorkspaceRoot = nodeItem.id < 0; // Workspace root node has negative ID
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -62,7 +60,7 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
     const isDropTarget = node.state.willReceiveDrop;
 
     // Check if deleted (including inherited from parent)
-    const _ITEMSTATUS = _TREESTATUS.getItemStatus(folderItem);
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(nodeItem);
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -78,13 +76,13 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
         }
 
         // Don't allow selection of workspace root node
-        if (isWorkspaceRoot) {
-            // Only allow expand/collapse for workspace root
-            if (hasChildren) {
-                node.toggle();
-            }
-            return;
-        }
+        // if (isWorkspaceRoot) {
+        //     // Only allow expand/collapse for workspace root
+        //     if (hasChildren) {
+        //         node.toggle();
+        //     }
+        //     return;
+        // }
 
         // Focus the tree container for keyboard navigation without scrolling
         const treeContainer = document.querySelector("[data-workspace-tree]") as HTMLElement;
@@ -97,29 +95,29 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
         if (e.ctrlKey || e.metaKey) {
             // Ctrl+Click: Toggle selection (like VS Code)
             if (isSelected) {
-                setSelectedItemIds((prev: number[]) => prev.filter((id) => id !== KWorkspaceItemId));
+                setSelectedItemIds((prev: number[]) => prev.filter((id) => id !== nodeId));
                 // Sync with react-arborist
                 node.deselect();
             } else {
-                setSelectedItemIds((prev: number[]) => [...prev, KWorkspaceItemId]);
+                setSelectedItemIds((prev: number[]) => [...prev, nodeId]);
                 // Sync with react-arborist (multi-select mode)
                 node.selectMulti();
             }
-            setLastSelectedItemId(KWorkspaceItemId);
+            setLastSelectedItemId(nodeId);
         } else if (e.shiftKey && lastSelectedItemId) {
             // Shift+Click: Range selection (like VS Code) - only visible nodes
             const tree = _treeRef?.current;
             if (!tree) {
                 // Fallback if tree ref not available
-                setSelectedItemIds([KWorkspaceItemId]);
-                setLastSelectedItemId(KWorkspaceItemId);
+                setSelectedItemIds([nodeId]);
+                setLastSelectedItemId(nodeId);
                 node.select();
                 return;
             }
 
             const allVisibleNodeIds = getVisibleNodeIds();
             const lastIndex = allVisibleNodeIds.indexOf(lastSelectedItemId);
-            const currentIndex = allVisibleNodeIds.indexOf(KWorkspaceItemId);
+            const currentIndex = allVisibleNodeIds.indexOf(nodeId);
 
             if (lastIndex !== -1 && currentIndex !== -1) {
                 const startIndex = Math.min(lastIndex, currentIndex);
@@ -138,23 +136,18 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
                 });
 
                 // Store will be updated by tree's onSelect handler
-                setLastSelectedItemId(KWorkspaceItemId);
+                setLastSelectedItemId(nodeId);
             } else {
-                setSelectedItemIds([KWorkspaceItemId]);
-                setLastSelectedItemId(KWorkspaceItemId);
+                setSelectedItemIds([nodeId]);
+                setLastSelectedItemId(nodeId);
                 node.select();
             }
         } else {
-            // Regular click: Single selection + toggle expand/collapse if has children (like VS Code)
-            setSelectedItemIds([KWorkspaceItemId]);
-            setLastSelectedItemId(KWorkspaceItemId);
-            // Sync with react-arborist (single select - clears others)
+            // Regular click: Single selection + open node tab (no toggle — icon handles toggle)
+            setSelectedItemIds([nodeId]);
+            setLastSelectedItemId(nodeId);
             node.select();
-
-            // Toggle expand/collapse if node has children
-            if (hasChildren) {
-                node.toggle();
-            }
+            openKNodeTab(nodeItem);
         }
     };
 
@@ -172,10 +165,10 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
             return;
         }
 
-        const _currentFolder = currentK?.flatData.find((f: any) => f.id === KWorkspaceItemId);
+        const _currentNode = currentK?.flatData.find((f: any) => f.id === nodeId);
 
         // Open folder-specific context menu with folder data (V2 structure)
-        const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };
+        const contextData = { ...nodeItem, parentId: _currentNode?.parentId ?? null };
         showContextMenu(e, kconstants.contextMenu.contextMenuTypes.kNode, contextData);
     };
 
@@ -203,6 +196,8 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
                 }}
                 onClick={handleMainClick}
                 onContextMenu={handleRightClick}
+                onMouseEnter={() => !isWorkspaceRoot && setHoveredNodeId(nodeId)}
+                onMouseLeave={() => setHoveredNodeId(null)}
                 className={`
                     flex items-center h-full w-full py-1 pr-2 cursor-pointer
                     ${isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
@@ -226,54 +221,32 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
                 </button>
 
                 {/* Folder Icon - VS Code Material Icon Theme style */}
-                <div className="mr-2 flex items-center">
+                <div
+                    className="mr-2 flex items-center"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (hasChildren) node.toggle();
+                    }}
+                >
                     {/* Workspace root node */}
                     {isWorkspaceRoot ? (
-                        <Layers className="w-4 h-4" style={{ color: folderColor || "#75beff" }} />
-                    ) : folderIcon && ICON_MAP[folderIcon] ? (
-                        // Custom icon: Folder as background + custom icon at bottom-right
+                        <LibraryBig className="w-4 h-4" style={{ color: nodeColor || "#A1887F" }} />
+                    ) : nodeIcon && ICON_MAP[nodeIcon] ? (
                         (() => {
-                            const CustomIcon = ICON_MAP[folderIcon];
+                            const CustomIcon = ICON_MAP[nodeIcon];
                             const isDeleted = _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted;
-                            const iconColor = isDeleted ? "#6b7280" : (folderColor || "#75beff");
                             return (
-                                <div className="relative w-4 h-4">
-                                    {/* Background: Folder icon with color */}
-                                    {node.isOpen ? (
-                                        <FolderOpen2
-                                            className="w-4 h-4 absolute inset-0"
-                                            color={ iconColor }
-                                        />
-                                    ) : (
-                                        <Folder2
-                                            className="w-4 h-4 absolute inset-0"
-                                            color={iconColor} />
-                                    )}
-                                    {/* Overlay: Custom icon at bottom-right, white color */}
-                                    <CustomIcon
-                                        className="w-2.5 h-2.5 absolute -bottom-0.5 -right-0.5"
-                                        style={{ color: isDeleted ? "#9ca3af" : "white" }}
-                                        strokeWidth={2.5}
-                                    />
-                                </div>
+                                <CustomIcon
+                                    className="w-4 h-4"
+                                    style={{ color: isDeleted ? "#6b7280" : (nodeColor || "#90A4AE") }}
+                                    strokeWidth={2}
+                                />
                             );
                         })()
-                    ) : hasChildren ? (
-                        node.isOpen ? (
-                            <FolderOpen2
-                                className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
-                                color={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? folderColor||"" : ""}
-                            />
-                        ) : (
-                            <Folder2
-                                className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
-                                color={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? folderColor||"" : ""}
-                            />
-                        )
                     ) : (
-                        <Folder2
+                        <Library
                             className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
-                            color={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? folderColor||"" : ""}
+                            color={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? nodeColor || "#90A4AE" : ""}
                         />
                     )}
                 </div>
@@ -282,8 +255,8 @@ export function KFolderNode({ node, style, dragHandle, treeData, treeType = "wor
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                     <div className="w-full min-w-0 flex items-center gap-2">
                         <KHighlightText
-                            text={`${folderName}`}
-                            // text={`${folderName} - ${KWorkspaceItemId} - ${entityId}`}
+                            text={`${nodeName}`}
+                            // text={`${nodeName} - ${nodeId} - ${entityId}`}
                             highlight={treeType === "workspaceTree" ? searchQuery : ""} // Only highlight in workspaceTree, tạm thời chưa làm cho targetTree có search
                             className={`
                             text-sm truncate
