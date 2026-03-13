@@ -41,6 +41,8 @@ export const constants = {
                 lifeLog: "lifeLog",
                 lifeLogGraph: "lifeLogGraph",
                 lifeLogTrack: "lifeLogTrack",
+                kKnowledge: "k-knowledge",
+                kNode: "k-node",
             } as const,
         },
         viewTypes: {
@@ -113,6 +115,9 @@ export const constants = {
             kNode: "k-node",
             kNote: "k-note",
             kFile: "k-file",
+            kKnowledgeSelector: "k-knowledge-selector",
+            kNodePanelBlank: "k-node-panel-blank",
+            kNodePanelCard: "k-node-panel-card",
         } as const,
     },
 

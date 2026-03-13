@@ -11,16 +11,14 @@ import { TaskEditorPanel } from "@/Components/Project/TaskEditorPanel";
 import { LogEditorPanel } from "@/Components/LifeLog/LogEditorPanel";
 import { LifeLogGraphPanel } from "@/Components/LifeLog/LifeLogGraphPanel";
 import { TrackEditorPanel } from "@/Components/LifeLog/TrackEditorPanel";
+import { KKnowledgeEditorPanel } from "@/Components/K/Components/KKnowledgeEditorPanel";
+import { KNodeEditorPanel } from "../K/Components/KNodeEditorPanel/KNodeEditorPanel";
 import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore } from "@/store/index";
-import { BaseTab } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
 import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";
-import { Track } from "@radix-ui/react-slider";
 import { TrackTabNavigation } from "@/HeadlessComponents/vsCode/TrackTabNavigation";
-import { NavigationHistorySync } from "@/HeadlessComponents/vsCode/NavigationHistorySync";
 import { TabBar } from "./TabBar";
 import {Note} from "@/types/index";
-import {useMobileStore} from "@/store/mobile/Mobile.store";
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -96,6 +94,8 @@ export function VSEditorArea() {
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLog && <LogEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogGraph && <LifeLogGraphPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogTrack && <TrackEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.kKnowledge && <KKnowledgeEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.kNode && <KNodeEditorPanel tab={activeTab} />}
                     </>
                 ) : (
                     // Welcome/empty state

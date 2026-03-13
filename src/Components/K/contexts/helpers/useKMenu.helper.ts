@@ -12,7 +12,6 @@ import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 import {buildTreeFromV2Items, filterTopLevelParents, useKNodeDialogHelper} from "../../hooks";
 import {useKStore} from "../../store/K.store";
 import {KService} from "../../service/K.service";
-import {NodeItemType} from "../../store/KFolderDialog.store";
 import {KItemV2} from "../../types/K-v2.types";
 import {KUpsertWorkspaceItemRequest, KItemAction} from "../../types/K.types";
 import {KDTO} from "../../types/K-dto.types";
@@ -20,6 +19,7 @@ import {kconstants} from "../../utils/K.Constants";
 import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
 import {getConfirmMessage} from "../../utils/confirmation-message.utils";
 import {Folder} from "../../types";
+import {NodeItemType} from "../../store/KFolderDialog.store";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -100,7 +100,7 @@ const $removeItems = (items: any[], idsToRemove: Set<number>): any[] => {
         }));
 };
 
-export const useKFolderMenuHelper = () => {
+export const useKMenuHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
@@ -396,28 +396,45 @@ export const useKFolderMenuHelper = () => {
         // ----------------
         // STEP 3: Build confirmation message based on delete type and selection
         // ----------------
+        const isCurrentlyDeleted = !isHardDelete && contextData.deletedAt != null;
         const childCount = isMultipleSelected ? 0 : $countChildren(contextData);
         const entityName = isMultipleSelected ? undefined : contextData.name;
-        
-        const confirmMsg = getConfirmMessage({
-            type: isHardDelete ? "hard-delete" : "soft-delete",
-            entityType: "folder",
-            count: selectedCount,
-            isMultiple: isMultipleSelected,
-            entityName,
-            childCount
-        });
+
+        let title: string;
+        let subtitle: string;
+        let confirmText: string;
+        let confirmColor: "destructive" | "default";
+
+        if (isCurrentlyDeleted) {
+            title = `Restore "${entityName || "item"}"?`;
+            subtitle = "This item will be restored and visible again.";
+            confirmText = "Restore";
+            confirmColor = "default";
+        } else {
+            const confirmMsg = getConfirmMessage({
+                type: isHardDelete ? "hard-delete" : "soft-delete",
+                entityType: "folder",
+                count: selectedCount,
+                isMultiple: isMultipleSelected,
+                entityName,
+                childCount
+            });
+            title = confirmMsg.title;
+            subtitle = confirmMsg.subtitle ?? '';
+            confirmText = isHardDelete ? "Delete Permanently" : "Delete";
+            confirmColor = "destructive";
+        }
 
         // ----------------
         // STEP 4: Show confirmation popover and handle user response
         // ----------------
         showConfirmation({
             anchorEl: anchorElement,
-            title: confirmMsg.title,
-            subtitle: confirmMsg.subtitle,
-            confirmText: isHardDelete ? "Delete Permanently" : "Delete",
+            title,
+            subtitle,
+            confirmText,
             cancelText: "Cancel",
-            confirmColor: "destructive",
+            confirmColor,
             buttonVariant: "default",
             zIndex: 20000,
             onConfirm: () => {

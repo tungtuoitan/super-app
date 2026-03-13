@@ -105,6 +105,7 @@ export interface KWsResponse {
     userId: number;
     name: string;
     description?: string;
+    imageBase64?: string;
     statusCode?: string;
     createdAt: string;
     updatedAt?: string;

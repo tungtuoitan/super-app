@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid, CheckSquare, Layers } from "lucide-react";
+import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid, CheckSquare, Layers, LibraryBig } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -64,6 +64,8 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
                 ? "#10b981" // emerald-500
                 : tab.type === constants.vscode.tab.tabTypes.trackingGraph
                   ? "#22c55e" // green-500
+                  : tab.type === constants.vscode.tab.tabTypes.kKnowledge || tab.type === constants.vscode.tab.tabTypes.kNode
+                      ? "#A1887F" // brown — knowledge
                   : "#9ca3af";
 
     const className = `w-4 h-4 ${isActive ? "opacity-100" : "opacity-50"}`;
@@ -94,6 +96,10 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
         case constants.vscode.tab.tabTypes.lifeLogGraph:
         case constants.vscode.tab.tabTypes.lifeLogTrack:
             return <LifeLogTabIcon tab={tab} className={className} />;
+
+        case constants.vscode.tab.tabTypes.kKnowledge:
+        case constants.vscode.tab.tabTypes.kNode:
+            return <LibraryBig className={className} style={{ color: iconColor }} />;
 
         default:
             return <FileText className={className} style={{ color: iconColor }} />;
@@ -257,9 +263,9 @@ export function TabBar() {
                 {isDropTarget && dragOverPosition === "right" && <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />}
                 <TabIcon tab={tab} isDeleted={isDeleted} isActive={activeTabId === tab.id} />
 
-                <span className={`text-[13px] whitespace-nowrap ${isDeleted ? "text-muted-foreground/40 line-through" : ""}`}>
-                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
-                    {isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""}
+                <span className={`text-[13px] whitespace-nowrap ${isDeleted && tab.type !== constants.vscode.tab.tabTypes.kNode      ? "text-muted-foreground/40 line-through" : ""}`}>
+                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.type === constants.vscode.tab.tabTypes.kNode ? "Knowledge" : tab.title}
+                    {tab.type !== constants.vscode.tab.tabTypes.kNode ? (isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : "") : ''}
                 </span>
 
                 <button

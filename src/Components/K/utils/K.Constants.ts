@@ -122,6 +122,8 @@ export const kconstants = {
             lifeLogLog: "lifelog-log",
             lifeLogTrack: "lifelog-track",
             kNode: "k-node",
+            kNodePanelBlank: "k-node-panel-blank",
+            kNodePanelCard: "k-node-panel-card",
             // @deprecated aliases — remove after Phase 3
             kFolder: "k-node",
             kNote: "k-note",

@@ -46,6 +46,8 @@ export interface IAutoCompleteOptions {
     longDesc?: string;
     /** Hierarchical level for nested options */
     level?: number;
+    /** Optional image URL / base64 data URL to show as thumbnail */
+    imageUrl?: string;
 }
 /**
  * Props interface for the GenericAutoComplete component.
@@ -163,7 +165,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
         }
         return {
             button: "h-10",
-            popover: "w-[300px] p-0",
+            popover: "w-[340px] p-0",
             command: "",
             item: "",
         };
@@ -200,7 +202,12 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                             inputProps.error && "border-destructive focus-visible:ring-destructive",
                         )}
                     >
-                        <span className="truncate">{displayValue || "Select option..."}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                            {selectedValue?.imageUrl && (
+                                <img src={selectedValue.imageUrl} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                            )}
+                            <span className="truncate">{displayValue || "Select option..."}</span>
+                        </div>
                         <div className="flex items-center gap-1">
                             {!disableClearable && displayValue && !disabled && (
                                 <span
@@ -239,10 +246,13 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                                         disabled={isDisabled}
                                         className={cn(sizeClasses.item, isDisabled && "opacity-50 cursor-not-allowed")}
                                     >
-                                        <Check className={cn("mr-2 h-4 w-4", isSelected ? "opacity-100" : "opacity-0")} />
-                                        <div className="flex items-center justify-between w-full">
-                                            <span>{label}</span>
-                                            {option.longDesc && <span className="text-xs text-muted-foreground ml-2">{option.longDesc}</span>}
+                                        <Check className={cn("mr-2 h-4 w-4 flex-shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
+                                        {option.imageUrl && (
+                                            <img src={option.imageUrl} alt="" className="w-6 h-6 rounded object-cover flex-shrink-0 mr-2" />
+                                        )}
+                                        <div className="flex items-center justify-between w-full min-w-0">
+                                            <span className="truncate">{label}</span>
+                                            {option.longDesc && <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{option.longDesc}</span>}
                                         </div>
                                     </CommandItem>
                                 );

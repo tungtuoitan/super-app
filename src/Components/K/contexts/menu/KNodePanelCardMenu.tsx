@@ -1,0 +1,46 @@
+import { MenuItem, MenuDivider } from "@szhsin/react-menu";
+import { Plus, Trash2, RotateCcw } from "lucide-react";
+import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import { useKMenuHelper } from "../helpers/useKMenu.helper";
+import { useKTreeStatusHelper } from "../../hooks/useKTreeStatusHelper";
+
+export function KNodePanelCardMenu() {
+    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { dhr_items } = useKMenuHelper();
+    const _TREESTATUS = useKTreeStatusHelper();
+
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
+
+    const handleNewCard = () => {
+        setIsContextMenuOpen(false);
+        window.dispatchEvent(new CustomEvent("k-node-inline-create", {
+            detail: { knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null },
+        }));
+    };
+
+    return (
+        <>
+            <MenuItem
+                onClick={handleNewCard}
+                disabled={_ITEMSTATUS.isDirectlyDeleted || _ITEMSTATUS.hasDeletedAncestor}
+            >
+                <Plus className="w-4 h-4 mr-2" />
+                New Card
+            </MenuItem>
+
+            <MenuDivider />
+
+            {_ITEMSTATUS.isDirectlyDeleted ? (
+                <MenuItem onClick={(e) => dhr_items(e, false)}>
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Restore
+                </MenuItem>
+            ) : !_ITEMSTATUS.hasDeletedAncestor && (
+                <MenuItem onClick={(e) => dhr_items(e, false)}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                </MenuItem>
+            )}
+        </>
+    );
+}
