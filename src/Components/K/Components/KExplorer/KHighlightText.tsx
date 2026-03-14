@@ -1,9 +1,10 @@
 /**
- * HighlightText - Highlights matching text in a string
- * Used for search result highlighting in tree nodes
+ * KHighlightText — highlights matching text, diacritic-insensitive.
+ * "bat" matches "Bát", "khoan" matches "khoăn", "duong" matches "đường", etc.
  */
 
 import React from "react";
+import { removeDiacritics } from "../../utils/searchUtils";
 
 interface HighlightTextProps {
     text: string;
@@ -11,44 +12,40 @@ interface HighlightTextProps {
     className?: string;
 }
 
-/**
- * Highlights matching portions of text with a yellow background
- * Case-insensitive matching
- */
 export function KHighlightText({ text, highlight, className = "" }: HighlightTextProps) {
-    // If no highlight text, return original text
     if (!highlight || !highlight.trim()) {
         return <span className={className}>{text}</span>;
     }
 
-    // Escape special regex characters in highlight text
-    const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const escapedHighlight = escapeRegex(highlight.trim());
+    // Work with NFC (composed) form — each visible char is one code-point.
+    // removeDiacritics preserves NFC length, so positions map 1-to-1.
+    const nfcText         = text.normalize("NFC");
+    const normalizedText  = removeDiacritics(nfcText).toLowerCase();
+    const normalizedQuery = removeDiacritics(highlight.trim()).toLowerCase();
 
-    // Split text by matching parts (case-insensitive)
-    const regex = new RegExp(`(${escapedHighlight})`, "gi");
-    const parts = text?.split(regex) || [];
+    if (!normalizedQuery) return <span className={className}>{nfcText}</span>;
 
-    return (
-        <span className={className}>
-            {parts.map((part, index) => {
-                // Check if this part matches the highlight text (case-insensitive)
-                const isMatch = part.toLowerCase() === highlight.toLowerCase();
+    const parts: React.ReactNode[] = [];
+    let i = 0;
 
-                return isMatch ? (
-                    <mark
-                        key={index}
-                        className="bg-yellow-400/80 text-black rounded-sm px-0.5"
-                        style={{
-                            backgroundColor: "rgb(250 204 21 / 0.8)", // yellow-400/80
-                        }}
-                    >
-                        {part}
-                    </mark>
-                ) : (
-                    <span key={index}>{part}</span>
-                );
-            })}
-        </span>
-    );
+    while (i < nfcText.length) {
+        const matchIdx = normalizedText.indexOf(normalizedQuery, i);
+        if (matchIdx === -1) {
+            parts.push(nfcText.slice(i));
+            break;
+        }
+        if (matchIdx > i) parts.push(nfcText.slice(i, matchIdx));
+        parts.push(
+            <mark
+                key={matchIdx}
+                className="bg-yellow-400/80 text-black rounded-sm px-0.5"
+                style={{ backgroundColor: "rgb(250 204 21 / 0.8)" }}
+            >
+                {nfcText.slice(matchIdx, matchIdx + normalizedQuery.length)}
+            </mark>,
+        );
+        i = matchIdx + normalizedQuery.length;
+    }
+
+    return <span className={className}>{parts.length ? parts : nfcText}</span>;
 }

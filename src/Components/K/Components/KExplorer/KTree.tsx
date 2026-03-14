@@ -14,15 +14,15 @@ import { CalculateKTreeContainerHeight } from "../../HeadlessComponents/Calculat
 import { CalculateKTreeDropZoneHeight } from "../../HeadlessComponents/CalculateKTreeDropZoneHeight";
 import { kconstants } from "../../utils/K.Constants";
 import { ScrollToHighlightItem } from "../../HeadlessComponents/ScrollToHighlightItem";
+import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 
 export function KTree() {
-    const { isDragging, currentK, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } = useKStore();
+    const { isDragging, currentK, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, markedNodeId, setMarkedNodeId, treeData: _storeTD, setTreeData } = useKStore();
     const { searchQuery } = useGridControlStore();
     const { handleSelectionChange, handleKeyDown } = KuseTreeHelper2();
     const { handleMove } = KuseTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const manager = useDragDropManager();
-    const { allK, isLoadingK, isLoadingTree, setIsLoadingTree, setIsLoadingK } = useKStore();
 
     // Transform workspace data to tree format
     // Handles: extract folders → filter by search → wrap in workspace root → convert to KTreeNode
@@ -72,13 +72,115 @@ export function KTree() {
         return baseTree;
     }, [currentK, searchQuery]);
 
-    // Keep original treeData for tree structure (including root)
-    // Root will be hidden via CSS, not by removing from data
+    // Sync local treeData to store so other hooks (e.g. handleDrillDown) can use it
+    useEffect(() => { setTreeData(treeData); }, [treeData]);
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = useMemo(() => {
         return KtreeMiniHelper.getAllVisibleNodeIds(treeData);
     }, [treeData]);
+
+    // ── Mark helpers ────────────────────────────────────────────────────────────
+
+    /** Collect the numeric IDs of a node and all its descendants */
+    function collectSubtreeIds(node: KTreeNode, out: Set<number>) {
+        out.add(node.data.id);
+        for (const child of node.children ?? []) collectSubtreeIds(child, out);
+    }
+
+    /** Numeric IDs of marked node + all descendants (null when no mark) */
+    const markedVisibleIds = useMemo((): Set<number> | null => {
+        if (!markedNodeId) return null;
+        function find(nodes: KTreeNode[]): Set<number> | null {
+            for (const node of nodes) {
+                if (node.data.id === markedNodeId) {
+                    const ids = new Set<number>();
+                    collectSubtreeIds(node, ids);
+                    return ids;
+                }
+                const child = find(node.children ?? []);
+                if (child) return child;
+            }
+            return null;
+        }
+        return find(treeData);
+    }, [markedNodeId, treeData]);
+
+    // Load saved mark from storage when workspace changes
+    useEffect(() => {
+        if (!currentK?.id) return;
+        const saved = storageService.get<number>(`${STORAGE_KEYS.K_TREE_MARK}_${currentK.id}`);
+        setMarkedNodeId(saved ?? null);
+    }, [currentK?.id]);
+
+    // When mark is set: close all → open path to node → expand full subtree → scroll
+    useEffect(() => {
+        if (!markedNodeId || !_treeRef.current) return;
+        const nodeId = markedNodeId; // narrow to number — TypeScript loses narrowing inside async
+
+        const waitForRender = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+        async function applyMark() {
+            if (!_treeRef.current) return;
+
+            _treeRef.current.closeAll();
+            await waitForRender(100);
+
+            const pathIds = KtreeMiniHelper.findPathToItem(treeData, nodeId);
+            if (pathIds.length === 0) return;
+
+            const openWithRetry = async (numId: number, depth: number) => {
+                let treeNode = _treeRef.current?.get(numId.toString());
+                let retries = 0;
+                while (!treeNode && retries < 15) {
+                    await waitForRender(50 + depth * 10);
+                    treeNode = _treeRef.current?.get(numId.toString());
+                    retries++;
+                }
+                if (treeNode && !treeNode.isOpen) {
+                    treeNode.open();
+                    await waitForRender(80 + depth * 15);
+                }
+            };
+
+            for (let i = 0; i < pathIds.length; i++) {
+                await openWithRetry(pathIds[i], i);
+            }
+
+            try { _treeRef.current?.scrollTo(nodeId.toString()); } catch (_) {}
+            await waitForRender(60);
+
+            function findNode(nodes: KTreeNode[], targetId: number): KTreeNode | null {
+                for (const n of nodes) {
+                    if (n.data.id === targetId) return n;
+                    const found = findNode(n.children ?? [], targetId);
+                    if (found) return found;
+                }
+                return null;
+            }
+            function getLevels(n: KTreeNode, depth: number, acc: number[][]) {
+                if (!acc[depth]) acc[depth] = [];
+                acc[depth].push(n.data.id);
+                for (const child of n.children ?? []) getLevels(child, depth + 1, acc);
+            }
+
+            const markedTreeNode = findNode(treeData, nodeId);
+            if (!markedTreeNode) return;
+
+            const levels: number[][] = [];
+            getLevels(markedTreeNode, 0, levels);
+
+            for (let lvl = 1; lvl < levels.length; lvl++) {
+                await waitForRender(40);
+                for (const numId of levels[lvl]) {
+                    const n = _treeRef.current?.get(numId.toString());
+                    if (n && !n.isOpen) n.open();
+                }
+            }
+        }
+
+        applyMark();
+    }, [markedNodeId]);
 
     // Keyboard navigation (VS Code-like)
     useEffect(() => {
@@ -228,7 +330,7 @@ export function KTree() {
                                         }}
                                     ></div>
                                 ) : (
-                                    <KNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} />
+                                    <KNode node={node} style={{ height: "100%" }} dragHandle={dragHandle} treeData={treeData} markedVisibleIds={markedVisibleIds} markedNodeId={markedNodeId} setMarkedNodeId={setMarkedNodeId} currentKId={currentK?.id ?? null} />
                                 )}
                             </div>
                         );

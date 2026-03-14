@@ -8,6 +8,7 @@ import { useKNodeEditorStore } from "../store/KNodeEditor.store";
 import { getDescendantIds, isAncestorNode } from "./kNodeEditor.miniHelper";
 import { generateTempId, collectIdsFromTree } from "../utils/temp-id.utils";
 import type { KItemV2 } from "../types/K-v2.types";
+import { KtreeMiniHelper } from "./Ktree.miniHelper";
 
 export const useKNodeEditorLoader = () => {
     const {
@@ -16,16 +17,21 @@ export const useKNodeEditorLoader = () => {
         setBreadcrumb,
         editingNodeId,
         setEditingNodeId,
+        editDraft,
         setEditDraft,
+        editOriginal,
         setEditOriginal,
         setParentPickerNodeId,
         setUnsavedPromptNodeId,
+        setPromptFlashTick,
         setInlineNewParentId,
         showDeleted,
         showAllChild,
+        inlineNewParentId
     } = useKNodeEditorStore();
 
-    const { currentK, setCurrentK } = useKStore();
+
+    const { currentK, setCurrentK, _treeRef, treeData } = useKStore();
     const { $user } = useAuthStore();
     const { loadTree } = useKLoader();
 
@@ -82,9 +88,23 @@ export const useKNodeEditorLoader = () => {
             }
             return [...prev, ...path];
         });
+        // Open node in KTree so its direct children are visible
+        KtreeMiniHelper.expandPathToItem(_treeRef, treeData, node.id);
     };
 
     const handleOpenEdit = (node: KItemV2) => {
+        if (inlineNewParentId !== undefined) return;
+        // Another card is already being edited — flash its prompt instead
+        if (editingNodeId != null && editingNodeId !== node.id) {
+            const isDirty =
+                editDraft.name !== editOriginal.name ||
+                editDraft.description !== editOriginal.description ||
+                editDraft.icon !== editOriginal.icon ||
+                editDraft.color !== editOriginal.color;
+            if (isDirty) setUnsavedPromptNodeId(editingNodeId);
+            setPromptFlashTick(t => t + 1);
+            return;
+        }
         const draft = { name: node.name, description: node.description || "", icon: node.icon || null, color: node.color || null };
         setEditingNodeId(node.id);
         setEditDraft(draft);
@@ -229,6 +249,38 @@ export const useKNodeEditorLoader = () => {
 
     const handleCancelInline = () => setInlineNewParentId(undefined);
 
+    /** Update icon + color immediately (no edit mode required). Optimistic + rollback. */
+    const handleUpdateIcon = async (node: KItemV2, iconType: string | null, color: string) => {
+        // Optimistic update
+        setCurrentK(prev => prev ? {
+            ...prev,
+            flatData: prev.flatData.map(n => n.id === node.id
+                ? { ...n, icon: iconType, color }
+                : n),
+        } : prev);
+
+        try {
+            await KService._upsertWorkspaceItems($user.userToken ?? "", rootNode.knowledgeId, [{
+                action: KItemAction.Update,
+                id: node.id,
+                nodeData: {
+                    name: node.name,
+                    description: node.description || null,
+                    color,
+                    icon: iconType,
+                },
+            }]);
+            await loadTree();
+        } catch (e) {
+            // Rollback to original on failure
+            setCurrentK(prev => prev ? {
+                ...prev,
+                flatData: prev.flatData.map(n => n.id === node.id ? node : n),
+            } : prev);
+            console.error(e);
+        }
+    };
+
     return {
         allNodes,
         scopedNodes,
@@ -243,5 +295,6 @@ export const useKNodeEditorLoader = () => {
         inlineNewParentId: undefined, // exposed via store directly
         handleInlineCreate,
         handleCancelInline,
+        handleUpdateIcon,
     };
 };

@@ -56,6 +56,10 @@ export interface KContextData {
     // Cross-panel hover sync
     hoveredNodeId: number | null;
     setHoveredNodeId: Dispatch<SetStateAction<number | null>>;
+
+    // Tree mark — highlight a subtree (node + descendants)
+    markedNodeId: number | null;
+    setMarkedNodeId: Dispatch<SetStateAction<number | null>>;
 }
 
 // @deprecated aliases — remove after all consumers updated
@@ -102,6 +106,9 @@ const kContextDefaultValue: KContextData = {
 
     hoveredNodeId: null,
     setHoveredNodeId: () => {},
+
+    markedNodeId: null,
+    setMarkedNodeId: () => {},
 };
 
 // @deprecated alias
@@ -138,6 +145,7 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
 
     const [scrollToItem, setScrollToItem] = useState<boolean>(false);
     const [hoveredNodeId, setHoveredNodeId] = useState<number | null>(null);
+    const [markedNodeId, setMarkedNodeId] = useState<number | null>(null);
 
     return (
         <KStore.Provider
@@ -182,6 +190,9 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
 
                 hoveredNodeId,
                 setHoveredNodeId,
+
+                markedNodeId,
+                setMarkedNodeId,
             }}
         >
             {children}

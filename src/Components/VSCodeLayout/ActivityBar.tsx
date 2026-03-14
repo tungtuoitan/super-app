@@ -12,7 +12,7 @@ const activityModules = [
     { id: constants.vscode.viewTypes.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
     { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
     { id: constants.vscode.viewTypes.k, icon: LibraryBig, label: constants.vscode.displayNames.k },
-    { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
+    // { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
     { id: constants.vscode.viewTypes.project, icon: Cuboid, label: constants.vscode.displayNames.project },
     { id: constants.vscode.viewTypes.lifeLog, icon: Shell, label: constants.vscode.displayNames.lifeLog },
 ];
