@@ -91,7 +91,10 @@ const _upsertWorkspaceItems = async (
     const res = await apiFetch(`${config.api.baseURL}/api/k/${knowledgeId}/nodes/batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requests),
+        body: JSON.stringify(requests.map((r) => ({
+            ...r,
+            parentId: (r.parentId != null && r.parentId <= 0) ? null : r.parentId,
+        }))),
     });
 
     if (res.ok) return await res.json();
