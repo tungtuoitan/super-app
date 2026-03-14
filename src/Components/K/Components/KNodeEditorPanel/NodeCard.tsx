@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";import { useDrag, useDrop } from "react-dnd";
-import { Trash2, GitBranch, LibraryBig, Library, RotateCcw } from "lucide-react";
+import { Trash2, LibraryBig, Library, RotateCcw, Maximize2, Minimize2, Bookmark } from "lucide-react";
 import type { KItemV2 } from "../../types/K-v2.types";
 import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
@@ -12,6 +12,12 @@ import { IconPicker } from "@/shared/components/ui/IconPicker";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
+import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { KHighlightText } from "../KExplorer/KHighlightText";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+
+const DESCRIPTION_WARN_LENGTH = 500;
 
 export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) {
     const {
@@ -19,17 +25,51 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
         editOriginal,
         parentPickerNodeId, setParentPickerNodeId,
         unsavedPromptNodeId, setUnsavedPromptNodeId,
+        promptFlashTick,
     } = useKNodeEditorStore();
-    const { allNodes, handleOpenEdit, handleCancelEdit, handleSubmitEdit, handleDelete, handleRestoreCard, handleSaveParent, handleDrillDown, scopeDepth } = useKNodeEditorLoader();
+    const { allNodes, handleOpenEdit, handleCancelEdit, handleSubmitEdit, handleDelete, handleRestoreCard, handleSaveParent, handleDrillDown, handleUpdateIcon, scopeDepth } = useKNodeEditorLoader();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { openKNodeTab } = useKNodeTabHelper();
-    const { hoveredNodeId, setHoveredNodeId } = useKStore();
+    const { hoveredNodeId, setHoveredNodeId, markedNodeId, setMarkedNodeId, currentK } = useKStore();
+    const { warning } = useConsoleHelper();
+    const { searchQuery } = useGridControlStore();
+
+    const isMarked = markedNodeId === node.id;
+    const handleToggleMark = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const newVal = isMarked ? null : node.id;
+        setMarkedNodeId(newVal);
+        if (currentK?.id) {
+            if (newVal === null) storageService.remove(`${STORAGE_KEYS.K_TREE_MARK}_${currentK.id}`);
+            else storageService.set(`${STORAGE_KEYS.K_TREE_MARK}_${currentK.id}`, newVal);
+        }
+    };
 
     const [showIconPicker, setShowIconPicker] = useState(false);
     const iconPickerRef = useRef<HTMLDivElement>(null);
     const nameInputRef = useRef<HTMLInputElement>(null);
     const focusFieldRef = useRef<"name" | "description">("name");
     const isEditing = editingNodeId === node.id;
+
+    // ── Warning: description too long while editing ───────────────────────────
+    const warnedDescRef = useRef(false);
+    useEffect(() => {
+        if (!isEditing) { warnedDescRef.current = false; return; }
+        if (editDraft.description.length > DESCRIPTION_WARN_LENGTH && !warnedDescRef.current) {
+            warning(`[K] "${editDraft.name || node.name}": description is ${editDraft.description.length} chars (> ${DESCRIPTION_WARN_LENGTH}). Consider shortening it.`);
+            warnedDescRef.current = true;
+        }
+    }, [isEditing, editDraft.description.length]);
+
+    // Card size: 1×1 (default) → 2×1 → 2×2 → back
+    const [cardSize, setCardSize] = useState<"1x1" | "2x1" | "2x2">("1x1");
+    const cycleSize = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setCardSize(s => s === "1x1" ? "2x1" : s === "2x1" ? "2x2" : "1x1");
+    };
+    const heightClass = cardSize === "2x2" ? "h-[26.75rem]" : CARD_HEIGHT;
+    const spanClass   = cardSize !== "1x1"  ? "col-span-2"  : "";
+    const rowClass    = cardSize === "2x2"  ? "row-span-2"  : "";
 
     // Focus the clicked field when entering edit mode
     useEffect(() => {
@@ -43,8 +83,31 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const isPickerOpen = parentPickerNodeId === node.id;
     const isPrompting = unsavedPromptNodeId === node.id;
     const isDeleted = !!node.deletedAt;
-    const isKnowledge = isRoot && node.id < 0; // workspace root virtual node
+    const isKnowledge = isRoot && node.id < 0;
     const isHoveredFromTree = !isRoot && hoveredNodeId === node.id;
+
+    // ── Flash the save/discard prompt ──────────────────────────────────────────
+    const [isFlashing, setIsFlashing] = useState(false);
+    const flashPrompt = () => {
+        setIsFlashing(true);
+        setTimeout(() => setIsFlashing(false), 500);
+    };
+
+    // Flash when user clicks outside while prompt is visible
+    useEffect(() => {
+        if (!isPrompting) return;
+        const handler = (e: MouseEvent) => {
+            if (!cardRef.current?.contains(e.target as Node)) flashPrompt();
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, [isPrompting]);
+
+    // Flash when triggered from outside (e.g. blocked inline-create attempt)
+    useEffect(() => {
+        if (!isPrompting || promptFlashTick === 0) return;
+        flashPrompt();
+    }, [promptFlashTick]);
 
     const level = isRoot ? 0 : (node.pathDepth ?? 1);
     const parentNode = !isRoot && node.parentId != null ? allNodes.find((n) => n.id === node.parentId) : null;
@@ -166,7 +229,7 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     // ── Unsaved changes prompt overlay ─────────────────────────────────────────
     const UnsavedPrompt = isPrompting ? (
         <div
-            className="absolute inset-0 rounded-lg bg-zinc-950/96 flex flex-col items-center justify-center gap-3 z-30"
+            className={`absolute inset-0 rounded-lg bg-zinc-950/96 flex flex-col items-center justify-center gap-3 z-30 transition-all duration-150 ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125" : ""}`}
             onMouseDown={(e) => e.stopPropagation()}
         >
             <p className="text-xs text-zinc-400 font-medium">Save changes?</p>
@@ -197,12 +260,13 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const hoverBorderColor = isHoveredFromTree && !dropActive && !isDragging
         ? "#75beff44"
         : undefined;
+    const markedBorderColor = isMarked && !isEditing && !dropActive ? "#f59e0b66" : undefined;
 
     return (
         <div
             ref={cardRef}
-            className={`group relative rounded-lg border flex flex-col ${CARD_HEIGHT} transition-colors duration-150 ${isEditing ? "border-blue-500/20" : cardState} ${isDeleted && !isEditing ? "opacity-50" : ""}`}
-            style={{ ...bgStyle, borderColor: !isEditing ? hoverBorderColor : undefined }}
+            className={`group relative rounded-lg border flex flex-col ${heightClass} ${spanClass} ${rowClass} transition-colors duration-150 ${isEditing ? "border-blue-500/20" : cardState} ${isDeleted && !isEditing ? "opacity-50" : ""}`}
+            style={{ ...bgStyle, borderColor: !isEditing ? (markedBorderColor ?? hoverBorderColor) : undefined }}
             data-node-card
             onMouseEnter={!isKnowledge ? () => setHoveredNodeId(node.id) : undefined}
             onMouseLeave={!isKnowledge ? () => setHoveredNodeId(null) : undefined}
@@ -210,28 +274,34 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
         >
             {UnsavedPrompt}
 
-            {/* Icon — absolute, same position both modes */}
+            {/* Icon — absolute, same position both modes. Always clickable (except knowledge root / deleted). */}
             <div className="absolute top-2 left-2 z-10" ref={iconPickerRef}>
-                {isEditing ? (
+                {isKnowledge || isDeleted ? (
+                    <div className="w-5 h-5 flex items-center justify-center pointer-events-none">
+                        <NodeIconDisplay opacity={0.4} />
+                    </div>
+                ) : (
                     <button
                         onClick={() => setShowIconPicker(v => !v)}
                         className="w-5 h-5 flex items-center justify-center rounded hover:bg-zinc-800 transition-colors"
                         title="Pick icon"
                     >
-                        <NodeIconDisplay opacity={0.6} />
+                        <NodeIconDisplay opacity={isEditing ? 0.6 : 0.4} />
                     </button>
-                ) : (
-                    <div className="w-5 h-5 flex items-center justify-center pointer-events-none">
-                        <NodeIconDisplay opacity={0.4} />
-                    </div>
                 )}
                 {showIconPicker && (
                     <div className="absolute top-6 left-0 z-50 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl" style={{ width: 280 }}>
                         <IconPicker
-                            value={editDraft.icon as IconType | null}
+                            value={(isEditing ? editDraft.icon : node.icon) as IconType | null}
                             onChange={(iconType, defaultColor) => {
-                                setDraft("icon", iconType);
-                                setDraft("color", defaultColor);
+                                if (isEditing) {
+                                    // In edit mode: update draft (saved on submit)
+                                    setDraft("icon", iconType);
+                                    setDraft("color", defaultColor);
+                                } else {
+                                    // Not editing: save immediately via API
+                                    handleUpdateIcon(node, iconType, defaultColor);
+                                }
                                 setShowIconPicker(false);
                             }}
                             columns={4}
@@ -309,29 +379,38 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                         style={{ color: editDraft.color || node.color || "#f4f4f5" }}
                         onKeyDown={(e) => {
                             if (e.key === "Escape") handleCancelEdit();
-                            if (e.key === "Enter") handleSubmitEdit(node, editDraft);
+                            // if (e.key === "Enter") handleSubmitEdit(node, editDraft);
                         }}
                     />
                 ) : !isKnowledge ? (
                     <button
-                        className="text-sm font-semibold text-left leading-snug line-clamp-2 mt-[3px] w-full hover:underline underline-offset-2 decoration-zinc-600 transition-colors hover:opacity-80"
+                        className="text-sm cursor-text font-semibold text-left leading-snug line-clamp-2 mt-[3px] w-full "
                         style={{ color: node.color || "#f4f4f5" }}
-                        onClick={(e) => {
+                        
+                        onDoubleClick={(e) => {
                             e.stopPropagation();
                             if (isEditing) return;
                             focusFieldRef.current = "name";
                             handleOpenEdit(node);
                         }}
-                        title={node.name}
-                    >
-                        {node.name}
+                        >
+                        <span className="cursor-pointer hover:underline underline-offset-2 decoration-zinc-600 transition-colors hover:opacity-80"
+                        title={`Drill into ${node.name}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (isEditing) return;
+                            handleDrillDown(node);
+                        }}
+                        >
+                            <KHighlightText text={node.name} highlight={searchQuery} />
+                        </span>
                     </button>
                 ) : (
                     <div
                         className="text-sm font-semibold text-left leading-snug line-clamp-2 mt-[3px]"
                         style={{ color: node.color || "#f4f4f5" }}
                     >
-                        {node.name}
+                        <KHighlightText text={node.name} highlight={searchQuery} />
                     </div>
                 )}
             </div>
@@ -349,20 +428,43 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                     />
                 ) : (
                     <div
-                        onClick={!isKnowledge && !isDeleted ? (e) => {
+                        onDoubleClick={!isKnowledge && !isDeleted ? (e) => {
                             e.stopPropagation();
                             focusFieldRef.current = "description";
                             handleOpenEdit(node);
                         } : undefined}
                         style={{ cursor: !isKnowledge && !isDeleted ? "text" : undefined, height: "100%" }}
                     >
-                        <KNodeDescView value={node.description} />
+                        <KNodeDescView value={node.description} highlight={searchQuery} />
                     </div>
                 )}
             </div>
 
-            {/* Footer — always present, same height */}
-            <div className={`px-4 pb-3 pt-2 shrink-0 border-t border-none`} />
+            {/* Footer — bookmark + resize buttons */}
+            <div className="px-2 pb-1.5 pt-1 shrink-0 flex items-center justify-between">
+                {/* Bookmark / mark toggle */}
+                {!isKnowledge && (
+                    <button
+                        onClick={handleToggleMark}
+                        title={isMarked ? "Remove mark" : "Mark this node"}
+                        className={`p-0.5 rounded transition-all ${isMarked ? "text-amber-400" : "text-zinc-600 hover:text-zinc-400 opacity-0 group-hover:opacity-100"}`}
+                    >
+                        <Bookmark className="w-3 h-3" fill={isMarked ? "currentColor" : "none"} />
+                    </button>
+                )}
+                {isKnowledge && <span />}
+                {!isKnowledge && (
+                    <button
+                        onClick={cycleSize}
+                        className={`p-0.5 rounded transition-all text-zinc-600 hover:text-zinc-400 ${cardSize !== "1x1" ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                        title={cardSize === "2x2" ? "Collapse card" : "Expand card"}
+                    >
+                        {cardSize === "2x2"
+                            ? <Minimize2 className="w-3 h-3" />
+                            : <Maximize2 className="w-3 h-3" />}
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

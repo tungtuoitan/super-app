@@ -7,6 +7,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { Bold, Italic, Underline as UnderlineIcon, List, ListChecks } from "lucide-react";
 import "./KNodeDescEditor.css";
+import { removeDiacritics } from "../../utils/searchUtils";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -166,13 +167,45 @@ export function KNodeDescEditor({ value, onChange, placeholder, autoFocus, onEsc
 
 // ── KNodeDescView ─────────────────────────────────────────────────────────────
 
-export function KNodeDescView({ value }: { value: string | null | undefined }) {
+/** Strip HTML tags → plain text (used for search filtering) */
+export function stripHtmlToText(html: string): string {
+    return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/** Inject <mark> highlight into HTML — diacritic-insensitive, operates only on text nodes */
+function highlightInHtml(html: string, query: string): string {
+    if (!query.trim()) return html;
+    const normalizedQuery = removeDiacritics(query.trim()).toLowerCase();
+    if (!normalizedQuery) return html;
+
+    return html
+        .split(/(<[^>]+>)/)
+        .map(part => {
+            if (part.startsWith("<")) return part; // HTML tag — leave untouched
+            const nfcPart        = part.normalize("NFC");
+            const normalizedPart = removeDiacritics(nfcPart).toLowerCase();
+            let result = "";
+            let i = 0;
+            while (i < nfcPart.length) {
+                const matchIdx = normalizedPart.indexOf(normalizedQuery, i);
+                if (matchIdx === -1) { result += nfcPart.slice(i); break; }
+                result += nfcPart.slice(i, matchIdx);
+                result += `<mark style="background:rgb(250 204 21/0.8);color:black;border-radius:2px;padding:0 2px">${nfcPart.slice(matchIdx, matchIdx + normalizedQuery.length)}</mark>`;
+                i = matchIdx + normalizedQuery.length;
+            }
+            return result;
+        })
+        .join("");
+}
+
+export function KNodeDescView({ value, highlight }: { value: string | null | undefined; highlight?: string }) {
     if (!value) return null;
     const html = isHtml(value) ? value : plainToHtml(value);
+    const displayHtml = highlight ? highlightInHtml(html, highlight) : html;
     return (
         <div
             className="k-node-desc-view text-xs text-zinc-400 leading-relaxed break-words min-h-full"
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: displayHtml }}
         />
     );
 }

@@ -90,22 +90,27 @@ export const useKLoader = () => {
             // Fetch workspace tree with V2 structure (ALL items, no filtering)
             const result: ResultOptions<KDTO> = await KService._getWorkspaceTreeV2(token, workspaceIdToLoad);
             if(result && result.success){
-                // Merge data: API data + existing virtual items (ID < 0) + new virtual items
-                const existingVirtualItems = (currentK?.flatData ?? []).filter((item: KItemV2) => item?.id < 0);
-                const mergedVirtualItems = calculatedVirtualItems
-                    ? calculatedVirtualItems // Use provided virtual items (updated)
-                    : existingVirtualItems; // Keep existing virtual items
+                const freshData = result.object?.flatData ?? [];
 
-                const newWorkspace = {
-                    ...result.object,
-                    flatData: [
-                        ...result.object?.flatData ?? [],
-                        ...mergedVirtualItems // KEEP VIRTUAL ITEMS (NEW FILE/NOTE/FOLDER,...)
-                    ]
-                } as KDTO;
+                // Use functional form so we read the CURRENT state (avoids stale-closure race
+                // where a concurrent loadTree() could preserve a virtual node that should be gone).
+                setCurrentK(prev => {
+                    const currentVirtualItems = (prev?.flatData ?? []).filter((item: KItemV2) => item?.id < 0);
+                    // If caller passed an explicit list (even empty []) → use it (removes disposed virtuals).
+                    // If caller passed nothing (undefined) → keep whatever virtual items are in current state.
+                    const mergedVirtualItems = calculatedVirtualItems !== undefined
+                        ? calculatedVirtualItems
+                        : currentVirtualItems;
 
-                setCurrentK(newWorkspace);
-                return newWorkspace;
+                    return {
+                        ...result.object,
+                        flatData: [...freshData, ...mergedVirtualItems],
+                    } as KDTO;
+                });
+
+                // Return a snapshot for callers that need it (mergedVirtualItems resolved above,
+                // so just return freshData; callers should prefer reading store state instead).
+                return { ...result.object, flatData: freshData } as KDTO;
             }
 
         } catch (error) {

@@ -21,6 +21,8 @@ export function KCustomDragPreview({
     treeData: KTreeNode[];
 }) {
     if (!isDragging || !offset) return null;
+    // Only show for tree-node drags — NodeCard drags have no dragIds
+    if (!dragIds || dragIds.length === 0) return null;
 
     // Count of items being dragged
     const itemCount = dragIds?.length || 0;
