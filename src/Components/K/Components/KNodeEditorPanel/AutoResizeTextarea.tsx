@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect } from "react";
+import { useRef, useLayoutEffect, forwardRef } from "react";
 
 interface AutoResizeTextareaProps {
     value: string;
@@ -8,24 +8,31 @@ interface AutoResizeTextareaProps {
     onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
-export function AutoResizeTextarea({ value, onChange, placeholder, className, onKeyDown }: AutoResizeTextareaProps) {
-    const ref = useRef<HTMLTextAreaElement>(null);
+export const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, AutoResizeTextareaProps>(
+    ({ value, onChange, placeholder, className, onKeyDown }, forwardedRef) => {
+        const localRef = useRef<HTMLTextAreaElement>(null);
 
-    useLayoutEffect(() => {
-        if (!ref.current) return;
-        ref.current.style.height = "auto";
-        ref.current.style.height = ref.current.scrollHeight + "px";
-    }, [value]);
+        useLayoutEffect(() => {
+            const el = localRef.current;
+            if (!el) return;
+            el.style.height = "auto";
+            el.style.height = el.scrollHeight + "px";
+        }, [value]);
 
-    return (
-        <textarea
-            ref={ref}
-            rows={5}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            onKeyDown={onKeyDown}
-            className={`resize-none overflow-hidden bg-transparent placeholder:opacity-20 outline-none w-full ${className}`}
-        />
-    );
-}
+        return (
+            <textarea
+                ref={(el) => {
+                    (localRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+                    if (typeof forwardedRef === "function") forwardedRef(el);
+                    else if (forwardedRef) forwardedRef.current = el;
+                }}
+                rows={5}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                onKeyDown={onKeyDown}
+                className={`resize-none overflow-hidden bg-transparent placeholder:opacity-20 outline-none w-full ${className}`}
+            />
+        );
+    }
+);

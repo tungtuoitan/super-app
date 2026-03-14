@@ -100,6 +100,15 @@ export const useKNodeEditorLoader = () => {
         if (!draft.name.trim()) return;
         setEditingNodeId(null);
         setUnsavedPromptNodeId(null);
+
+        // Optimistic update — show new values immediately, no flicker
+        setCurrentK(prev => prev ? {
+            ...prev,
+            flatData: prev.flatData.map(n => n.id === node.id
+                ? { ...n, name: draft.name.trim(), description: draft.description || null, color: draft.color, icon: draft.icon }
+                : n),
+        } : prev);
+
         try {
             await KService._upsertWorkspaceItems($user.userToken ?? "", rootNode.knowledgeId, [{
                 action: KItemAction.Update,
@@ -113,6 +122,11 @@ export const useKNodeEditorLoader = () => {
             }]);
             await loadTree();
         } catch (e) {
+            // Rollback to original on failure
+            setCurrentK(prev => prev ? {
+                ...prev,
+                flatData: prev.flatData.map(n => n.id === node.id ? node : n),
+            } : prev);
             console.error(e);
         }
     };
