@@ -1,0 +1,6 @@
+CREATE SCHEMA [urm]
+    AUTHORIZATION [dbo];
+
+
+GO
+

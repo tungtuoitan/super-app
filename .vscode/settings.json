@@ -21,6 +21,9 @@
     "editor.insertSpaces": true,
     "editor.detectIndentation": false,
     "editor.unicodeHighlight.ambiguousCharacters": false,
-    "claudeCodeChat.permissions.yoloMode": true
+    "claudeCodeChat.permissions.yoloMode": true,
+    "dataworkspace.excludedProjects": [
+        "SuperApp-dev/SuperApp-dev.sqlproj"
+    ]
     // }
 }

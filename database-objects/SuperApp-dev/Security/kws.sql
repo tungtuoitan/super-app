@@ -1,0 +1,6 @@
+CREATE SCHEMA [kws]
+    AUTHORIZATION [dbo];
+
+
+GO
+
