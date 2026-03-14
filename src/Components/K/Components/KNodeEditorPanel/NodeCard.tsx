@@ -5,7 +5,7 @@ import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKStore } from "../../store/K.store";
 import { DND_TYPE, CARD_HEIGHT, isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
-import { AutoResizeTextarea } from "./AutoResizeTextarea";
+import { KNodeDescEditor, KNodeDescView } from "./KNodeDescEditor";
 import type { IconType } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { IconPicker } from "@/shared/components/ui/IconPicker";
@@ -28,13 +28,16 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const [showIconPicker, setShowIconPicker] = useState(false);
     const iconPickerRef = useRef<HTMLDivElement>(null);
     const nameInputRef = useRef<HTMLInputElement>(null);
+    const focusFieldRef = useRef<"name" | "description">("name");
     const isEditing = editingNodeId === node.id;
 
-    // Focus name input without scroll when entering edit mode
+    // Focus the clicked field when entering edit mode
     useEffect(() => {
-        if (isEditing) {
+        if (!isEditing) return;
+        if (focusFieldRef.current !== "description") {
             nameInputRef.current?.focus({ preventScroll: true });
         }
+        // desc autoFocus handled by KNodeDescEditor's autoFocus prop
     }, [isEditing]);
 
     const isPickerOpen = parentPickerNodeId === node.id;
@@ -84,10 +87,10 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const [{ isDragging }, dragRef] = useDrag(() => ({
         type: DND_TYPE,
         item: { id: node.id },
-        // Cannot drag: root card or deleted node
-        canDrag: () => !isRoot && !isDeleted,
+        // Cannot drag: root card, deleted node, or currently editing
+        canDrag: () => !isRoot && !isDeleted && !isEditing,
         collect: (monitor) => ({ isDragging: monitor.isDragging() }),
-    }), [node.id, isRoot, isDeleted]);
+    }), [node.id, isRoot, isDeleted, isEditing]);
 
     const [{ isOver, canDrop }, dropRef] = useDrop(() => ({
         accept: DND_TYPE,
@@ -201,7 +204,6 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
             className={`group relative rounded-lg border flex flex-col ${CARD_HEIGHT} transition-colors duration-150 ${isEditing ? "border-blue-500/20" : cardState} ${isDeleted && !isEditing ? "opacity-50" : ""}`}
             style={{ ...bgStyle, borderColor: !isEditing ? hoverBorderColor : undefined }}
             data-node-card
-            onDoubleClick={!isEditing && !isKnowledge ? (e) => { e.stopPropagation(); handleOpenEdit(node); } : undefined}
             onMouseEnter={!isKnowledge ? () => setHoveredNodeId(node.id) : undefined}
             onMouseLeave={!isKnowledge ? () => setHoveredNodeId(null) : undefined}
             onContextMenu={handleContextMenu}
@@ -314,8 +316,13 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                     <button
                         className="text-sm font-semibold text-left leading-snug line-clamp-2 mt-[3px] w-full hover:underline underline-offset-2 decoration-zinc-600 transition-colors hover:opacity-80"
                         style={{ color: node.color || "#f4f4f5" }}
-                        onClick={(e) => { e.stopPropagation(); handleDrillDown(node); }}
-                        title={`Drill into ${node.name}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (isEditing) return;
+                            focusFieldRef.current = "name";
+                            handleOpenEdit(node);
+                        }}
+                        title={node.name}
                     >
                         {node.name}
                     </button>
@@ -330,24 +337,26 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
             </div>
 
             {/* Description */}
-            <div className="px-4 pt-1.5 flex-1 min-h-0 overflow-y-auto">
+            <div className="px-4 pt-1.5 flex-1 min-h-0 text-left overflow-y-auto">
                 {isEditing ? (
-                    <AutoResizeTextarea
+                    <KNodeDescEditor
                         value={editDraft.description}
                         onChange={(v) => setDraft("description", v)}
-                        placeholder="Description… (Shift+Enter for new line)"
-                        className="text-xs text-zinc-400 leading-relaxed w-full text-left"
-                        onKeyDown={(e) => {
-                            if (e.key === "Escape") handleCancelEdit();
-                            if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSubmitEdit(node, editDraft);
-                            }
-                        }}
+                        placeholder="Description… (Ctrl+Enter to save)"
+                        autoFocus={focusFieldRef.current === "description"}
+                        onEscape={handleCancelEdit}
+                        onCtrlEnter={() => handleSubmitEdit(node, editDraft)}
                     />
                 ) : (
-                    <div className="text-xs text-left text-zinc-400 leading-relaxed whitespace-pre-line">
-                        {node.description || ""}
+                    <div
+                        onClick={!isKnowledge && !isDeleted ? (e) => {
+                            e.stopPropagation();
+                            focusFieldRef.current = "description";
+                            handleOpenEdit(node);
+                        } : undefined}
+                        style={{ cursor: !isKnowledge && !isDeleted ? "text" : undefined, height: "100%" }}
+                    >
+                        <KNodeDescView value={node.description} />
                     </div>
                 )}
             </div>
