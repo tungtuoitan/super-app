@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { ChevronRight, Trash2, Layers, Trash, LibraryBig } from "lucide-react";
+import { ChevronRight, Trash2, Layers, Trash, LibraryBig, Bookmark } from "lucide-react";
 import { useKStore } from "../../store/K.store";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { KItemV2 } from "../../types/K-v2.types";
@@ -10,12 +10,20 @@ import { NodeCard } from "./NodeCard";
 import { InlineNewNodeCard } from "./InlineNewNodeCard";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { KtreeMiniHelper } from "../../hooks/Ktree.miniHelper";
+import { kconstants } from "../../utils/K.Constants";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { stripHtmlToText } from "./KNodeDescEditor";
+import { containsNormalized } from "../../utils/searchUtils";
 
 function KNodeEditorContent() {
-    const { rootNode, breadcrumb, setBreadcrumb, setEditingNodeId, setParentPickerNodeId, inlineNewParentId, setInlineNewParentId, showDeleted, setShowDeleted, showAllChild, setShowAllChild } = useKNodeEditorStore();
-    const { currentK, allK, setSelectedItemIds, setLastSelectedItemId, setScrollToItem } = useKStore();
+    const { rootNode, breadcrumb, setBreadcrumb, setEditingNodeId, setParentPickerNodeId, inlineNewParentId, setInlineNewParentId, showDeleted, setShowDeleted, showAllChild, setShowAllChild, editingNodeId, unsavedPromptNodeId, setPromptFlashTick } = useKNodeEditorStore();
+    const { currentK, allK, setSelectedItemIds, setLastSelectedItemId, setScrollToItem, markedNodeId, _treeRef, treeData } = useKStore();
     const { scopedNodes, allNodes } = useKNodeEditorLoader();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { warning } = useConsoleHelper();
+    const { searchQuery } = useGridControlStore();
 
     const kName = allK.find(k => k.id === rootNode.knowledgeId)?.name ?? "";
 
@@ -25,6 +33,20 @@ function KNodeEditorContent() {
         if (!last?.id || last.id < 0) return rootNode;
         return allNodes.find(n => n.id === last.id) ?? rootNode;
     }, [breadcrumb, allNodes, rootNode]);
+
+    // ── Warning: > 12 direct children ────────────────────────────────────────
+    const directChildrenCount = useMemo(() => {
+        const scopeId = currentScopeNode.id < 0 ? null : currentScopeNode.id;
+        return allNodes.filter(n => n.parentId === scopeId && !n.deletedAt).length;
+    }, [currentScopeNode.id, allNodes]);
+
+    const warnedScopeRef = useRef<number | null>(null);
+    useEffect(() => {
+        if (directChildrenCount > 12 && warnedScopeRef.current !== currentScopeNode.id) {
+            warning(`[K] "${currentScopeNode.name}" has ${directChildrenCount} direct children (> 12). Consider grouping them into sub-nodes.`);
+            warnedScopeRef.current = currentScopeNode.id;
+        }
+    }, [directChildrenCount, currentScopeNode.id, currentScopeNode.name]);
 
     // Init breadcrumb: walk up parentId chain from rootNode to the tree root
     const breadcrumbNodeIdRef = useRef<number | null>(null);
@@ -66,9 +88,13 @@ function KNodeEditorContent() {
     useEffect(() => {
         const handler = (e: Event) => {
             const detail = (e as CustomEvent).detail as { knowledgeId: number; parentId: number | null };
-            if (detail.knowledgeId === rootNode.knowledgeId) {
-                setInlineNewParentId(detail.parentId);
+            if (detail.knowledgeId !== rootNode.knowledgeId) return;
+            // Block if editing or unsaved-prompt is active — flash the prompt instead
+            if (editingNodeId != null || unsavedPromptNodeId != null) {
+                setPromptFlashTick(t => t + 1);
+                return;
             }
+            setInlineNewParentId(detail.parentId);
         };
         window.addEventListener("k-node-inline-create", handler);
         return () => window.removeEventListener("k-node-inline-create", handler);
@@ -84,6 +110,15 @@ function KNodeEditorContent() {
         () => [...scopedNodes].sort((a, b) => (a.pathDepth ?? 0) - (b.pathDepth ?? 0)),
         [scopedNodes]
     );
+
+    // Filter by search query — diacritic-insensitive match on name or description
+    const filteredNodes = useMemo(() => {
+        if (!searchQuery.trim()) return sortedNodes;
+        return sortedNodes.filter(n =>
+            containsNormalized(n.name, searchQuery) ||
+            (n.description ? containsNormalized(stripHtmlToText(n.description), searchQuery) : false)
+        );
+    }, [sortedNodes, searchQuery]);
 
     if (currentK?.id !== rootNode.knowledgeId) {
         return (
@@ -102,7 +137,11 @@ function KNodeEditorContent() {
                     {kName && (
                         <span className="flex items-center gap-1 shrink-0">
                             <button
-                                onClick={() => setBreadcrumb(prev => [prev[0]])}
+                                onClick={() => {
+                                    setBreadcrumb(prev => [prev[0]]);
+                                    // Open workspace root in KTree so direct children are visible
+                                    KtreeMiniHelper.expandPathToItem(_treeRef, treeData, kconstants.workspace.root.workspaceItemId);
+                                }}
                                 className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors"
                                 title={kName}
                             >
@@ -134,13 +173,16 @@ function KNodeEditorContent() {
                                     >
                                         {entry.name}
                                     </button>
+                                    {entry.id === markedNodeId && (
+                                        <Bookmark className="w-3 h-3 text-amber-400 shrink-0" fill="currentColor" />
+                                    )}
                                 </span>
                             );
                         });
                     })()}
                 </div>
                 <div className="ml-auto flex items-center gap-2 text-[11px] text-zinc-600 shrink-0">
-                    <span>{sortedNodes.length} node{sortedNodes.length !== 1 ? "s" : ""}</span>
+                    <span>{filteredNodes.length} node{filteredNodes.length !== 1 ? "s" : ""}</span>
                     <button
                         onClick={() => setShowAllChild(v => !v)}
                         className={`p-1 rounded transition-colors ${!showAllChild ? "text-blue-400 bg-blue-900/20" : "text-zinc-600 hover:text-zinc-400"}`}
@@ -163,7 +205,7 @@ function KNodeEditorContent() {
                 <div className="grid grid-cols-4 gap-3">
                     {/* card 0 = current scope node (breadcrumb last item) */}
                     <NodeCard node={currentScopeNode} isRoot />
-                    {sortedNodes.map((node) => (
+                    {filteredNodes.map((node) => (
                         <NodeCard key={node.id} node={node} />
                     ))}
                     {inlineNewParentId !== undefined && <InlineNewNodeCard />}

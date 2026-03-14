@@ -111,4 +111,5 @@ export const storageService = {
 // Storage keys constants
 export const STORAGE_KEYS = {
     USER_PROFILE: "userProfile",
+    K_TREE_MARK: "k_tree_mark", // suffixed per workspace: k_tree_mark_{workspaceId}
 } as const;

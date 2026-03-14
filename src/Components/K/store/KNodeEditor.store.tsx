@@ -16,6 +16,8 @@ interface KNodeEditorContextData {
     setParentPickerNodeId: Dispatch<SetStateAction<number | null>>;
     unsavedPromptNodeId: number | null;
     setUnsavedPromptNodeId: Dispatch<SetStateAction<number | null>>;
+    promptFlashTick: number;
+    setPromptFlashTick: Dispatch<SetStateAction<number>>;
     inlineNewParentId: number | null | undefined;
     setInlineNewParentId: Dispatch<SetStateAction<number | null | undefined>>;
     showDeleted: boolean;
@@ -33,6 +35,7 @@ export function KNodeEditorProvider({ rootNode, children }: { rootNode: KItemV2;
     const [editOriginal, setEditOriginal] = useState<{ name: string; description: string; icon: string | null; color: string | null }>({ name: "", description: "", icon: null, color: null });
     const [parentPickerNodeId, setParentPickerNodeId] = useState<number | null>(null);
     const [unsavedPromptNodeId, setUnsavedPromptNodeId] = useState<number | null>(null);
+    const [promptFlashTick, setPromptFlashTick] = useState(0);
     const [inlineNewParentId, setInlineNewParentId] = useState<number | null | undefined>(undefined);
     const [showDeleted, setShowDeleted] = useState<boolean>(false);
     const [showAllChild, setShowAllChild] = useState<boolean>(true);
@@ -46,6 +49,7 @@ export function KNodeEditorProvider({ rootNode, children }: { rootNode: KItemV2;
             editOriginal, setEditOriginal,
             parentPickerNodeId, setParentPickerNodeId,
             unsavedPromptNodeId, setUnsavedPromptNodeId,
+            promptFlashTick, setPromptFlashTick,
             inlineNewParentId, setInlineNewParentId,
             showDeleted, setShowDeleted,
             showAllChild, setShowAllChild,

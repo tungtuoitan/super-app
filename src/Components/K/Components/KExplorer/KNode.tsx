@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { NodeApi } from "react-arborist";
-import { ChevronDown, ChevronRight, LibraryBig, Library } from "lucide-react";
+import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/useKTreeHelper2";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -12,6 +12,7 @@ import {kconstants} from "../../utils/K.Constants";
 import {IconType} from "../../shared/icons/icon.types";
 import {ICON_MAP} from "../../shared/icons/icon.config";
 import {useKNodeTabHelper} from "../../hooks/useKNodeTabHelper";
+import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
@@ -19,6 +20,10 @@ interface NodeProps {
     dragHandle?: any;
     treeData: KTreeNode[];
     treeType?: "workspaceTree" | "targetTree";
+    markedVisibleIds?: Set<number> | null;
+    markedNodeId?: number | null;
+    setMarkedNodeId?: React.Dispatch<React.SetStateAction<number | null>>;
+    currentKId?: number | null;
 }
 
 type IconProps = {
@@ -33,9 +38,8 @@ const Folder2: React.FC<IconProps> = ({ className, color }) => (
 
 export default Folder2;
 
-export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: NodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId } = useKStore();
-    const { searchQuery } = useGridControlStore();
+export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds, markedNodeId, setMarkedNodeId, currentKId }: NodeProps) {
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId } = useKStore();    const { searchQuery } = useGridControlStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();
     const _TREESTATUS = useKTreeStatusHelper();
@@ -61,6 +65,81 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
 
     // Check if deleted (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(nodeItem);
+
+    // Mark feature
+    const isMarked = markedNodeId === nodeId;
+    const isDimmed = !!markedVisibleIds && !markedVisibleIds.has(nodeId);
+    const isHovered = hoveredNodeId === nodeId;
+
+    const handleToggleMark = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!setMarkedNodeId || !currentKId) return;
+        const newVal = isMarked ? null : nodeId;
+        setMarkedNodeId(newVal);
+        if (newVal === null) {
+            storageService.remove(`${STORAGE_KEYS.K_TREE_MARK}_${currentKId}`);
+        } else {
+            storageService.set(`${STORAGE_KEYS.K_TREE_MARK}_${currentKId}`, newVal);
+        }
+    };
+
+    // Expand/collapse subtree — 3-state cycle: expand(1 lvl) → expand all → collapse
+    // 0 = collapsed, 1 = expanded 1 level, 2 = expanded all
+    const [expandPhase, setExpandPhase] = useState<0 | 1 | 2>(0);
+
+    function findSubtree(nodes: KTreeNode[], targetId: number): KTreeNode | null {
+        for (const n of nodes) {
+            if (n.data.id === targetId) return n;
+            const found = findSubtree(n.children ?? [], targetId);
+            if (found) return found;
+        }
+        return null;
+    }
+    function collectAllTreeIds(n: KTreeNode): string[] {
+        return [n.id, ...(n.children ?? []).flatMap(collectAllTreeIds)];
+    }
+
+    /** Open node + all descendants level-by-level so react-arborist has time to register each level */
+    function openSubtreeLevelByLevel(root: KTreeNode) {
+        function getLevels(n: KTreeNode, depth: number, acc: string[][]) {
+            if (!acc[depth]) acc[depth] = [];
+            acc[depth].push(n.id);
+            for (const child of n.children ?? []) getLevels(child, depth + 1, acc);
+        }
+        const levels: string[][] = [];
+        getLevels(root, 0, levels);
+        levels.forEach((ids, i) => {
+            setTimeout(() => ids.forEach(id => _treeRef.current?.get(id)?.open()), i * 40);
+        });
+    }
+
+    const handleExpandCollapse = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!_treeRef.current || !hasChildren) return;
+
+        const subtree = findSubtree(treeData, nodeId);
+        if (!subtree) return;
+
+        // Reset if node was manually closed from outside
+        const currentPhase = !node.isOpen ? 0 : expandPhase === 0 ? 1 : expandPhase;
+
+        if (currentPhase === 0) {
+            // Collapsed → expand 1 level: open this node only
+            _treeRef.current.get(subtree.id)?.open();
+            (subtree.children ?? []).forEach(child => _treeRef.current?.get(child.id)?.close());
+            setExpandPhase(1);
+        } else if (currentPhase === 1) {
+            // Expanded 1 level → expand ALL descendants (level-by-level for virtualization)
+            openSubtreeLevelByLevel(subtree);
+            setExpandPhase(2);
+        } else {
+            // Expanded all → collapse (close this node + all descendants)
+            collectAllTreeIds(subtree).forEach(id => _treeRef.current?.get(id)?.close());
+            setExpandPhase(0);
+        }
+    };
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -196,11 +275,11 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 }}
                 onClick={handleMainClick}
                 onContextMenu={handleRightClick}
-                onMouseEnter={() => !isWorkspaceRoot && setHoveredNodeId(nodeId)}
+                onMouseEnter={() => setHoveredNodeId(nodeId)}
                 onMouseLeave={() => setHoveredNodeId(null)}
                 className={`
                     flex items-center h-full w-full py-1 pr-2 cursor-pointer
-                    ${isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
+                    ${isDimmed ? "opacity-20" : isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
                     ${isWorkspaceRoot ? "font-semibold" : ""}
                     ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
                     ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
@@ -268,6 +347,34 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         />
                     </div>
                 </div>
+
+                {/* Mark button — visible on hover or when this node is marked */}
+                {!isWorkspaceRoot && treeType === "workspaceTree" && (isHovered || isMarked) && (
+                    <button
+                        onClick={handleToggleMark}
+                        title={isMarked ? "Remove mark" : "Mark subtree"}
+                        className={`ml-1 shrink-0 p-0.5 rounded transition-colors ${isMarked ? "text-amber-400 hover:text-amber-300" : "text-zinc-500 hover:text-zinc-300"}`}
+                    >
+                        <Bookmark className="w-3 h-3" fill={isMarked ? "currentColor" : "none"} />
+                    </button>
+                )}
+
+                {/* Expand/collapse subtree — 3-state, shown on hover for any node with children */}
+                {hasChildren && isHovered && (() => {
+                    const phase = !node.isOpen ? 0 : expandPhase === 0 ? 1 : expandPhase;
+                    const titles = ["Expand children", "Expand all descendants", "Collapse all"];
+                    return (
+                        <button
+                            onClick={handleExpandCollapse}
+                            title={titles[phase]}
+                            className="ml-0.5 shrink-0 p-0.5 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
+                        >
+                            {phase === 2
+                                ? <ChevronsDownUp className="w-3 h-3" />
+                                : <ChevronsUpDown className="w-3 h-3" />}
+                        </button>
+                    );
+                })()}
             </div>
         </div>
     );
