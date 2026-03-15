@@ -19,6 +19,7 @@ import { ProjectView } from "./ProjectView";
 import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
 import { NoteGrid } from "@/Components/Note/NoteGrid";
 import { GridControlBar } from "@/Components/shared/GridControlBar";
+import {useGridControlStore} from "@/store/grid/useGridControl.store";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -53,14 +54,14 @@ interface VSCodeLayoutProps {
  * - Sub-components: ⏳ Still using MUI (will migrate incrementally)
  */
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
-    const { activeView } = useNavigationStore();
     const location = useLocation();
     const { isMobile } = useMobileStore();
     const { isSideBarVisible, setIsSideBarVisible, isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const mobileEditorRef = useRef<ImperativePanelHandle>(null);
+    const { moduleName } = useGridControlStore();
 
     // Auto-register grid based on current URL
-    const { getGridConfigFromPath, registerGrid } = useGridAutoRegisterHelper();
+    const { registerGrid } = useGridAutoRegisterHelper();
 
     useEffect(() => {
         registerGrid();
@@ -93,13 +94,13 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                     <Panel id="mobile-sidebar" defaultSize={40} minSize={15}>
                         <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col">
                             <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
-                                <span>{activeView}</span>
-                                {activeView === constants.vscode.viewTypes.lifeLog && (
+                                <span>{moduleName}</span>
+                                {moduleName === constants.modules.lifeLog && (
                                     <GridControlBar hideFilter />
                                 )}
                             </div>
                             <div className="flex-1 overflow-hidden">
-                                <MobileSideBarContent activeView={activeView} />
+                                <MobileSideBarContent moduleName={moduleName} />
                             </div>
                         </div>
                     </Panel>
@@ -131,7 +132,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                 <PanelGroup direction="horizontal" autoSaveId="notes-layout-horizontal" className="flex-1">
                     {/* Side Bar */}
                     <>
-                        <VSSideBar activeView={activeView} />
+                        <VSSideBar moduleName={moduleName} />
                         <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
                     </>
 
@@ -172,14 +173,14 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
  * - Panel sizes auto-save and persist across sessions
  */
 
-function MobileSideBarContent({ activeView }: { activeView: ActivityBarView }) {
+function MobileSideBarContent({ moduleName   }: { moduleName: string }) {
     return (
         <div className="h-full overflow-hidden">
-            {activeView === constants.vscode.viewTypes.ws && <WsView />}
-            {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
-            {activeView === constants.vscode.viewTypes.note && <NoteGrid source={constants.modules.note} />}
-            {activeView === constants.vscode.viewTypes.project && <ProjectView />}
-            {activeView === constants.vscode.viewTypes.lifeLog && <LifeLogView />}
+            {moduleName === constants.modules.ws && <WsView />}
+            {moduleName === constants.modules.workspace && <WorkspaceView />}
+            {moduleName === constants.modules.note && <NoteGrid source={constants.modules.note} />}
+            {moduleName === constants.modules.project && <ProjectView />}
+            {moduleName === constants.modules.lifeLog && <LifeLogView />}
         </div>
     );
 }

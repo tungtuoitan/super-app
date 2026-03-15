@@ -395,9 +395,9 @@ export const constants = {
 
 // Type exports
 export type ActivityBarView =
-    | typeof constants.navigation.views.workspace
-    | typeof constants.navigation.views.k
-    | typeof constants.navigation.views.ws
-    | typeof constants.navigation.views.note
-    | typeof constants.navigation.views.project
-    | typeof constants.navigation.views.lifeLog;
+    | typeof constants.modules.workspace
+    | typeof constants.modules.k
+    | typeof constants.modules.ws
+    | typeof constants.modules.note
+    | typeof constants.modules.project
+    | typeof constants.modules.lifeLog;
