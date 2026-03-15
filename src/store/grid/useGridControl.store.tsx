@@ -7,6 +7,8 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 import type { UserFilters, ViewFilter } from "@/types/common.types";
+import {constants} from "@/utils/index";
+import {STORAGE_KEYS, storageService} from "@/services/storage.service";
 
 export interface GridControlContextData {
     // Search query
@@ -43,7 +45,8 @@ export const useGridControlStore = () => useContext(GridControlStore);
 
 export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [moduleName, setModuleName] = useState<string>("");
+    const [moduleName, setModuleName] = useState<string>(storageService.get<string>(`${STORAGE_KEYS.MODULE_NAME}`) ?? constants.modules.project);
+
     const [filterViewKey, setFilterViewKey] = useState<keyof UserFilters | null>(null);
     const [uiFilters, setUIFilters] = useState<ViewFilter>({});
 

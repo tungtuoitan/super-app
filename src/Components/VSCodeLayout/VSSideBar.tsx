@@ -15,7 +15,7 @@ import { Console } from "./Console";
 import {KView} from "../K/Components/KView";
 
 interface VSSideBarProps {
-    activeView: ActivityBarView;
+    moduleName: string;
 }
 
 /**
@@ -33,7 +33,7 @@ interface VSSideBarProps {
  * - When collapsed, panel size goes to 0 but resize handle remains visible
  * - User can drag the resize handle to expand the panel again (like VSCode)
  */
-export function VSSideBar({ activeView }: VSSideBarProps) {
+export function VSSideBar({ moduleName }: VSSideBarProps) {
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useMobileStore();
 
@@ -62,18 +62,18 @@ export function VSSideBar({ activeView }: VSSideBarProps) {
                             <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
                                 {/* Header */}
                                 <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
-                                    <span>{getViewTitle(activeView)}</span>
-                                    <GridControlBar hideFilter={activeView === constants.vscode.viewTypes.lifeLog} />
+                                    <span>{getViewTitle(moduleName)}</span>
+                                    <GridControlBar hideFilter={moduleName === constants.modules.lifeLog} />
                                 </div>
 
                                 {/* Content */}
                                 <div className="flex-1 overflow-hidden">
-                                    {activeView === constants.vscode.viewTypes.ws && <WsView />}
-                                    {activeView === constants.vscode.viewTypes.workspace && <WorkspaceView />}
-                                    {activeView === constants.vscode.viewTypes.k && <KView />}
-                                    {activeView === constants.vscode.viewTypes.note && <NotesView />}
-                                    {activeView === constants.vscode.viewTypes.project && <ProjectView />}
-                                    {activeView === constants.vscode.viewTypes.lifeLog && <LifeLogView />}
+                                    {moduleName === constants.modules.ws && <WsView />}
+                                    {moduleName === constants.modules.workspace && <WorkspaceView />}
+                                    {moduleName === constants.modules.k && <KView />}
+                                    {moduleName === constants.modules.note && <NotesView />}
+                                    {moduleName === constants.modules.project && <ProjectView />}
+                                    {moduleName === constants.modules.lifeLog && <LifeLogView />}
                                 </div>
                             </div>
                         </Panel>
@@ -104,18 +104,20 @@ function NotesView() {
 /**
  * Get view title for header
  */
-function getViewTitle(view: ActivityBarView): string {
-    switch (view) {
-        case constants.vscode.viewTypes.workspace:
-            return constants.vscode.displayNames.workspace;
-        case constants.vscode.viewTypes.ws:
+function getViewTitle(moduleName: string): string {
+    switch (moduleName) {
+        case constants.modules.workspace:
+            return constants.modules.workspace;
+        case constants.modules.ws:
             return "Ws";
-        case constants.vscode.viewTypes.note:
-            return constants.vscode.displayNames.notes;
-        case constants.vscode.viewTypes.project:
-            return constants.vscode.displayNames.project;
-        case constants.vscode.viewTypes.lifeLog:
-            return constants.vscode.displayNames.lifeLog;
+        case constants.modules.note:
+            return constants.modules.note;
+        case constants.modules.project:
+            return constants.modules.project;
+        case constants.modules.lifeLog:
+            return constants.modules.lifeLog;
+        case constants.modules.k:
+            return constants.modules.k;
         default:
             return "View";
     }

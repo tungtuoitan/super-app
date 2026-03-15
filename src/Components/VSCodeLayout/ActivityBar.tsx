@@ -6,15 +6,15 @@ import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
 import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { useNavigationStore } from "@/contexts/NavigationContext";
+import {useGridControlStore} from "@/store/grid/useGridControl.store";
 
 const activityModules = [
-    { id: constants.vscode.viewTypes.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
-    { id: constants.vscode.viewTypes.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
-    { id: constants.vscode.viewTypes.k, icon: LibraryBig, label: constants.vscode.displayNames.k },
-    // { id: constants.vscode.viewTypes.note, icon: FileText, label: constants.vscode.displayNames.notes },
-    { id: constants.vscode.viewTypes.project, icon: Cuboid, label: constants.vscode.displayNames.project },
-    { id: constants.vscode.viewTypes.lifeLog, icon: Shell, label: constants.vscode.displayNames.lifeLog },
+    { id: constants.modules.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
+    { id: constants.modules.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
+    { id: constants.modules.k, icon: LibraryBig, label: constants.vscode.displayNames.k },
+    // { id: constants.modules.note, icon: FileText, label: constants.vscode.displayNames.notes },
+    { id: constants.modules.project, icon: Cuboid, label: constants.vscode.displayNames.project },
+    { id: constants.modules.lifeLog, icon: Shell, label: constants.vscode.displayNames.lifeLog },
 ];
 
 interface ActivityBarProps {
@@ -24,8 +24,8 @@ interface ActivityBarProps {
 export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { setAccountsOpen, setSettingsOpen } = useActivityBarStore();
     const { handleActivityClick } = useActivityBarHelper();
-    const { activeView } = useNavigationStore();
     const { isAuthenticated } = useAuthStore();
+    const { moduleName } = useGridControlStore();
 
     if (horizontal) {
         return (
@@ -36,7 +36,7 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
                         <TooltipProvider>
                             {activityModules.map((activity) => {
                                 const Icon = activity.icon;
-                                const isActive = activeView === activity.id;
+                                const isActive = moduleName === activity.id;
 
                                 return (
                                     <button
@@ -104,7 +104,7 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
                     <TooltipProvider>
                         {activityModules.map((activity) => {
                             const Icon = activity.icon;
-                            const isActive = activeView === activity.id;
+                            const isActive = moduleName === activity.id;
 
                             return (
                                 <button

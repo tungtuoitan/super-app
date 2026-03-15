@@ -12,31 +12,31 @@ import { constants, ActivityBarView } from "@/utils/constants";
 /**
  * Helper function to get view from route path
  */
-const getViewFromRoute = (pathname: string): ActivityBarView | null => {
-    switch (pathname) {
-        case "/":
-        case "/workspace":
-            return constants.navigation.views.workspace;
-        case "/k":
-        case "/Kworkspace":
-            return constants.navigation.views.k;
-        case "/ws":
-            return constants.navigation.views.ws;
-        case "/notes":
-            return constants.navigation.views.note;
-        case "/project":
-            return constants.navigation.views.project;
-        case "/lifelog":
-            return constants.navigation.views.lifeLog;
-        default:
-            return null;
-    }
-};
+// const getViewFromRoute = (pathname: string): ActivityBarView | null => {
+//     switch (pathname) {
+//         case "/":
+//         case "/workspace":
+//             return constants.navigation.views.workspace;
+//         case "/k":
+//         case "/Kworkspace":
+//             return constants.navigation.views.k;
+//         case "/ws":
+//             return constants.navigation.views.ws;
+//         case "/notes":
+//             return constants.navigation.views.note;
+//         case "/project":
+//             return constants.navigation.views.project;
+//         case "/lifelog":
+//             return constants.navigation.views.lifeLog;
+//         default:
+//             return null;
+//     }
+// };
 
 /**
  * Helper function to get route from view
  */
-const getRouteFromView = (view: ActivityBarView): string => {
+const getRouteFromView = (view: string): string => {
     switch (view) {
         case constants.navigation.views.workspace:
             return "/workspace";
@@ -66,7 +66,7 @@ export interface NavigationContextValue {
     toggleNavigation: () => void;
     selectedItemId: string | null;
     setSelectedItemId: (id: string) => void;
-    activeView: ActivityBarView;
+    // activeView: ActivityBarView;
     navigateToView: (view: ActivityBarView) => void;
 }
 
@@ -78,7 +78,7 @@ export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
     toggleNavigation: () => {},
     selectedItemId: null,
     setSelectedItemId: () => {},
-    activeView: constants.navigation.views.workspace,
+    // activeView: constants.navigation.views.workspace,
     navigateToView: () => {},
 };
 
@@ -107,18 +107,19 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const bodyWrapperRef = useRef<HTMLDivElement>(null);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-    const [activeView, setActiveView] = useState<ActivityBarView>(constants.navigation.views.workspace);
+    // const [activeView, setActiveView] = useState<ActivityBarView>(constants.modules.lifeLog);
+    // const { moduleName } = useGridControlStore();
 
     const location = useLocation();
     const navigate = useNavigate();
 
     // Sync activeView with current route
-    useEffect(() => {
-        const view = getViewFromRoute(location.pathname);
-        if (view && view !== activeView) {
-            setActiveView(view);
-        }
-    }, [location.pathname]);
+    // useEffect(() => {
+    //     const view = getViewFromRoute(location.pathname);
+    //     if (view && view !== activeView) {
+    //         setActiveView(view);
+    //     }
+    // }, [moduleName]);
 
     const toggleNavigation = () => {
         setExpanded((prev) => !prev);
@@ -141,7 +142,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
                 toggleNavigation,
                 selectedItemId,
                 setSelectedItemId,
-                activeView,
+                // activeView,
                 navigateToView,
             }}
         >

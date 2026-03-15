@@ -19,38 +19,76 @@ import { constants } from "@/utils/index";
 */
 export const useGridAutoRegisterHelper = () => {
     const location = useLocation();
-    const { setModuleName, setFilterViewKey, setSearchQuery } = useGridControlStore();
-    const getGridConfigFromPath = (pathname: string) => {
-        switch (pathname) {
-            case "/workspace":
+    const { setModuleName, moduleName, setFilterViewKey, setSearchQuery } = useGridControlStore();
+    // const getGridConfigFromPath = (pathname: string) => {
+    //     switch (pathname) {
+    //         case "/workspace":
+    //             return {
+    //                 name: constants.modules.workspace,
+    //                 filterViewKey: constants.filters.views.workspace as keyof import("@/types/common.types").UserFilters,
+    //             };
+    //         case "/k":
+    //         case "/Kworkspace":
+    //             return {
+    //                 name: constants.modules.k,
+    //                 filterViewKey: constants.filters.views.k as keyof import("@/types/common.types").UserFilters,
+    //             };
+    //         case "/ws":
+    //             return {
+    //                 name: constants.modules.ws,
+    //                 filterViewKey: constants.filters.views.wsGrid as keyof import("@/types/common.types").UserFilters,
+    //             };
+    //         case "/notes":
+    //             return {
+    //                 name: constants.modules.note,
+    //                 filterViewKey: constants.filters.views.noteGrid as keyof import("@/types/common.types").UserFilters,
+    //             };
+    //         case "/project":
+    //             return {
+    //                 name: constants.modules.project,
+    //                 filterViewKey: constants.filters.views.projectGrid as keyof import("@/types/common.types").UserFilters,
+    //             };
+    //         case "/lifelog":
+    //             return {
+    //                 name: "LifeLog",
+    //                 filterViewKey: null,
+    //             };
+    //         default:
+    //             return null;
+    //     }
+    // };
+
+    const getGridConfigFromModuleName = (moduleName: string) => {
+        const _moduleName = moduleName.toLowerCase();
+        switch (_moduleName) {
+            case constants.modules.workspace:
                 return {
-                    name: constants.modules.workspace,
+                    // name: constants.modules.workspace,
                     filterViewKey: constants.filters.views.workspace as keyof import("@/types/common.types").UserFilters,
                 };
-            case "/k":
-            case "/Kworkspace":
+            case constants.modules.k:
                 return {
-                    name: constants.modules.k,
+                    // name: constants.modules.k,
                     filterViewKey: constants.filters.views.k as keyof import("@/types/common.types").UserFilters,
                 };
-            case "/ws":
+            case constants.modules.ws:
                 return {
-                    name: constants.modules.ws,
+                    // name: constants.modules.ws,
                     filterViewKey: constants.filters.views.wsGrid as keyof import("@/types/common.types").UserFilters,
                 };
-            case "/notes":
+            case constants.modules.note:
                 return {
-                    name: constants.modules.note,
+                    // name: constants.modules.note,
                     filterViewKey: constants.filters.views.noteGrid as keyof import("@/types/common.types").UserFilters,
                 };
-            case "/project":
+            case constants.modules.project:
                 return {
-                    name: constants.modules.project,
+                    // name: constants.modules.project,
                     filterViewKey: constants.filters.views.projectGrid as keyof import("@/types/common.types").UserFilters,
                 };
-            case "/lifelog":
+            case constants.modules.lifeLog:
                 return {
-                    name: "LifeLog",
+                    // name: "LifeLog",
                     filterViewKey: null,
                 };
             default:
@@ -59,18 +97,21 @@ export const useGridAutoRegisterHelper = () => {
     };
 
     const registerGrid = () => {
-        const config = getGridConfigFromPath(location.pathname);
+        const config = getGridConfigFromModuleName(moduleName);
+        setFilterViewKey(config?.filterViewKey ?? constants.filters.views.projectGrid);
 
-        if (config) {
-            // Register grid with proper config
-            setModuleName(config.name);
-            setFilterViewKey(config.filterViewKey);
-        } else {
-            // Clear registration for non-grid routes
-            setModuleName("");
-            setFilterViewKey(null);
-            setSearchQuery("");
-        }
+        // if (config) {
+        //     // Register grid with proper config
+        //     setFilterViewKey(config.filterViewKey);
+
+        //     // setModuleName(config.name);
+        // } 
+        // else {
+        //     // Clear registration for non-grid routes
+        //     setModuleName("");
+        //     setFilterViewKey(null);
+        //     setSearchQuery("");
+        // }
 
         // Cleanup: clear on unmount
         return () => {
@@ -81,7 +122,7 @@ export const useGridAutoRegisterHelper = () => {
     }
     
     return {
-        getGridConfigFromPath,
+        getGridConfigFromModuleName,
         registerGrid
     }
 };
