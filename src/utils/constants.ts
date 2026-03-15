@@ -183,9 +183,11 @@ export const constants = {
         taskStatus: {
             colors: {
                 open: { bg: "#1f6f43", text: "#ffffff" },
-                in_progress: { bg: "#52400c", text: "#ffffff" },
+                in_progress: { bg: "#7c6215", text: "#ffffff" },
+                background_progress: { bg: "#251f0c", text: "#ffffff" },
+                paused: { bg: "#575757", text: "#ffffff" },
                 completed: { bg: "#6f42c1", text: "#ffffff" },
-                on_hold: { bg: "#4b5563", text: "#ffffff" },
+                on_hold: { bg: "#475363", text: "#ffffff" },
                 cancelled: { bg: "#a63636", text: "#ffffff" },
             } as Record<string, { bg: string; text: string }>,
             default: { bg: "#4b5563", text: "#ffffff" },
@@ -194,6 +196,8 @@ export const constants = {
             colors: {
                 open: { bg: "#09331c", text: "#E5E7EB" },
                 in_progress: { bg: "#6e560b", text: "#E5E7EB" },
+                background_progress: { bg: "#251f0c", text: "#ffffff" },
+                paused: { bg: "#464646", text: "#ffffff" },
                 completed: { bg: "#311a5e", text: "#E5E7EB" },
                 on_hold: { bg: "#2B2F45", text: "#E5E7EB" },
                 cancelled: { bg: "#4A2E3A", text: "#E5E7EB" },
@@ -220,9 +224,11 @@ export const constants = {
         taskStatuses: {
             Open: 1,
             "In Progress": 2,
-            Completed: 3,
-            "On Hold": 4,
-            Cancelled: 5,
+            "Bg Progress": 3,
+            "Paused": 4,
+            Completed: 5,
+            "On Hold": 6,
+            Cancelled: 7,
         } as Record<string, number>,
         taskPriorities: {
             Low: 1,
@@ -245,10 +251,10 @@ export const constants = {
             workspace: { statusCode: "active", deletedAt: "null" },
             k: { statusCode: "active", deletedAt: "null" },
             projectGrid: { statusCode: "active" },
-            taskGrid: { status: "open,in_progress", priority: "low,medium,high" },
+            taskGrid: { status: "open,in_progress,background_progress,paused", priority: "low,medium,high" },
         } as const,
         taskDefaults: {
-            status: "open,in_progress",
+            status: "open,in_progress,background_progress,paused",
             priority: "low,medium,high",
         } as const,
         taskGroups: [
