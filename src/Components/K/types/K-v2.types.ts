@@ -42,7 +42,19 @@ export interface KItemV2 {
   // ── Timestamps ────────────────────────────
   createdAt: string;
   updatedAt?: string | null;
+  /**
+   * Với shortcut: resolved từ node gốc (non-null = gốc đã bị xóa → shortcut hiển thị là deleted).
+   * Với node thường: deleted_at của chính nó.
+   */
   deletedAt?: string | null;
+
+  // ── Shortcut fields ───────────────────────
+  /** "draft" = node thường | "shortcut" = shortcut trỏ về node gốc */
+  typeCode?: string | null;
+  /** k.node.id của node gốc (chỉ có khi typeCode === "shortcut") */
+  refTargetId?: number | null;
+  /** k.knowledge.id của node gốc */
+  refTargetKnowledgeId?: number | null;
 
   // ── UI state ──────────────────────────────
   isExpanded?: boolean;

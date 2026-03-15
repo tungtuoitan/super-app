@@ -3,117 +3,125 @@ import {
     Plus as AddIcon,
     Edit as EditIcon,
     Trash2 as DeleteIcon,
-    File as FileIcon,
-    FileText as NoteIcon,
     AlertTriangle as HardDeleteIcon,
     RotateCcw as RestoreIcon,
-    BarChart3 as TrackingIcon,
+    CornerDownRight as ShortcutIcon,
 } from "lucide-react";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import {useKStore} from "../../store/K.store";
 import {useKMenuHelper} from "../helpers/useKMenu.helper";
 import {useKTreeStatusHelper} from "../../hooks/useKTreeStatusHelper";
 import {kconstants} from "../../utils/K.Constants";
+import {useKShortcutDialogHelper} from "../../hooks/useKShortcutDialog.helper";
 
 /**
- * WorkspaceFolderNodeMenu
- * Context menu for folder nodes in workspace workspace tree
+ * KNodeMenu
+ * Context menu for nodes in the K knowledge tree.
  *
- * Menu Items:
- * - Add Folder/File/Note (submenu)
- * - Edit (rename folder)
- * - Delete / Hard Delete
+ * Shortcut nodes behave differently from regular nodes:
+ *   - "New Card" is hidden (children belong to the original)
+ *   - "Edit"    → labelled "Edit Original" (writes through to the source node)
+ *   - "Delete"  → replaced by "Remove Shortcut" (hard-deletes the shortcut row only)
+ *
+ * "Add Shortcut here" mở VSPanel shortcut tab, khóa parentNode = node đang right-click.
  */
 export function KNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
     const { selectedItemIds, currentK } = useKStore();
-    const { createFolder, editFolder, dhr_items } = useKMenuHelper();
+    const { createFolder, editFolder, dhr_items, deleteShortcut } = useKMenuHelper();
+    const { openShortcutDialog } = useKShortcutDialogHelper();
     const _TREESTATUS = useKTreeStatusHelper();
 
-    // Calculate derived values
-    const entityId = contextData?.entityId
+    const entityId        = contextData?.entityId;
     const isWorkspaceRoot = contextData && entityId < 0;
+    const isShortcut      = contextData?.typeCode === "shortcut";
 
-    // Check deleted status (including inherited from parent)
-    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
-    
-    const addMenuItems = [
-        { type: kconstants.workspace.itemTypes.folder, icon: AddIcon, label: "New Card", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
-    ];
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
 
     return (
         <>
-            {/* Add submenu - Create new items */}
-            {addMenuItems.map((item) => {
-                const Icon = item.icon;
-                const handleClick = () => {
-                    if (item.type === kconstants.workspace.itemTypes.folder) {
-                        createFolder(item.type, contextData);
+            {/* ── New Card — hidden for shortcuts ── */}
+            {!isShortcut && (
+                <MenuItem
+                    onClick={() => createFolder(kconstants.workspace.itemTypes.folder, contextData)}
+                    disabled={
+                        _ITEMSTATUS.hasDeletedAncestor ||
+                        _ITEMSTATUS.isDirectlyDeleted   ||
+                        _TREESTATUS.selectedItemStatuses.isMultiple
                     }
-                    // Other types not implemented yet
-                };
-                return (
-                    <MenuItem key={item.type} onClick={handleClick} disabled={item.disabled}>
-                        <Icon className="w-4 h-4 mr-2" />
-                        {item.label}
-                    </MenuItem>
-                );
-            })}
+                >
+                    <AddIcon className="w-4 h-4 mr-2" />
+                    New Card
+                </MenuItem>
+            )}
 
-            {/* Only show Edit and Delete options for non-root folders */}
+            {/* ── Add Shortcut here — hidden for workspace root only ── */}
+            {!isWorkspaceRoot && (
+                <MenuItem
+                    onClick={() => openShortcutDialog(contextData)}
+                    disabled={
+                        _ITEMSTATUS.hasDeletedAncestor ||
+                        _ITEMSTATUS.isDirectlyDeleted   ||
+                        _TREESTATUS.selectedItemStatuses.isMultiple
+                    }
+                >
+                    <ShortcutIcon className="w-4 h-4 mr-2 text-indigo-400" />
+                    Add Shortcut here
+                </MenuItem>
+            )}
+
+            {/* ── Edit / Delete — only for non-root ── */}
             {!isWorkspaceRoot && (
                 <>
-                    <MenuDivider />
+                    {!isShortcut && <MenuDivider />}
 
-                    {/* Edit - disabled if multiple items selected or deleted */}
-                    <MenuItem onClick={() => editFolder(contextData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
+                    {/* Edit — for shortcuts this edits the original node */}
+                    <MenuItem
+                        onClick={() => editFolder(contextData)}
+                        disabled={
+                            _TREESTATUS.selectedItemStatuses.isMultiple ||
+                            _ITEMSTATUS.hasDeletedAncestor              ||
+                            _ITEMSTATUS.isDirectlyDeleted
+                        }
+                    >
                         <EditIcon className="w-4 h-4 mr-2" />
-                        Edit
+                        {isShortcut ? "Edit Original" : "Edit"}
                     </MenuItem>
 
-                    {/* Delete/Restore options */}
-                    {(() => {
-                        // If item is directly deleted (not inherited), show both Hard Delete and Restore
-                        if (_ITEMSTATUS.isDirectlyDeleted) {
-                            return (
-                                <>
-                                    {/* //*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
-                                    {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
-                                    <HardDeleteIcon className="w-4 h-4 mr-2" />
-                                    Hard Delete
-                                </MenuItem> */}
+                    {/* ── SHORTCUT: Remove Shortcut (hard-delete row) ── */}
+                    {isShortcut ? (
+                        <MenuItem onClick={(e) => deleteShortcut(e)} className="text-red-500">
+                            <ShortcutIcon className="w-4 h-4 mr-2" />
+                            Remove Shortcut
+                        </MenuItem>
+                    ) : (
+                        /* ── REGULAR NODE: Soft-delete / Restore ── */
+                        (() => {
+                            if (_ITEMSTATUS.isDirectlyDeleted) {
+                                return (
                                     <MenuItem onClick={(e) => dhr_items(e, false)}>
                                         <RestoreIcon className="w-4 h-4 mr-2" />
                                         Restore
                                     </MenuItem>
-                                </>
-                            );
-                        }
-                        // If item is deleted but not directly (inherited from parent), only show Hard Delete
-                        // Don't show if multiple selected and any item is still active
-                        //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
-                        // else if (isDeleted && !isDirectlyDeleted && !(isMultipleSelected && hasAnyNormalItem)) {
-                        //     return (
-                        //         <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
-                        //             <HardDeleteIcon className="w-4 h-4 mr-2" />
-                        //             Hard Delete
-                        //         </MenuItem>
-                        //     );
-                        // }
-                        // If item is not deleted, show normal Delete option
-                        // Disable if multiple selected and any item is still active (deletedAt = null)
-                        
-                        else if (!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
-                            return (
-                                <MenuItem onClick={(e) => dhr_items(e, false)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasAnyDeletedItem}>
-                                    <DeleteIcon className="w-4 h-4 mr-2" />
-                                    Delete
-                                </MenuItem>
-                            );
-                        }
-                        // Don't show anything if conditions don't match
-                        return null;
-                    })()}
+                                );
+                            }
+                            if (!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
+                                return (
+                                    <MenuItem
+                                        onClick={(e) => dhr_items(e, false)}
+                                        disabled={
+                                            _TREESTATUS.selectedItemStatuses.isMultiple &&
+                                            _TREESTATUS.selectedItemStatuses.hasAnyDeletedItem
+                                        }
+                                    >
+                                        <DeleteIcon className="w-4 h-4 mr-2" />
+                                        Delete
+                                    </MenuItem>
+                                );
+                            }
+                            return null;
+                        })()
+                    )}
                 </>
             )}
         </>

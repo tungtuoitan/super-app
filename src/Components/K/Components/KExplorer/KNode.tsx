@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NodeApi } from "react-arborist";
-import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
+import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp, CornerDownRight } from "lucide-react";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/useKTreeHelper2";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -65,6 +65,9 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
 
     // Check if deleted (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(nodeItem);
+
+    // Shortcut
+    const isShortcut = nodeItem.typeCode === "shortcut";
 
     // Mark feature
     const isMarked = markedNodeId === nodeId;
@@ -301,7 +304,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
 
                 {/* Folder Icon - VS Code Material Icon Theme style */}
                 <div
-                    className="mr-2 flex items-center"
+                    className="mr-2 flex items-center relative"
                     onClick={(e) => {
                         e.stopPropagation();
                         if (hasChildren) node.toggle();
@@ -327,6 +330,13 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
                             color={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? nodeColor || "#90A4AE" : ""}
                         />
+                    )}
+
+                    {/* Shortcut badge — small arrow overlay (Windows/OneDrive style) */}
+                    {isShortcut && (
+                        <div className="absolute -bottom-0.5 -right-1 w-2.5 h-2.5 rounded-sm bg-editor-sidebar flex items-center justify-center">
+                            <CornerDownRight className="w-2 h-2 text-indigo-400" />
+                        </div>
                     )}
                 </div>
 

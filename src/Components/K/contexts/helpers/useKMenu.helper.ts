@@ -603,9 +603,69 @@ export const useKMenuHelper = () => {
         return items.find(item => item.id === targetId) || null;
     };
 
+    /**
+     * Hard-delete a shortcut node row via DELETE /api/k/{knowledgeId}/shortcuts/{nodeId}.
+     * Shows confirmation, calls dedicated API, removes from local flatData.
+     */
+    const deleteShortcut = (event: any) => {
+        if (!contextData || !currentK) return;
+
+        const nodeId = contextData.id as number;
+        if (!nodeId || nodeId <= 0) return;
+
+        setIsContextMenuOpen(false);
+
+        const nativeEvent   = event.syntheticEvent || event;
+        const anchorElement = nativeEvent?.target as HTMLElement;
+
+        showConfirmation({
+            anchorEl:      anchorElement,
+            title:         `Remove shortcut "${contextData.name}"?`,
+            subtitle:      "The shortcut will be permanently removed. The original node is not affected.",
+            confirmText:   "Remove Shortcut",
+            cancelText:    "Cancel",
+            confirmColor:  "destructive",
+            buttonVariant: "default",
+            zIndex:        20000,
+            onConfirm: async () => {
+                try {
+                    const token  = $user.userToken;
+                    const result = await KService._deleteShortcut(token ?? "", currentK.id, nodeId);
+
+                    if (!result.success) {
+                        throw new Error(result.message || "Failed to remove shortcut");
+                    }
+
+                    // Optimistic update — remove from local flatData immediately
+                    setCurrentK({
+                        ...currentK,
+                        flatData: currentK.flatData.filter((n) => n.id !== nodeId),
+                    });
+
+                    // Clear selection if the deleted shortcut was selected
+                    if (selectedItemIds.includes(nodeId)) {
+                        setSelectedItemIds(selectedItemIds.filter((id) => id !== nodeId));
+                        setLastSelectedItemId(null);
+                    }
+
+                    _console.success(`Shortcut "${contextData.name}" removed`);
+                } catch (error) {
+                    console.error("❌ Failed to remove shortcut:", error);
+                    const msg = await parseApiError(error);
+                    if (isUnauthorizedError(error)) {
+                        _console.error("Unauthorized. Please login again.");
+                    } else {
+                        _console.error(`Failed to remove shortcut: ${msg}`);
+                    }
+                }
+            },
+        });
+    };
+
     return {
         createFolder,
         editFolder,
-        dhr_items
+        dhr_items,
+        deleteShortcut,
     };
 };

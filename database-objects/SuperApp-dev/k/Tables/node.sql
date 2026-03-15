@@ -9,8 +9,9 @@ CREATE TABLE [k].[node] (
     [PathDepth]    INT             CONSTRAINT [DF_kwi_PathDepth] DEFAULT ((0)) NOT NULL,
     [name]         NVARCHAR (255)  DEFAULT ('') NOT NULL,
     [description]  NVARCHAR (MAX)  NULL,
-    [color]        NVARCHAR (7)    DEFAULT ('#F59E0B') NULL,
-    [icon]         NVARCHAR (50)   DEFAULT (N'📁') NULL,
+    [type_code]    NVARCHAR (50)   CONSTRAINT [DF_kwi_type_code] DEFAULT ('draft') NOT NULL,
+    [icon]         VARCHAR (MAX)   NULL,
+    [color]        VARCHAR (50)    NULL,
     CONSTRAINT [PK_kworkspace_items] PRIMARY KEY CLUSTERED ([id] ASC),
     CONSTRAINT [CK_kwi_MaxDepth] CHECK ([PathDepth]<=(30)),
     CONSTRAINT [FK_kwi_parent] FOREIGN KEY ([parent_id]) REFERENCES [k].[node] ([id]),
@@ -36,5 +37,20 @@ CREATE NONCLUSTERED INDEX [IX_kwi_parent]
     ON [k].[node]([parent_id] ASC) WHERE ([deleted_at] IS NULL);
 
 
+GO
+
+
+ALTER TABLE [k].[node]
+    ADD CONSTRAINT [DF_kwi_type_code] DEFAULT ('draft') FOR [type_code];
+GO
+
+-- ── Shortcut columns ──────────────────────────────────────────────────────────
+-- ref_target_id          : k.node.id của node đích (NULL = node thường)
+-- ref_target_knowledge_id: knowledge của node đích (denormalized, tránh JOIN khi cần)
+-- Không dùng FK constraint để tránh cascade phức tạp.
+-- Dữ liệu được cleanup bởi trigger/scheduled job khi target bị xóa hẳn.
+ALTER TABLE [k].[node]
+    ADD [ref_target_id]           INT NULL,
+        [ref_target_knowledge_id] INT NULL;
 GO
 

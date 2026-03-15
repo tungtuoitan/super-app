@@ -1,6 +1,6 @@
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { X, FileText, Settings, ArrowRightLeft, Terminal } from "lucide-react";
-import { useState } from "react";
+import { X, FileText, Settings, ArrowRightLeft, Terminal, CornerDownRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Panel } from "react-resizable-panels";
 import { useActivityBarStore, useMovingTreeStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -14,12 +14,14 @@ import { NoteDetailTab } from "../Note/NoteDetailTab";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {kconstants} from "../K/utils/K.Constants";
 import {KMovingTab} from "../K/Components/VSPanel/KMovingTab";
+import {useKShortcutDialogStore} from "../K/store/KShortcutDialog.store";
+import {KShortcutTab} from "../K/Components/VSPanel/KShortcutTab/KShortcutTab";
 
 interface VSPanelProps {
     onClose: () => void;
 }
 
-type PanelTab = "noteDetail" | "properties" | "moving" | "console";
+type PanelTab = "noteDetail" | "properties" | "moving" | "console" | "shortcut";
 
 /**
  * VSPanel - Bottom panel for content details
@@ -36,9 +38,19 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const [activeTabb, setActiveTabb] = useState<PanelTab>("noteDetail");
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const { moduleName } = useGridControlStore();
-    console.log('>>>>>>>>> w',moduleName === kconstants.modules.workspace && activeTabb === "moving");
     const { setTargetWorkspace } = useMovingTreeStore();
     const { isMobile } = useMobileStore();
+
+    // ── Auto-switch to "shortcut" tab when workflow is triggered ────────────
+    const { isOpen: isShortcutOpen } = useKShortcutDialogStore();
+    useEffect(() => {
+        if (isShortcutOpen) {
+            setActiveTabb("shortcut");
+        } else if (activeTabb === "shortcut") {
+            setActiveTabb("noteDetail");
+        }
+    }, [isShortcutOpen]);
+
     const changeTab = (tab: PanelTab) => {
         if (tab !== "moving") setTargetWorkspace(null);
         setActiveTabb(tab);
@@ -89,6 +101,17 @@ export function VSPanel({ onClose }: VSPanelProps) {
                                 <ArrowRightLeft className="w-4 h-4" />
                                 <span>Moving</span>
                             </button>
+                            {moduleName === kconstants.modules.k && (
+                                <button
+                                    onClick={() => changeTab("shortcut")}
+                                    className={`flex items-center gap-1.5 px-3 text-[13px] border-b-2 transition-colors ${
+                                        activeTabb === "shortcut" ? "border-editor-active text-editor-fg" : "border-transparent text-muted-foreground hover:text-editor-fg"
+                                    }`}
+                                >
+                                    <CornerDownRight className="w-4 h-4" />
+                                    <span>Shortcut</span>
+                                </button>
+                            )}
                             {isMobile && (
                                 <button
                                     onClick={() => changeTab("console")}
@@ -108,11 +131,12 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     </div>
 
                     {/* Panel Content */}
-                    <div className={`flex-1 overflow-auto ${activeTabb === "moving" || activeTabb === "console" ? "" : "p-3"}`}>
+                    <div className={`flex-1 overflow-auto ${activeTabb === "moving" || activeTabb === "shortcut" || activeTabb === "console" ? "overflow-hidden" : "p-3"}`}>
                         {activeTabb === "noteDetail" && activeTab?.type === constants.vscode.tab.tabTypes.note && <NoteDetailTab />}
                         {/* {activeTabb === "properties" && <PropertiesTab />} */}
                         {moduleName === kconstants.modules.workspace && activeTabb === "moving" && <MovingTab />}
                         {moduleName === kconstants.modules.k && activeTabb === "moving" && <KMovingTab />}
+                        {moduleName === kconstants.modules.k && activeTabb === "shortcut" && <KShortcutTab />}
                         {activeTabb === "console" && isMobile && <ConsoleTab />}
                     </div>
                 </div>

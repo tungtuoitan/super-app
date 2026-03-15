@@ -17,6 +17,7 @@ import { constants } from "@/utils/constants";
 
 /**
  * Workspace View - KTree for folder navigation with workspace selection
+ * KShortcutDialogProvider đã được mount ở Main.tsx (cùng cấp với KMovingTreeProvider)
  */
 export function KView() {
     const { $user } = useAuthStore();

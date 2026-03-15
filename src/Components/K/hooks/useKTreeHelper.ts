@@ -119,7 +119,17 @@ export const KuseTreeHelper = () => {
                     if (SPECIAL_IDS.includes(targetItemId)) {
                         newParentId = undefined; // Move to workspace root
                     } else {
-                        // const targetNodeData = targetNode.data;
+
+                        // ── SHORTCUT GUARD ──────────────────────────────────
+                        // Dropping onto a shortcut node: node gốc luôn thuộc
+                        // knowledge khác → không thể dùng làm parent trong
+                        // same-knowledge move. Block và yêu cầu dùng Move panel.
+                        if (targetNode.data.typeCode === "shortcut") {
+                            _console.error("Cannot drop onto a shortcut. Open the Move panel to move cross-knowledge.");
+                            setIsDragging(false);
+                            return;
+                        }
+                        // ────────────────────────────────────────────────────
 
                         // ---- VALIDATION: Check if all items already have this parent ----
                         const allSameParent = selectedItemIds.every((id: number) => {
@@ -136,17 +146,6 @@ export const KuseTreeHelper = () => {
                         }
 
                         newParentId = targetItemId;
-                        
-                        // ---- Check if this is a folder (V2: entityType === 2) ----
-                        // const isFolder = "entityType" in targetNodeData && targetNodeData.entityType === 2;
-
-                        // if (isFolder) {
-                        //     // ---- Dropping INTO a folder ----
-                        //     newParentId = targetItemId;
-                        // } else {
-                        //     // ---- Dropping BETWEEN siblings - use their parent ----
-                        //     newParentId = targetNodeData.parentId ?? undefined;
-                        // }
                     }
                 }
             }

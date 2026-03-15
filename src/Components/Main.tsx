@@ -35,6 +35,7 @@ import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
 import {KProvider} from "./K/store/K.store";
 import {KFolderDialogProvider} from "./K/store/KFolderDialog.store";
 import {KMovingTreeProvider} from "./K/store/KMovingTree.store";
+import {KShortcutDialogProvider} from "./K/store/KShortcutDialog.store";
 
 /**
  * Main application layout component.
@@ -78,6 +79,7 @@ export function Main() {
                                                                             <NoteGridPopupProvider>
                                                                                     <MovingTreeProvider>
                                                                                         <KMovingTreeProvider>
+                                                                                            <KShortcutDialogProvider>
                                                                                             <WsProvider>
                                                                                                 <WsDetailProvider>
                                                                                                     <ProjectProvider>
@@ -116,6 +118,7 @@ export function Main() {
                                                                                                     </ProjectProvider>
                                                                                                 </WsDetailProvider>
                                                                                             </WsProvider>
+                                                                                            </KShortcutDialogProvider>
                                                                                         </KMovingTreeProvider>
                                                                                     </MovingTreeProvider>
                                                                             </NoteGridPopupProvider>

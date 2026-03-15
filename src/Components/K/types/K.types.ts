@@ -30,6 +30,9 @@ export interface KUpsertNodeData {
     description?: string | null;
     color?: string | null;
     icon?: string | null;
+    // Shortcut: set cả hai để tạo shortcut node, không set = node thường
+    refTargetId?: number | null;
+    refTargetKnowledgeId?: number | null;
 }
 
 // ============================================

@@ -106,17 +106,36 @@ export const useKNodeDialogHelper = () => {
         try {
             // Prepare batch request with action-based API
             if (mode === "edit") {
-                // UPDATE action: update existing folder
-                await KService._upsertWorkspaceItems(token, selectedKId, [{
-                    action: KItemAction.Update,
-                    id: editingNode!.id,
-                    nodeData: {
-                        name: newNodeName.trim(),
-                        description: description.trim() || undefined,
-                        color,
-                        icon: icon || undefined,
-                    }
-                }]);
+                const isShortcut = (editingNode as any)?.typeCode === "shortcut";
+
+                if (isShortcut) {
+                    // Shortcut: edit goes to the ORIGINAL node in the target knowledge
+                    // (shortcut is just a pointer — editing it edits the source of truth)
+                    const targetKnowledgeId = (editingNode as any).refTargetKnowledgeId as number;
+                    const targetNodeId      = (editingNode as any).refTargetId as number;
+                    await KService._upsertWorkspaceItems(token, targetKnowledgeId, [{
+                        action: KItemAction.Update,
+                        id:     targetNodeId,
+                        nodeData: {
+                            name:        newNodeName.trim(),
+                            description: description.trim() || undefined,
+                            color,
+                            icon: icon || undefined,
+                        }
+                    }]);
+                } else {
+                    // Regular node: update in current knowledge
+                    await KService._upsertWorkspaceItems(token, selectedKId, [{
+                        action: KItemAction.Update,
+                        id: editingNode!.id,
+                        nodeData: {
+                            name:        newNodeName.trim(),
+                            description: description.trim() || undefined,
+                            color,
+                            icon: icon || undefined,
+                        }
+                    }]);
+                }
             } else {
                 // CREATE action: create new folder + workspace_item
                 // IMPORTANT: parentId = parent's workspace_items.id (NOT entityId!)

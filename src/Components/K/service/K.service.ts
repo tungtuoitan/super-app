@@ -118,6 +118,24 @@ const _deleteWorkspaceItems = async (
     return Promise.reject(res);
 };
 
+// ── Hard-delete a shortcut row ────────────────────────────────────────────────
+// Only valid for nodes where type_code = 'shortcut'.
+// Removes the row from the DB entirely — no soft-delete, no cascade.
+
+const _deleteShortcut = async (
+    _token: string,
+    knowledgeId: number,
+    nodeId: number,
+): Promise<ResultOptions> => {
+    const res = await apiFetch(
+        `${config.api.baseURL}/api/k/${knowledgeId}/shortcuts/${nodeId}`,
+        { method: "DELETE", headers: { "Content-Type": "application/json" } },
+    );
+
+    if (res.ok) return await res.json();
+    return Promise.reject(res);
+};
+
 // ── Export ───────────────────────────────────────────────────────────────────
 
 export const KService = {
@@ -128,4 +146,5 @@ export const KService = {
     _getWorkspaceTreeV2,
     _upsertWorkspaceItems,
     _deleteWorkspaceItems,
+    _deleteShortcut,
 };

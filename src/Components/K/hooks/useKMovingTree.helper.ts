@@ -160,18 +160,34 @@ export const useKMovingTreeHelper = () => {
             let targetId: number | null = null;
 
             if (args.parentNode) {
-                const parentNodeData = args.parentNode.data.data as any;
+                const parentNodeData = args.parentNode.data.data as KItemV2;
 
                 // Check if dropped on drop zone → treat as root
-                if (SPECIAL_IDS.includes(parentNodeData.entityId)) {
+                if (SPECIAL_IDS.includes(parentNodeData.id)) {
                     targetId = null;
                 }
+                // ── SHORTCUT RESOLUTION ────────────────────────────────────────
+                // Drop vào shortcut node trong KMovingTree = drop vào node gốc.
+                // refTargetKnowledgeId phải khớp với targetWorkspaceId.
+                else if (parentNodeData.typeCode === "shortcut") {
+                    if (!parentNodeData.refTargetId || !parentNodeData.refTargetKnowledgeId) {
+                        _console.error("Shortcut node is missing target reference. Cannot drop here.");
+                        return;
+                    }
+                    if (parentNodeData.refTargetKnowledgeId !== targetWorkspaceId) {
+                        _console.error("Shortcut points to a different knowledge than the target. Cannot drop here.");
+                        return;
+                    }
+                    // Resolve: dùng node gốc làm parent
+                    targetId = parentNodeData.refTargetId;
+                }
+                // ──────────────────────────────────────────────────────────────
                 // Check if parent node is a folder
                 else if (isFolderV2(parentNodeData as unknown as KItemV2)) {
-                    // Drop into folder → use folder's entityId
+                    // Drop into folder → use folder's id
                     targetId = parentNodeData.id;
                 } else {
-                    // Drop into note/file → use their parent folder entityId
+                    // Drop into note/file → use their parent folder id
                     targetId = parentNodeData.parentId ?? null;
                 }
             } else {

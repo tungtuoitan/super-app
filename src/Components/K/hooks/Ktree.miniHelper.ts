@@ -307,6 +307,70 @@ export function $removeItems(flatData: KItemV2[], idsToRemove: Set<number>): KIt
 }
 
 // ============================================
+// SHORTCUT GRAFTING
+// ============================================
+
+/**
+ * Graft same-knowledge shortcut children into the tree.
+ *
+ * For each shortcut node (typeCode === 'shortcut') pointing to a node in the
+ * SAME knowledge, deep-clone the target's subtree and attach it as the
+ * shortcut's children — making the shortcut act as a transparent proxy.
+ *
+ * Grafted clones get a synthetic string ID prefix `"g{shortcutId}-"` so
+ * react-arborist never sees duplicate node keys.  The underlying KItemV2.id
+ * stays the real numeric ID, so all click / context-menu operations continue
+ * to work on the original node.
+ *
+ * Cross-knowledge shortcuts: left as leaf nodes (target tree not loaded here).
+ */
+export function graftShortcutChildren(
+    roots: KTreeNode[],
+    knowledgeId: number,
+): KTreeNode[] {
+    if (!knowledgeId || knowledgeId <= 0) return roots;
+
+    // Build lookup from real numeric id → original (pre-graft) KTreeNode.
+    // Skip already-grafted clones (synthetic ids start with "g").
+    const lookup = new Map<number, KTreeNode>();
+    $traverse(roots).forEach((n) => {
+        if (!n.id.startsWith("g")) lookup.set(n.data.id, n);
+    });
+
+    /** Deep-clone a subtree, assigning synthetic string IDs throughout. */
+    function cloneSubtree(node: KTreeNode, prefix: string): KTreeNode {
+        return {
+            ...node,
+            id: `${prefix}${node.data.id}`,
+            children: (node.children ?? []).map((c) => cloneSubtree(c, prefix)),
+        };
+    }
+
+    function process(nodes: KTreeNode[]): KTreeNode[] {
+        return nodes.map((node) => {
+            const processedChildren = process(node.children ?? []);
+
+            const isShortcut =
+                node.data.typeCode === "shortcut" &&
+                node.data.refTargetId != null &&
+                node.data.refTargetKnowledgeId === knowledgeId;
+
+            if (isShortcut) {
+                const target = lookup.get(node.data.refTargetId!);
+                const graftedChildren = (target?.children ?? []).map((c) =>
+                    cloneSubtree(c, `g${node.data.id}-`),
+                );
+                return { ...node, children: [...processedChildren, ...graftedChildren] };
+            }
+
+            return { ...node, children: processedChildren };
+        });
+    }
+
+    return process(roots);
+}
+
+// ============================================
 // EXPORT OBJECT
 // ============================================
 
@@ -322,5 +386,6 @@ export const KtreeMiniHelper = {
     transformToTreeData,
     findPathToItem,
     expandPathToItem,
+    graftShortcutChildren,
     $removeItems,
 };

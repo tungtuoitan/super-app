@@ -29,8 +29,12 @@ export function KTree() {
     const treeData = useMemo(() => {
         const baseTree = KtreeMiniHelper.transformToTreeData(currentK, searchQuery);
 
+        // Graft same-knowledge shortcut children — shortcut node expands to show
+        // its target's full subtree (cloned with synthetic IDs to avoid key collisions)
+        const graftedTree = KtreeMiniHelper.graftShortcutChildren(baseTree, currentK?.id ?? 0);
+
         // Add invisible drop zone at the end to catch drops to root level
-        if (baseTree.length > 0 && currentK?.id) {
+        if (graftedTree.length > 0 && currentK?.id) {
             const dropZoneNode: KTreeNode = {
                 id: `drop-zone-root-${currentK.id}`,
                 name: "",
@@ -66,10 +70,10 @@ export function KTree() {
                 } as any,
                 children: [],
             };
-            return [...baseTree, dropZoneNode];
+            return [...graftedTree, dropZoneNode];
         }
 
-        return baseTree;
+        return graftedTree;
     }, [currentK, searchQuery]);
 
     // Sync local treeData to store so other hooks (e.g. handleDrillDown) can use it
