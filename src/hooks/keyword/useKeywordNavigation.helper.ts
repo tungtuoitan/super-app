@@ -42,6 +42,7 @@ export const useKeywordNavigationHelper = () => {
     const { openTab, updateActiveTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();
+    const { setModuleName } = useGridControlStore();
     const _console = useConsoleHelper();
     const { moduleName } = useGridControlStore();
     const { navigateToView } = useNavigationStore();
@@ -259,7 +260,8 @@ export const useKeywordNavigationHelper = () => {
                 if (!parsed.workspaceId) return;
 
                 if (moduleName !== constants.modules.workspace) {
-                    navigateToView(constants.vscode.viewTypes.workspace);
+                    // navigateToView(constants.vscode.viewTypes.workspace);
+                    // setModuleName(constants.modules.workspace);
                 }
 
                 let targetWorkspace: WorkspaceDTO | null = currentWorkspace;

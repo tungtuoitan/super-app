@@ -18,6 +18,7 @@ import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
 import { constants } from "@/utils/index";
 import { Project } from "@/store/project/useProject.store";
 import { Button } from "@/Components/ui/button";
+import {useGridControlStore} from "@/store/grid/useGridControl.store";
 
 type TabType = "general" | "taskList" | "kanban" | "timeline";
 
@@ -49,6 +50,7 @@ export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentP
     const { setSelectedWorkspaceId } = useWorkspaceStore();
     const { navigateToView } = useNavigationStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
+    const { setModuleName } = useGridControlStore();
 
     // Get active inner tab from editor tab metadata, default to "general"
     const currentTab = openTabs.find((t) => t.id === tabId);
@@ -67,7 +69,8 @@ export function ProjectDetailContent({ projectId, tabId }: ProjectDetailContentP
         if (!selectedProject?.workspaceId) return;
         await saveNewsBeforeNavigate();
         setSelectedWorkspaceId(selectedProject.workspaceId);
-        navigateToView(constants.navigation.views.workspace);
+        // navigateToView(constants.navigation.views.workspace);
+        setModuleName(constants.modules.workspace);
     }, [selectedProject?.workspaceId, saveNewsBeforeNavigate, setSelectedWorkspaceId, navigateToView]);
 
     // Update inner tab in editor tab metadata
