@@ -22,6 +22,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         projectId: dto.projectId,
         parentTaskId: dto.parentTaskId,
         type: dto.type,
+        taskType: dto.taskType || "personal",
         title: dto.title,
         note: dto.note,
         status: dto.status,
@@ -33,6 +34,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
         folderWorkspaceItemId: dto.folderWorkspaceItemId,
+        checklistJson: dto.checklistJson ?? null,
     }));
 };
 
@@ -60,6 +62,8 @@ export const useMultiProjectTaskGridHelper = () => {
             projectId: projectId,
             parentTaskId: parentTaskId || null,
             type: "task",
+            taskType: "personal",
+            checklistJson: null,
             title: "",
             note: "",
             status: "open",

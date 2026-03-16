@@ -109,7 +109,7 @@ export function WsDetailContent() {
                                 label: "Status",
                             }}
                             size="small"
-                            disabled={isDeleted || isHardDeleted}
+                            disabled={isDeleted || !!isHardDeleted}
                         />
 
                         {/* Workspace Name with ID */}
@@ -133,9 +133,8 @@ export function WsDetailContent() {
                                     }}
                                     placeholder="Enter workspace name..."
                                     size="small"
-                                    disabled={isDeleted || isHardDeleted}
+                                    disabled={isDeleted || !!isHardDeleted}
                                     error={!!nameError}
-                                    helperText={nameError}
                                 />
                             </div>
                         </div>
@@ -152,7 +151,7 @@ export function WsDetailContent() {
                                 onChange={(e) => handleFieldChange("description", e.target.value)}
                                 placeholder="Enter workspace description..."
                                 className="min-h-[120px] resize-none"
-                                disabled={isDeleted || isHardDeleted}
+                                disabled={isDeleted || !!isHardDeleted}
                             />
                         </div>
                     </CardContent>

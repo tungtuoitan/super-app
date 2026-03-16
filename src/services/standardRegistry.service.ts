@@ -33,6 +33,24 @@ const _getStandardRegistries = async (
     return Promise.reject(res);
 };
 
+/**
+ * Save a checklist template text as the default for a taskType registry entry.
+ * Persists to dbo.standard_registries.json_detail as { "checklistTemplate": "..." }
+ */
+const _setChecklistTemplate = async (
+    _token: string,
+    taskTypeCode: string,
+    template: string
+): Promise<void> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/StandardRegistry/setChecklistTemplate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskTypeCode, template }),
+    });
+    if (!res.ok) return Promise.reject(res);
+};
+
 export const standardRegistryService = {
     _getStandardRegistries,
+    _setChecklistTemplate,
 };
