@@ -144,6 +144,7 @@ export const useKeywordNavigationHelper = () => {
                                 projectId: dto.projectId,
                                 parentTaskId: dto.parentTaskId,
                                 type: dto.type,
+                                taskType: dto.taskType || "personal",
                                 title: dto.title,
                                 note: dto.note,
                                 status: dto.status,
@@ -155,6 +156,7 @@ export const useKeywordNavigationHelper = () => {
                                 updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
                                 deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                                 folderWorkspaceItemId: dto.folderWorkspaceItemId,
+                                checklistJson: dto.checklistJson ?? null,
                             };
                             openTab(task, constants.vscode.tab.tabTypes.task, openedBy);
                         } else {

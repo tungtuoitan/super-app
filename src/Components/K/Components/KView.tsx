@@ -82,7 +82,16 @@ export function KView() {
             {/* Workspace Selector */}
             <div className="px-3 py-2" onContextMenu={handleContextMenu}>
                 <GenericAutoComplete
-                    allOptions={workspaceOptions}
+                    allOptions={workspaceOptions.sort((a, b) => {
+                        const aActive = a.active ? 1 : 0;
+                        const bActive = b.active ? 1 : 0;
+
+                        if (aActive !== bActive) {
+                            return bActive - aActive;
+                        }
+
+                        return (a?.desc ?? "").localeCompare(b?.desc ?? "");
+                    })}
                     value={workspaceOptions.find((option) => option.id === selectedKId?.toString()) || null}
                     onChange={handleWorkspaceChange}
                     inputProps={{

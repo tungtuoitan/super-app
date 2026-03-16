@@ -13,6 +13,9 @@ import { useConsoleHelper } from "../console/useConsole.helper";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "@/store/project/useProjectDetail.store";
 import { parseAsLocalDate } from "@/utils/date.utils";
+import { useEditorTabsStore } from "@/store/index";
+import { constants } from "@/utils/constants";
+import type { BaseTab } from "@/types/editor/tab.types";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
@@ -48,6 +51,7 @@ export const useProjectGridHelper = () => {
     const _console = useConsoleHelper();
     const { openProjectTab, openMultiProjectTab } = useProjectTabHelper();
     const { setShouldFocusProjectName } = useProjectDetailStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
 
     // Create new project (temporary with negative ID) and open tab
     const __createNewProject = () => {

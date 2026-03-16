@@ -11,6 +11,7 @@ export interface TaskDTO {
     projectId: number;
     parentTaskId?: number | null;
     type: string;
+    taskType: string;
     title: string;
     note?: string | null;
     status: string;
@@ -30,6 +31,9 @@ export interface TaskDTO {
     projectEndDate?: string | null;
     parentStartDate?: string | null;
     parentEndDate?: string | null;
+
+    /** JSON checklist stored as string: { groups: [...] } */
+    checklistJson?: string | null;
 }
 
 const _getTasks = async (
@@ -65,6 +69,7 @@ const _upsertTaskBatch = async (
         projectId: number;
         parentTaskId?: number | null;
         type?: string;
+        taskType?: string;
         title: string;
         note?: string | null;
         status?: string;
@@ -74,6 +79,7 @@ const _upsertTaskBatch = async (
         orderIndex?: number;
         deletedAt?: string | null;
         folderWorkspaceItemId?: number | null;
+        checklistJson?: string | null;
     }>
 ): Promise<ResultOptions<TaskDTO>> => {
     const res = await apiFetch(`${config.api.baseURL}/api/task`, {

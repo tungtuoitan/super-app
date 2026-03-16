@@ -12,6 +12,7 @@ export interface Task {
     projectId: number;
     parentTaskId?: number | null;
     type: string;
+    taskType: string;
     title: string;
     note?: string | null;
     status: string;
@@ -25,6 +26,9 @@ export interface Task {
 
     // Workspace folder linked to this task (set when first note is created)
     folderWorkspaceItemId?: number | null;
+
+    /** JSON checklist stored as string: ChecklistJSON serialized */
+    checklistJson?: string | null;
 
     // Limit dates for warning display (parsed from backend)
     projectStartDate?: Date | null;
