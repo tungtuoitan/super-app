@@ -53,8 +53,8 @@ export interface TabViewState {
 
 export interface BaseTab {
     id: string;
-    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2;
-    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2;
+    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2 | null;
+    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2 | null;
     type: TabType;
     title: string;
     hasUnsavedChanges?: boolean;

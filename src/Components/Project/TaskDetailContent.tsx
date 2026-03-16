@@ -17,14 +17,23 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { taskService, TaskDTO } from "@/services/task.service";
 import { projectService } from "@/services/project.service";
+import { standardRegistryService } from "@/services/standardRegistry.service";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { useTaskLinkedKeywordsHelper } from "@/hooks/task/useTaskLinkedKeywords.helper";
 import { useTaskWorkspaceItemHelper } from "@/hooks/task/useTaskWorkspaceItem.helper";
 import { useCommandPaletteHelper } from "@/hooks/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { KeywordIconRenderer } from "@/Components/shared/KeywordIconRenderer";
-import { parseAsLocalDate } from "@/utils/date.utils";
+import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { TaskChecklist } from "./TaskChecklist";
+import {
+    ChecklistJSON,
+    parseChecklistJson,
+    isChecklistAllDone,
+    getChecklistTemplate,
+    parseTextToChecklist,
+} from "@/utils/checklist.utils";
 
 /**
  * Get task status colors from constants
@@ -55,11 +64,26 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { projects } = useProjectStore();
     const { $user } = useAuthStore();
-    const { tasks } = useTaskStore();
+    const { tasks, setTasks } = useTaskStore();
+
+    // Task type options from registry
+    const taskTypeOptions: IStatusOption[] = useMemo(() => {
+        const taskTypes = registriesByType["taskType"] || [];
+        return taskTypes.map((reg) => ({
+            id: reg.code,
+            code: reg.code,
+            label: reg.description || reg.code,
+            bgColor: "",
+            textColor: "",
+        }));
+    }, [registriesByType]);
 
     // Find the task tab by ID
     const taskTab = openTabs.find((tab) => tab.id === taskTabId && tab.type === constants.vscode.tab.tabTypes.task);
     const selectedTask = taskTab ? (taskTab.data as Task) : undefined;
+
+    const currentTaskTypeValue: IStatusOption | null =
+        taskTypeOptions.find((o) => o.code === selectedTask?.taskType) ?? null;
 
     // State for parent task options (loaded separately)
     const [parentTaskOptions, setParentTaskOptions] = useState<IAutoCompleteOptions[]>([]);
@@ -348,15 +372,43 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     };
 
     const handleStatusChange = (event: React.SyntheticEvent, newValue: IStatusOption | null) => {
-        if (newValue) {
-            handleFieldChange("status", newValue.code);
+        if (!newValue) return;
+        // Block setting "completed" if checklist exists but isn't fully done
+        if (newValue.code === "completed" && selectedTask?.checklistJson) {
+            const checklist = parseChecklistJson(selectedTask.checklistJson);
+            if (checklist && !isChecklistAllDone(checklist)) {
+                alert("Complete all checklist items before closing this task.");
+                return;
+            }
         }
+        handleFieldChange("status", newValue.code);
     };
 
     const handlePriorityChange = (event: React.SyntheticEvent, newValue: IStatusOption | null) => {
         if (newValue) {
             handleFieldChange("priority", newValue.code);
         }
+    };
+
+    const handleTaskTypeChange = (event: React.SyntheticEvent, newValue: IStatusOption | null) => {
+        if (!newValue || !taskTab || !selectedTask) return;
+        const newType = newValue.code;
+        // Auto-populate checklist from template when task type is set and no checklist exists yet
+        let newChecklistJson = selectedTask.checklistJson ?? null;
+        if (!newChecklistJson) {
+            const template = getChecklistTemplate(newType, registriesByType);
+            if (template) {
+                const json = parseTextToChecklist(template);
+                newChecklistJson = JSON.stringify(json);
+            }
+        }
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((t) =>
+                t.id === taskTabId
+                    ? { ...t, data: { ...selectedTask, taskType: newType, checklistJson: newChecklistJson }, hasUnsavedChanges: true }
+                    : t
+            )
+        );
     };
 
     const handleProjectChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
@@ -382,6 +434,83 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
     const handleParentTaskChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
         handleFieldChange("parentTaskId", newValue ? (newValue.id as number) : null);
     };
+
+    // ── Checklist helpers ─────────────────────────────────────────────────────
+
+    /** Persist checklistJson (and optionally auto-complete status) to server immediately */
+    const saveChecklistToServer = useCallback(async (json: ChecklistJSON, task: Task) => {
+        if (task.id <= 0 || !$user.userToken) return;
+        const allDone = isChecklistAllDone(json);
+        const newStatus = allDone ? "completed" : task.status;
+        const newChecklistJson = JSON.stringify(json);
+
+        await taskService._upsertTaskBatch($user.userToken, [{
+            id: task.id,
+            projectId: task.projectId,
+            parentTaskId: task.parentTaskId,
+            type: task.type,
+            taskType: task.taskType,
+            title: task.title,
+            note: task.note,
+            status: newStatus,
+            priority: task.priority,
+            startDate: toLocalISOString(task.startDate),
+            endDate: toLocalISOString(task.endDate),
+            orderIndex: task.orderIndex,
+            deletedAt: null,
+            checklistJson: newChecklistJson,
+        }]);
+
+        // Update tab to reflect server save (clear unsaved flag + status if auto-completed)
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((t) =>
+                t.id === taskTabId
+                    ? {
+                          ...t,
+                          data: { ...(t.data as Task), checklistJson: newChecklistJson, status: newStatus },
+                          data0: { ...(t.data as Task), checklistJson: newChecklistJson, status: newStatus },
+                          hasUnsavedChanges: false,
+                      }
+                    : t
+            )
+        );
+
+        // Also update tasks store so grid reflects new status
+        if (allDone) {
+            setTasks((prev) => prev.map((t) => t.id === task.id ? { ...t, checklistJson: newChecklistJson, status: newStatus } : t));
+        }
+    }, [$user.userToken, taskTabId, setOpenTabs, setTasks]);
+
+    /** Item toggled in view mode → update local state + save immediately (skipped for new tasks) */
+    const handleChecklistChange = useCallback((updated: ChecklistJSON) => {
+        if (!selectedTask) return;
+        const newJson = JSON.stringify(updated);
+        const isNewTask = selectedTask.id <= 0;
+        // Optimistic local update
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((t) =>
+                t.id === taskTabId
+                    ? { ...t, data: { ...(t.data as Task), checklistJson: newJson }, hasUnsavedChanges: isNewTask }
+                    : t
+            )
+        );
+        // Persist immediately for saved tasks (no-op for new tasks — saved with the task)
+        if (!isNewTask) {
+            saveChecklistToServer(updated, { ...selectedTask, checklistJson: newJson });
+        }
+    }, [selectedTask, taskTabId, setOpenTabs, saveChecklistToServer]);
+
+    /** Checklist saved from edit mode */
+    const handleChecklistSave = useCallback((json: ChecklistJSON) => {
+        if (!selectedTask) return;
+        handleChecklistChange(json);
+    }, [selectedTask, handleChecklistChange]);
+
+    /** Set as default for task type — saves template text to registry */
+    const handleSetAsDefault = useCallback(async (templateText: string) => {
+        if (!selectedTask?.taskType || !$user.userToken) return;
+        await standardRegistryService._setChecklistTemplate($user.userToken, selectedTask.taskType, templateText);
+    }, [selectedTask?.taskType, $user.userToken]);
 
     if (!selectedTask) {
         return (
@@ -456,6 +585,18 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 </div>
                             </div>
 
+                            {/* Task Checklist — collapsed bar + popup (shown when task type has a template) */}
+                            {(parseChecklistJson(selectedTask.checklistJson) !== null || getChecklistTemplate(selectedTask.taskType ?? "personal", registriesByType)) && (
+                                <TaskChecklist
+                                    checklist={parseChecklistJson(selectedTask.checklistJson)}
+                                    templateText={getChecklistTemplate(selectedTask.taskType ?? "personal", registriesByType)}
+                                    disabled={isDisabled}
+                                    onChange={handleChecklistChange}
+                                    onSave={handleChecklistSave}
+                                    onSetAsDefault={handleSetAsDefault}
+                                />
+                            )}
+
                             {/* Note - Rich Text Editor */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium flex items-center gap-2">
@@ -506,6 +647,19 @@ export function TaskDetailContent({ taskTabId }: TaskDetailContentProps) {
                                 }}
                                 disabled={isDisabled}
                                 placeholder="Select priority..."
+                            />
+
+                            {/* Task Type */}
+                            <StatusAutoComplete
+                                value={currentTaskTypeValue}
+                                onChange={handleTaskTypeChange}
+                                options={taskTypeOptions}
+                                inputProps={{
+                                    name: "taskType",
+                                    label: "Task Type",
+                                }}
+                                disabled={isDisabled}
+                                placeholder="Select task type..."
                             />
 
                             {/* Project Selection */}
