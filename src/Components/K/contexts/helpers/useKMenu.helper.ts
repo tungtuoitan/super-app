@@ -19,7 +19,7 @@ import {kconstants} from "../../utils/K.Constants";
 import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
 import {getConfirmMessage} from "../../utils/confirmation-message.utils";
 import {Folder} from "../../types";
-import {NodeItemType} from "../../store/KFolderDialog.store";
+import {NodeItemType} from "../../store/KNodeDialog.store";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS

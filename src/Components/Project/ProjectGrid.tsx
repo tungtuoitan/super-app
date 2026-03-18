@@ -1,9 +1,10 @@
 /**
  * ProjectGrid - Project Grid Component
  * VSCode-style dark theme table for projects
+ * Pure UI — reads from selector, helper, headless. NO business logic.
  */
 
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
     useReactTable,
     getCoreRowModel,
@@ -19,17 +20,16 @@ import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { Project, useProjectStore } from "@/store/project/useProject.store";
 import { useProjectGridHelper } from "@/hooks/project/useProjectGrid.helper";
 import { useProjectTabHelper } from "@/hooks/project/useProjectTab.helper";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import { useAuthStore } from "@/store/index";
-import { useGeneralStore } from "@/store/general/General.store";
+import { useProjectGridSelector } from "@/Selectors/project/useProjectGrid.selector";
+import { useProjectGridHeadless } from "@/HeadlessComponents/project/useProjectGrid.headless";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
 
 /**
  * ProjectGrid - project grid with table display
+ * Pure UI — NO props.
  */
 export function ProjectGrid() {
     const {
-        projects,
         totalCount,
         projectGridIsLoading,
         projectGridError,
@@ -40,23 +40,19 @@ export function ProjectGrid() {
         projectGridColumnFilters,
         setProjectGridColumnFilters,
         containerRef,
-        setContainerWidth,
     } = useProjectStore();
 
-    const { loadProjects, openProjectContextMenu } = useProjectGridHelper();
+    // ── Handlers (from helper) ───────────────────────────
+    const { openProjectContextMenu } = useProjectGridHelper();
     const { openProjectTab } = useProjectTabHelper();
-    const { searchQuery } = useGridControlStore();
-    const { $user } = useAuthStore();
-    const { registriesByType,registries } = useGeneralStore();
 
-    // Get status label from registry
-    const getStatusLabel = (statusCode: string) => {
-        const projectStatuses = registriesByType["project_status"] || [];
-        const status = projectStatuses.find((s) => s.code === statusCode);
-        return status?.description || statusCode;
-    };
+    // ── Computed values (from selector) ──────────────────
+    const { getStatusLabel, filteredData } = useProjectGridSelector();
 
-    // Define columns for the data table
+    // ── Side-effects (headless) ──────────────────────────
+    useProjectGridHeadless();
+
+    // Define columns for the data table (contains JSX — acceptable in UI)
     const columns = useMemo<ColumnDef<Project>[]>(() => {
         return [
             {
@@ -89,55 +85,12 @@ export function ProjectGrid() {
                     );
                 },
             },
-            // {
-            //     accessorKey: "deletedAt",
-            //     header: () => <div className="text-left text-sm">Deleted</div>,
-            //     size: 60,
-            //     enableSorting: true,
-            //     filterFn: (row, columnId, filterValue) => {
-            //         const deletedAt = row.original.deletedAt;
-            //         if (filterValue === "null") {
-            //             return deletedAt === null || deletedAt === undefined;
-            //         }
-            //         if (filterValue === "notNull") {
-            //             return deletedAt !== null && deletedAt !== undefined;
-            //         }
-            //         return true;
-            //     },
-            //     cell: ({ getValue }) => {
-            //         const deletedAt = getValue() as Date | null | undefined;
-
-            //         if (!deletedAt) {
-            //             return null;
-            //         }
-
-            //         return (
-            //             <div className="flex items-center justify-start pl-2" title="Deleted">
-            //                 <div className="w-2 h-2 rounded-full bg-destructive"></div>
-            //             </div>
-            //         );
-            //     },
-            // },
         ];
-    }, [registries]);
-
-    // Filter data by search query
-    const filteredData = useMemo(() => {
-        if (!searchQuery) {
-            return projects;
-        }
-        const query = searchQuery.toLowerCase();
-        return projects.filter(
-            (p) =>
-                p.name?.toLowerCase().includes(query) ||
-                p.description?.toLowerCase().includes(query) ||
-                String(p.id).includes(query)
-        );
-    }, [projects, searchQuery]);
+    }, [getStatusLabel]);
 
     // Create table instance
     const table = useReactTable({
-        data: filteredData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -153,27 +106,6 @@ export function ProjectGrid() {
         },
         getRowId: (row) => String(row.id),
     });
-
-    // Update container width on resize
-    useEffect(() => {
-        if (!containerRef.current) return;
-
-        const resizeObserver = new ResizeObserver((entries) => {
-            for (const entry of entries) {
-                setContainerWidth(entry.contentRect.width);
-            }
-        });
-
-        resizeObserver.observe(containerRef.current);
-        return () => resizeObserver.disconnect();
-    }, []);
-
-    // Load data when user is ready
-    useEffect(() => {
-        if (!$user.userId) return;
-        loadProjects();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [$user.userId,$user.userToken, $user.filters?.projectGrid, projectGridPagination.pageIndex, projectGridPagination.pageSize]);
 
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
@@ -230,10 +162,7 @@ export function ProjectGrid() {
                                 className={`border-b h-[48px] cursor-pointer hover:bg-muted/50 transition-colors ${
                                     row.original.deletedAt ? "opacity-60" : ""
                                 }`}
-                                onClick={() => {
-                                    // Open project tab when clicking row
-                                    openProjectTab(row.original);
-                                }}
+                                onClick={() => openProjectTab(row.original)}
                                 onContextMenu={(e) => {
                                     e.stopPropagation();
                                     openProjectContextMenu(e, row);

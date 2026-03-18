@@ -9,7 +9,7 @@ import { isFolder } from "../types/K-v2.types";
 import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../utils/K.Constants";
 import {Folder} from "../types";
-import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/KFolderDialog.store";
+import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/KNodeDialog.store";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();

@@ -1,60 +1,38 @@
 /**
  * Project Editor Panel
  * Editor panel for project tabs in VSCodeLayout
- * Toolbar is now shared in VSEditorArea
+ * NO props — reads active tab from useEditorTabHelper.
+ * All useEffect logic lives in ProjectEditorPanelHeadless.
  */
 
-import React, { useEffect } from "react";
+import React from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { ProjectDetailContent } from "./ProjectDetailContent";
-import { Project } from "@/store/project/useProject.store";
+import { ProjectEditorPanelHeadless } from "@/HeadlessComponents/project/ProjectEditorPanelHeadless";
+import {useProjectDetailStore} from "@/store/project/useProjectDetail.store";
 
-interface ProjectEditorPanelProps {
-    tab: BaseTab;
-}
+export function ProjectEditorPanel() {
+    const { setOpenTabs } = useEditorTabsStore();
+    const { getActiveTab } = useEditorTabHelper();
+    const { contentRef } = useProjectDetailStore();
 
-export function ProjectEditorPanel({ tab }: ProjectEditorPanelProps) {
-    const { setOpenTabs, openTabs } = useEditorTabsStore();
+    const activeTab = getActiveTab();
 
-    const contentRef = React.useRef<HTMLDivElement>(null);
-
-    // Get project from tab data
-    const project = tab.data as Project;
-
-    // Sync hasUnsavedChanges with projectHasChanges
-    useEffect(() => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) =>
-                t.id === tab.id
-                    ? {
-                          ...t,
-                          hasUnsavedChanges: tab.data && tab.data0 ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0) : false,
-                      }
-                    : t
-            )
-        );
-    }, [tab.id, tab.data]);
-
-    // Restore scroll position when tab becomes active
-    useEffect(() => {
-        const viewState = openTabs.find((t: BaseTab) => t.id === tab.id)?.viewState;
-        if (contentRef.current && viewState?.scrollTop !== undefined) {
-            contentRef.current.scrollTop = viewState.scrollTop;
-        }
-    }, [tab.id]);
+    if (!activeTab) return null;
 
     // Save scroll position when scrolling
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const scrollTop = e.currentTarget.scrollTop;
-        setOpenTabs((prev: BaseTab[]) => prev.map((t) => (t.id === tab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t)));
+        setOpenTabs((prev: BaseTab[]) => prev.map((t) => (t.id === activeTab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t)));
     };
 
     return (
         <div className="w-full h-full flex flex-col overflow-hidden bg-background">
-            {/* Content */}
+            <ProjectEditorPanelHeadless />
             <div ref={contentRef} onScroll={handleScroll} className="flex-1 overflow-hidden bg-background">
-                <ProjectDetailContent projectId={project.id} tabId={tab.id} />
+                <ProjectDetailContent />
             </div>
         </div>
     );

@@ -216,6 +216,7 @@ export const useEditorToolbarHelper = () => {
                 orderIndex: savedTask.orderIndex,
                 deletedAt: savedTask.deletedAt ? savedTask.deletedAt.toISOString() : null,
                 folderWorkspaceItemId,
+                checklistJson: savedTask.checklistJson,
             }]);
 
             if (updatedTaskResult.success && updatedTaskResult.data?.[0]) {

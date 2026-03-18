@@ -263,7 +263,7 @@ export const useKeywordNavigationHelper = () => {
 
                 if (moduleName !== constants.modules.workspace) {
                     // navigateToView(constants.vscode.viewTypes.workspace);
-                    // setModuleName(constants.modules.workspace);
+                    setModuleName(constants.modules.workspace);
                 }
 
                 let targetWorkspace: WorkspaceDTO | null = currentWorkspace;

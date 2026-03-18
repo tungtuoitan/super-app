@@ -10,7 +10,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
-import TaskList from "@tiptap/extension-task-list";
+import TaskGrid from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { TextStyle, Color } from "@tiptap/extension-text-style";
 import { cn } from "@/lib/utils";
@@ -132,7 +132,7 @@ export function RichTextEditor({
                     class: "rich-text-link",
                 },
             }),
-            TaskList.configure({
+            TaskGrid.configure({
                 HTMLAttributes: {
                     class: "task-list",
                 },

@@ -147,6 +147,8 @@ export const useTaskGridHelper = () => {
                         endDate: toLocalISOString(task.endDate),
                         orderIndex: task.orderIndex,
                         deletedAt: deletedAt,
+                        folderWorkspaceItemId: task.folderWorkspaceItemId,
+                        checklistJson: task.checklistJson,
                     };
                 });
 
@@ -166,11 +168,11 @@ export const useTaskGridHelper = () => {
 
             // Clear selection
             setTaskGridRowSelection({});
-        } catch (error) {
-            console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} tasks:`, error);
-            const errorMessage = await parseApiError(error);
+        } catch (err) {
+            console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} tasks:`, err);
+            const errorMessage = await parseApiError(err);
 
-            if (isUnauthorizedError(error)) {
+            if (isUnauthorizedError(err)) {
                 _console.error("Unauthorized. Please login again.");
             } else {
                 _console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} tasks: ${errorMessage}`);
@@ -307,9 +309,7 @@ export const useTaskGridHelper = () => {
                 _console.error("Unauthorized. Please login again.");
             }
         } finally {
-            setTimeout(() => {
-                setTaskGridIsLoading(false);
-            }, 100);
+            setTaskGridIsLoading(false);
         }
     };
 
@@ -333,12 +333,14 @@ export const useTaskGridHelper = () => {
                 endDate: toLocalISOString(task.endDate),
                 orderIndex: task.orderIndex,
                 deletedAt: toLocalISOString(task.deletedAt),
+                folderWorkspaceItemId: task.folderWorkspaceItemId,
+                checklistJson: task.checklistJson,
             };
 
             const result = await taskService._upsertTaskBatch(token, [request]);
 
             if (!result.success) {
-                throw new Error(result.message || "Failed to save task");
+                throw new Error(result.message || "Failed to save task"); 
             }
 
             _console.success("Task saved successfully");
