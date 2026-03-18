@@ -5,13 +5,10 @@
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import { ResultOptions } from "../types";
+import type { TaskWorkspaceItemDTO } from "@/types/task/taskDetail.types";
 
-export interface TaskWorkspaceItemDTO {
-    id: number;
-    taskId: number;
-    workspaceItemId: number;
-    itemType: number; // 2 = Folder, 3 = Note
-}
+// Re-export for backward compatibility
+export type { TaskWorkspaceItemDTO } from "@/types/task/taskDetail.types";
 
 const _getTaskWorkspaceItems = async (
     _token: string,

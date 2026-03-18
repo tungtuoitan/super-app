@@ -3,7 +3,9 @@
  * Parser, validator, and helpers for the per-task checklist system.
  *
  * EDIT FORMAT (user types / pastes):
- *   # Group Name
+ *   # Group Name        (level 1)
+ *   ## Sub-group Name   (level 2)
+ *   ### Detail Name     (level 3)
  *   - Item name
  *   - Optional item (o)
  *
@@ -15,36 +17,17 @@
  */
 
 import type { StandardRegistry } from "@/types/standardRegistry.types";
+import type { ChecklistItem, ChecklistGroup, ChecklistJSON, ValidationResult } from "@/types/task/checklist.types";
 
-// ─── Domain types ─────────────────────────────────────────────────────────────
-
-export interface ChecklistItem {
-    name: string;
-    isOptional: boolean;
-    isChecked: boolean;
-    isSkipped: boolean;
-}
-
-export interface ChecklistGroup {
-    name: string;
-    items: ChecklistItem[];
-}
-
-export interface ChecklistJSON {
-    groups: ChecklistGroup[];
-}
-
-export interface ValidationResult {
-    valid: boolean;
-    errors: string[];
-}
+// Re-export types for backward compatibility
+export type { ChecklistItem, ChecklistGroup, ChecklistJSON, ValidationResult } from "@/types/task/checklist.types";
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 /**
  * Validate user-typed checklist text.
  * Rules:
- *  - At least one group (# header)
+ *  - At least one group (#, ##, or ### header)
  *  - Each group must have at least one item (- line)
  *  - No unexpected line prefixes
  *  - Item name must not be empty
@@ -68,7 +51,7 @@ export function validateChecklistText(text: string): ValidationResult {
             if (hasGroup && !currentGroupHasItems) {
                 errors.push(`Group "${currentGroupName}" has no items.`);
             }
-            const name = line.replace(/^#+\s*/, "").trim();
+            const name = line.replace(/^#{1,3}\s*/, "").trim();
             if (!name) {
                 errors.push(`Line ${idx + 1}: Group name cannot be empty.`);
             }
@@ -77,7 +60,7 @@ export function validateChecklistText(text: string): ValidationResult {
             currentGroupHasItems = false;
         } else if (line.startsWith("-")) {
             if (!hasGroup) {
-                errors.push(`Line ${idx + 1}: Items must be inside a group (start with # Group Name).`);
+                errors.push(`Line ${idx + 1}: Items must be inside a group (start with #, ##, or ### Group Name).`);
             }
             const content = line.replace(/^-\s*/, "").trim();
             const name = content.endsWith(" (o)") ? content.slice(0, -4).trim() : content;
@@ -86,7 +69,7 @@ export function validateChecklistText(text: string): ValidationResult {
             }
             currentGroupHasItems = true;
         } else {
-            errors.push(`Line ${idx + 1}: Invalid — use '# Group Name' or '- Item name' (optionally ending with '(o)').`);
+            errors.push(`Line ${idx + 1}: Invalid — use '#/##/### Group Name' or '- Item name' (optionally ending with '(o)').`);
         }
     });
 
@@ -95,7 +78,7 @@ export function validateChecklistText(text: string): ValidationResult {
         errors.push(`Group "${currentGroupName}" has no items.`);
     }
     if (!hasGroup) {
-        errors.push("No groups found. Use '# Group Name' to define at least one group.");
+        errors.push("No groups found. Use '#', '##', or '### Group Name' to define at least one group.");
     }
 
     return { valid: errors.length === 0, errors };
@@ -105,6 +88,7 @@ export function validateChecklistText(text: string): ValidationResult {
 
 /**
  * Parse user-typed text into ChecklistJSON.
+ * Supports #, ##, ### headings (level 1, 2, 3).
  * If `existing` is provided, checked/skipped states are preserved for items
  * whose (groupName + itemName) matches an existing item.
  */
@@ -125,7 +109,10 @@ export function parseTextToChecklist(text: string, existing?: ChecklistJSON): Ch
         if (!line) return;
 
         if (line.startsWith("#")) {
-            currentGroup = { name: line.replace(/^#+\s*/, "").trim(), items: [] };
+            const hashMatch = line.match(/^(#{1,3})\s*/);
+            const level = hashMatch ? hashMatch[1].length : 1;
+            const name = line.replace(/^#{1,3}\s*/, "").trim();
+            currentGroup = { name, level, items: [] };
             groups.push(currentGroup);
         } else if (line.startsWith("-") && currentGroup) {
             const content = line.replace(/^-\s*/, "").trim();
@@ -147,12 +134,14 @@ export function parseTextToChecklist(text: string, existing?: ChecklistJSON): Ch
 
 /**
  * Convert ChecklistJSON → edit text (no state, just structure).
+ * Preserves heading level (#, ##, ###).
  * Used when opening the editor — user sees clean definition.
  */
 export function checklistToText(json: ChecklistJSON): string {
     return json.groups
         .map((g) => {
-            const header = `# ${g.name}`;
+            const hashes = "#".repeat(g.level ?? 1);
+            const header = `${hashes} ${g.name}`;
             const items = g.items.map((i) => `- ${i.name}${i.isOptional ? " (o)" : ""}`);
             return [header, ...items].join("\n");
         })
@@ -218,83 +207,9 @@ export function getFlatItems(json: ChecklistJSON): ChecklistItem[] {
 // ─── Template helpers ─────────────────────────────────────────────────────────
 
 /**
- * Built-in fallback templates per taskType code.
- * Used when the registry entry has no json_detail (not yet customised via "Set as default").
- */
-const BUILTIN_CHECKLIST_TEMPLATES: Record<string, string> = {
-    "vanthiel-coding": `# Nhận task
-- Update to InProgress
-- GPT đọc task
-- Thêm progress vào description - task lớn (o)
-- Thêm bonus vào description (o)
-- Tạo testcase file
-- Coding
-- Test local
-- Đọc từng dòng code – không có code thừa
-
-# Đẩy lên dev
-- Thông báo deploy dev
-- Đẩy code FE (o)
-- → master-sub-dev (o)
-- → master-dev (o)
-- Đẩy code BE (o)
-- → master-dev BE (o)
-- Đẩy DB (o)
-- → procedure (o)
-- → table (o)
-- → table type (o)
-- Thông báo done
-- Set Env = DEV
-- Test dev
-- Comment bằng chứng: img, testcase
-- Comment test pass
-- Tạo code list
-
-# Đẩy lên UAT
-- Thông báo deploy UAT
-- Đẩy code FE (o)
-- → master-sub-uat (o)
-- → master-uat (o)
-- Đẩy code BE (o)
-- → master-uat BE (o)
-- Đẩy DB (o)
-- → procedure UAT (o)
-- → table UAT (o)
-- → table type UAT (o)
-- Thông báo done
-- Set Env = UAT
-- Test UAT (o)
-- Comment bằng chứng UAT: img, testcase (o)
-- Comment test pass UAT (o)
-- Test nhanh UAT (o)
-- Chuẩn bị data cho b (o)
-- Tag @b: ready for UAT testing (o)
-- Set Status = Tested
-
-# Đẩy lên master-prod
-- Đẩy code FE (o)
-- → master-sub-uat prod (o)
-- → master-uat prod (o)
-- Đẩy code BE (o)
-- → master-uat BE prod (o)
-- Comment: ready on master-prod
-- → Paste commit images (o)
-- → List commit (o)
-- → List procedures (o)
-- → Tag Renel (o)
-- → cc @b @c.Uyen (o)
-
-# Hoàn thành
-- Check prod on next day
-- Close sa.task`,
-};
-
-/**
  * Get the default checklist template text for a given taskType code.
- * Priority:
- *  1. Custom template in dbo.standard_registries.json_detail (set via "Set as default")
- *  2. Built-in hardcoded template (BUILTIN_CHECKLIST_TEMPLATES)
- *  3. Empty string (no template for this taskType)
+ * Only source: custom template in dbo.standard_registries.json_detail (set via "Set as default").
+ * Returns empty string if no template is found.
  */
 export function getChecklistTemplate(
     taskTypeCode: string,
@@ -303,18 +218,16 @@ export function getChecklistTemplate(
     const regs = registriesByType["taskType"] ?? [];
     const reg = regs.find((r) => r.code === taskTypeCode);
 
-    // 1. Custom template from DB
     if (reg?.json_detail) {
         try {
             const custom = JSON.parse(reg.json_detail)?.checklistTemplate;
             if (custom && typeof custom === "string") return custom;
         } catch {
-            // fall through to builtin
+            // invalid JSON — return empty
         }
     }
 
-    // 2. Built-in fallback
-    return BUILTIN_CHECKLIST_TEMPLATES[taskTypeCode] ?? "";
+    return "";
 }
 
 /** Parse a JSON string from the DB into ChecklistJSON. Returns null on failure. */

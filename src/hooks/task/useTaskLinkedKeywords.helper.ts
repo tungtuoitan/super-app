@@ -1,38 +1,24 @@
 /**
  * Task Linked Keywords Helper
- * Business logic for linking/unlinking keywords to tasks via TargetKeywords table
+ * Functions only — linking/unlinking keywords to tasks via TargetKeywords table.
+ * State lives in useTaskStore.
  */
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { targetKeywordService, TargetKeywordTargetType } from "@/services/targetKeyword.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useGeneralStore } from "@/store/index";
+import { useTaskStore } from "@/store/task/useTask.store";
 import { Keyword } from "@/types/keyword.types";
-
-export interface LinkedKeyword {
-    linkId: number; // TargetKeyword.id
-    targetId: number;
-    targetType: TargetKeywordTargetType;
-    keywordId: number;
-    // Resolved from allKeywords
-    name: string;
-    type: Keyword["type"];
-    link: string;
-    longLink: string;
-    icon?: string;
-    color?: string;
-    workspaceItemId?: number; // for folder/note/file keywords
-}
+import type { LinkedKeyword } from "@/types/task/taskDetail.types";
 
 export const useTaskLinkedKeywordsHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { allKeywords } = useGeneralStore();
-
-    const [linkedKeywords, setLinkedKeywords] = useState<LinkedKeyword[]>([]);
-    const [isLoadingLinkedKeywords, setIsLoadingLinkedKeywords] = useState(false);
+    const { setLinkedKeywords, setIsLoadingLinkedKeywords } = useTaskStore();
 
     /**
      * Load linked keywords for a task, resolve keyword details from allKeywords
@@ -79,7 +65,7 @@ export const useTaskLinkedKeywordsHelper = () => {
         } finally {
             setIsLoadingLinkedKeywords(false);
         }
-    }, [$user.userToken, allKeywords]);
+    }, [$user.userToken, allKeywords, setLinkedKeywords, setIsLoadingLinkedKeywords]);
 
     /**
      * Link a keyword to a task
@@ -133,11 +119,9 @@ export const useTaskLinkedKeywordsHelper = () => {
                 _console.error(`Failed to unlink keyword: ${errorMessage}`);
             }
         }
-    }, [$user.userToken, _console]);
+    }, [$user.userToken, _console, setLinkedKeywords]);
 
     return {
-        linkedKeywords,
-        isLoadingLinkedKeywords,
         loadLinkedKeywords,
         linkKeyword,
         unlinkKeyword,

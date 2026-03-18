@@ -21,7 +21,11 @@ import { WsProvider } from "@/store/ws/useWs.store";
 import { WsDetailProvider } from "@/store/ws/useWsDetail.store";
 import { ProjectProvider } from "@/store/project/useProject.store";
 import { ProjectDetailProvider } from "@/store/project/useProjectDetail.store";
-import { TaskProvider } from "@/store/task/useTask.store";
+import { TaskGridProvider } from "@/store/task/useTaskGrid.store";
+import { TaskDetailProvider } from "@/store/task/useTaskDetail.store";
+import { TaskChecklistProvider } from "@/store/task/useTaskChecklist.store";
+import { TaskTimelineProvider } from "@/store/task/useTaskTimeline.store";
+import { MultiTimelineProvider } from "@/store/task/useMultiTimeline.store";
 import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";
 import { AuthGuard } from "@/Components/Auth/AuthGuard";
@@ -33,7 +37,7 @@ import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
 import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
 import {KProvider} from "./K/store/K.store";
-import {KFolderDialogProvider} from "./K/store/KFolderDialog.store";
+import {KFolderDialogProvider} from "./K/store/KNodeDialog.store";
 import {KMovingTreeProvider} from "./K/store/KMovingTree.store";
 
 /**
@@ -82,8 +86,12 @@ export function Main() {
                                                                                                 <WsDetailProvider>
                                                                                                     <ProjectProvider>
                                                                                                         <ProjectDetailProvider>
-                                                                                                            <TaskProvider>
-                                                                                                                <LifeLogProvider>
+                                                                                                            <TaskGridProvider>
+                                                                                                                <TaskDetailProvider>
+                                                                                                                    <TaskChecklistProvider>
+                                                                                                                        <TaskTimelineProvider>
+                                                                                                                            <MultiTimelineProvider>
+                                                                                                                    <LifeLogProvider>
                                                                                                                     <NoteDetailProvider>
                                                                                                                         <NoteGridProvider>
                                                                                                                             <EditorTabProvider>
@@ -111,7 +119,11 @@ export function Main() {
                                                                                                                         </NoteGridProvider>
                                                                                                                     </NoteDetailProvider>
                                                                                                                 </LifeLogProvider>
-                                                                                                            </TaskProvider>
+                                                                                                                </MultiTimelineProvider>
+                                                                                                                        </TaskTimelineProvider>
+                                                                                                                    </TaskChecklistProvider>
+                                                                                                                </TaskDetailProvider>
+                                                                                                            </TaskGridProvider>
                                                                                                         </ProjectDetailProvider>
                                                                                                     </ProjectProvider>
                                                                                                 </WsDetailProvider>

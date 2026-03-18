@@ -31,7 +31,8 @@
             "@/pages/*": ["pages/*"],
             "@/store/*": ["store/*"],
             "@/styles/*": ["styles/*"],
-            "@/HeadlessComponents/*": ["HeadlessComponents/*"]
+            "@/HeadlessComponents/*": ["HeadlessComponents/*"],
+            "@/Selectors/*": ["Selectors/*"]
         }
     },
     "include": ["src"]

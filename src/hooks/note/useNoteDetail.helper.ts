@@ -42,7 +42,7 @@ export const useNoteDetailHelper = () => {
         }
 
         const activeNote = activeTab.data as Note;
-        console.log("[Helper] Current note:", { id: activeNote.id, name: activeNote.name });
+        // console.log("[Helper] Current note:", { id: activeNote.id, name: activeNote.name });
 
         // Extract value based on field type
         let _value;
@@ -71,11 +71,11 @@ export const useNoteDetailHelper = () => {
         }
         
 
-        console.log("[Helper] Updated note:", { field, newValue: typeof _value === "string" ? _value.substring(0, 50) : _value });
+        // console.log("[Helper] Updated note:", { field, newValue: typeof _value === "string" ? _value.substring(0, 50) : _value });
 
         // Update tab data directly (hasUnsavedChanges will be auto-calculated in NoteEditorPanel)
         setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated } : t)));
-        console.log("[Helper] Tabs updated");
+        // console.log("[Helper] Tabs updated");
     };
 
     /**

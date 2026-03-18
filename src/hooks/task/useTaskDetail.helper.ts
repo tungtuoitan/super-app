@@ -1,145 +1,140 @@
 /**
- * Task Detail Helper
- * Business logic for task detail operations
+ * Task Detail Helper — core entry point
+ *
+ * Functions only:
+ *  - Task upsert           (save / create / restore)
+ *  - Keyword / workspace   (link, navigate, unlink)
+ *
+ * Pure utilities moved to TaskDetail.utils.ts.
+ * State lives in useTaskStore. Derived values live in Selectors.
+ * Side-effects (useEffect) live in TaskDetailHeadless.
  */
 
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { Task, useTaskStore } from "@/store/task/useTask.store";
-import { taskService, TaskDTO } from "@/services/task.service";
+import { taskService } from "@/services/task.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
+import { useGeneralStore } from "@/store/general/General.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
+import { useTaskLinkedKeywordsHelper } from "@/hooks/task/useTaskLinkedKeywords.helper";
+import { useCommandPaletteHelper } from "@/hooks/index";
+import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
+import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
 
-/**
- * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
- * Uses parseAsLocalDate to treat backend UTC as local time
- */
-export const transformTaskData = (dtos: TaskDTO[]): Task[] => {
-    return dtos.map((dto) => ({
-        id: dto.id,
-        projectId: dto.projectId,
-        parentTaskId: dto.parentTaskId,
-        type: dto.type,
-        taskType: dto.taskType || "personal",
-        title: dto.title,
-        note: dto.note,
-        status: dto.status,
-        priority: dto.priority,
-        startDate: parseAsLocalDate(dto.startDate),
-        endDate: parseAsLocalDate(dto.endDate),
-        orderIndex: dto.orderIndex,
-        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-        updatedAt: parseAsLocalDate(dto.updatedAt),
-        deletedAt: parseAsLocalDate(dto.deletedAt),
-        folderWorkspaceItemId: dto.folderWorkspaceItemId,
-        checklistJson: dto.checklistJson ?? null,
-        // Limit dates for warning display
-        projectStartDate: parseAsLocalDate(dto.projectStartDate),
-        projectEndDate: parseAsLocalDate(dto.projectEndDate),
-        parentStartDate: parseAsLocalDate(dto.parentStartDate),
-        parentEndDate: parseAsLocalDate(dto.parentEndDate),
-    }));
-};
+// Re-export utils for backward compatibility
+export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../../utils/task/TaskDetail.utils";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main hook
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const useTaskDetailHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
-    const { tasks, setTasks } = useTaskStore();
+    const { setTasks, linkedKeywords, folderItems } = useTaskStore();
+    const { allKeywords } = useGeneralStore();
 
-    /**
-     * Handle task field change - updates task data in tab
-     */
-    const handleTaskFieldChange = (field: keyof Task, value: any) => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t: BaseTab) => {
-                if (t.id === activeTabId) {
-                    const taskData = t.data as Task;
-                    return {
-                        ...t,
-                        data: { ...taskData, [field]: value },
-                        hasUnsavedChanges: true,
-                    };
-                }
-                return t;
-            }),
-        );
-    };
+    const { selectedTask } = useTaskDetailSelector();
 
-    /**
-     * Save current task (create or update using Upsert pattern)
-     * @param tabId - Current tab ID to update after save
-     */
+    // ── Linked keywords & workspace items ─────────────────────────────────────
+    const { linkKeyword, unlinkKeyword } = useTaskLinkedKeywordsHelper();
+    const { openForLink } = useCommandPaletteHelper();
+    const { navigateLink } = useKeywordNavigationHelper();
+    const { showConfirmation } = useConfirmationPopoverHelper();
+
+    const handleOpenLinkPalette = useCallback(() => {
+        if (!selectedTask) return;
+        const linkedIds = new Set(linkedKeywords.map((lk) => lk.keywordId));
+        const folderWsItemIds = new Set(folderItems.map((fi) => fi.workspaceItemId));
+        allKeywords.forEach((kw) => {
+            if (kw.workspaceItemId !== undefined && folderWsItemIds.has(kw.workspaceItemId)) {
+                linkedIds.add(kw.id);
+            }
+        });
+        openForLink((keyword) => linkKeyword(selectedTask.id, keyword.id), linkedIds);
+    }, [selectedTask, openForLink, linkKeyword, linkedKeywords, folderItems, allKeywords]);
+
+    const handleNavigateKeyword = useCallback(
+        (keyword: { link: string; longLink: string; name: string; type: any; id: number; hardDeletedAt: null }) => {
+            navigateLink(keyword as any, {
+                link: `sa/p${selectedTask?.projectId}/t${selectedTask?.id}`,
+                label: selectedTask?.title ?? "",
+            });
+        },
+        [navigateLink, selectedTask],
+    );
+
+    const handleUnlinkKeyword = useCallback(
+        (event: React.MouseEvent, linkId: number, name: string) => {
+            if (!selectedTask) return;
+            showConfirmation({
+                title: name,
+                subtitle: "This will remove the link between this keyword and the task.",
+                confirmText: "Unlink",
+                cancelText: "Cancel",
+                confirmColor: "destructive",
+                cancelColor: "outline",
+                anchorEl: event.currentTarget as HTMLElement,
+                onConfirm: async () => {
+                    await unlinkKeyword(selectedTask.id, linkId);
+                },
+            });
+        },
+        [selectedTask, unlinkKeyword, showConfirmation],
+    );
+
+    // ── Save task (upsert) ────────────────────────────────────────────────────
+
     const upsertTask = useCallback(
         async (tabId?: string): Promise<Task | null> => {
-            // Get task data from active tab
-            const activeTab = openTabs.find((tab) => tab.id === (tabId || activeTabId));
-            const selectedTask = activeTab?.data as Task | undefined;
+            const activeTab = openTabs.find((tab) => tab.id === (tabId ?? activeTabId));
+            const taskToSave = activeTab?.data as Task | undefined;
 
-            if (!selectedTask) {
+            if (!taskToSave) {
                 console.warn("No selected task to upsert");
                 return null;
             }
-
-            // ============================================================
-            // Step 1.5: Validate title field
-            // ============================================================
-            if (!selectedTask.title || selectedTask.title.trim() === "") {
+            if (!taskToSave.title?.trim()) {
                 _console.error("Task title is required");
                 return null;
             }
 
-            // ============================================================
-            // Step 2: Determine operation mode (create/update/restore)
-            // ============================================================
-            const isCreateMode = selectedTask.id <= 0;
+            const isCreateMode = taskToSave.id <= 0;
             const originalTask = activeTab?.data0 as Task | undefined;
-            const isRestoreMode = selectedTask.id > 0 && originalTask?.deletedAt && !selectedTask.deletedAt;
-            const token = $user.userToken;
+            const isRestoreMode = taskToSave.id > 0 && !!originalTask?.deletedAt && !taskToSave.deletedAt;
 
             try {
-                // ============================================================
-                // Step 3: Prepare upsert data - use toLocalISOString to preserve local time
-                // ============================================================
-                const upsertData = {
-                    id: isCreateMode ? 0 : selectedTask.id,
-                    projectId: selectedTask.projectId,
-                    parentTaskId: selectedTask.parentTaskId,
-                    type: selectedTask.type || "task",
-                    taskType: selectedTask.taskType || "personal",
-                    title: selectedTask.title,
-                    note: selectedTask.note,
-                    status: selectedTask.status || "open",
-                    priority: selectedTask.priority || "low",
-                    startDate: toLocalISOString(selectedTask.startDate),
-                    endDate: toLocalISOString(selectedTask.endDate),
-                    orderIndex: selectedTask.orderIndex || 0,
-                    deletedAt: isRestoreMode ? null : toLocalISOString(selectedTask.deletedAt),
-                    folderWorkspaceItemId: selectedTask.folderWorkspaceItemId,
-                };
+                const result = await taskService._upsertTaskBatch($user.userToken, [
+                    {
+                        id: isCreateMode ? 0 : taskToSave.id,
+                        projectId: taskToSave.projectId,
+                        parentTaskId: taskToSave.parentTaskId,
+                        type: taskToSave.type || "task",
+                        taskType: taskToSave.taskType || "personal",
+                        title: taskToSave.title,
+                        note: taskToSave.note,
+                        status: taskToSave.status || "open",
+                        priority: taskToSave.priority || "low",
+                        startDate: toLocalISOString(taskToSave.startDate),
+                        endDate: toLocalISOString(taskToSave.endDate),
+                        orderIndex: taskToSave.orderIndex || 0,
+                        deletedAt: isRestoreMode ? null : toLocalISOString(taskToSave.deletedAt),
+                        folderWorkspaceItemId: taskToSave.folderWorkspaceItemId,
+                        checklistJson: taskToSave.checklistJson,
+                    },
+                ]);
 
-                // ============================================================
-                // Step 4: Call batch API to upsert task
-                // ============================================================
-                const result = await taskService._upsertTaskBatch(token, [upsertData]);
-                if (!result.success) {
-                    throw new Error(result.message || "Failed to save task");
-                }
+                if (!result.success) throw new Error(result.message || "Failed to save task");
 
-                // ============================================================
-                // Step 6: Extract and validate saved task from response
-                // ============================================================
-                const savedTask = result && result.data && result.data.length > 0 ? result.data[0] : null;
+                const savedTask = result?.data?.[0] ?? null;
+                if (!savedTask) throw new Error("Failed to save task: No data returned from server");
 
-                if (!savedTask) {
-                    throw new Error("Failed to save task: No data returned from server");
-                }
-
-                // Transform DTO to domain model using parseAsLocalDate
-                // Preserve limit dates from the current task (not returned by upsert API)
                 const transformedTask: Task = {
                     id: savedTask.id,
                     projectId: savedTask.projectId,
@@ -158,56 +153,63 @@ export const useTaskDetailHelper = () => {
                     deletedAt: parseAsLocalDate(savedTask.deletedAt),
                     folderWorkspaceItemId: savedTask.folderWorkspaceItemId,
                     checklistJson: savedTask.checklistJson ?? null,
-                    projectStartDate: selectedTask.projectStartDate,
-                    projectEndDate: selectedTask.projectEndDate,
-                    parentStartDate: selectedTask.parentStartDate,
-                    parentEndDate: selectedTask.parentEndDate,
+                    // Preserve limit dates (not returned by upsert API)
+                    projectStartDate: taskToSave.projectStartDate,
+                    projectEndDate: taskToSave.projectEndDate,
+                    parentStartDate: taskToSave.parentStartDate,
+                    parentEndDate: taskToSave.parentEndDate,
                 };
 
-                // ============================================================
-                // Step 10: Update tab data and data0 with server response
-                // ============================================================
                 _console.success(isCreateMode ? "Task created successfully" : "Task saved successfully");
+
                 if (tabId) {
                     setOpenTabs((prev) =>
-                        prev.map((tab: BaseTab) => {
-                            if (tab.id === tabId) {
-                                return {
-                                    ...tab,
-                                    title: transformedTask.title || "Unsaved Task",
-                                    data: transformedTask,
-                                    data0: transformedTask,
-                                    hasUnsavedChanges: false,
-                                };
-                            }
-                            return tab;
-                        }),
+                        prev.map((tab: BaseTab) =>
+                            tab.id === tabId
+                                ? { ...tab, title: transformedTask.title || "Unsaved Task", data: transformedTask, data0: transformedTask, hasUnsavedChanges: false }
+                                : tab,
+                        ),
                     );
                 }
 
-                // Sync task store so Project tab (TaskList) reflects the updated task
-                setTasks((prev) =>
-                    prev.map((t) => (t.id === transformedTask.id ? transformedTask : t))
-                );
-
+                setTasks((prev) => prev.map((t) => (t.id === transformedTask.id ? transformedTask : t)));
                 return transformedTask;
-            } catch (error) {
-                console.error("Failed to save task:", error);
-                const errorMessage = await parseApiError(error);
-
-                if (isUnauthorizedError(error)) {
-                    _console.error("Unauthorized. Please login again.");
-                } else {
-                    _console.error(`Failed to save task: ${errorMessage}`);
-                }
+            } catch (err) {
+                console.error("Failed to save task:", err);
+                const errorMessage = await parseApiError(err);
+                _console.error(isUnauthorizedError(err) ? "Unauthorized. Please login again." : `Failed to save task: ${errorMessage}`);
                 return null;
             }
         },
         [openTabs, activeTabId, $user, _console, setOpenTabs, setTasks],
     );
 
+    /**
+     * @deprecated Use handleFieldChange instead.
+     * Targets the active tab via store's activeTabId — kept for backward compatibility.
+     */
+    const handleTaskFieldChange = useCallback(
+        (field: keyof Task, value: any) => {
+            setOpenTabs((prev: BaseTab[]) =>
+                prev.map((t: BaseTab) => {
+                    if (t.id !== activeTabId) return t;
+                    return { ...t, data: { ...(t.data as Task), [field]: value }, hasUnsavedChanges: true };
+                }),
+            );
+        },
+        [activeTabId, setOpenTabs],
+    );
+
+    // ── Return ────────────────────────────────────────────────────────────────
     return {
+        // save
         upsertTask,
+        /** @deprecated */
         handleTaskFieldChange,
+
+        // keyword handlers (own functions — compose from sub-helpers internally)
+        handleOpenLinkPalette,
+        handleNavigateKeyword,
+        handleUnlinkKeyword,
     };
 };

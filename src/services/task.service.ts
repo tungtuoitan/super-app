@@ -5,36 +5,10 @@
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import { ResultOptions } from "../types";
+import type { TaskDTO } from "@/types/task/task.types";
 
-export interface TaskDTO {
-    id: number;
-    projectId: number;
-    parentTaskId?: number | null;
-    type: string;
-    taskType: string;
-    title: string;
-    note?: string | null;
-    status: string;
-    priority: string;
-    startDate?: string | null;
-    endDate?: string | null;
-    orderIndex: number;
-    createdAt: string;
-    updatedAt?: string | null;
-    deletedAt?: string | null;
-
-    // Workspace folder linked to this task
-    folderWorkspaceItemId?: number | null;
-
-    // Limit dates from backend for warning display
-    projectStartDate?: string | null;
-    projectEndDate?: string | null;
-    parentStartDate?: string | null;
-    parentEndDate?: string | null;
-
-    /** JSON checklist stored as string: { groups: [...] } */
-    checklistJson?: string | null;
-}
+// Re-export for backward compatibility
+export type { TaskDTO } from "@/types/task/task.types";
 
 const _getTasks = async (
     _token: string,

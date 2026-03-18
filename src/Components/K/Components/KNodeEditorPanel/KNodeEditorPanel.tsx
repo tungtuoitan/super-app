@@ -61,7 +61,8 @@ function KNodeEditorContent() {
             while (curr) {
                 path.unshift({ id: curr.id, name: curr.name, color: curr.color || null });
                 if (curr.parentId == null) break;
-                curr = allNodes.find(n => n.id === curr!.parentId);
+                const parentId = curr.parentId;
+                curr = allNodes.find(n => n.id === parentId);
             }
         }
         if (path.length === 0) {
