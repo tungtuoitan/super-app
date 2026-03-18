@@ -611,7 +611,7 @@ export async function expandPathToItem(
 
     // Find path to target (includes target itself)
     const pathIds = findPathToItem(treeData, targetId);
-    console.log('[expandPathToItem] pathIds:', pathIds, 'targetId:', targetId);
+    // console.log('[expandPathToItem] pathIds:', pathIds, 'targetId:', targetId);
     if (pathIds.length === 0) return false;
 
     // Convert to Set for O(1) lookup
@@ -637,14 +637,14 @@ export async function expandPathToItem(
         const retryDelay = 50 + depth * 10; // Longer delays for deeper nodes
 
         while (!node && retries < maxRetries) {
-            console.log(`[expandPathToItem] Node ${id} at depth ${depth} not found, retry ${retries + 1}/${maxRetries}`);
+            // console.log(`[expandPathToItem] Node ${id} at depth ${depth} not found, retry ${retries + 1}/${maxRetries}`);
             await waitForRender(retryDelay);
             node = treeRef.current.get(id.toString());
             retries++;
         }
 
         if (node) {
-            console.log(`[expandPathToItem] Opening node ${id} at depth ${depth}, isOpen: ${node.isOpen}`);
+            // console.log(`[expandPathToItem] Opening node ${id} at depth ${depth}, isOpen: ${node.isOpen}`);
             if (!node.isOpen) {
                 node.open();
                 // Wait longer for children to render - virtualized lists need more time

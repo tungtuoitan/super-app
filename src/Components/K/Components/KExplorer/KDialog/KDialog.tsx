@@ -18,7 +18,7 @@ import {isFolder, KItemV2} from "../../../types/K-v2.types";
 import {kconstants} from "../../../utils/K.Constants";
 import {getAllIconLabel} from "../../../shared/icons/icon.utils";
 import {IconType} from "../../../shared/icons/icon.types";
-import {useNodeDialogStore} from "../../../store/KFolderDialog.store";
+import {useNodeDialogStore} from "../../../store/KNodeDialog.store";
 import { getIconDefaultColor } from "@/shared/icons";
 
 export function KDialog() {

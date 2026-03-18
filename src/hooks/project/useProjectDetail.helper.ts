@@ -10,8 +10,15 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useProjectDetailStore } from "@/store/project/useProjectDetail.store";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
+import { constants } from "@/utils/index";
+import { useProjectDetailSelector } from "@/Selectors/project/useProjectDetail.selector";
+import type { TabType } from "@/types/project/projectDetail.type";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
@@ -37,6 +44,11 @@ export const useProjectDetailHelper = () => {
     const { setProjects, setProjectGridIsLoading, setProjectGridError, setTotalCount } = useProjectStore();
     const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
+    const { setSelectedWorkspaceId } = useWorkspaceStore();
+    const { saveNewsBeforeNavigate } = useWorkspaceHelper();
+    const { setModuleName } = useGridControlStore();
+    const { tabId } = useProjectDetailStore();
+    const { selectedProject } = useProjectDetailSelector();
 
     // Load projects with filters (duplicated from grid helper to avoid circular dependency)
     const loadProjects = async () => {
@@ -202,8 +214,60 @@ export const useProjectDetailHelper = () => {
         [openTabs, activeTabId, loadProjects, $user, _console, setOpenTabs]
     );
 
+    // Update inner tab in editor tab metadata
+    const setActiveTab = useCallback((newTab: TabType) => {
+        setOpenTabs((prev) =>
+            prev.map((t) =>
+                t.id === tabId
+                    ? { ...t, metadata: { ...t.metadata, innerTab: newTab } }
+                    : t,
+            ),
+        );
+    }, [tabId, setOpenTabs]);
+
+    // Navigate to workspace view for this project
+    const handleOpenWorkspace = useCallback(async () => {
+        if (!selectedProject?.workspaceId) return;
+        await saveNewsBeforeNavigate();
+        setSelectedWorkspaceId(selectedProject.workspaceId);
+        setModuleName(constants.modules.workspace);
+    }, [selectedProject?.workspaceId, saveNewsBeforeNavigate, setSelectedWorkspaceId, setModuleName]);
+
+    // Field-specific change handlers for ProjectGeneral form
+    const handleStatusChange = useCallback((event: React.SyntheticEvent, newValue: { code: string } | null) => {
+        if (newValue) {
+            handleProjectFieldChange("status", newValue.code);
+        }
+    }, [handleProjectFieldChange]);
+
+    const handleStartDateChange = useCallback((date: Date | null) => {
+        handleProjectFieldChange("startDate", date);
+    }, [handleProjectFieldChange]);
+
+    const handleEndDateChange = useCallback((date: Date | null) => {
+        handleProjectFieldChange("endDate", date);
+    }, [handleProjectFieldChange]);
+
+    const handleDescriptionChange = useCallback((value: string) => {
+        handleProjectFieldChange("description", value);
+    }, [handleProjectFieldChange]);
+
+    const handleNameChange = useCallback((value: string, setNameError: (msg: string) => void) => {
+        const trimmed = value.slice(0, 50);
+        handleProjectFieldChange("name", trimmed.toUpperCase());
+        if (trimmed && trimmed.trim() !== "") setNameError("");
+        else setNameError("Project Name is required");
+    }, [handleProjectFieldChange]);
+
     return {
         upsertProject,
         handleProjectFieldChange,
+        setActiveTab,
+        handleOpenWorkspace,
+        handleStatusChange,
+        handleStartDateChange,
+        handleEndDateChange,
+        handleDescriptionChange,
+        handleNameChange,
     };
 };

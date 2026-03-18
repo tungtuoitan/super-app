@@ -1,9 +1,10 @@
 /**
  * StatusAutoComplete Component
  * A specialized autocomplete for status selection with color-coded options (GitHub-style)
+ * Fully controlled — no internal state, derives display value from props.
  */
 
-import { CSSProperties, useEffect, useState } from "react";
+import { CSSProperties, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/Components/ui/button";
@@ -68,6 +69,7 @@ export interface StatusAutoCompleteProps {
 
 /**
  * StatusAutoComplete - Autocomplete component with color-coded status options (GitHub-style)
+ * Fully controlled: display value derived from `value` prop, no internal selectedValue state.
  */
 export function StatusAutoComplete(props: StatusAutoCompleteProps) {
     const {
@@ -86,19 +88,11 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
     } = props;
 
     const [open, setOpen] = useState(false);
-    const [selectedValue, setSelectedValue] = useState<IStatusOption | null>(null);
 
-    useEffect(() => {
-        if (value) {
-            const found = options.find((x) => x.code === value.code);
-            setSelectedValue(found || value);
-        } else {
-            setSelectedValue(null);
-        }
-    }, [value, options]);
+    // Derive selected value directly from props — no internal state, no useEffect sync
+    const selectedValue = value ? (options.find((x) => x.code === value.code) || value) : null;
 
     const handleSelect = (option: IStatusOption) => {
-        setSelectedValue(option);
         setOpen(false);
         if (onChange) {
             const syntheticEvent = {
@@ -110,7 +104,6 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
     };
 
     const handleClear = () => {
-        setSelectedValue(null);
         if (onChange) {
             const syntheticEvent = {
                 type: "change",

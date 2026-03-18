@@ -36,7 +36,6 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const [activeTabb, setActiveTabb] = useState<PanelTab>("noteDetail");
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const { moduleName } = useGridControlStore();
-    console.log('>>>>>>>>> w',moduleName === kconstants.modules.workspace && activeTabb === "moving");
     const { setTargetWorkspace } = useMovingTreeStore();
     const { isMobile } = useMobileStore();
     const changeTab = (tab: PanelTab) => {

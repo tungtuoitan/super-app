@@ -33,7 +33,6 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         // Find keyword by link
         const keyword = allKeywords.find(k => k.link === item.link);
         if (keyword) {
-            console.log(1, 'Navigating to breadcrumb item:', keyword);
             navigateLink(keyword);
         }
     };

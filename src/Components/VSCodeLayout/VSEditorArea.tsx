@@ -1,13 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { NoteEditorPanel, ConfirmCloseDialog, EditorToolbar } from "@/Components/Editor";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { WsEditorPanel } from "@/Components/Workspace";
 import { TrackingGraphPanel } from "@/Components/TrackingGraph";
 import { ProjectEditorPanel } from "@/Components/Project/ProjectEditorPanel";
-import { MultiProjectEditorPanel } from "@/Components/Project/MultiProjectEditorPanel";
-import { TaskEditorPanel } from "@/Components/Project/TaskEditorPanel";
 import { LogEditorPanel } from "@/Components/LifeLog/LogEditorPanel";
 import { LifeLogGraphPanel } from "@/Components/LifeLog/LifeLogGraphPanel";
 import { TrackEditorPanel } from "@/Components/LifeLog/TrackEditorPanel";
@@ -19,6 +15,8 @@ import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";
 import { TrackTabNavigation } from "@/HeadlessComponents/vsCode/TrackTabNavigation";
 import { TabBar } from "./TabBar";
 import {Note} from "@/types/index";
+import {TaskEditorPanel} from "../Task/TaskEditorPanel";
+import {MultiProjectEditorPanel} from "../MultiProject/MultiProjectEditorPanel";
 
 /**
  * VSEditorArea - Main editor area for note content
@@ -87,9 +85,9 @@ export function VSEditorArea() {
                     <>
                         {activeTab.type === constants.vscode.tab.tabTypes.note && <NoteEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.workspace && <WsEditorPanel tab={activeTab} />}
-                        {activeTab.type === constants.vscode.tab.tabTypes.project && <ProjectEditorPanel tab={activeTab} />}
-                        {activeTab.type === constants.vscode.tab.tabTypes.multiProject && <MultiProjectEditorPanel tab={activeTab} />}
-                        {activeTab.type === constants.vscode.tab.tabTypes.task && <TaskEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.project && <ProjectEditorPanel />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.multiProject && <MultiProjectEditorPanel />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.task && <TaskEditorPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.trackingGraph && <TrackingGraphPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLog && <LogEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogGraph && <LifeLogGraphPanel />}

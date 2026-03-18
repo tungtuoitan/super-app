@@ -12,8 +12,7 @@ import { useProjectStore } from "@/store/project/useProject.store";
 
 export const useTaskTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
-    const { updateActiveTab } = useEditorTabHelper();
-    const { setNewTabAnd } = useEditorTabHelper();
+    const { updateActiveTab, setNewTabAnd } = useEditorTabHelper();
     const { projects } = useProjectStore();
     const { tasks } = useTaskStore();
 

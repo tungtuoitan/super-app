@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
-import TaskList from "@tiptap/extension-task-list";
+import TaskGrid from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { Bold, Italic, Underline as UnderlineIcon, List, ListChecks } from "lucide-react";
 import "./KNodeDescEditor.css";
@@ -70,7 +70,7 @@ export function KNodeDescEditor({ value, onChange, placeholder, autoFocus, onEsc
             StarterKit.configure({ heading: { levels: [1, 2] } }),
             Placeholder.configure({ placeholder: placeholder ?? "Description…" }),
             Underline,
-            TaskList.configure({ HTMLAttributes: { class: "k-task-list" } }),
+            TaskGrid.configure({ HTMLAttributes: { class: "k-task-list" } }),
             TaskItem.configure({ nested: true, HTMLAttributes: { class: "k-task-item" } }),
         ],
         content: toTiptapContent(value),

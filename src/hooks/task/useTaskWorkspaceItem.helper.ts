@@ -1,28 +1,23 @@
 /**
  * Task Workspace Item Helper
- * Business logic for managing notes linked to a task via the task's workspace folder
+ * Functions only — managing notes linked to a task via workspace folder.
+ * State lives in useTaskStore.
  */
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import type { Note } from "@/types/note.types";
 import { type Task } from "@/store/task/useTask.store";
+import { type TaskFolderItem } from "@/types/task/taskDetail.types";
+import { useTaskStore } from "@/store/task/useTask.store";
 import { useGeneralStore } from "@/store/index";
 import { useEditorTabsStore } from "@/store/index";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { constants } from "@/utils/constants";
 import { workspaceService } from "@/services/workspace.service";
-import { WorkspaceNoteItem, WorkspaceFileItem, NoteEntity } from "@/types/workspace-v2.types";
+import { WorkspaceNoteItem, WorkspaceFileItem } from "@/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-
-export interface TaskFolderItem {
-    workspaceItemId: number;
-    entityId: number;
-    entityType: 3 | 4;
-    name: string;
-    noteData?: NoteEntity; // available for entityType=3, used to open tab
-}
 
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();
@@ -30,9 +25,7 @@ export const useTaskWorkspaceItemHelper = () => {
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { openTab } = useEditorTabHelper();
-
-    const [folderItems, setFolderItems] = useState<TaskFolderItem[]>([]);
-    const [isLoadingFolderItems, setIsLoadingFolderItems] = useState(false);
+    const { setFolderItems, setIsLoadingFolderItems } = useTaskStore();
 
     /**
      * Load notes/files inside the task's workspace folder.
@@ -71,7 +64,7 @@ export const useTaskWorkspaceItemHelper = () => {
         } finally {
             setIsLoadingFolderItems(false);
         }
-    }, [$user]);
+    }, [$user, setFolderItems, setIsLoadingFolderItems]);
 
     /**
      * Open a note from the task's folder in an editor tab.
@@ -140,8 +133,6 @@ export const useTaskWorkspaceItemHelper = () => {
     }, [$user, registries, openTabs, setOpenTabs, setActiveTabId, setShouldFocusNoteName]);
 
     return {
-        folderItems,
-        isLoadingFolderItems,
         loadFolderItems,
         openFolderItem,
         createTaskNote,
