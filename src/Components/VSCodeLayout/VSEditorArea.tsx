@@ -89,7 +89,7 @@ export function VSEditorArea() {
                         {activeTab.type === constants.vscode.tab.tabTypes.multiProject && <MultiProjectEditorPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.task && <TaskEditorPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.trackingGraph && <TrackingGraphPanel tab={activeTab} />}
-                        {activeTab.type === constants.vscode.tab.tabTypes.lifeLog && <LogEditorPanel tab={activeTab} />}
+                        {activeTab.type === constants.vscode.tab.tabTypes.lifeLog && <LogEditorPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogGraph && <LifeLogGraphPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogTrack && <TrackEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.kKnowledge && <KKnowledgeEditorPanel tab={activeTab} />}

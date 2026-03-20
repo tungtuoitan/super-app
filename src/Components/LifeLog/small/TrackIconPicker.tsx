@@ -7,45 +7,13 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Upload, X, Shell } from "lucide-react";
+import { processImage, isCustomImage } from "@/utils/lifeLog.utils";
 
 interface TrackIconPickerProps {
     value: string;          // base64 data URL, or "" / DEFAULT_ICON for no custom image
     onChange: (v: string) => void;
     trackColor?: string;    // used to tint the default Shell icon preview
 }
-
-const TARGET_SIZE = 32;
-const MAX_BYTES = 100 * 1024;
-
-function processImage(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = () => {
-            URL.revokeObjectURL(url);
-            const side = Math.min(img.naturalWidth, img.naturalHeight);
-            const sx = (img.naturalWidth - side) / 2;
-            const sy = (img.naturalHeight - side) / 2;
-
-            const canvas = document.createElement("canvas");
-            canvas.width = TARGET_SIZE;
-            canvas.height = TARGET_SIZE;
-            canvas.getContext("2d")!.drawImage(img, sx, sy, side, side, 0, 0, TARGET_SIZE, TARGET_SIZE);
-
-            let quality = 0.95;
-            let dataUrl = canvas.toDataURL("image/webp", quality);
-            while (dataUrl.length * 0.75 > MAX_BYTES && quality > 0.1) {
-                quality -= 0.05;
-                dataUrl = canvas.toDataURL("image/webp", quality);
-            }
-            resolve(dataUrl);
-        };
-        img.onerror = reject;
-        img.src = url;
-    });
-}
-
-const isCustomImage = (v: string) => v.startsWith("data:image");
 
 export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPickerProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);

@@ -2,41 +2,22 @@
  * LogGeneral - Form to view/edit a log entry's fields
  */
 
-import { useCallback } from "react";
 import { Label } from "@/Components/ui/label";
 import { Input } from "@/Components/ui/input";
 import { Textarea } from "@/Components/ui/textarea";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
-import { useEditorTabsStore } from "@/store/index";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
-import { LOG_TYPES, LOG_TYPE_CONFIG, type LifeLogLog, type LogType } from "@/types/lifeLog.types";
+import { useLogGeneralHelper } from "@/hooks/lifeLog/useLogGeneral.helper";
+import { LOG_TYPES, LOG_TYPE_CONFIG, type LogType } from "@/types/lifeLog.types";
 import { format } from "date-fns";
-import { LogTypeIcon } from "./LogTypeIcon";
-import { TrackIconDisplay } from "./TrackIconDisplay";
+import { LogTypeIcon } from "./small/LogTypeIcon";
+import { TrackIconDisplay } from "./small/TrackIconDisplay";
 import { SingleDatePicker } from "./SingleDatePicker";
 
-interface LogGeneralProps {
-    logId: number;
-    tabId: string;
-}
-
-export function LogGeneral({ logId, tabId }: LogGeneralProps) {
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+export function LogGeneral() {
     const { tracks } = useLifeLogStore();
-
-    const tab = openTabs.find((t) => t.id === tabId);
-    const log = tab?.data as LifeLogLog | undefined;
-
-    const handleFieldChange = useCallback(<K extends keyof LifeLogLog>(field: K, value: LifeLogLog[K]) => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tabId
-                    ? { ...t, data: { ...t.data as LifeLogLog, [field]: value }, hasUnsavedChanges: true }
-                    : t
-            )
-        );
-    }, [tabId, setOpenTabs]);
+    const { log, handleFieldChange } = useLogGeneralHelper();
 
     if (!log) return null;
 
@@ -91,7 +72,7 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
                 </div>
             )}
 
-        
+
             <div className="flex justify-between">
                 {/* Occur At */}
                 <div className="w-full">

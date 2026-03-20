@@ -6,30 +6,12 @@
 import { useCallback } from "react";
 import { lifeLogService } from "@/services/lifeLog.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/types/lifeLog.types";
+import type { UpsertLifeLogLogDTO, LifeLogLog } from "@/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
-import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/utils/date.utils";
+import { transformLog } from "@/utils/lifeLog.utils";
 import { debugLog } from "@/hooks/debugLog/useDebugLog";
-
-export function transformLog(dto: LifeLogLogDTO): LifeLogLog {
-    const result = {
-        id: dto.id,
-        userId: dto.userId,
-        type: (dto.type as LogType) ?? "note",
-        trackId: dto.trackId ?? undefined,
-        title: dto.title ?? undefined,
-        description: dto.description ?? undefined,
-        isSensitive: dto.isSensitive ?? false,
-        location: dto.location ?? undefined,
-        occurAt: dto.occurAt ? parseAsLocalDate(dto.occurAt) ?? undefined : undefined,
-        createdAt: parseAsLocalDate(dto.createdAt) ?? new Date(),
-        updatedAt: dto.updatedAt ? parseAsLocalDate(dto.updatedAt) ?? undefined : undefined,
-        deletedAt: dto.deletedAt ? parseAsLocalDate(dto.deletedAt) : null,
-    };
-
-    return result;
-}
 
 export function useLifeLogLogHelper() {
     const { setLogs, setIsLoading, setError, logs } = useLifeLogStore();

@@ -9,8 +9,8 @@ import { Checkbox } from "@/Components/ui/checkbox";
 import { useEditorTabsStore } from "@/store/index";
 import { useLifeLogTrackHelper } from "@/hooks/lifeLog/useLifeLogTrack.helper";
 import type { LifeLogTrack } from "@/types/lifeLog.types";
-import { TrackIconPicker } from "./TrackIconPicker";
-import { TRACK_COLORS } from "./trackColors";
+import { TrackIconPicker } from "./small/TrackIconPicker";
+import { TRACK_COLORS } from "@/utils/lifeLog.constants";
 import { Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
 

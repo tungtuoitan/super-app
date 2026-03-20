@@ -12,8 +12,8 @@ import { Ws } from "@/types/workspace.types";
 import { useTabBarHelper } from "@/hooks/vsCode/useTabBarHelper";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
-import { LogTypeIcon } from "@/Components/LifeLog/LogTypeIcon";
-import { TrackIconDisplay } from "@/Components/LifeLog/TrackIconDisplay";
+import { LogTypeIcon } from "@/Components/LifeLog/small/LogTypeIcon";
+import { TrackIconDisplay } from "@/Components/LifeLog/small/TrackIconDisplay";
 import type { LifeLogLog } from "@/types/lifeLog.types";
 import type { Task } from "@/store/task/useTask.store";
 

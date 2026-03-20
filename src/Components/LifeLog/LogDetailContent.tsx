@@ -4,15 +4,10 @@
 
 import { LogGeneral } from "./LogGeneral";
 
-interface LogDetailContentProps {
-    logId: number;
-    tabId: string;
-}
-
-export function LogDetailContent({ logId, tabId }: LogDetailContentProps) {
+export function LogDetailContent() {
     return (
         <div className="flex flex-col h-full w-full bg-background overflow-auto">
-            <LogGeneral logId={logId} tabId={tabId} />
+            <LogGeneral />
         </div>
     );
 }

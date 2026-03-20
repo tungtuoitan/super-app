@@ -5,8 +5,12 @@
 
 import { TrackPanel } from "./TrackPanel";
 import { LogList } from "./LogList";
+import { useLifeLogHeadless } from "@/HeadlessComponents/lifeLog/useLifeLog.headless";
 
 export function LifeLogView() {
+    // Side-effects: load logs + tracks on mount
+    useLifeLogHeadless();
+
     return (
         <div className="h-full flex flex-col overflow-hidden">
             <LogList />

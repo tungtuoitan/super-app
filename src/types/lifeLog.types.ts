@@ -114,3 +114,32 @@ export const LOG_TYPE_CONFIG: Record<LogType, { label: string; color: string; lu
     moment:     { label: "Moment",     color: "#38bdf8", lucideIcon: "Scan" },
     progress:   { label: "Progress",   color: "#2dd4bf", lucideIcon: "LoaderCircle" },
 };
+
+// ─── Track color type ────────────────────────────────────────────────────────
+
+export interface TrackColor {
+    name: string;
+    hex: string;
+}
+
+// ─── Graph types ─────────────────────────────────────────────────────────────
+
+export type GraphMode = "frequency" | "count";
+
+export interface DateRangeOption {
+    label: string;
+    days: number | null;
+}
+
+export interface FreqPoint {
+    x: number;
+    y: number;
+    count: number;
+    logIds: number[];
+}
+
+export interface FreqTrack {
+    track: LifeLogTrack;
+    trackIdx: number;
+    points: FreqPoint[];
+}

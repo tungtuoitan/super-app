@@ -1,40 +1,17 @@
 /**
  * TrackPanel - Horizontal scrollable list of tracks for quick tap-logging
- * Tracks are sorted by usage count (desc) derived from logs in store
  */
 
-import { useEffect, useCallback, useMemo } from "react";
-import { Plus, BarChart2 } from "lucide-react";
-import { useLifeLogTrackHelper } from "@/hooks/lifeLog/useLifeLogTrack.helper";
+import { Plus } from "lucide-react";
 import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
+import { useLifeLogTrackSelector } from "@/Selectors/lifeLog/useLifeLogTrack.selector";
 import { TrackItem } from "./TrackItem";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 
 export function TrackPanel() {
-    const { tracks, logs } = useLifeLogStore();
-    const { loadTracks } = useLifeLogTrackHelper();
-    const { openGraphTab, openNewTrackTab } = useLifeLogTabHelper();
+    const { sortedTracks } = useLifeLogTrackSelector();
+    const { openNewTrackTab } = useLifeLogTabHelper();
     const { isMobile } = useMobileStore();
-    const { openLogTab, openNewLogTab } = useLifeLogTabHelper();
-
-
-    useEffect(() => {
-        loadTracks();
-    }, [loadTracks]);
-
-    const handleAddTrack = useCallback(() => {
-        openNewTrackTab();
-    }, [openNewTrackTab]);
-
-    const sortedTracks = useMemo(() => {
-        const active = tracks.filter((t) => !t.deletedAt);
-        const usageMap = new Map<number, number>();
-        for (const log of logs) {
-            if (log.trackId) usageMap.set(log.trackId, (usageMap.get(log.trackId) ?? 0) + 1);
-        }
-        return [...active].sort((a, b) => (usageMap.get(b.id) ?? 0) - (usageMap.get(a.id) ?? 0));
-    }, [tracks, logs]);
 
     return (
         <div className="border-b border-border flex-shrink-0 flex items-center" style={{ borderTop: "1px solid rgb(63, 63, 70)" }}>
@@ -45,7 +22,7 @@ export function TrackPanel() {
                     <p className="text-xs text-muted-foreground italic flex-shrink-0">No tracks yet.</p>
                 )}
                 {sortedTracks.map((track) => (
-                    <TrackItem key={track.id} track={track} />
+                    <TrackItem key={track.id} trackId={track.id} />
                 ))}
                 <button
                     onClick={() => openNewTrackTab()}

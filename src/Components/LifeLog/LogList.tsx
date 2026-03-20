@@ -2,27 +2,21 @@
  * LogList - Scrollable list of log entries
  */
 
-import { useEffect, useCallback } from "react";
-import { Plus, RefreshCw, Loader2, BarChart2, PlusCircle, NotebookPen } from "lucide-react";
+import { useCallback } from "react";
+import { RefreshCw, Loader2, BarChart2, NotebookPen } from "lucide-react";
 import { useLifeLogLogHelper } from "@/hooks/lifeLog/useLifeLogLog.helper";
 import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
 import { LogItem } from "./LogItem";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
-import type { LifeLogLog } from "@/types/lifeLog.types";
-import { useLifeLogTrackHelper } from "@/hooks/lifeLog/useLifeLogTrack.helper";
 
 export function LogList() {
-    const { logs, tracks, isLoading } = useLifeLogStore();
-    const { loadLogs, deleteLog } = useLifeLogLogHelper();
-    const { openLogTab, openNewLogTab } = useLifeLogTabHelper();
+    const { logs, isLoading } = useLifeLogStore();
+    const { loadLogs } = useLifeLogLogHelper();
+    const { openNewLogTab, openGraphTab } = useLifeLogTabHelper();
     const { searchQuery } = useGridControlStore();
     const { isMobile } = useMobileStore();
-
-    useEffect(() => {
-        loadLogs();
-    }, [loadLogs]);
 
     const handleAddLog = useCallback(() => {
         openNewLogTab();
@@ -35,17 +29,6 @@ export function LogList() {
               return (l.title ?? "").toLowerCase().includes(q) || (l.description ?? "").toLowerCase().includes(q);
           })
         : activeLogs;
-
-    const { loadTracks } = useLifeLogTrackHelper();
-    const { openGraphTab, openNewTrackTab } = useLifeLogTabHelper();
-
-    useEffect(() => {
-        loadTracks();
-    }, [loadTracks]);
-
-    const handleAddTrack = useCallback(() => {
-        openNewTrackTab();
-    }, [openNewTrackTab]);
 
     return (
         <div className="flex flex-col h-full overflow-hidden relative">
@@ -119,14 +102,13 @@ export function LogList() {
                     </div>
                 ) : (
                     filtered.map((log, i) => {
-                        const track = log.trackId ? tracks.find((t) => t.id === log.trackId) : undefined;
                         const prev = filtered[i - 1];
                         const gapMs = prev ? new Date(prev.createdAt).getTime() - new Date(log.createdAt).getTime() : 0;
                         const gapHours = gapMs / 3_600_000;
                         const marginTop = gapHours < 1 ? 0 : gapHours < 6 ? 4 : gapHours < 24 ? 8 : gapHours < 72 ? 12 : gapHours < 168 ? 18 : 24;
                         return (
                             <div key={log.id} style={marginTop ? { marginTop } : undefined}>
-                                <LogItem log={log} trackEmoji={track?.emoji} trackColor={track?.color} onClick={openLogTab} onDelete={(l: LifeLogLog) => deleteLog(l.id)} />
+                                <LogItem logId={log.id} />
                             </div>
                         );
                     })
