@@ -65,6 +65,8 @@ export interface StatusAutoCompleteProps {
     disableClearable?: boolean;
     /** Placeholder text */
     placeholder?: string;
+    /** Option codes that should appear disabled (grayed out, not selectable) */
+    disabledCodes?: string[];
 }
 
 /**
@@ -85,6 +87,7 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
         disabled,
         disableClearable,
         placeholder = "Select status...",
+        disabledCodes = [],
     } = props;
 
     const [open, setOpen] = useState(false);
@@ -204,13 +207,18 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
                         <CommandGroup>
                             {options.map((option) => {
                                 const isSelected = selectedValue?.code === option.code;
+                                const isOptionDisabled = disabledCodes.includes(option.code);
 
                                 return (
                                     <CommandItem
                                         key={option.code}
                                         value={`${option.code}-${option.label}`}
-                                        onSelect={() => handleSelect(option)}
-                                        className={cn(sizeClasses.item)}
+                                        onSelect={() => !isOptionDisabled && handleSelect(option)}
+                                        className={cn(
+                                            sizeClasses.item,
+                                            isOptionDisabled && "opacity-35 cursor-not-allowed"
+                                        )}
+                                        disabled={isOptionDisabled}
                                     >
                                         <Check
                                             className={cn(

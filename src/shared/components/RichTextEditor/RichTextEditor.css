@@ -7,6 +7,8 @@
 .ProseMirror {
     outline: none;
     min-height: inherit;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 /* Placeholder */
@@ -320,6 +322,26 @@
 .ProseMirror .task-item > label input[type="checkbox"]:focus {
     outline: none;
     box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+}
+
+/* Comment readonly — minimal chrome for inline display */
+.comment-readonly {
+    opacity: 1 !important;
+    background: transparent !important;
+}
+
+.comment-readonly .ProseMirror {
+    min-height: auto !important;
+    padding: 0;
+}
+
+.comment-readonly .tiptap-toolbar,
+.comment-readonly .ProseMirror-menubar {
+    display: none;
+}
+
+.comment-readonly .prose {
+    padding: 0;
 }
 
 /* Bubble Menu (Floating Toolbar) */

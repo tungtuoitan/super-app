@@ -25,6 +25,7 @@ import { useCommandPaletteHelper } from "@/hooks/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
+import { useTaskCommentHelper } from "@/hooks/task/useTaskComment.helper";
 
 // Re-export utils for backward compatibility
 export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../../utils/task/TaskDetail.utils";
@@ -41,6 +42,7 @@ export const useTaskDetailHelper = () => {
     const { allKeywords } = useGeneralStore();
 
     const { selectedTask } = useTaskDetailSelector();
+    const { submitVersionComment } = useTaskCommentHelper();
 
     // ── Linked keywords & workspace items ─────────────────────────────────────
     const { linkKeyword, unlinkKeyword } = useTaskLinkedKeywordsHelper();
@@ -110,6 +112,14 @@ export const useTaskDetailHelper = () => {
             const isRestoreMode = taskToSave.id > 0 && !!originalTask?.deletedAt && !taskToSave.deletedAt;
 
             try {
+                // For existing tasks: send original (last-saved) values for section fields
+                // so Ctrl+S doesn't overwrite in-progress section edits.
+                // Sections save themselves independently via PATCH.
+                const sectionNote = isCreateMode ? taskToSave.note : (originalTask?.note ?? taskToSave.note);
+                const sectionChecklist = isCreateMode ? taskToSave.checklistJson : (originalTask?.checklistJson ?? taskToSave.checklistJson);
+                const sectionProcess = isCreateMode ? taskToSave.processJson : (originalTask?.processJson ?? taskToSave.processJson);
+                const sectionCustomTabs = isCreateMode ? taskToSave.customTabsJson : (originalTask?.customTabsJson ?? taskToSave.customTabsJson);
+
                 const result = await taskService._upsertTaskBatch($user.userToken, [
                     {
                         id: isCreateMode ? 0 : taskToSave.id,
@@ -118,7 +128,7 @@ export const useTaskDetailHelper = () => {
                         type: taskToSave.type || "task",
                         taskType: taskToSave.taskType || "personal",
                         title: taskToSave.title,
-                        note: taskToSave.note,
+                        note: sectionNote,
                         status: taskToSave.status || "open",
                         priority: taskToSave.priority || "low",
                         startDate: toLocalISOString(taskToSave.startDate),
@@ -126,7 +136,9 @@ export const useTaskDetailHelper = () => {
                         orderIndex: taskToSave.orderIndex || 0,
                         deletedAt: isRestoreMode ? null : toLocalISOString(taskToSave.deletedAt),
                         folderWorkspaceItemId: taskToSave.folderWorkspaceItemId,
-                        checklistJson: taskToSave.checklistJson,
+                        checklistJson: sectionChecklist,
+                        processJson: sectionProcess,
+                        customTabsJson: sectionCustomTabs,
                     },
                 ]);
 
@@ -153,6 +165,8 @@ export const useTaskDetailHelper = () => {
                     deletedAt: parseAsLocalDate(savedTask.deletedAt),
                     folderWorkspaceItemId: savedTask.folderWorkspaceItemId,
                     checklistJson: savedTask.checklistJson ?? null,
+                    processJson: savedTask.processJson ?? null,
+                    customTabsJson: savedTask.customTabsJson ?? null,
                     // Preserve limit dates (not returned by upsert API)
                     projectStartDate: taskToSave.projectStartDate,
                     projectEndDate: taskToSave.projectEndDate,
@@ -181,7 +195,7 @@ export const useTaskDetailHelper = () => {
                 return null;
             }
         },
-        [openTabs, activeTabId, $user, _console, setOpenTabs, setTasks],
+        [openTabs, activeTabId, $user, _console, setOpenTabs, setTasks, submitVersionComment],
     );
 
     /**

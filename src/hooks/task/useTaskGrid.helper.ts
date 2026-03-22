@@ -37,6 +37,8 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         deletedAt: parseAsLocalDate(dto.deletedAt),
         folderWorkspaceItemId: dto.folderWorkspaceItemId,
         checklistJson: dto.checklistJson ?? null,
+        processJson: dto.processJson ?? null,
+        customTabsJson: dto.customTabsJson ?? null,
         // Limit dates for warning display
         projectStartDate: parseAsLocalDate(dto.projectStartDate),
         projectEndDate: parseAsLocalDate(dto.projectEndDate),
@@ -149,6 +151,8 @@ export const useTaskGridHelper = () => {
                         deletedAt: deletedAt,
                         folderWorkspaceItemId: task.folderWorkspaceItemId,
                         checklistJson: task.checklistJson,
+                        processJson: task.processJson,
+                        customTabsJson: task.customTabsJson,
                     };
                 });
 
@@ -335,6 +339,8 @@ export const useTaskGridHelper = () => {
                 deletedAt: toLocalISOString(task.deletedAt),
                 folderWorkspaceItemId: task.folderWorkspaceItemId,
                 checklistJson: task.checklistJson,
+                processJson: task.processJson,
+                customTabsJson: task.customTabsJson,
             };
 
             const result = await taskService._upsertTaskBatch(token, [request]);

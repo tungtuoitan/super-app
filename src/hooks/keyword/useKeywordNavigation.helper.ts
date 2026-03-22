@@ -157,6 +157,8 @@ export const useKeywordNavigationHelper = () => {
                                 deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                                 folderWorkspaceItemId: dto.folderWorkspaceItemId,
                                 checklistJson: dto.checklistJson ?? null,
+                                processJson: dto.processJson ?? null,
+                                customTabsJson: dto.customTabsJson ?? null,
                             };
                             openTab(task, constants.vscode.tab.tabTypes.task, openedBy);
                         } else {

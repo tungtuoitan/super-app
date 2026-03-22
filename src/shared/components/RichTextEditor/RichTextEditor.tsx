@@ -44,6 +44,10 @@ interface RichTextEditorProps {
     disabled?: boolean;
     className?: string;
     minHeight?: string;
+    /** Auto-focus the editor on mount */
+    autoFocus?: boolean;
+    /** Increment to trigger focus (for tab-switch scenarios where editor is already mounted) */
+    focusTrigger?: number;
     /** Upload context: "project" or "workspace" */
     uploadContext?: UploadContext;
     /** Upload context ID: project_id or workspace_id */
@@ -94,6 +98,8 @@ export function RichTextEditor({
     disabled = false,
     className,
     minHeight = "200px",
+    autoFocus = false,
+    focusTrigger,
     uploadContext,
     uploadContextId,
 }: RichTextEditorProps) {
@@ -147,6 +153,7 @@ export function RichTextEditor({
         ],
         content: value,
         editable: !disabled,
+        autofocus: autoFocus ? "end" : false,
         onUpdate: ({ editor }) => {
             // Get HTML and clean blob URLs before saving
             // Blob URLs are session-specific and won't work after reload
@@ -159,6 +166,14 @@ export function RichTextEditor({
 
     // Load images with data-file-id via proxy
     useProxyImageLoader({ editor, token: $user.userToken || null });
+
+    // Focus when focusTrigger changes (for tab-switch scenarios)
+    useEffect(() => {
+        if (focusTrigger && editor && !disabled) {
+            // Small delay to allow the hidden→visible transition
+            requestAnimationFrame(() => editor.commands.focus("end"));
+        }
+    }, [focusTrigger, editor, disabled]);
 
     // Handle image upload
     const handleImageUpload = useCallback(

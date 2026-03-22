@@ -29,6 +29,7 @@ export const useTaskDetailSelector = () => {
     );
 
     const selectedTask = taskTab ? (taskTab.data as Task) : undefined;
+    console.log(selectedTask);
 
     // ── Project ───────────────────────────────────────────────────────────────
 
