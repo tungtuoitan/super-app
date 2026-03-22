@@ -55,17 +55,25 @@ export function TaskDetailHeadless() {
     }, [selectedTask?.id, selectedTask?.folderWorkspaceItemId, currentProject?.workspaceId, loadFolderItems]);
 
     // Effect 5: Sync hasUnsavedChanges for editor tab
+    // Exclude section fields (note, checklistJson, processJson, customTabsJson)
+    // because those are saved independently via section Save buttons.
     useEffect(() => {
         if (!tab) return;
         setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) =>
-                t.id === tab.id
-                    ? {
-                          ...t,
-                          hasUnsavedChanges: tab.data && tab.data0 ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0) : false,
-                      }
-                    : t,
-            ),
+            prev.map((t) => {
+                if (t.id !== tab.id) return t;
+                const sectionKeys = ["note", "checklistJson", "processJson", "customTabsJson"];
+                const stripSections = (obj: any) => {
+                    if (!obj) return obj;
+                    const copy = { ...obj };
+                    for (const k of sectionKeys) delete copy[k];
+                    return copy;
+                };
+                const hasChanges = tab.data && tab.data0
+                    ? JSON.stringify(stripSections(tab.data)) !== JSON.stringify(stripSections(tab.data0))
+                    : false;
+                return { ...t, hasUnsavedChanges: hasChanges };
+            }),
         );
     }, [tab?.id, tab?.data, setOpenTabs]);
 

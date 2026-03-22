@@ -25,6 +25,12 @@ export interface Task {
     /** JSON checklist stored as string: ChecklistJSON serialized */
     checklistJson?: string | null;
 
+    /** JSON process/step stored as string: same structure as ChecklistJSON */
+    processJson?: string | null;
+
+    /** JSON custom tabs stored as string: CustomTabsJSON serialized */
+    customTabsJson?: string | null;
+
     // Limit dates for warning display (parsed from backend)
     projectStartDate?: Date | null;
     projectEndDate?: Date | null;
@@ -66,4 +72,10 @@ export interface TaskDTO {
 
     /** JSON checklist stored as string: { groups: [...] } */
     checklistJson?: string | null;
+
+    /** JSON process/step stored as string: same structure as checklistJson */
+    processJson?: string | null;
+
+    /** JSON custom tabs stored as string */
+    customTabsJson?: string | null;
 }

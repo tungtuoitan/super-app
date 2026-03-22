@@ -24,8 +24,11 @@ import { ProjectDetailProvider } from "@/store/project/useProjectDetail.store";
 import { TaskGridProvider } from "@/store/task/useTaskGrid.store";
 import { TaskDetailProvider } from "@/store/task/useTaskDetail.store";
 import { TaskChecklistProvider } from "@/store/task/useTaskChecklist.store";
+import { TaskProcessProvider } from "@/store/task/useTaskProcess.store";
+import { TaskDetailSectionProvider } from "@/store/task/useTaskDetailSection.store";
 import { TaskTimelineProvider } from "@/store/task/useTaskTimeline.store";
 import { MultiTimelineProvider } from "@/store/task/useMultiTimeline.store";
+import { TaskCommentProvider } from "@/store/task/useTaskComment.store";
 import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";
 import { AuthGuard } from "@/Components/Auth/AuthGuard";
@@ -89,38 +92,44 @@ export function Main() {
                                                                                                             <TaskGridProvider>
                                                                                                                 <TaskDetailProvider>
                                                                                                                     <TaskChecklistProvider>
-                                                                                                                        <TaskTimelineProvider>
-                                                                                                                            <MultiTimelineProvider>
-                                                                                                                    <LifeLogProvider>
-                                                                                                                    <NoteDetailProvider>
-                                                                                                                        <NoteGridProvider>
-                                                                                                                            <EditorTabProvider>
-                                                                                                                                <TrackingGraphProvider>
-                                                                                                                                    <EditorProvider>
-                                                                                                                                        <EditorToolbarProvider>
-                                                                                                                                            <DialogProvider>
-                                                                                                                                                <OrchestratorContextMenuStoreProvider>
-                                                                                                                                                    <ConfirmationPopoverProvider>
-                                                                                                                                                        <OrchestratorContextMenu>
-                                                                                                                                                            <AuthGuard>
-                                                                                                                                                                <GridControlProvider>
-                                                                                                                                                                    <MainNav />
-                                                                                                                                                                </GridControlProvider>
-                                                                                                                                                            </AuthGuard>
-                                                                                                                                                        </OrchestratorContextMenu>
-                                                                                                                                                        <ConfirmationPopoverContainer />
-                                                                                                                                                    </ConfirmationPopoverProvider>
-                                                                                                                                                </OrchestratorContextMenuStoreProvider>
-                                                                                                                                            </DialogProvider>
-                                                                                                                                        </EditorToolbarProvider>
-                                                                                                                                    </EditorProvider>
-                                                                                                                                </TrackingGraphProvider>
-                                                                                                                            </EditorTabProvider>
-                                                                                                                        </NoteGridProvider>
-                                                                                                                    </NoteDetailProvider>
-                                                                                                                </LifeLogProvider>
-                                                                                                                </MultiTimelineProvider>
-                                                                                                                        </TaskTimelineProvider>
+                                                                                                                        <TaskProcessProvider>
+                                                                                                                            <TaskDetailSectionProvider>
+                                                                                                                                <TaskCommentProvider>
+                                                                                                                                    <TaskTimelineProvider>
+                                                                                                                                        <MultiTimelineProvider>
+                                                                                                                                <LifeLogProvider>
+                                                                                                                                <NoteDetailProvider>
+                                                                                                                                    <NoteGridProvider>
+                                                                                                                                        <EditorTabProvider>
+                                                                                                                                            <TrackingGraphProvider>
+                                                                                                                                                <EditorProvider>
+                                                                                                                                                    <EditorToolbarProvider>
+                                                                                                                                                        <DialogProvider>
+                                                                                                                                                            <OrchestratorContextMenuStoreProvider>
+                                                                                                                                                                <ConfirmationPopoverProvider>
+                                                                                                                                                                    <OrchestratorContextMenu>
+                                                                                                                                                                        <AuthGuard>
+                                                                                                                                                                            <GridControlProvider>
+                                                                                                                                                                                <MainNav />
+                                                                                                                                                                            </GridControlProvider>
+                                                                                                                                                                        </AuthGuard>
+                                                                                                                                                                    </OrchestratorContextMenu>
+                                                                                                                                                                    <ConfirmationPopoverContainer />
+                                                                                                                                                                </ConfirmationPopoverProvider>
+                                                                                                                                                            </OrchestratorContextMenuStoreProvider>
+                                                                                                                                                        </DialogProvider>
+                                                                                                                                                    </EditorToolbarProvider>
+                                                                                                                                                </EditorProvider>
+                                                                                                                                            </TrackingGraphProvider>
+                                                                                                                                        </EditorTabProvider>
+                                                                                                                                    </NoteGridProvider>
+                                                                                                                                </NoteDetailProvider>
+                                                                                                                            </LifeLogProvider>
+                                                                                                                            </MultiTimelineProvider>
+                                                                                                                                    </TaskTimelineProvider>
+                                                                                                                                </TaskCommentProvider>
+                                                                                                                            </TaskDetailSectionProvider>
+                                                                                                                        </TaskProcessProvider>
                                                                                                                     </TaskChecklistProvider>
                                                                                                                 </TaskDetailProvider>
                                                                                                             </TaskGridProvider>

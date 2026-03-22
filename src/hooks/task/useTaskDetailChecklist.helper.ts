@@ -10,8 +10,7 @@ import { standardRegistryService } from "@/services/standardRegistry.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
-import { toLocalISOString } from "@/utils/date.utils";
-import { ChecklistJSON, isChecklistAllDone } from "@/utils/checklist.utils";
+import { ChecklistJSON } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
 
 export const useTaskDetailChecklistHelper = () => {
@@ -20,56 +19,29 @@ export const useTaskDetailChecklistHelper = () => {
     const { setTasks } = useTaskStore();
     const { selectedTask } = useTaskDetailSelector();
 
-    /** Persist checklistJson (and optionally auto-complete status) to server immediately */
+    /** Persist checklistJson to server immediately (no auto-complete — only process controls completion) */
     const saveChecklistToServer = useCallback(
         async (json: ChecklistJSON, task: Task) => {
             if (task.id <= 0 || !$user.userToken) return;
-            const allDone = isChecklistAllDone(json);
-            const newStatus = allDone ? "completed" : task.status;
             const newChecklistJson = JSON.stringify(json);
 
-            await taskService._upsertTaskBatch($user.userToken, [
-                {
-                    id: task.id,
-                    projectId: task.projectId,
-                    parentTaskId: task.parentTaskId,
-                    type: task.type,
-                    taskType: task.taskType,
-                    title: task.title,
-                    note: task.note,
-                    status: newStatus,
-                    priority: task.priority,
-                    startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate),
-                    orderIndex: task.orderIndex,
-                    deletedAt: null,
-                    checklistJson: newChecklistJson,
-                    folderWorkspaceItemId: task.folderWorkspaceItemId,
-                },
-            ]);
+            await taskService._patchTask($user.userToken, task.id, {
+                checklistJson: newChecklistJson,
+            });
 
-            // Update tab — clear unsaved flag + sync auto-completed status
+            // Update tab — clear unsaved flag
             setOpenTabs((prev: BaseTab[]) =>
                 prev.map((t) =>
                     t.id === activeTabId
                         ? {
                               ...t,
-                              data: { ...(t.data as Task), checklistJson: newChecklistJson, status: newStatus },
-                              data0: { ...(t.data as Task), checklistJson: newChecklistJson, status: newStatus },
+                              data: { ...(t.data as Task), checklistJson: newChecklistJson },
+                              data0: { ...(t.data as Task), checklistJson: newChecklistJson },
                               hasUnsavedChanges: false,
                           }
                         : t,
                 ),
             );
-
-            // Sync tasks store so grid reflects new status when all items are done
-            if (allDone) {
-                setTasks((prev) =>
-                    prev.map((t) =>
-                        t.id === task.id ? { ...t, checklistJson: newChecklistJson, status: newStatus } : t,
-                    ),
-                );
-            }
         },
         [$user.userToken, activeTabId, setOpenTabs, setTasks],
     );
