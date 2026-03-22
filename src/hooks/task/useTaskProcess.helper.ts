@@ -97,7 +97,7 @@ export const useTaskProcessHelper = () => {
         [editErrors.length, setEditText, setEditErrors],
     );
 
-    const handleSaveEdit = useCallback(() => {
+    const handleProcessSaveEdit = useCallback(() => {
         const v = validateChecklistText(editText);
         if (!v.valid) { setEditErrors(v.errors); return; }
         const newChecklist = parseTextToChecklist(editText, parsedProcess ?? undefined);
@@ -110,7 +110,7 @@ export const useTaskProcessHelper = () => {
         setEditErrors([]);
     }, [editText, parsedProcess, handleProcessSave, submitVersionComment, setEditErrors, setIsEditing]);
 
-    const handleCancelEdit = useCallback(() => {
+    const handleProcessCancelEdit = useCallback(() => {
         setIsEditing(false);
         setEditErrors([]);
     }, [setIsEditing, setEditErrors]);
@@ -121,7 +121,7 @@ export const useTaskProcessHelper = () => {
         handleStartEdit,
         handleStartEditAt,
         handleEditChange,
-        handleSaveEdit,
-        handleCancelEdit,
+        handleProcessSaveEdit,
+        handleProcessCancelEdit,
     };
 };

@@ -46,7 +46,7 @@ function TaskChecklistInner() {
     const { parsedChecklist } = useTaskDetailChecklistSelector();
 
     const {
-        isEditing,
+        isChecklistEditing,
         editText,
         editErrors,
         collapsedGroups,
@@ -69,16 +69,14 @@ function TaskChecklistInner() {
         handleStartEdit,
         handleStartEditAt,
         handleEditChange,
-        handleSaveEdit,
         handleSetAsDefault,
-        handleCancelEdit,
     } = useTaskChecklistHelper();
 
     const isTestcase = parsedChecklist?.checklistType === "testcase";
     const env = isTestcase ? activeEnv : undefined;
 
     // ── No checklist yet — show "Create" button ─────────────────────────────────
-    if (!parsedChecklist && !isEditing) {
+    if (!parsedChecklist && !isChecklistEditing) {
         return (
             <button
                 onClick={handleStartEdit}
@@ -92,7 +90,7 @@ function TaskChecklistInner() {
     }
 
     // ── Edit mode ─────────────────────────────────────────────────────────────
-    if (isEditing) {
+    if (isChecklistEditing) {
         return (
             <div className="flex flex-col h-full gap-1 mt-2">
                 {/* Type selector */}

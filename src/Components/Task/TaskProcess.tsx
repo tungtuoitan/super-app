@@ -40,7 +40,7 @@ function TaskProcessInner() {
     const { parsedProcess } = useTaskDetailProcessSelector();
 
     const {
-        isEditing,
+        isProcessEditing,
         editText,
         editErrors,
         collapsedGroups,
@@ -56,12 +56,10 @@ function TaskProcessInner() {
         handleStartEdit,
         handleStartEditAt,
         handleEditChange,
-        handleSaveEdit,
-        handleCancelEdit,
     } = useTaskProcessHelper();
 
     // ── No process yet — show "Create" button ─────────────────────────────────
-    if (!parsedProcess && !isEditing) {
+    if (!parsedProcess && !isProcessEditing) {
         return (
             <button
                 onClick={handleStartEdit}
@@ -75,7 +73,7 @@ function TaskProcessInner() {
     }
 
     // ── Edit mode ─────────────────────────────────────────────────────────────
-    if (isEditing) {
+    if (isProcessEditing) {
         return (
             <div className="flex flex-col h-full gap-1 mt-2">
                 <textarea
