@@ -22,9 +22,6 @@ import type { StandardRegistry } from "@/types/standardRegistry.types";
 import type { ChecklistItem, ChecklistGroup, ChecklistJSON, ChecklistType, EnvCheckState, ValidationResult } from "@/types/task/checklist.types";
 import { TESTCASE_ENVIRONMENTS } from "@/types/task/checklist.constants";
 
-// Re-export types for backward compatibility
-export type { ChecklistItem, ChecklistGroup, ChecklistJSON, ChecklistType, EnvCheckState, ValidationResult } from "@/types/task/checklist.types";
-
 // ─── Suffix parsing helper ───────────────────────────────────────────────────
 
 /**

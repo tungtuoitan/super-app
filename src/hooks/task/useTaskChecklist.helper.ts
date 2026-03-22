@@ -110,7 +110,7 @@ export const useTaskChecklistHelper = () => {
         [editErrors.length, setEditText, setEditErrors],
     );
 
-    const handleSaveEdit = useCallback(() => {
+    const handleChecklistSaveEdit = useCallback(() => {
         const v = validateChecklistText(editText);
         if (!v.valid) { setEditErrors(v.errors); return; }
 
@@ -146,7 +146,7 @@ export const useTaskChecklistHelper = () => {
         finally { setSettingDefault(false); }
     }, [editText, persistDefaultTemplate, setEditErrors, setSettingDefault]);
 
-    const handleCancelEdit = useCallback(() => {
+    const handleChecklistCancelEdit = useCallback(() => {
         setIsEditing(false);
         setEditErrors([]);
     }, [setIsEditing, setEditErrors]);
@@ -157,8 +157,8 @@ export const useTaskChecklistHelper = () => {
         handleStartEdit,
         handleStartEditAt,
         handleEditChange,
-        handleSaveEdit,
+        handleChecklistSaveEdit,
         handleSetAsDefault,
-        handleCancelEdit,
+        handleChecklistCancelEdit,
     };
 };
