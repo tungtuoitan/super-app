@@ -11,7 +11,7 @@ import { DEFAULT_ENV } from "@/types/task/checklist.constants";
 export interface TaskChecklistContextData {
     isExpanded: boolean;
     setIsExpanded: Dispatch<SetStateAction<boolean>>;
-    isEditing: boolean;
+    isChecklistEditing: boolean;
     setIsEditing: Dispatch<SetStateAction<boolean>>;
     editText: string;
     setEditText: Dispatch<SetStateAction<string>>;
@@ -38,7 +38,7 @@ export interface TaskChecklistContextData {
 export const taskChecklistContextDefaultValue: TaskChecklistContextData = {
     isExpanded: false,
     setIsExpanded: () => {},
-    isEditing: false,
+    isChecklistEditing: false,
     setIsEditing: () => {},
     editText: "",
     setEditText: () => {},
@@ -82,7 +82,7 @@ export const TaskChecklistProvider: React.FC<React.PropsWithChildren<unknown>> =
         <TaskChecklistStore.Provider
             value={{
                 isExpanded, setIsExpanded,
-                isEditing, setIsEditing,
+                isChecklistEditing: isEditing, setIsEditing,
                 editText, setEditText,
                 editErrors, setEditErrors,
                 editCursorPos, setEditCursorPos,

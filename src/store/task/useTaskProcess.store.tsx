@@ -9,7 +9,7 @@ import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, 
 export interface TaskProcessContextData {
     isExpanded: boolean;
     setIsExpanded: Dispatch<SetStateAction<boolean>>;
-    isEditing: boolean;
+    isProcessEditing: boolean;
     setIsEditing: Dispatch<SetStateAction<boolean>>;
     editText: string;
     setEditText: Dispatch<SetStateAction<string>>;
@@ -26,7 +26,7 @@ export interface TaskProcessContextData {
 export const taskProcessContextDefaultValue: TaskProcessContextData = {
     isExpanded: false,
     setIsExpanded: () => {},
-    isEditing: false,
+    isProcessEditing: false,
     setIsEditing: () => {},
     editText: "",
     setEditText: () => {},
@@ -58,7 +58,7 @@ export const TaskProcessProvider: React.FC<React.PropsWithChildren<unknown>> = (
         <TaskProcessStore.Provider
             value={{
                 isExpanded, setIsExpanded,
-                isEditing, setIsEditing,
+                isProcessEditing: isEditing, setIsEditing,
                 editText, setEditText,
                 editErrors, setEditErrors,
                 editCursorPos, setEditCursorPos,

@@ -10,7 +10,8 @@ import { taskService } from "@/services/task.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
-import { ChecklistJSON, isChecklistAllDone } from "@/utils/checklist.utils";
+import { ChecklistJSON } from "@/types/task/checklist.types";
+import { isChecklistAllDone } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
 
 export const useTaskDetailProcessHelper = () => {

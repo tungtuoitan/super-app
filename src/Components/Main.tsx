@@ -26,6 +26,7 @@ import { TaskDetailProvider } from "@/store/task/useTaskDetail.store";
 import { TaskChecklistProvider } from "@/store/task/useTaskChecklist.store";
 import { TaskProcessProvider } from "@/store/task/useTaskProcess.store";
 import { TaskDetailSectionProvider } from "@/store/task/useTaskDetailSection.store";
+import { TaskSectionProvider } from "@/store/task/useTaskSection.store";
 import { TaskTimelineProvider } from "@/store/task/useTaskTimeline.store";
 import { MultiTimelineProvider } from "@/store/task/useMultiTimeline.store";
 import { TaskCommentProvider } from "@/store/task/useTaskComment.store";
@@ -94,6 +95,7 @@ export function Main() {
                                                                                                                     <TaskChecklistProvider>
                                                                                                                         <TaskProcessProvider>
                                                                                                                             <TaskDetailSectionProvider>
+                                                                                                                                <TaskSectionProvider>
                                                                                                                                 <TaskCommentProvider>
                                                                                                                                     <TaskTimelineProvider>
                                                                                                                                         <MultiTimelineProvider>
@@ -128,6 +130,7 @@ export function Main() {
                                                                                                                             </MultiTimelineProvider>
                                                                                                                                     </TaskTimelineProvider>
                                                                                                                                 </TaskCommentProvider>
+                                                                                                                                </TaskSectionProvider>
                                                                                                                             </TaskDetailSectionProvider>
                                                                                                                         </TaskProcessProvider>
                                                                                                                     </TaskChecklistProvider>
