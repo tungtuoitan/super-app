@@ -14,6 +14,7 @@ import {
     toggleChecklistItem,
     flatItemIndex,
     findItemCursorOffset,
+    getFlatItems,
 } from "@/utils/checklist.utils";
 import { useTaskProcessStore } from "@/store/task/useTaskProcess.store";
 import { useTaskProcessSelector } from "@/Selectors/task/TaskProcessSelector";
@@ -45,16 +46,28 @@ export const useTaskProcessHelper = () => {
 
     const handleToggle = useCallback(
         (gi: number, ii: number, action: "check" | "skip") => {
-            if (!parsedProcess || isDisabled) return;
-            const item = parsedProcess.groups[gi].items[ii];
-            // Optional items are never locked by sequential progress
-            if (!item.isOptional) {
-                const fi = flatItemIndex(parsedProcess, gi, ii);
-                if (!item.isChecked && !item.isSkipped && fi > nextRequiredIndex) return;
-            }
-            handleProcessChange(toggleChecklistItem(parsedProcess, gi, ii, action));
+            if (isDisabled) return;
+            // Transform fn: always applied to the LATEST process state inside
+            // setOpenTabs' functional updater — prevents rapid-click overwrites.
+            handleProcessChange((current) => {
+                const item = current.groups[gi]?.items[ii];
+                if (!item) return current;
+                if (!item.isOptional) {
+                    const fi = flatItemIndex(current, gi, ii);
+                    if (!item.isChecked && !item.isSkipped) {
+                        const flat = getFlatItems(current);
+                        let nextReq = flat.length;
+                        for (let i = 0; i < flat.length; i++) {
+                            if (flat[i].isOptional) continue;
+                            if (!flat[i].isChecked && !flat[i].isSkipped) { nextReq = i; break; }
+                        }
+                        if (fi > nextReq) return current;
+                    }
+                }
+                return toggleChecklistItem(current, gi, ii, action);
+            });
         },
-        [parsedProcess, isDisabled, nextRequiredIndex, handleProcessChange],
+        [isDisabled, handleProcessChange],
     );
 
     const toggleGroup = useCallback(
