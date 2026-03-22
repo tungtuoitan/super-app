@@ -4,7 +4,7 @@
  * Displays status info and action buttons based on tab type and state
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Save, RotateCcw, Undo2 } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
@@ -58,19 +58,30 @@ export function EditorToolbar() {
     // Get toolbar actions for active tab
     const { upsertOrchestraitor, commonCancel, _deleteStatusText, _itemId } = useEditorToolbarHelper();
 
+    // ── Keyboard shortcut: Ctrl+S or Alt+S → save ────────────────────────────
+    // Refs ensure listener is registered once — no remove/re-add gap on re-renders.
+    const activeTabRef = useRef(activeTab);
+    const isSavingRef = useRef(isSaving);
+    const upsertOrchestraitorRef = useRef(upsertOrchestraitor);
+    activeTabRef.current = activeTab;
+    isSavingRef.current = isSaving;
+    upsertOrchestraitorRef.current = upsertOrchestraitor;
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "s") {
+            const isCtrlS = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "s";
+            const isAltS  = e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.key.toLowerCase() === "s";
+            if (isCtrlS || isAltS) {
                 e.preventDefault();
-                if (activeTab && activeTab.hasUnsavedChanges && !isSaving) {
-                    upsertOrchestraitor();
+                e.stopImmediatePropagation();
+                if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
+                    upsertOrchestraitorRef.current();
                 }
             }
         };
-
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [activeTab, isSaving, upsertOrchestraitor]);
+        window.addEventListener("keydown", handleKeyDown, { capture: true });
+        return () => window.removeEventListener("keydown", handleKeyDown, { capture: true });
+    }, []); // intentional empty deps — listener lives for the full mount lifetime
 
     return (
         <div className="h-6 flex items-center justify-between px-4 bg-black border-b border-white/5 gap-2">
@@ -129,7 +140,7 @@ export function EditorToolbar() {
                                 </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Save (Ctrl+S)</p>
+                                <p>Save (Ctrl+S / Alt+S)</p>
                             </TooltipContent>
                         </Tooltip>
                     )}
