@@ -60,7 +60,7 @@ export function EditorToolbar() {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "s") {
                 e.preventDefault();
                 if (activeTab && activeTab.hasUnsavedChanges && !isSaving) {
                     upsertOrchestraitor();

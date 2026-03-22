@@ -54,6 +54,8 @@ const _upsertTaskBatch = async (
         deletedAt?: string | null;
         folderWorkspaceItemId?: number | null;
         checklistJson?: string | null;
+        processJson?: string | null;
+        customTabsJson?: string | null;
     }>
 ): Promise<ResultOptions<TaskDTO>> => {
     const res = await apiFetch(`${config.api.baseURL}/api/task`, {
@@ -75,8 +77,33 @@ const _getTaskById = async (_token: string, id: number): Promise<ResultOptions<T
     return Promise.reject(res);
 };
 
+/**
+ * Partial update a single task — only non-null fields are updated in DB.
+ * Use for section saves (process, checklist, custom tabs) to avoid overwriting other fields.
+ */
+const _patchTask = async (
+    _token: string,
+    taskId: number,
+    patch: {
+        note?: string;
+        checklistJson?: string;
+        processJson?: string;
+        customTabsJson?: string;
+        status?: string;
+    }
+): Promise<ResultOptions<TaskDTO>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/task/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+    });
+    if (res.ok) return (await res.json()) as ResultOptions<TaskDTO>;
+    return Promise.reject(res);
+};
+
 export const taskService = {
     _getTasks,
     _getTaskById,
     _upsertTaskBatch,
+    _patchTask,
 };

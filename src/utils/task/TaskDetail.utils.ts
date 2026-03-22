@@ -56,6 +56,8 @@ export const transformTaskData = (dtos: TaskDTO[]): Task[] =>
         deletedAt: parseAsLocalDate(dto.deletedAt),
         folderWorkspaceItemId: dto.folderWorkspaceItemId,
         checklistJson: dto.checklistJson ?? null,
+        processJson: dto.processJson ?? null,
+        customTabsJson: dto.customTabsJson ?? null,
         projectStartDate: parseAsLocalDate(dto.projectStartDate),
         projectEndDate: parseAsLocalDate(dto.projectEndDate),
         parentStartDate: parseAsLocalDate(dto.parentStartDate),

@@ -109,6 +109,8 @@ export const useTaskTimelineHelper = () => {
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,
+                    processJson: task.processJson,
+                    customTabsJson: task.customTabsJson,
                 };
 
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);

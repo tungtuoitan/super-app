@@ -102,6 +102,8 @@ export const useTaskKanbanHelper = () => {
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,
+                    processJson: task.processJson,
+                    customTabsJson: task.customTabsJson,
                 });
 
                 subtaskUpdates.forEach((update) => {
@@ -120,6 +122,8 @@ export const useTaskKanbanHelper = () => {
                         orderIndex: subtask.orderIndex,
                         folderWorkspaceItemId: subtask.folderWorkspaceItemId,
                         checklistJson: subtask.checklistJson,
+                        processJson: subtask.processJson,
+                        customTabsJson: subtask.customTabsJson,
                     });
                 });
 

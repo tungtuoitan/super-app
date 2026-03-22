@@ -1,65 +1,52 @@
 /**
- * TaskChecklist Component
+ * TaskProcess Component
  *
- * Inline display within the Checklist tab section.
+ * Inline display within the Process tab section.
  * Shows progress bar header + checklist items directly (no popup).
- * For testcase type: shows environment tabs (LOCAL/DEV/UAT/PROD).
- *
- * Item row layout: [check] [skip?] item text
- * Skip button is shown inline next to check (not hover-only on the right).
+ * Process steps are always sequential (locked until previous is done).
  */
 
-import { flatItemIndex, getChecklistTypeLabel, getItemCheckState, checklistProgress } from "@/utils/checklist.utils";
-import type { ChecklistType } from "@/types/task/checklist.types";
-import { REQUIRED_ENVIRONMENTS, OPTIONAL_ENVIRONMENTS } from "@/types/task/checklist.constants";
-import type { TestcaseEnvironment } from "@/types/task/checklist.constants";
+import { flatItemIndex } from "@/utils/checklist.utils";
 import {
-    CheckSquare2,
-    Square,
+    CheckCircle2,
+    Circle,
     ChevronDown,
     ChevronRight,
     Edit2,
     Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTaskChecklistStore } from "@/store/task/useTaskChecklist.store";
-import { useTaskChecklistSelector } from "@/Selectors/task/TaskChecklistSelector";
-import { useTaskDetailChecklistSelector } from "@/Selectors/task/TaskDetailChecklistSelector";
-import { useTaskChecklistHelper } from "@/hooks/task/useTaskChecklist.helper";
+import { useTaskProcessStore } from "@/store/task/useTaskProcess.store";
+import { useTaskProcessSelector } from "@/Selectors/task/TaskProcessSelector";
+import { useTaskDetailProcessSelector } from "@/Selectors/task/TaskDetailProcessSelector";
+import { useTaskProcessHelper } from "@/hooks/task/useTaskProcess.helper";
 import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
-import { TaskChecklistHeadless } from "@/HeadlessComponents/task/TaskChecklistHeadless";
+import { TaskProcessHeadless } from "@/HeadlessComponents/task/TaskProcessHeadless";
 
-export function TaskChecklist() {
+export function TaskProcess() {
     return (
         <>
-            <TaskChecklistHeadless />
-            <TaskChecklistInner />
+            <TaskProcessHeadless />
+            <TaskProcessInner />
         </>
     );
 }
 
-function TaskChecklistInner() {
+function TaskProcessInner() {
     const {
         progress, allDone, nextRequiredIndex,
-    } = useTaskChecklistSelector();
+    } = useTaskProcessSelector();
 
-    const { parsedChecklist } = useTaskDetailChecklistSelector();
+    const { parsedProcess } = useTaskDetailProcessSelector();
 
     const {
         isEditing,
         editText,
         editErrors,
         collapsedGroups,
-        settingDefault,
         editCursorPos,
         setEditCursorPos,
-        editChecklistType,
-        setEditChecklistType,
-        activeEnv,
-        setActiveEnv,
-        enabledOptionalEnvs,
-        setEnabledOptionalEnvs,
-    } = useTaskChecklistStore();
+    } = useTaskProcessStore();
 
     const { isDisabled } = useTaskDetailSelector();
 
@@ -70,15 +57,11 @@ function TaskChecklistInner() {
         handleStartEditAt,
         handleEditChange,
         handleSaveEdit,
-        handleSetAsDefault,
         handleCancelEdit,
-    } = useTaskChecklistHelper();
+    } = useTaskProcessHelper();
 
-    const isTestcase = parsedChecklist?.checklistType === "testcase";
-    const env = isTestcase ? activeEnv : undefined;
-
-    // ── No checklist yet — show "Create" button ─────────────────────────────────
-    if (!parsedChecklist && !isEditing) {
+    // ── No process yet — show "Create" button ─────────────────────────────────
+    if (!parsedProcess && !isEditing) {
         return (
             <button
                 onClick={handleStartEdit}
@@ -86,7 +69,7 @@ function TaskChecklistInner() {
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
             >
                 <Plus className="h-3.5 w-3.5" />
-                Create checklist
+                Create process
             </button>
         );
     }
@@ -95,24 +78,6 @@ function TaskChecklistInner() {
     if (isEditing) {
         return (
             <div className="flex flex-col h-full gap-1 mt-2">
-                {/* Type selector */}
-                <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] text-muted-foreground">Type:</span>
-                    {(["checklist", "testcase", "repeat-checklist"] as ChecklistType[]).map((t) => (
-                        <button
-                            key={t}
-                            onClick={() => setEditChecklistType(t)}
-                            className={cn(
-                                "text-[10px] px-2 py-0.5 rounded border transition-colors",
-                                editChecklistType === t
-                                    ? "border-primary text-primary bg-primary/10"
-                                    : "border-border text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            {getChecklistTypeLabel(t)}
-                        </button>
-                    ))}
-                </div>
                 <textarea
                     ref={(el) => {
                         if (el && editCursorPos >= 0) {
@@ -128,7 +93,7 @@ function TaskChecklistInner() {
                         "flex-1 min-h-[600px] w-full text-xs font-mono rounded border bg-muted/30 px-3 py-2 resize-none outline-none focus:border-primary transition-colors leading-6",
                         editErrors.length > 0 ? "border-destructive" : "border-border"
                     )}
-                    placeholder={"# Group Name\n- Item one\n- Optional item-o"}
+                    placeholder={"# Phase Name\n- Step one\n- Optional step-o"}
                     spellCheck={false}
                     autoFocus={editCursorPos < 0}
                 />
@@ -140,24 +105,16 @@ function TaskChecklistInner() {
                     </div>
                 )}
                 <p className="text-[10px] text-muted-foreground shrink-0">
-                    <code className="bg-muted px-0.5 rounded"># Group</code>{" · "}
+                    <code className="bg-muted px-0.5 rounded"># Phase</code>{" · "}
                     <code className="bg-muted px-0.5 rounded">## Sub</code>{" · "}
                     <code className="bg-muted px-0.5 rounded">### Detail</code>{" · "}
-                    <code className="bg-muted px-0.5 rounded">- Item</code>{" · "}
+                    <code className="bg-muted px-0.5 rounded">- Step</code>{" · "}
                     <code className="bg-muted px-0.5 rounded">-o</code> optional{" · "}
                     <code className="bg-muted px-0.5 rounded">--</code> close group
                 </p>
             </div>
         );
     }
-
-    // ── Visible environments for testcase ────────────────────────────────────
-    const visibleEnvs: TestcaseEnvironment[] = isTestcase
-        ? [...REQUIRED_ENVIRONMENTS, ...OPTIONAL_ENVIRONMENTS.filter((e) => enabledOptionalEnvs.includes(e))]
-        : [];
-    const hiddenOptionalEnvs = isTestcase
-        ? OPTIONAL_ENVIRONMENTS.filter((e) => !enabledOptionalEnvs.includes(e))
-        : [];
 
     // ── View mode (inline) ────────────────────────────────────────────────────
     return (
@@ -168,7 +125,7 @@ function TaskChecklistInner() {
                     <div
                         className={cn(
                             "h-full rounded-full transition-all duration-300",
-                            "bg-amber-500"
+                            allDone ? "bg-purple-500" : "bg-purple-500"
                         )}
                         style={{ width: progress ? `${(progress.done / progress.total) * 100}%` : "0%" }}
                     />
@@ -176,63 +133,22 @@ function TaskChecklistInner() {
                 <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">
                     {progress?.done}/{progress?.total}
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
-                    {getChecklistTypeLabel(parsedChecklist?.checklistType)}
-                </span>
                 {!isDisabled && (
                     <button
                         onClick={handleStartEdit}
                         className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                        title="Edit checklist"
+                        title="Edit process"
                     >
                         <Edit2 className="h-3 w-3" />
                     </button>
                 )}
             </div>
 
-            {/* Env tabs — only for testcase */}
-            {isTestcase && (
-                <div className="flex items-center gap-1 shrink-0 pb-2">
-                    {visibleEnvs.map((e) => {
-                        const ep = checklistProgress(parsedChecklist!, e);
-                        const isActive = e === activeEnv;
-                        return (
-                            <button
-                                key={e}
-                                onClick={() => setActiveEnv(e)}
-                                className={cn(
-                                    "text-[10px] px-2 py-0.5 rounded border transition-colors tabular-nums",
-                                    isActive
-                                        ? "border-amber-500 text-amber-500 bg-amber-500/10"
-                                        : "border-border text-muted-foreground hover:text-foreground"
-                                )}
-                            >
-                                {e}
-                                <span className="ml-1 opacity-60">{ep.done}/{ep.total}</span>
-                            </button>
-                        );
-                    })}
-                    {hiddenOptionalEnvs.map((e) => (
-                        <button
-                            key={`add-${e}`}
-                            onClick={() => setEnabledOptionalEnvs((prev) => [...prev, e])}
-                            className="text-[10px] px-1.5 py-0.5 rounded border border-dashed border-border text-muted-foreground/50 hover:text-foreground hover:border-foreground transition-colors"
-                            title={`Enable ${e} environment`}
-                        >
-                            + {e}
-                        </button>
-                    ))}
-                </div>
-            )}
-
             {/* Items — scrollable */}
             <div className="flex-1 min-h-0 overflow-y-auto space-y-1 pr-1">
-                {parsedChecklist!.groups.map((group, gi) => {
+                {parsedProcess!.groups.map((group, gi) => {
                     const collapsed = collapsedGroups.has(group.name);
-                    const groupDone = group.items.every((i) => {
-                        const s = getItemCheckState(i, env);
-                        return s.isChecked || s.isSkipped;
-                    });
+                    const groupDone = group.items.every((i) => i.isChecked || i.isSkipped);
                     const level = group.level ?? 1;
                     const headerIndent = level === 1 ? "" : level === 2 ? "pl-6" : "pl-12";
                     const itemIndent = level === 1 ? "pl-5" : level === 2 ? "pl-11" : "pl-[4.25rem]";
@@ -259,10 +175,9 @@ function TaskChecklistInner() {
                             )}
 
                             {!collapsed && group.items.map((item, ii) => {
-                                const fi = flatItemIndex(parsedChecklist!, gi, ii);
-                                const s = getItemCheckState(item, env);
+                                const fi = flatItemIndex(parsedProcess!, gi, ii);
                                 // Optional items never block sequential progress
-                                const isLocked = !item.isOptional && !s.isChecked && !s.isSkipped && fi > nextRequiredIndex;
+                                const isLocked = !item.isOptional && !item.isChecked && !item.isSkipped && fi > nextRequiredIndex;
                                 return (
                                     <div
                                         key={ii}
@@ -276,11 +191,11 @@ function TaskChecklistInner() {
                                         <button
                                             onClick={() => handleToggle(gi, ii, "check")}
                                             disabled={isDisabled || isLocked}
-                                            className="mt-1 shrink-0 text-muted-foreground hover:text-amber-500 disabled:cursor-not-allowed transition-colors"
+                                            className="mt-1 shrink-0 text-muted-foreground hover:text-purple-500 disabled:cursor-not-allowed transition-colors"
                                         >
-                                            {s.isChecked
-                                                ? <CheckSquare2 className="h-3.5 w-3.5 text-amber-500" />
-                                                : <Square className="h-3.5 w-3.5" />}
+                                            {item.isChecked
+                                                ? <CheckCircle2 className="h-3.5 w-3.5 text-purple-500" />
+                                                : <Circle className="h-3.5 w-3.5" />}
                                         </button>
 
                                         <span
@@ -288,7 +203,7 @@ function TaskChecklistInner() {
                                             className={cn(
                                                 "flex-1 text-xs leading-5 text-left select-none",
                                                 isDisabled || isLocked ? "cursor-default" : "cursor-pointer",
-                                                (s.isChecked || s.isSkipped) && "line-through text-muted-foreground opacity-70"
+                                                (item.isChecked || item.isSkipped) && "line-through text-muted-foreground opacity-70"
                                             )}
                                         >
                                             {item.name}
@@ -304,9 +219,9 @@ function TaskChecklistInner() {
                 })}
 
                 {allDone && (
-                    <div className="flex items-center gap-1.5 text-xs text-amber-500 font-medium pt-1">
-                        <CheckSquare2 className="h-3.5 w-3.5" />
-                        All checks complete — task can now be closed.
+                    <div className="flex items-center gap-1.5 text-xs text-purple-500 font-medium pt-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        All steps complete!
                     </div>
                 )}
             </div>
