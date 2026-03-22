@@ -16,6 +16,7 @@ import {
     flatItemIndex,
     findItemCursorOffset,
     getItemCheckState,
+    getFlatItems,
     migrateToTestcase,
     migrateFromTestcase,
 } from "@/utils/checklist.utils";
@@ -55,17 +56,34 @@ export const useTaskChecklistHelper = () => {
 
     const handleToggle = useCallback(
         (gi: number, ii: number, action: "check" | "skip") => {
-            if (!parsedChecklist || isDisabled) return;
-            const item = parsedChecklist.groups[gi].items[ii];
-            // Optional items are never locked by sequential progress
-            if (!item.isOptional) {
-                const fi = flatItemIndex(parsedChecklist, gi, ii);
-                const s = getItemCheckState(item, env);
-                if (!s.isChecked && !s.isSkipped && fi > nextRequiredIndex) return;
-            }
-            handleChecklistChange(toggleChecklistItem(parsedChecklist, gi, ii, action, env));
+            if (isDisabled) return;
+            // Pass a transform fn so the update is applied to the LATEST checklist
+            // state inside setOpenTabs' functional updater — prevents stale-closure
+            // overwrites when the user clicks multiple checkboxes rapidly.
+            handleChecklistChange((current) => {
+                const item = current.groups[gi]?.items[ii];
+                if (!item) return current;
+                // Resolve env from current state (testcase type)
+                const currentEnv = current.checklistType === "testcase" ? activeEnv : undefined;
+                // Guard: sequential progress — compute nextRequiredIndex from current
+                if (!item.isOptional) {
+                    const fi = flatItemIndex(current, gi, ii);
+                    const s = getItemCheckState(item, currentEnv);
+                    if (!s.isChecked && !s.isSkipped) {
+                        const flat = getFlatItems(current);
+                        let nextReq = flat.length;
+                        for (let i = 0; i < flat.length; i++) {
+                            if (flat[i].isOptional) continue;
+                            const fs = getItemCheckState(flat[i], currentEnv);
+                            if (!fs.isChecked && !fs.isSkipped) { nextReq = i; break; }
+                        }
+                        if (fi > nextReq) return current;
+                    }
+                }
+                return toggleChecklistItem(current, gi, ii, action, currentEnv);
+            });
         },
-        [parsedChecklist, isDisabled, nextRequiredIndex, handleChecklistChange, env],
+        [isDisabled, handleChecklistChange, activeEnv],
     );
 
     const toggleGroup = useCallback(
