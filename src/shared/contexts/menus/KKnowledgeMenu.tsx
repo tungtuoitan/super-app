@@ -29,7 +29,7 @@ export function KKnowledgeMenu() {
                     <MenuDivider />
                     <MenuItem onClick={() => executeDirectly({ callback: contextData?.onEdit })}>
                         <Pencil className="w-4 h-4 mr-2" />
-                        Edit
+                        Open Knowledge
                     </MenuItem>
                     <MenuItem
                         onClick={(e) =>

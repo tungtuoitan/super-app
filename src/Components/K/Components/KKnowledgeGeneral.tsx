@@ -84,7 +84,7 @@ export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps
     if (!knowledge) return null;
 
     return (
-        <div className="flex flex-col gap-0 p-4 max-w-xl">
+        <div className="flex flex-col gap-0 p-4 w-full">
             {/* Accent bar */}
             <div className="h-1 rounded-full mb-4 bg-primary/40" />
 
@@ -111,7 +111,7 @@ export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps
                     value={knowledge.description ?? ""}
                     onChange={(e) => handleFieldChange("description", e.target.value)}
                     placeholder="Short description..."
-                    rows={2}
+                    rows={12}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground"
                 />
             </div>

@@ -30,8 +30,14 @@ export interface KItemV2 {
   /** Hex color code */
   color?: string | null;
 
-  /** Icon emoji or class */
+  /** Icon emoji or class — only used when nodeType = "entity" */
   icon?: string | null;
+
+  /** Node type — "entity" | "question" | null */
+  nodeType?: "entity" | "question" | null;
+
+  /** Workflow status — "draft" | null */
+  statusCode?: string | null;
 
   /** Materialized path, e.g. "/1/5/12/" */
   pathIds: string;

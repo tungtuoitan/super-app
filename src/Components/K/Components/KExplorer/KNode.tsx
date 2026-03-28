@@ -1,18 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NodeApi } from "react-arborist";
-import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
+import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp, HelpCircle } from "lucide-react";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/useKTreeHelper2";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { KHighlightText } from "./KHighlightText";
-import {useKStore} from "../../store/K.store";
-import {useKTreeStatusHelper} from "../../hooks/useKTreeStatusHelper";
-import {KTreeNode} from "../../hooks";
-import {kconstants} from "../../utils/K.Constants";
-import {IconType} from "../../shared/icons/icon.types";
-import {ICON_MAP} from "../../shared/icons/icon.config";
-import {useKNodeTabHelper} from "../../hooks/useKNodeTabHelper";
+import { useKStore } from "../../store/K.store";
+import { useKTreeStatusHelper } from "../../hooks/useKTreeStatusHelper";
+import { KTreeNode } from "../../hooks";
+import { kconstants } from "../../utils/K.Constants";
+import { IconType } from "../../shared/icons/icon.types";
+import { ICON_MAP } from "../../shared/icons/icon.config";
+import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { useEditorTabsStore } from "@/store/index";
+import { constants } from "@/utils/constants";
+import type { KWsResponse } from "../../types/K.types";
+import { kTestDrag } from "../KTestDetail/kTestDrag";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
@@ -39,11 +43,12 @@ const Folder2: React.FC<IconProps> = ({ className, color }) => (
 export default Folder2;
 
 export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds, markedNodeId, setMarkedNodeId, currentKId }: NodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId } = useKStore();    const { searchQuery } = useGridControlStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, nodeScoreMap, setPendingQuizTabSwitch } = useKStore();    const { searchQuery } = useGridControlStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();
     const _TREESTATUS = useKTreeStatusHelper();
-    const { openKNodeTab } = useKNodeTabHelper();
+    const { activateDraftNode } = useKNodeDialogHelper();
 
     // Safe cast: KTree already filters to only render FolderNode for folders
     const nodeItem = node.data.data;
@@ -52,10 +57,15 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const nodeId = nodeItem.id; // workspace_items.id (unique)
     const nodeName = nodeItem.name;
     const nodeColor = nodeItem.color;
-    const nodeIcon = nodeItem.icon as IconType | undefined; // Icon type from database
+    const nodeIcon = nodeItem.icon as IconType | undefined; // Icon type from database — only for entity nodes
+    const nodeType = nodeItem.nodeType; // "entity" | "question" | null
+    const isQuestion = nodeType === "question";
     const hasChildren = node.data.children && node.data.children.length > 0;
-    const isSelected = isNodeSelected(nodeId); // Use workspace_items.id for selection
-    const isWorkspaceRoot = nodeItem.id < 0; // Workspace root node has negative ID
+    const isSelected = isNodeSelected(nodeId);
+    const isWorkspaceRoot = nodeItem.id < 0;
+
+    // Latest quiz score for question nodes (0–5), undefined if never tested
+    const score = isQuestion ? nodeScoreMap[nodeId] : undefined;
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -66,10 +76,40 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     // Check if deleted (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(nodeItem);
 
+    // Knowledge imageBase64 — used for workspace root node icon
+    const knowledgeImage = isWorkspaceRoot
+        ? allK.find((k) => k.id === nodeItem.knowledgeId)?.imageBase64 ?? null
+        : null;
+
     // Mark feature
     const isMarked = markedNodeId === nodeId;
     const isDimmed = !!markedVisibleIds && !markedVisibleIds.has(nodeId);
     const isHovered = hoveredNodeId === nodeId;
+
+    // ── Native drag tracking for test-panel drop zone ─────────────────────────
+    // Use native addEventListener (not React synthetic or state) to avoid
+    // conflicting with react-arborist's DnD system. Writes to a module-level
+    // variable (kTestDrag) so NO React re-render happens during drag.
+    const innerDivRef  = useRef<HTMLDivElement | null>(null);
+    const dragStateRef = useRef({ selectedItemIds, nodeId });
+    dragStateRef.current = { selectedItemIds, nodeId }; // always fresh
+
+    useEffect(() => {
+        const el = innerDivRef.current;
+        if (!el) return;
+        const onDragStart = () => {
+            const { selectedItemIds: sids, nodeId: nid } = dragStateRef.current;
+            const ids = sids.includes(nid) && sids.length > 0 ? [...sids] : [nid];
+            kTestDrag.set(ids);
+        };
+        const onDragEnd = () => kTestDrag.clear();
+        el.addEventListener("dragstart", onDragStart);
+        el.addEventListener("dragend",   onDragEnd);
+        return () => {
+            el.removeEventListener("dragstart", onDragStart);
+            el.removeEventListener("dragend",   onDragEnd);
+        };
+    }, []);
 
     const handleToggleMark = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -87,6 +127,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     // Expand/collapse subtree — 3-state cycle: expand(1 lvl) → expand all → collapse
     // 0 = collapsed, 1 = expanded 1 level, 2 = expanded all
     const [expandPhase, setExpandPhase] = useState<0 | 1 | 2>(0);
+    const [isDraftHovered, setIsDraftHovered] = useState(false);
 
     function findSubtree(nodes: KTreeNode[], targetId: number): KTreeNode | null {
         for (const n of nodes) {
@@ -226,7 +267,31 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
             setSelectedItemIds([nodeId]);
             setLastSelectedItemId(nodeId);
             node.select();
-            openKNodeTab(nodeItem);
+            // 1. Find or create the k-knowledge editor tab for currentK
+            const kTab = openTabs.find(
+                (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge &&
+                       (t.data as KWsResponse).id === currentK?.id
+            );
+            if (kTab) {
+                setActiveTabId(kTab.id);
+            } else if (currentK) {
+                // No tab open yet — find the KWsResponse from allK and create one
+                const ks = allK.find((k) => k.id === currentK.id);
+                if (ks) {
+                    const newTab = {
+                        id:                `k-knowledge-tab-${ks.id}-${Date.now()}`,
+                        type:              constants.vscode.tab.tabTypes.kKnowledge,
+                        data:              ks,
+                        data0:             ks,
+                        title:             "Knowledge",
+                        hasUnsavedChanges: false,
+                    };
+                    setOpenTabs((prev: any[]) => [...prev, newTab]);
+                    setActiveTabId(newTab.id);
+                }
+            }
+            // 2. Signal KKnowledgeEditorPanel to switch to Quiz tab
+            setPendingQuizTabSwitch(nodeId);
         }
     };
 
@@ -264,6 +329,8 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         >
             <div
                 ref={(el) => {
+                    // Also store for native drag listeners (test drop zone)
+                    innerDivRef.current = el;
                     // Make entire node draggable (VS Code style - no special cursor)
                     if (dragHandle && typeof dragHandle === "function" && el) {
                         try {
@@ -309,7 +376,17 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 >
                     {/* Workspace root node */}
                     {isWorkspaceRoot ? (
-                        <LibraryBig className="w-4 h-4" style={{ color: nodeColor || "#A1887F" }} />
+                        knowledgeImage ? (
+                            <img
+                                src={knowledgeImage}
+                                alt=""
+                                className="w-4 h-4 rounded-sm object-cover flex-shrink-0"
+                            />
+                        ) : (
+                            <LibraryBig className="w-4 h-4" style={{ color: nodeColor || "#A1887F" }} />
+                        )
+                    ) : nodeType === "question" ? (
+                        <HelpCircle className="w-4 h-4" style={{ color: "#6b7280" }} strokeWidth={2} />
                     ) : nodeIcon && ICON_MAP[nodeIcon] ? (
                         (() => {
                             const CustomIcon = ICON_MAP[nodeIcon];
@@ -342,11 +419,47 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             ${hasChildren ? "font-semibold" : "font-normal"}
                             ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
                             ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}
-                            ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
+                            ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : isQuestion ? "text-white/70" : "text-editor-fg"}
                         `}
                         />
+                        {/* Draft badge — hover to see "Keep it", click to activate */}
+                        {nodeItem.statusCode === "draft" && treeType === "workspaceTree" && (
+                            <button
+                                onMouseEnter={() => setIsDraftHovered(true)}
+                                onMouseLeave={() => setIsDraftHovered(false)}
+                                onClick={async (e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    await activateDraftNode(nodeItem);
+                                }}
+                                title="Click to keep this node (mark as active)"
+                                className={`
+                                    shrink-0 text-[9px] font-semibold tracking-wide px-1 py-0 rounded border leading-4
+                                    transition-colors cursor-pointer
+                                    ${isDraftHovered
+                                        ? "border-emerald-500/60 text-emerald-400 bg-emerald-900/30"
+                                        : "border-amber-600/50 text-amber-500/80 bg-amber-900/20"}
+                                `}
+                            >
+                                {isDraftHovered ? "Keep it" : "DRAFT"}
+                            </button>
+                        )}
                     </div>
                 </div>
+
+                {/* Score badge — only for question nodes that have been tested */}
+                {isQuestion && score !== undefined && treeType === "workspaceTree" && (
+                    <span
+                        title={`Last score: ${score}/5`}
+                        className={`shrink-0 text-[9px] font-bold px-1 py-0 rounded leading-4 ${
+                            score >= 4 ? "bg-green-900/40 text-green-400" :
+                            score >= 2 ? "bg-yellow-900/40 text-yellow-400" :
+                                         "bg-red-900/40 text-red-400"
+                        }`}
+                    >
+                        {score}/5
+                    </span>
+                )}
 
                 {/* Mark button — visible on hover or when this node is marked */}
                 {!isWorkspaceRoot && treeType === "workspaceTree" && (isHovered || isMarked) && (

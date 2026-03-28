@@ -118,6 +118,23 @@ const _deleteWorkspaceItems = async (
     return Promise.reject(res);
 };
 
+// ── Import nodes from Markdown (AI-powered) ──────────────────────────────────
+
+const _importMarkdown = async (
+    _token: string,
+    knowledgeId: number,
+    markdown: string,
+    parentNodeId: number | null,
+): Promise<ResultOptions> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/k/${knowledgeId}/nodes/import-markdown`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markdown, parentNodeId }),
+    });
+    if (res.ok) return await res.json();
+    return Promise.reject(res);
+};
+
 // ── Export ───────────────────────────────────────────────────────────────────
 
 export const KService = {
@@ -128,4 +145,5 @@ export const KService = {
     _getWorkspaceTreeV2,
     _upsertWorkspaceItems,
     _deleteWorkspaceItems,
+    _importMarkdown,
 };

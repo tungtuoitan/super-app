@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, HelpCircle } from "lucide-react";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";
@@ -16,6 +16,8 @@ export function InlineNewNodeCard() {
     const [showIconPicker, setShowIconPicker] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
+
+    const isQuestion = draft.name.trimEnd().endsWith("?");
 
     useEffect(() => {
         setTimeout(() => inputRef.current?.focus(), 50);
@@ -45,17 +47,23 @@ export function InlineNewNodeCard() {
         >
             {/* Icon button — top left */}
             <div className="absolute top-2 left-2 z-10" ref={pickerRef}>
-                <button
-                    onClick={() => setShowIconPicker(v => !v)}
-                    className="w-5 h-5 flex items-center justify-center rounded hover:bg-zinc-800 transition-colors"
-                    title="Pick icon"
-                >
-                    {IconComponent
-                        ? <IconComponent className="w-3.5 h-3.5" style={{ color: draft.color || "#75beff" }} strokeWidth={2} />
-                        : <span className="text-[10px] text-zinc-600">+icon</span>
-                    }
-                </button>
-                {showIconPicker && (
+                {isQuestion ? (
+                    <div className="w-5 h-5 flex items-center justify-center pointer-events-none">
+                        <HelpCircle className="w-3.5 h-3.5" style={{ color: "#6b7280" }} strokeWidth={2} />
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setShowIconPicker(v => !v)}
+                        className="w-5 h-5 flex items-center justify-center rounded hover:bg-zinc-800 transition-colors"
+                        title="Pick icon"
+                    >
+                        {IconComponent
+                            ? <IconComponent className="w-3.5 h-3.5" style={{ color: draft.color || "#75beff" }} strokeWidth={2} />
+                            : <span className="text-[10px] text-zinc-600">+icon</span>
+                        }
+                    </button>
+                )}
+                {!isQuestion && showIconPicker && (
                     <div className="absolute top-6 left-0 z-50 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl" style={{ width: 280 }}>
                         <IconPicker
                             value={draft.icon as IconType | null}
@@ -99,7 +107,7 @@ export function InlineNewNodeCard() {
                     onChange={(e) => setDraft(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Name"
                     className="w-full bg-transparent text-sm font-semibold text-left outline-none border-b border-zinc-700 pb-0.5"
-                    style={{ color: draft.color || "#f4f4f5" }}
+                    style={{ color: isQuestion ? "#ffffff" : (draft.color || "#f4f4f5") }}
                     onKeyDown={(e) => {
                         if (e.key === "Escape") handleCancelInline();
                         if (e.key === "Enter") handleInlineCreate(draft, inlineNewParentId ?? null);

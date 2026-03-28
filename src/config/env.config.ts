@@ -20,6 +20,9 @@ export const envConfig = {
     // Google OAuth
     REACT_APP_GOOGLE_CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID,
     REACT_APP_GOOGLE_REDIRECT_URI: process.env.REACT_APP_GOOGLE_REDIRECT_URI,
+
+    // Groq
+    REACT_APP_GROQ_API_KEY: process.env.REACT_APP_GROQ_API_KEY,
 } as const;
 
 /**
