@@ -3,17 +3,16 @@ import {
     Plus as AddIcon,
     Edit as EditIcon,
     Trash2 as DeleteIcon,
-    File as FileIcon,
-    FileText as NoteIcon,
     AlertTriangle as HardDeleteIcon,
     RotateCcw as RestoreIcon,
-    BarChart3 as TrackingIcon,
+    FileCode as ImportMarkdownIcon,
 } from "lucide-react";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import {useKStore} from "../../store/K.store";
-import {useKMenuHelper} from "../helpers/useKMenu.helper";
-import {useKTreeStatusHelper} from "../../hooks/useKTreeStatusHelper";
-import {kconstants} from "../../utils/K.Constants";
+import { useKStore } from "../../store/K.store";
+import { useKMenuHelper } from "../helpers/useKMenu.helper";
+import { useKTreeStatusHelper } from "../../hooks/useKTreeStatusHelper";
+import { useKTabHelper } from "../../hooks/useKTab.helper";
+import { kconstants } from "../../utils/K.Constants";
 
 /**
  * WorkspaceFolderNodeMenu
@@ -26,8 +25,9 @@ import {kconstants} from "../../utils/K.Constants";
  */
 export function KNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
-    const { selectedItemIds, currentK } = useKStore();
+    const { selectedItemIds, currentK, allK, setPendingImportNodeId } = useKStore();
     const { createFolder, editFolder, dhr_items } = useKMenuHelper();
+    const { openKnowledgeTab } = useKTabHelper();
     const _TREESTATUS = useKTreeStatusHelper();
 
     // Calculate derived values
@@ -36,10 +36,18 @@ export function KNodeMenu() {
 
     // Check deleted status (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
-    
+
     const addMenuItems = [
         { type: kconstants.workspace.itemTypes.folder, icon: AddIcon, label: "New Card", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
     ];
+
+    const handleImportMarkdown = () => {
+        // Store the target parent node in KStore so KKnowledgeEditorPanel can read it even if not yet mounted
+        setPendingImportNodeId(contextData?.id ?? null);
+        // Ensure the knowledge tab is open
+        const ks = allK.find(k => k.id === currentK?.id);
+        if (ks) openKnowledgeTab(ks);
+    };
 
     return (
         <>
@@ -69,6 +77,12 @@ export function KNodeMenu() {
                     <MenuItem onClick={() => editFolder(contextData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
                         <EditIcon className="w-4 h-4 mr-2" />
                         Edit
+                    </MenuItem>
+
+                    {/* Import from Markdown */}
+                    <MenuItem onClick={handleImportMarkdown} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
+                        <ImportMarkdownIcon className="w-4 h-4 mr-2" />
+                        Import từ Markdown
                     </MenuItem>
 
                     {/* Delete/Restore options */}

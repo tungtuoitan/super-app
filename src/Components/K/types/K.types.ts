@@ -29,7 +29,12 @@ export interface KUpsertNodeData {
     name: string;
     description?: string | null;
     color?: string | null;
+    /** Only applicable when nodeType = "entity" */
     icon?: string | null;
+    /** Node type — "entity" | "question" | null */
+    nodeType?: "entity" | "question" | null;
+    /** Workflow status — "draft" | null (active). Pass null to activate a draft node. */
+    statusCode?: string | null;
 }
 
 // ============================================

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";import { useDrag, useDrop } from "react-dnd";
-import { Trash2, LibraryBig, Library, RotateCcw, Maximize2, Minimize2, Bookmark } from "lucide-react";
+import { Trash2, LibraryBig, Library, HelpCircle, RotateCcw, Maximize2, Minimize2, Bookmark } from "lucide-react";
 import type { KItemV2 } from "../../types/K-v2.types";
 import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
@@ -85,6 +85,7 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const isDeleted = !!node.deletedAt;
     const isKnowledge = isRoot && node.id < 0;
     const isHoveredFromTree = !isRoot && hoveredNodeId === node.id;
+    const isQuestion = node.nodeType === "question";
 
     // ── Flash the save/discard prompt ──────────────────────────────────────────
     const [isFlashing, setIsFlashing] = useState(false);
@@ -123,6 +124,9 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
         }
         if (isRoot) {
             return <LibraryBig className="w-3.5 h-3.5" style={{ color: node.color || "#A1887F", opacity }} strokeWidth={2} />;
+        }
+        if (isQuestion) {
+            return <HelpCircle className="w-3.5 h-3.5" style={{ color: "#6b7280", opacity: Math.min(opacity + 0.3, 1) }} strokeWidth={2} />;
         }
         if (IconComponent) {
             return <IconComponent className="w-3.5 h-3.5" style={{ color: iconColor, opacity }} strokeWidth={2} />;
@@ -178,9 +182,12 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     useEffect(() => {
         if (!isEditing) return;
         const handler = (e: KeyboardEvent) => {
-            if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                handleSubmitEdit(node, editDraft);
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                // Only fire if focus is inside this card (not in the desc editor — it handles its own)
+                if (cardRef.current?.contains(document.activeElement)) {
+                    e.preventDefault();
+                    handleSubmitEdit(node, editDraft);
+                }
             }
         };
         document.addEventListener("keydown", handler);
@@ -274,9 +281,9 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
         >
             {UnsavedPrompt}
 
-            {/* Icon — absolute, same position both modes. Always clickable (except knowledge root / deleted). */}
+            {/* Icon — absolute, same position both modes. Always clickable (except knowledge root / deleted / question). */}
             <div className="absolute top-2 left-2 z-10" ref={iconPickerRef}>
-                {isKnowledge || isDeleted ? (
+                {isKnowledge || isDeleted || isQuestion ? (
                     <div className="w-5 h-5 flex items-center justify-center pointer-events-none">
                         <NodeIconDisplay opacity={0.4} />
                     </div>
@@ -376,16 +383,17 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                         onChange={(e) => setDraft("name", e.target.value)}
                         placeholder="Name"
                         className="w-full bg-transparent text-sm font-semibold text-left outline-none border-b border-zinc-700 pb-0.5"
-                        style={{ color: editDraft.color || node.color || "#f4f4f5" }}
+                        style={{ color: isQuestion ? "#808080" : (editDraft.color || node.color || "#f4f4f5") }}
                         onKeyDown={(e) => {
-                            if (e.key === "Escape") handleCancelEdit();
-                            // if (e.key === "Enter") handleSubmitEdit(node, editDraft);
+                            if (e.key === "Escape") { e.preventDefault(); handleCancelEdit(); }
+                            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); handleSubmitEdit(node, editDraft); }
+                            if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); } // block accidental save
                         }}
                     />
                 ) : !isKnowledge ? (
                     <button
                         className="text-sm cursor-text font-semibold text-left leading-snug line-clamp-2 mt-[3px] w-full "
-                        style={{ color: node.color || "#f4f4f5" }}
+                        style={{ color: isQuestion ? "#808080" : (node.color || "#f4f4f5") }}
                         
                         onDoubleClick={(e) => {
                             e.stopPropagation();

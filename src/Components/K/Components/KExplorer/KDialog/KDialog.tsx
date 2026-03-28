@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { HelpCircle, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
 import { GenericTextField, IconPicker } from "@/shared/components";
@@ -20,13 +20,14 @@ import {getAllIconLabel} from "../../../shared/icons/icon.utils";
 import {IconType} from "../../../shared/icons/icon.types";
 import {useNodeDialogStore} from "../../../store/KNodeDialog.store";
 import { getIconDefaultColor } from "@/shared/icons";
+import type { KNodeType } from "../../../store/KNodeDialog.store";
 
 export function KDialog() {
     // Get state from ExplorerStore
     const { currentK } = useKStore();
 
     // Get form state from NodeDialogStore (unified approach)
-    const { isNodeDialogOpen, mode, itemType, editingNode, parentNode, newNodeName, setNewNodeName, description, setDescription, color, setColor, icon, setIcon, errors, setErrors, isSubmitting } =
+    const { isNodeDialogOpen, mode, itemType, editingNode, parentNode, newNodeName, setNewNodeName, description, setDescription, color, setColor, icon, setIcon, nodeType, setNodeType, errors, setErrors, isSubmitting } =
         useNodeDialogStore();
 
     // Get business logic and dialog actions from helper
@@ -41,8 +42,23 @@ export function KDialog() {
             hasManuallySelectedIcon.current = false;
             setIcon(IconType.LIBRARIES);
             setColor(getIconDefaultColor(IconType.LIBRARIES));
+            setNodeType("entity");
         }
     }, [isNodeDialogOpen, mode]);
+
+    // Auto-infer nodeType from name: trailing "?" → question, otherwise entity
+    useEffect(() => {
+        if (itemType !== kconstants.workspace.itemTypes.folder) return;
+        const inferred: KNodeType = newNodeName.trimEnd().endsWith("?") ? "question" : "entity";
+        setNodeType(inferred);
+        if (inferred === "question") {
+            setIcon(null);
+            setColor(kconstants.color[0].value);
+        } else if (!hasManuallySelectedIcon.current) {
+            setIcon(IconType.LIBRARIES);
+            setColor(getIconDefaultColor(IconType.LIBRARIES));
+        }
+    }, [newNodeName, itemType]);
 
     // Auto-select icon based on folder name (only in create mode and only for folders)
     // useEffect(() => {
@@ -188,7 +204,7 @@ export function KDialog() {
                                         size="small"
                                         error={!!errors.name || isDuplicateName}
                                         helperText={errors.name || (isDuplicateName ? `A ${itemLabel.toLowerCase()} with this name already exists in this location` : "")}
-                                        maxLength={50}
+                                        maxLength={200}
                                     />
                                 </div>
                                 <div className="folder-name-suggestion">
@@ -260,40 +276,51 @@ export function KDialog() {
                         />
                     </div>
 
-                    {/* Only show color and icon pickers for folders */}
-                    {itemType === kconstants.workspace.itemTypes.folder && (
-                        <>
-                            {/* Compact Color Picker - Disabled, using default gray color from icon config */}
-                            {/* <div className="space-y-2">
-                                <Label htmlFor="color">Color</Label>
-                                <div className="grid grid-cols-8 gap-2">
-                                    {kconstants.color.map((option) => (
-                                        <button
-                                            key={option.value}
-                                            type="button"
-                                            onClick={() => setColor(option.value)}
-                                            title={option.label}
-                                            className={cn(
-                                                "flex items-center justify-center p-2 rounded-md border-2 transition-all",
-                                                color === option.value ? "border-primary " : "border-border hover:border-primary/50"
-                                            )}
-                                        >
-                                            <div className="w-5 h-5 rounded border" style={{ backgroundColor: option.value }} />
-                                        </button>
-                                    ))}
-                                </div>
-                            </div> */}
+                    {/* Node type toggle + Icon picker — fixed height to prevent jumping */}
+                    <div className="space-y-1.5">
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest">Node type</p>
+                        <div className="flex gap-2">
+                            {(["entity", "question"] as const).map((t) => (
+                                <button
+                                    key={t}
+                                    type="button"
+                                    onClick={() => {
+                                        setNodeType(t);
+                                        if (t === "question") {
+                                            setIcon(null);
+                                            setColor(kconstants.color[0].value);
+                                        } else if (!icon) {
+                                            setIcon(IconType.LIBRARIES);
+                                            setColor(getIconDefaultColor(IconType.LIBRARIES));
+                                        }
+                                    }}
+                                    className={`flex-1 py-1.5 rounded text-xs border transition-colors flex items-center justify-center gap-1.5 ${
+                                        nodeType === t
+                                            ? "border-primary bg-primary/10 text-primary font-medium"
+                                            : "border-border text-muted-foreground hover:border-primary/50"
+                                    }`}
+                                >
+                                    {t === "question"
+                                        ? <><HelpCircle className="w-3.5 h-3.5" /> Question</>
+                                        : <>Entity</>
+                                    }
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
-                            {/* Icon Picker - Reusable component with groups */}
+                    {/* Icon picker — always rendered to prevent layout shift, disabled for question type */}
+                    {itemType === kconstants.workspace.itemTypes.folder && (
+                        <div className={nodeType === "question" ? "opacity-30 pointer-events-none" : ""}>
                             <IconPicker
-                                value={icon}
+                                value={nodeType === "question" ? null : icon}
                                 onChange={handleIconChange}
                                 label="Icon"
                                 columns={4}
                                 maxHeight="300px"
                                 showGroupLabels={true}
                             />
-                        </>
+                        </div>
                     )}
                 </div>
 

@@ -10,6 +10,7 @@ import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../utils/K.Constants";
 import {Folder} from "../types";
 import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/KNodeDialog.store";
+import type { KItemV2 } from "../types/K-v2.types";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();
@@ -20,7 +21,7 @@ export const useKNodeDialogHelper = () => {
     const {
         mode,
         itemType,
-        setItemType, 
+        setItemType,
         editingNode,
         parentNode,
         setParentNode,
@@ -28,6 +29,7 @@ export const useKNodeDialogHelper = () => {
         description,
         color,
         icon,
+        nodeType,
         setErrors,
         setIsSubmitting,
         setIsLoadingTree,
@@ -38,6 +40,7 @@ export const useKNodeDialogHelper = () => {
         setDescription,
         setColor,
         setIcon,
+        setNodeType,
     } = useNodeDialogStore();
 
     // Workspace state
@@ -58,6 +61,7 @@ export const useKNodeDialogHelper = () => {
         setDescription("");
         setColor(kconstants.color[0].value); // Reset to default color
         setIcon(null);
+        setNodeType("entity");
         setErrors({});
         setIsSubmitting(false);
     };
@@ -114,7 +118,8 @@ export const useKNodeDialogHelper = () => {
                         name: newNodeName.trim(),
                         description: description.trim() || undefined,
                         color,
-                        icon: icon || undefined,
+                        icon: nodeType === "entity" ? (icon || undefined) : null,
+                        nodeType: nodeType ?? undefined,
                     }
                 }]);
             } else {
@@ -132,7 +137,8 @@ export const useKNodeDialogHelper = () => {
                         name: newNodeName.trim(),
                         description: description.trim() || undefined,
                         color,
-                        icon: icon || undefined,
+                        icon: nodeType === "entity" ? (icon || undefined) : null,
+                        nodeType: nodeType ?? undefined,
                     }
                 }]);
             }
@@ -227,6 +233,7 @@ export const useKNodeDialogHelper = () => {
             setDescription(folderData.description || "");
             setColor(folderData.color || kconstants.color[0].value);
             setIcon(folderData.icon || null);
+            setNodeType(folderData.nodeType || "entity");
         }
 
         // Clear any previous errors
@@ -249,6 +256,30 @@ export const useKNodeDialogHelper = () => {
         }, 200); // Clear after animation
     };
 
+    /**
+     * Activate a draft node — sets statusCode to null (active)
+     */
+    const activateDraftNode = async (nodeItem: KItemV2) => {
+        if (!selectedKId) return;
+        try {
+            await KService._upsertWorkspaceItems(token, selectedKId, [{
+                action: KItemAction.Update,
+                id: nodeItem.id,
+                nodeData: {
+                    name:        nodeItem.name,
+                    description: nodeItem.description,
+                    color:       nodeItem.color,
+                    icon:        nodeItem.icon,
+                    nodeType:    nodeItem.nodeType,
+                    statusCode:  'active'
+                },
+            }]);
+            await loadTree();
+        } catch (error: any) {
+            _console.error(error?.message || "Failed to activate node");
+        }
+    };
+
     return {
         // Dialog actions
         openNodeDialog,
@@ -257,6 +288,9 @@ export const useKNodeDialogHelper = () => {
         // Validation & Submit (unified)
         validateNewNode,
         submitNode,
+
+        // Inline status toggle
+        activateDraftNode,
     };
 };
 
