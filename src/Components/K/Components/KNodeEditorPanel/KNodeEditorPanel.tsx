@@ -16,6 +16,7 @@ import { kconstants } from "../../utils/K.Constants";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { containsNormalized } from "../../utils/searchUtils";
+import { useEditorTabsStore } from "@/store/index";
 
 function KNodeEditorContent() {
     const { rootNode, breadcrumb, setBreadcrumb, setEditingNodeId, setParentPickerNodeId, inlineNewParentId, setInlineNewParentId, showDeleted, setShowDeleted, showAllChild, setShowAllChild, editingNodeId, unsavedPromptNodeId, setPromptFlashTick } = useKNodeEditorStore();
@@ -78,6 +79,10 @@ function KNodeEditorContent() {
 
     // Sync KTree selection whenever breadcrumb last item changes (drilldown or back)
     const lastBreadcrumbId = breadcrumb[breadcrumb.length - 1]?.id ?? null;
+    const lastBreadcrumbName = breadcrumb[breadcrumb.length - 1]?.name ?? null;
+
+    const { setOpenTabs } = useEditorTabsStore();
+
     useEffect(() => {
         if (lastBreadcrumbId && lastBreadcrumbId > 0) {
             setSelectedItemIds([lastBreadcrumbId]);
@@ -85,6 +90,16 @@ function KNodeEditorContent() {
             setScrollToItem(true);
         }
     }, [lastBreadcrumbId]);
+
+    // Sync kNode singleton tab title in TabBar whenever breadcrumb changes
+    useEffect(() => {
+        if (!lastBreadcrumbName) return;
+        setOpenTabs(prev => prev.map(t =>
+            t.type === constants.vscode.tab.tabTypes.kNode
+                ? { ...t, title: lastBreadcrumbName }
+                : t
+        ));
+    }, [lastBreadcrumbName]);
 
     useEffect(() => {
         const handler = (e: Event) => {

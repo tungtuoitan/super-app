@@ -19,11 +19,12 @@ import { KItemV2 } from "../types/K-v2.types";
 import {useKMovingTreeStore} from "../store/KMovingTree.store";
 import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
 import {ResultOptions} from "../types";
+import { KTestService } from "../service/kTest.service";
 
 export const useKLoader = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree } = useKStore();
+    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap } = useKStore();
     const { setTargetWorkspaceId } = useKMovingTreeStore();
 
     /**
@@ -39,12 +40,15 @@ export const useKLoader = () => {
 
             setAllK(data);
 
-            // Set default to first workspace if available and no tree loaded
+            // Set default to first non-deleted workspace if available and no tree loaded
             if (data.length > 0 && !currentK) {
-                const defaultWorkspaceId = data[0].id;
+                const firstActive = data.find((k) => !k.deletedAt);
+                if (!firstActive) return data;
+                const defaultWorkspaceId = firstActive.id;
                 setSelectedKId(defaultWorkspaceId);
-                if(data.length > 1){
-                    setTargetWorkspaceId(data.length > 0 ? data[1].id : null); //* set 1 workspace bất kì miễn khác selectedKId
+                const nextTarget = data.find((k) => !k.deletedAt && k.id !== defaultWorkspaceId);
+                if (nextTarget) {
+                    setTargetWorkspaceId(nextTarget.id);
                 }
                 // Auto-load tree for default workspace
                 // await loadTree(defaultWorkspaceId);
@@ -177,6 +181,16 @@ export const useKLoader = () => {
         }
     };
 
+    /** Load per-question-node latest scores and store in nodeScoreMap */
+    const loadNodeScores = async (knowledgeId: number): Promise<void> => {
+        try {
+            const scores = await KTestService._getNodeScores(knowledgeId);
+            setNodeScoreMap(scores ?? {});
+        } catch {
+            // non-critical — silently ignore
+        }
+    };
+
     return {
         // Actions only - get state directly from useKStore()
         loadAllK,
@@ -184,5 +198,6 @@ export const useKLoader = () => {
         createKnowledge,
         updateKnowledge,
         softDeleteKnowledge,
+        loadNodeScores,
     };
 };

@@ -264,7 +264,7 @@ export function TabBar() {
                 <TabIcon tab={tab} isDeleted={isDeleted} isActive={activeTabId === tab.id} />
 
                 <span className={`text-[13px] whitespace-nowrap ${isDeleted && tab.type !== constants.vscode.tab.tabTypes.kNode      ? "text-muted-foreground/40 line-through" : ""}`}>
-                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.type === constants.vscode.tab.tabTypes.kNode ? "Knowledge" : tab.title}
+                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
                     {tab.type !== constants.vscode.tab.tabTypes.kNode ? (isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : "") : ''}
                 </span>
 

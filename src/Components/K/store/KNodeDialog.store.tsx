@@ -7,10 +7,12 @@ export interface NodeDialogFormErrors {
     name?: string;
     description?: string;
     color?: string;
+    nodeType?: string;
 }
 
 export type DialogMode = "create" | "edit";
 export type NodeItemType = typeof kconstants.workspace.itemTypes.node;
+export type KNodeType = "entity" | "question";
 
 export interface NodeDialogContextData {
     // Dialog state
@@ -34,6 +36,8 @@ export interface NodeDialogContextData {
     setColor: Dispatch<SetStateAction<string>>;
     icon: IconType | null;
     setIcon: Dispatch<SetStateAction<IconType | null>>;
+    nodeType: KNodeType | null;
+    setNodeType: Dispatch<SetStateAction<KNodeType | null>>;
 
     // Validation
     errors: NodeDialogFormErrors;
@@ -70,6 +74,8 @@ const nodeDialogContextDefaultValue: NodeDialogContextData = {
     setColor: () => {},
     icon: null,
     setIcon: () => {},
+    nodeType: null,
+    setNodeType: () => {},
 
     errors: {},
     setErrors: () => {},
@@ -108,6 +114,7 @@ export const KNodeDialogProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const [description, setDescription] = useState<string>("");
     const [color, setColor] = useState<string>(ICON_COLORS.GREY);
     const [icon, setIcon] = useState<IconType | null>(null);
+    const [nodeType, setNodeType] = useState<"entity" | "question" | null>(null);
 
     const [errors, setErrors] = useState<NodeDialogFormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -135,6 +142,8 @@ export const KNodeDialogProvider: React.FC<React.PropsWithChildren<unknown>> = (
                 setColor,
                 icon,
                 setIcon,
+                nodeType,
+                setNodeType,
 
                 errors,
                 setErrors,

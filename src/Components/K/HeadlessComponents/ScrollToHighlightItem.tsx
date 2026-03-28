@@ -91,6 +91,8 @@ export function ScrollToHighlightItem() {
             }
             // Reset scrolling flag to allow re-run if needed
             isScrollingRef.current = false;
+            // Always clear loading if the operation is cancelled
+            setIsLoadingTree(false);
         };
         // Only depend on scrollToItem to prevent re-runs
         // eslint-disable-next-line react-hooks/exhaustive-deps

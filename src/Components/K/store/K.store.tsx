@@ -60,6 +60,37 @@ export interface KContextData {
     // Tree mark — highlight a subtree (node + descendants)
     markedNodeId: number | null;
     setMarkedNodeId: Dispatch<SetStateAction<number | null>>;
+
+    /**
+     * Pending markdown import — set by KNodeMenu right-click.
+     * undefined  = no pending import
+     * null       = pending import, parent = root
+     * number     = pending import, parent = that node id
+     * KKnowledgeEditorPanel reads this, switches to import tab, then resets to undefined.
+     */
+    pendingImportNodeId: number | null | undefined;
+    setPendingImportNodeId: Dispatch<SetStateAction<number | null | undefined>>;
+
+    /**
+     * Pending quiz tab switch — set by node click in tree.
+     * undefined  = no pending switch
+     * number     = switch to quiz tab (value = clicked node id)
+     * KKnowledgeEditorPanel reads this, switches to quiz tab, then resets to undefined.
+     */
+    pendingQuizTabSwitch: number | undefined;
+    setPendingQuizTabSwitch: Dispatch<SetStateAction<number | undefined>>;
+
+    /** Latest quiz score per question nodeId (nodeType="question") — used for tree score overlay */
+    nodeScoreMap: Record<number, number>;
+    setNodeScoreMap: Dispatch<SetStateAction<Record<number, number>>>;
+
+    /** Tree filter: when false (default), question nodes are hidden */
+    showQuestionNodes: boolean;
+    setShowQuestionNodes: Dispatch<SetStateAction<boolean>>;
+
+    /** Node IDs being dragged from the tree toward the test panel — cleared on dragEnd */
+    testDropNodeIds: number[];
+    setTestDropNodeIds: Dispatch<SetStateAction<number[]>>;
 }
 
 // @deprecated aliases — remove after all consumers updated
@@ -109,6 +140,19 @@ const kContextDefaultValue: KContextData = {
 
     markedNodeId: null,
     setMarkedNodeId: () => {},
+
+    pendingImportNodeId: undefined,
+    setPendingImportNodeId: () => {},
+
+    pendingQuizTabSwitch: undefined,
+    setPendingQuizTabSwitch: () => {},
+
+    nodeScoreMap: {},
+    setNodeScoreMap: () => {},
+    showQuestionNodes: false,
+    setShowQuestionNodes: () => {},
+    testDropNodeIds: [],
+    setTestDropNodeIds: () => {},
 };
 
 // @deprecated alias
@@ -146,6 +190,11 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
     const [scrollToItem, setScrollToItem] = useState<boolean>(false);
     const [hoveredNodeId, setHoveredNodeId] = useState<number | null>(null);
     const [markedNodeId, setMarkedNodeId] = useState<number | null>(null);
+    const [pendingImportNodeId, setPendingImportNodeId] = useState<number | null | undefined>(undefined);
+    const [pendingQuizTabSwitch, setPendingQuizTabSwitch] = useState<number | undefined>(undefined);
+    const [nodeScoreMap, setNodeScoreMap] = useState<Record<number, number>>({});
+    const [showQuestionNodes, setShowQuestionNodes] = useState<boolean>(false);
+    const [testDropNodeIds, setTestDropNodeIds]     = useState<number[]>([]);
 
     return (
         <KStore.Provider
@@ -193,6 +242,19 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
 
                 markedNodeId,
                 setMarkedNodeId,
+
+                pendingImportNodeId,
+                setPendingImportNodeId,
+
+                pendingQuizTabSwitch,
+                setPendingQuizTabSwitch,
+
+                nodeScoreMap,
+                setNodeScoreMap,
+                showQuestionNodes,
+                setShowQuestionNodes,
+                testDropNodeIds,
+                setTestDropNodeIds,
             }}
         >
             {children}
