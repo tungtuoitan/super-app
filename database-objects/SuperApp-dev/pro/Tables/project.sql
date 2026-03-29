@@ -10,6 +10,7 @@ CREATE TABLE [pro].[project] (
     [start_date]   DATETIME2 (7)  NULL,
     [end_date]     DATETIME2 (7)  NULL,
     [workspace_id] INT            NULL,
+    [image]        NVARCHAR (MAX) NULL,
     CONSTRAINT [pk_project] PRIMARY KEY CLUSTERED ([id] ASC),
     CONSTRAINT [FK_project_workspace] FOREIGN KEY ([workspace_id]) REFERENCES [ws].[workspaces] ([id]) ON DELETE SET NULL
 );

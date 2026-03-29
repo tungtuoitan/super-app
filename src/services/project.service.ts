@@ -17,6 +17,7 @@ export interface ProjectDTO {
     updatedAt?: string | null;
     deletedAt?: string | null;
     workspaceId?: number | null;
+    image?: string | null;
 }
 
 const _getProjects = async (
@@ -56,6 +57,7 @@ const _upsertProjectBatch = async (
         endDate?: string | null;
         deletedAt?: string | null;
         workspaceId?: number | null;
+        image?: string | null;
     }>
 ): Promise<ResultOptions<ProjectDTO>> => {
     const res = await apiFetch(`${config.api.baseURL}/api/project`, {
