@@ -60,17 +60,32 @@ export const useMultiProjectTaskFlowHelper = () => {
     );
 
     const handleNodeDragStop = useCallback(
-        (_event: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+        (_event: React.MouseEvent, _node: { id: string }, draggedNodes: { id: string; position: { x: number; y: number } }[]) => {
             setDraggingNodeId(null);
-            // Update savedPositions so Effect 2 (taskIdKey rebuild) preserves this position
-            setSavedPositions((prev) => ({ ...prev, [node.id]: node.position }));
-            const nodeId = parseInt(node.id, 10);
-            if (!nodeId) return;
-            flowService._upsertPositions($user.userToken, [
-                { nodeId, nodeType: "task", x: node.position.x, y: node.position.y },
-            ]).catch(() => {});
+            if (draggedNodes.length === 0) return;
+
+            // Re-apply selection to all dragged nodes (React Flow deselects on drop)
+            const draggedIds = new Set(draggedNodes.map((n) => n.id));
+            requestAnimationFrame(() => {
+                setFlowNodes((prev) =>
+                    prev.map((n) => (draggedIds.has(n.id) ? { ...n, selected: true } : n)),
+                );
+            });
+
+            // Update savedPositions for ALL dragged nodes (includes multi-selected)
+            const posUpdate: Record<string, { x: number; y: number }> = {};
+            const payload: { nodeId: number; nodeType: string; x: number; y: number }[] = [];
+            for (const n of draggedNodes) {
+                posUpdate[n.id] = n.position;
+                const nodeId = parseInt(n.id, 10);
+                if (nodeId) payload.push({ nodeId, nodeType: "task", x: n.position.x, y: n.position.y });
+            }
+            setSavedPositions((prev) => ({ ...prev, ...posUpdate }));
+            if (payload.length > 0) {
+                flowService._upsertPositions($user.userToken, payload).catch(() => {});
+            }
         },
-        [setDraggingNodeId, setSavedPositions, $user.userToken],
+        [setDraggingNodeId, setFlowNodes, setSavedPositions, $user.userToken],
     );
 
     // ── Custom edge connect ─────────────────────────────────────────────────

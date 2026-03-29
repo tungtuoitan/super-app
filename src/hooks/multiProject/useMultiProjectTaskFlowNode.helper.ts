@@ -169,12 +169,21 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 type: "taskFlowNode",
                 position: { x: posX, y: posY },
                 data: {
-                    task: { ...nearestTask, id: 0, title: "", parentTaskId: null, status: "open", priority: "medium" } as Task,
+                    task: {
+                        ...nearestTask,
+                        id: 0, title: "", parentTaskId: null,
+                        status: "open", priority: "medium",
+                        processJson: null, checklistJson: null, customTabsJson: null, note: null,
+                    } as Task,
                     projectName,
                 },
             };
 
-            setFlowNodes((prev) => [...prev, tempNode]);
+            // Deselect all existing nodes, then add new temp node
+            setFlowNodes((prev) => [
+                ...prev.map((n) => (n.selected ? { ...n, selected: false } : n)),
+                tempNode,
+            ]);
             setEditingNodeId(tempId);
         },
         [filteredTasks, currentFlowNodes, projectNameMap, setFlowNodes, setEditingNodeId],
