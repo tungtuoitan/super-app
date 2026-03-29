@@ -7,6 +7,7 @@ import { NoteGridMenu } from "./menus/NoteGridMenu";
 import { WsGridMenu } from "./menus/WsGridMenu";
 import { ProjectGridMenu } from "./menus/ProjectGridMenu";
 import { TaskGridMenu } from "./menus/TaskGridMenu";
+import { TaskFlowMenu } from "./menus/TaskFlowMenu";
 import { TabBarMenu } from "./menus/TabBarMenu";
 import { LogListMenu } from "./menus/LogListMenu";
 import { TrackPanelMenu } from "./menus/TrackPanelMenu";
@@ -64,6 +65,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case "task-grid":
                 return <TaskGridMenu />;
+
+            case constants.contextMenu.contextMenuTypes.taskFlow:
+                return <TaskFlowMenu />;
 
             case "tab":
                 return <TabBarMenu />;
