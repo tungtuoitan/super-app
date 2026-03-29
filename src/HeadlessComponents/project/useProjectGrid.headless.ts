@@ -8,11 +8,19 @@ import { useEffect } from "react";
 import { useProjectStore } from "@/store/project/useProject.store";
 import { useAuthStore } from "@/store/index";
 import { useProjectGridHelper } from "@/hooks/project/useProjectGrid.helper";
+import { useProjectTabHelper } from "@/hooks/project/useProjectTab.helper";
 
 export const useProjectGridHeadless = () => {
     const { containerRef, setContainerWidth, projectGridPagination } = useProjectStore();
     const { $user } = useAuthStore();
     const { loadProjects } = useProjectGridHelper();
+    const { openMultiProjectTab } = useProjectTabHelper();
+
+    // Auto-open pinned MultiProject tab on mount
+    useEffect(() => {
+        openMultiProjectTab([]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Update container width on resize
     useEffect(() => {

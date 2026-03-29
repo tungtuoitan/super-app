@@ -118,6 +118,7 @@ export const constants = {
             kKnowledgeSelector: "k-knowledge-selector",
             kNodePanelBlank: "k-node-panel-blank",
             kNodePanelCard: "k-node-panel-card",
+            taskFlow: "task-flow",
         } as const,
     },
 
@@ -183,7 +184,7 @@ export const constants = {
         taskStatus: {
             colors: {
                 open: { bg: "#1f6f43", text: "#ffffff" },
-                in_progress: { bg: "#7c6215", text: "#ffffff" },
+                in_progress: { bg: "#FCCC3E", text: "#1a1a1a" },
                 background_progress: { bg: "#251f0c", text: "#ffffff" },
                 paused: { bg: "#575757", text: "#ffffff" },
                 completed: { bg: "#6f42c1", text: "#ffffff" },

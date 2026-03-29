@@ -5,13 +5,14 @@
  */
 
 import React from "react";
-import { ListTodo, Columns, GanttChartSquare, CalendarRange } from "lucide-react";
+import { ListTodo, Columns, GanttChartSquare, CalendarRange, GitBranch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/Components/ui/scroll-area";
 import { MultiProjectTaskList } from "./MultiProjectTaskList";
 import { MultiProjectKanbanView } from "./MultiProjectKanbanView";
 import { MultiProjectProTimelineView } from "./MultiProjectProTimelineView";
 import { MultiProjectTimelineView } from "./MultiProjectTimelineView";
+import { MultiProjectTaskFlowView } from "./MultiProjectTaskFlowView";
 import { TaskFilterPopup } from "../Task/TaskFilterPopup";
 import { ProjectChip } from "./small/ProjectChip";
 import { useMultiProjectDetailHeadless } from "../../HeadlessComponents/multiProject/useMultiProjectDetail.headless";
@@ -24,6 +25,7 @@ const TABS: TabConfig[] = [
     { id: "taskList", label: "ALL TASKS", icon: <ListTodo className="h-4 w-4" /> },
     { id: "kanban", label: "KANBAN", icon: <Columns className="h-4 w-4" /> },
     { id: "timeline", label: "TASK TIMELINE", icon: <GanttChartSquare className="h-4 w-4" /> },
+    { id: "taskFlow", label: "TASK FLOW", icon: <GitBranch className="h-4 w-4" /> },
 ];
 
 /**
@@ -53,6 +55,8 @@ export function MultiProjectDetailContent() {
                 return <MultiProjectProTimelineView />;
             case "timeline":
                 return <MultiProjectTimelineView />;
+            case "taskFlow":
+                return <MultiProjectTaskFlowView />;
             default:
                 return null;
         }
@@ -90,7 +94,7 @@ export function MultiProjectDetailContent() {
                 </div>
                 <div className="flex items-center gap-1 px-2">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mr-1">{filteredProjectIds.length} / {availableProjects.length} Projects</span>
-                    {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline") && <TaskFilterPopup />}
+                    {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline" || activeTab === "taskFlow") && <TaskFilterPopup />}
                 </div>
             </div>
 

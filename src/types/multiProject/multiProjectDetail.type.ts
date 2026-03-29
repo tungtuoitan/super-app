@@ -1,4 +1,4 @@
-export type TabType = "taskList" | "kanban" | "proTimeline" | "timeline";
+export type TabType = "taskList" | "kanban" | "proTimeline" | "timeline" | "taskFlow";
 
 export interface TabConfig {
     id: TabType;
