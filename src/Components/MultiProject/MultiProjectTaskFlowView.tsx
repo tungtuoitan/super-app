@@ -14,7 +14,6 @@ import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import {
     ReactFlow,
     ReactFlowProvider,
-    Controls,
     MiniMap,
     Background,
     BackgroundVariant,
@@ -24,7 +23,7 @@ import {
     type Viewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Wand2 } from "lucide-react";
+import { Wand2, Scan, Maximize, Crosshair, View, ScanEye } from "lucide-react";
 import { MultiTaskFlowProvider } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowHeadless } from "@/HeadlessComponents/multiProject/useMultiProjectTaskFlow.headless";
 import { useMultiProjectTaskFlowSelector } from "@/Selectors/multipleProject/useMultiProjectTaskFlow.selector";
@@ -125,6 +124,44 @@ function TaskFlowCanvas() {
 
     const isEmpty = flowNodes.length === 0;
 
+    // ── View controls ───────────────────────────────────────────────────────
+
+    const handleNormalView = useCallback(() => {
+        rfInstance.zoomTo(1, { duration: 300 });
+    }, [rfInstance]);
+
+    const handleFitView = useCallback(() => {
+        rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
+    }, [rfInstance]);
+
+    const handleBackToCenter = useCallback(() => {
+        const inProgressNode = flowNodes.find(
+            (n) => (n.data as { task?: { status: string } }).task?.status === "in_progress",
+        );
+        if (!inProgressNode) {
+            // Fallback: fit view if no in_progress node
+            rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
+            return;
+        }
+        // Center on that node (offset by half node size to hit center)
+        rfInstance.setCenter(
+            inProgressNode.position.x + 115,
+            inProgressNode.position.y + 38,
+            { zoom: 1, duration: 300 },
+        );
+    }, [rfInstance, flowNodes]);
+
+    // F1 = Normal View, F2 = Fit View, F3 = Back to Center
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "F1") { e.preventDefault(); handleFitView(); }
+            if (e.key === "F2") { e.preventDefault(); handleNormalView(); }
+            if (e.key === "F3") { e.preventDefault(); handleBackToCenter(); }
+        };
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [handleNormalView, handleFitView, handleBackToCenter]);
+
     // Persist viewport across tab switches
     const savedViewport = useMemo(
         () => storageService.get<Viewport>(STORAGE_KEYS.TASK_FLOW_VIEWPORT),
@@ -160,6 +197,7 @@ function TaskFlowCanvas() {
                 minZoom={MIN_ZOOM}
                 maxZoom={MAX_ZOOM}
                 deleteKeyCode={null}
+                multiSelectionKeyCode="Control"
                 connectionMode={ConnectionMode.Loose}
                 connectionRadius={30}
                 zoomOnScroll={false}
@@ -174,27 +212,32 @@ function TaskFlowCanvas() {
                     className="text-muted-foreground/15"
                 />
 
-                <Controls
-                    className="[&>button]:bg-card [&>button]:border-border [&>button]:text-foreground [&>button:hover]:bg-muted"
-                    showInteractive={false}
-                />
-
-                {/* <MiniMap
-                    className="!bg-muted/50 !border !border-border rounded-lg overflow-hidden"
-                    nodeColor={(node) => {
-                        const task = (node.data as { task?: { status: string } }).task;
-                        if (task?.status === "completed") return "#6f42c1";
-                        if (task?.status === "in_progress") return "#7c6215";
-                        if (task?.status === "cancelled") return "#a63636";
-                        return "#4b5563";
-                    }}
-                    maskColor="rgba(0,0,0,0.1)"
-                /> */}
-
-                <Panel position="top-right" className="flex items-center gap-2">
+                <Panel position="top-right" className="flex items-center gap-1.5">
+                    <button
+                        onClick={handleFitView}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
+                        title="Fit all nodes in view (F2)"
+                    >
+                        <Scan className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                        onClick={handleNormalView}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
+                        title="Normal view — zoom 100% (F1)"
+                    >
+                        <ScanEye className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                        onClick={handleBackToCenter}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
+                        title="Center on in-progress task (F3)"
+                    >
+                        <Crosshair className="h-3.5 w-3.5" />
+                    </button>
+                    <div className="w-px h-5 bg-border" />
                     <button
                         onClick={handleAutoLayout}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
                         title="Gently align nodes to straighten edges"
                     >
                         <Wand2 className="h-3.5 w-3.5" />
