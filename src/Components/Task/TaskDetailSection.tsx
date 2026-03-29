@@ -106,7 +106,7 @@ export function TaskDetailSection() {
                     </div>
                 )}
 
-                {activeSection === "comment" && !isSectionDirty && (
+                {/* {activeSection === "comment" && !isSectionDirty && (
                     <div className="shrink-0 py-1">
                         <CommentFilterDropdown
                             value={commentFilter}
@@ -115,7 +115,7 @@ export function TaskDetailSection() {
                             onShowDetailChange={setCommentShowDetail}
                         />
                     </div>
-                )}
+                )} */}
             </div>
 
             {/* ── Section Panels ── */}
@@ -143,7 +143,8 @@ export function TaskDetailSection() {
                     </div>
                 </div>
                 <div className={cn("h-full mt-2.5 border-t pt-4", activeSection !== "comment" && "hidden")}>
-                    {isNewTask ? <NewTaskPlaceholder /> : <TaskComment />}
+                    {isNewTask ? <NewTaskPlaceholder /> : <></>}
+                    {/* {isNewTask ? <NewTaskPlaceholder /> : <TaskComment />} */}
                 </div>
 
                 {customTabs.tabs.map((tab) => (

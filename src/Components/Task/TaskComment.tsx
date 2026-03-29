@@ -97,28 +97,21 @@ function TaskCommentInner() {
                     {!isDisabled && (
                         <div className="border-t border-border pt-3 mt-1">
                             <div className="space-y-2">
-                                <div
-                                    className="border rounded-md overflow-hidden"
-                                    onKeyDown={(e) => {
-                                        if (e.ctrlKey && e.key === "Enter") {
-                                            e.preventDefault();
-                                            handleSubmit();
-                                        }
-                                    }}
-                                >
+                                <div className="border rounded-md overflow-hidden">
                                     <RichTextEditor
                                         value={newComment}
                                         onChange={setNewComment}
-                                        placeholder="Add a comment... (Ctrl+Enter to submit)"
+                                        placeholder="Add a comment... (Enter to submit, Ctrl+Enter for newline)"
                                         minHeight="96px"
                                         className="text-left"
                                         focusTrigger={commentFocusTrigger}
                                         uploadContext="project"
                                         uploadContextId={selectedTask?.projectId}
+                                        onEnter={handleSubmit}
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] text-muted-foreground">Ctrl+Enter to submit</span>
+                                    <span className="text-[10px] text-muted-foreground">Enter to submit</span>
                                     <button
                                         onClick={handleSubmit}
                                         disabled={!newComment.trim() || newComment === "<p></p>"}

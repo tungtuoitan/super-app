@@ -4,7 +4,7 @@
  * Supports bold, italic, underline, lists, headings, images, and file attachments
  */
 
-import React, { useEffect, useRef, useCallback, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useCallback, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -52,6 +52,11 @@ interface RichTextEditorProps {
     uploadContext?: UploadContext;
     /** Upload context ID: project_id or workspace_id */
     uploadContextId?: number;
+    /**
+     * When provided, Enter key sends (calls onEnter) and Ctrl+Enter inserts a new paragraph.
+     * Without this prop, Enter behaves normally (creates paragraph).
+     */
+    onEnter?: () => void;
 }
 
 interface ToolbarButtonProps {
@@ -102,9 +107,12 @@ export function RichTextEditor({
     focusTrigger,
     uploadContext,
     uploadContextId,
+    onEnter,
 }: RichTextEditorProps) {
     const { $user } = useAuthStore();
     const [isUploading, setIsUploading] = useState(false);
+    const onEnterRef = useRef<(() => void) | undefined>(onEnter);
+    useLayoutEffect(() => { onEnterRef.current = onEnter; }, [onEnter]);
     const [showBubbleMenu, setShowBubbleMenu] = useState(false);
     const [bubbleMenuPosition, setBubbleMenuPosition] = useState({ top: 0, left: 0 });
     const [showColorPicker, setShowColorPicker] = useState(false);
@@ -115,6 +123,26 @@ export function RichTextEditor({
     const _console = useConsoleHelper();
 
     const editor = useEditor({
+        editorProps: {
+            handleKeyDown: (view, event) => {
+                if (!onEnterRef.current) return false;
+                if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+                    // Enter → send
+                    onEnterRef.current();
+                    return true;
+                }
+                if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+                    // Ctrl+Enter → new paragraph
+                    const { state } = view;
+                    const tr = state.tr;
+                    if (!state.selection.empty) tr.deleteSelection();
+                    tr.split(tr.mapping.map(state.selection.$from.pos)).scrollIntoView();
+                    view.dispatch(tr);
+                    return true;
+                }
+                return false;
+            },
+        },
         extensions: [
             StarterKit.configure({
                 heading: {
