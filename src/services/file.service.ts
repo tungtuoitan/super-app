@@ -28,7 +28,7 @@ export interface FileUploadResult<T> {
     data?: T;
 }
 
-export type UploadContext = "project" | "workspace";
+export type UploadContext = "project" | "workspace" | "conversation" | "general";
 
 const _uploadImage = async (
     _token: string,

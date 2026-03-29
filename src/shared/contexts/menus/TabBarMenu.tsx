@@ -5,6 +5,7 @@ import {
     PinOff as UnpinIcon,
     X as CloseIcon,
     XCircle as CloseAllIcon,
+    MessageSquare as ConversationIcon,
 } from "lucide-react";
 import { useTabBarMenuHelper } from "@/shared/contexts/helpers/useTabBarMenu.helper";
 
@@ -13,17 +14,29 @@ import { useTabBarMenuHelper } from "@/shared/contexts/helpers/useTabBarMenu.hel
  * Context menu for tabs in the tab bar
  *
  * Menu Items:
+ * - Conversations (when tab has a supported entity)
  * - Pin Tab / Unpin Tab
  * - Close All Tabs
  * - Close All But Pinned
  */
 export function TabBarMenu() {
-    const { contextTabId, isPinned, isChild, pinTab, unpinTab, closeAllSavedTabs, closeSavedTabsButPinned } = useTabBarMenuHelper();
+    const { contextTabId, isPinned, isChild, conversationEntity, openConversation, pinTab, unpinTab, closeAllSavedTabs, closeSavedTabsButPinned } = useTabBarMenuHelper();
 
     if (!contextTabId) return null;
 
     return (
         <>
+            {/* Conversations — only for supported entity tabs */}
+            {conversationEntity && (
+                <>
+                    <MenuItem onClick={openConversation}>
+                        <ConversationIcon className="w-4 h-4 mr-2" />
+                        Conversations
+                    </MenuItem>
+                    <MenuDivider />
+                </>
+            )}
+
             {/* Pin/Unpin — hidden for group child tabs */}
             {!isChild && (
                 isPinned ? (

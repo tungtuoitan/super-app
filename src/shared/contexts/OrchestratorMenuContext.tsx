@@ -19,6 +19,7 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
 import {KNodeMenu} from "../../Components/K/contexts/menu/KNodeMenu";
 import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
 import { KNodePanelCardMenu } from "../../Components/K/contexts/menu/KNodePanelCardMenu";
+import { ConversationMessageMenu } from "./menus/ConversationMessageMenu";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -80,6 +81,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case constants.contextMenu.contextMenuTypes.kKnowledgeSelector:
                 return <KKnowledgeMenu />;
+
+            case constants.contextMenu.contextMenuTypes.conversationMessage:
+                return <ConversationMessageMenu />;
 
             default:
                 return (
