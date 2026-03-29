@@ -150,7 +150,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
             </div>
 
             {/* Status Bar - Fixed height, no resize */}
-            <StatusBar />
+            {/* <StatusBar /> */}
         </div>
     );
 }

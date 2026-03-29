@@ -330,18 +330,28 @@
     background: transparent !important;
 }
 
+/* Remove the p-3 padding from EditorContent wrapper */
+.comment-readonly .prose {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
 .comment-readonly .ProseMirror {
     min-height: auto !important;
-    padding: 0;
+    padding: 0 !important;
+}
+
+/* Remove top/bottom margin on first/last paragraph so single-line messages don't get extra space */
+.comment-readonly .ProseMirror > p:first-child {
+    margin-top: 0 !important;
+}
+.comment-readonly .ProseMirror > p:last-child {
+    margin-bottom: 0 !important;
 }
 
 .comment-readonly .tiptap-toolbar,
 .comment-readonly .ProseMirror-menubar {
     display: none;
-}
-
-.comment-readonly .prose {
-    padding: 0;
 }
 
 /* Bubble Menu (Floating Toolbar) */

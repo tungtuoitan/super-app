@@ -119,6 +119,7 @@ export const constants = {
             kNodePanelBlank: "k-node-panel-blank",
             kNodePanelCard: "k-node-panel-card",
             taskFlow: "task-flow",
+            conversationMessage: "conversation-message",
         } as const,
     },
 

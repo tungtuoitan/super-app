@@ -6,7 +6,7 @@ export const BUILTIN_TABS: Array<{ key: BuiltinTab; label: string; icon: React.E
     { key: "process", label: "Process", icon: ListOrdered },
     { key: "checklist", label: "Checklist", icon: CheckSquare },
     { key: "desc", label: "Description", icon: FileText },
-    { key: "comment", label: "Comment", icon: MessageSquare },
+    // { key: "comment", label: "Comment", icon: MessageSquare },
 ];
 
 export const TAB_COLORS: Record<string, { active: string }> = {
