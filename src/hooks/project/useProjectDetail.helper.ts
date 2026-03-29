@@ -36,6 +36,7 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
         workspaceId: dto.workspaceId,
+        image: dto.image,
     }));
 };
 
@@ -142,6 +143,7 @@ export const useProjectDetailHelper = () => {
                     endDate: toLocalISOString(selectedProject.endDate),
                     deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch,
                     workspaceId: selectedProject.workspaceId,
+                    image: selectedProject.image || null,
                 };
 
                 // ============================================================
@@ -173,6 +175,7 @@ export const useProjectDetailHelper = () => {
                     updatedAt: parseAsLocalDate(savedProject.updatedAt),
                     deletedAt: parseAsLocalDate(savedProject.deletedAt),
                     workspaceId: savedProject.workspaceId,
+                    image: savedProject.image,
                 };
 
                 // ============================================================
@@ -259,6 +262,10 @@ export const useProjectDetailHelper = () => {
         else setNameError("Project Name is required");
     }, [handleProjectFieldChange]);
 
+    const handleImageChange = useCallback((value: string) => {
+        handleProjectFieldChange("image", value || null);
+    }, [handleProjectFieldChange]);
+
     return {
         upsertProject,
         handleProjectFieldChange,
@@ -269,5 +276,6 @@ export const useProjectDetailHelper = () => {
         handleEndDateChange,
         handleDescriptionChange,
         handleNameChange,
+        handleImageChange,
     };
 };

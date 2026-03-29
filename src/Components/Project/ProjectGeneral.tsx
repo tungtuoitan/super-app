@@ -15,6 +15,7 @@ import { useProjectDetailHelper } from "@/hooks/project/useProjectDetail.helper"
 import { useProjectDetailSelector } from "@/Selectors/project/useProjectDetail.selector";
 import { useProjectGeneralHeadless } from "@/HeadlessComponents/project/useProjectGeneral.headless";
 import { formatDateTime } from "@/utils/formatters";
+import { ProjectImagePicker } from "./ProjectImagePicker";
 
 /**
  * ProjectGeneral
@@ -28,7 +29,7 @@ export function ProjectGeneral() {
     const { selectedProject, statusOptions, currentStatusValue, isDisabled, isDeleted } = useProjectDetailSelector();
 
     // ── Handlers (from helper) ───────────────────────────
-    const { handleNameChange, handleStatusChange, handleStartDateChange, handleEndDateChange, handleDescriptionChange } = useProjectDetailHelper();
+    const { handleNameChange, handleStatusChange, handleStartDateChange, handleEndDateChange, handleDescriptionChange, handleImageChange } = useProjectDetailHelper();
 
     // ── Side-effects (headless) ──────────────────────────
     const { projectKey } = useProjectGeneralHeadless();
@@ -122,7 +123,8 @@ export function ProjectGeneral() {
 
                     {/* Right Column - Metadata (1/3 width) */}
                     <div className="flex-1 min-w-0">
-                        <CardContent className="space-y-7">
+                        <CardContent className="space-y-3.5">
+
                             {/* Project Status - moved to right column */}
                             <StatusAutoComplete
                                 value={currentStatusValue}
@@ -135,6 +137,16 @@ export function ProjectGeneral() {
                                 disabled={isDeleted}
                                 placeholder="Select status..."
                             />
+                                {/* Project Image */}
+                                <div className="space-y-1 text-left mt-[-16px]">
+                                    <label className="text-xs text-left font-semibold uppercase tracking-wider text-muted-foreground">
+                                        Image
+                                    </label>
+                                    <ProjectImagePicker
+                                        value={selectedProject.image ?? ""}
+                                        onChange={handleImageChange}
+                                    />
+                                </div>
 
                             <p className="text-xs text-left text-muted-foreground leading-relaxed">
                                 Created: {selectedProject.createdAt ? formatDateTime(selectedProject.createdAt) : "N/A"}
