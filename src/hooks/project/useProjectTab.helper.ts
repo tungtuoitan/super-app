@@ -111,7 +111,7 @@ export const useProjectTabHelper = () => {
             );
             updateActiveTab(existingTab.id);
         } else {
-            // Create new multi-project tab
+            // Create new multi-project tab — pinned at first position
             const newTab: BaseTab = {
                 id: `multi-project-tab-${Date.now()}`,
                 type: constants.vscode.tab.tabTypes.multiProject,
@@ -119,9 +119,10 @@ export const useProjectTabHelper = () => {
                 data0: tabData,
                 title: "Multiple-Projects",
                 hasUnsavedChanges: false,
+                isPinned: true,
             };
 
-            const newTabs = [...openTabs, newTab];
+            const newTabs = [newTab, ...openTabs];
             setOpenTabs(newTabs);
             updateActiveTab(newTab.id, newTabs);
         }

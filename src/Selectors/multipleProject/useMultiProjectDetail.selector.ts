@@ -7,6 +7,7 @@
 import { useMemo } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { useProjectStore } from "@/store/project/useProject.store";
+import type { TabType } from "@/types/multiProject/multiProjectDetail.type";
 
 export const useMultiProjectDetailSelector = () => {
     const { openTabs, activeTabId } = useEditorTabsStore();
@@ -19,7 +20,7 @@ export const useMultiProjectDetailSelector = () => {
 
     // Active inner tab
     const activeTab = useMemo(() => {
-        return (currentTab?.metadata?.innerTab as "taskList" | "kanban" | "proTimeline" | "timeline") || "proTimeline";
+        return (currentTab?.metadata?.innerTab as TabType) || "taskFlow";
     }, [currentTab?.metadata?.innerTab]);
 
     // All available projects (not deleted)
