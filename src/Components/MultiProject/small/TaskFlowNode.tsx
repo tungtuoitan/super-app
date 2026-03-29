@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, useViewport } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
@@ -26,11 +26,12 @@ import type { TaskFlowNodeData } from "@/types/multiProject/multiProjectTaskFlow
 const HANDLE_BASE = "!w-3 !h-3 !rounded-full !border-2 !border-primary !bg-primary/80 z-10";
 
 export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNodeData>>) {
-    const { editingNodeId, draggingNodeId } = useMultiTaskFlowStore();
+    const { editingNodeId, draggingNodeId, flowNodes } = useMultiTaskFlowStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleChangeProject, handleChangeStatus } = useMultiProjectTaskFlowNodeHelper();
     const { allProjects } = useMultiProjectTaskFlowSelector();
     const { registriesByType } = useGeneralStore();
     const { openTaskTab } = useTaskTabHelper();
+    const { zoom } = useViewport();
     const statusOptions = registriesByType["task_status"] ?? [];
 
     const isEditing = editingNodeId === id;
@@ -40,6 +41,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const [isHovered, setIsHovered] = useState(false);
     const [projectPickerOpen, setProjectPickerOpen] = useState(false);
     const isDragging = draggingNodeId === id;
+    const multiSelected = useMemo(() => flowNodes.filter((n) => n.selected).length > 1, [flowNodes]);
     const inputRef = useRef<HTMLInputElement>(null);
     const nodeRef = useRef<HTMLDivElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -67,12 +69,13 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
             if (inputRef.current) {
                 inputRef.current.focus();
                 inputRef.current.select();
-            } else if (attempts < 5) {
+            } else if (attempts < 20) {
                 attempts++;
-                requestAnimationFrame(tryFocus);
+                setTimeout(tryFocus, 30);
             }
         };
-        requestAnimationFrame(tryFocus);
+        // Initial delay lets React Flow finish mounting the new node
+        setTimeout(tryFocus, 50);
     }, [isEditing, data.task.title]);
 
     // Delete key → set status to cancelled (only when selected, not editing, not temp)
@@ -159,10 +162,14 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
-                <Handle type="source" position={Position.Top}    id="top"    className={HANDLE_BASE} style={{ ...handleOpacity, top: -6 }} />
-                <Handle type="source" position={Position.Bottom} id="bottom" className={HANDLE_BASE} style={{ ...handleOpacity, bottom: -6 }} />
-                <Handle type="source" position={Position.Left}   id="left"   className={HANDLE_BASE} style={{ ...handleOpacity, left: -6 }} />
-                <Handle type="source" position={Position.Right}  id="right"  className={HANDLE_BASE} style={{ ...handleOpacity, right: -6 }} />
+                {!isTempNode && (
+                    <>
+                        <Handle type="source" position={Position.Top}    id="top"    className={HANDLE_BASE} style={{ ...handleOpacity, top: -6 }} />
+                        <Handle type="source" position={Position.Bottom} id="bottom" className={HANDLE_BASE} style={{ ...handleOpacity, bottom: -6 }} />
+                        <Handle type="source" position={Position.Left}   id="left"   className={HANDLE_BASE} style={{ ...handleOpacity, left: -6 }} />
+                        <Handle type="source" position={Position.Right}  id="right"  className={HANDLE_BASE} style={{ ...handleOpacity, right: -6 }} />
+                    </>
+                )}
 
                 <div className="px-3 py-3 flex flex-col items-center gap-1.5">
                     {isHighPriority && (
@@ -208,9 +215,12 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                 </div>
             </div>
 
-            {/* FigJam-style minibar — absolute below node, no layout impact */}
-            {selected && !isTempNode && !isDragging && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 flex items-center gap-1 px-1 py-0.5 bg-card/90 border border-border rounded-lg shadow-sm nodrag nopan whitespace-nowrap">
+            {/* FigJam-style minibar — absolute below node, counter-scaled to ignore zoom */}
+            {selected && !isTempNode && !isDragging && !multiSelected && (
+                <div
+                    className="absolute left-1/2 origin-top flex items-center gap-1 px-1 py-0.5 bg-card/90 border border-border rounded-lg shadow-sm nodrag nopan whitespace-nowrap"
+                    style={{ top: "100%", marginTop: 6, transform: `translateX(-50%) scale(${1 / zoom})` }}
+                >
                     {/* Status pills from registry */}
                     {statusOptions.filter((s) => s.isActive).map((opt) => {
                         const isActive = data.task.status === opt.code;

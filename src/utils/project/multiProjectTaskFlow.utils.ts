@@ -236,12 +236,22 @@ export function smartWand(
         ? maxConnectedBottom + V_GAP * 2
         : 0;
 
-    // Group orphans by status, maintaining STATUS_ORDER
+    // Group orphans by status, maintaining STATUS_ORDER, sorted by createdAt within each group
     const orphanByStatus = new Map<string, typeof orphanNodes>();
     for (const n of orphanNodes) {
         const status = (n.data as TaskFlowNodeData).task.status ?? "open";
         if (!orphanByStatus.has(status)) orphanByStatus.set(status, []);
         orphanByStatus.get(status)!.push(n);
+    }
+    for (const [, group] of orphanByStatus) {
+        group.sort((a, b) => {
+            const aDate = (a.data as TaskFlowNodeData).task.createdAt;
+            const bDate = (b.data as TaskFlowNodeData).task.createdAt;
+            if (!aDate && !bDate) return 0;
+            if (!aDate) return 1;
+            if (!bDate) return -1;
+            return new Date(aDate).getTime() - new Date(bDate).getTime();
+        });
     }
 
     // Layout: each status is a column, nodes stacked vertically
