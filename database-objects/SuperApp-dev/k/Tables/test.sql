@@ -7,6 +7,8 @@ CREATE TABLE [k].[test] (
     [created_at]   DATETIME2 (7)  CONSTRAINT [DF_ktest_created_at] DEFAULT (getutcdate()) NOT NULL,
     [updated_at]   DATETIME2 (7)  NULL,
     [deleted_at]   DATETIME2 (7)  NULL,
+    [user_id]      INT            DEFAULT ((0)) NOT NULL,
+    [mode]         NVARCHAR (50)  DEFAULT ('standard') NULL,
     CONSTRAINT [PK_ktest] PRIMARY KEY CLUSTERED ([id] ASC),
     CONSTRAINT [FK_ktest_knowledge] FOREIGN KEY ([knowledge_id]) REFERENCES [k].[knowledge] ([id]) ON DELETE CASCADE
 );

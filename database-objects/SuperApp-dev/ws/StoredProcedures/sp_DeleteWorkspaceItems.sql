@@ -151,3 +151,9 @@ END
 
 GO
 
+
+GRANT EXECUTE
+    ON OBJECT::[ws].[sp_DeleteWorkspaceItems] TO PUBLIC
+    AS [dbo];
+GO
+
