@@ -14,7 +14,7 @@ import {
     ColumnDef,
     flexRender,
 } from "@tanstack/react-table";
-import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, FolderOpen } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
 import { Project, useProjectStore } from "@/store/project/useProject.store";
@@ -60,6 +60,23 @@ export function ProjectGrid() {
                 header: () => <div className="text-left text-sm font-semibold ml-2">ID</div>,
                 size: 20,
                 cell: ({ getValue }) => <div className="text-left text-sm font-medium ml-3">{getValue() as number}</div>,
+            },
+            {
+                accessorKey: "image",
+                header: () => null,
+                size: 40,
+                cell: ({ getValue }) => {
+                    const img = getValue() as string | null | undefined;
+                    return (
+                        <div className="flex items-center justify-center px-1">
+                            {img?.startsWith("data:image") ? (
+                                <img src={img} alt="" className="w-7 h-7 rounded object-cover" />
+                            ) : (
+                                <FolderOpen className="w-4 h-4 text-muted-foreground/50" />
+                            )}
+                        </div>
+                    );
+                },
             },
             {
                 accessorKey: "name",
