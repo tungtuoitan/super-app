@@ -10,7 +10,7 @@ import { useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectDetailSelector } from "./useMultiProjectDetail.selector";
 
 export const useMultiProjectTaskFlowSelector = () => {
-    const { tasks } = useTaskGridStore();
+    const { tasks, allTasks } = useTaskGridStore();
     const { projects } = useProjectStore();
     const { flowNodes, flowEdges, editingNodeId, editingEdgeId, savedEdges, positionsLoaded } = useMultiTaskFlowStore();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
@@ -20,9 +20,12 @@ export const useMultiProjectTaskFlowSelector = () => {
         [projects],
     );
 
+    // TaskFlow always shows ALL tasks (no status/priority filter) — only filter by project & not deleted
+    const flowSourceTasks = allTasks.length > 0 ? allTasks : tasks;
+
     const filteredTasks = useMemo(
-        () => tasks.filter((t) => filteredProjectIds.includes(t.projectId) && !t.deletedAt),
-        [tasks, filteredProjectIds],
+        () => flowSourceTasks.filter((t) => filteredProjectIds.includes(t.projectId) && !t.deletedAt),
+        [flowSourceTasks, filteredProjectIds],
     );
 
     /** Stable key — changes only when the set of task IDs changes */

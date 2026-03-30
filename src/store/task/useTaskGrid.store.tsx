@@ -12,6 +12,9 @@ export type { TaskPaginationState } from "@/types/task/task.types";
 export interface TaskGridContextData {
     tasks: Task[];
     setTasks: Dispatch<SetStateAction<Task[]>>;
+    /** All tasks (no status/priority filter) — used by TaskFlow to show full picture */
+    allTasks: Task[];
+    setAllTasks: Dispatch<SetStateAction<Task[]>>;
     taskTotalCount: number;
     setTaskTotalCount: Dispatch<SetStateAction<number>>;
     taskGridIsLoading: boolean;
@@ -35,6 +38,8 @@ export interface TaskGridContextData {
 export const taskGridContextDefaultValue: TaskGridContextData = {
     tasks: [],
     setTasks: () => {},
+    allTasks: [],
+    setAllTasks: () => {},
     taskTotalCount: 0,
     setTaskTotalCount: () => {},
     taskGridIsLoading: true,
@@ -61,6 +66,7 @@ export const useTaskGridStore = () => useContext(TaskGridStore);
 
 export const TaskGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [allTasks, setAllTasks] = useState<Task[]>([]);
     const [taskTotalCount, setTaskTotalCount] = useState<number>(0);
     const [taskGridIsLoading, setTaskGridIsLoading] = useState<boolean>(true);
     const [taskGridError, setTaskGridError] = useState<Error | null>(null);
@@ -76,6 +82,7 @@ export const TaskGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
         <TaskGridStore.Provider
             value={{
                 tasks, setTasks,
+                allTasks, setAllTasks,
                 taskTotalCount, setTaskTotalCount,
                 taskGridIsLoading, setTaskGridIsLoading,
                 taskGridError, setTaskGridError,
