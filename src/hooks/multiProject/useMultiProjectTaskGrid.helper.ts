@@ -42,7 +42,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
 
 export const useMultiProjectTaskGridHelper = () => {
     const { $user } = useAuthStore();
-    const { tasks, setTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } =
+    const { tasks, setTasks, setAllTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } =
         useTaskStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const _console = useConsoleHelper();
@@ -272,7 +272,16 @@ export const useMultiProjectTaskGridHelper = () => {
                 priority: taskGridFilters.priority,
             };
 
-            const result = await taskService._getTasks(token, filterParams);
+            // allTasksParams: same projectIds but WITHOUT status/priority filter
+            const allTasksParams = {
+                projectIds: validProjectIds.join(","),
+                deletedAt: "null",
+            };
+
+            const [result, allResult] = await Promise.all([
+                taskService._getTasks(token, filterParams),
+                taskService._getTasks(token, allTasksParams),
+            ]);
 
             if (!result.success) {
                 throw new Error(result.message || "Failed to load tasks");
@@ -282,6 +291,13 @@ export const useMultiProjectTaskGridHelper = () => {
             setTasks(transformedData);
             setTaskTotalCount(result.totalCount || transformedData.length);
             setTaskGridError(null);
+
+            // Store unfiltered tasks for TaskFlow view
+            if (allResult.success) {
+                setAllTasks(transformTaskData(allResult.data || []));
+            } else {
+                setAllTasks(transformedData);
+            }
         } catch (err) {
             const errorMessage = await parseApiError(err);
             setTaskGridError(new Error(errorMessage));
