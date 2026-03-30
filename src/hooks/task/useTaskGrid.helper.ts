@@ -50,7 +50,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
 
 export const useTaskGridHelper = () => {
     const { $user } = useAuthStore();
-    const { tasks, setTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } = useTaskStore();
+    const { tasks, setTasks, setAllTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } = useTaskStore();
     const { projects } = useProjectStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const _console = useConsoleHelper();
@@ -300,7 +300,18 @@ export const useTaskGridHelper = () => {
                 filterParams.projectIds = String(projectId);
             }
 
-            const result = await taskService._getTasks(token, filterParams);
+            // allTasksParams: same as filterParams but WITHOUT status/priority filter
+            const allTasksParams: { projectIds?: string; deletedAt?: string } = {
+                deletedAt: "null",
+            };
+            if (projectId && projectId > 0) {
+                allTasksParams.projectIds = String(projectId);
+            }
+
+            const [result, allResult] = await Promise.all([
+                taskService._getTasks(token, filterParams),
+                taskService._getTasks(token, allTasksParams),
+            ]);
 
             if (!result.success) {
                 throw new Error(result.message || "Failed to load tasks");
@@ -310,6 +321,14 @@ export const useTaskGridHelper = () => {
             setTasks(transformedData);
             setTaskTotalCount(result.totalCount || transformedData.length);
             setTaskGridError(null);
+
+            // Store unfiltered tasks for TaskFlow view
+            if (allResult.success) {
+                setAllTasks(transformTaskData(allResult.data || []));
+            } else {
+                // Fallback: use filtered tasks
+                setAllTasks(transformedData);
+            }
         } catch (err) {
             const errorMessage = await parseApiError(err);
             setTaskGridError(new Error(errorMessage));
