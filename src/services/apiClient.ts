@@ -111,8 +111,14 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
         isRefreshing = false;
         debugLog.log("apiClient", "auth-failed", { url, device });
         debugLog.flush();
-        onAuthFailed();
-        window.dispatchEvent(new Event("auth:unauthorized"));
+
+        // Don't trigger logout during OAuth callback — exchange is still in progress
+        if (!window.location.pathname.includes("/auth/callback")) {
+            onAuthFailed();
+            window.dispatchEvent(new Event("auth:unauthorized"));
+        } else {
+            debugLog.log("apiClient", "auth-failed-suppressed-oauth", { url, device });
+        }
         return response;
     }
 }
