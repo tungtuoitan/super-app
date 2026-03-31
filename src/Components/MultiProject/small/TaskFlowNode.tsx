@@ -26,7 +26,7 @@ import type { TaskFlowNodeData } from "@/types/multiProject/multiProjectTaskFlow
 const HANDLE_BASE = "!w-3 !h-3 !rounded-full !border-2 !border-primary !bg-primary/80 z-10";
 
 export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNodeData>>) {
-    const { editingNodeId, draggingNodeId, flowNodes } = useMultiTaskFlowStore();
+    const { editingNodeId, draggingNodeId, flowNodes, flowEdges, connectingSourceId } = useMultiTaskFlowStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleChangeProject, handleChangeStatus } = useMultiProjectTaskFlowNodeHelper();
     const { allProjects } = useMultiProjectTaskFlowSelector();
     const { registriesByType } = useGeneralStore();
@@ -51,7 +51,9 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
 
     const borderColor = getStatusBorderColor(data.task.status);
     const bgColor = getStatusNodeBackground(data.task.status);
-    const showHandles = isHovered || !!selected;
+    const anyEdgeSelected = useMemo(() => flowEdges.some((e) => e.selected), [flowEdges]);
+    const isConnectingDrag = !!connectingSourceId && connectingSourceId !== id;
+    const showHandles = !anyEdgeSelected && (isHovered || !!selected || isConnectingDrag);
     const handleOpacity: React.CSSProperties = { opacity: showHandles ? 1 : 0, transition: "opacity 0.15s" };
 
     // Process progress (checked / total)

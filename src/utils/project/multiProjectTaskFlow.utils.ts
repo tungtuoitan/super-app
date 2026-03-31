@@ -228,7 +228,28 @@ export function smartWand(
     });
 }
 
-// ── Auto-align snap (center-to-center) ──────────────────────────────────────
+// ── Nearest handle pair ──────────────────────────────────────────────────────
+
+/**
+ * Given two nodes, compute the most natural source/target handle pair
+ * based on the center-to-center direction.
+ */
+export function nearestHandlePair(
+    srcCx: number, srcCy: number,
+    tgtCx: number, tgtCy: number,
+): { sourceHandle: string; targetHandle: string } {
+    const dx = tgtCx - srcCx;
+    const dy = tgtCy - srcCy;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+        return dx >= 0
+            ? { sourceHandle: "right", targetHandle: "left" }
+            : { sourceHandle: "left",  targetHandle: "right" };
+    } else {
+        return dy >= 0
+            ? { sourceHandle: "bottom", targetHandle: "top" }
+            : { sourceHandle: "top",    targetHandle: "bottom" };
+    }
+}
 
 const SNAP_THRESHOLD = 40; // px — snap when centers are within this distance
 

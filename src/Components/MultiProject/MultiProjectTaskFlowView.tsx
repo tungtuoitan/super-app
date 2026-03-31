@@ -104,7 +104,7 @@ function TaskFlowCanvas() {
     useMultiProjectTaskFlowHeadless();
 
     const { flowNodes, flowEdges } = useMultiProjectTaskFlowSelector();
-    const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout } = useMultiProjectTaskFlowHelper();
+    const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout } = useMultiProjectTaskFlowHelper();
     const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
     const { loadTasks } = useTaskGridHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -240,6 +240,8 @@ function TaskFlowCanvas() {
                 onNodeDrag={handleNodeDrag}
                 onNodeDragStop={handleNodeDragStop}
                 onConnect={handleConnect}
+                onConnectStart={handleConnectStart}
+                onConnectEnd={handleConnectEnd}
                 onReconnectStart={handleReconnectStart}
                 onReconnectEnd={handleReconnectEnd}
                 onReconnect={handleReconnect}
@@ -262,7 +264,7 @@ function TaskFlowCanvas() {
                 panOnDrag={[1]}
                 selectNodesOnDrag={true}
                 connectionMode={ConnectionMode.Loose}
-                connectionRadius={30}
+                connectionRadius={80}
                 zoomOnScroll={false}
                 panOnScroll={false}
                 proOptions={{ hideAttribution: true }}
