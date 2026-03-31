@@ -97,7 +97,7 @@ const FLOW_CSS = `
 `;
 
 const MIN_ZOOM = 0.05;
-const MAX_ZOOM = 2;
+const MAX_ZOOM = 1;
 const PAN_SPEED = 0.8;
 
 function TaskFlowCanvas() {
@@ -112,6 +112,8 @@ function TaskFlowCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
     const isDragSelecting = useRef(false);
     const inProgressIndexRef = useRef(0);
+    // Dynamic min zoom: after fitView, lock min to the resulting zoom (can't zoom out past "see all")
+    const dynMinZoomRef = useRef(MIN_ZOOM);
 
     // Drag-select only nodes — deselect edges caught in the selection box
     const handleSelectionChange = useCallback(({ edges: selectedEdges }: { nodes: any[]; edges: any[] }) => {
@@ -149,7 +151,7 @@ function TaskFlowCanvas() {
             if (e.ctrlKey) {
                 // Zoom toward cursor
                 const factor = e.deltaY > 0 ? 0.92 : 1.08;
-                const newZoom = Math.min(Math.max(zoom * factor, MIN_ZOOM), MAX_ZOOM);
+                const newZoom = Math.min(Math.max(zoom * factor, dynMinZoomRef.current), MAX_ZOOM);
                 const rect = el.getBoundingClientRect();
                 const cx = e.clientX - rect.left;
                 const cy = e.clientY - rect.top;
@@ -182,6 +184,11 @@ function TaskFlowCanvas() {
 
     const handleFitView = useCallback(() => {
         rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
+        // After animation settles, lock min-zoom to the resulting level
+        setTimeout(() => {
+            const { zoom } = rfInstance.getViewport();
+            dynMinZoomRef.current = Math.max(MIN_ZOOM, zoom);
+        }, 320);
     }, [rfInstance]);
 
     const handleBackToCenter = useCallback(() => {
@@ -190,6 +197,10 @@ function TaskFlowCanvas() {
         );
         if (inProgressNodes.length === 0) {
             rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
+            setTimeout(() => {
+                const { zoom } = rfInstance.getViewport();
+                dynMinZoomRef.current = Math.max(MIN_ZOOM, zoom);
+            }, 320);
             return;
         }
         const idx = inProgressIndexRef.current % inProgressNodes.length;
@@ -255,7 +266,7 @@ function TaskFlowCanvas() {
                 fitView={!savedViewport}
                 fitViewOptions={{ padding: 0.15, maxZoom: 1 }}
                 defaultViewport={savedViewport ?? { x: 0, y: 0, zoom: 1 }}
-                minZoom={MIN_ZOOM}
+                minZoom={dynMinZoomRef.current}
                 maxZoom={MAX_ZOOM}
                 deleteKeyCode={null}
                 multiSelectionKeyCode="Control"

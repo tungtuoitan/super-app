@@ -17,4 +17,6 @@ export interface FlowEdgeData extends Record<string, unknown> {
     edgeId: number;
     note: string | null;
     arrowDirection: ArrowDirection;
+    /** Whether to show animated dots (set at render time based on source node status) */
+    _animate?: boolean;
 }
