@@ -16,10 +16,10 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { flowService } from "@/services/flow.service";
 import type { FlowEdgeData, ArrowDirection } from "@/types/multiProject/multiProjectTaskFlow.type";
-import { buildTaskFlowLayout, smartWand, computeOptimalHandles, NODE_WIDTH, estimateNodeHeight } from "@/utils/project/multiProjectTaskFlow.utils";
+import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "@/utils/project/multiProjectTaskFlow.utils";
 
 export const useMultiProjectTaskFlowHelper = () => {
-    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions } = useMultiTaskFlowStore();
+    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions, flowNodes, setConnectingSourceId } = useMultiTaskFlowStore();
     const { savedEdges } = useMultiProjectTaskFlowSelector();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
@@ -206,6 +206,41 @@ export const useMultiProjectTaskFlowHelper = () => {
         [setDraggingNodeId, setFlowNodes, setSavedPositions, $user.userToken],
     );
 
+    // ── Connection drag tracking ────────────────────────────────────────────
+
+    const handleConnectStart = useCallback(
+        (_: unknown, params: { nodeId?: string | null }) => {
+            setConnectingSourceId(params.nodeId ?? null);
+        },
+        [setConnectingSourceId],
+    );
+
+    const handleConnectEnd = useCallback(() => {
+        setConnectingSourceId(null);
+    }, [setConnectingSourceId]);
+
+    // ── Resolve handles: use RF value when explicit, compute nearest otherwise ─
+
+    const resolveHandles = useCallback(
+        (sourceId: string, targetId: string, sourceHandle?: string | null, targetHandle?: string | null) => {
+            if (sourceHandle && targetHandle) return { sourceHandle, targetHandle };
+            const srcNode = flowNodes.find((n) => n.id === sourceId);
+            const tgtNode = flowNodes.find((n) => n.id === targetId);
+            if (!srcNode || !tgtNode) return { sourceHandle: sourceHandle ?? "bottom", targetHandle: targetHandle ?? "top" };
+            const srcH = srcNode.measured?.height ?? estimateNodeHeight((srcNode.data as import("@/types/multiProject/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+            const tgtH = tgtNode.measured?.height ?? estimateNodeHeight((tgtNode.data as import("@/types/multiProject/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+            const pair = nearestHandlePair(
+                srcNode.position.x + NODE_WIDTH / 2, srcNode.position.y + srcH / 2,
+                tgtNode.position.x + NODE_WIDTH / 2, tgtNode.position.y + tgtH / 2,
+            );
+            return {
+                sourceHandle: sourceHandle ?? pair.sourceHandle,
+                targetHandle: targetHandle ?? pair.targetHandle,
+            };
+        },
+        [flowNodes],
+    );
+
     // ── Custom edge connect ─────────────────────────────────────────────────
 
     const handleConnect = useCallback(
@@ -213,13 +248,18 @@ export const useMultiProjectTaskFlowHelper = () => {
             if (reconnectingRef.current) return;
             if (!connection.source || !connection.target) return;
 
+            const { sourceHandle, targetHandle } = resolveHandles(
+                connection.source, connection.target,
+                connection.sourceHandle, connection.targetHandle,
+            );
+
             const tempId = `temp-${Date.now()}`;
             const newEdge: Edge<FlowEdgeData> = {
                 id: tempId,
                 source: connection.source,
                 target: connection.target,
-                sourceHandle: connection.sourceHandle ?? "bottom",
-                targetHandle: connection.targetHandle ?? "top",
+                sourceHandle,
+                targetHandle,
                 type: "flowEdgeWithNote",
                 reconnectable: false,
                 data: { edgeId: 0, note: null, arrowDirection: "forward" },
@@ -231,10 +271,10 @@ export const useMultiProjectTaskFlowHelper = () => {
                 const result = await flowService._upsertEdges($user.userToken, [{
                     sourceId: parseInt(connection.source, 10),
                     sourceType: "task",
-                    sourceHandle: connection.sourceHandle ?? "bottom",
+                    sourceHandle,
                     targetId: parseInt(connection.target, 10),
                     targetType: "task",
-                    targetHandle: connection.targetHandle ?? "top",
+                    targetHandle,
                     note: null,
                 }]);
 
@@ -253,7 +293,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                 _console.error("Failed to save connection");
             }
         },
-        [$user.userToken, setFlowEdges, setSavedEdges, _console],
+        [$user.userToken, resolveHandles, setFlowEdges, setSavedEdges, _console],
     );
 
     // ── Edge note editing ───────────────────────────────────────────────────
@@ -331,12 +371,17 @@ export const useMultiProjectTaskFlowHelper = () => {
         async (oldEdge: Edge, newConnection: Connection) => {
             if (!newConnection.source || !newConnection.target) return;
 
+            const { sourceHandle, targetHandle } = resolveHandles(
+                newConnection.source, newConnection.target,
+                newConnection.sourceHandle, newConnection.targetHandle,
+            );
+
             const updated: Edge<FlowEdgeData> = {
                 ...oldEdge,
                 source: newConnection.source,
                 target: newConnection.target,
-                sourceHandle: newConnection.sourceHandle ?? oldEdge.sourceHandle,
-                targetHandle: newConnection.targetHandle ?? oldEdge.targetHandle,
+                sourceHandle,
+                targetHandle,
                 data: oldEdge.data as FlowEdgeData,
             };
 
@@ -349,14 +394,14 @@ export const useMultiProjectTaskFlowHelper = () => {
             flowService._upsertEdges($user.userToken, [{
                 id: edgeData.edgeId,
                 sourceId: parseInt(newConnection.source, 10),
-                sourceHandle: newConnection.sourceHandle ?? "bottom",
+                sourceHandle,
                 targetId: parseInt(newConnection.target, 10),
-                targetHandle: newConnection.targetHandle ?? "top",
+                targetHandle,
                 note: edgeData.note,
                 arrowDirection: edgeData.arrowDirection,
             }]).catch(() => _console.error("Failed to update connection"));
         },
-        [setFlowEdges, setSavedEdges, $user.userToken, _console],
+        [resolveHandles, setFlowEdges, setSavedEdges, $user.userToken, _console],
     );
 
     // ── Auto layout ─────────────────────────────────────────────────────────
@@ -395,6 +440,8 @@ export const useMultiProjectTaskFlowHelper = () => {
         handleNodeDrag,
         handleNodeDragStop,
         handleConnect,
+        handleConnectStart,
+        handleConnectEnd,
         handleReconnectStart,
         handleReconnectEnd,
         handleReconnect,

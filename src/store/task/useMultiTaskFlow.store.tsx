@@ -35,6 +35,9 @@ export interface MultiTaskFlowContextData {
     /** When true, dragged nodes snap center-to-center with connected neighbors */
     autoAlign: boolean;
     setAutoAlign: Dispatch<SetStateAction<boolean>>;
+    /** Node ID that is currently the source of a connection drag (null = not dragging) */
+    connectingSourceId: string | null;
+    setConnectingSourceId: Dispatch<SetStateAction<string | null>>;
 }
 
 const defaultValue: MultiTaskFlowContextData = {
@@ -56,6 +59,8 @@ const defaultValue: MultiTaskFlowContextData = {
     setPositionsLoaded: () => {},
     autoAlign: false,
     setAutoAlign: () => {},
+    connectingSourceId: null,
+    setConnectingSourceId: () => {},
 };
 
 const MultiTaskFlowStore = createContext<MultiTaskFlowContextData>(defaultValue);
@@ -72,6 +77,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [savedPositions, setSavedPositions] = useState<Record<string, { x: number; y: number }>>({});
     const [positionsLoaded, setPositionsLoaded] = useState(false);
     const [autoAlign, setAutoAlign] = useState(false);
+    const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
 
     return (
         <MultiTaskFlowStore.Provider
@@ -85,6 +91,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
                 savedPositions, setSavedPositions,
                 positionsLoaded, setPositionsLoaded,
                 autoAlign, setAutoAlign,
+                connectingSourceId, setConnectingSourceId,
             }}
         >
             {children}

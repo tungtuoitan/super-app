@@ -180,18 +180,19 @@ export function FlowEdgeWithNote({
                 <style>{`
                     @keyframes flow-fwd { from { stroke-dashoffset: ${FLOW_PERIOD}; } to { stroke-dashoffset: 0; } }
                     @keyframes flow-bwd { from { stroke-dashoffset: 0; } to { stroke-dashoffset: ${FLOW_PERIOD}; } }
-                    .react-flow__edge.selected .react-flow__edgeanchor { r: 7; fill: hsl(var(--primary)); stroke: hsl(var(--background)); stroke-width: 2; opacity: 1; pointer-events: all; }
-                    .react-flow__edge.selected .react-flow__edgeanchor:hover { r: 9; }
+                    .react-flow__edge.selected .react-flow__edgeupdater {
+                        fill: hsl(var(--primary));
+                        stroke: hsl(var(--background));
+                        stroke-width: 2.5;
+                        r: 8;
+                        cursor: crosshair;
+                    }
+                    .react-flow__edge.selected .react-flow__edgeupdater:hover {
+                        fill: hsl(var(--primary) / 0.8);
+                        r: 10;
+                    }
                 `}</style>
             </defs>
-
-            {/* Endpoint handle rings — visual outer ring (behind RF anchors) */}
-            {selected && (
-                <>
-                    <circle cx={sourceX} cy={sourceY} r={12} fill="hsl(var(--primary)/0.15)" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="3 2" style={{ pointerEvents: "none" }} />
-                    <circle cx={targetX} cy={targetY} r={12} fill="hsl(var(--primary)/0.15)" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="3 2" style={{ pointerEvents: "none" }} />
-                </>
-            )}
 
             {/* Static base line — gives the edge a visible track */}
             <BaseEdge
