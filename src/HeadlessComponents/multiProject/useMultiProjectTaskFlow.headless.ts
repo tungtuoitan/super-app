@@ -2,7 +2,7 @@
  * MultiProject Task Flow Headless
  * Side-effects only (useEffect).
  * 1. Loads saved positions + custom edges from API on first mount.
- * 2. Rebuilds node/edge layout when the task set changes.
+ * 2. Rebuilds node layout when the task set changes.
  *    Preserves user-dragged positions for existing nodes.
  */
 
@@ -57,13 +57,17 @@ export function useMultiProjectTaskFlowHeadless() {
 
             // Rebuild layout using saved positions (only if tasks already loaded)
             if (filteredTasks.length > 0) {
-                const { nodes: autoNodes, edges: autoEdges } = buildTaskFlowLayout(filteredTasks, projectNameMap);
-                const nodes = autoNodes.map((n) => ({
-                    ...n,
-                    position: positions[n.id] ?? n.position,
-                }));
-                setFlowNodes(nodes);
-                setFlowEdges([...autoEdges, ...customEdges]);
+                const { nodes: autoNodes } = buildTaskFlowLayout(filteredTasks, projectNameMap);
+                const autoIds = new Set(autoNodes.map((n) => n.id));
+                setFlowNodes((prev) => {
+                    const extras = prev.filter((n) => !autoIds.has(n.id));
+                    const merged = autoNodes.map((n) => ({
+                        ...n,
+                        position: positions[n.id] ?? n.position,
+                    }));
+                    return [...merged, ...extras];
+                });
+                setFlowEdges(customEdges);
             }
         }).catch(() => {/* silent — use auto layout if API unavailable */});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,23 +81,28 @@ export function useMultiProjectTaskFlowHeadless() {
             return;
         }
 
-        const { nodes: autoNodes, edges: autoEdges } = buildTaskFlowLayout(filteredTasks, projectNameMap);
+        const { nodes: autoNodes } = buildTaskFlowLayout(filteredTasks, projectNameMap);
+        const autoIds = new Set(autoNodes.map((n) => n.id));
 
         setFlowNodes((prev) => {
+            // Preserve any node that isn't in autoNodes (temp nodes, just-created nodes
+            // whose task hasn't yet landed in filteredTasks) so they don't disappear.
+            const extras = prev.filter((n) => !autoIds.has(n.id));
+
             // Merge: existing node positions > saved backend positions > auto-layout
             const prevPositions: Record<string, { x: number; y: number }> = {};
             for (const n of prev) prevPositions[n.id] = n.position;
-            return autoNodes.map((n) => ({
+            const merged = autoNodes.map((n) => ({
                 ...n,
                 position: prevPositions[n.id] ?? savedPositions[n.id] ?? n.position,
             }));
+            return [...merged, ...extras];
         });
 
         setFlowEdges((prev) => {
-            // Merge: custom edges from prev OR from savedEdges (for first load after F5)
+            // Keep only custom edges
             const prevCustom = prev.filter((e) => e.type === "flowEdgeWithNote");
-            const custom = prevCustom.length > 0 ? prevCustom : savedEdges;
-            return [...autoEdges, ...custom];
+            return prevCustom.length > 0 ? prevCustom : savedEdges;
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [taskIdKey, savedPositions, savedEdges]);

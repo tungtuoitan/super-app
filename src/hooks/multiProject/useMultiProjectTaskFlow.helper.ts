@@ -16,20 +16,41 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { flowService } from "@/services/flow.service";
 import type { FlowEdgeData, ArrowDirection } from "@/types/multiProject/multiProjectTaskFlow.type";
-import { buildTaskFlowLayout, smartWand } from "@/utils/project/multiProjectTaskFlow.utils";
+import { buildTaskFlowLayout, smartWand, computeOptimalHandles, NODE_WIDTH, estimateNodeHeight } from "@/utils/project/multiProjectTaskFlow.utils";
 
 export const useMultiProjectTaskFlowHelper = () => {
     const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions } = useMultiTaskFlowStore();
-    const { filteredTasks, projectNameMap, savedEdges } = useMultiProjectTaskFlowSelector();
+    const { savedEdges } = useMultiProjectTaskFlowSelector();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const reconnectingRef = useRef(false);
+    // drag start positions for Shift-axis-constraint
+    const dragStartRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+    // locked axis per node: null = not yet decided, 'x' = locked horizontal, 'y' = locked vertical
+    const dragAxisRef = useRef<Map<string, "x" | "y" | null>>(new Map());
+    // last snapped positions applied by handleNodeDrag — restored at drop to avoid RF overwrite
+    const lastSnappedRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
     // ── Node changes (drag/select) ──────────────────────────────────────────
 
     const handleNodesChange = useCallback(
         (changes: NodeChange[]) => {
-            setFlowNodes((prev) => applyNodeChanges(changes, prev) as typeof prev);
+            setFlowNodes((prev) => {
+                // Intercept final drop position changes (dragging: false) and substitute
+                // the snapped position so React Flow's raw pointer position never lands in state
+                const patched = changes.map((c) => {
+                    if (
+                        c.type === "position" &&
+                        c.dragging === false &&
+                        c.id &&
+                        lastSnappedRef.current.has(c.id)
+                    ) {
+                        return { ...c, position: lastSnappedRef.current.get(c.id)! };
+                    }
+                    return c;
+                });
+                return applyNodeChanges(patched, prev) as typeof prev;
+            });
         },
         [setFlowNodes],
     );
@@ -55,35 +76,132 @@ export const useMultiProjectTaskFlowHelper = () => {
     const handleNodeDragStart = useCallback(
         (_event: React.MouseEvent, node: { id: string }) => {
             setDraggingNodeId(node.id);
+            dragStartRef.current.clear();
+            dragAxisRef.current.clear();
+            lastSnappedRef.current.clear();
+            // Capture start positions for this node and all co-selected nodes
+            setFlowNodes((prev) => {
+                for (const n of prev) {
+                    if (n.selected || n.id === node.id) {
+                        dragStartRef.current.set(n.id, { ...n.position });
+                        dragAxisRef.current.set(n.id, null);
+                    }
+                }
+                return prev;
+            });
         },
-        [setDraggingNodeId],
+        [setDraggingNodeId, setFlowNodes],
+    );
+
+    // ── Live drag: center-snap + Shift axis constraint ─────────────────────
+
+    const SNAP_THRESHOLD = 20;   // px — magnetic snap range
+    const AXIS_LOCK_MIN  = 8;    // px — minimum movement before axis is decided
+
+    const handleNodeDrag = useCallback(
+        (event: React.MouseEvent, _node: { id: string }, draggedNodes: { id: string; position: { x: number; y: number } }[]) => {
+            if (draggedNodes.length === 0) return;
+            const draggedIds = new Set(draggedNodes.map((n) => n.id));
+            const shiftHeld = event.shiftKey;
+
+            setFlowNodes((prev) => {
+                // Build a fast lookup of all non-dragged node centers using measured height
+                const otherCenters: { cx: number; cy: number }[] = [];
+                for (const n of prev) {
+                    if (draggedIds.has(n.id)) continue;
+                    const h = n.measured?.height ?? estimateNodeHeight((n.data as import("@/types/multiProject/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+                    otherCenters.push({ cx: n.position.x + NODE_WIDTH / 2, cy: n.position.y + h / 2 });
+                }
+
+                return prev.map((n) => {
+                    if (!draggedIds.has(n.id)) return n;
+
+                    const startPos = dragStartRef.current.get(n.id);
+                    const h = n.measured?.height ?? estimateNodeHeight((n.data as import("@/types/multiProject/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+                    let { x, y } = n.position;
+
+                    // ── 1. Center-snap (always on) — snap only the closer axis ──
+                    const cx = x + NODE_WIDTH / 2;
+                    const cy = y + h / 2;
+                    let bestSnapCx: number | null = null;
+                    let bestSnapCy: number | null = null;
+                    let bestDx = SNAP_THRESHOLD;
+                    let bestDy = SNAP_THRESHOLD;
+                    for (const oc of otherCenters) {
+                        const dx = Math.abs(cx - oc.cx);
+                        const dy = Math.abs(cy - oc.cy);
+                        if (dx < bestDx) { bestDx = dx; bestSnapCx = oc.cx; }
+                        if (dy < bestDy) { bestDy = dy; bestSnapCy = oc.cy; }
+                    }
+                    // Only snap the axis that is closer to alignment — never both at once
+                    if (bestSnapCx !== null && (bestSnapCy === null || bestDx <= bestDy)) {
+                        x = bestSnapCx - NODE_WIDTH / 2;
+                    } else if (bestSnapCy !== null) {
+                        y = bestSnapCy - h / 2;
+                    }
+
+                    // ── 2. Shift axis constraint (overrides snap on locked axis) ─
+                    if (shiftHeld && startPos) {
+                        const totalDx = Math.abs(n.position.x - startPos.x);
+                        const totalDy = Math.abs(n.position.y - startPos.y);
+
+                        // Decide axis once movement exceeds AXIS_LOCK_MIN
+                        let axis = dragAxisRef.current.get(n.id) ?? null;
+                        if (axis === null && (totalDx > AXIS_LOCK_MIN || totalDy > AXIS_LOCK_MIN)) {
+                            axis = totalDx >= totalDy ? "x" : "y";
+                            dragAxisRef.current.set(n.id, axis);
+                        }
+
+                        if (axis === "x") y = startPos.y;  // horizontal drag → freeze Y
+                        if (axis === "y") x = startPos.x;  // vertical drag   → freeze X
+                    } else if (!shiftHeld) {
+                        // Reset axis lock when Shift is released mid-drag
+                        dragAxisRef.current.set(n.id, null);
+                    }
+
+                    lastSnappedRef.current.set(n.id, { x, y });
+                    return { ...n, position: { x, y } };
+                });
+            });
+        },
+        [setFlowNodes],
     );
 
     const handleNodeDragStop = useCallback(
         (_event: React.MouseEvent, _node: { id: string }, draggedNodes: { id: string; position: { x: number; y: number } }[]) => {
             setDraggingNodeId(null);
+            dragAxisRef.current.clear();
             if (draggedNodes.length === 0) return;
 
-            // Re-apply selection to all dragged nodes (React Flow deselects on drop)
             const draggedIds = new Set(draggedNodes.map((n) => n.id));
-            requestAnimationFrame(() => {
-                setFlowNodes((prev) =>
-                    prev.map((n) => (draggedIds.has(n.id) ? { ...n, selected: true } : n)),
-                );
-            });
+            const snapshotSnapped = new Map(lastSnappedRef.current);
+            // Do NOT clear lastSnappedRef yet — handleNodesChange still needs it to intercept
+            // the final position change that React Flow fires synchronously after this callback.
+            // Clear it in the RAF after the interception has happened.
 
-            // Update savedPositions for ALL dragged nodes (includes multi-selected)
-            const posUpdate: Record<string, { x: number; y: number }> = {};
-            const payload: { nodeId: number; nodeType: string; x: number; y: number }[] = [];
-            for (const n of draggedNodes) {
-                posUpdate[n.id] = n.position;
-                const nodeId = parseInt(n.id, 10);
-                if (nodeId) payload.push({ nodeId, nodeType: "task", x: n.position.x, y: n.position.y });
-            }
-            setSavedPositions((prev) => ({ ...prev, ...posUpdate }));
-            if (payload.length > 0) {
-                flowService._upsertPositions($user.userToken, payload).catch(() => {});
-            }
+            requestAnimationFrame(() => {
+                lastSnappedRef.current.clear();
+
+                setFlowNodes((prev) => {
+                    const posUpdate: Record<string, { x: number; y: number }> = {};
+                    const payload: { nodeId: number; nodeType: string; x: number; y: number }[] = [];
+
+                    const updated = prev.map((n) => {
+                        if (!draggedIds.has(n.id)) return n;
+                        const pos = snapshotSnapped.get(n.id) ?? n.position;
+                        posUpdate[n.id] = pos;
+                        const nodeId = parseInt(n.id, 10);
+                        if (nodeId) payload.push({ nodeId, nodeType: "task", x: pos.x, y: pos.y });
+                        return { ...n, position: pos, selected: true };
+                    });
+
+                    setSavedPositions((p) => ({ ...p, ...posUpdate }));
+                    if (payload.length > 0) {
+                        flowService._upsertPositions($user.userToken, payload).catch(() => {});
+                    }
+                    return updated;
+                });
+            });
         },
         [setDraggingNodeId, setFlowNodes, setSavedPositions, $user.userToken],
     );
@@ -243,43 +361,38 @@ export const useMultiProjectTaskFlowHelper = () => {
 
     // ── Auto layout ─────────────────────────────────────────────────────────
 
-    // ── Intelligent adjust (gentle alignment, minimal movement) ────────────
-
     const handleAutoLayout = useCallback(() => {
         setFlowNodes((prev) => {
-            // Collect all edges (auto + custom) for alignment analysis
-            const allEdges = [
-                ...filteredTasks
-                    .filter((t) => t.parentTaskId)
-                    .map((t) => ({ source: String(t.parentTaskId), target: String(t.id) })),
-                ...savedEdges.map((e) => ({ source: e.source, target: e.target })),
-            ];
-            const adjusted = smartWand(prev, allEdges);
+            const subEdges = savedEdges.map((e) => ({ source: e.source, target: e.target }));
+            // Gather orphan nodes (no connected edges) and pack them neatly
+            const adjusted = smartWand(prev, subEdges);
 
-            // Persist adjusted positions (best-effort) and update savedPositions
+            // Recompute handles only for moved nodes
+            setFlowEdges((prevEdges) => {
+                const handleMap = computeOptimalHandles(adjusted, prevEdges);
+                return prevEdges.map((e) => {
+                    const optimal = handleMap.get(e.id);
+                    return optimal ? { ...e, sourceHandle: optimal.sourceHandle, targetHandle: optimal.targetHandle } : e;
+                });
+            });
+
+            // Persist moved positions (skip temp nodes: id = NaN)
             const newPositions: Record<string, { x: number; y: number }> = {};
-            const payload = adjusted.map((n) => {
-                newPositions[n.id] = n.position;
-                return {
-                    nodeId: parseInt(n.id, 10),
-                    nodeType: "task",
-                    x: n.position.x,
-                    y: n.position.y,
-                };
-            }).filter((p) => p.nodeId > 0);
-            setSavedPositions(newPositions);
-            if (payload.length > 0) {
-                flowService._upsertPositions($user.userToken, payload).catch(() => {});
-            }
+            const payload = adjusted
+                .map((n) => { newPositions[n.id] = n.position; return { nodeId: parseInt(n.id, 10), nodeType: "task", x: n.position.x, y: n.position.y }; })
+                .filter((p) => p.nodeId > 0);
+            setSavedPositions((prev) => ({ ...prev, ...newPositions }));
+            if (payload.length > 0) flowService._upsertPositions($user.userToken, payload).catch(() => {});
 
             return adjusted;
         });
-    }, [filteredTasks, savedEdges, setFlowNodes, setSavedPositions, $user.userToken]);
+    }, [savedEdges, setFlowNodes, setFlowEdges, setSavedPositions, $user.userToken]);
 
     return {
         handleNodesChange,
         handleEdgesChange,
         handleNodeDragStart,
+        handleNodeDrag,
         handleNodeDragStop,
         handleConnect,
         handleReconnectStart,
