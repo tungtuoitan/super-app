@@ -25,7 +25,7 @@ export const useMultiProjectTaskFlowSelector = () => {
         [tasks, filteredProjectIds],
     );
 
-    /** Stable key — changes only when the set of task IDs changes */
+    /** Stable key — changes when the set of task IDs changes */
     const taskIdKey = useMemo(
         () => filteredTasks.map((t) => t.id).sort((a, b) => a - b).join(","),
         [filteredTasks],

@@ -21,16 +21,19 @@ import {
     ConnectionMode,
     useReactFlow,
     type Viewport,
+    SelectionMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Wand2, Scan, Maximize, Crosshair, View, ScanEye } from "lucide-react";
+import { Wand2, Scan, Maximize, Crosshair, View, ScanEye, RefreshCw } from "lucide-react";
 import { MultiTaskFlowProvider } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowHeadless } from "@/HeadlessComponents/multiProject/useMultiProjectTaskFlow.headless";
 import { useMultiProjectTaskFlowSelector } from "@/Selectors/multipleProject/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "@/hooks/multiProject/useMultiProjectTaskFlow.helper";
 import { useMultiProjectTaskFlowNodeHelper } from "@/hooks/multiProject/useMultiProjectTaskFlowNode.helper";
+import { useTaskGridHelper } from "@/hooks/task/useTaskGrid.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
+import { cn } from "@/lib/utils";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { TaskFlowNode } from "./small/TaskFlowNode";
 import { FlowEdgeWithNote } from "./small/FlowEdgeWithNote";
@@ -57,6 +60,40 @@ const FLOW_CSS = `
     pointer-events: all;
 }
 .react-flow__edge.selected .react-flow__edgeanchor:hover { r: 7; }
+
+/* In-progress task — rotating conic border */
+@keyframes taskflow-rotate {
+    0%   { --angle: 0deg; }
+    100% { --angle: 360deg; }
+}
+@property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+.taskflow-inprogress {
+    position: relative;
+}
+.taskflow-inprogress::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: inherit;
+    background: conic-gradient(
+        from var(--angle),
+        transparent 0%,
+        rgba(250, 204, 21, 0.6) 10%,
+        transparent 20%
+    );
+    animation: taskflow-rotate 3s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: 1.5px;
+    pointer-events: none;
+    z-index: 1;
+}
 `;
 
 const MIN_ZOOM = 0.05;
@@ -67,11 +104,24 @@ function TaskFlowCanvas() {
     useMultiProjectTaskFlowHeadless();
 
     const { flowNodes, flowEdges } = useMultiProjectTaskFlowSelector();
-    const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDragStop, handleConnect, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout } = useMultiProjectTaskFlowHelper();
+    const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout } = useMultiProjectTaskFlowHelper();
     const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
+    const { loadTasks } = useTaskGridHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const rfInstance = useReactFlow();
     const containerRef = useRef<HTMLDivElement>(null);
+    const isDragSelecting = useRef(false);
+    const inProgressIndexRef = useRef(0);
+
+    // Drag-select only nodes — deselect edges caught in the selection box
+    const handleSelectionChange = useCallback(({ edges: selectedEdges }: { nodes: any[]; edges: any[] }) => {
+        if (isDragSelecting.current && selectedEdges.length > 0) {
+            handleEdgesChange(selectedEdges.map((e: any) => ({ id: e.id, type: "select" as const, selected: false })));
+        }
+    }, [handleEdgesChange]);
+
+    const handleSelectionStart = useCallback(() => { isDragSelecting.current = true; }, []);
+    const handleSelectionEnd = useCallback(() => { isDragSelecting.current = false; }, []);
 
     // ── Right-click context menu (orchestrator) ─────────────────────────────
     const handlePaneContextMenu = useCallback(
@@ -135,18 +185,19 @@ function TaskFlowCanvas() {
     }, [rfInstance]);
 
     const handleBackToCenter = useCallback(() => {
-        const inProgressNode = flowNodes.find(
+        const inProgressNodes = flowNodes.filter(
             (n) => (n.data as { task?: { status: string } }).task?.status === "in_progress",
         );
-        if (!inProgressNode) {
-            // Fallback: fit view if no in_progress node
+        if (inProgressNodes.length === 0) {
             rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
             return;
         }
-        // Center on that node (offset by half node size to hit center)
+        const idx = inProgressIndexRef.current % inProgressNodes.length;
+        inProgressIndexRef.current = idx + 1;
+        const node = inProgressNodes[idx];
         rfInstance.setCenter(
-            inProgressNode.position.x + 115,
-            inProgressNode.position.y + 38,
+            node.position.x + 115,
+            node.position.y + 38,
             { zoom: 1, duration: 300 },
         );
     }, [rfInstance, flowNodes]);
@@ -172,6 +223,10 @@ function TaskFlowCanvas() {
         storageService.set(STORAGE_KEYS.TASK_FLOW_VIEWPORT, viewport);
     }, []);
 
+    const handleRefresh = useCallback(() => {
+        loadTasks();
+    }, [loadTasks]);
+
     return (
         <div ref={containerRef} className="h-full w-full relative">
             <style>{FLOW_CSS}</style>
@@ -182,6 +237,7 @@ function TaskFlowCanvas() {
                 onNodesChange={handleNodesChange}
                 onEdgesChange={handleEdgesChange}
                 onNodeDragStart={handleNodeDragStart}
+                onNodeDrag={handleNodeDrag}
                 onNodeDragStop={handleNodeDragStop}
                 onConnect={handleConnect}
                 onReconnectStart={handleReconnectStart}
@@ -189,6 +245,9 @@ function TaskFlowCanvas() {
                 onReconnect={handleReconnect}
                 onPaneContextMenu={handlePaneContextMenu}
                 onMoveEnd={handleMoveEnd}
+                onSelectionChange={handleSelectionChange}
+                onSelectionStart={handleSelectionStart}
+                onSelectionEnd={handleSelectionEnd}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 fitView={!savedViewport}
@@ -198,6 +257,10 @@ function TaskFlowCanvas() {
                 maxZoom={MAX_ZOOM}
                 deleteKeyCode={null}
                 multiSelectionKeyCode="Control"
+                selectionOnDrag
+                selectionMode={SelectionMode.Partial}
+                panOnDrag={[1]}
+                selectNodesOnDrag={true}
                 connectionMode={ConnectionMode.Loose}
                 connectionRadius={30}
                 zoomOnScroll={false}
@@ -237,11 +300,19 @@ function TaskFlowCanvas() {
                     <div className="w-px h-5 bg-border" />
                     <button
                         onClick={handleAutoLayout}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
-                        title="Gently align nodes to straighten edges"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border rounded-md shadow-sm transition-colors bg-card border-border text-foreground hover:bg-muted"
+                        title="Gather orphan nodes (nodes with no connections) into a tidy group"
                     >
                         <Wand2 className="h-3.5 w-3.5" />
-                        Smart Wand
+                        Tidy Up
+                    </button>
+                    <div className="w-px h-5 bg-border" />
+                    <button
+                        onClick={handleRefresh}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
+                        title="Refresh tasks from server"
+                    >
+                        <RefreshCw className="h-3.5 w-3.5" />
                     </button>
                 </Panel>
 

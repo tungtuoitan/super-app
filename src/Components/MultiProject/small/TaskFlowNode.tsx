@@ -37,6 +37,9 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const isEditing = editingNodeId === id;
     const isTempNode = id.startsWith("temp-node-");
     const isHighPriority = data.task.priority === "high" || data.task.priority === "urgent";
+    const isDone = data.task.status === "completed" || data.task.status === "cancelled";
+    const isInProgress = data.task.status === "in_progress";
+    const nodeOpacity = isDone ? 0.4 : 1;
     const [editValue, setEditValue] = useState(data.task.title);
     const [isHovered, setIsHovered] = useState(false);
     const [projectPickerOpen, setProjectPickerOpen] = useState(false);
@@ -138,8 +141,10 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
 
     const currentProject = allProjects.find((p) => p.id === data.task.projectId);
 
+    const nodeWidth = 200;
+
     return (
-        <div ref={nodeRef} className="relative w-[200px]">
+        <div ref={nodeRef} className="relative" style={{ opacity: nodeOpacity, width: nodeWidth }}>
             {/* Project label — absolute above node, no layout impact */}
             <span className="absolute -top-4 left-0 right-0 text-center text-[9px] text-muted-foreground/50 truncate select-none pointer-events-none">
                 {data.projectName}
@@ -148,11 +153,13 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
             {/* Node body */}
             <div
                 className={cn(
-                    "relative rounded-xl border shadow-sm w-[200px] transition-shadow duration-150 select-none",
+                    "relative rounded-xl border shadow-sm transition-shadow duration-150 select-none",
                     selected ? "shadow-lg ring-1 ring-primary/50" : "hover:shadow-md",
                     isEditing && "ring-2 ring-primary",
+                    isInProgress && !selected && "taskflow-inprogress",
                 )}
                 style={{
+                    width: nodeWidth,
                     borderColor: borderColor + "66",
                     borderLeftWidth: "3px",
                     borderLeftColor: borderColor,
