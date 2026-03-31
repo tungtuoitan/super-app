@@ -13,7 +13,8 @@ import { useMultiProjectTaskFlowHelper } from "@/hooks/multiProject/useMultiProj
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "@/types/multiProject/multiProjectTaskFlow.type";
 
 const ARROW_CYCLE: ArrowDirection[] = ["forward", "backward", "both"];
-const ARROW_SYMBOL: Record<ArrowDirection, string> = { forward: "A→B", backward: "B→A", both: "A↔B" };
+const ARROW_SYMBOL: Record<ArrowDirection, string> = { forward: "→", backward: "←", both: "↔" };
+const ARROW_LABEL: Record<ArrowDirection, string> = { forward: "A → B", backward: "B → A", both: "A ↔ B" };
 
 // Flow animation constants
 const FLOW_DASH = "10 6";
@@ -121,57 +122,11 @@ export function FlowEdgeWithNote({
 
     // ── Render label content ────────────────────────────────────────────────
 
-    const renderLabel = () => {
-        if (!isEditing && !selected && !hasNote) return null;
-
-        return (
-            <div className="flex items-center gap-1">
-                {/* Note button / textarea */}
-                {isEditing ? (
-                    <textarea
-                        ref={textareaRef}
-                        value={editValue}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        onBlur={handleConfirm}
-                        placeholder="Add note..."
-                        rows={1}
-                        style={editSize ? { width: editSize.width, minHeight: editSize.height } : undefined}
-                        className="max-w-[220px] min-w-[80px] px-2 py-1 bg-card border border-primary rounded-lg outline-none text-foreground placeholder:text-muted-foreground resize-none overflow-hidden text-[10px] font-medium"
-                    />
-                ) : (
-                    <button
-                        ref={labelRef}
-                        type="button"
-                        onClick={handleLabelClick}
-                        className={cn(
-                            "px-2.5 py-1 rounded-lg border text-[10px] font-medium text-left whitespace-pre-wrap break-words max-w-[220px] transition-all backdrop-blur-sm",
-                            hasNote
-                                ? "bg-card border-border text-foreground shadow-sm"
-                                : selected
-                                    ? "bg-card border-border text-muted-foreground shadow-sm"
-                                    : "bg-card/60 border-dashed border-muted-foreground/50 text-muted-foreground/70",
-                        )}
-                        title={hasNote ? undefined : "Add note to connection"}
-                    >
-                        {hasNote ? note : <MessageSquarePlus className="h-3.5 w-3.5" />}
-                    </button>
-                )}
-
-                {/* Arrow toggle — only when selected */}
-                {selected && (
-                    <button
-                        type="button"
-                        onClick={handleToggleArrow}
-                        onMouseDown={(e) => { if (isEditing) e.preventDefault(); }}
-                        title={`Direction: ${currentArrow} (click to cycle)`}
-                        className="flex items-center justify-center w-6 h-6 rounded-md bg-card border border-border text-foreground text-xs font-bold shadow-sm backdrop-blur-sm hover:bg-muted transition-colors shrink-0"
-                    >
-                        {ARROW_SYMBOL[currentArrow]}
-                    </button>
-                )}
-            </div>
-        );
+    const edgeLabelBase: React.CSSProperties = {
+        position: "absolute",
+        pointerEvents: "all",
+        zIndex: isEditing ? 1000 : undefined,
+        opacity: isDimmed ? 0.4 : 1,
     };
 
     return (
@@ -194,17 +149,12 @@ export function FlowEdgeWithNote({
                 `}</style>
             </defs>
 
-            {/* Static base line — gives the edge a visible track */}
+            {/* Static base line */}
             <BaseEdge
                 id={`${id}-track`}
                 path={edgePath}
                 interactionWidth={20}
-                style={{
-                    stroke: strokeColor,
-                    strokeWidth,
-                    strokeDasharray: FLOW_DASH,
-                    opacity: 0.25,
-                }}
+                style={{ stroke: strokeColor, strokeWidth, strokeDasharray: FLOW_DASH, opacity: 0.25 }}
             />
 
             {/* Animated flow layer — forward */}
@@ -213,12 +163,7 @@ export function FlowEdgeWithNote({
                     id={`${id}-fwd`}
                     path={edgePath}
                     interactionWidth={0}
-                    style={{
-                        stroke: strokeColor,
-                        strokeWidth,
-                        strokeDasharray: FLOW_DASH,
-                        animation: animFwd,
-                    }}
+                    style={{ stroke: strokeColor, strokeWidth, strokeDasharray: FLOW_DASH, animation: animFwd }}
                 />
             )}
 
@@ -238,20 +183,64 @@ export function FlowEdgeWithNote({
                 />
             )}
 
-            <EdgeLabelRenderer>
-                <div
-                    style={{
-                        position: "absolute",
-                        transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
-                        pointerEvents: "all",
-                        zIndex: isEditing ? 1000 : undefined,
-                        opacity: isDimmed ? 0.4 : 1,
-                    }}
-                    className="nodrag nopan"
-                >
-                    {renderLabel()}
-                </div>
-            </EdgeLabelRenderer>
+            {/* ── Direction toggle — above the edge midpoint ─────────────────── */}
+            {selected && !isEditing && (
+                <EdgeLabelRenderer>
+                    <div
+                        style={{ ...edgeLabelBase, transform: `translate(-50%, -100%) translate(${labelX}px, ${labelY - 6}px)` }}
+                        className="nodrag nopan"
+                    >
+                        <button
+                            type="button"
+                            onClick={handleToggleArrow}
+                            title={`Direction: ${currentArrow} — click to cycle`}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground shadow-lg hover:bg-primary/80 active:scale-95 transition-all border border-primary/30 whitespace-nowrap"
+                        >
+                            <span className="text-sm leading-none">{ARROW_SYMBOL[currentArrow]}</span>
+                            <span className="opacity-80">{ARROW_LABEL[currentArrow]}</span>
+                        </button>
+                    </div>
+                </EdgeLabelRenderer>
+            )}
+
+            {/* ── Note button / editor — below the edge midpoint ─────────────── */}
+            {(selected || hasNote) && (
+                <EdgeLabelRenderer>
+                    <div
+                        style={{ ...edgeLabelBase, transform: `translate(-50%, 0%) translate(${labelX}px, ${labelY + 6}px)` }}
+                        className="nodrag nopan"
+                    >
+                        {isEditing ? (
+                            <textarea
+                                ref={textareaRef}
+                                value={editValue}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                onBlur={handleConfirm}
+                                placeholder="Add note..."
+                                rows={1}
+                                style={editSize ? { width: editSize.width, minHeight: editSize.height } : undefined}
+                                className="max-w-[220px] min-w-[100px] px-2.5 py-1.5 bg-card border-2 border-primary rounded-xl outline-none text-foreground placeholder:text-muted-foreground resize-none overflow-hidden text-xs font-medium shadow-xl"
+                            />
+                        ) : (
+                            <button
+                                ref={labelRef}
+                                type="button"
+                                onClick={handleLabelClick}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium text-left whitespace-pre-wrap break-words max-w-[200px] transition-all shadow-md backdrop-blur-sm",
+                                    hasNote
+                                        ? "bg-card border-border text-foreground hover:bg-muted"
+                                        : "bg-card/90 border-dashed border-muted-foreground/60 text-muted-foreground hover:border-primary/60 hover:text-foreground",
+                                )}
+                                title={hasNote ? "Edit note" : "Add note to connection"}
+                            >
+                                {hasNote ? note : <><MessageSquarePlus className="h-3.5 w-3.5 shrink-0" /><span>Add note</span></>}
+                            </button>
+                        )}
+                    </div>
+                </EdgeLabelRenderer>
+            )}
         </>
     );
 }

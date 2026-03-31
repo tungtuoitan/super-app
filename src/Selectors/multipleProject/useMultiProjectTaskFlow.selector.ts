@@ -20,18 +20,18 @@ export const useMultiProjectTaskFlowSelector = () => {
         [projects],
     );
 
+    /** ALL non-deleted tasks (TaskFlow shows every task regardless of active project filter) */
     const filteredTasks = useMemo(
-        () => tasks.filter((t) => filteredProjectIds.includes(t.projectId) && !t.deletedAt),
-        [tasks, filteredProjectIds],
+        () => tasks.filter((t) => !t.deletedAt),
+        [tasks],
     );
 
-    /** Stable key — changes when the set of task IDs changes */
     const taskIdKey = useMemo(
         () => filteredTasks.map((t) => t.id).sort((a, b) => a - b).join(","),
         [filteredTasks],
     );
 
-    /** Projects in the current multi-project view (for project picker) */
+    /** Projects in the current multi-project view (for project picker in node header) */
     const filteredProjects = useMemo(
         () => projects.filter((p) => filteredProjectIds.includes(p.id)),
         [projects, filteredProjectIds],
