@@ -32,6 +32,9 @@ export interface MultiTaskFlowContextData {
     /** Whether positions have been loaded from backend this session */
     positionsLoaded: boolean;
     setPositionsLoaded: Dispatch<SetStateAction<boolean>>;
+    /** When true, dragged nodes snap center-to-center with connected neighbors */
+    autoAlign: boolean;
+    setAutoAlign: Dispatch<SetStateAction<boolean>>;
 }
 
 const defaultValue: MultiTaskFlowContextData = {
@@ -51,6 +54,8 @@ const defaultValue: MultiTaskFlowContextData = {
     setSavedPositions: () => {},
     positionsLoaded: false,
     setPositionsLoaded: () => {},
+    autoAlign: false,
+    setAutoAlign: () => {},
 };
 
 const MultiTaskFlowStore = createContext<MultiTaskFlowContextData>(defaultValue);
@@ -66,6 +71,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [savedEdges, setSavedEdges] = useState<Edge<FlowEdgeData>[]>([]);
     const [savedPositions, setSavedPositions] = useState<Record<string, { x: number; y: number }>>({});
     const [positionsLoaded, setPositionsLoaded] = useState(false);
+    const [autoAlign, setAutoAlign] = useState(false);
 
     return (
         <MultiTaskFlowStore.Provider
@@ -78,6 +84,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
                 savedEdges, setSavedEdges,
                 savedPositions, setSavedPositions,
                 positionsLoaded, setPositionsLoaded,
+                autoAlign, setAutoAlign,
             }}
         >
             {children}

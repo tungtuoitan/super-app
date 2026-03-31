@@ -54,6 +54,7 @@ export function ConversationDialog() {
         isOpen, setIsOpen,
         isMinimized, setIsMinimized,
         entityType, entityId, entityLabel,
+        selectedTopicId,
     } = useConversationStore();
     const { openDialog } = useConversationHelper();
 
@@ -72,6 +73,27 @@ export function ConversationDialog() {
     // ── Resize drag ───────────────────────────────────────────────────────────
     const [panelHeight, setPanelHeight] = useState(540);
     const dragStartRef = useRef<{ y: number; h: number } | null>(null);
+
+    // ── F8 shortcut → open global chat + focus compose ───────────────────────
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "F8") {
+                e.preventDefault();
+                openDialog(null, null, "");
+            }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, [openDialog]);
+
+    // ── Header gradient based on entity type + topic ─────────────────────────
+    const headerGradient = useMemo(() => {
+        if (!entityType) return "linear-gradient(135deg, #475569 0%, #334155 50%, #1e293b 100%)";            // global → slate
+        if (selectedTopicId === null) return "linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%)"; // internal/quick notes → indigo
+        if (entityType === "project") return "linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%)"; // project → orange
+        if (entityType === "task") return "linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%)";    // task → green
+        return "linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%)";                              // default → violet
+    }, [entityType, selectedTopicId]);
 
     const handleResizeStart = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -161,8 +183,9 @@ export function ConversationDialog() {
 
                 {/* ── Title bar ──────────────────────────────────────────────── */}
                 <div
-                    className="h-[44px] shrink-0 flex items-center gap-2 px-3 select-none"
-                    style={{ background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%)" }}
+                    className="h-[44px] shrink-0 flex items-center gap-2 px-3 select-none transition-[background] duration-300"
+                    style={{ background: headerGradient }}
+                    onDoubleClick={() => setIsMinimized(m => !m)}
                 >
                     {/* Entity badge → opens floating picker */}
                     {entityType && entityLabel ? (

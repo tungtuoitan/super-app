@@ -3,20 +3,26 @@
  * Shows a note badge in the middle. Click to edit inline. Arrow toggle when selected.
  */
 
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { getSmoothStepPath, EdgeLabelRenderer, BaseEdge } from "@xyflow/react";
 import type { EdgeProps, Edge } from "@xyflow/react";
 import { MessageSquarePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowHelper } from "@/hooks/multiProject/useMultiProjectTaskFlow.helper";
-import type { FlowEdgeData, ArrowDirection } from "@/types/multiProject/multiProjectTaskFlow.type";
+import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "@/types/multiProject/multiProjectTaskFlow.type";
 
 const ARROW_CYCLE: ArrowDirection[] = ["forward", "backward", "both"];
-const ARROW_SYMBOL: Record<ArrowDirection, string> = { forward: "→", backward: "←", both: "↔" };
+const ARROW_SYMBOL: Record<ArrowDirection, string> = { forward: "A→B", backward: "B→A", both: "A↔B" };
+
+// Flow animation constants
+const FLOW_DASH = "10 6";
+const FLOW_PERIOD = 16; // dash(10) + gap(6)
 
 export function FlowEdgeWithNote({
     id,
+    source,
+    target,
     sourceX, sourceY,
     targetX, targetY,
     sourcePosition,
@@ -24,8 +30,17 @@ export function FlowEdgeWithNote({
     data,
     selected,
 }: EdgeProps<Edge<FlowEdgeData>>) {
-    const { editingEdgeId, setEditingEdgeId } = useMultiTaskFlowStore();
+    const { editingEdgeId, setEditingEdgeId, flowNodes } = useMultiTaskFlowStore();
     const { handleEdgeNoteConfirm, handleEdgeDelete } = useMultiProjectTaskFlowHelper();
+
+    const isDimmed = useMemo(() => {
+        const DIMMED = new Set(["completed", "cancelled"]);
+        const sNode = flowNodes.find((n) => n.id === source);
+        const tNode = flowNodes.find((n) => n.id === target);
+        const sStatus = (sNode?.data as TaskFlowNodeData)?.task?.status;
+        const tStatus = (tNode?.data as TaskFlowNodeData)?.task?.status;
+        return (sStatus && DIMMED.has(sStatus)) || (tStatus && DIMMED.has(tStatus));
+    }, [flowNodes, source, target]);
 
     const edgeData = data as FlowEdgeData;
     const isEditing = editingEdgeId === id;
@@ -73,12 +88,13 @@ export function FlowEdgeWithNote({
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [selected, isEditing, id, handleEdgeDelete]);
 
-    const strokeColor = selected ? "hsl(var(--primary))" : "#6b7280";
+    const strokeColor = selected ? "hsl(var(--primary))" : isDimmed ? "#6b728030" : "#6b728099";
     const strokeWidth = selected ? 2 : 1.5;
 
-    const markerId = `arrow-${id.replace(/[^a-z0-9]/gi, "_")}`;
-    const previewShowStart = currentArrow === "backward" || currentArrow === "both";
-    const previewShowEnd   = currentArrow === "forward"  || currentArrow === "both";
+    // Flow animation: dashes move along the path to indicate direction
+    const speed = selected ? 0.5 : isDimmed ? 1.8 : 0.9; // seconds per period
+    const animFwd = `flow-fwd ${speed}s linear infinite`;
+    const animBwd = `flow-bwd ${speed}s linear infinite`;
 
     const handleLabelClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
@@ -142,7 +158,7 @@ export function FlowEdgeWithNote({
                     </button>
                 )}
 
-                {/* Arrow toggle — solid button, only when selected */}
+                {/* Arrow toggle — only when selected */}
                 {selected && (
                     <button
                         type="button"
@@ -161,26 +177,65 @@ export function FlowEdgeWithNote({
     return (
         <>
             <defs>
-                <marker id={`${markerId}-end`} markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto">
-                    <path d="M0,0 L0,8 L9,4 z" fill={strokeColor} />
-                </marker>
-                <marker id={`${markerId}-start`} markerWidth="12" markerHeight="12" refX="0" refY="4" orient="auto-start-reverse">
-                    <path d="M0,0 L0,8 L9,4 z" fill={strokeColor} />
-                </marker>
+                <style>{`
+                    @keyframes flow-fwd { from { stroke-dashoffset: ${FLOW_PERIOD}; } to { stroke-dashoffset: 0; } }
+                    @keyframes flow-bwd { from { stroke-dashoffset: 0; } to { stroke-dashoffset: ${FLOW_PERIOD}; } }
+                    .react-flow__edge.selected .react-flow__edgeanchor { r: 7; fill: hsl(var(--primary)); stroke: hsl(var(--background)); stroke-width: 2; opacity: 1; pointer-events: all; }
+                    .react-flow__edge.selected .react-flow__edgeanchor:hover { r: 9; }
+                `}</style>
             </defs>
 
+            {/* Endpoint handle rings — visual outer ring (behind RF anchors) */}
+            {selected && (
+                <>
+                    <circle cx={sourceX} cy={sourceY} r={12} fill="hsl(var(--primary)/0.15)" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="3 2" style={{ pointerEvents: "none" }} />
+                    <circle cx={targetX} cy={targetY} r={12} fill="hsl(var(--primary)/0.15)" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="3 2" style={{ pointerEvents: "none" }} />
+                </>
+            )}
+
+            {/* Static base line — gives the edge a visible track */}
             <BaseEdge
-                id={id}
+                id={`${id}-track`}
                 path={edgePath}
-                markerEnd={previewShowEnd   ? `url(#${markerId}-end)`   : undefined}
-                markerStart={previewShowStart ? `url(#${markerId}-start)` : undefined}
                 interactionWidth={20}
                 style={{
                     stroke: strokeColor,
                     strokeWidth,
-                    strokeDasharray: "6 3",
+                    strokeDasharray: FLOW_DASH,
+                    opacity: 0.25,
                 }}
             />
+
+            {/* Animated flow layer — forward */}
+            {(currentArrow === "forward" || currentArrow === "both") && (
+                <BaseEdge
+                    id={`${id}-fwd`}
+                    path={edgePath}
+                    interactionWidth={0}
+                    style={{
+                        stroke: strokeColor,
+                        strokeWidth,
+                        strokeDasharray: FLOW_DASH,
+                        animation: animFwd,
+                    }}
+                />
+            )}
+
+            {/* Animated flow layer — backward */}
+            {(currentArrow === "backward" || currentArrow === "both") && (
+                <BaseEdge
+                    id={`${id}-bwd`}
+                    path={edgePath}
+                    interactionWidth={0}
+                    style={{
+                        stroke: strokeColor,
+                        strokeWidth: currentArrow === "both" ? strokeWidth * 0.7 : strokeWidth,
+                        strokeDasharray: FLOW_DASH,
+                        animation: animBwd,
+                        opacity: currentArrow === "both" ? 0.6 : 1,
+                    }}
+                />
+            )}
 
             <EdgeLabelRenderer>
                 <div
@@ -189,6 +244,7 @@ export function FlowEdgeWithNote({
                         transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
                         pointerEvents: "all",
                         zIndex: isEditing ? 1000 : undefined,
+                        opacity: isDimmed ? 0.4 : 1,
                     }}
                     className="nodrag nopan"
                 >
