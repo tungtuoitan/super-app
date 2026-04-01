@@ -20,17 +20,17 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import type { Edge } from "@xyflow/react";
 
 export function useMultiProjectTaskFlowHeadless() {
-    const { setFlowNodes, setFlowEdges, setSavedEdges, savedEdges, setSavedPositions, savedPositions, positionsLoaded, setPositionsLoaded } = useMultiTaskFlowStore();
+    const { setFlowNodes, setFlowEdges, setSavedEdges, savedEdges, setSavedPositions, savedPositions, positionsLoaded, setPositionsLoaded, isTaskFlowLoading } = useMultiTaskFlowStore();
     const { filteredTasks, projectNameMap, taskIdKey } = useMultiProjectTaskFlowSelector();
     const { loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
     const { $user } = useAuthStore();
 
-    // ── Load all tasks without status/priority filters ──────────────────────
+    // ── Load all tasks (no filter) — only once per token ───────────────────
     useEffect(() => {
         loadTaskFlowTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [$user.userToken, filteredProjectIds]);
+    }, [$user.userToken]);
 
     // ── Load saved positions + custom edges on first mount ──────────────────
     useEffect(() => {
@@ -83,6 +83,9 @@ export function useMultiProjectTaskFlowHeadless() {
 
     // ── Rebuild when the set of task IDs changes ────────────────────────────
     useEffect(() => {
+        // Don't clear while still loading — prevents "no tasks" flash on mount
+        if (isTaskFlowLoading) return;
+
         if (filteredTasks.length === 0) {
             setFlowNodes([]);
             setFlowEdges((prev) => prev.filter((e) => e.type === "flowEdgeWithNote"));
@@ -108,5 +111,5 @@ export function useMultiProjectTaskFlowHeadless() {
             return prevCustom.length > 0 ? prevCustom : savedEdges;
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [taskIdKey, savedPositions, savedEdges]);
+    }, [taskIdKey, savedPositions, savedEdges, isTaskFlowLoading]);
 }

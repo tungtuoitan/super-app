@@ -10,7 +10,7 @@
  *   ctrl+scroll    → zoom toward cursor
  */
 
-import React, { useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useRef, useEffect, useCallback, useMemo, useState } from "react";
 import {
     ReactFlow,
     ReactFlowProvider,
@@ -24,8 +24,8 @@ import {
     SelectionMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Wand2, Scan, Maximize, Crosshair, View, ScanEye, RefreshCw } from "lucide-react";
-import { MultiTaskFlowProvider } from "@/store/task/useMultiTaskFlow.store";
+import { Wand2, Scan, Crosshair, RefreshCw, Focus } from "lucide-react";
+import { MultiTaskFlowProvider, useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowHeadless } from "@/HeadlessComponents/multiProject/useMultiProjectTaskFlow.headless";
 import { useMultiProjectTaskFlowSelector } from "@/Selectors/multipleProject/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "@/hooks/multiProject/useMultiProjectTaskFlow.helper";
@@ -34,6 +34,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { constants } from "@/utils/constants";
 import { cn } from "@/lib/utils";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { NODE_WIDTH, NODE_HEIGHT } from "@/utils/project/multiProjectTaskFlow.utils";
 import { TaskFlowNode } from "./small/TaskFlowNode";
 import { FlowEdgeWithNote } from "./small/FlowEdgeWithNote";
 
@@ -103,6 +104,7 @@ function TaskFlowCanvas() {
     useMultiProjectTaskFlowHeadless();
 
     const { flowNodes, flowEdges } = useMultiProjectTaskFlowSelector();
+    const { isTaskFlowLoading } = useMultiTaskFlowStore();
     const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout, loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
     const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
@@ -172,22 +174,66 @@ function TaskFlowCanvas() {
         return () => el.removeEventListener("wheel", onWheel, { capture: true } as EventListenerOptions);
     }, [rfInstance]);
 
-    const isEmpty = flowNodes.length === 0;
+    const isEmpty = flowNodes.length === 0 && !isTaskFlowLoading;
 
     // ── View controls ───────────────────────────────────────────────────────
 
-    const handleNormalView = useCallback(() => {
-        rfInstance.zoomTo(1, { duration: 300 });
-    }, [rfInstance]);
+    // F1 cycles: fitAll → focusInProgress → fitAll → ...
+    type ViewMode = "fitAll" | "focusInProgress";
+    const [viewMode, setViewMode] = useState<ViewMode>("fitAll");
 
     const handleFitView = useCallback(() => {
         rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
-        // After animation settles, lock min-zoom to the resulting level
         setTimeout(() => {
             const { zoom } = rfInstance.getViewport();
             dynMinZoomRef.current = Math.max(MIN_ZOOM, zoom);
         }, 320);
+        setViewMode("fitAll");
     }, [rfInstance]);
+
+    const handleFocusInProgress = useCallback(() => {
+        const inProgressNodes = flowNodes.filter(
+            (n) => (n.data as { task?: { status: string } }).task?.status === "in_progress",
+        );
+        if (inProgressNodes.length === 0) {
+            handleFitView();
+            return;
+        }
+
+        // Bounding box of all in-progress nodes
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const n of inProgressNodes) {
+            minX = Math.min(minX, n.position.x);
+            minY = Math.min(minY, n.position.y);
+            maxX = Math.max(maxX, n.position.x + NODE_WIDTH);
+            maxY = Math.max(maxY, n.position.y + NODE_HEIGHT);
+        }
+        const boxW = maxX - minX;
+        const boxH = maxY - minY;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        // Container size
+        const el = containerRef.current;
+        const cW = el?.clientWidth ?? 800;
+        const cH = el?.clientHeight ?? 600;
+
+        // Target area: center square with side = 7/12 of container width
+        const targetSide = (7 / 12) * cW;
+        const targetW = targetSide;
+        const targetH = Math.min(targetSide, cH * (7 / 12));
+
+        // Zoom = max zoom that fits all in-progress nodes inside the target area
+        const zoomX = boxW > 0 ? targetW / boxW : 2;
+        const zoomY = boxH > 0 ? targetH / boxH : 2;
+        const zoom = Math.min(zoomX, zoomY, 2); // cap at 2x
+
+        rfInstance.setViewport(
+            { x: cW / 2 - centerX * zoom, y: cH / 2 - centerY * zoom, zoom },
+            { duration: 300 },
+        );
+        setViewMode("focusInProgress");
+    }, [rfInstance, flowNodes, containerRef, handleFitView]);
 
     const handleBackToCenter = useCallback(() => {
         const inProgressNodes = flowNodes.filter(
@@ -211,16 +257,21 @@ function TaskFlowCanvas() {
         );
     }, [rfInstance, flowNodes]);
 
-    // F1 = Normal View, F2 = Fit View, F3 = Back to Center
+    // F1 toggles between 2 views
+    const handleF1Toggle = useCallback(() => {
+        if (viewMode === "fitAll") handleFocusInProgress();
+        else handleFitView();
+    }, [viewMode, handleFocusInProgress, handleFitView]);
+
+    // F1 = Toggle views, F2 = Normal zoom, F3 = Back to Center
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "F1") { e.preventDefault(); handleFitView(); }
-            if (e.key === "F2") { e.preventDefault(); handleNormalView(); }
-            if (e.key === "F3") { e.preventDefault(); handleBackToCenter(); }
+            if (e.key === "F1") { e.preventDefault(); handleF1Toggle(); }
+            if (e.key === "F2") { e.preventDefault(); handleBackToCenter(); }
         };
         document.addEventListener("keydown", onKeyDown);
         return () => document.removeEventListener("keydown", onKeyDown);
-    }, [handleNormalView, handleFitView, handleBackToCenter]);
+    }, [handleF1Toggle, handleBackToCenter]);
 
     // Persist viewport across tab switches
     const savedViewport = useMemo(
@@ -288,18 +339,16 @@ function TaskFlowCanvas() {
 
                 <Panel position="top-right" className="flex items-center gap-1.5">
                     <button
-                        onClick={handleFitView}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
-                        title="Fit all nodes in view (F2)"
+                        onClick={handleF1Toggle}
+                        className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
+                            viewMode === "focusInProgress"
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-card border-border text-foreground hover:bg-muted",
+                        )}
+                        title="Toggle view: Fit All ↔ Focus In-Progress (F1)"
                     >
-                        <Scan className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                        onClick={handleNormalView}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground"
-                        title="Normal view — zoom 100% (F1)"
-                    >
-                        <ScanEye className="h-3.5 w-3.5" />
+                        {viewMode === "fitAll" ? <Scan className="h-3.5 w-3.5" /> : <Focus className="h-3.5 w-3.5" />}
                     </button>
                     <button
                         onClick={handleBackToCenter}

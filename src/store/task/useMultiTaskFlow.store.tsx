@@ -42,6 +42,9 @@ export interface MultiTaskFlowContextData {
     /** All non-deleted tasks loaded without status/priority filters — used by TaskFlow to show full picture */
     taskFlowTasks: Task[];
     setTaskFlowTasks: Dispatch<SetStateAction<Task[]>>;
+    /** True while loadTaskFlowTasks is in-flight — prevents false "empty" flash */
+    isTaskFlowLoading: boolean;
+    setIsTaskFlowLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 const defaultValue: MultiTaskFlowContextData = {
@@ -67,6 +70,8 @@ const defaultValue: MultiTaskFlowContextData = {
     setConnectingSourceId: () => {},
     taskFlowTasks: [],
     setTaskFlowTasks: () => {},
+    isTaskFlowLoading: true,
+    setIsTaskFlowLoading: () => {},
 };
 
 const MultiTaskFlowStore = createContext<MultiTaskFlowContextData>(defaultValue);
@@ -85,6 +90,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [autoAlign, setAutoAlign] = useState(false);
     const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
     const [taskFlowTasks, setTaskFlowTasks] = useState<Task[]>([]);
+    const [isTaskFlowLoading, setIsTaskFlowLoading] = useState(true);
 
     return (
         <MultiTaskFlowStore.Provider
@@ -100,6 +106,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
                 autoAlign, setAutoAlign,
                 connectingSourceId, setConnectingSourceId,
                 taskFlowTasks, setTaskFlowTasks,
+                isTaskFlowLoading, setIsTaskFlowLoading,
             }}
         >
             {children}
