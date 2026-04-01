@@ -31,7 +31,7 @@ export function FlowEdgeWithNote({
     data,
     selected,
 }: EdgeProps<Edge<FlowEdgeData>>) {
-    const { editingEdgeId, setEditingEdgeId, flowNodes } = useMultiTaskFlowStore();
+    const { editingEdgeId, setEditingEdgeId, flowNodes, flowEdges } = useMultiTaskFlowStore();
     const { handleEdgeNoteConfirm, handleEdgeDelete } = useMultiProjectTaskFlowHelper();
 
     const isDimmed = useMemo(() => {
@@ -53,6 +53,11 @@ export function FlowEdgeWithNote({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const labelRef = useRef<HTMLButtonElement>(null);
     const [editSize, setEditSize] = useState<{ width: number; height: number } | null>(null);
+
+    // When another edge is selected, disable interaction on unselected edges
+    // so their wide hit-area doesn't block the selected edge's reconnect handles
+    const anyEdgeSelected = flowEdges.some(e => e.selected);
+    const hitWidth = selected ? 20 : (anyEdgeSelected ? 0 : 20);
 
     const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX, sourceY, sourcePosition,
@@ -153,7 +158,7 @@ export function FlowEdgeWithNote({
             <BaseEdge
                 id={`${id}-track`}
                 path={edgePath}
-                interactionWidth={20}
+                interactionWidth={hitWidth}
                 style={{ stroke: strokeColor, strokeWidth, strokeDasharray: FLOW_DASH, opacity: 0.25 }}
             />
 

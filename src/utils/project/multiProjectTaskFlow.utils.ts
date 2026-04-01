@@ -181,7 +181,7 @@ export function smartWand(
         maxConnectedBottom = Math.max(maxConnectedBottom, n.position.y + h);
     }
     const orphanStartY = connectedNodes.length > 0
-        ? maxConnectedBottom + V_GAP * 2
+        ? maxConnectedBottom + V_GAP * 8
         : 0;
 
     // Group by status, sort within each group by createdAt
