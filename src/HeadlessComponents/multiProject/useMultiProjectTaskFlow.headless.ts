@@ -1,14 +1,17 @@
 /**
  * MultiProject Task Flow Headless
  * Side-effects only (useEffect).
- * 1. Loads saved positions + custom edges from API on first mount.
- * 2. Rebuilds node layout when the task set changes.
+ * 1. Loads all tasks (no status/priority filter) into taskFlowTasks on mount and when projectIds change.
+ * 2. Loads saved positions + custom edges from API on first mount.
+ * 3. Rebuilds node layout when the task set changes.
  *    Preserves user-dragged positions for existing nodes.
  */
 
 import { useEffect } from "react";
 import { useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "@/Selectors/multipleProject/useMultiProjectTaskFlow.selector";
+import { useMultiProjectTaskFlowHelper } from "@/hooks/multiProject/useMultiProjectTaskFlow.helper";
+import { useMultiProjectDetailSelector } from "@/Selectors/multipleProject/useMultiProjectDetail.selector";
 import { buildTaskFlowLayout } from "@/utils/project/multiProjectTaskFlow.utils";
 import { flowService } from "@/services/flow.service";
 import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/services/flow.service";
@@ -19,7 +22,15 @@ import type { Edge } from "@xyflow/react";
 export function useMultiProjectTaskFlowHeadless() {
     const { setFlowNodes, setFlowEdges, setSavedEdges, savedEdges, setSavedPositions, savedPositions, positionsLoaded, setPositionsLoaded } = useMultiTaskFlowStore();
     const { filteredTasks, projectNameMap, taskIdKey } = useMultiProjectTaskFlowSelector();
+    const { loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
+    const { filteredProjectIds } = useMultiProjectDetailSelector();
     const { $user } = useAuthStore();
+
+    // ── Load all tasks without status/priority filters ──────────────────────
+    useEffect(() => {
+        loadTaskFlowTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [$user.userToken, filteredProjectIds]);
 
     // ── Load saved positions + custom edges on first mount ──────────────────
     useEffect(() => {
@@ -34,14 +45,12 @@ export function useMultiProjectTaskFlowHeadless() {
             const edgeDtos: FlowEdgeDTO[] = (edgeResult.data as FlowEdgeDTO[]) ?? [];
             const posDtos: FlowNodePositionDTO[] = (posResult.data as FlowNodePositionDTO[]) ?? [];
 
-            // Build saved positions map and persist to store
             const positions: Record<string, { x: number; y: number }> = {};
             for (const p of posDtos) {
                 positions[String(p.nodeId)] = { x: p.x, y: p.y };
             }
             setSavedPositions(positions);
 
-            // Convert edge DTOs to RF edges
             const customEdges: Edge<FlowEdgeData>[] = edgeDtos.map((e) => ({
                 id: `custom-${e.id}`,
                 source: String(e.sourceId),
@@ -55,7 +64,6 @@ export function useMultiProjectTaskFlowHeadless() {
 
             setSavedEdges(customEdges);
 
-            // Rebuild layout using saved positions (only if tasks already loaded)
             if (filteredTasks.length > 0) {
                 const { nodes: autoNodes } = buildTaskFlowLayout(filteredTasks, projectNameMap);
                 const autoIds = new Set(autoNodes.map((n) => n.id));
@@ -85,11 +93,7 @@ export function useMultiProjectTaskFlowHeadless() {
         const autoIds = new Set(autoNodes.map((n) => n.id));
 
         setFlowNodes((prev) => {
-            // Preserve any node that isn't in autoNodes (temp nodes, just-created nodes
-            // whose task hasn't yet landed in filteredTasks) so they don't disappear.
             const extras = prev.filter((n) => !autoIds.has(n.id));
-
-            // Merge: existing node positions > saved backend positions > auto-layout
             const prevPositions: Record<string, { x: number; y: number }> = {};
             for (const n of prev) prevPositions[n.id] = n.position;
             const merged = autoNodes.map((n) => ({
@@ -100,7 +104,6 @@ export function useMultiProjectTaskFlowHeadless() {
         });
 
         setFlowEdges((prev) => {
-            // Keep only custom edges
             const prevCustom = prev.filter((e) => e.type === "flowEdgeWithNote");
             return prevCustom.length > 0 ? prevCustom : savedEdges;
         });

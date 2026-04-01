@@ -30,7 +30,6 @@ import { useMultiProjectTaskFlowHeadless } from "@/HeadlessComponents/multiProje
 import { useMultiProjectTaskFlowSelector } from "@/Selectors/multipleProject/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "@/hooks/multiProject/useMultiProjectTaskFlow.helper";
 import { useMultiProjectTaskFlowNodeHelper } from "@/hooks/multiProject/useMultiProjectTaskFlowNode.helper";
-import { useTaskGridHelper } from "@/hooks/task/useTaskGrid.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import { cn } from "@/lib/utils";
@@ -104,9 +103,8 @@ function TaskFlowCanvas() {
     useMultiProjectTaskFlowHeadless();
 
     const { flowNodes, flowEdges } = useMultiProjectTaskFlowSelector();
-    const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout } = useMultiProjectTaskFlowHelper();
+    const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout, loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
     const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
-    const { loadTasks } = useTaskGridHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const rfInstance = useReactFlow();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -235,8 +233,8 @@ function TaskFlowCanvas() {
     }, []);
 
     const handleRefresh = useCallback(() => {
-        loadTasks();
-    }, [loadTasks]);
+        loadTaskFlowTasks();
+    }, [loadTaskFlowTasks]);
 
     return (
         <div ref={containerRef} className="h-full w-full relative">

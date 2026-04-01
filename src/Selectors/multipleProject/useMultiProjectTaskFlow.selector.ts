@@ -4,15 +4,13 @@
  */
 
 import { useMemo } from "react";
-import { useTaskGridStore } from "@/store/task/useTask.store";
 import { useProjectStore } from "@/store/project/useProject.store";
 import { useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectDetailSelector } from "./useMultiProjectDetail.selector";
 
 export const useMultiProjectTaskFlowSelector = () => {
-    const { tasks } = useTaskGridStore();
     const { projects } = useProjectStore();
-    const { flowNodes, flowEdges, editingNodeId, editingEdgeId, savedEdges, positionsLoaded } = useMultiTaskFlowStore();
+    const { flowNodes, flowEdges, editingNodeId, editingEdgeId, savedEdges, positionsLoaded, taskFlowTasks } = useMultiTaskFlowStore();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
 
     const projectNameMap = useMemo(
@@ -22,8 +20,8 @@ export const useMultiProjectTaskFlowSelector = () => {
 
     /** ALL non-deleted tasks (TaskFlow shows every task regardless of active project filter) */
     const filteredTasks = useMemo(
-        () => tasks.filter((t) => !t.deletedAt),
-        [tasks],
+        () => taskFlowTasks.filter((t) => !t.deletedAt),
+        [taskFlowTasks],
     );
 
     const taskIdKey = useMemo(
