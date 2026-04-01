@@ -7,6 +7,7 @@
 import React, { createContext, useContext, useState, Dispatch, SetStateAction } from "react";
 import type { Node, Edge } from "@xyflow/react";
 import type { TaskFlowNodeData, FlowEdgeData } from "@/types/multiProject/multiProjectTaskFlow.type";
+import type { Task } from "@/types/task/task.types";
 
 export interface MultiTaskFlowContextData {
     /** Parent-child + user-created edges (rendered by React Flow) */
@@ -38,6 +39,9 @@ export interface MultiTaskFlowContextData {
     /** Node ID that is currently the source of a connection drag (null = not dragging) */
     connectingSourceId: string | null;
     setConnectingSourceId: Dispatch<SetStateAction<string | null>>;
+    /** All non-deleted tasks loaded without status/priority filters — used by TaskFlow to show full picture */
+    taskFlowTasks: Task[];
+    setTaskFlowTasks: Dispatch<SetStateAction<Task[]>>;
 }
 
 const defaultValue: MultiTaskFlowContextData = {
@@ -61,6 +65,8 @@ const defaultValue: MultiTaskFlowContextData = {
     setAutoAlign: () => {},
     connectingSourceId: null,
     setConnectingSourceId: () => {},
+    taskFlowTasks: [],
+    setTaskFlowTasks: () => {},
 };
 
 const MultiTaskFlowStore = createContext<MultiTaskFlowContextData>(defaultValue);
@@ -78,6 +84,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [positionsLoaded, setPositionsLoaded] = useState(false);
     const [autoAlign, setAutoAlign] = useState(false);
     const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
+    const [taskFlowTasks, setTaskFlowTasks] = useState<Task[]>([]);
 
     return (
         <MultiTaskFlowStore.Provider
@@ -92,6 +99,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
                 positionsLoaded, setPositionsLoaded,
                 autoAlign, setAutoAlign,
                 connectingSourceId, setConnectingSourceId,
+                taskFlowTasks, setTaskFlowTasks,
             }}
         >
             {children}
