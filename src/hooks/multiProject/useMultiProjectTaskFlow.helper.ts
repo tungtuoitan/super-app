@@ -12,15 +12,44 @@ import { applyNodeChanges, applyEdgeChanges } from "@xyflow/react";
 import type { NodeChange, EdgeChange, Connection, Edge } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "@/Selectors/multipleProject/useMultiProjectTaskFlow.selector";
+import { useMultiProjectDetailSelector } from "@/Selectors/multipleProject/useMultiProjectDetail.selector";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { flowService } from "@/services/flow.service";
+import { taskService } from "@/services/task.service";
+import type { TaskDTO } from "@/services/task.service";
+import type { Task } from "@/types/task/task.types";
 import type { FlowEdgeData, ArrowDirection } from "@/types/multiProject/multiProjectTaskFlow.type";
 import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "@/utils/project/multiProjectTaskFlow.utils";
+import { parseAsLocalDate } from "@/utils/date.utils";
+
+const transformTaskData = (dtos: TaskDTO[]): Task[] =>
+    dtos.map((dto) => ({
+        id: dto.id,
+        projectId: dto.projectId,
+        parentTaskId: dto.parentTaskId,
+        type: dto.type,
+        taskType: dto.taskType || "personal",
+        title: dto.title,
+        note: dto.note,
+        status: dto.status,
+        priority: dto.priority,
+        startDate: parseAsLocalDate(dto.startDate),
+        endDate: parseAsLocalDate(dto.endDate),
+        orderIndex: dto.orderIndex,
+        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+        updatedAt: parseAsLocalDate(dto.updatedAt),
+        deletedAt: parseAsLocalDate(dto.deletedAt),
+        folderWorkspaceItemId: dto.folderWorkspaceItemId,
+        checklistJson: dto.checklistJson ?? null,
+        processJson: dto.processJson ?? null,
+        customTabsJson: dto.customTabsJson ?? null,
+    }));
 
 export const useMultiProjectTaskFlowHelper = () => {
-    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions, flowNodes, setConnectingSourceId } = useMultiTaskFlowStore();
+    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions, flowNodes, setConnectingSourceId, setTaskFlowTasks } = useMultiTaskFlowStore();
     const { savedEdges } = useMultiProjectTaskFlowSelector();
+    const { filteredProjectIds } = useMultiProjectDetailSelector();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const reconnectingRef = useRef(false);
@@ -433,6 +462,21 @@ export const useMultiProjectTaskFlowHelper = () => {
         });
     }, [savedEdges, setFlowNodes, setFlowEdges, setSavedPositions, $user.userToken]);
 
+    const loadTaskFlowTasks = useCallback(async () => {
+        if (!$user.userToken || filteredProjectIds.length === 0) return;
+        try {
+            const result = await taskService._getTasks($user.userToken, {
+                deletedAt: "null",
+                projectIds: filteredProjectIds.join(","),
+            });
+            if (result.success && result.data) {
+                setTaskFlowTasks(transformTaskData(result.data as TaskDTO[]));
+            }
+        } catch {
+            _console.error("Failed to load task flow tasks");
+        }
+    }, [$user.userToken, filteredProjectIds, setTaskFlowTasks, _console]);
+
     return {
         handleNodesChange,
         handleEdgesChange,
@@ -448,5 +492,6 @@ export const useMultiProjectTaskFlowHelper = () => {
         handleEdgeNoteConfirm,
         handleEdgeDelete,
         handleAutoLayout,
+        loadTaskFlowTasks,
     };
 };

@@ -34,6 +34,7 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         updatedAt: parseAsLocalDate(dto.updatedAt),
         deletedAt: parseAsLocalDate(dto.deletedAt),
         workspaceId: dto.workspaceId,
+        image: dto.image,
     }));
 };
 
@@ -204,15 +205,9 @@ export const useProjectGridHelper = () => {
                 deletedAt?: string;
                 status?: string;
             } = {
-                deletedAt: "null", // Only active (non-deleted) projects
+                deletedAt: projectGridFilters?.deletedAt ?? "null",
+                status: projectGridFilters?.statusCode ?? "active",
             };
-
-            if (projectGridFilters?.statusCode) {
-                filterParams.status = projectGridFilters.statusCode;
-            }
-            // if (projectGridFilters?.deletedAt) {
-            //     filterParams.deletedAt = projectGridFilters.deletedAt;
-            // }
 
             const result = await projectService._getProjects(token, filterParams);
 
