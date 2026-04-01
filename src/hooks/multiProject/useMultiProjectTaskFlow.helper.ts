@@ -47,7 +47,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] =>
     }));
 
 export const useMultiProjectTaskFlowHelper = () => {
-    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions, flowNodes, setConnectingSourceId, setTaskFlowTasks } = useMultiTaskFlowStore();
+    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions, flowNodes, setConnectingSourceId, setTaskFlowTasks, setIsTaskFlowLoading } = useMultiTaskFlowStore();
     const { savedEdges } = useMultiProjectTaskFlowSelector();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
     const { $user } = useAuthStore();
@@ -438,17 +438,9 @@ export const useMultiProjectTaskFlowHelper = () => {
     const handleAutoLayout = useCallback(() => {
         setFlowNodes((prev) => {
             const subEdges = savedEdges.map((e) => ({ source: e.source, target: e.target }));
-            // Gather orphan nodes (no connected edges) and pack them neatly
-            const adjusted = smartWand(prev, subEdges);
 
-            // Recompute handles only for moved nodes
-            setFlowEdges((prevEdges) => {
-                const handleMap = computeOptimalHandles(adjusted, prevEdges);
-                return prevEdges.map((e) => {
-                    const optimal = handleMap.get(e.id);
-                    return optimal ? { ...e, sourceHandle: optimal.sourceHandle, targetHandle: optimal.targetHandle } : e;
-                });
-            });
+            // Only reposition orphan nodes — connected nodes + their edges stay untouched
+            const adjusted = smartWand(prev, subEdges);
 
             // Persist moved positions (skip temp nodes: id = NaN)
             const newPositions: Record<string, { x: number; y: number }> = {};
@@ -460,22 +452,22 @@ export const useMultiProjectTaskFlowHelper = () => {
 
             return adjusted;
         });
-    }, [savedEdges, setFlowNodes, setFlowEdges, setSavedPositions, $user.userToken]);
+    }, [savedEdges, setFlowNodes, setSavedPositions, $user.userToken]);
 
     const loadTaskFlowTasks = useCallback(async () => {
-        if (!$user.userToken || filteredProjectIds.length === 0) return;
+        if (!$user.userToken) return;
+        setIsTaskFlowLoading(true);
         try {
-            const result = await taskService._getTasks($user.userToken, {
-                deletedAt: "null",
-                projectIds: filteredProjectIds.join(","),
-            });
+            const result = await taskService._getTasks($user.userToken, { deletedAt: "null" });
             if (result.success && result.data) {
                 setTaskFlowTasks(transformTaskData(result.data as TaskDTO[]));
             }
         } catch {
             _console.error("Failed to load task flow tasks");
+        } finally {
+            setIsTaskFlowLoading(false);
         }
-    }, [$user.userToken, filteredProjectIds, setTaskFlowTasks, _console]);
+    }, [$user.userToken, setTaskFlowTasks, setIsTaskFlowLoading, _console]);
 
     return {
         handleNodesChange,
