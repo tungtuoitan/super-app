@@ -116,4 +116,5 @@ export const STORAGE_KEYS = {
     COMMENT_FILTER: "commentFilter",
     COMMENT_SHOW_DETAIL: "commentShowDetail",
     TASK_FLOW_VIEWPORT: "taskFlowViewport", // { x, y, zoom } for MultiProject Task Flow tab
+    CONVERSATION_DIALOG_LAYOUT: "conversationDialogLayout", // { width, height, right } for ConversationDialog
 } as const;

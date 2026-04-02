@@ -20,6 +20,7 @@ import { useTaskGridStore } from "@/store/task/useTaskGrid.store";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { constants } from "@/utils/constants";
 import { ConversationHeadless } from "@/HeadlessComponents/conversation/ConversationHeadless";
+import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { TopicList } from "./small/TopicList";
 import { MessageArea } from "./small/MessageArea";
 
@@ -47,6 +48,21 @@ function getTabEntity(tab: { type: string; data: any; title: string } | null) {
     }
 }
 
+// ── persist layout ───────────────────────────────────────────────────────────
+
+interface DialogLayout { width: number; height: number; right: number }
+
+const DEFAULT_LAYOUT: DialogLayout = { width: 680, height: 540, right: 24 };
+
+function loadLayout(): DialogLayout {
+    return storageService.get<DialogLayout>(STORAGE_KEYS.CONVERSATION_DIALOG_LAYOUT) ?? DEFAULT_LAYOUT;
+}
+
+function saveLayout(layout: Partial<DialogLayout>) {
+    const current = loadLayout();
+    storageService.set(STORAGE_KEYS.CONVERSATION_DIALOG_LAYOUT, { ...current, ...layout });
+}
+
 // ── component ─────────────────────────────────────────────────────────────────
 
 export function ConversationDialog() {
@@ -70,9 +86,28 @@ export function ConversationDialog() {
     const [pickerPos, setPickerPos] = useState({ top: 0, left: 0, width: 320 });
     const badgeButtonRef = useRef<HTMLButtonElement>(null);
 
-    // ── Resize drag ───────────────────────────────────────────────────────────
-    const [panelHeight, setPanelHeight] = useState(540);
+    // ── Resize drag (vertical) ──────────────────────────────────────────────
+    const [panelHeight, setPanelHeight] = useState(() => loadLayout().height);
     const dragStartRef = useRef<{ y: number; h: number } | null>(null);
+
+    // ── Resize drag (horizontal — left edge) ────────────────────────────────
+    const MIN_WIDTH = 480;
+    const MAX_WIDTH = MIN_WIDTH * 2; // 960
+    const [panelWidth, setPanelWidth] = useState(() => loadLayout().width);
+    const dragStartXRef = useRef<{ x: number; w: number } | null>(null);
+
+    // ── Move drag (horizontal — title bar) ──────────────────────────────────
+    const [panelRight, setPanelRight] = useState(() => loadLayout().right);
+    const moveStartRef = useRef<{ x: number; r: number } | null>(null);
+    const didMoveRef = useRef(false);
+
+    // ── Persist layout on change ────────────────────────────────────────────
+    const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+        if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = setTimeout(() => saveLayout({ width: panelWidth, height: panelHeight, right: panelRight }), 300);
+        return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+    }, [panelWidth, panelHeight, panelRight]);
 
     // ── F8 shortcut → open global chat + focus compose ───────────────────────
     useEffect(() => {
@@ -101,7 +136,7 @@ export function ConversationDialog() {
 
         const onMove = (ev: MouseEvent) => {
             if (!dragStartRef.current) return;
-            const delta = dragStartRef.current.y - ev.clientY; // drag up = positive = taller
+            const delta = dragStartRef.current.y - ev.clientY;
             const next = Math.max(240, Math.min(window.innerHeight - 80, dragStartRef.current.h + delta));
             setPanelHeight(next);
         };
@@ -113,6 +148,73 @@ export function ConversationDialog() {
         document.addEventListener("mousemove", onMove);
         document.addEventListener("mouseup", onUp);
     }, [panelHeight]);
+
+    // ── Width resize (drag left edge) ────────────────────────────────────────
+    const handleWidthResizeStart = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        dragStartXRef.current = { x: e.clientX, w: panelWidth };
+
+        const onMove = (ev: MouseEvent) => {
+            if (!dragStartXRef.current) return;
+            const delta = dragStartXRef.current.x - ev.clientX; // drag left = positive = wider
+            const next = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, window.innerWidth - panelRight - 20, dragStartXRef.current.w + delta));
+            setPanelWidth(next);
+        };
+        const onUp = () => {
+            dragStartXRef.current = null;
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+        };
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+    }, [panelWidth, panelRight]);
+
+    // ── Width resize (drag right edge) ───────────────────────────────────────
+    const dragStartRightRef = useRef<{ x: number; w: number; r: number } | null>(null);
+
+    const handleRightResizeStart = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        dragStartRightRef.current = { x: e.clientX, w: panelWidth, r: panelRight };
+
+        const onMove = (ev: MouseEvent) => {
+            if (!dragStartRightRef.current) return;
+            const delta = ev.clientX - dragStartRightRef.current.x; // drag right = positive = wider
+            const nextWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, dragStartRightRef.current.w + delta));
+            const nextRight = Math.max(0, dragStartRightRef.current.r - (nextWidth - dragStartRightRef.current.w));
+            setPanelWidth(nextWidth);
+            setPanelRight(nextRight);
+        };
+        const onUp = () => {
+            dragStartRightRef.current = null;
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+        };
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+    }, [panelWidth, panelRight]);
+
+    // ── Horizontal move (drag title bar) ─────────────────────────────────────
+    const handleMoveStart = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        moveStartRef.current = { x: e.clientX, r: panelRight };
+        didMoveRef.current = false;
+
+        const onMove = (ev: MouseEvent) => {
+            if (!moveStartRef.current) return;
+            if (Math.abs(ev.clientX - moveStartRef.current.x) > 3) didMoveRef.current = true;
+            const delta = moveStartRef.current.x - ev.clientX; // drag left = positive = more right
+            const maxRight = window.innerWidth - panelWidth - 20;
+            const next = Math.max(0, Math.min(maxRight, moveStartRef.current.r + delta));
+            setPanelRight(next);
+        };
+        const onUp = () => {
+            moveStartRef.current = null;
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+        };
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+    }, [panelRight, panelWidth]);
 
     // Items for the selected picker type — must be before early return (Rules of Hooks)
     const pickerItems = useMemo(() => {
@@ -161,16 +263,38 @@ export function ConversationDialog() {
         <>
             <div
                 className={cn(
-                    "fixed bottom-0 right-6 z-[100]",
-                    "w-[680px] flex flex-col",
+                    "fixed bottom-0 z-[10100]",
+                    "flex flex-col",
                     "rounded-t-xl overflow-hidden",
                     "shadow-[0_-4px_32px_rgba(0,0,0,0.45)]",
                     "ring-1 ring-white/10",
-                    !dragStartRef.current && "transition-[height] duration-200 ease-in-out",
+                    !dragStartRef.current && !dragStartXRef.current && "transition-[height] duration-200 ease-in-out",
                 )}
-                style={{ height: isMinimized ? 44 : panelHeight }}
+                style={{ height: isMinimized ? 44 : panelHeight, width: panelWidth, right: panelRight }}
             >
-                {/* ── Resize handle ───────────────────────────────────────────── */}
+                {/* ── Left-edge resize handle (width) ────────────────────────── */}
+                {!isMinimized && (
+                    <div
+                        onMouseDown={handleWidthResizeStart}
+                        className="absolute top-0 left-0 bottom-0 w-1.5 cursor-ew-resize z-10 group"
+                        title="Drag to resize width"
+                    >
+                        <div className="absolute top-1/2 -translate-y-1/2 left-0 w-0.5 h-10 rounded-full bg-white/20 group-hover:bg-white/50 transition-colors" />
+                    </div>
+                )}
+
+                {/* ── Right-edge resize handle (width) ───────────────────────── */}
+                {!isMinimized && (
+                    <div
+                        onMouseDown={handleRightResizeStart}
+                        className="absolute top-0 right-0 bottom-0 w-1.5 cursor-ew-resize z-10 group"
+                        title="Drag to resize width"
+                    >
+                        <div className="absolute top-1/2 -translate-y-1/2 right-0 w-0.5 h-10 rounded-full bg-white/20 group-hover:bg-white/50 transition-colors" />
+                    </div>
+                )}
+
+                {/* ── Resize handle (height) ─────────────────────────────────── */}
                 {!isMinimized && (
                     <div
                         onMouseDown={handleResizeStart}
@@ -183,8 +307,9 @@ export function ConversationDialog() {
 
                 {/* ── Title bar ──────────────────────────────────────────────── */}
                 <div
-                    className="h-[44px] shrink-0 flex items-center gap-2 px-3 select-none transition-[background] duration-300"
+                    className="h-[44px] shrink-0 flex items-center gap-2 px-3 select-none cursor-grab active:cursor-grabbing transition-[background] duration-300"
                     style={{ background: headerGradient }}
+                    onMouseDown={handleMoveStart}
                     onDoubleClick={() => setIsMinimized(m => !m)}
                 >
                     {/* Entity badge → opens floating picker */}
@@ -192,6 +317,7 @@ export function ConversationDialog() {
                         <button
                             ref={badgeButtonRef}
                             onClick={handlePickerOpen}
+                            onMouseDown={e => e.stopPropagation()}
                             className={cn(
                                 "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium",
                                 "bg-white/15 text-white/90 border border-white/20",
@@ -208,6 +334,7 @@ export function ConversationDialog() {
                         <button
                             ref={badgeButtonRef}
                             onClick={handlePickerOpen}
+                            onMouseDown={e => e.stopPropagation()}
                             className={cn(
                                 "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium",
                                 "bg-white/15 text-white/70 border border-white/20",
@@ -225,6 +352,7 @@ export function ConversationDialog() {
                     {activeTabEntity && !(activeTabEntity.entityType === entityType && activeTabEntity.entityId === entityId) && (
                         <button
                             onClick={() => openDialog(activeTabEntity.entityType, activeTabEntity.entityId, activeTabEntity.label)}
+                            onMouseDown={e => e.stopPropagation()}
                             className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-white/70 hover:bg-white/20 hover:text-white transition-colors"
                             title={`Switch to current tab: ${activeTabEntity.label}`}
                         >
@@ -233,11 +361,12 @@ export function ConversationDialog() {
                         </button>
                     )}
 
-                    {/* Spacer → click to toggle minimize */}
-                    <div className="flex-1 cursor-pointer" onClick={() => setIsMinimized(m => !m)} />
+                    {/* Spacer */}
+                    <div className="flex-1" />
 
                     <button
                         onClick={() => setIsMinimized(m => !m)}
+                        onMouseDown={e => e.stopPropagation()}
                         className="p-1.5 rounded hover:bg-white/20 text-white/70 hover:text-white transition-colors"
                         title={isMinimized ? "Expand" : "Minimize"}
                     >
@@ -274,12 +403,12 @@ export function ConversationDialog() {
                 <>
                     {/* Backdrop to close picker */}
                     <div
-                        className="fixed inset-0 z-[199]"
+                        className="fixed inset-0 z-[10199]"
                         onClick={() => setShowPicker(false)}
                     />
                     {/* Picker panel */}
                     <div
-                        className="fixed z-[200] bg-popover border border-border rounded-xl shadow-2xl p-3 space-y-2"
+                        className="fixed z-[10200] bg-popover border border-border rounded-xl shadow-2xl p-3 space-y-2"
                         style={{ top: pickerPos.top, left: pickerPos.left, width: pickerPos.width }}
                     >
                         {/* Type tabs */}

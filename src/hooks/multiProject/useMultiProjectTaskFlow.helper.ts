@@ -19,9 +19,10 @@ import { flowService } from "@/services/flow.service";
 import { taskService } from "@/services/task.service";
 import type { TaskDTO } from "@/services/task.service";
 import type { Task } from "@/types/task/task.types";
-import type { FlowEdgeData, ArrowDirection } from "@/types/multiProject/multiProjectTaskFlow.type";
+import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "@/types/multiProject/multiProjectTaskFlow.type";
 import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "@/utils/project/multiProjectTaskFlow.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 const transformTaskData = (dtos: TaskDTO[]): Task[] =>
     dtos.map((dto) => ({
@@ -47,7 +48,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] =>
     }));
 
 export const useMultiProjectTaskFlowHelper = () => {
-    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions, flowNodes, setConnectingSourceId, setTaskFlowTasks, setIsTaskFlowLoading } = useMultiTaskFlowStore();
+    const { setFlowNodes, setFlowEdges, setEditingEdgeId, setSavedEdges, setDraggingNodeId, setSavedPositions, flowNodes, flowEdges, setConnectingSourceId, setTaskFlowTasks, setIsTaskFlowLoading, lockOldNodes } = useMultiTaskFlowStore();
     const { savedEdges } = useMultiProjectTaskFlowSelector();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
     const { $user } = useAuthStore();
@@ -60,14 +61,42 @@ export const useMultiProjectTaskFlowHelper = () => {
     // last snapped positions applied by handleNodeDrag — restored at drop to avoid RF overwrite
     const lastSnappedRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
+    // ── Lock guards ────────────────────────────────────────────────────────
+    const isNodeLocked = useCallback((nodeId: string): boolean => {
+        if (!lockOldNodes) return false;
+        const node = flowNodes.find((n) => n.id === nodeId);
+        const status = (node?.data as TaskFlowNodeData)?.task?.status;
+        return status === "completed" || status === "cancelled";
+    }, [lockOldNodes, flowNodes]);
+
+    const isEdgeLocked = useCallback((edgeId: string): boolean => {
+        if (!lockOldNodes) return false;
+        const edge = flowEdges.find((e) => e.id === edgeId);
+        if (!edge) return false;
+        return isNodeLocked(edge.source) || isNodeLocked(edge.target);
+    }, [lockOldNodes, flowEdges, isNodeLocked]);
+
     // ── Node changes (drag/select) ──────────────────────────────────────────
 
     const handleNodesChange = useCallback(
         (changes: NodeChange[]) => {
             setFlowNodes((prev) => {
+                // Build a set of locked node IDs for fast lookup
+                const lockedIds = lockOldNodes
+                    ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled"; }).map((n) => n.id))
+                    : null;
+
+                // Filter out position and select changes for locked nodes
+                const filtered = lockedIds
+                    ? changes.filter((c) => {
+                        if (!("id" in c) || !lockedIds.has(c.id as string)) return true;
+                        return c.type !== "position" && c.type !== "select";
+                    })
+                    : changes;
+
                 // Intercept final drop position changes (dragging: false) and substitute
                 // the snapped position so React Flow's raw pointer position never lands in state
-                const patched = changes.map((c) => {
+                const patched = filtered.map((c) => {
                     if (
                         c.type === "position" &&
                         c.dragging === false &&
@@ -81,7 +110,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                 return applyNodeChanges(patched, prev) as typeof prev;
             });
         },
-        [setFlowNodes],
+        [setFlowNodes, lockOldNodes],
     );
 
     // ── Edge changes (select → toggle reconnectable) ──────────────────────
@@ -130,7 +159,12 @@ export const useMultiProjectTaskFlowHelper = () => {
     const handleNodeDrag = useCallback(
         (event: React.MouseEvent, _node: { id: string }, draggedNodes: { id: string; position: { x: number; y: number } }[]) => {
             if (draggedNodes.length === 0) return;
-            const draggedIds = new Set(draggedNodes.map((n) => n.id));
+            // Exclude locked nodes from drag calculation
+            const activeDragged = lockOldNodes
+                ? draggedNodes.filter((n) => !isNodeLocked(n.id))
+                : draggedNodes;
+            if (activeDragged.length === 0) return;
+            const draggedIds = new Set(activeDragged.map((n) => n.id));
             const shiftHeld = event.shiftKey;
 
             setFlowNodes((prev) => {
@@ -193,7 +227,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                 });
             });
         },
-        [setFlowNodes],
+        [setFlowNodes, lockOldNodes, isNodeLocked],
     );
 
     const handleNodeDragStop = useCallback(
@@ -202,7 +236,13 @@ export const useMultiProjectTaskFlowHelper = () => {
             dragAxisRef.current.clear();
             if (draggedNodes.length === 0) return;
 
-            const draggedIds = new Set(draggedNodes.map((n) => n.id));
+            // Filter out locked nodes — they shouldn't have their positions persisted
+            const unlocked = draggedNodes.filter((n) => !isNodeLocked(n.id));
+            if (unlocked.length < draggedNodes.length) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "drag", lockedCount: draggedNodes.length - unlocked.length });
+            }
+
+            const draggedIds = new Set(unlocked.map((n) => n.id));
             const snapshotSnapped = new Map(lastSnappedRef.current);
             // Do NOT clear lastSnappedRef yet — handleNodesChange still needs it to intercept
             // the final position change that React Flow fires synchronously after this callback.
@@ -232,7 +272,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                 });
             });
         },
-        [setDraggingNodeId, setFlowNodes, setSavedPositions, $user.userToken],
+        [setDraggingNodeId, setFlowNodes, setSavedPositions, $user.userToken, isNodeLocked],
     );
 
     // ── Connection drag tracking ────────────────────────────────────────────
@@ -276,6 +316,11 @@ export const useMultiProjectTaskFlowHelper = () => {
         async (connection: Connection) => {
             if (reconnectingRef.current) return;
             if (!connection.source || !connection.target) return;
+
+            if (isNodeLocked(connection.source) || isNodeLocked(connection.target)) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "connect", source: connection.source, target: connection.target });
+                return;
+            }
 
             const { sourceHandle, targetHandle } = resolveHandles(
                 connection.source, connection.target,
@@ -322,13 +367,18 @@ export const useMultiProjectTaskFlowHelper = () => {
                 _console.error("Failed to save connection");
             }
         },
-        [$user.userToken, resolveHandles, setFlowEdges, setSavedEdges, _console],
+        [$user.userToken, resolveHandles, setFlowEdges, setSavedEdges, _console, isNodeLocked],
     );
 
     // ── Edge note editing ───────────────────────────────────────────────────
 
     const handleEdgeNoteConfirm = useCallback(
         async (edgeId: string, note: string, arrowDirection: ArrowDirection) => {
+            if (isEdgeLocked(edgeId)) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "edgeNote", edgeId });
+                setEditingEdgeId(null);
+                return;
+            }
             setEditingEdgeId(null);
             const trimmed = note.trim() || null;
 
@@ -360,11 +410,15 @@ export const useMultiProjectTaskFlowHelper = () => {
                 _console.error("Failed to save note");
             }
         },
-        [savedEdges, setFlowEdges, setSavedEdges, setEditingEdgeId, $user.userToken, _console],
+        [savedEdges, setFlowEdges, setSavedEdges, setEditingEdgeId, $user.userToken, _console, isEdgeLocked],
     );
 
     const handleEdgeDelete = useCallback(
         async (edgeId: string) => {
+            if (isEdgeLocked(edgeId)) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "edgeDelete", edgeId });
+                return;
+            }
             setEditingEdgeId(null);
             const edge = savedEdges.find((e) => e.id === edgeId);
 
@@ -388,7 +442,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                 _console.error("Failed to delete connection");
             }
         },
-        [savedEdges, setFlowEdges, setSavedEdges, setEditingEdgeId, $user.userToken, _console],
+        [savedEdges, setFlowEdges, setSavedEdges, setEditingEdgeId, $user.userToken, _console, isEdgeLocked],
     );
 
     // ── Reconnect (drag edge endpoint to new node) ──────────────────────────
@@ -399,6 +453,12 @@ export const useMultiProjectTaskFlowHelper = () => {
     const handleReconnect = useCallback(
         async (oldEdge: Edge, newConnection: Connection) => {
             if (!newConnection.source || !newConnection.target) return;
+
+            // Block if old edge is locked OR new target/source is locked
+            if (isEdgeLocked(oldEdge.id) || isNodeLocked(newConnection.source) || isNodeLocked(newConnection.target)) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "reconnect", edgeId: oldEdge.id, newSource: newConnection.source, newTarget: newConnection.target });
+                return;
+            }
 
             const { sourceHandle, targetHandle } = resolveHandles(
                 newConnection.source, newConnection.target,
@@ -430,7 +490,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                 arrowDirection: edgeData.arrowDirection,
             }]).catch(() => _console.error("Failed to update connection"));
         },
-        [resolveHandles, setFlowEdges, setSavedEdges, $user.userToken, _console],
+        [resolveHandles, setFlowEdges, setSavedEdges, $user.userToken, _console, isEdgeLocked, isNodeLocked],
     );
 
     // ── Auto layout ─────────────────────────────────────────────────────────
@@ -440,7 +500,13 @@ export const useMultiProjectTaskFlowHelper = () => {
             const subEdges = savedEdges.map((e) => ({ source: e.source, target: e.target }));
 
             // Only reposition orphan nodes — connected nodes + their edges stay untouched
-            const adjusted = smartWand(prev, subEdges);
+            // Also exclude locked nodes from repositioning
+            const lockedIds = lockOldNodes
+                ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled"; }).map((n) => n.id))
+                : new Set<string>();
+            const movable = prev.filter((n) => !lockedIds.has(n.id));
+            const frozen = prev.filter((n) => lockedIds.has(n.id));
+            const adjusted = smartWand(movable, subEdges);
 
             // Persist moved positions (skip temp nodes: id = NaN)
             const newPositions: Record<string, { x: number; y: number }> = {};
@@ -450,9 +516,9 @@ export const useMultiProjectTaskFlowHelper = () => {
             setSavedPositions((prev) => ({ ...prev, ...newPositions }));
             if (payload.length > 0) flowService._upsertPositions($user.userToken, payload).catch(() => {});
 
-            return adjusted;
+            return [...adjusted, ...frozen];
         });
-    }, [savedEdges, setFlowNodes, setSavedPositions, $user.userToken]);
+    }, [savedEdges, setFlowNodes, setSavedPositions, $user.userToken, lockOldNodes]);
 
     const loadTaskFlowTasks = useCallback(async () => {
         if (!$user.userToken) return;
@@ -485,5 +551,7 @@ export const useMultiProjectTaskFlowHelper = () => {
         handleEdgeDelete,
         handleAutoLayout,
         loadTaskFlowTasks,
+        isNodeLocked,
+        isEdgeLocked,
     };
 };
