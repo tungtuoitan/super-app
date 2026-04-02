@@ -1,13 +1,6 @@
 /**
- * MultiProjectTaskFlowView
- * Task dependency/hierarchy visualiser using React Flow.
- * Features: drag nodes (persisted), inline rename, custom connections with notes.
- * NO props — reads from store/selector/headless.
- *
- * Scroll behaviour:
- *   scroll         → pan up/down
- *   shift+scroll   → pan left/right
- *   ctrl+scroll    → zoom toward cursor
+ * MultiProjectTaskFlowView — Task dependency visualiser using React Flow.
+ * Scroll=pan, Shift+scroll=horizontal, Ctrl+scroll=zoom.
  */
 
 import React, { useRef, useEffect, useCallback, useMemo, useState } from "react";
@@ -20,11 +13,12 @@ import {
     Panel,
     ConnectionMode,
     useReactFlow,
+    useStoreApi,
     type Viewport,
     SelectionMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Wand2, Scan, Crosshair, RefreshCw, Focus } from "lucide-react";
+import { Wand2, Scan, Crosshair, RefreshCw, Focus, Lock, Unlock, Map } from "lucide-react";
 import { MultiTaskFlowProvider, useMultiTaskFlowStore } from "@/store/task/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowHeadless } from "@/HeadlessComponents/multiProject/useMultiProjectTaskFlow.headless";
 import { useMultiProjectTaskFlowSelector } from "@/Selectors/multipleProject/useMultiProjectTaskFlow.selector";
@@ -35,80 +29,23 @@ import { constants } from "@/utils/constants";
 import { cn } from "@/lib/utils";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { NODE_WIDTH, NODE_HEIGHT } from "@/utils/project/multiProjectTaskFlow.utils";
+import { TASK_FLOW_CSS, MIN_ZOOM, MAX_ZOOM, PAN_SPEED } from "@/utils/project/multiProjectTaskFlow.constants";
 import { TaskFlowNode } from "./small/TaskFlowNode";
 import { FlowEdgeWithNote } from "./small/FlowEdgeWithNote";
 
 const nodeTypes = { taskFlowNode: TaskFlowNode };
 const edgeTypes = { flowEdgeWithNote: FlowEdgeWithNote };
 
-const FLOW_CSS = `
-.react-flow__connection-line { stroke: hsl(var(--primary)); stroke-width: 1.5; }
-
-/* Reconnect anchor handles — only shown when edge is selected */
-.react-flow__edgeanchor {
-    fill: hsl(var(--primary));
-    stroke: hsl(var(--background));
-    stroke-width: 2;
-    r: 5;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s, r 0.15s;
-    cursor: grab;
-}
-.react-flow__edge.selected .react-flow__edgeanchor {
-    opacity: 1;
-    pointer-events: all;
-}
-.react-flow__edge.selected .react-flow__edgeanchor:hover { r: 7; }
-
-/* In-progress task — rotating conic border */
-@keyframes taskflow-rotate {
-    0%   { --angle: 0deg; }
-    100% { --angle: 360deg; }
-}
-@property --angle {
-    syntax: '<angle>';
-    initial-value: 0deg;
-    inherits: false;
-}
-.taskflow-inprogress {
-    position: relative;
-}
-.taskflow-inprogress::before {
-    content: '';
-    position: absolute;
-    inset: -1.5px;
-    border-radius: inherit;
-    background: conic-gradient(
-        from var(--angle),
-        transparent 0%,
-        rgba(250, 204, 21, 0.6) 10%,
-        transparent 20%
-    );
-    animation: taskflow-rotate 3s linear infinite;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    padding: 1.5px;
-    pointer-events: none;
-    z-index: 1;
-}
-`;
-
-const MIN_ZOOM = 0.05;
-const MAX_ZOOM = 1;
-const PAN_SPEED = 0.8;
-
 function TaskFlowCanvas() {
     useMultiProjectTaskFlowHeadless();
 
     const { flowNodes, flowEdges } = useMultiProjectTaskFlowSelector();
-    const { isTaskFlowLoading } = useMultiTaskFlowStore();
+    const { isTaskFlowLoading, lockOldNodes, setLockOldNodes } = useMultiTaskFlowStore();
     const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout, loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
     const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const rfInstance = useReactFlow();
+    const storeApi = useStoreApi();
     const containerRef = useRef<HTMLDivElement>(null);
     const isDragSelecting = useRef(false);
     const inProgressIndexRef = useRef(0);
@@ -116,11 +53,19 @@ function TaskFlowCanvas() {
     const dynMinZoomRef = useRef(MIN_ZOOM);
 
     // Drag-select only nodes — deselect edges caught in the selection box
-    const handleSelectionChange = useCallback(({ edges: selectedEdges }: { nodes: any[]; edges: any[] }) => {
+    // Also: activate nodesSelectionActive for Ctrl+Click multi-select so bounding box shows
+    const handleSelectionChange = useCallback(({ nodes: selectedNodes, edges: selectedEdges }: { nodes: any[]; edges: any[] }) => {
         if (isDragSelecting.current && selectedEdges.length > 0) {
             handleEdgesChange(selectedEdges.map((e: any) => ({ id: e.id, type: "select" as const, selected: false })));
         }
-    }, [handleEdgesChange]);
+        // Show selection bounding box when ≥2 nodes are selected (Ctrl+Click or drag)
+        const store = storeApi.getState();
+        if (selectedNodes.length > 1 && !store.nodesSelectionActive) {
+            storeApi.setState({ nodesSelectionActive: true });
+        } else if (selectedNodes.length <= 1 && store.nodesSelectionActive && !isDragSelecting.current) {
+            storeApi.setState({ nodesSelectionActive: false });
+        }
+    }, [handleEdgesChange, storeApi]);
 
     const handleSelectionStart = useCallback(() => { isDragSelecting.current = true; }, []);
     const handleSelectionEnd = useCallback(() => { isDragSelecting.current = false; }, []);
@@ -144,6 +89,10 @@ function TaskFlowCanvas() {
         if (!el) return;
 
         const onWheel = (e: WheelEvent) => {
+            // Let scrollable popups (e.g. checklist) handle their own scroll
+            const target = e.target as HTMLElement;
+            if (target.closest?.(".nopan")) return;
+
             e.preventDefault();
             e.stopPropagation(); // prevent React Flow from also handling this event
             const { x, y, zoom } = rfInstance.getViewport();
@@ -178,31 +127,35 @@ function TaskFlowCanvas() {
 
     // ── View controls ───────────────────────────────────────────────────────
 
-    // F1 cycles: fitAll → focusInProgress → fitAll → ...
-    type ViewMode = "fitAll" | "focusInProgress";
-    const [viewMode, setViewMode] = useState<ViewMode>("fitAll");
+    // F1 toggles: focusClose (zoom in on in-progress) ↔ birdEye (zoom out max, center on in-progress)
+    type ViewMode = "focusClose" | "birdEye";
+    const [viewMode, setViewMode] = useState<ViewMode>("focusClose");
+    const [showMiniMap, setShowMiniMap] = useState(false);
 
-    const handleFitView = useCallback(() => {
-        rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
-        setTimeout(() => {
-            const { zoom } = rfInstance.getViewport();
-            dynMinZoomRef.current = Math.max(MIN_ZOOM, zoom);
-        }, 320);
-        setViewMode("fitAll");
-    }, [rfInstance]);
+    /** Get in-progress/background_progress nodes */
+    const getActiveNodes = useCallback(() => {
+        return flowNodes.filter((n) => {
+            const status = (n.data as { task?: { status: string } }).task?.status;
+            return status === "in_progress" || status === "background_progress";
+        });
+    }, [flowNodes]);
 
-    const handleFocusInProgress = useCallback(() => {
-        const inProgressNodes = flowNodes.filter(
-            (n) => (n.data as { task?: { status: string } }).task?.status === "in_progress",
-        );
-        if (inProgressNodes.length === 0) {
-            handleFitView();
+    /** Mode 1: Focus close-up on in-progress nodes */
+    const handleFocusClose = useCallback(() => {
+        const activeNodes = getActiveNodes();
+        if (activeNodes.length === 0) {
+            rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
+            setTimeout(() => {
+                const { zoom } = rfInstance.getViewport();
+                dynMinZoomRef.current = Math.max(MIN_ZOOM, zoom);
+            }, 320);
+            setViewMode("focusClose");
             return;
         }
 
-        // Bounding box of all in-progress nodes
+        // Bounding box of all active nodes
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (const n of inProgressNodes) {
+        for (const n of activeNodes) {
             minX = Math.min(minX, n.position.x);
             minY = Math.min(minY, n.position.y);
             maxX = Math.max(maxX, n.position.x + NODE_WIDTH);
@@ -213,33 +166,84 @@ function TaskFlowCanvas() {
         const centerX = (minX + maxX) / 2;
         const centerY = (minY + maxY) / 2;
 
-        // Container size
         const el = containerRef.current;
         const cW = el?.clientWidth ?? 800;
         const cH = el?.clientHeight ?? 600;
 
-        // Target area: center square with side = 7/12 of container width
         const targetSide = (7 / 12) * cW;
         const targetW = targetSide;
         const targetH = Math.min(targetSide, cH * (7 / 12));
 
-        // Zoom = max zoom that fits all in-progress nodes inside the target area
         const zoomX = boxW > 0 ? targetW / boxW : 2;
         const zoomY = boxH > 0 ? targetH / boxH : 2;
-        const zoom = Math.min(zoomX, zoomY, 2); // cap at 2x
+        const zoom = Math.min(zoomX, zoomY, MAX_ZOOM);
 
         rfInstance.setViewport(
             { x: cW / 2 - centerX * zoom, y: cH / 2 - centerY * zoom, zoom },
             { duration: 300 },
         );
-        setViewMode("focusInProgress");
-    }, [rfInstance, flowNodes, containerRef, handleFitView]);
+        setViewMode("focusClose");
+    }, [rfInstance, getActiveNodes, containerRef]);
+
+    /** Mode 2: Bird's eye — fit ALL nodes but center on in-progress area */
+    const handleBirdEye = useCallback(() => {
+        const activeNodes = getActiveNodes();
+
+        if (flowNodes.length === 0) {
+            setViewMode("birdEye");
+            return;
+        }
+
+        // Bounding box of ALL nodes → determine zoom to fit everything
+        let allMinX = Infinity, allMinY = Infinity, allMaxX = -Infinity, allMaxY = -Infinity;
+        for (const n of flowNodes) {
+            allMinX = Math.min(allMinX, n.position.x);
+            allMinY = Math.min(allMinY, n.position.y);
+            allMaxX = Math.max(allMaxX, n.position.x + NODE_WIDTH);
+            allMaxY = Math.max(allMaxY, n.position.y + NODE_HEIGHT);
+        }
+
+        const el = containerRef.current;
+        const cW = el?.clientWidth ?? 800;
+        const cH = el?.clientHeight ?? 600;
+
+        const allW = allMaxX - allMinX;
+        const allH = allMaxY - allMinY;
+        const padding = 0.15;
+        const fitZoomX = allW > 0 ? cW * (1 - padding * 2) / allW : 1;
+        const fitZoomY = allH > 0 ? cH * (1 - padding * 2) / allH : 1;
+        const fitZoom = Math.min(fitZoomX, fitZoomY, MAX_ZOOM);
+
+        // Center on in-progress area if possible, otherwise center on all
+        let cx: number, cy: number;
+        if (activeNodes.length > 0) {
+            let aMinX = Infinity, aMinY = Infinity, aMaxX = -Infinity, aMaxY = -Infinity;
+            for (const n of activeNodes) {
+                aMinX = Math.min(aMinX, n.position.x);
+                aMinY = Math.min(aMinY, n.position.y);
+                aMaxX = Math.max(aMaxX, n.position.x + NODE_WIDTH);
+                aMaxY = Math.max(aMaxY, n.position.y + NODE_HEIGHT);
+            }
+            cx = (aMinX + aMaxX) / 2;
+            cy = (aMinY + aMaxY) / 2;
+        } else {
+            cx = (allMinX + allMaxX) / 2;
+            cy = (allMinY + allMaxY) / 2;
+        }
+
+        rfInstance.setViewport(
+            { x: cW / 2 - cx * fitZoom, y: cH / 2 - cy * fitZoom, zoom: fitZoom },
+            { duration: 300 },
+        );
+        setTimeout(() => {
+            dynMinZoomRef.current = Math.max(MIN_ZOOM, fitZoom);
+        }, 320);
+        setViewMode("birdEye");
+    }, [rfInstance, flowNodes, getActiveNodes, containerRef]);
 
     const handleBackToCenter = useCallback(() => {
-        const inProgressNodes = flowNodes.filter(
-            (n) => (n.data as { task?: { status: string } }).task?.status === "in_progress",
-        );
-        if (inProgressNodes.length === 0) {
+        const activeNodes = getActiveNodes();
+        if (activeNodes.length === 0) {
             rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
             setTimeout(() => {
                 const { zoom } = rfInstance.getViewport();
@@ -247,27 +251,32 @@ function TaskFlowCanvas() {
             }, 320);
             return;
         }
-        const idx = inProgressIndexRef.current % inProgressNodes.length;
+        const idx = inProgressIndexRef.current % activeNodes.length;
         inProgressIndexRef.current = idx + 1;
-        const node = inProgressNodes[idx];
+        const node = activeNodes[idx];
         rfInstance.setCenter(
             node.position.x + 115,
             node.position.y + 38,
             { zoom: 1, duration: 300 },
         );
-    }, [rfInstance, flowNodes]);
+    }, [rfInstance, getActiveNodes]);
 
-    // F1 toggles between 2 views
+    // F1 toggles between 2 modes
     const handleF1Toggle = useCallback(() => {
-        if (viewMode === "fitAll") handleFocusInProgress();
-        else handleFitView();
-    }, [viewMode, handleFocusInProgress, handleFitView]);
+        if (viewMode === "focusClose") handleBirdEye();
+        else handleFocusClose();
+    }, [viewMode, handleBirdEye, handleFocusClose]);
 
-    // F1 = Toggle views, F2 = Normal zoom, F3 = Back to Center
+    // F1 = Toggle views, F2 = Back to Center, M = Toggle MiniMap
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
+            // Skip when typing in input/textarea
+            const tag = (e.target as HTMLElement)?.tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA") return;
+
             if (e.key === "F1") { e.preventDefault(); handleF1Toggle(); }
             if (e.key === "F2") { e.preventDefault(); handleBackToCenter(); }
+            if (e.key === "F3") { e.preventDefault(); setShowMiniMap((v) => !v); }
         };
         document.addEventListener("keydown", onKeyDown);
         return () => document.removeEventListener("keydown", onKeyDown);
@@ -287,9 +296,24 @@ function TaskFlowCanvas() {
         loadTaskFlowTasks();
     }, [loadTaskFlowTasks]);
 
+    // Auto re-lock after 30s when user turns lock off
+    const relockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleToggleLock = useCallback(() => {
+        if (lockOldNodes) {
+            // Turning OFF → start 30s re-lock timer
+            setLockOldNodes(false);
+            relockTimerRef.current = setTimeout(() => { setLockOldNodes(true); }, 30_000);
+        } else {
+            // Turning ON manually → clear timer
+            if (relockTimerRef.current) { clearTimeout(relockTimerRef.current); relockTimerRef.current = null; }
+            setLockOldNodes(true);
+        }
+    }, [lockOldNodes, setLockOldNodes]);
+    useEffect(() => () => { if (relockTimerRef.current) clearTimeout(relockTimerRef.current); }, []);
+
     return (
         <div ref={containerRef} className="h-full w-full relative">
-            <style>{FLOW_CSS}</style>
+            <style>{TASK_FLOW_CSS}</style>
 
             <ReactFlow
                 nodes={flowNodes}
@@ -318,7 +342,7 @@ function TaskFlowCanvas() {
                 minZoom={dynMinZoomRef.current}
                 maxZoom={MAX_ZOOM}
                 deleteKeyCode={null}
-                multiSelectionKeyCode="Control"
+                multiSelectionKeyCode="Shift"
                 selectionOnDrag
                 selectionMode={SelectionMode.Partial}
                 panOnDrag={[1]}
@@ -337,18 +361,36 @@ function TaskFlowCanvas() {
                     className="text-muted-foreground/15"
                 />
 
+                {showMiniMap && (
+                    <MiniMap
+                        position="bottom-right"
+                        pannable
+                        zoomable
+                        maskColor="transparent"
+                        className="!bg-card !border !border-border !rounded-lg !shadow-lg minimap-yellow-frame"
+                        style={{ width: 180, height: 120 }}
+                        nodeColor={(node) => {
+                            const status = (node.data as { task?: { status: string } })?.task?.status;
+                            if (status === "in_progress") return "hsl(var(--primary))";
+                            if (status === "background_progress") return "#38bdf8";
+                            if (status === "completed" || status === "cancelled") return "hsl(var(--muted-foreground) / 0.3)";
+                            return "hsl(var(--muted-foreground) / 0.6)";
+                        }}
+                    />
+                )}
+
                 <Panel position="top-right" className="flex items-center gap-1.5">
                     <button
                         onClick={handleF1Toggle}
                         className={cn(
                             "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
-                            viewMode === "focusInProgress"
+                            viewMode === "focusClose"
                                 ? "bg-primary text-primary-foreground border-primary"
                                 : "bg-card border-border text-foreground hover:bg-muted",
                         )}
-                        title="Toggle view: Fit All ↔ Focus In-Progress (F1)"
+                        title="Toggle view: Focus In-Progress ↔ Bird's Eye (F1)"
                     >
-                        {viewMode === "fitAll" ? <Scan className="h-3.5 w-3.5" /> : <Focus className="h-3.5 w-3.5" />}
+                        {viewMode === "focusClose" ? <Focus className="h-3.5 w-3.5" /> : <Scan className="h-3.5 w-3.5" />}
                     </button>
                     <button
                         onClick={handleBackToCenter}
@@ -374,13 +416,33 @@ function TaskFlowCanvas() {
                     >
                         <RefreshCw className="h-3.5 w-3.5" />
                     </button>
+                    <div className="w-px h-5 bg-border" />
+                    <button
+                        onClick={handleToggleLock}
+                        className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
+                            lockOldNodes
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-card border-border border-red-500 text-foreground hover:bg-muted",
+                        )}
+                        title={lockOldNodes ? "Unlock completed/cancelled tasks" : "Lock completed/cancelled tasks"}
+                    >
+                        {lockOldNodes ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5 text-red-500" />}
+                    </button>
+                    <div className="w-px h-5 bg-border" />
+                    <button
+                        onClick={() => setShowMiniMap((v) => !v)}
+                        className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
+                            showMiniMap
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-card border-border text-foreground hover:bg-muted",
+                        )}
+                        title="Toggle MiniMap (M)"
+                    >
+                        <Map className="h-3.5 w-3.5" />
+                    </button>
                 </Panel>
-
-                {/* <Panel position="bottom-center">
-                    <p className="text-[10px] text-muted-foreground/50 select-none">
-                        Scroll to pan · Shift+scroll for horizontal · Ctrl+scroll to zoom · Double-click to rename
-                    </p>
-                </Panel> */}
             </ReactFlow>
 
             {isEmpty && (

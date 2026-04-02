@@ -45,6 +45,9 @@ export interface MultiTaskFlowContextData {
     /** True while loadTaskFlowTasks is in-flight — prevents false "empty" flash */
     isTaskFlowLoading: boolean;
     setIsTaskFlowLoading: Dispatch<SetStateAction<boolean>>;
+    /** When true, completed/cancelled nodes + their edges are locked (non-draggable, non-editable) */
+    lockOldNodes: boolean;
+    setLockOldNodes: Dispatch<SetStateAction<boolean>>;
 }
 
 const defaultValue: MultiTaskFlowContextData = {
@@ -72,6 +75,8 @@ const defaultValue: MultiTaskFlowContextData = {
     setTaskFlowTasks: () => {},
     isTaskFlowLoading: true,
     setIsTaskFlowLoading: () => {},
+    lockOldNodes: true,
+    setLockOldNodes: () => {},
 };
 
 const MultiTaskFlowStore = createContext<MultiTaskFlowContextData>(defaultValue);
@@ -91,6 +96,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
     const [taskFlowTasks, setTaskFlowTasks] = useState<Task[]>([]);
     const [isTaskFlowLoading, setIsTaskFlowLoading] = useState(true);
+    const [lockOldNodes, setLockOldNodes] = useState(true);
 
     return (
         <MultiTaskFlowStore.Provider
@@ -107,6 +113,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
                 connectingSourceId, setConnectingSourceId,
                 taskFlowTasks, setTaskFlowTasks,
                 isTaskFlowLoading, setIsTaskFlowLoading,
+                lockOldNodes, setLockOldNodes,
             }}
         >
             {children}
