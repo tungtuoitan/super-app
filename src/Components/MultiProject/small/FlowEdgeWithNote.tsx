@@ -32,7 +32,8 @@ export function FlowEdgeWithNote({
     selected,
 }: EdgeProps<Edge<FlowEdgeData>>) {
     const { editingEdgeId, setEditingEdgeId, flowNodes, flowEdges } = useMultiTaskFlowStore();
-    const { handleEdgeNoteConfirm, handleEdgeDelete } = useMultiProjectTaskFlowHelper();
+    const { handleEdgeNoteConfirm, handleEdgeDelete, isEdgeLocked } = useMultiProjectTaskFlowHelper();
+    const edgeLocked = isEdgeLocked(id);
 
     const isDimmed = useMemo(() => {
         const DIMMED = new Set(["completed", "cancelled"]);
@@ -84,15 +85,15 @@ export function FlowEdgeWithNote({
         e.target.style.height = `${e.target.scrollHeight}px`;
     }, []);
 
-    // Delete key removes selected edge
+    // Delete key removes selected edge (not when locked)
     useEffect(() => {
-        if (!selected || isEditing) return;
+        if (!selected || isEditing || edgeLocked) return;
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Delete" || e.key === "Backspace") handleEdgeDelete(id);
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [selected, isEditing, id, handleEdgeDelete]);
+    }, [selected, isEditing, edgeLocked, id, handleEdgeDelete]);
 
     const strokeColor = selected ? "hsl(var(--primary))" : isDimmed ? "#6b728030" : "#6b728099";
     const strokeWidth = selected ? 2 : 1.5;
@@ -103,11 +104,12 @@ export function FlowEdgeWithNote({
     const animBwd = `flow-bwd ${speed}s linear infinite`;
 
     const handleLabelClick = useCallback((e: React.MouseEvent) => {
+        if (edgeLocked) return;
         e.stopPropagation();
         const el = labelRef.current;
         if (el) setEditSize({ width: el.offsetWidth, height: el.offsetHeight });
         setEditingEdgeId(id);
-    }, [id, setEditingEdgeId]);
+    }, [id, edgeLocked, setEditingEdgeId]);
 
     const handleConfirm = useCallback(() => {
         handleEdgeNoteConfirm(id, editValue, currentArrow);
@@ -119,11 +121,12 @@ export function FlowEdgeWithNote({
     }, [handleConfirm, setEditingEdgeId]);
 
     const handleToggleArrow = useCallback((e: React.MouseEvent) => {
+        if (edgeLocked) return;
         e.stopPropagation();
         const idx = ARROW_CYCLE.indexOf(currentArrow);
         const next = ARROW_CYCLE[(idx + 1) % ARROW_CYCLE.length];
         handleEdgeNoteConfirm(id, note, next);
-    }, [id, note, currentArrow, handleEdgeNoteConfirm]);
+    }, [id, edgeLocked, note, currentArrow, handleEdgeNoteConfirm]);
 
     // ── Render label content ────────────────────────────────────────────────
 
@@ -188,8 +191,8 @@ export function FlowEdgeWithNote({
                 />
             )}
 
-            {/* ── Direction toggle — above the edge midpoint ─────────────────── */}
-            {selected && !isEditing && (
+            {/* ── Direction toggle — above the edge midpoint (hidden when locked) ── */}
+            {selected && !isEditing && !edgeLocked && (
                 <EdgeLabelRenderer>
                     <div
                         style={{ ...edgeLabelBase, transform: `translate(-50%, -100%) translate(${labelX}px, ${labelY - 6}px)` }}

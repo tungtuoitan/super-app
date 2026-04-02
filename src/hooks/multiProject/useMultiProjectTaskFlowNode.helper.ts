@@ -15,6 +15,8 @@ import { flowService } from "@/services/flow.service";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "@/types/multiProject/multiProjectTaskFlow.type";
 import type { Task } from "@/types/task/task.types";
+import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();
@@ -22,6 +24,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
     const { tasks, setTasks } = useTaskGridStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
+    const { isNodeLocked } = useMultiProjectTaskFlowHelper();
 
     // ── Rename ──────────────────────────────────────────────────────────────
 
@@ -100,6 +103,11 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             setEditingNodeId(null);
             if (!trimmed) return;
 
+            if (isNodeLocked(nodeId)) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "rename", nodeId });
+                return;
+            }
+
             const taskId = parseInt(nodeId, 10);
             const task = tasks.find((t) => t.id === taskId);
             if (!task || task.title === trimmed) return;
@@ -135,7 +143,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 _console.error("Failed to rename task");
             }
         },
-        [tasks, currentFlowNodes, setTasks, setFlowNodes, setEditingNodeId, $user.userToken, _console],
+        [tasks, currentFlowNodes, setTasks, setFlowNodes, setEditingNodeId, $user.userToken, _console, isNodeLocked],
     );
 
     // ── Add task at position (right-click canvas) ─────────────────────────
@@ -193,6 +201,10 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
 
     const handleChangeProject = useCallback(
         async (nodeId: string, newProjectId: number) => {
+            if (isNodeLocked(nodeId)) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "changeProject", nodeId });
+                return;
+            }
             const taskId = parseInt(nodeId, 10);
             const task = tasks.find((t) => t.id === taskId);
             if (!task || task.projectId === newProjectId) return;
@@ -229,13 +241,17 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 _console.error("Failed to change project");
             }
         },
-        [tasks, projectNameMap, setTasks, setFlowNodes, $user.userToken, _console],
+        [tasks, projectNameMap, setTasks, setFlowNodes, $user.userToken, _console, isNodeLocked],
     );
 
     // ── Change status of a task node ─────────────────────────────────────
 
     const handleChangeStatus = useCallback(
         async (nodeId: string, newStatus: string) => {
+            if (isNodeLocked(nodeId)) {
+                debugLog.log("taskflow", "locked-node-blocked", { action: "changeStatus", nodeId, newStatus });
+                return;
+            }
             const taskId = parseInt(nodeId, 10);
             const task = tasks.find((t) => t.id === taskId);
             if (!task || task.status === newStatus) return;
@@ -272,7 +288,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 _console.error("Failed to change status");
             }
         },
-        [tasks, setTasks, setFlowNodes, $user.userToken, _console],
+        [tasks, setTasks, setFlowNodes, $user.userToken, _console, isNodeLocked],
     );
 
     return {
@@ -282,5 +298,6 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
         handleAddTaskAtPosition,
         handleChangeProject,
         handleChangeStatus,
+        isNodeLocked,
     };
 };

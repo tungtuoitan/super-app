@@ -63,7 +63,7 @@ export function getStatusNodeBackground(status: string): string {
     const map: Record<string, string> = {
         open:                "rgba(31, 111, 67, 0.10)",
         in_progress:         "rgba(252, 204, 62, 0.12)",
-        background_progress: "rgba(37, 31, 12, 0.14)",
+        background_progress: "rgba(180, 130, 50, 0.12)",
         paused:              "rgba(87, 87, 87, 0.09)",
         completed:           "rgba(111, 66, 193, 0.10)",
         on_hold:             "rgba(71, 83, 99, 0.09)",
@@ -174,14 +174,26 @@ export function smartWand(
     if (orphanNodes.length === 0) return nodes;
 
     // ── Group orphan nodes into status columns ─────────────────────────────
-    // Place below the bottom edge of all connected nodes (or at y=0 if none)
-    let maxConnectedBottom = 0;
-    for (const n of connectedNodes) {
-        const h = estimateNodeHeight((n.data as TaskFlowNodeData).task);
-        maxConnectedBottom = Math.max(maxConnectedBottom, n.position.y + h);
+    // Place below the center of in-progress / background_progress nodes.
+    // If none exist, fall back to the bottom of all connected nodes.
+    const ACTIVE_STATUSES = new Set(["in_progress", "background_progress"]);
+    const activeNodes = connectedNodes.filter((n) => ACTIVE_STATUSES.has((n.data as TaskFlowNodeData).task.status));
+    const anchorNodes = activeNodes.length > 0 ? activeNodes : connectedNodes;
+
+    let anchorBottom = 0;
+    let anchorCenterX = 0;
+    if (anchorNodes.length > 0) {
+        let sumX = 0;
+        for (const n of anchorNodes) {
+            const h = estimateNodeHeight((n.data as TaskFlowNodeData).task);
+            anchorBottom = Math.max(anchorBottom, n.position.y + h);
+            sumX += n.position.x + NODE_WIDTH / 2;
+        }
+        anchorCenterX = sumX / anchorNodes.length;
     }
-    const orphanStartY = connectedNodes.length > 0
-        ? maxConnectedBottom + V_GAP * 8
+
+    const orphanStartY = anchorNodes.length > 0
+        ? anchorBottom + V_GAP * 8
         : 0;
 
     // Group by status, sort within each group by createdAt
@@ -203,22 +215,28 @@ export function smartWand(
     }
 
     // Layout: each status = one column, nodes stacked vertically
+    // Count total columns first to center them under the anchor area
     const orphanInfo = new Map<string, { x: number; y: number }>();
-    let colX = 0;
-    const layoutGroup = (group: typeof orphanNodes) => {
+    const activeGroups: (typeof orphanNodes)[] = [];
+    for (const status of STATUS_ORDER) {
+        const group = orphanByStatus.get(status);
+        if (group?.length) activeGroups.push(group);
+    }
+    for (const [status, group] of orphanByStatus) {
+        if (!STATUS_ORDER.includes(status) && group.length) activeGroups.push(group);
+    }
+    const totalColumnsWidth = activeGroups.length * (NODE_WIDTH + H_GAP) - H_GAP;
+    let colX = anchorNodes.length > 0
+        ? anchorCenterX - totalColumnsWidth / 2
+        : 0;
+
+    for (const group of activeGroups) {
         let rowY = orphanStartY;
         for (const n of group) {
             orphanInfo.set(n.id, { x: colX, y: rowY });
             rowY += estimateNodeHeight((n.data as TaskFlowNodeData).task) + V_GAP;
         }
         colX += NODE_WIDTH + H_GAP;
-    };
-    for (const status of STATUS_ORDER) {
-        const group = orphanByStatus.get(status);
-        if (group?.length) layoutGroup(group);
-    }
-    for (const [status, group] of orphanByStatus) {
-        if (!STATUS_ORDER.includes(status) && group.length) layoutGroup(group);
     }
 
     // Return: connected nodes unchanged, orphans repositioned

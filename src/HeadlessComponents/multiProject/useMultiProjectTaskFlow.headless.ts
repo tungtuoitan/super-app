@@ -17,10 +17,12 @@ import { flowService } from "@/services/flow.service";
 import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/services/flow.service";
 import type { FlowEdgeData } from "@/types/multiProject/multiProjectTaskFlow.type";
 import { useAuthStore } from "@/store/auth/Auth.store";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 import type { Edge } from "@xyflow/react";
+import type { TaskFlowNodeData } from "@/types/multiProject/multiProjectTaskFlow.type";
 
 export function useMultiProjectTaskFlowHeadless() {
-    const { setFlowNodes, setFlowEdges, setSavedEdges, savedEdges, setSavedPositions, savedPositions, positionsLoaded, setPositionsLoaded, isTaskFlowLoading } = useMultiTaskFlowStore();
+    const { setFlowNodes, setFlowEdges, setSavedEdges, savedEdges, setSavedPositions, savedPositions, positionsLoaded, setPositionsLoaded, isTaskFlowLoading, lockOldNodes } = useMultiTaskFlowStore();
     const { filteredTasks, projectNameMap, taskIdKey } = useMultiProjectTaskFlowSelector();
     const { loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
@@ -69,10 +71,15 @@ export function useMultiProjectTaskFlowHeadless() {
                 const autoIds = new Set(autoNodes.map((n) => n.id));
                 setFlowNodes((prev) => {
                     const extras = prev.filter((n) => !autoIds.has(n.id));
-                    const merged = autoNodes.map((n) => ({
-                        ...n,
-                        position: positions[n.id] ?? n.position,
-                    }));
+                    const merged = autoNodes.map((n) => {
+                        const status = (n.data as TaskFlowNodeData).task?.status;
+                        const locked = lockOldNodes && (status === "completed" || status === "cancelled");
+                        return {
+                            ...n,
+                            position: positions[n.id] ?? n.position,
+                            draggable: !locked,
+                        };
+                    });
                     return [...merged, ...extras];
                 });
                 setFlowEdges(customEdges);
@@ -99,10 +106,19 @@ export function useMultiProjectTaskFlowHeadless() {
             const extras = prev.filter((n) => !autoIds.has(n.id));
             const prevPositions: Record<string, { x: number; y: number }> = {};
             for (const n of prev) prevPositions[n.id] = n.position;
-            const merged = autoNodes.map((n) => ({
-                ...n,
-                position: prevPositions[n.id] ?? savedPositions[n.id] ?? n.position,
-            }));
+            const merged = autoNodes.map((n) => {
+                const status = (n.data as TaskFlowNodeData).task?.status;
+                const locked = lockOldNodes && (status === "completed" || status === "cancelled");
+                return {
+                    ...n,
+                    position: prevPositions[n.id] ?? savedPositions[n.id] ?? n.position,
+                    draggable: !locked,
+                };
+            });
+            debugLog.log("taskflow", "rebuild", {
+                nodeCount: merged.length + extras.length,
+                lockedCount: merged.filter((n) => n.draggable === false).length,
+            });
             return [...merged, ...extras];
         });
 
@@ -111,5 +127,5 @@ export function useMultiProjectTaskFlowHeadless() {
             return prevCustom.length > 0 ? prevCustom : savedEdges;
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [taskIdKey, savedPositions, savedEdges, isTaskFlowLoading]);
+    }, [taskIdKey, savedPositions, savedEdges, isTaskFlowLoading, lockOldNodes]);
 }
