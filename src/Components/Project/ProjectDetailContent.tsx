@@ -13,6 +13,7 @@ import { TaskGrid } from "../Task/TaskGrid";
 import { TaskKanbanView } from "../Task/TaskKanbanView";
 import { TaskTimelineView } from "../Task/TaskTimelineView";
 import { TaskFilterPopup } from "../Task/TaskFilterPopup";
+import { TaskSearchInput } from "../Task/small/TaskSearchInput";
 import { useProjectDetailSelector } from "@/Selectors/project/useProjectDetail.selector";
 import { useProjectDetailHelper } from "@/hooks/project/useProjectDetail.helper";
 import { ProjectDetailHeadless } from "@/HeadlessComponents/project/ProjectDetailHeadless";
@@ -79,6 +80,7 @@ export function ProjectDetailContent() {
                     </div>
                     {/* Right side actions */}
                     <div className="flex items-center gap-1 pr-2">
+                        {activeTab === "taskList" && <TaskSearchInput />}
                         {showTaskFilter && <TaskFilterPopup />}
                         {selectedProject?.workspaceId && (
                             <Button

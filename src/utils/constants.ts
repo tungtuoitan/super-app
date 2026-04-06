@@ -186,7 +186,7 @@ export const constants = {
             colors: {
                 open: { bg: "#1f6f43", text: "#ffffff" },
                 in_progress: { bg: "#FCCC3E", text: "#1a1a1a" },
-                background_progress: { bg: "#251f0c", text: "#ffffff" },
+                background_progress: { bg: "#534514", text: "#ffffff" },
                 paused: { bg: "#575757", text: "#ffffff" },
                 completed: { bg: "#6f42c1", text: "#ffffff" },
                 on_hold: { bg: "#475363", text: "#ffffff" },

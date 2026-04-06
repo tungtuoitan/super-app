@@ -15,7 +15,7 @@ import { sortTasksHierarchically } from "@/utils/task/TaskGrid.utils";
 import { constants } from "@/utils/constants";
 
 export const useTaskListSelector = () => {
-    const { tasks } = useTaskStore();
+    const { tasks, taskSearchQuery } = useTaskStore();
     const { registriesByType } = useGeneralStore();
     const { projects } = useProjectStore();
     const { projectId } = useProjectDetailStore();
@@ -59,10 +59,19 @@ export const useTaskListSelector = () => {
             .sort((a, b) => (constants.optionOrder.taskPriorities[a.label] ?? 999) - (constants.optionOrder.taskPriorities[b.label] ?? 999));
     }, [registriesByType]);
 
-    // Filter tasks by projectId
+    // Filter tasks by projectId and search query
     const filteredTasks = useMemo(() => {
-        return tasks.filter((task) => task.projectId === projectId);
-    }, [tasks, projectId]);
+        let result = tasks.filter((task) => task.projectId === projectId);
+        if (taskSearchQuery) {
+            const query = taskSearchQuery.toLowerCase();
+            result = result.filter(
+                (task) =>
+                    task.title?.toLowerCase().includes(query) ||
+                    String(task.id).includes(query),
+            );
+        }
+        return result;
+    }, [tasks, projectId, taskSearchQuery]);
 
     // Sort tasks: parent tasks first, then subtasks immediately after their parent
     const sortedTasks = useMemo(() => {

@@ -33,6 +33,8 @@ export interface TaskGridContextData {
     taskContainerWidth: number;
     setTaskContainerWidth: Dispatch<SetStateAction<number>>;
     taskDetailContentRef: RefObject<HTMLDivElement>;
+    taskSearchQuery: string;
+    setTaskSearchQuery: Dispatch<SetStateAction<string>>;
 }
 
 export const taskGridContextDefaultValue: TaskGridContextData = {
@@ -58,6 +60,8 @@ export const taskGridContextDefaultValue: TaskGridContextData = {
     taskContainerWidth: 0,
     setTaskContainerWidth: () => {},
     taskDetailContentRef: { current: null },
+    taskSearchQuery: "",
+    setTaskSearchQuery: () => {},
 };
 
 export const TaskGridStore = createContext<TaskGridContextData>(taskGridContextDefaultValue);
@@ -77,6 +81,7 @@ export const TaskGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
     const taskContainerRef = useRef<HTMLDivElement>(null);
     const [taskContainerWidth, setTaskContainerWidth] = useState<number>(0);
     const taskDetailContentRef = useRef<HTMLDivElement>(null);
+    const [taskSearchQuery, setTaskSearchQuery] = useState<string>("");
 
     return (
         <TaskGridStore.Provider
@@ -93,6 +98,7 @@ export const TaskGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ c
                 taskContainerRef,
                 taskContainerWidth, setTaskContainerWidth,
                 taskDetailContentRef,
+                taskSearchQuery, setTaskSearchQuery,
             }}
         >
             {children}
