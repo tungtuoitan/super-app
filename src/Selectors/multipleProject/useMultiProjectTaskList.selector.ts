@@ -15,7 +15,7 @@ import { sortTasksHierarchically } from "@/utils/task/TaskGrid.utils";
 import { constants } from "@/utils/constants";
 
 export const useMultiProjectTaskListSelector = () => {
-    const { tasks } = useTaskStore();
+    const { tasks, taskSearchQuery } = useTaskStore();
     const { registriesByType } = useGeneralStore();
     const { projects } = useProjectStore();
     const { projectIds } = useMultiTimelineStore();
@@ -65,10 +65,19 @@ export const useMultiProjectTaskListSelector = () => {
             .sort((a, b) => (constants.optionOrder.taskPriorities[a.label] ?? 999) - (constants.optionOrder.taskPriorities[b.label] ?? 999));
     }, [registriesByType]);
 
-    // Filter tasks by projectIds
+    // Filter tasks by projectIds and search query
     const filteredTasks = useMemo(() => {
-        return tasks.filter((task) => projectIds.includes(task.projectId));
-    }, [tasks, projectIds]);
+        let result = tasks.filter((task) => projectIds.includes(task.projectId));
+        if (taskSearchQuery) {
+            const query = taskSearchQuery.toLowerCase();
+            result = result.filter(
+                (task) =>
+                    task.title?.toLowerCase().includes(query) ||
+                    String(task.id).includes(query),
+            );
+        }
+        return result;
+    }, [tasks, projectIds, taskSearchQuery]);
 
     // Sort tasks hierarchically
     const sortedTasks = useMemo(() => {

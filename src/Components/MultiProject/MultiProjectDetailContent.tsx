@@ -14,6 +14,7 @@ import { MultiProjectProTimelineView } from "./MultiProjectProTimelineView";
 import { MultiProjectTimelineView } from "./MultiProjectTimelineView";
 import { MultiProjectTaskFlowView } from "./MultiProjectTaskFlowView";
 import { TaskFilterPopup } from "../Task/TaskFilterPopup";
+import { TaskSearchInput } from "../Task/small/TaskSearchInput";
 import { ProjectChip } from "./small/ProjectChip";
 import { useMultiProjectDetailHeadless } from "../../HeadlessComponents/multiProject/useMultiProjectDetail.headless";
 import { useMultiProjectDetailSelector } from "../../Selectors/multipleProject/useMultiProjectDetail.selector";
@@ -94,6 +95,7 @@ export function MultiProjectDetailContent() {
                 </div>
                 <div className="flex items-center gap-1 px-2">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mr-1">{filteredProjectIds.length} / {availableProjects.length} Projects</span>
+                    {activeTab === "taskList" && <TaskSearchInput />}
                     {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline" || activeTab === "taskFlow") && <TaskFilterPopup />}
                 </div>
             </div>
