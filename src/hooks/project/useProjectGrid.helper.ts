@@ -16,7 +16,6 @@ import { parseAsLocalDate } from "@/utils/date.utils";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
-import { useConversationHelper } from "@/hooks/conversation/useConversation.helper";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
@@ -52,7 +51,6 @@ export const useProjectGridHelper = () => {
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const _console = useConsoleHelper();
     const { openProjectTab, openMultiProjectTab } = useProjectTabHelper();
-    const { openDialog: openConversationDialog } = useConversationHelper();
     const { setShouldFocusProjectName } = useProjectDetailStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
 
@@ -182,12 +180,6 @@ export const useProjectGridHelper = () => {
             onOpenProjectView: () => {
                 if (selectedProjects.length === 1) {
                     openProjectTab(selectedProjects[0]);
-                }
-            },
-            onOpenConversations: () => {
-                if (selectedProjects.length === 1) {
-                    const p = selectedProjects[0];
-                    openConversationDialog("project", p.id, p.name);
                 }
             },
         });

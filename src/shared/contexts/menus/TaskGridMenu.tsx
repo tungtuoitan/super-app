@@ -1,6 +1,6 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
-import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, GitBranch as SubTaskIcon, MessageSquare as ConversationIcon } from "lucide-react";
+import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, GitBranch as SubTaskIcon } from "lucide-react";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
@@ -43,14 +43,6 @@ export function TaskGridMenu() {
                 <MenuItem onClick={() => executeDirectly({ callback: () => contextData?.onAddSubTask?.(hoveredTask.id) })}>
                     <SubTaskIcon className="w-4 h-4 mr-2" />
                     Add Subtask
-                </MenuItem>
-            )}
-
-            {/* Conversations — only for a single persisted task */}
-            {hoveredTask && hoveredTask.id > 0 && (
-                <MenuItem onClick={() => executeDirectly({ callback: () => contextData?.onOpenConversations?.(hoveredTask) })}>
-                    <ConversationIcon className="w-4 h-4 mr-2" />
-                    Conversations
                 </MenuItem>
             )}
 

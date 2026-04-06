@@ -13,7 +13,6 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { useConsoleHelper } from "../console/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";
-import { useConversationHelper } from "@/hooks/conversation/useConversation.helper";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
@@ -54,7 +53,6 @@ export const useTaskGridHelper = () => {
     const { projects } = useProjectStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const _console = useConsoleHelper();
-    const { openDialog: openConversationDialog } = useConversationHelper();
 
     /**
      * Create new task (temporary with negative ID)
@@ -271,9 +269,6 @@ export const useTaskGridHelper = () => {
                         onTaskCreated(newSubTask);
                     }
                 }
-            },
-            onOpenConversations: (task: Task) => {
-                openConversationDialog("task", task.id, task.title || `Task #${task.id}`);
             },
         });
     };

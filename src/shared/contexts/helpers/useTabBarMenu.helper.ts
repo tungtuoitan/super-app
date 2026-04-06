@@ -7,7 +7,6 @@
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import { useConversationHelper } from "@/hooks/conversation/useConversation.helper";
 import { constants } from "@/utils/constants";
 import type { Task } from "@/store/task/useTask.store";
 import type { BaseTab } from "@/types/editor/tab.types";
@@ -26,31 +25,11 @@ const isGroupChild = (tab: BaseTab, allTabs: BaseTab[]): boolean => {
     return allTabs.some((t) => getTaskGroupLink(t) === link);
 };
 
-/** Maps tab type to conversation entity type string, or null if not supported */
-const getConversationEntity = (tab: BaseTab): { entityType: string; entityId: number; label: string } | null => {
-    const tabTypes = constants.vscode.tab.tabTypes;
-    const data = tab.data as any;
-    if (!data || !data.id || data.id <= 0) return null;
-
-    switch (tab.type) {
-        case tabTypes.project:
-            return { entityType: "project", entityId: data.id, label: data.name ?? tab.title };
-        case tabTypes.task:
-            return { entityType: "task", entityId: data.id, label: data.title ?? tab.title };
-        case tabTypes.note:
-            return { entityType: "note", entityId: data.id, label: data.title ?? tab.title };
-        case tabTypes.workspace:
-            return { entityType: "workspace", entityId: data.id, label: data.name ?? tab.title };
-        default:
-            return null;
-    }
-};
 
 export const useTabBarMenuHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { closeTabs } = useEditorTabHelper();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
-    const { openDialog } = useConversationHelper();
 
     // Get the context tab ID from the context menu store
     const contextTabId = contextData?.tabId || null;
@@ -145,20 +124,10 @@ export const useTabBarMenuHelper = () => {
         setIsContextMenuOpen(false);
     };
 
-    const conversationEntity = contextTab ? getConversationEntity(contextTab) : null;
-
-    const openConversation = () => {
-        if (!conversationEntity) return;
-        openDialog(conversationEntity.entityType, conversationEntity.entityId, conversationEntity.label);
-        setIsContextMenuOpen(false);
-    };
-
     return {
         contextTabId,
         isPinned,
         isChild,
-        conversationEntity,
-        openConversation,
         pinTab,
         unpinTab,
         closeAllSavedTabs,

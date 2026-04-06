@@ -6,13 +6,10 @@
 import { useCallback } from "react";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useTaskCommentStore } from "@/store/task/useTaskComment.store";
-import { useConversationStore } from "@/store/conversation/useConversation.store";
 import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
 import { taskCommentService } from "@/services/taskComment.service";
-import { conversationService } from "@/services/conversation.service";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import type { TaskComment, TaskCommentDTO } from "@/types/task/taskComment.types";
-import type { ConMessage, ConMessageDTO } from "@/types/conversation.types";
 
 /** Transform DTO (string dates) → domain model (Date objects) */
 const transformComment = (dto: TaskCommentDTO): TaskComment => ({
@@ -26,15 +23,6 @@ const transformComment = (dto: TaskCommentDTO): TaskComment => ({
     deletedAt: parseAsLocalDate(dto.deletedAt),
 });
 
-const toConMessage = (dto: ConMessageDTO): ConMessage => ({
-    ...dto,
-    createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
-    updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
-    deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
-    occurAt: dto.occurAt ? new Date(dto.occurAt) : null,
-    replies: [],
-});
-
 export const useTaskCommentHelper = () => {
     const { $user } = useAuthStore();
     const { selectedTask } = useTaskDetailSelector();
@@ -45,13 +33,6 @@ export const useTaskCommentHelper = () => {
         setEditingCommentId,
         setDraftContent,
     } = useTaskCommentStore();
-    const {
-        isOpen: isConvOpen,
-        entityType: convEntityType,
-        entityId: convEntityId,
-        selectedTopicId: convTopicId,
-        setMessages: setConvMessages,
-    } = useConversationStore();
 
     /** Load all comments for the current task */
     const loadComments = useCallback(
@@ -187,11 +168,10 @@ export const useTaskCommentHelper = () => {
     const submitVersionComment = useCallback(
         (section: "process" | "checklist" | "desc", oldText: string, newText: string) => {
             if (!selectedTask || selectedTask.id <= 0 || !$user.userToken) return;
+            // Skip if no meaningful change
             if (oldText.trim() === newText.trim()) return;
 
             const content = JSON.stringify({ type: "version", section, oldText, newText });
-
-            // 1) Legacy task comment
             taskCommentService._upsertComment($user.userToken, {
                 id: 0,
                 taskId: selectedTask.id,
@@ -205,25 +185,8 @@ export const useTaskCommentHelper = () => {
             }).catch((err) => {
                 console.error("Failed to create version comment:", err);
             });
-
-            // 2) Conversation message (quick notes = topicId null)
-            conversationService._upsertMessage($user.userToken, {
-                id: 0,
-                entityType: "task",
-                entityId: selectedTask.id,
-                topicId: null,
-                type: "version",
-                content,
-            }).then((res) => {
-                if (!res.success || !res.data) return;
-                const viewing = isConvOpen && convEntityType === "task"
-                    && convEntityId === selectedTask.id && convTopicId === null;
-                if (viewing) {
-                    setConvMessages((prev) => [...prev, toConMessage(res.data as unknown as ConMessageDTO)]);
-                }
-            }).catch(() => {});
         },
-        [selectedTask, $user.userToken, setComments, isConvOpen, convEntityType, convEntityId, convTopicId, setConvMessages],
+        [selectedTask, $user.userToken, setComments],
     );
 
     return {
