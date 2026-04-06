@@ -13,6 +13,8 @@ import { LogListMenu } from "./menus/LogListMenu";
 import { TrackPanelMenu } from "./menus/TrackPanelMenu";
 import { KKnowledgeMenu } from "./menus/KKnowledgeMenu";
 import { constants } from "@/utils/constants";
+import "@szhsin/react-menu/dist/index.css";
+import "@szhsin/react-menu/dist/transitions/slide.css";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import {KNodeMenu} from "../../Components/K/contexts/menu/KNodeMenu";
 import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
