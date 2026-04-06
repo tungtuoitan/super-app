@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Check, FlaskConical, Loader2, Pencil, Play, X } from "lucide-react";
+import { BookOpen, Check, Loader2, Pencil, Play, Plus, X } from "lucide-react";
 import { Button } from "@/Components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/Components/ui/dialog";
+import { ScoreSparkline } from "../small/ScoreSparkline";
 import { useKTestStore } from "../../store/useKTest.store";
 import { useKTestLoader } from "../../hooks/useKTest.loader";
-import { useKStore } from "../../store/K.store";
 import type { KTestDetail, KTestSummary } from "../../types/kTest.type";
 
 interface KTestGridProps {
@@ -24,14 +23,13 @@ const LEVEL_CLASS: Record<number, string> = {
 
 export function KTestGrid({ knowledgeId, pendingStartTestId, onPendingStartHandled, onStartTest, onViewDetail }: KTestGridProps) {
     const { tests, isLoadingTests } = useKTestStore();
-    const { loadTests, getTestDetail, createTestFromNodes, updateTest } = useKTestLoader();
-    const { selectedItemIds, currentK } = useKStore();
+    const { loadTests, getTestDetail, createEmptyTest, updateTest } = useKTestLoader();
 
-    const [createDialogOpen, setCreateDialogOpen] = useState(false);
-    const [level, setLevel]                       = useState<1 | 2 | 3>(1);
-    const [isCreating, setIsCreating]             = useState(false);
-    const [createError, setCreateError]           = useState<string | null>(null);
-    const [startingId, setStartingId]             = useState<number | null>(null);
+    const [startingId, setStartingId]   = useState<number | null>(null);
+    const [creatingTest, setCreatingTest] = useState(false);
+    const [newTestTitle, setNewTestTitle] = useState("");
+    const [creating, setCreating]         = useState(false);
+    const newTitleRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (knowledgeId > 0) loadTests(knowledgeId);
@@ -46,13 +44,6 @@ export function KTestGrid({ knowledgeId, pendingStartTestId, onPendingStartHandl
         handleStart(test);
     }, [pendingStartTestId, isLoadingTests, tests]);
 
-    // Derive selected entity node IDs from the tree selection — skip deleted nodes
-    const selectedEntityNodeIds = selectedItemIds.filter(id => {
-        if (!currentK?.flatData) return false;
-        const node = currentK.flatData.find(n => n.id === id);
-        return node && !node.deletedAt && (node.nodeType === "entity" || node.nodeType == null);
-    });
-
     const handleStart = async (test: KTestSummary) => {
         setStartingId(test.id);
         try {
@@ -63,33 +54,22 @@ export function KTestGrid({ knowledgeId, pendingStartTestId, onPendingStartHandl
         }
     };
 
-    const handleCreate = async () => {
-        if (selectedEntityNodeIds.length === 0) {
-            setCreateError("Select at least one entity node in the tree first.");
-            return;
-        }
-        setIsCreating(true);
-        setCreateError(null);
+    const handleCreateTest = async () => {
+        if (!newTestTitle.trim() || creating) return;
+        setCreating(true);
         try {
-            const detail = await createTestFromNodes(knowledgeId, {
-                title: `Test ${new Date().toLocaleDateString("en-US")}`,
-                level,
-                nodeIds: selectedEntityNodeIds,
-                includeDescendants: true,
-                count: 2147483647, // int.MaxValue — include all available questions
-            });
-            if (detail) {
-                setCreateDialogOpen(false);
-                loadTests(knowledgeId);
-            } else {
-                setCreateError("No questions found. Make sure the selected entity nodes have question children.");
-            }
-        } catch {
-            setCreateError("Failed to create test. Please try again.");
-        } finally {
-            setIsCreating(false);
-        }
+            await createEmptyTest(knowledgeId, newTestTitle.trim());
+            setNewTestTitle("");
+            setCreatingTest(false);
+        } finally { setCreating(false); }
     };
+
+    const startCreateTest = () => {
+        setCreatingTest(true);
+        setTimeout(() => newTitleRef.current?.focus(), 0);
+    };
+
+    const cancelCreateTest = () => { setCreatingTest(false); setNewTestTitle(""); };
 
     if (isLoadingTests) {
         return (
@@ -107,20 +87,30 @@ export function KTestGrid({ knowledgeId, pendingStartTestId, onPendingStartHandl
                     <h2 className="text-sm font-semibold">Tests</h2>
                     <p className="text-xs text-muted-foreground mt-0.5">{tests.length} test{tests.length !== 1 ? "s" : ""}</p>
                 </div>
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => { setCreateError(null); setCreateDialogOpen(true); }}
-                    title={selectedEntityNodeIds.length === 0 ? "Select entity nodes in the tree first" : "Create test from selected nodes"}
-                >
-                    <FlaskConical className="w-3.5 h-3.5 mr-1.5" />
-                    Create New Test
-                    {selectedEntityNodeIds.length > 0 && (
-                        <span className="ml-1.5 bg-primary text-primary-foreground rounded-full px-1.5 text-[10px]">
-                            {selectedEntityNodeIds.length}
-                        </span>
-                    )}
-                </Button>
+                {creatingTest ? (
+                    <div className="flex items-center gap-2">
+                        <input
+                            ref={newTitleRef}
+                            value={newTestTitle}
+                            onChange={e => setNewTestTitle(e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter") handleCreateTest(); if (e.key === "Escape") cancelCreateTest(); }}
+                            placeholder="Test name…"
+                            disabled={creating}
+                            className="text-sm bg-zinc-900 border border-zinc-700 rounded px-2 py-1 outline-none focus:border-zinc-500 w-48"
+                        />
+                        <button onClick={handleCreateTest} disabled={creating || !newTestTitle.trim()} className="text-green-500 hover:text-green-400 disabled:opacity-40">
+                            {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                        </button>
+                        <button onClick={cancelCreateTest} className="text-zinc-500 hover:text-zinc-300">
+                            <X className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
+                ) : (
+                    <Button size="sm" variant="outline" onClick={startCreateTest}>
+                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        New Test
+                    </Button>
+                )}
             </div>
 
             {/* Empty state */}
@@ -128,7 +118,7 @@ export function KTestGrid({ knowledgeId, pendingStartTestId, onPendingStartHandl
                 <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-2">
                     <BookOpen className="w-8 h-8 opacity-30" />
                     <p className="text-sm">No tests yet.</p>
-                    <p className="text-xs">Select entity nodes in the tree and click "Create New test".</p>
+                    <p className="text-xs">Click "New Test" to create one.</p>
                 </div>
             )}
 
@@ -147,82 +137,6 @@ export function KTestGrid({ knowledgeId, pendingStartTestId, onPendingStartHandl
                     />
                 ))}
             </div>
-
-            {/* Create test dialog */}
-            <Dialog open={createDialogOpen} onOpenChange={(o) => { if (!isCreating) setCreateDialogOpen(o); }}>
-                <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                        <DialogTitle className="text-sm flex items-center gap-2">
-                            <FlaskConical className="w-4 h-4 text-primary" />
-                            Create test from selected nodes
-                        </DialogTitle>
-                    </DialogHeader>
-
-                    <div className="flex flex-col gap-3 py-2">
-                        {selectedEntityNodeIds.length === 0 ? (
-                            <p className="text-xs text-destructive">
-                                No nodes selected. Go back to the tree and select at least one entity node.
-                            </p>
-                        ) : (
-                            <p className="text-xs text-muted-foreground">
-                                <strong>{selectedEntityNodeIds.length}</strong> entity node(s) selected.
-                                All question nodes underneath will be included.
-                            </p>
-                        )}
-
-                        {/* Level */}
-                        <div>
-                            <label className="text-xs text-muted-foreground uppercase tracking-widest block mb-1">
-                                Difficulty
-                            </label>
-                            <div className="flex gap-2">
-                                {([1, 2, 3] as const).map(l => (
-                                    <button
-                                        key={l}
-                                        type="button"
-                                        disabled={isCreating}
-                                        onClick={() => setLevel(l)}
-                                        className={`flex-1 py-1 rounded text-xs border transition-colors ${
-                                            level === l
-                                                ? "border-primary bg-primary/10 text-primary"
-                                                : "border-border text-muted-foreground hover:border-primary/50"
-                                        }`}
-                                    >
-                                        {LEVEL_LABEL[l]}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {createError && (
-                            <p className="text-xs text-destructive">{createError}</p>
-                        )}
-                        {isCreating && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                Creating test...
-                            </p>
-                        )}
-                    </div>
-
-                    <DialogFooter>
-                        <Button variant="ghost" size="sm" onClick={() => setCreateDialogOpen(false)} disabled={isCreating}>
-                            Cancel
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={handleCreate}
-                            disabled={isCreating || selectedEntityNodeIds.length === 0}
-                            className="gap-1.5"
-                        >
-                            {isCreating
-                                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Creating...</>
-                                : <><FlaskConical className="w-3.5 h-3.5" />Create</>
-                            }
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }
@@ -321,7 +235,7 @@ function TestRow({ test, isStarting, onStart, onView, onRename }: TestRowProps) 
             </div>
 
             {/* Right — sparkline */}
-            <ScoreSparkline scores={test.scoreHistory} />
+            <ScoreSparkline scores={test.scoreHistory} slots={10} />
 
             {/* Action buttons */}
             <div className="flex items-center gap-1 shrink-0 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -355,62 +269,3 @@ function formatRelativeDate(iso: string): string {
     return years === 1 ? "1 year ago" : `${years} years ago`;
 }
 
-// ── ScoreSparkline — mini column chart (right side of test row) ───────────────
-
-function ScoreSparkline({ scores }: { scores: number[] }) {
-    const SLOTS   = 10;           // always render 10 columns
-    const W       = 88;           // total SVG width
-    const H       = 36;           // total SVG height
-    const barW    = 6;
-    const gap     = 2;
-    const rx      = 2;            // corner radius
-
-    // Pad left with nulls for missing history
-    const slots: (number | null)[] = [
-        ...Array(Math.max(0, SLOTS - scores.length)).fill(null),
-        ...scores.slice(-SLOTS),
-    ];
-
-    const barColor = (pct: number) =>
-        pct >= 70 ? "#22c55e" : pct >= 40 ? "#eab308" : "#ef4444";
-
-    return (
-        <svg
-            width={W}
-            height={H}
-            className="shrink-0 self-center"
-            style={{ display: "block" }}
-        >
-            {/* baseline */}
-            <line x1={0} y1={H} x2={W} y2={H} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
-
-            {slots.map((pct, i) => {
-                const x = i * (barW + gap);
-                if (pct === null) {
-                    // ghost slot — just a faint thin line
-                    return (
-                        <rect
-                            key={i}
-                            x={x} y={H - 3}
-                            width={barW} height={3}
-                            rx={rx}
-                            fill="currentColor"
-                            opacity={0.1}
-                        />
-                    );
-                }
-                const h = Math.max(3, Math.round((pct / 100) * H));
-                const y = H - h;
-                return (
-                    <g key={i}>
-                        {/* background track */}
-                        <rect x={x} y={0} width={barW} height={H} rx={rx} fill="currentColor" opacity={0.06} />
-                        {/* value bar */}
-                        <rect x={x} y={y} width={barW} height={h} rx={rx} fill={barColor(pct)} opacity={0.9} />
-                        <title>{pct}%</title>
-                    </g>
-                );
-            })}
-        </svg>
-    );
-}

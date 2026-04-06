@@ -43,6 +43,7 @@ export const constants = {
                 lifeLogTrack: "lifeLogTrack",
                 kKnowledge: "k-knowledge",
                 kNode: "k-node",
+                kDailyReview: "k-daily-review",
             } as const,
         },
         viewTypes: {

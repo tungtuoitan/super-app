@@ -5,7 +5,7 @@ import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKStore } from "../../store/K.store";
 import { DND_TYPE, CARD_HEIGHT, isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
-import { KNodeDescEditor, KNodeDescView } from "./KNodeDescEditor";
+import { AutoResizeTextarea } from "./AutoResizeTextarea";
 import type { IconType } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { IconPicker } from "@/shared/components/ui/IconPicker";
@@ -13,25 +13,31 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import { KHighlightText } from "../KExplorer/KHighlightText";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import {useGlobalShortcut} from "@/shared/hooks/useGlobalShortcut";
 
-const DESCRIPTION_WARN_LENGTH = 500;
-
-export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) {
+export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV2; isRoot?: boolean; compact?: boolean; onSubmitEdit?: (draft: { name: string; description: string; icon: string | null; color: string | null }) => Promise<void> }) {
     const {
-        editingNodeId, editDraft, setEditDraft,
+        editingNodeId, editDraft, setEditDraft,setEditingNodeId,
         editOriginal,
         parentPickerNodeId, setParentPickerNodeId,
         unsavedPromptNodeId, setUnsavedPromptNodeId,
         promptFlashTick,
-    } = useKNodeEditorStore();
+    } = useKNodeEditorStore(); 
     const { allNodes, handleOpenEdit, handleCancelEdit, handleSubmitEdit, handleDelete, handleRestoreCard, handleSaveParent, handleDrillDown, handleUpdateIcon, scopeDepth } = useKNodeEditorLoader();
+    const submitEdit = (n: KItemV2, draft: { name: string; description: string; icon: string | null; color: string | null }) => {
+        if (onSubmitEdit) {
+            if (!draft.name.trim()) return;
+            setEditingNodeId(null);
+            setUnsavedPromptNodeId(null);
+            return onSubmitEdit(draft);
+        }
+        return handleSubmitEdit(n, draft);
+    };
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { openKNodeTab } = useKNodeTabHelper();
     const { hoveredNodeId, setHoveredNodeId, markedNodeId, setMarkedNodeId, currentK } = useKStore();
-    const { warning } = useConsoleHelper();
     const { searchQuery } = useGridControlStore();
 
     const isMarked = markedNodeId === node.id;
@@ -51,33 +57,24 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const focusFieldRef = useRef<"name" | "description">("name");
     const isEditing = editingNodeId === node.id;
 
-    // ── Warning: description too long while editing ───────────────────────────
-    const warnedDescRef = useRef(false);
-    useEffect(() => {
-        if (!isEditing) { warnedDescRef.current = false; return; }
-        if (editDraft.description.length > DESCRIPTION_WARN_LENGTH && !warnedDescRef.current) {
-            warning(`[K] "${editDraft.name || node.name}": description is ${editDraft.description.length} chars (> ${DESCRIPTION_WARN_LENGTH}). Consider shortening it.`);
-            warnedDescRef.current = true;
-        }
-    }, [isEditing, editDraft.description.length]);
-
     // Card size: 1×1 (default) → 2×1 → 2×2 → back
     const [cardSize, setCardSize] = useState<"1x1" | "2x1" | "2x2">("1x1");
     const cycleSize = (e: React.MouseEvent) => {
         e.stopPropagation();
         setCardSize(s => s === "1x1" ? "2x1" : s === "2x1" ? "2x2" : "1x1");
     };
-    const heightClass = cardSize === "2x2" ? "h-[26.75rem]" : CARD_HEIGHT;
+    const heightClass = compact && !isEditing ? "h-16" : cardSize === "2x2" ? "h-[26.75rem]" : CARD_HEIGHT;
     const spanClass   = cardSize !== "1x1"  ? "col-span-2"  : "";
     const rowClass    = cardSize === "2x2"  ? "row-span-2"  : "";
 
     // Focus the clicked field when entering edit mode
     useEffect(() => {
         if (!isEditing) return;
-        if (focusFieldRef.current !== "description") {
+        if (focusFieldRef.current === "description") {
+            descRef.current?.focus({ preventScroll: true });
+        } else {
             nameInputRef.current?.focus({ preventScroll: true });
         }
-        // desc autoFocus handled by KNodeDescEditor's autoFocus prop
     }, [isEditing]);
 
     const isPickerOpen = parentPickerNodeId === node.id;
@@ -85,7 +82,7 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const isDeleted = !!node.deletedAt;
     const isKnowledge = isRoot && node.id < 0;
     const isHoveredFromTree = !isRoot && hoveredNodeId === node.id;
-    const isQuestion = node.nodeType === "question";
+
 
     // ── Flash the save/discard prompt ──────────────────────────────────────────
     const [isFlashing, setIsFlashing] = useState(false);
@@ -125,9 +122,6 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
         if (isRoot) {
             return <LibraryBig className="w-3.5 h-3.5" style={{ color: node.color || "#A1887F", opacity }} strokeWidth={2} />;
         }
-        if (isQuestion) {
-            return <HelpCircle className="w-3.5 h-3.5" style={{ color: "#6b7280", opacity: Math.min(opacity + 0.3, 1) }} strokeWidth={2} />;
-        }
         if (IconComponent) {
             return <IconComponent className="w-3.5 h-3.5" style={{ color: iconColor, opacity }} strokeWidth={2} />;
         }
@@ -141,10 +135,11 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     //     : level === 3 ? { backgroundColor: "#181A20" }
     //     : { backgroundColor: "#1B1D23" };
 
-    const bgStyle = isRoot
+    const bgStyle = compact
+    ? { backgroundColor: "#0f1014" }
+    : isRoot
     ? { backgroundColor: "#000000" }
     : level - scopeDepth === 1 ? { backgroundColor: "#111318" }
-    // : level === 2 ? { backgroundColor: "#14171C" }
     : level - scopeDepth === 2 ? { backgroundColor: "#181A20" }
     : { backgroundColor: "#1B1D23" };
 
@@ -154,14 +149,15 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
     const [{ isDragging }, dragRef] = useDrag(() => ({
         type: DND_TYPE,
         item: { id: node.id },
-        // Cannot drag: root card, deleted node, or currently editing
-        canDrag: () => !isRoot && !isDeleted && !isEditing,
+        // Cannot drag: root card, deleted node, currently editing, or compact mode
+        canDrag: () => !isRoot && !isDeleted && !isEditing && !compact,
         collect: (monitor) => ({ isDragging: monitor.isDragging() }),
-    }), [node.id, isRoot, isDeleted, isEditing]);
+    }), [node.id, isRoot, isDeleted, isEditing, compact]);
 
     const [{ isOver, canDrop }, dropRef] = useDrop(() => ({
         accept: DND_TYPE,
         canDrop: (item: { id: number }) => {
+            if (compact) return false;                                    // no reparenting in compact mode
             if (item.id === node.id) return false;                        // can't drop onto itself
             if (node.deletedAt != null) return false;                     // can't drop onto deleted target
             if (isAncestorNode(item.id, node.id, allNodes)) return false; // can't drop into descendant
@@ -172,27 +168,24 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
         },
         drop: (item: { id: number }) => handleSaveParent(item.id, node.id),
         collect: (monitor) => ({ isOver: monitor.isOver(), canDrop: monitor.canDrop() }),
-    }), [node.id, node.deletedAt, allNodes, handleSaveParent]);
+    }), [node.id, node.deletedAt, allNodes, handleSaveParent, compact]);
 
     const cardRef = useRef<HTMLDivElement>(null);
-    if (!isRoot) dragRef(cardRef);
+    const descRef = useRef<HTMLTextAreaElement>(null);
+    // In compact mode don't register DND_TYPE drag — lets the Kanban wrapper's drag take over
+    if (!isRoot && !compact) dragRef(cardRef);
     dropRef(cardRef);
 
-    // Ctrl+S to save while editing
-    useEffect(() => {
-        if (!isEditing) return;
-        const handler = (e: KeyboardEvent) => {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                // Only fire if focus is inside this card (not in the desc editor — it handles its own)
-                if (cardRef.current?.contains(document.activeElement)) {
-                    e.preventDefault();
-                    handleSubmitEdit(node, editDraft);
-                }
-            }
-        };
-        document.addEventListener("keydown", handler);
-        return () => document.removeEventListener("keydown", handler);
-    }, [isEditing, node, editDraft]);
+    // Ctrl+S → save editing node (priority 100 beats EditorToolbar's 50)
+    const nodeRef = useRef(node);
+    const editDraftRef = useRef(editDraft);
+    nodeRef.current = node;
+    editDraftRef.current = editDraft;
+
+    useGlobalShortcut("ctrl+s", { id: "k-node-save", priority: 100, enabled: isEditing }, () => {
+        submitEdit(nodeRef.current, editDraftRef.current);
+        return true;
+    });
 
     // Detect click outside while editing — compare with original before showing prompt
     useEffect(() => {
@@ -242,7 +235,7 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
             <p className="text-xs text-zinc-400 font-medium">Save changes?</p>
             <div className="flex gap-2">
                 <button
-                    onClick={() => handleSubmitEdit(node, editDraft)}
+                    onClick={() => submitEdit(node, editDraft)}
                     className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
                 >
                     Save
@@ -282,7 +275,7 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
             {UnsavedPrompt}
 
             {/* Icon — absolute, same position both modes. Always clickable (except knowledge root / deleted / question). */}
-            <div className="absolute top-2 left-2 z-10" ref={iconPickerRef}>
+            {/* <div className="absolute top-2 left-2 z-10" ref={iconPickerRef}>
                 {isKnowledge || isDeleted || isQuestion ? (
                     <div className="w-5 h-5 flex items-center justify-center pointer-events-none">
                         <NodeIconDisplay opacity={0.4} />
@@ -318,7 +311,7 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                         />
                     </div>
                 )}
-            </div>
+            </div> */}
 
             {/* Drop-to-reparent overlay */}
             {dropActive && !isEditing && (
@@ -327,55 +320,11 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                 </div>
             )}
 
-            {/* Header — fixed h-8 */}
-            <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-2 shrink-0 h-8">
-                {/* Parent name — click to drilldown into parent */}
-                {parentNode ? (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); handleDrillDown(parentNode); }}
-                        className="text-[10px] ml-3 font-mono text-zinc-600 hover:text-zinc-400 border border-zinc-800 hover:border-zinc-700 rounded px-1.5 py-0.5 leading-none truncate max-w-[80px] transition-colors"
-                        title={`Go to ${parentNode.name}`}
-                    >
-                        {parentNode.name}
-                    </button>
-                ) : !isRoot ? (
-                    <span className="text-[10px] ml-3 font-mono text-zinc-700 border border-zinc-800/50 rounded px-1.5 py-0.5 leading-none">
-                        root
-                    </span>
-                ) : null}
-                {isEditing ? (
-                    <div className="ml-auto flex items-center gap-1">
-                        <button
-                            onClick={() => handleSubmitEdit(node, editDraft)}
-                            className="text-[11px] text-zinc-400 hover:text-green-400 px-1.5 py-0.5 rounded"
-                        >
-                            Save
-                        </button>
-                        <button
-                            onClick={handleCancelEdit}
-                            className="text-[11px] text-zinc-500 hover:text-zinc-300 px-1.5 py-0.5 rounded"
-                        >
-                            Esc
-                        </button>
-                    </div>
-                ) : (
-                    <div className="ml-auto hidden group-hover:flex items-center gap-1">
-                        {!isKnowledge && !isDeleted && (
-                            <button onClick={() => handleDelete(node.id)} className="text-zinc-600 hover:text-red-400 p-0.5 rounded">
-                                <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                        )}
-                        {!isKnowledge && isDeleted && (
-                            <button onClick={() => handleRestoreCard(node.id)} className="text-zinc-600 hover:text-green-400 p-0.5 rounded" title="Restore">
-                                <RotateCcw className="w-3.5 h-3.5" />
-                            </button>
-                        )}
-                    </div>
-                )}
-            </div>
 
             {/* Name */}
-            <div className="px-4 shrink-0 h-6">
+            <div className={compact && !isEditing ? "px-3 flex items-center h-full" : " mt-4 px-2 shrink-0 h-6"}
+            
+            >
                 {isEditing ? (
                     <input
                         ref={nameInputRef}
@@ -383,73 +332,70 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                         onChange={(e) => setDraft("name", e.target.value)}
                         placeholder="Name"
                         className="w-full bg-transparent text-sm font-semibold text-left outline-none border-b border-zinc-700 pb-0.5"
-                        style={{ color: isQuestion ? "#808080" : (editDraft.color || node.color || "#f4f4f5") }}
+                        style={{ color:"#808080" }}
+                        // style={{ color: isQuestion ? "#808080" : (editDraft.color || node.color || "#f4f4f5") }}
                         onKeyDown={(e) => {
                             if (e.key === "Escape") { e.preventDefault(); handleCancelEdit(); }
-                            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); handleSubmitEdit(node, editDraft); }
+                            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); submitEdit(node, editDraft); }
                             if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); } // block accidental save
                         }}
                     />
-                ) : !isKnowledge ? (
+                ) :
                     <button
                         className="text-sm cursor-text font-semibold text-left leading-snug line-clamp-2 mt-[3px] w-full "
-                        style={{ color: isQuestion ? "#808080" : (node.color || "#f4f4f5") }}
-                        
+                        // style={{ color: isQuestion ? "#808080" : (node.color || "#f4f4f5") }}
+                        style={{ color:"#808080" }}
                         onDoubleClick={(e) => {
                             e.stopPropagation();
                             if (isEditing) return;
                             focusFieldRef.current = "name";
                             handleOpenEdit(node);
                         }}
+                        
                         >
-                        <span className="cursor-pointer hover:underline underline-offset-2 decoration-zinc-600 transition-colors hover:opacity-80"
+                        <span className="cursor-text underline-offset-2 decoration-zinc-600 transition-colors hover:opacity-80"
                         title={`Drill into ${node.name}`}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if (isEditing) return;
-                            handleDrillDown(node);
-                        }}
                         >
                             <KHighlightText text={node.name} highlight={searchQuery} />
                         </span>
                     </button>
-                ) : (
-                    <div
-                        className="text-sm font-semibold text-left leading-snug line-clamp-2 mt-[3px]"
-                        style={{ color: node.color || "#f4f4f5" }}
-                    >
-                        <KHighlightText text={node.name} highlight={searchQuery} />
-                    </div>
-                )}
+                 }
             </div>
 
             {/* Description */}
-            <div className="px-4 pt-1.5 flex-1 min-h-0 text-left overflow-y-auto">
-                {isEditing ? (
-                    <KNodeDescEditor
-                        value={editDraft.description}
-                        onChange={(v) => setDraft("description", v)}
-                        placeholder="Description… (Ctrl+Enter to save)"
-                        autoFocus={focusFieldRef.current === "description"}
-                        onEscape={handleCancelEdit}
-                        onCtrlEnter={() => handleSubmitEdit(node, editDraft)}
-                    />
-                ) : (
-                    <div
-                        onDoubleClick={!isKnowledge && !isDeleted ? (e) => {
-                            e.stopPropagation();
-                            focusFieldRef.current = "description";
-                            handleOpenEdit(node);
-                        } : undefined}
-                        style={{ cursor: !isKnowledge && !isDeleted ? "text" : undefined, height: "100%" }}
-                    >
-                        <KNodeDescView value={node.description} highlight={searchQuery} />
-                    </div>
-                )}
-            </div>
+            {(!compact || isEditing) && (
+                <div className="px-4 pt-1.5 flex-1 min-h-0 text-left overflow-y-auto">
+                    {isEditing ? (
+                        <AutoResizeTextarea
+                            ref={descRef}
+                            value={editDraft.description}
+                            onChange={(v) => setDraft("description", v)}
+                            placeholder="Description…"
+                            className="text-xs text-zinc-400 leading-relaxed"
+                            onKeyDown={(e) => {
+                                if (e.key === "Escape") { e.preventDefault(); handleCancelEdit(); }
+                                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); submitEdit(node, editDraft); }
+                            }}
+                        />
+                    ) : (
+                        <div
+                            onDoubleClick={!isKnowledge && !isDeleted ? (e) => {
+                                e.stopPropagation();
+                                focusFieldRef.current = "description";
+                                handleOpenEdit(node);
+                            } : undefined}
+                            style={{ cursor: !isKnowledge && !isDeleted ? "text" : undefined, height: "100%" }}
+                        >
+                            <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap break-words">
+                                <KHighlightText text={node.description ?? ''} highlight={searchQuery} />
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Footer — bookmark + resize buttons */}
-            <div className="px-2 pb-1.5 pt-1 shrink-0 flex items-center justify-between">
+            {!compact && <div className="px-2 pb-1.5 pt-1 shrink-0 flex items-center justify-between">
                 {/* Bookmark / mark toggle */}
                 {!isKnowledge && (
                     <button
@@ -472,7 +418,7 @@ export function NodeCard({ node, isRoot }: { node: KItemV2; isRoot?: boolean }) 
                             : <Maximize2 className="w-3 h-3" />}
                     </button>
                 )}
-            </div>
+            </div>}
         </div>
     );
 }

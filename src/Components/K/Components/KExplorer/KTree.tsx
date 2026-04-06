@@ -17,27 +17,17 @@ import { ScrollToHighlightItem } from "../../HeadlessComponents/ScrollToHighligh
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 
 export function KTree() {
-    const { isDragging, currentK, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, markedNodeId, setMarkedNodeId, treeData: _storeTD, setTreeData, showQuestionNodes, setShowQuestionNodes } = useKStore();
+    const { isDragging, currentK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, markedNodeId, setMarkedNodeId, treeData: _storeTD, setTreeData } = useKStore();
     const { searchQuery } = useGridControlStore();
     const { handleSelectionChange, handleKeyDown } = KuseTreeHelper2();
     const { handleMove } = KuseTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const manager = useDragDropManager();
 
-    // Filter state — show question nodes (default: false = only entity nodes shown)
-    // Managed in K.store so KTestGrid can also react to it
-
-    // Build filtered knowledge: remove question nodes and their descendants when showQuestionNodes=false
+    // Always hide question nodes and their descendants — only entity nodes in the tree
     const filteredK = useMemo(() => {
-        if (showQuestionNodes || !currentK) return currentK;
-
-        const questionIds = new Set(
-            currentK.flatData
-                .filter((n) => n.nodeType === "question")
-                .map((n) => n.id)
-        );
-
-        // BFS: collect descendants of hidden nodes
+        if (!currentK) return currentK;
+        const questionIds = new Set([]);
         const hiddenIds = new Set<number>(questionIds);
         let changed = true;
         while (changed) {
@@ -49,12 +39,10 @@ export function KTree() {
                 }
             }
         }
-
-        return { ...currentK, flatData: currentK.flatData.filter((n) => !hiddenIds.has(n.id)) };
-    }, [currentK, showQuestionNodes]);
+        return { ...currentK, flatData: currentK.flatData.filter(n => !hiddenIds.has(n.id)) };
+    }, [currentK]);
 
     // Transform workspace data to tree format
-    // Handles: extract folders → filter by search → wrap in workspace root → convert to KTreeNode
     const treeData = useMemo(() => {
         const baseTree = KtreeMiniHelper.transformToTreeData(filteredK, searchQuery);
 
@@ -270,16 +258,6 @@ export function KTree() {
                 <CalculateKTreeContainerHeight />
                 <CalculateKTreeDropZoneHeight treeData={treeData} containerHeight={containerHeight} treeRef={_treeRef} setDropZoneHeight={setDropZoneHeight} />
                 <ScrollToHighlightItem />
-                    {/* Show questions filter */}
-                    <label className="flex items-center gap-1.5 px-1 pb-1 cursor-pointer select-none text-xs text-muted-foreground hover:text-editor-fg transition-colors">
-                        <input
-                            type="checkbox"
-                            checked={showQuestionNodes}
-                            onChange={(e) => setShowQuestionNodes(e.target.checked)}
-                            className="w-3 h-3 accent-primary"
-                        />
-                        Show questions
-                    </label>
                 {/* Loading overlay when dragging */}
                 {isDragging && (
                     <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">

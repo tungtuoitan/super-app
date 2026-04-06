@@ -9,6 +9,7 @@ import { LifeLogGraphPanel } from "@/Components/LifeLog/LifeLogGraphPanel";
 import { TrackEditorPanel } from "@/Components/LifeLog/TrackEditorPanel";
 import { KKnowledgeEditorPanel } from "@/Components/K/Components/KKnowledgeEditorPanel";
 import { KNodeEditorPanel } from "../K/Components/KNodeEditorPanel/KNodeEditorPanel";
+import { KDailyReviewPanel } from "../K/Components/KDailyReview/KDailyReviewPanel";
 import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";
@@ -80,6 +81,16 @@ export function VSEditorArea() {
 
             {/* Main content area */}
             <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">
+                {/* K Knowledge panels — kept mounted (hidden) to preserve KTestStore context */}
+                {openTabs
+                    .filter(t => t.type === constants.vscode.tab.tabTypes.kKnowledge)
+                    .map(t => (
+                        <div key={t.id} className="w-full h-full overflow-hidden" style={{ display: t.id === activeTabId ? undefined : 'none' }}>
+                            <KKnowledgeEditorPanel tab={t} />
+                        </div>
+                    ))
+                }
+
                 {activeTab ? (
                     // Render appropriate editor based on tab type
                     <>
@@ -92,8 +103,8 @@ export function VSEditorArea() {
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLog && <LogEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogGraph && <LifeLogGraphPanel />}
                         {activeTab.type === constants.vscode.tab.tabTypes.lifeLogTrack && <TrackEditorPanel tab={activeTab} />}
-                        {activeTab.type === constants.vscode.tab.tabTypes.kKnowledge && <KKnowledgeEditorPanel tab={activeTab} />}
                         {activeTab.type === constants.vscode.tab.tabTypes.kNode && <KNodeEditorPanel tab={activeTab} />}
+                        {/* {activeTab.type === constants.vscode.tab.tabTypes.kDailyReview && <KDailyReviewPanel onComplete={() => closeTab(activeTab.id)} />} */}
                     </>
                 ) : (
                     // Welcome/empty state

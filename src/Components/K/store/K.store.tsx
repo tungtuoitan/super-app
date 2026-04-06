@@ -77,8 +77,8 @@ export interface KContextData {
      * number     = switch to quiz tab (value = clicked node id)
      * KKnowledgeEditorPanel reads this, switches to quiz tab, then resets to undefined.
      */
-    pendingQuizTabSwitch: number | undefined;
-    setPendingQuizTabSwitch: Dispatch<SetStateAction<number | undefined>>;
+    pendingQuizTabSwitch: number | null | undefined;
+    setPendingQuizTabSwitch: Dispatch<SetStateAction<number | null | undefined>>;
 
     /** Latest quiz score per question nodeId (nodeType="question") — used for tree score overlay */
     nodeScoreMap: Record<number, number>;
@@ -91,6 +91,10 @@ export interface KContextData {
     /** Node IDs being dragged from the tree toward the test panel — cleared on dragEnd */
     testDropNodeIds: number[];
     setTestDropNodeIds: Dispatch<SetStateAction<number[]>>;
+
+    /** Global daily review: number of tests with due questions (for ActivityBar badge) */
+    dailyReviewDueCount: number;
+    setDailyReviewDueCount: Dispatch<SetStateAction<number>>;
 }
 
 // @deprecated aliases — remove after all consumers updated
@@ -153,6 +157,8 @@ const kContextDefaultValue: KContextData = {
     setShowQuestionNodes: () => {},
     testDropNodeIds: [],
     setTestDropNodeIds: () => {},
+    dailyReviewDueCount: 0,
+    setDailyReviewDueCount: () => {},
 };
 
 // @deprecated alias
@@ -191,10 +197,11 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
     const [hoveredNodeId, setHoveredNodeId] = useState<number | null>(null);
     const [markedNodeId, setMarkedNodeId] = useState<number | null>(null);
     const [pendingImportNodeId, setPendingImportNodeId] = useState<number | null | undefined>(undefined);
-    const [pendingQuizTabSwitch, setPendingQuizTabSwitch] = useState<number | undefined>(undefined);
+    const [pendingQuizTabSwitch, setPendingQuizTabSwitch] = useState<number | null | undefined>(undefined);
     const [nodeScoreMap, setNodeScoreMap] = useState<Record<number, number>>({});
     const [showQuestionNodes, setShowQuestionNodes] = useState<boolean>(false);
     const [testDropNodeIds, setTestDropNodeIds]     = useState<number[]>([]);
+    const [dailyReviewDueCount, setDailyReviewDueCount] = useState<number>(0);
 
     return (
         <KStore.Provider
@@ -255,6 +262,8 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
                 setShowQuestionNodes,
                 testDropNodeIds,
                 setTestDropNodeIds,
+                dailyReviewDueCount,
+                setDailyReviewDueCount,
             }}
         >
             {children}

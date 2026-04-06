@@ -13,6 +13,7 @@ import { apiFetch } from "@/services/apiClient";
 import type { KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
 import { ResultOptions } from "../../../types";
 import type { KDTO } from "../types/K-dto.types";
+import type { KImportTestMarkdownRequest } from "../types/kMarkdownImport.type";
 
 // ── Get all knowledge bases ──────────────────────────────────────────────────
 
@@ -135,6 +136,22 @@ const _importMarkdown = async (
     return Promise.reject(res);
 };
 
+// ── Import tests from structured markdown ─────────────────────────────────────
+
+const _importTestMarkdown = async (
+    _token: string,
+    knowledgeId: number,
+    request: KImportTestMarkdownRequest,
+): Promise<ResultOptions> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/k/${knowledgeId}/import-test-markdown`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+    });
+    if (res.ok) return await res.json();
+    return Promise.reject(res);
+};
+
 // ── Export ───────────────────────────────────────────────────────────────────
 
 export const KService = {
@@ -146,4 +163,5 @@ export const KService = {
     _upsertWorkspaceItems,
     _deleteWorkspaceItems,
     _importMarkdown,
+    _importTestMarkdown,
 };
