@@ -4,19 +4,24 @@ import { apiFetch } from "@/services/apiClient";
 import type {
     KTestSummary,
     KTestDetail,
-    KCreateTestFromNodesRequest,
     KSubmitAnswersRequest,
     KSubmitAnswersResult,
-    KNodeScoreMap,
+    KQuestionScoreMap,
     KUpdateTestRequest,
-    KUpdateTestNodesRequest,
+    KUpdateQuestionsRequest,
+    KDailyQueueItem,
+    KDailySessionQuestion,
+    KDailySubmitRequest,
 } from "../types/kTest.type";
 import type { ResultOptions } from "../../../types";
 
 const base = (knowledgeId: number) => `${config.api.baseURL}/api/k/${knowledgeId}`;
 
-const _getTests = async (knowledgeId: number): Promise<KTestSummary[]> => {
-    const res = await apiFetch(`${base(knowledgeId)}/tests`, { method: "GET" });
+const _getTests = async (knowledgeId: number, nodeId?: number): Promise<KTestSummary[]> => {
+    const url = nodeId != null
+        ? `${base(knowledgeId)}/tests?nodeId=${nodeId}`
+        : `${base(knowledgeId)}/tests`;
+    const res = await apiFetch(url, { method: "GET" });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };
@@ -27,14 +32,15 @@ const _getTestDetail = async (knowledgeId: number, testId: number): Promise<Resu
     return Promise.reject(res);
 };
 
-const _createTestFromNodes = async (
+const _createEmptyTest = async (
     knowledgeId: number,
-    request: KCreateTestFromNodesRequest
+    title: string,
+    nodeId?: number | null,
 ): Promise<ResultOptions<KTestDetail>> => {
-    const res = await apiFetch(`${base(knowledgeId)}/tests/create`, {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/create-empty`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(request),
+        body: JSON.stringify({ title, nodeId: nodeId ?? null }),
     });
     if (res.ok) return res.json();
     return Promise.reject(res);
@@ -54,8 +60,21 @@ const _submitAnswers = async (
     return Promise.reject(res);
 };
 
-const _getNodeScores = async (knowledgeId: number): Promise<KNodeScoreMap> => {
-    const res = await apiFetch(`${base(knowledgeId)}/node-scores`, { method: "GET" });
+const _getQuestionScores = async (knowledgeId: number): Promise<KQuestionScoreMap> => {
+    const res = await apiFetch(`${base(knowledgeId)}/question-scores`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+const _reorderTests = async (
+    knowledgeId: number,
+    orderedTestIds: number[]
+): Promise<ResultOptions> => {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/reorder`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderedTestIds),
+    });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };
@@ -74,15 +93,67 @@ const _updateTest = async (
     return Promise.reject(res);
 };
 
-const _updateTestNodes = async (
+const _updateQuestions = async (
     knowledgeId: number,
     testId: number,
-    request: KUpdateTestNodesRequest
+    request: KUpdateQuestionsRequest
 ): Promise<ResultOptions> => {
-    const res = await apiFetch(`${base(knowledgeId)}/tests/${testId}/nodes`, {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/${testId}/questions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
+    });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+// ── SRS / Daily Review ─────────────────────────────────────────────────────
+
+const _getDailyQueue = async (knowledgeId: number): Promise<ResultOptions<KDailyQueueItem[]>> => {
+    const res = await apiFetch(`${base(knowledgeId)}/daily-queue`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+const _getGlobalDailyQueue = async (): Promise<ResultOptions<KDailyQueueItem[]>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/k/global-daily-queue`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+const _getDailySession = async (
+    knowledgeId: number,
+    testId: number,
+    limit = 30
+): Promise<ResultOptions<KDailySessionQuestion[]>> => {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/${testId}/daily-session?limit=${limit}`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+const _submitDailyAnswers = async (
+    knowledgeId: number,
+    testId: number,
+    request: KDailySubmitRequest
+): Promise<ResultOptions<KSubmitAnswersResult>> => {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/${testId}/daily-submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+    });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+const _updateTestStatus = async (
+    knowledgeId: number,
+    testId: number,
+    status: string
+): Promise<ResultOptions> => {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/${testId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
     });
     if (res.ok) return res.json();
     return Promise.reject(res);
@@ -106,10 +177,16 @@ const _transcribeAudio = async (audioBlob: Blob): Promise<string> => {
 export const KTestService = {
     _getTests,
     _getTestDetail,
-    _createTestFromNodes,
+    _createEmptyTest,
+    _reorderTests,
     _submitAnswers,
-    _getNodeScores,
+    _getQuestionScores,
     _updateTest,
-    _updateTestNodes,
+    _updateQuestions,
     _transcribeAudio,
+    _getDailyQueue,
+    _getGlobalDailyQueue,
+    _getDailySession,
+    _submitDailyAnswers,
+    _updateTestStatus,
 };

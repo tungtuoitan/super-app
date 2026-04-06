@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { KService } from "../service/K.service";
+import { KTestService } from "../service/kTest.service";
 import { useKLoader } from "./useK.loader";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import { useKStore } from "../store/K.store";
+import type { KMdParsed, KExistingTestAddition } from "../types/kMarkdownImport.type";
+import type { KTestSummary } from "../types/kTest.type";
 
 export interface KMarkdownImportState {
     isLoading: boolean;
@@ -23,7 +26,30 @@ export const useKMarkdownImportHelper = () => {
         error: null,
     });
 
-    const generate = async (markdown: string, parentNodeId: number | null) => {
+    const [existingTests, setExistingTests] = useState<KTestSummary[]>([]);
+    const [testsLoading, setTestsLoading] = useState(false);
+
+    const loadTestsForNode = async (nodeId: number) => {
+        const knowledgeId = currentK?.id;
+        if (!knowledgeId || knowledgeId < 0) return;
+        setTestsLoading(true);
+        try {
+            const tests = await KTestService._getTests(knowledgeId, nodeId);
+            setExistingTests(tests);
+        } catch {
+            setExistingTests([]);
+        } finally {
+            setTestsLoading(false);
+        }
+    };
+
+    const clearExistingTests = () => setExistingTests([]);
+
+    const generate = async (
+        parsed: KMdParsed,
+        parentNodeId: number,
+        existingTestAdditions: KExistingTestAddition[],
+    ) => {
         const knowledgeId = currentK?.id;
         if (!knowledgeId || knowledgeId < 0) {
             _console.error("No knowledge selected");
@@ -32,10 +58,15 @@ export const useKMarkdownImportHelper = () => {
 
         setState({ isLoading: true, insertedCount: null, error: null });
         try {
-            const result = await KService._importMarkdown($user.userToken, knowledgeId, markdown, parentNodeId);
-            const nodes = (result.object as any[]) ?? [];
-            setState({ isLoading: false, insertedCount: nodes.length, error: null });
-            _console.success(`Imported ${nodes.length} nodes as draft`);
+            await KService._importTestMarkdown($user.userToken, knowledgeId, {
+                parentNodeId,
+                tests: parsed.tests,
+                orphanQuestions: parsed.orphanQuestions,
+                existingTestAdditions,
+            });
+            const count = parsed.tests.length + existingTestAdditions.filter(a => a.questions.length > 0).length;
+            setState({ isLoading: false, insertedCount: count, error: null });
+            _console.success(`Imported ${parsed.tests.length} new tests, updated ${existingTestAdditions.length} existing tests`);
             await loadTree();
         } catch (err: any) {
             const msg = err?.message ?? "Import failed";
@@ -46,5 +77,5 @@ export const useKMarkdownImportHelper = () => {
 
     const reset = () => setState({ isLoading: false, insertedCount: null, error: null });
 
-    return { state, generate, reset };
+    return { state, generate, reset, existingTests, testsLoading, loadTestsForNode, clearExistingTests };
 };

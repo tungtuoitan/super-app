@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NodeApi } from "react-arborist";
-import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp, HelpCircle } from "lucide-react";
+import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/useKTreeHelper2";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -43,7 +43,7 @@ const Folder2: React.FC<IconProps> = ({ className, color }) => (
 export default Folder2;
 
 export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds, markedNodeId, setMarkedNodeId, currentKId }: NodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, nodeScoreMap, setPendingQuizTabSwitch } = useKStore();    const { searchQuery } = useGridControlStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, setPendingQuizTabSwitch } = useKStore();    const { searchQuery } = useGridControlStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();
@@ -57,15 +57,10 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const nodeId = nodeItem.id; // workspace_items.id (unique)
     const nodeName = nodeItem.name;
     const nodeColor = nodeItem.color;
-    const nodeIcon = nodeItem.icon as IconType | undefined; // Icon type from database — only for entity nodes
-    const nodeType = nodeItem.nodeType; // "entity" | "question" | null
-    const isQuestion = nodeType === "question";
+    const nodeIcon = nodeItem.icon as IconType | undefined;
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isNodeSelected(nodeId);
     const isWorkspaceRoot = nodeItem.id < 0;
-
-    // Latest quiz score for question nodes (0–5), undefined if never tested
-    const score = isQuestion ? nodeScoreMap[nodeId] : undefined;
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -267,23 +262,36 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
             setSelectedItemIds([nodeId]);
             setLastSelectedItemId(nodeId);
             node.select();
-            // 1. Find or create the k-knowledge editor tab for currentK
+            // 1. Find or create the single k-knowledge editor tab
             const kTab = openTabs.find(
-                (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge &&
-                       (t.data as KWsResponse).id === currentK?.id
+                (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge
             );
             if (kTab) {
+                // Reuse — swap data if different knowledge
+                const tabKId = (kTab.data as KWsResponse).id;
+                if (tabKId !== currentK?.id && currentK) {
+                    const ks = allK.find((k) => k.id === currentK.id);
+                    if (ks) {
+                        setOpenTabs((prev: any[]) =>
+                            prev.map((t) =>
+                                t.id === kTab.id
+                                    ? { ...t, data: ks, data0: ks, title: ks.name || "Knowledge", hasUnsavedChanges: false }
+                                    : t,
+                            ),
+                        );
+                    }
+                }
                 setActiveTabId(kTab.id);
             } else if (currentK) {
                 // No tab open yet — find the KWsResponse from allK and create one
                 const ks = allK.find((k) => k.id === currentK.id);
                 if (ks) {
                     const newTab = {
-                        id:                `k-knowledge-tab-${ks.id}-${Date.now()}`,
+                        id:                `k-knowledge-tab-${Date.now()}`,
                         type:              constants.vscode.tab.tabTypes.kKnowledge,
                         data:              ks,
                         data0:             ks,
-                        title:             "Knowledge",
+                        title:             ks.name || "Knowledge",
                         hasUnsavedChanges: false,
                     };
                     setOpenTabs((prev: any[]) => [...prev, newTab]);
@@ -385,8 +393,6 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         ) : (
                             <LibraryBig className="w-4 h-4" style={{ color: nodeColor || "#A1887F" }} />
                         )
-                    ) : nodeType === "question" ? (
-                        <HelpCircle className="w-4 h-4" style={{ color: "#6b7280" }} strokeWidth={2} />
                     ) : nodeIcon && ICON_MAP[nodeIcon] ? (
                         (() => {
                             const CustomIcon = ICON_MAP[nodeIcon];
@@ -419,7 +425,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             ${hasChildren ? "font-semibold" : "font-normal"}
                             ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
                             ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}
-                            ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : isQuestion ? "text-white/70" : "text-editor-fg"}
+                            ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
                         `}
                         />
                         {/* Draft badge — hover to see "Keep it", click to activate */}
@@ -446,20 +452,6 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         )}
                     </div>
                 </div>
-
-                {/* Score badge — only for question nodes that have been tested */}
-                {isQuestion && score !== undefined && treeType === "workspaceTree" && (
-                    <span
-                        title={`Last score: ${score}/5`}
-                        className={`shrink-0 text-[9px] font-bold px-1 py-0 rounded leading-4 ${
-                            score >= 4 ? "bg-green-900/40 text-green-400" :
-                            score >= 2 ? "bg-yellow-900/40 text-yellow-400" :
-                                         "bg-red-900/40 text-red-400"
-                        }`}
-                    >
-                        {score}/5
-                    </span>
-                )}
 
                 {/* Mark button — visible on hover or when this node is marked */}
                 {!isWorkspaceRoot && treeType === "workspaceTree" && (isHovered || isMarked) && (

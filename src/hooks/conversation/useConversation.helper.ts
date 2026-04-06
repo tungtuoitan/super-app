@@ -71,6 +71,22 @@ export const useConversationHelper = () => {
         }
     }, [setEntityType, setEntityId, setEntityLabel, setSelectedTopicId, setMessages, setTopics, setIsOpen, setIsMinimized, setIsCreatingTopic, setNewTopicName, setReplyingToId, setEditingMessageId, setDraftContent, setRecentEntities]);
 
+    // ── Switch entity (without resetting dialog open/minimize state) ─────
+
+    const switchEntity = useCallback((type: string | null, id: number | null, label: string) => {
+        setEntityType(type);
+        setEntityId(id);
+        setEntityLabel(label);
+        setSelectedTopicId(null);
+        setMessages([]);
+        setTopics([]);
+        setIsCreatingTopic(false);
+        setNewTopicName("");
+        setReplyingToId(null);
+        setEditingMessageId(null);
+        setDraftContent("");
+    }, [setEntityType, setEntityId, setEntityLabel, setSelectedTopicId, setMessages, setTopics, setIsCreatingTopic, setNewTopicName, setReplyingToId, setEditingMessageId, setDraftContent]);
+
     // ── Topics ────────────────────────────────────────────────────────────
 
     const loadTopics = useCallback(async () => {
@@ -247,6 +263,7 @@ export const useConversationHelper = () => {
 
     return {
         openDialog,
+        switchEntity,
         loadTopics,
         createTopic,
         updateTopic,

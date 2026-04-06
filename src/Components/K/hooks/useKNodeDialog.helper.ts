@@ -270,7 +270,6 @@ export const useKNodeDialogHelper = () => {
                     description: nodeItem.description,
                     color:       nodeItem.color,
                     icon:        nodeItem.icon,
-                    nodeType:    nodeItem.nodeType,
                     statusCode:  'active'
                 },
             }]);

@@ -10,7 +10,7 @@ import React, { useState, useMemo, useRef, useCallback, useEffect } from "react"
 import { createPortal } from "react-dom";
 import {
     Minus, X,
-    Folder, CheckSquare, FileText, Globe, Pencil, Check, Navigation,
+    Folder, CheckSquare, FileText, Globe, Pencil, Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConversationStore } from "@/store/conversation/useConversation.store";
@@ -70,15 +70,28 @@ export function ConversationDialog() {
         isOpen, setIsOpen,
         isMinimized, setIsMinimized,
         entityType, entityId, entityLabel,
-        selectedTopicId,
     } = useConversationStore();
-    const { openDialog } = useConversationHelper();
+    const { openDialog, switchEntity } = useConversationHelper();
 
     const { projects } = useProjectStore();
     const { tasks }    = useTaskGridStore();
     const { openTabs, activeTabId } = useEditorTabsStore();
     const activeTab = openTabs.find(t => t.id === activeTabId) ?? null;
     const activeTabEntity = getTabEntity(activeTab as any);
+
+    // ── Sync entity with active tab ─────────────────────────────────────
+    useEffect(() => {
+        if (!isOpen) return;
+        if (activeTabEntity) {
+            if (activeTabEntity.entityType !== entityType || activeTabEntity.entityId !== entityId) {
+                switchEntity(activeTabEntity.entityType, activeTabEntity.entityId, activeTabEntity.label);
+            }
+        } else {
+            if (entityType !== null || entityId !== null) {
+                switchEntity(null, null, "");
+            }
+        }
+    }, [activeTabId]);
 
     const [showPicker, setShowPicker] = useState(false);
     const [pickerType, setPickerType] = useState<EntityTypeValue>("project");
@@ -121,14 +134,8 @@ export function ConversationDialog() {
         return () => document.removeEventListener("keydown", onKey);
     }, [openDialog]);
 
-    // ── Header gradient based on entity type + topic ─────────────────────────
-    const headerGradient = useMemo(() => {
-        if (!entityType) return "linear-gradient(135deg, #475569 0%, #334155 50%, #1e293b 100%)";            // global → slate
-        if (selectedTopicId === null) return "linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%)"; // internal/quick notes → indigo
-        if (entityType === "project") return "linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%)"; // project → orange
-        if (entityType === "task") return "linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%)";    // task → green
-        return "linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%)";                              // default → violet
-    }, [entityType, selectedTopicId]);
+    // ── Header gradient — unified violet theme ────────────────────────────────
+    const headerGradient = "linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%)";
 
     const handleResizeStart = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -345,19 +352,6 @@ export function ConversationDialog() {
                         >
                             <Globe className="w-3.5 h-3.5" />
                             <span>Select entity</span>
-                        </button>
-                    )}
-
-                    {/* Use current tab entity button */}
-                    {activeTabEntity && !(activeTabEntity.entityType === entityType && activeTabEntity.entityId === entityId) && (
-                        <button
-                            onClick={() => openDialog(activeTabEntity.entityType, activeTabEntity.entityId, activeTabEntity.label)}
-                            onMouseDown={e => e.stopPropagation()}
-                            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-white/70 hover:bg-white/20 hover:text-white transition-colors"
-                            title={`Switch to current tab: ${activeTabEntity.label}`}
-                        >
-                            <Navigation className="w-3 h-3" />
-                            <span className="max-w-[100px] truncate">{activeTabEntity.label}</span>
                         </button>
                     )}
 

@@ -328,6 +328,7 @@
 .comment-readonly {
     opacity: 1 !important;
     background: transparent !important;
+    pointer-events: auto !important;
 }
 
 /* Remove the p-3 padding from EditorContent wrapper */
@@ -339,6 +340,14 @@
 .comment-readonly .ProseMirror {
     min-height: auto !important;
     padding: 0 !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    cursor: default !important;
+}
+
+.comment-readonly .ProseMirror * {
+    -webkit-user-select: text !important;
+    user-select: text !important;
 }
 
 /* Remove top/bottom margin on first/last paragraph so single-line messages don't get extra space */

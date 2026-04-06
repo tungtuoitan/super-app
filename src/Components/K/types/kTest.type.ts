@@ -4,11 +4,16 @@ export interface KTestSummary {
     id: number;
     knowledgeId: number;
     userId: number;
+    /** Entity node (k.node.id) this test is linked to */
+    nodeId: number | null;
     title: string;
     level: number;
     mode: string;
-    nodeCount: number;
-    /** Number of nodes with isActive = true */
+    /** inactive | learning | mastered */
+    status: string | null;
+    /** Total question count */
+    questionCount: number;
+    /** Number of questions with isActive = true */
     activeCount: number;
     /** Latest submission score (null if never submitted) */
     lastTotalPoints: number | null;
@@ -16,6 +21,7 @@ export interface KTestSummary {
     lastPct: number | null;
     lastSubmittedAt: string | null;
     createdAt: string | null;
+    sortOrder: number;
     /** Last ≤10 submission percentages oldest→newest — for sparkline */
     scoreHistory: number[];
 }
@@ -28,57 +34,57 @@ export interface KTestDetail {
     title: string;
     level: number;
     mode: string;
-    /** Question nodes pulled from k.node */
+    /** Questions belonging to this test (from k.question table) */
     questions: KTestQuestion[];
     createdAt: string | null;
 }
 
-/** A single question in the test — sourced from a question node */
+/** A single question in the test — stored in k.question table */
 export interface KTestQuestion {
-    /** k.test_node.id */
-    testNodeId: number;
-    /** k.node.id */
-    nodeId: number;
-    /** k.node.name — used as the question text */
+    /** k.question.id */
+    id: number;
+    /** k.question.name — the question text */
     question: string;
-    /** k.node.description — expected answer */
+    /** k.question.description — expected answer */
     answer: string | null;
     /** Whether this question is active in the test */
     isActive: boolean;
+    /** Display/sort order within the test */
+    sortOrder: number;
     /** Last ≤10 individual points (0–5) oldest→newest */
     scoreHistory: number[];
+    /** Non-null when question has been soft-deleted */
+    deletedAt?: string | null;
 }
 
 // ── Update test request ───────────────────────────────────────────────────────
 
 export interface KUpdateTestRequest {
     title: string;
+    /** Optionally re-link test to a different entity node */
+    nodeId?: number | null;
 }
 
-export interface KUpdateTestNodesRequest {
-    /** k.node IDs to add as new questions */
-    addNodeIds: number[];
-    /** k.test_node IDs to toggle isActive */
-    toggleTestNodeIds: number[];
-    /** k.test_node IDs to permanently delete from this test */
-    deleteTestNodeIds: number[];
-}
+// ── Question management ──────────────────────────────────────────────────────
 
-// ── Create test request ───────────────────────────────────────────────────────
-
-export interface KCreateTestFromNodesRequest {
-    title: string;
-    level: 1 | 2 | 3;
-    /** Entity node IDs to pull question nodes from */
-    nodeIds: number[];
-    includeDescendants: boolean;
-    count: number;
+export interface KUpdateQuestionsRequest {
+    /** New questions to add to the test */
+    addQuestions: Array<{ name: string; description?: string | null }>;
+    /** Existing questions to update name/description */
+    updateQuestions: Array<{ id: number; name: string; description?: string | null }>;
+    /** k.question IDs to toggle isActive */
+    toggleQuestionIds: number[];
+    /** k.question IDs to soft-delete */
+    deleteQuestionIds: number[];
+    /** k.question IDs to restore (clear deletedAt) */
+    restoreQuestionIds: number[];
 }
 
 // ── Submit answers + grading result ──────────────────────────────────────────
 
 export interface KAnswerItem {
-    nodeId: number;
+    /** k.question.id */
+    questionId: number;
     /** null = skipped */
     answerText: string | null;
 }
@@ -91,11 +97,11 @@ export interface KSubmitAnswersResult {
     totalPoints: number;
     maxPoints: number;
     pct: number;
-    grades: KNodeGrade[];
+    grades: KQuestionGrade[];
 }
 
-export interface KNodeGrade {
-    nodeId: number;
+export interface KQuestionGrade {
+    questionId: number;
     question: string;
     answerText: string | null;
     expectedAnswer: string | null;
@@ -103,6 +109,39 @@ export interface KNodeGrade {
     comment: string | null;
 }
 
-// ── Node scores (progress tracking) ──────────────────────────────────────────
+// ── Question scores (progress tracking) ─────────────────────────────────────
 
-export type KNodeScoreMap = Record<number, number>;
+export type KQuestionScoreMap = Record<number, number>;
+
+// ── Daily Review (SRS) ────────────────────────────────────────────────────
+
+export interface KDailyQueueItem {
+    testId: number;
+    knowledgeId: number;
+    knowledgeName: string;
+    title: string;
+    level: number;
+    status: string | null;
+    /** Questions due for review */
+    dueCount: number;
+    /** New questions (never reviewed) */
+    newCount: number;
+    /** Total active questions */
+    activeCount: number;
+}
+
+export interface KDailySessionQuestion {
+    id: number;
+    question: string;
+    answer: string | null;
+}
+
+export interface KDailyAnswerItem {
+    questionId: number;
+    answerText: string | null;
+    responseTimeMs: number | null;
+}
+
+export interface KDailySubmitRequest {
+    answers: KDailyAnswerItem[];
+}

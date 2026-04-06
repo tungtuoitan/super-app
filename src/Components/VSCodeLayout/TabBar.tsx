@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid, CheckSquare, Layers, LibraryBig } from "lucide-react";
+import { X, FileText, Folder, Box, Pin, BarChart3, Cuboid, CheckSquare, Layers, LibraryBig, CalendarClock } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
@@ -100,6 +100,9 @@ function TabIcon({ tab, isDeleted = false, isActive = false }: TabIconProps) {
         case constants.vscode.tab.tabTypes.kKnowledge:
         case constants.vscode.tab.tabTypes.kNode:
             return <LibraryBig className={className} style={{ color: iconColor }} />;
+
+        case constants.vscode.tab.tabTypes.kDailyReview:
+            return <CalendarClock className={className} style={{ color: iconColor }} />;
 
         default:
             return <FileText className={className} style={{ color: iconColor }} />;

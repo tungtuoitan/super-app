@@ -24,7 +24,7 @@ import { KTestService } from "../service/kTest.service";
 export const useKLoader = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap } = useKStore();
+    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap, setDailyReviewDueCount } = useKStore();
     const { setTargetWorkspaceId } = useKMovingTreeStore();
 
     /**
@@ -61,6 +61,17 @@ export const useKLoader = () => {
         } finally {
             setIsLoadingK(false);
         }
+    };
+
+    /** Load global daily review due count (for ActivityBar badge) */
+    const loadDailyReviewCount = async () => {
+        try {
+            const res = await KTestService._getGlobalDailyQueue();
+            if (res.success && res.object) {
+                const dueCount = res.object.filter(q => q.dueCount + q.newCount > 0).length;
+                setDailyReviewDueCount(dueCount);
+            }
+        } catch { /* silent */ }
     };
 
     /**
@@ -182,14 +193,14 @@ export const useKLoader = () => {
     };
 
     /** Load per-question-node latest scores and store in nodeScoreMap */
-    const loadNodeScores = async (knowledgeId: number): Promise<void> => {
-        try {
-            const scores = await KTestService._getNodeScores(knowledgeId);
-            setNodeScoreMap(scores ?? {});
-        } catch {
-            // non-critical — silently ignore
-        }
-    };
+    // const loadNodeScores = async (knowledgeId: number): Promise<void> => {
+    //     try {
+    //         const scores = await KTestService._getNodeScores(knowledgeId);
+    //         setNodeScoreMap(scores ?? {});
+    //     } catch {
+    //         // non-critical — silently ignore
+    //     }
+    // };
 
     return {
         // Actions only - get state directly from useKStore()
@@ -198,6 +209,7 @@ export const useKLoader = () => {
         createKnowledge,
         updateKnowledge,
         softDeleteKnowledge,
-        loadNodeScores,
+        loadDailyReviewCount,
+        // loadNodeScores,
     };
 };
