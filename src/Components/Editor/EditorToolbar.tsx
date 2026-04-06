@@ -12,6 +12,7 @@ import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
 import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
+import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { constants } from "@/utils/constants";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
 import { useProjectStore } from "@/store/project/useProject.store";
@@ -59,7 +60,7 @@ export function EditorToolbar() {
     const { upsertOrchestraitor, commonCancel, _deleteStatusText, _itemId } = useEditorToolbarHelper();
 
     // ── Keyboard shortcut: Ctrl+S or Alt+S → save ────────────────────────────
-    // Refs ensure listener is registered once — no remove/re-add gap on re-renders.
+    // Refs ensure callback is always fresh without re-registering the listener.
     const activeTabRef = useRef(activeTab);
     const isSavingRef = useRef(isSaving);
     const upsertOrchestraitorRef = useRef(upsertOrchestraitor);
@@ -67,21 +68,19 @@ export function EditorToolbar() {
     isSavingRef.current = isSaving;
     upsertOrchestraitorRef.current = upsertOrchestraitor;
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            const isCtrlS = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "s";
-            const isAltS  = e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.key.toLowerCase() === "s";
-            if (isCtrlS || isAltS) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
-                    upsertOrchestraitorRef.current();
-                }
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown, { capture: true });
-        return () => window.removeEventListener("keydown", handleKeyDown, { capture: true });
-    }, []); // intentional empty deps — listener lives for the full mount lifetime
+    useGlobalShortcut("ctrl+s", { id: "editor-toolbar-save", priority: 50 }, () => {
+        if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
+            upsertOrchestraitorRef.current();
+        }
+        return true; // always claim — prevent browser Save dialog
+    });
+
+    useGlobalShortcut("alt+s", { id: "editor-toolbar-save-alt", priority: 50 }, () => {
+        if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
+            upsertOrchestraitorRef.current();
+        }
+        return true;
+    });
 
     return (
         <div className="h-6 flex items-center justify-between px-4 bg-black border-b border-white/5 gap-2">

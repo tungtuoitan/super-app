@@ -133,6 +133,10 @@ export function MessageItem({ message, isReply = false, isFirstInGroup = true, a
     };
 
     const handleContextMenu = (e: React.MouseEvent) => {
+        // Allow native context menu when text is selected (for Copy, etc.)
+        const selection = window.getSelection();
+        if (selection && selection.toString().trim().length > 0) return;
+
         showContextMenu(e, constants.contextMenu.contextMenuTypes.conversationMessage, {
             isReply,
             onReply: handleStartReply,
@@ -155,14 +159,12 @@ export function MessageItem({ message, isReply = false, isFirstInGroup = true, a
                         <span className="text-[11px] font-semibold text-foreground/70">{msgAuthor.name}</span>
                         <span className="text-[9px] text-muted-foreground/40 tabular-nums">{formatTime(message.createdAt)}</span>
                     </div>
-                    <RichTextEditor
-                        value={message.content ?? ""}
-                        onChange={() => {}}
-                        disabled
-                        minHeight="auto"
-                        className={cn("text-left comment-readonly", isVersion && "italic text-muted-foreground text-xs")}
-                        uploadContext={uploadContext}
-                        uploadContextId={entityId ?? undefined}
+                    <div
+                        className={cn(
+                            "prose prose-sm dark:prose-invert max-w-none text-left text-sm leading-relaxed select-text cursor-default",
+                            isVersion && "italic text-muted-foreground text-xs",
+                        )}
+                        dangerouslySetInnerHTML={{ __html: message.content ?? "" }}
                     />
                 </div>
             </div>
@@ -174,7 +176,7 @@ export function MessageItem({ message, isReply = false, isFirstInGroup = true, a
         <div className={cn("group", isFirstInGroup ? "mt-3" : "mt-0.5")}>
             <div
                 className={cn(
-                    "flex items-start gap-2 px-2 py-0.5 rounded-md transition-colors cursor-default",
+                    "flex items-start gap-2 px-2 py-0.5 rounded-md transition-colors",
                     isBeingRepliedTo
                         ? "bg-violet-500/10 border-l-2 border-violet-500/60"
                         : "hover:bg-white/[0.03]"
@@ -236,14 +238,12 @@ export function MessageItem({ message, isReply = false, isFirstInGroup = true, a
                             {message.title && (
                                 <p className="text-xs font-semibold text-foreground mb-0.5">{message.title}</p>
                             )}
-                            <RichTextEditor
-                                value={message.content ?? ""}
-                                onChange={() => {}}
-                                disabled
-                                minHeight="auto"
-                                className={cn("text-left comment-readonly", isVersion && "italic text-muted-foreground text-xs")}
-                                uploadContext={uploadContext}
-                                uploadContextId={entityId ?? undefined}
+                            <div
+                                className={cn(
+                                    "prose prose-sm dark:prose-invert max-w-none text-left text-sm leading-relaxed select-text cursor-default",
+                                    isVersion && "italic text-muted-foreground text-xs",
+                                )}
+                                dangerouslySetInnerHTML={{ __html: message.content ?? "" }}
                             />
                             {!isFirstInGroup && message.updatedAt && message.updatedAt > message.createdAt && (
                                 <span className="text-[10px] text-muted-foreground/30">(edited)</span>

@@ -7,6 +7,7 @@ import { useActivityBarStore } from "@/store/index";
 import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
+import { useKStore } from "@/Components/K/store/K.store";
 
 const activityModules = [
     { id: constants.modules.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
@@ -26,6 +27,12 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { handleActivityClick } = useActivityBarHelper();
     const { isAuthenticated } = useAuthStore();
     const { moduleName } = useGridControlStore();
+    const { dailyReviewDueCount } = useKStore();
+
+    const getBadge = (moduleId: string) => {
+        if (moduleId === constants.modules.k && dailyReviewDueCount > 0) return dailyReviewDueCount;
+        return 0;
+    };
 
     if (horizontal) {
         return (
@@ -37,16 +44,22 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
                             {activityModules.map((activity) => {
                                 const Icon = activity.icon;
                                 const isActive = moduleName === activity.id;
+                                const badge = getBadge(activity.id);
 
                                 return (
                                     <button
                                         key={activity.id}
                                         onClick={() => handleActivityClick(activity.id)}
-                                        className={`w-12 h-12 rounded-none transition-colors border-transparent ${
+                                        className={`relative w-12 h-12 rounded-none transition-colors border-transparent ${
                                             isActive ? "text-editor-white border-editor-active" : "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
                                         }`}
                                     >
                                         <Icon className="w-6 h-6 mx-auto" />
+                                        {badge > 0 && (
+                                            <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
+                                                {badge > 99 ? "99+" : badge}
+                                            </span>
+                                        )}
                                     </button>
                                 );
                             })}
@@ -105,16 +118,22 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
                         {activityModules.map((activity) => {
                             const Icon = activity.icon;
                             const isActive = moduleName === activity.id;
+                            const badge = getBadge(activity.id);
 
                             return (
                                 <button
                                     key={activity.id}
                                     onClick={() => handleActivityClick(activity.id)}
-                                    className={`w-12 h-12 rounded-none transition-colors border-transparent ${
+                                    className={`relative w-12 h-12 rounded-none transition-colors border-transparent ${
                                         isActive ? "text-editor-white border-editor-active": "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
                                     }`}
                                 >
                                     <Icon className="w-6 h-6 mx-auto" />
+                                    {badge > 0 && (
+                                        <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
+                                            {badge > 99 ? "99+" : badge}
+                                        </span>
+                                    )}
                                 </button>
                             );
                         })}

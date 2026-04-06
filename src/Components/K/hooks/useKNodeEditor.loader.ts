@@ -121,13 +121,11 @@ export const useKNodeEditorLoader = () => {
         setEditingNodeId(null);
         setUnsavedPromptNodeId(null);
 
-        const nodeType = draft.name.trim().endsWith("?") ? "question" : "entity";
-
         // Optimistic update — show new values immediately, no flicker
         setCurrentK(prev => prev ? {
             ...prev,
             flatData: prev.flatData.map(n => n.id === node.id
-                ? { ...n, name: draft.name.trim(), description: draft.description || null, color: draft.color, icon: draft.icon, nodeType }
+                ? { ...n, name: draft.name.trim(), description: draft.description || null, color: draft.color, icon: draft.icon }
                 : n),
         } : prev);
 
@@ -139,8 +137,7 @@ export const useKNodeEditorLoader = () => {
                     name: draft.name.trim(),
                     description: draft.description || null,
                     color: draft.color,
-                    icon: nodeType === "question" ? null : draft.icon,
-                    nodeType,
+                    icon: draft.icon,
                 },
             }]);
             await loadTree();
@@ -206,8 +203,6 @@ export const useKNodeEditorLoader = () => {
     const handleInlineCreate = async (draft: { name: string; description: string; icon: string | null; color: string | null }, parentId: number | null) => {
         if (!draft.name.trim() || !currentK) return;
 
-        const nodeType = draft.name.trim().endsWith("?") ? "question" : "entity";
-
         // ── STEP 1: inject virtual node immediately so the card appears at once ──
         const { workspaceItemIds } = collectIdsFromTree(currentK.flatData);
         const tempId = generateTempId(workspaceItemIds);
@@ -218,9 +213,8 @@ export const useKNodeEditorLoader = () => {
             parentId: parentId ?? null,
             name: draft.name.trim(),
             description: draft.description || null,
-            color: nodeType === "question" ? null : draft.color,
-            icon: nodeType === "question" ? null : draft.icon,
-            nodeType,
+            color: draft.color,
+            icon: draft.icon,
             pathDepth: parentId != null
                 ? (currentK.flatData.find(n => n.id === parentId)?.pathDepth ?? 0) + 1
                 : 1,
@@ -238,9 +232,8 @@ export const useKNodeEditorLoader = () => {
                 nodeData: {
                     name: draft.name.trim(),
                     description: draft.description || null,
-                    color: nodeType === "question" ? null : draft.color,
-                    icon: nodeType === "question" ? null : draft.icon,
-                    nodeType,
+                    color: draft.color,
+                    icon: draft.icon,
                 },
             }]);
 

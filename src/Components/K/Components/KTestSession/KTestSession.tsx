@@ -3,7 +3,7 @@ import { Mic, MicOff, ChevronLeft, ChevronRight, BookOpen, KeyRound, Loader2, Ch
 import { Button } from "@/Components/ui/button";
 import { KTestService } from "../../service/kTest.service";
 import { useKTestLoader } from "../../hooks/useKTest.loader";
-import type { KTestQuestion, KNodeGrade, KSubmitAnswersResult } from "../../types/kTest.type";
+import type { KTestQuestion, KQuestionGrade, KSubmitAnswersResult } from "../../types/kTest.type";
 
 interface KTestSessionProps {
     knowledgeId: number;
@@ -13,7 +13,7 @@ interface KTestSessionProps {
     onBack: () => void;
 }
 
-type AnswerMap = Record<number, string>; // nodeId → answerText
+type AnswerMap = Record<number, string>; // questionId → answerText
 
 export function KTestSession({ knowledgeId, testId, questions, onComplete, onBack }: KTestSessionProps) {
     const { submitAnswers } = useKTestLoader();
@@ -31,7 +31,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
     const answersRef       = useRef<AnswerMap>({}); // always-fresh answers, avoids stale closure on submit
 
     const currentQuestion = questions[currentIndex];
-    const currentAnswer   = currentQuestion ? (answers[currentQuestion.nodeId] ?? "") : "";
+    const currentAnswer   = currentQuestion ? (answers[currentQuestion.id] ?? "") : "";
     const totalQuestions  = questions.length;
     const progress        = totalQuestions > 0 ? Math.round((currentIndex / totalQuestions) * 100) : 0;
 
@@ -63,9 +63,9 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
                     const text = await KTestService._transcribeAudio(audioBlob);
                     if (text.trim()) {
                         setAnswers((prev) => {
-                            const nodeId = currentQuestion.nodeId;
-                            const existing = prev[nodeId] ?? "";
-                            return { ...prev, [nodeId]: existing ? `${existing} ${text.trim()}` : text.trim() };
+                            const qId = currentQuestion.id;
+                            const existing = prev[qId] ?? "";
+                            return { ...prev, [qId]: existing ? `${existing} ${text.trim()}` : text.trim() };
                         });
                     }
                 } catch {
@@ -81,7 +81,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
         } catch {
             alert("Cannot access microphone.");
         }
-    }, [currentQuestion?.nodeId]);
+    }, [currentQuestion?.id]);
 
     const stopRecording = useCallback(() => {
         mediaRecorderRef.current?.stop();
@@ -107,21 +107,20 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
         setIsSubmitting(true);
         try {
             const answerPayload = questions.map(q => ({
-                nodeId: q.nodeId,
-                answerText: answersRef.current[q.nodeId]?.trim() || null, // ref = always latest
+                questionId: q.id,
+                answerText: answersRef.current[q.id]?.trim() || null,
             }));
             const res = await submitAnswers(knowledgeId, testId, { answers: answerPayload });
             setResult(res);
         } catch {
-            // Show partial result on error
             setResult({
                 totalPoints: 0,
                 maxPoints: questions.length,
                 pct: 0,
                 grades: questions.map(q => ({
-                    nodeId: q.nodeId,
+                    questionId: q.id,
                     question: q.question,
-                    answerText: answersRef.current[q.nodeId] ?? null,
+                    answerText: answersRef.current[q.id] ?? null,
                     expectedAnswer: null,
                     point: 0,
                     comment: null,
@@ -130,7 +129,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
         } finally {
             setIsSubmitting(false);
         }
-    }, [questions, knowledgeId, testId, submitAnswers]); // answers removed — read via ref
+    }, [questions, knowledgeId, testId, submitAnswers]);
 
     // ── Keyboard shortcuts ────────────────────────────────────────────────────
     useEffect(() => {
@@ -214,7 +213,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
                     {/* Per-question grades */}
                     <div className="w-full flex flex-col gap-3">
                         {grades.map((g, i) => (
-                            <GradeCard key={g.nodeId} index={i + 1} grade={g} />
+                            <GradeCard key={g.questionId} index={i + 1} grade={g} />
                         ))}
                     </div>
 
@@ -261,7 +260,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
                         ref={textareaRef}
                         value={currentAnswer}
                         onChange={(e) =>
-                            setAnswers((prev) => ({ ...prev, [currentQuestion.nodeId]: e.target.value }))
+                            setAnswers((prev) => ({ ...prev, [currentQuestion.id]: e.target.value }))
                         }
                         placeholder="Speak or type your answer..."
                         rows={10}
@@ -378,7 +377,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
 
 // ── GradeCard ─────────────────────────────────────────────────────────────────
 
-function GradeCard({ index, grade }: { index: number; grade: KNodeGrade }) {
+function GradeCard({ index, grade }: { index: number; grade: KQuestionGrade }) {
     const [showAnswer, setShowAnswer] = useState(false);
 
     return (

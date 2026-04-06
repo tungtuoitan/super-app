@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useCallback } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
-import { Loader2 } from "lucide-react";
+import { CalendarClock, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useKStore } from "../store/K.store";
 import { useKLoader } from "../hooks";
@@ -20,15 +20,16 @@ import { constants } from "@/utils/constants";
  */
 export function KView() {
     const { $user } = useAuthStore();
-    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId } = useKStore();
-    const { loadAllK, loadTree, softDeleteKnowledge } = useKLoader();
-    const { openNewKnowledgeTab, openKnowledgeTab } = useKTabHelper();
+    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount } = useKStore();
+    const { loadAllK, loadTree, softDeleteKnowledge, loadDailyReviewCount } = useKLoader();
+    const { openNewKnowledgeTab, openKnowledgeTab, openGlobalDailyReviewTab } = useKTabHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
-    // Load workspaces on mount
+    // Load workspaces + daily review count on mount
     useEffect(() => {
         if (!$user.userId) return;
         loadAllK();
+        loadDailyReviewCount();
     }, [$user.userId, $user.userToken]);
 
     useEffect(() => {
@@ -103,6 +104,20 @@ export function KView() {
                     size="small"
                 />
             </div>
+
+            {/* Daily Review shortcut */}
+            {/* {dailyReviewDueCount > 0 && (
+                <button
+                    onClick={openGlobalDailyReviewTab}
+                    className="mx-3 mb-1 flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-blue-400 hover:bg-blue-500/10 transition-colors"
+                >
+                    <CalendarClock className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">Daily Review</span>
+                    <span className="ml-auto shrink-0 bg-blue-600 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                        {dailyReviewDueCount}
+                    </span>
+                </button>
+            )} */}
 
             {/* Workspace Tree */}
             <div className="flex-1 overflow-hidden relative">

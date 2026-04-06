@@ -56,13 +56,12 @@ export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps
         if (isNew) {
             const created = await createKnowledge(payload);
             if (created) {
-                // Replace temp tab data with the real created entity
+                // Replace temp tab data with the real created entity (keep same tab id)
                 setOpenTabs((prev) =>
                     prev.map((t) =>
                         t.id === tabId
                             ? {
                                   ...t,
-                                  id: `k-knowledge-tab-${created.id}-${Date.now()}`,
                                   data: created,
                                   data0: created,
                                   title: created.name,

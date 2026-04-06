@@ -18,7 +18,6 @@ CREATE TABLE [k].[node] (
     [point]                   INT             CONSTRAINT [DF_knode_point] DEFAULT ((10)) NULL,
     [status]                  NVARCHAR (50)   CONSTRAINT [DF_knode_status] DEFAULT ('active') NULL,
     [status_code]             NVARCHAR (50)   NULL,
-    [node_type]               NVARCHAR (50)   NULL,
     CONSTRAINT [PK_kworkspace_items] PRIMARY KEY CLUSTERED ([id] ASC),
     CONSTRAINT [CK_kwi_MaxDepth] CHECK ([PathDepth]<=(30)),
     CONSTRAINT [FK_kwi_parent] FOREIGN KEY ([parent_id]) REFERENCES [k].[node] ([id]),

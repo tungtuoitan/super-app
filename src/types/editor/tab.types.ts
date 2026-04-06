@@ -14,7 +14,7 @@ import { KItemV2 } from "@/Components/K/types/K-v2.types";
 import { constants } from "@/utils/constants";
 import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
 
-export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | typeof constants.vscode.tab.tabTypes.trackingGraph | typeof constants.vscode.tab.tabTypes.project | typeof constants.vscode.tab.tabTypes.multiProject | typeof constants.vscode.tab.tabTypes.task | typeof constants.vscode.tab.tabTypes.lifeLog | typeof constants.vscode.tab.tabTypes.lifeLogGraph | typeof constants.vscode.tab.tabTypes.lifeLogTrack | typeof constants.vscode.tab.tabTypes.kKnowledge | typeof constants.vscode.tab.tabTypes.kNode | "folder" | "settings";
+export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | typeof constants.vscode.tab.tabTypes.trackingGraph | typeof constants.vscode.tab.tabTypes.project | typeof constants.vscode.tab.tabTypes.multiProject | typeof constants.vscode.tab.tabTypes.task | typeof constants.vscode.tab.tabTypes.lifeLog | typeof constants.vscode.tab.tabTypes.lifeLogGraph | typeof constants.vscode.tab.tabTypes.lifeLogTrack | typeof constants.vscode.tab.tabTypes.kKnowledge | typeof constants.vscode.tab.tabTypes.kNode | typeof constants.vscode.tab.tabTypes.kDailyReview | "folder" | "settings";
 
 /**
  * Data type for multi-project tab
@@ -23,6 +23,11 @@ export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constan
 export interface MultiProjectTabData {
     projectIds: number[];
     projects: Project[];
+}
+
+export interface KDailyReviewTabData {
+    knowledgeId: number;
+    knowledgeName: string;
 }
 
 /**
@@ -53,8 +58,8 @@ export interface TabViewState {
 
 export interface BaseTab {
     id: string;
-    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2 | null;
-    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2 | null;
+    data: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2 | KDailyReviewTabData | null;
+    data0: Note | Ws | TrackingGraphTabData | Project | Task | MultiProjectTabData | LifeLogLog | LifeLogTrack | KWsResponse | KItemV2 | KDailyReviewTabData | null;
     type: TabType;
     title: string;
     hasUnsavedChanges?: boolean;
