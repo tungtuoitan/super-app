@@ -108,9 +108,9 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
         <div className="group rounded px-2 py-1.5 hover:bg-muted/30 transition-colors">
             <div className="flex items-start gap-2">
                 {$user.picture ? (
-                    <img src={$user.picture} alt={displayName} className="h-6 w-6 rounded-full shrink-0 mt-0.5" />
+                    <img src={$user.picture} alt={displayName} className="h-5 w-5 rounded-full shrink-0 mt-0.5" />
                 ) : (
-                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                         <User className="h-3.5 w-3.5 text-primary" />
                     </div>
                 )}

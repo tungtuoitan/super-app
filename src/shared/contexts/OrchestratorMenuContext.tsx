@@ -13,13 +13,10 @@ import { LogListMenu } from "./menus/LogListMenu";
 import { TrackPanelMenu } from "./menus/TrackPanelMenu";
 import { KKnowledgeMenu } from "./menus/KKnowledgeMenu";
 import { constants } from "@/utils/constants";
-import "@szhsin/react-menu/dist/index.css";
-import "@szhsin/react-menu/dist/transitions/slide.css";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import {KNodeMenu} from "../../Components/K/contexts/menu/KNodeMenu";
 import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
 import { KNodePanelCardMenu } from "../../Components/K/contexts/menu/KNodePanelCardMenu";
-import { ConversationMessageMenu } from "./menus/ConversationMessageMenu";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -81,9 +78,6 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case constants.contextMenu.contextMenuTypes.kKnowledgeSelector:
                 return <KKnowledgeMenu />;
-
-            case constants.contextMenu.contextMenuTypes.conversationMessage:
-                return <ConversationMessageMenu />;
 
             default:
                 return (

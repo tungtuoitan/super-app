@@ -1,6 +1,6 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
-import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, Layers as MultiProjectIcon, MessageSquare as ConversationIcon } from "lucide-react";
+import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, Layers as MultiProjectIcon } from "lucide-react";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 
@@ -38,14 +38,6 @@ export function ProjectGridMenu() {
                 <MultiProjectIcon className="w-4 h-4 mr-2" />
                 Open Multiple Projects
             </MenuItem>
-
-            {/* Open Conversations — only when exactly 1 persisted project selected */}
-            {contextData?.selectedProjects?.length === 1 && contextData.selectedProjects[0]?.id > 0 && (
-                <MenuItem onClick={() => executeDirectly({ callback: contextData?.onOpenConversations! })}>
-                    <ConversationIcon className="w-4 h-4 mr-2" />
-                    Conversations
-                </MenuItem>
-            )}
 
             <MenuDivider />
 

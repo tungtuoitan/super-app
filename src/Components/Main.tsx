@@ -43,8 +43,6 @@ import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
 import {KProvider} from "./K/store/K.store";
 import {KFolderDialogProvider} from "./K/store/KNodeDialog.store";
 import {KMovingTreeProvider} from "./K/store/KMovingTree.store";
-import { ConversationProvider } from "@/store/conversation/useConversation.store";
-import { ConversationDialog } from "@/Components/Conversation/ConversationDialog";
 
 /**
  * Main application layout component.
@@ -92,7 +90,6 @@ export function Main() {
                                                                                                 <WsDetailProvider>
                                                                                                     <ProjectProvider>
                                                                                                         <ProjectDetailProvider>
-                                                                                                        <ConversationProvider>
                                                                                                             <TaskGridProvider>
                                                                                                                 <TaskDetailProvider>
                                                                                                                     <TaskChecklistProvider>
@@ -120,7 +117,6 @@ export function Main() {
                                                                                                                                                                         </AuthGuard>
                                                                                                                                                                     </OrchestratorContextMenu>
                                                                                                                                                                     <ConfirmationPopoverContainer />
-                                                                                                                                                    <ConversationDialog />
                                                                                                                                                                 </ConfirmationPopoverProvider>
                                                                                                                                                             </OrchestratorContextMenuStoreProvider>
                                                                                                                                                         </DialogProvider>
@@ -140,7 +136,6 @@ export function Main() {
                                                                                                                     </TaskChecklistProvider>
                                                                                                                 </TaskDetailProvider>
                                                                                                             </TaskGridProvider>
-                                                                                                        </ConversationProvider>
                                                                                                         </ProjectDetailProvider>
                                                                                                     </ProjectProvider>
                                                                                                 </WsDetailProvider>
