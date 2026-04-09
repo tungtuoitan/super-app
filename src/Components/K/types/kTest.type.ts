@@ -53,6 +53,10 @@ export interface KTestQuestion {
     sortOrder: number;
     /** Last ≤10 individual points (0–5) oldest→newest */
     scoreHistory: number[];
+    /** SRS next review date (null = never reviewed) */
+    srsNextReviewAt?: string | null;
+    /** Current retention 0–100% (forgetting curve) */
+    retention: number;
     /** Non-null when question has been soft-deleted */
     deletedAt?: string | null;
 }
@@ -144,4 +148,38 @@ export interface KDailyAnswerItem {
 
 export interface KDailySubmitRequest {
     answers: KDailyAnswerItem[];
+}
+
+// ── Retention ────────────────────────────────────────────────────────────────
+
+export interface KRetentionSummary {
+    average: number;
+    totalQuestions: number;
+    tests: KRetentionTestItem[];
+}
+
+export interface KRetentionTestItem {
+    testId: number;
+    title: string;
+    retention: number;
+    questionCount: number;
+}
+
+// ── Retention Graph ──────────────────────────────────────────────────────
+
+export interface KRetentionGraph {
+    questions: KRetentionGraphQuestion[];
+    days: KRetentionGraphDay[];
+}
+
+export interface KRetentionGraphQuestion {
+    id: number;
+    name: string;
+    testTitle: string;
+}
+
+export interface KRetentionGraphDay {
+    date: string;
+    average: number;
+    retentions: number[];
 }
