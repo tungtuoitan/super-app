@@ -299,7 +299,7 @@ function DailyTestCard({ card, isLoading, onStart, onNavigate }: {
                     <Button
                         size="sm"
                         variant="outline"
-                        className="gap-1 h-6 text-[10px] shrink-0 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="gap-1 h-6 text-[10px] shrink-0 px-2 opacity-50 group-hover:opacity-100 transition-opacity"
                         disabled={isLoading}
                         onClick={onStart}
                     >

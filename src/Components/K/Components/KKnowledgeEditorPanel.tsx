@@ -11,6 +11,7 @@ import { KTestRecordSession } from "./KTestRecordSession/KTestRecordSession";
 import { KTestDetail } from "./KTestDetail/KTestDetail";
 import { KMarkdownImportPanel } from "./KMarkdownImportPanel/KMarkdownImportPanel";
 import { KDailyReviewPanel } from "./KDailyReview/KDailyReviewPanel";
+import { KRetentionBadge } from "./small/KRetentionBadge";
 import { KTestStore, useKTestStoreValues } from "../store/useKTest.store";
 import { KTestService } from "../service/kTest.service";
 import { useKStore } from "../store/K.store";
@@ -241,6 +242,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                             </button>
                         ))}
                     </div>
+                    {!isNew && <KRetentionBadge knowledgeId={knowledge.id} />}
                 </div>
 
                 {/* Content */}
