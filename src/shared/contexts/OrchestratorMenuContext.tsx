@@ -12,6 +12,7 @@ import { TabBarMenu } from "./menus/TabBarMenu";
 import { LogListMenu } from "./menus/LogListMenu";
 import { TrackPanelMenu } from "./menus/TrackPanelMenu";
 import { KKnowledgeMenu } from "./menus/KKnowledgeMenu";
+import { WorkspaceSelectorMenu } from "./menus/WorkspaceSelectorMenu";
 import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
@@ -81,6 +82,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case constants.contextMenu.contextMenuTypes.kKnowledgeSelector:
                 return <KKnowledgeMenu />;
+
+            case constants.contextMenu.contextMenuTypes.workspaceSelector:
+                return <WorkspaceSelectorMenu />;
 
             case constants.contextMenu.contextMenuTypes.conversationMessage:
                 return <ConversationMessageMenu />;

@@ -120,7 +120,7 @@ export function Main() {
                                                                                                                                                                         </AuthGuard>
                                                                                                                                                                     </OrchestratorContextMenu>
                                                                                                                                                                     <ConfirmationPopoverContainer />
-                                                                                                                                                    <ConversationDialog />
+                                                                                                                                                    {/* <ConversationDialog /> */}
                                                                                                                                                                 </ConfirmationPopoverProvider>
                                                                                                                                                             </OrchestratorContextMenuStoreProvider>
                                                                                                                                                         </DialogProvider>

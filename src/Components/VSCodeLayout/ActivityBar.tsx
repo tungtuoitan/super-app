@@ -1,4 +1,4 @@
-import { Folder, FileText, Settings, Boxes, UserCircle, Cuboid, Feather, Footprints, AudioWaveform, Spline, RulerDimensionLine, Ruler, Clover, Shell, BookIcon, LibraryBig } from "lucide-react";
+import { FileText, Settings, Boxes, UserCircle, Cuboid, Feather, Footprints, AudioWaveform, Spline, RulerDimensionLine, Ruler, Clover, Shell, BookIcon, LibraryBig } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { SettingsDialog } from "./SettingsDialog";
 import { AccountsDialog } from "./AccountsDialog";
@@ -10,11 +10,10 @@ import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import { useKStore } from "@/Components/K/store/K.store";
 
 const activityModules = [
-    { id: constants.modules.ws, icon: Boxes, label: constants.vscode.displayNames.ws },
-    { id: constants.modules.workspace, icon: Folder, label: constants.vscode.displayNames.workspace },
+    { id: constants.modules.workspace, icon: Boxes, label: constants.vscode.displayNames.workspace },
+    { id: constants.modules.project, icon: Cuboid, label: constants.vscode.displayNames.project },
     { id: constants.modules.k, icon: LibraryBig, label: constants.vscode.displayNames.k },
     // { id: constants.modules.note, icon: FileText, label: constants.vscode.displayNames.notes },
-    { id: constants.modules.project, icon: Cuboid, label: constants.vscode.displayNames.project },
     { id: constants.modules.lifeLog, icon: Shell, label: constants.vscode.displayNames.lifeLog },
 ];
 

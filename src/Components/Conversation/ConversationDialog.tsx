@@ -377,7 +377,7 @@ export function ConversationDialog() {
                 </div>
 
                 {/* ── Always-mounted side effects ────────────────────────────── */}
-                <ConversationHeadless />
+                {/* <ConversationHeadless /> */}
 
                 {/* ── Body ───────────────────────────────────────────────────── */}
                 {!isMinimized && (
