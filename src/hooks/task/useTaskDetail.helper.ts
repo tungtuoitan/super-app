@@ -26,6 +26,7 @@ import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
 import { useTaskCommentHelper } from "@/hooks/task/useTaskComment.helper";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 // Re-export utils for backward compatibility
 export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../../utils/task/TaskDetail.utils";
@@ -111,6 +112,15 @@ export const useTaskDetailHelper = () => {
             const originalTask = activeTab?.data0 as Task | undefined;
             const isRestoreMode = taskToSave.id > 0 && !!originalTask?.deletedAt && !taskToSave.deletedAt;
 
+            debugLog.log("task-upsert", "upsertTask-start", {
+                taskId: taskToSave.id,
+                isCreateMode,
+                folderWorkspaceItemId: taskToSave.folderWorkspaceItemId,
+                originalFolderWorkspaceItemId: originalTask?.folderWorkspaceItemId,
+                title: taskToSave.title,
+                source: "useTaskDetail.helper",
+            });
+
             try {
                 // For existing tasks: send original (last-saved) values for section fields
                 // so Ctrl+S doesn't overwrite in-progress section edits.
@@ -147,6 +157,14 @@ export const useTaskDetailHelper = () => {
                 const savedTask = result?.data?.[0] ?? null;
                 if (!savedTask) throw new Error("Failed to save task: No data returned from server");
 
+                debugLog.log("task-upsert", "upsertTask-response", {
+                    taskId: savedTask.id,
+                    folderWorkspaceItemId_sent: taskToSave.folderWorkspaceItemId,
+                    folderWorkspaceItemId_returned: savedTask.folderWorkspaceItemId,
+                    isCreateMode,
+                    source: "useTaskDetail.helper",
+                });
+
                 const transformedTask: Task = {
                     id: savedTask.id,
                     projectId: savedTask.projectId,
@@ -175,6 +193,7 @@ export const useTaskDetailHelper = () => {
                 };
 
                 _console.success(isCreateMode ? "Task created successfully" : "Task saved successfully");
+                debugLog.flush();
 
                 if (tabId) {
                     setOpenTabs((prev) =>

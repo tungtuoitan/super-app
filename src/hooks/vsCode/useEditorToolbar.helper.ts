@@ -40,6 +40,7 @@ import { useLifeLogLogHelper } from "../lifeLog/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../lifeLog/useLifeLogTrack.helper";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -132,6 +133,12 @@ export const useEditorToolbarHelper = () => {
      * 3. Update task.folderWorkspaceItemId in DB and local store
      */
     const _createTaskFolder = async (savedTask: Task) => {
+        debugLog.log("task-folder", "createTaskFolder-start", {
+            taskId: savedTask.id,
+            title: savedTask.title,
+            projectId: savedTask.projectId,
+            existingFolderWorkspaceItemId: savedTask.folderWorkspaceItemId,
+        });
         try {
             const token = $user.userToken ?? "";
 
@@ -165,7 +172,12 @@ export const useEditorToolbarHelper = () => {
             }
 
             let workspaceId = project.workspaceId;
-            if (!workspaceId) return;
+            if (!workspaceId) {
+                debugLog.log("task-folder", "createTaskFolder-skip-no-workspace", {
+                    taskId: savedTask.id, projectId: savedTask.projectId,
+                });
+                return;
+            }
 
             // --- Create folder named after task ---
             const folderName = savedTask.title || "Untitled";
@@ -201,6 +213,13 @@ export const useEditorToolbarHelper = () => {
 
             const folderWorkspaceItemId = newFolderWsItem.id;
 
+            debugLog.log("task-folder", "createTaskFolder-folder-created", {
+                taskId: savedTask.id,
+                folderWorkspaceItemId,
+                folderName: savedTask.title,
+                workspaceId,
+            });
+
             // --- Update task with folderWorkspaceItemId ---
             const updatedTaskResult = await taskService._upsertTaskBatch(token, [{
                 id: savedTask.id,
@@ -222,6 +241,11 @@ export const useEditorToolbarHelper = () => {
             }]);
 
             if (updatedTaskResult.success && updatedTaskResult.data?.[0]) {
+                debugLog.log("task-folder", "createTaskFolder-task-updated", {
+                    taskId: savedTask.id,
+                    folderWorkspaceItemId,
+                    returnedFolderWorkspaceItemId: updatedTaskResult.data[0].folderWorkspaceItemId,
+                });
                 setTasks((prev) => prev.map((t) =>
                     t.id === savedTask.id ? { ...t, folderWorkspaceItemId } : t
                 ));
@@ -341,6 +365,12 @@ export const useEditorToolbarHelper = () => {
                 case constants.vscode.tab.tabTypes.task: {
                     // TASK HANDLER: Delegate to Task Upsert Logic
                     const isNewTask = (activeTab.data as Task).id <= 0;
+                    debugLog.log("task-upsert", "toolbar-save-task", {
+                        taskId: (activeTab.data as Task).id,
+                        isNewTask,
+                        folderWorkspaceItemId: (activeTab.data as Task).folderWorkspaceItemId,
+                        source: "useEditorToolbar.helper",
+                    });
                     const savedTask = await upsertTask(activeTab.id);
                     // After creating a new task, auto-create its workspace folder
                     if (isNewTask && savedTask) {

@@ -78,6 +78,13 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     const newTask = taskResult.data[0] as unknown as Task;
                     const realId = String(newTask.id);
 
+                    debugLog.log("task-upsert", "flow-task-created", {
+                        taskId: newTask.id,
+                        folderWorkspaceItemId: newTask.folderWorkspaceItemId,
+                        title: trimmed,
+                        source: "useMultiProjectTaskFlowNode (no _createTaskFolder called)",
+                    });
+
                     setFlowNodes((prev) =>
                         prev.map((n) =>
                             n.id === nodeId
@@ -92,6 +99,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     ]).catch(() => {});
 
                     _console.success("Task created");
+                    debugLog.flush();
                 } catch {
                     setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
                     _console.error("Failed to create task");
@@ -122,11 +130,16 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             );
 
             try {
+                debugLog.log("task-upsert", "flow-rename-upsert", {
+                    taskId: task.id, folderWorkspaceItemId: task.folderWorkspaceItemId,
+                    title: trimmed, source: "useMultiProjectTaskFlowNode.rename",
+                });
                 const result = await taskService._upsertTaskBatch($user.userToken, [{
                     id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
                     type: task.type, title: trimmed, note: task.note, status: task.status,
                     priority: task.priority, startDate: toLocalISOString(task.startDate),
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
                 }]);
                 if (!result.success) throw new Error(result.message);
@@ -221,11 +234,17 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             );
 
             try {
+                debugLog.log("task-upsert", "flow-changeProject-upsert", {
+                    taskId: task.id, folderWorkspaceItemId: task.folderWorkspaceItemId,
+                    oldProjectId: task.projectId, newProjectId,
+                    source: "useMultiProjectTaskFlowNode.changeProject",
+                });
                 const result = await taskService._upsertTaskBatch($user.userToken, [{
                     id: task.id, projectId: newProjectId, parentTaskId: task.parentTaskId,
                     type: task.type, title: task.title, note: task.note, status: task.status,
                     priority: task.priority, startDate: toLocalISOString(task.startDate),
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
                 }]);
                 if (!result.success) throw new Error(result.message);
@@ -268,11 +287,17 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             );
 
             try {
+                debugLog.log("task-upsert", "flow-changeStatus-upsert", {
+                    taskId: task.id, folderWorkspaceItemId: task.folderWorkspaceItemId,
+                    oldStatus: task.status, newStatus,
+                    source: "useMultiProjectTaskFlowNode.changeStatus",
+                });
                 const result = await taskService._upsertTaskBatch($user.userToken, [{
                     id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
                     type: task.type, title: task.title, note: task.note, status: newStatus,
                     priority: task.priority, startDate: toLocalISOString(task.startDate),
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
                 }]);
                 if (!result.success) throw new Error(result.message);
