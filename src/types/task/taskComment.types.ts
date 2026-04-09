@@ -44,7 +44,18 @@ export interface SimpleDiffProps {
     stripHtml?: boolean;
 }
 
-export interface DiffLine { type: "add" | "remove" | "equal"; content: string; }
+export interface InlineSegment { type: "equal" | "add" | "remove"; text: string; }
+
+export interface DiffLine {
+    type: "add" | "remove" | "equal" | "modify";
+    content: string;
+    /** For "modify" lines: inline word-level diff segments */
+    segments?: InlineSegment[];
+    /** Which side: "old" = removal half, "new" = addition half (only for modify) */
+    side?: "old" | "new";
+    oldLineNo?: number;
+    newLineNo?: number;
+}
 export interface ImageInfo { fileId: string; src: string; }
 
 export type CommentFilterType = "all" | "comment" | "process" | "checklist" | "desc" | "custom";

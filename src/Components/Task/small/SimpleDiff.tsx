@@ -3,7 +3,7 @@ import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fileService } from "@/services/file.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import type { SimpleDiffProps, ImageInfo } from "@/types/task/taskComment.types";
+import type { SimpleDiffProps, ImageInfo, DiffLine, InlineSegment } from "@/types/task/taskComment.types";
 import { htmlToPlainText, computeImageDiff, computeDiff } from "@/utils/task/simpleDiff.utils";
 
 function DiffImageThumb({ img, type }: { img: ImageInfo; type: "add" | "remove" }) {
@@ -55,6 +55,73 @@ function CopyButton({ text, label }: { text: string; label: string }) {
     );
 }
 
+/** Render inline segments with word-level highlights */
+function InlineHighlight({ segments, side }: { segments: InlineSegment[]; side: "old" | "new" }) {
+    return (
+        <span className="whitespace-pre-wrap break-all">
+            {segments.map((seg, i) => {
+                if (seg.type === "equal") return <span key={i}>{seg.text}</span>;
+                const isHighlight = (side === "old" && seg.type === "remove") || (side === "new" && seg.type === "add");
+                if (!isHighlight) return null;
+                return (
+                    <span key={i} className={cn(
+                        "rounded-sm",
+                        side === "old" ? "bg-red-500/30 text-red-300" : "bg-green-500/30 text-green-300",
+                    )}>
+                        {seg.text}
+                    </span>
+                );
+            })}
+        </span>
+    );
+}
+
+function DiffLineRow({ line, showUnchanged }: { line: DiffLine; showUnchanged: boolean }) {
+    if (line.type === "equal" && !showUnchanged) return null;
+
+    const isModify = line.type === "modify";
+    const isOldModify = isModify && line.side === "old";
+    const isNewModify = isModify && line.side === "new";
+
+    return (
+        <div className={cn(
+            "flex leading-5 min-h-[20px] text-xs font-mono",
+            line.type === "add" && "bg-green-500/10 text-green-400",
+            line.type === "remove" && "bg-red-500/10 text-red-400",
+            isOldModify && "bg-red-500/10 text-red-400",
+            isNewModify && "bg-green-500/10 text-green-400",
+            line.type === "equal" && "text-muted-foreground/70",
+        )}>
+            {/* Old line number */}
+            <span className={cn(
+                "w-8 shrink-0 select-none text-right pr-1 border-r border-border/40 text-[10px] leading-5",
+                (line.type === "add" || isNewModify) ? "text-transparent" : "text-muted-foreground/40",
+            )}>
+                {line.oldLineNo ?? ""}
+            </span>
+            {/* New line number */}
+            <span className={cn(
+                "w-8 shrink-0 select-none text-right pr-1 border-r border-border/40 text-[10px] leading-5",
+                (line.type === "remove" || isOldModify) ? "text-transparent" : "text-muted-foreground/40",
+            )}>
+                {line.newLineNo ?? ""}
+            </span>
+            {/* +/- indicator */}
+            <span className="w-4 shrink-0 select-none opacity-50 text-center">
+                {line.type === "add" || isNewModify ? "+" : line.type === "remove" || isOldModify ? "−" : " "}
+            </span>
+            {/* Content */}
+            <span className="flex-1 px-1">
+                {isModify && line.segments ? (
+                    <InlineHighlight segments={line.segments} side={line.side!} />
+                ) : (
+                    <span className="whitespace-pre-wrap break-all">{line.content || " "}</span>
+                )}
+            </span>
+        </div>
+    );
+}
+
 export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentExpand, stripHtml = false }: SimpleDiffProps) {
     const [showUnchanged, setShowUnchanged] = useState(false);
     const displayOld = useMemo(() => stripHtml ? htmlToPlainText(oldText) : oldText, [oldText, stripHtml]);
@@ -70,6 +137,8 @@ export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentE
 
     const hasTextChanges = lines.some((l) => l.type !== "equal");
     const hasImageChanges = imageDiff !== null;
+    const removeCount = lines.filter((l) => l.type === "remove" || (l.type === "modify" && l.side === "old")).length;
+    const addCount = lines.filter((l) => l.type === "add" || (l.type === "modify" && l.side === "new")).length;
 
     if (!hasTextChanges && !hasImageChanges) {
         return <div className="text-[10px] text-muted-foreground italic py-2">No differences found.</div>;
@@ -85,12 +154,12 @@ export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentE
             )}
 
             {hasTextChanges && (
-                <div className="rounded border border-border overflow-hidden text-xs font-mono">
+                <div className="rounded border border-border overflow-hidden">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/40 border-b border-border">
                         <span className="text-[10px] text-muted-foreground">
-                            <span className="text-red-400">−{lines.filter((l) => l.type === "remove").length}</span>
+                            <span className="text-red-400">−{removeCount}</span>
                             {" / "}
-                            <span className="text-green-400">+{lines.filter((l) => l.type === "add").length}</span>
+                            <span className="text-green-400">+{addCount}</span>
                         </span>
                         <div className="ml-auto flex items-center gap-1.5">
                             <CopyButton text={displayOld} label="Old" />
@@ -106,22 +175,9 @@ export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentE
                     </div>
 
                     <div className="max-h-[400px] overflow-y-auto">
-                        {lines.map((line, i) => {
-                            if (line.type === "equal" && !showUnchanged) return null;
-                            return (
-                                <div key={i} className={cn(
-                                    "flex px-3 py-0.5 leading-5 min-h-[20px]",
-                                    line.type === "add" && "bg-green-500/15 text-green-400",
-                                    line.type === "remove" && "bg-red-500/15 text-red-400",
-                                    line.type === "equal" && "text-muted-foreground/70",
-                                )}>
-                                    <span className="w-4 shrink-0 select-none opacity-50 text-right mr-2">
-                                        {line.type === "add" ? "+" : line.type === "remove" ? "−" : " "}
-                                    </span>
-                                    <span className="whitespace-pre-wrap break-all">{line.content || " "}</span>
-                                </div>
-                            );
-                        })}
+                        {lines.map((line, i) => (
+                            <DiffLineRow key={i} line={line} showUnchanged={showUnchanged} />
+                        ))}
                     </div>
                 </div>
             )}
