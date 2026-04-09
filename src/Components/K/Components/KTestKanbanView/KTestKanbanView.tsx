@@ -12,6 +12,7 @@ import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { NodeCard } from "../KNodeEditorPanel/NodeCard";
 import { KNodeEditorProvider } from "../../store/KNodeEditor.store";
 import { ScoreSparkline } from "../small/ScoreSparkline";
+import { QuestionScoreBar } from "../small/QuestionScoreBar";
 import type { KTestDetail, KTestQuestion, KTestSummary } from "../../types/kTest.type";
 import type { KItemV2 } from "../../types/K-v2.types";
 
@@ -623,7 +624,7 @@ function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOpt
     return (
         <div
             ref={wrapperRef}
-            className={isSelected ? "ring-1 ring-blue-500/70 rounded-lg" : ""}
+            className={`relative ${isSelected ? "ring-1 ring-blue-500/70 rounded-lg" : ""}`}
             style={{ opacity: isDragging ? 0 : 1, cursor: question.deletedAt ? "default" : "grab" }}
             onClick={e => {
                 if (e.shiftKey && !question.deletedAt) { e.stopPropagation(); onToggleSelect(question.id, testId); }
@@ -633,6 +634,13 @@ function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOpt
             <KNodeEditorProvider rootNode={node}>
                 <NodeCard node={node} compact onSubmitEdit={handleSubmitEdit} />
             </KNodeEditorProvider>
+
+            {/* Score history + SRS next review — overlaid at bottom-right */}
+            {!question.deletedAt && (question.scoreHistory.length > 0 || question.srsNextReviewAt) && (
+                <div className="absolute bottom-1.5 right-2 pointer-events-none">
+                    <QuestionScoreBar scores={question.scoreHistory} srsNextReviewAt={question.srsNextReviewAt} retention={question.retention} />
+                </div>
+            )}
 
             {ctxMenu && (
                 <div

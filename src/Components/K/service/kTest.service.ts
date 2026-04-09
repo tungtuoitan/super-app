@@ -12,6 +12,8 @@ import type {
     KDailyQueueItem,
     KDailySessionQuestion,
     KDailySubmitRequest,
+    KRetentionSummary,
+    KRetentionGraph,
 } from "../types/kTest.type";
 import type { ResultOptions } from "../../../types";
 
@@ -159,6 +161,18 @@ const _updateTestStatus = async (
     return Promise.reject(res);
 };
 
+const _getRetention = async (knowledgeId: number): Promise<KRetentionSummary> => {
+    const res = await apiFetch(`${base(knowledgeId)}/retention`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+const _getRetentionGraph = async (knowledgeId: number, days = 14): Promise<KRetentionGraph> => {
+    const res = await apiFetch(`${base(knowledgeId)}/retention-graph?days=${days}`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 const _transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     const formData = new FormData();
     formData.append("file", audioBlob, "audio.webm");
@@ -189,4 +203,6 @@ export const KTestService = {
     _getDailySession,
     _submitDailyAnswers,
     _updateTestStatus,
+    _getRetention,
+    _getRetentionGraph,
 };
