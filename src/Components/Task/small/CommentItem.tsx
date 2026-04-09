@@ -6,7 +6,6 @@ import { useTaskCommentSelector } from "@/Selectors/task/TaskCommentSelector";
 import { useTaskCommentStore } from "@/store/task/useTaskComment.store";
 import { useTaskCommentHelper } from "@/hooks/task/useTaskComment.helper";
 import { useTaskSectionStore } from "@/store/task/useTaskSection.store";
-import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { parseVersionComment, formatTimeAgo, formatFullDate } from "@/utils/task/versionComment.utils";
@@ -19,7 +18,6 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
     const { editingCommentId, draftContent, setDraftContent } = useTaskCommentStore();
     const { updateComment, deleteComment, cancelReplyOrEdit, startEdit, startReply } = useTaskCommentHelper();
     const { commentShowDetail, scrollContainerRef } = useTaskSectionStore();
-    const { isDisabled } = useTaskDetailSelector();
     const { $user } = useAuthStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
 
@@ -139,8 +137,7 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
                         </div>
                     </CollapsibleContent>
                 </div>
-                {!isDisabled && (
-                    <div className={cn(
+                <div className={cn(
                         "opacity-0 group-hover:opacity-100 flex items-center gap-0.5 shrink-0 transition-opacity",
                     )}>
                         {!isReply && (
@@ -167,7 +164,6 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
                             <Trash2 className="h-3 w-3" />
                         </button>
                     </div>
-                )}
             </div>
         </div>
     );
