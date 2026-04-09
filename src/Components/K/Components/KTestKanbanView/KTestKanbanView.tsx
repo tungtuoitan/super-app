@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Check, Loader2, Pencil, Play, Plus, X, HelpCircle, Mic, Trash2, RotateCcw, Eye, EyeOff, BookX } from "lucide-react";
+import { BookOpen, Check, Loader2, Pencil, Play, Plus, X, HelpCircle, Mic, Trash2, RotateCcw, Eye, EyeOff, BookX, GripVertical } from "lucide-react";
 import { useDrag, useDrop } from "react-dnd";
 import { Button } from "@/Components/ui/button";
 import { ScrollArea } from "@/Components/ui/scroll-area";
@@ -15,6 +15,7 @@ import { ScoreSparkline } from "../small/ScoreSparkline";
 import { QuestionScoreBar } from "../small/QuestionScoreBar";
 import type { KTestDetail, KTestQuestion, KTestSummary } from "../../types/kTest.type";
 import type { KItemV2 } from "../../types/K-v2.types";
+import { KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
 
 const KANBAN_DND  = "kanban-question-card";
 const COLUMN_DND  = "kanban-column";
@@ -45,6 +46,18 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
         if (key === lastLoadKeyRef.current) return;
         lastLoadKeyRef.current = key;
         if (knowledgeId > 0) loadTests(knowledgeId, activeNodeId ?? undefined);
+    }, [knowledgeId, activeNodeId]);
+
+    // Reload when a test is moved to another node via tree drop
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const { sourceNodeId, knowledgeId: kId } = (e as CustomEvent).detail;
+            if (kId === knowledgeId && sourceNodeId === activeNodeId) {
+                loadTests(knowledgeId, activeNodeId ?? undefined);
+            }
+        };
+        window.addEventListener("k-test-moved", handler);
+        return () => window.removeEventListener("k-test-moved", handler);
     }, [knowledgeId, activeNodeId]);
 
     useEffect(() => {
@@ -308,6 +321,7 @@ interface KanbanColumnProps {
 }
 
 function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRecord, onRename, onDrop, onColumnDrop, onNewCardCreated, onRefresh, onOptimisticUpdate, onStatusChange, selectedIds, onToggleSelect, onClearSelection }: KanbanColumnProps) {
+    const { activeNodeId } = useKTestStore();
     const [editingTitle, setEditingTitle] = useState(false);
     const [titleDraft, setTitleDraft]     = useState("");
     const [isSaving, setIsSaving]         = useState(false);
@@ -368,6 +382,18 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
     colDragRef(headerRef);
     colDropRef(columnRef);
 
+    // Drag source for moving test to a tree node
+    const treeDragHandleRef = useRef<HTMLDivElement>(null);
+    const [{ isTreeDragging }, treeDragRef, treeDragPreview] = useDrag<KanbanTestToTreeItem, void, { isTreeDragging: boolean }>(() => ({
+        type: KANBAN_TEST_TO_TREE,
+        item: { testId: test.id, knowledgeId, title: test.title, sourceNodeId: activeNodeId! },
+        canDrag: () => !isAnyEditing,
+        collect: monitor => ({ isTreeDragging: monitor.isDragging() }),
+    }), [test.id, knowledgeId, test.title, isAnyEditing]);
+    treeDragRef(treeDragHandleRef);
+    // Use column header as drag preview image
+    treeDragPreview(headerRef);
+
     const startEdit = () => {
         setTitleDraft(test.title);
         setEditingTitle(true);
@@ -397,7 +423,7 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
     return (
         <div
             ref={columnRef}
-            className={`relative flex flex-col shrink-0 rounded-lg border transition-all ${isColumnDragging ? "!w-0 !min-w-0 overflow-hidden opacity-0 border-0" : "w-64"} ${dropActive ? "border-blue-500/60 bg-blue-950/20" : "border-zinc-800/60 bg-zinc-900/30"}`}
+            className={`relative flex flex-col shrink-0 rounded-lg border transition-all ${isColumnDragging || isTreeDragging ? "!w-0 !min-w-0 overflow-hidden opacity-0 border-0" : "w-64"} ${dropActive ? "border-blue-500/60 bg-blue-950/20" : "border-zinc-800/60 bg-zinc-900/30"}`}
             onContextMenu={openCtxMenu}
         >
             {/* Column insertion indicator */}
@@ -415,6 +441,14 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
             >
                 {/* Row 1: title + controls */}
                 <div className="flex items-center gap-2 px-3 py-2">
+                {/* Drag handle for moving test to tree node */}
+                <div
+                    ref={treeDragHandleRef}
+                    title="Drag to tree node to move"
+                    className={`shrink-0 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-zinc-400 ${isTreeDragging ? "!opacity-100 text-blue-400" : ""}`}
+                >
+                    <GripVertical className="w-3 h-3" />
+                </div>
                 <div className="flex-1 min-w-0">
                     {editingTitle ? (
                         <div className="flex items-center gap-1">
@@ -621,10 +655,20 @@ function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOpt
         await onRefresh();
     };
 
+    const handleResetSrs = async () => {
+        setCtxMenu(null);
+        await KTestService._updateQuestions(knowledgeId, testId, {
+            addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
+            deleteQuestionIds: [], restoreQuestionIds: [],
+            resetSrsQuestionIds: [question.id],
+        });
+        await onRefresh();
+    };
+
     return (
         <div
             ref={wrapperRef}
-            className={`relative ${isSelected ? "ring-1 ring-blue-500/70 rounded-lg" : ""}`}
+            className={` relative ${isSelected ? "ring-1 ring-blue-500/70 rounded-lg" : ""}`}
             style={{ opacity: isDragging ? 0 : 1, cursor: question.deletedAt ? "default" : "grab" }}
             onClick={e => {
                 if (e.shiftKey && !question.deletedAt) { e.stopPropagation(); onToggleSelect(question.id, testId); }
@@ -657,13 +701,24 @@ function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOpt
                             Restore
                         </button>
                     ) : (
-                        <button
-                            onClick={handleDelete}
-                            className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-red-400"
-                        >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            Delete
-                        </button>
+                        <>
+                            {question.scoreHistory.length > 0 && (
+                                <button
+                                    onClick={handleResetSrs}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-amber-400"
+                                >
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                    Reset SRS
+                                </button>
+                            )}
+                            <button
+                                onClick={handleDelete}
+                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-red-400"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                Delete
+                            </button>
+                        </>
                     )}
                 </div>
             )}

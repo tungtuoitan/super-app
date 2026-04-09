@@ -18,6 +18,7 @@ interface DailyCardData {
     testId: number;
     knowledgeId: number;
     knowledgeName: string;
+    nodeName: string;
     title: string;
     status: string | null;
     scoreHistory: number[];
@@ -38,7 +39,7 @@ type SessionState = {
 const STATUS_ORDER: Record<string, number> = { learning: 0, mastered: 1, inactive: 2 };
 
 export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }: KDailyReviewPanelProps) {
-    const { setDailyReviewDueCount, allK } = useKStore();
+    const { setDailyReviewDueCount, allK, currentK } = useKStore();
 
     const [allTests, setAllTests]         = useState<KTestSummary[]>([]);
     const [queue, setQueue]               = useState<KDailyQueueItem[]>([]);
@@ -82,6 +83,10 @@ export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }:
     const cards: DailyCardData[] = useMemo(() => {
         const queueMap = new Map(queue.map(q => [q.testId, q]));
         const kNameMap = new Map(allK.map(k => [k.id, k.name]));
+        const nodeNameMap = new Map<number, string>();
+        for (const n of (currentK?.flatData ?? [])) {
+            nodeNameMap.set(n.id, n.name);
+        }
 
         // Start from allTests (has scoreHistory), enrich with queue counts
         const merged: DailyCardData[] = [];
@@ -95,6 +100,7 @@ export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }:
                 testId: t.id,
                 knowledgeId: kId,
                 knowledgeName: kNameMap.get(kId) ?? "",
+                nodeName: t.nodeId ? (nodeNameMap.get(t.nodeId) ?? "") : "",
                 title: t.title,
                 status: t.status,
                 scoreHistory: t.scoreHistory,
@@ -113,6 +119,7 @@ export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }:
                 testId: q.testId,
                 knowledgeId: q.knowledgeId,
                 knowledgeName: q.knowledgeName,
+                nodeName: "",
                 title: q.title,
                 status: q.status,
                 scoreHistory: [],
@@ -309,9 +316,9 @@ function DailyTestCard({ card, isLoading, onStart, onNavigate }: {
                 )}
             </div>
 
-            {/* Row 2: knowledge name (global mode) */}
-            {card.knowledgeName && (
-                <p className="text-[10px] text-left text-muted-foreground/50 truncate mt-0.5">{card.knowledgeName}</p>
+            {/* Row 2: node name */}
+            {card.nodeName && (
+                <p className="text-[10px] text-left text-muted-foreground/50 truncate mt-0.5">{card.nodeName}</p>
             )}
 
             {/* Row 2: sparkline + stats */}

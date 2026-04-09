@@ -16,7 +16,9 @@ import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { KWsResponse } from "../../types/K.types";
-import { kTestDrag } from "../KTestDetail/kTestDrag";
+import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
+import { useDrop } from "react-dnd";
+import { KTestService } from "../../service/kTest.service";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
@@ -105,6 +107,19 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
             el.removeEventListener("dragend",   onDragEnd);
         };
     }, []);
+
+    // ── Drop zone for kanban test columns ────────────────────────────────────
+    const [{ isTestOver }, testDropRef] = useDrop<KanbanTestToTreeItem, void, { isTestOver: boolean }>(() => ({
+        accept: KANBAN_TEST_TO_TREE,
+        canDrop: () => !isWorkspaceRoot,
+        drop: (item) => {
+            const targetNodeId = nodeItem.id; // k.node.id
+            KTestService._updateTest(item.knowledgeId, item.testId, { nodeId: targetNodeId }).then(() => {
+                window.dispatchEvent(new CustomEvent("k-test-moved", { detail: { sourceNodeId: item.sourceNodeId, knowledgeId: item.knowledgeId } }));
+            });
+        },
+        collect: monitor => ({ isTestOver: monitor.isOver() && monitor.canDrop() }),
+    }), [nodeItem.id, isWorkspaceRoot]);
 
     const handleToggleMark = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -339,6 +354,8 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 ref={(el) => {
                     // Also store for native drag listeners (test drop zone)
                     innerDivRef.current = el;
+                    // react-dnd drop target for kanban test columns
+                    testDropRef(el);
                     // Make entire node draggable (VS Code style - no special cursor)
                     if (dragHandle && typeof dragHandle === "function" && el) {
                         try {
@@ -358,6 +375,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                     ${isWorkspaceRoot ? "font-semibold" : ""}
                     ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
                     ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
+                    ${isTestOver ? "bg-blue-500/20 outline outline-1 outline-blue-500/60 -outline-offset-1 rounded" : ""}
                 `}
             >
                 {/* Expand/Collapse Button */}

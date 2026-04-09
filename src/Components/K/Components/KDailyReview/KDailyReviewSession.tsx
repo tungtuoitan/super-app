@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ArrowLeft, Mic, MicOff, ChevronRight, Loader2, CheckCircle2, XCircle, Type, BookOpen, KeyRound, Send, PenLine } from "lucide-react";
+import { KReviewEditor } from "../small/KReviewEditor";
 import { Button } from "@/Components/ui/button";
 import { KTestService } from "../../service/kTest.service";
 import type { KDailySessionQuestion, KDailyAnswerItem, KSubmitAnswersResult, KQuestionGrade } from "../../types/kTest.type";
@@ -217,7 +218,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
     // Keyboard: Enter → advance (record mode), Ctrl+Enter → advance (text mode)
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (isSubmitting || result) return;
+            if (isSubmitting || result || phase === "reviewing") return;
             if (mode === "record" && e.key === "Enter") { e.preventDefault(); advance(); }
             if (mode === "text" && e.key === "Enter" && e.ctrlKey) { e.preventDefault(); advance(); }
         };
@@ -256,22 +257,13 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                     </div>
                 )}
 
-                {/* All questions with editable answers */}
-                <div className="flex-1 overflow-auto px-3 py-3">
-                    <div className="flex flex-col gap-3 max-w-lg mx-auto">
-                        {questions.map((q, i) => (
-                            <div key={q.id} className="rounded-lg border border-border bg-card p-3">
-                                <p className="text-sm font-medium mb-1.5">{i + 1}. {q.question}</p>
-                                <textarea
-                                    value={answers[q.id] ?? ""}
-                                    onChange={e => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
-                                    placeholder="No answer recorded — type here…"
-                                    rows={2}
-                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-md p-2 text-sm outline-none focus:border-zinc-500 resize-none"
-                                />
-                            </div>
-                        ))}
-                    </div>
+                {/* Monaco editor for Q&A review */}
+                <div className="flex-1 min-h-0">
+                    <KReviewEditor
+                        questions={questions}
+                        answers={answers}
+                        onAnswersChange={setAnswers}
+                    />
                 </div>
 
                 {/* Footer */}
@@ -543,6 +535,8 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
 
 function GradeCard({ index, grade }: { index: number; grade: KQuestionGrade }) {
     const [showAnswer, setShowAnswer] = useState(false);
+    const isWeak = grade.point <= 4;
+
     return (
         <div className={`rounded-lg border p-2.5 flex flex-col gap-1.5 text-left ${grade.point >= 4 ? "border-green-500/30 bg-green-500/5" : "border-red-500/30 bg-red-500/5"}`}>
             <div className="flex items-start justify-between gap-2">
@@ -568,7 +562,14 @@ function GradeCard({ index, grade }: { index: number; grade: KQuestionGrade }) {
                     {grade.answerText ? grade.answerText : <span className="italic opacity-50">no answer</span>}
                 </div>
             )}
-            {grade.comment && (
+            {isWeak && grade.comment && (
+                <div className="mt-1.5 rounded-md bg-amber-500/10 border border-amber-500/20 px-2.5 py-2">
+                    <p className="text-[13px] font-medium text-amber-400 leading-relaxed">
+                        {grade.comment}
+                    </p>
+                </div>
+            )}
+            {!isWeak && grade.comment && (
                 <p className="text-xs mt-2 text-right italic text-muted-foreground/70 flex items-start gap-1.5">
                     <KeyRound className="w-3 h-3 shrink-0 mt-0.5 opacity-50" />
                     {grade.comment}

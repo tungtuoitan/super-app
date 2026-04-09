@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Mic, Loader2, CheckCircle2, XCircle, BookOpen, KeyRound, Send, PenLine } from "lucide-react";
+import { KReviewEditor } from "../small/KReviewEditor";
 import { Button } from "@/Components/ui/button";
 import { KTestService } from "../../service/kTest.service";
 import { useKTestLoader } from "../../hooks/useKTest.loader";
@@ -178,7 +179,7 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
     // Keyboard: Enter → advance
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Enter" && !isSubmitting && !result) { e.preventDefault(); advance(); }
+            if (e.key === "Enter" && !isSubmitting && !result && phase !== "reviewing") { e.preventDefault(); advance(); }
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
@@ -212,21 +213,13 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
                     </div>
                 )}
 
-                <div className="flex-1 overflow-auto px-3 py-3">
-                    <div className="flex flex-col gap-3 max-w-lg mx-auto">
-                        {questions.map((q, i) => (
-                            <div key={q.id} className="rounded-lg border border-border bg-card p-3">
-                                <p className="text-left text-gray-500 text-sm font-medium mb-1.5">{i + 1}. {q.question}</p>
-                                <textarea
-                                    value={answers[q.id] ?? ""}
-                                    onChange={e => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
-                                    placeholder="No answer recorded — type here…"
-                                    rows={2}
-                                    className="w-full bg-transparent rounded-md p-2 text-sm outline-none focus:border-zinc-500 resize-none"
-                                />
-                            </div>
-                        ))}
-                    </div>
+                {/* Monaco editor for Q&A review */}
+                <div className="flex-1 min-h-0">
+                    <KReviewEditor
+                        questions={questions}
+                        answers={answers}
+                        onAnswersChange={setAnswers}
+                    />
                 </div>
 
                 <div className="shrink-0 px-3 py-3 border-t border-border flex justify-center">
