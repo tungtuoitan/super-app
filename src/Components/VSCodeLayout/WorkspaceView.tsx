@@ -3,7 +3,7 @@
  * Extracted from VSSideBar for better separation of concerns
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useCallback } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { WorkspaceTree } from "../Workspace/Explorer/WorkspaceTree";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
@@ -13,6 +13,9 @@ import { FolderDialog } from "../Workspace/Explorer/FolderDialog/FolderDialog";
 import { NoteGridPopup } from "../Workspace/NoteGridPopup";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
+import { constants } from "@/utils/constants";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection
@@ -20,8 +23,10 @@ import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
 export function WorkspaceView() {
     const { $user } = useAuthStore();
     const { allWorkspaces, isLoadingWorkspaces, isLoadingTree, isLoadingTreeByOpeningFolder, selectedWorkspaceId, setSelectedWorkspaceId } = useWorkspaceStore();
-    const { loadAllWorkspaces, loadTree } = useWorkspaceLoader();
+    const { loadAllWorkspaces, loadTree, softDeleteWorkspace } = useWorkspaceLoader();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
+    const { openNewWorkspaceTab, openWorkspaceTab } = useWsTabHelper();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     // Load workspaces on mount
     useEffect(() => {
@@ -64,12 +69,31 @@ export function WorkspaceView() {
         setSelectedWorkspaceId(newWorkspaceId);
     };
 
+    // Right-click context menu on the selector area
+    const handleContextMenu = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const selected = selectedWorkspaceId != null ? allWorkspaces.find((ws) => ws.id === selectedWorkspaceId) : undefined;
+            showContextMenu(e, constants.contextMenu.contextMenuTypes.workspaceSelector, {
+                hasSelected: selected != null,
+                onAdd: () => openNewWorkspaceTab(),
+                onEdit: () => { if (selected) openWorkspaceTab(selected); },
+                onDelete: async () => {
+                    if (selectedWorkspaceId != null) {
+                        await softDeleteWorkspace(selectedWorkspaceId);
+                    }
+                },
+            });
+        },
+        [showContextMenu, selectedWorkspaceId, allWorkspaces, openNewWorkspaceTab, openWorkspaceTab, softDeleteWorkspace],
+    );
+
     return (
         <div className="h-full overflow-auto flex flex-col">
             {/* Workspace Selector */}
-            <div className="px-3 py-2">
-                <div>
-                    <GenericAutoComplete
+            <div className="px-3 py-2" onContextMenu={handleContextMenu}>
+                <GenericAutoComplete
                         allOptions={workspaceOptions}
                         value={workspaceOptions.find((option) => option.id === selectedWorkspaceId?.toString()) || null}
                         onChange={handleWorkspaceChange}
@@ -81,10 +105,6 @@ export function WorkspaceView() {
                         disabled={isLoadingWorkspaces || workspaceOptions.length === 0}
                         size="small"
                     />
-                </div>
-
-                {/* Filter Popup */}
-                {/* <GenericFilterPopup /> */}
             </div>
 
             {/* Workspace Tree */}

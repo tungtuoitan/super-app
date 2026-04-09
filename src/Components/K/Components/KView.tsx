@@ -80,7 +80,7 @@ export function KView() {
 
     return (
         <div className="h-full overflow-auto flex flex-col">
-            {/* Workspace Selector */}
+        {/* Workspace Selector */}
             <div className="px-3 py-2" onContextMenu={handleContextMenu}>
                 <GenericAutoComplete
                     allOptions={workspaceOptions.sort((a, b) => {

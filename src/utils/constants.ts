@@ -119,6 +119,7 @@ export const constants = {
             kKnowledgeSelector: "k-knowledge-selector",
             kNodePanelBlank: "k-node-panel-blank",
             kNodePanelCard: "k-node-panel-card",
+            workspaceSelector: "workspace-selector",
             taskFlow: "task-flow",
         } as const,
     },

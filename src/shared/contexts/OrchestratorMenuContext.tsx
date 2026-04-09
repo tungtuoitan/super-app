@@ -12,6 +12,7 @@ import { TabBarMenu } from "./menus/TabBarMenu";
 import { LogListMenu } from "./menus/LogListMenu";
 import { TrackPanelMenu } from "./menus/TrackPanelMenu";
 import { KKnowledgeMenu } from "./menus/KKnowledgeMenu";
+import { WorkspaceSelectorMenu } from "./menus/WorkspaceSelectorMenu";
 import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
