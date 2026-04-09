@@ -10,10 +10,10 @@ Sau mỗi lần trả lời, AI chấm điểm 0–5:
 
 | Score | Ý nghĩa | SRS |
 |-------|---------|-----|
-| **0–2** | Fail nặng | Reset, ôn lại sau **1 giờ** |
-| **3** | Fail vừa | Reset, ôn lại **ngày mai** |
-| **4** | Khá | Pass — interval tăng |
-| **5** | Tốt | Pass — interval tăng |
+| **0–2** | Fail nặng | Reset, ôn lại sau **30 phút** |
+| **3** | Fail vừa | Reset, ôn lại sau **2 giờ** |
+| **4** | Gần đạt | Interval **giảm 20%** — chưa hoàn hảo, ôn sớm hơn |
+| **5** | Hoàn hảo | Pass — interval tăng theo SM-2 |
 
 ---
 
@@ -34,17 +34,25 @@ Mỗi câu hỏi có 4 giá trị SRS:
 ```
 repetitions = 0
 interval = 0
-nextReview = now + 1 giờ
+nextReview = now + 30 phút
 ```
 
 **Nếu fail vừa (score = 3):**
 ```
 repetitions = 0
-interval = 1
-nextReview = now + 1 ngày
+interval = 0
+nextReview = now + 2 giờ
 ```
 
-**Nếu pass (score ≥ 4):**
+**Nếu gần đạt (score = 4):**
+```
+interval = max(1, interval × 0.8)
+nextReview = now + interval ngày
+(repetitions giữ nguyên — không reset nhưng cũng không tăng)
+```
+*Lưu ý: `max(1, ...)` đảm bảo interval tối thiểu 1 ngày (cho câu mới hoặc vừa reset).*
+
+**Nếu hoàn hảo (score = 5):**
 ```
 Lần 1 (repetitions = 0): interval = 1 ngày
 Lần 2 (repetitions = 1): interval = 6 ngày
@@ -68,14 +76,15 @@ easeFactor = max(1.3, easeFactor)
 | 3 | 16 ngày | 2.8 | +16 ngày |
 | 4 | 45 ngày | 2.9 | +45 ngày |
 
-### Ví dụ progression (score 4):
+### Ví dụ progression (score 4 → interval giảm 20%):
 
-| Lần | Interval | EaseFactor | Next Review |
-|-----|----------|------------|-------------|
-| 1 | 1 ngày | 2.5 | +1 ngày |
-| 2 | 6 ngày | 2.5 | +6 ngày |
-| 3 | 15 ngày | 2.5 | +15 ngày |
-| 4 | 38 ngày | 2.5 | +38 ngày |
+| Lần | Interval | Next Review |
+|-----|----------|-------------|
+| Đang 6 ngày, score 4 | 6 × 0.8 = 4.8 ngày | +4.8 ngày |
+| Tiếp score 4 | 4.8 × 0.8 = 3.8 ngày | +3.8 ngày |
+| Tiếp score 5 | 3.8 × 2.5 = 9.5 ngày | +9.5 ngày |
+
+> **Triết lý:** Chỉ score 5 mới đẩy interval xa hơn. Score 4 = "gần đạt" → ôn sớm hơn. Score ≤ 3 = reset hoàn toàn.
 
 ---
 
@@ -107,10 +116,8 @@ Khi ôn chủ động (không qua Daily Review), kết quả **cũng cập nhậ
 
 | Chuyển | Điều kiện |
 |--------|-----------|
-| `learning` → `mastered` | 5 session gần nhất **tất cả** có avgPoint > 4.5 **và** avgSpeedRatio < 1.0 |
-| `mastered` → `learning` | Bất kỳ session nào trong 5 gần nhất **không** đạt điều kiện trên |
-
-`speedRatio = responseTimeMs / readingTimeMs` (readingTimeMs = wordCount / 3.33 × 1000)
+| `learning` → `mastered` | 5 session gần nhất **tất cả** có avgPoint > 4.5 |
+| `mastered` → `learning` | Bất kỳ session nào trong 5 gần nhất có avgPoint ≤ 4.5 |
 
 ---
 

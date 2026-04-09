@@ -158,16 +158,16 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                 return <KKnowledgeGeneral knowledgeId={knowledge.id} tabId={tab.id} />;
             case "testKanban":
                 if (isNew) return null;
-                if (view.kind === "testDetail") {
-                    return (
-                        <KTestDetail
-                            knowledgeId={knowledge.id}
-                            testId={view.testId}
-                            onBack={() => setView({ kind: "none" })}
-                            onStart={(detail) => handleStartTest(detail)}
-                        />
-                    );
-                }
+                // if (view.kind === "testDetail") {
+                //     return (
+                //         <KTestDetail
+                //             knowledgeId={knowledge.id}
+                //             testId={view.testId}
+                //             onBack={() => setView({ kind: "none" })}
+                //             onStart={(detail) => handleStartTest(detail)}
+                //         />
+                //     );
+                // }
                 return (
                     <KTestKanbanView
                         knowledgeId={knowledge.id}
