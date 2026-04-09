@@ -144,6 +144,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                     status: allDone ? "completed" : task.status,
                     priority: task.priority, startDate: toLocalISOString(task.startDate),
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: newJsonStr, customTabsJson: task.customTabsJson,
                 }]);
                 if (!result.success) throw new Error();

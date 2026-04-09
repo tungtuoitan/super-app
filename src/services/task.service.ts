@@ -6,6 +6,7 @@ import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import { ResultOptions } from "../types";
 import type { TaskDTO } from "@/types/task/task.types";
+import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 // Re-export for backward compatibility
 export type { TaskDTO } from "@/types/task/task.types";
@@ -58,13 +59,39 @@ const _upsertTaskBatch = async (
         customTabsJson?: string | null;
     }>
 ): Promise<ResultOptions<TaskDTO>> => {
+    // ── Debug: log every upsert request with folderWorkspaceItemId ──
+    for (const req of requests) {
+        debugLog.log("task-upsert", "service-upsertTaskBatch", {
+            id: req.id,
+            title: req.title,
+            folderWorkspaceItemId: req.folderWorkspaceItemId,
+            folderWorkspaceItemId_isUndefined: req.folderWorkspaceItemId === undefined,
+            folderWorkspaceItemId_isNull: req.folderWorkspaceItemId === null,
+            caller: new Error().stack?.split("\n")[2]?.trim(),
+        });
+    }
+
     const res = await apiFetch(`${config.api.baseURL}/api/task`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requests),
     });
 
-    if (res.ok) return (await res.json()) as ResultOptions<TaskDTO>;
+    if (res.ok) {
+        const result = (await res.json()) as ResultOptions<TaskDTO>;
+        // ── Debug: log response folderWorkspaceItemId ──
+        if (result.data) {
+            for (const dto of result.data) {
+                debugLog.log("task-upsert", "service-upsertTaskBatch-response", {
+                    id: dto.id,
+                    title: dto.title,
+                    folderWorkspaceItemId: dto.folderWorkspaceItemId,
+                });
+            }
+        }
+        debugLog.flush();
+        return result;
+    }
     return Promise.reject(res);
 };
 
