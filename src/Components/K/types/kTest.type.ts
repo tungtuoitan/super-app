@@ -64,7 +64,7 @@ export interface KTestQuestion {
 // ── Update test request ───────────────────────────────────────────────────────
 
 export interface KUpdateTestRequest {
-    title: string;
+    title?: string;
     /** Optionally re-link test to a different entity node */
     nodeId?: number | null;
 }
@@ -82,6 +82,8 @@ export interface KUpdateQuestionsRequest {
     deleteQuestionIds: number[];
     /** k.question IDs to restore (clear deletedAt) */
     restoreQuestionIds: number[];
+    /** k.question IDs to reset SRS state */
+    resetSrsQuestionIds?: number[];
 }
 
 // ── Submit answers + grading result ──────────────────────────────────────────
