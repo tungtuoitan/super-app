@@ -86,11 +86,11 @@ export const useMultiProjectTaskFlowHelper = () => {
                     ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled"; }).map((n) => n.id))
                     : null;
 
-                // Filter out position and select changes for locked nodes
+                // Filter out position changes for locked nodes (allow select so miniBar viewDetail works)
                 const filtered = lockedIds
                     ? changes.filter((c) => {
                         if (!("id" in c) || !lockedIds.has(c.id as string)) return true;
-                        return c.type !== "position" && c.type !== "select";
+                        return c.type !== "position";
                     })
                     : changes;
 
