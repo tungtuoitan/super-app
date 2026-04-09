@@ -13,6 +13,7 @@
 
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { workspaceService } from "@/services/workspace.service";
+import { wsService } from "@/services/ws.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
@@ -129,9 +130,33 @@ export const useWorkspaceLoader = () => {
 
 
 
+    /**
+     * Soft-delete a workspace by setting its deletedAt timestamp
+     */
+    const softDeleteWorkspace = async (workspaceId: number) => {
+        try {
+            const token = $user.userToken;
+            const ws = allWorkspaces.find((w) => w.id === workspaceId);
+            if (!ws) return;
+
+            const result = await wsService._upsertWsBatch(token, [
+                { id: ws.id, name: ws.name, description: ws.description, userId: ws.userId, deletedAt: new Date().toISOString() },
+            ]);
+
+            if (result.success) {
+                _console.success("Workspace deleted");
+                await loadAllWorkspaces();
+            }
+        } catch (error) {
+            console.error("Failed to soft-delete workspace:", error);
+            _console.error("Failed to delete workspace");
+        }
+    };
+
     return {
         // Actions only - get state directly from useWorkspaceStore()
         loadAllWorkspaces,
         loadTree,
+        softDeleteWorkspace,
     };
 };
