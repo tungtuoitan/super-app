@@ -18,21 +18,23 @@ export function CollapsibleContent({ children }: { children: React.ReactNode }) 
     }, [children]);
 
     return (
-        <div className="relative">
-            <div
-                ref={ref}
-                className={cn(!expanded && isOverflowing && "overflow-hidden")}
-                style={!expanded && isOverflowing ? { maxHeight: `${COLLAPSE_HEIGHT}px` } : undefined}
-            >
-                {children}
+        <div>
+            <div className="relative">
+                <div
+                    ref={ref}
+                    className={cn(!expanded && isOverflowing && "overflow-hidden")}
+                    style={!expanded && isOverflowing ? { maxHeight: `${COLLAPSE_HEIGHT}px` } : undefined}
+                >
+                    {children}
+                </div>
+                {isOverflowing && !expanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+                )}
             </div>
-            {isOverflowing && !expanded && (
-                <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-            )}
             {isOverflowing && (
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors mt-0.5"
+                    className="relative z-10 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors mt-0.5"
                 >
                     {expanded ? (
                         <><ChevronUp className="h-3 w-3" /> Show less</>

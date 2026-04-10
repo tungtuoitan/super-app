@@ -145,7 +145,7 @@ export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentE
     }
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-2 text-left">
             {hasImageChanges && (
                 <div className="flex flex-wrap gap-2">
                     {imageDiff!.removed.map((img) => <DiffImageThumb key={`rm-${img.fileId}`} img={img} type="remove" />)}
