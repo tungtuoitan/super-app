@@ -44,7 +44,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const isTempNode = id.startsWith("temp-node-");
     const nodeLocked = isNodeLocked(id);
     const isHighPriority = data.task.priority === "high" || data.task.priority === "urgent";
-    const isDone = data.task.status === "completed" || data.task.status === "cancelled";
+    const isDone = data.task.status === "completed" || data.task.status === "cancelled" || data.task.status === "failed";
     const isInProgress = data.task.status === "in_progress";
     const isBgProgress = data.task.status === "background_progress";
     const nodeOpacity = isDone ? 0.4 : 1;

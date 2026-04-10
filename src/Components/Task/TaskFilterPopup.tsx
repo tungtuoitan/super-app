@@ -125,7 +125,7 @@ export function TaskFilterPopup() {
                             const options = registriesByType[group.standardRegistryType] || [];
                             const isEmpty = !(pending as any)[group.key]?.trim();
                             const ORDER = {
-                                status: ["open", "in_progress","background_progress","paused", "completed", "on_hold", "cancelled"],
+                                status: ["open", "in_progress","background_progress","paused", "completed", "on_hold", "cancelled", "failed"],
                                 priority: ["low", "medium", "high"]
                             };
 

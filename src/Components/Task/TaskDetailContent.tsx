@@ -165,7 +165,7 @@ export function TaskDetailContent() {
                             inputProps={{ name: "status", label: "Status" }}
                             disabled={isDeleted}
                             placeholder="Select status..."
-                            disabledCodes={["completed"]}
+                            disabledCodes={["completed", "failed"]}
                         />
 
                         <StatusAutoComplete

@@ -373,7 +373,7 @@ function TaskFlowCanvas() {
                             const status = (node.data as { task?: { status: string } })?.task?.status;
                             if (status === "in_progress") return "hsl(var(--primary))";
                             if (status === "background_progress") return "#38bdf8";
-                            if (status === "completed" || status === "cancelled") return "hsl(var(--muted-foreground) / 0.3)";
+                            if (status === "completed" || status === "cancelled" || status === "failed") return "hsl(var(--muted-foreground) / 0.3)";
                             return "hsl(var(--muted-foreground) / 0.6)";
                         }}
                     />

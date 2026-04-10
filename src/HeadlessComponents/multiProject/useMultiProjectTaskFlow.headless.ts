@@ -73,7 +73,7 @@ export function useMultiProjectTaskFlowHeadless() {
                     const extras = prev.filter((n) => !autoIds.has(n.id));
                     const merged = autoNodes.map((n) => {
                         const status = (n.data as TaskFlowNodeData).task?.status;
-                        const locked = lockOldNodes && (status === "completed" || status === "cancelled");
+                        const locked = lockOldNodes && (status === "completed" || status === "cancelled" || status === "failed");
                         return {
                             ...n,
                             position: positions[n.id] ?? n.position,
@@ -108,7 +108,7 @@ export function useMultiProjectTaskFlowHeadless() {
             for (const n of prev) prevPositions[n.id] = n.position;
             const merged = autoNodes.map((n) => {
                 const status = (n.data as TaskFlowNodeData).task?.status;
-                const locked = lockOldNodes && (status === "completed" || status === "cancelled");
+                const locked = lockOldNodes && (status === "completed" || status === "cancelled" || status === "failed");
                 return {
                     ...n,
                     position: prevPositions[n.id] ?? savedPositions[n.id] ?? n.position,
