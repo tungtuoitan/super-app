@@ -92,7 +92,7 @@ export function getTaskBarColors(status: string) {
 
 /** Check if task status is non-draggable (dropped, completed, cancelled) */
 export function isStatusNonDraggable(status: string): boolean {
-    return ["dropped", "completed", "cancelled"].includes(status);
+    return ["dropped", "completed", "cancelled", "failed"].includes(status);
 }
 
 /** Get task status colors with border (for kanban column header) */
@@ -142,7 +142,7 @@ export function validateDropTaskOntoTask(dragTask: Task, dropTask: Task, allTask
     }
 
     // Rule 2: Drop target status must be open, inprogress, or onhold
-    if (["completed", "cancelled"].includes(dropTask.status)) {
+    if (["completed", "cancelled", "failed"].includes(dropTask.status)) {
         return { canDrop: false, errorMessage: `Cannot drop onto a ${dropTask.status} task` };
     }
 

@@ -33,6 +33,8 @@ export const useMultiProjectKanbanHelper = () => {
 
             if (task.status === "cancelled" && targetStatus === "completed") return false;
             if (task.status === "completed" && (targetStatus === "cancelled" || targetStatus === "onhold")) return false;
+            if (task.status === "failed") return false;
+            if (targetStatus === "failed") return false;
 
             if (targetStatus === "completed") {
                 const subtasks = filteredTasks.filter((t) => t.parentTaskId === task.id);

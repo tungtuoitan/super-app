@@ -66,7 +66,7 @@ export const useMultiProjectTaskFlowHelper = () => {
         if (!lockOldNodes) return false;
         const node = flowNodes.find((n) => n.id === nodeId);
         const status = (node?.data as TaskFlowNodeData)?.task?.status;
-        return status === "completed" || status === "cancelled";
+        return status === "completed" || status === "cancelled" || status === "failed";
     }, [lockOldNodes, flowNodes]);
 
     const isEdgeLocked = useCallback((edgeId: string): boolean => {
@@ -83,7 +83,7 @@ export const useMultiProjectTaskFlowHelper = () => {
             setFlowNodes((prev) => {
                 // Build a set of locked node IDs for fast lookup
                 const lockedIds = lockOldNodes
-                    ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled"; }).map((n) => n.id))
+                    ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled" || s === "failed"; }).map((n) => n.id))
                     : null;
 
                 // Filter out position changes for locked nodes (allow select so miniBar viewDetail works)
@@ -502,7 +502,7 @@ export const useMultiProjectTaskFlowHelper = () => {
             // Only reposition orphan nodes — connected nodes + their edges stay untouched
             // Also exclude locked nodes from repositioning
             const lockedIds = lockOldNodes
-                ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled"; }).map((n) => n.id))
+                ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled" || s === "failed"; }).map((n) => n.id))
                 : new Set<string>();
             const movable = prev.filter((n) => !lockedIds.has(n.id));
             const frozen = prev.filter((n) => lockedIds.has(n.id));
