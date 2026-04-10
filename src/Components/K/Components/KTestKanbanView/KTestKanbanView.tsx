@@ -10,7 +10,7 @@ import { AutoResizeTextarea } from "../KNodeEditorPanel/AutoResizeTextarea";
 import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { NodeCard } from "../KNodeEditorPanel/NodeCard";
-import { KNodeEditorProvider } from "../../store/KNodeEditor.store";
+import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { ScoreSparkline } from "../small/ScoreSparkline";
 import { QuestionScoreBar } from "../small/QuestionScoreBar";
 import type { KTestDetail, KTestQuestion, KTestSummary } from "../../types/kTest.type";
@@ -39,7 +39,11 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
     const [creating, setCreating]             = useState(false);
     const newTitleRef = useRef<HTMLInputElement>(null);
     const [selectedMap, setSelectedMap] = useState<Map<number, number>>(new Map()); // questionId -> testId
+    const [showDeletedTests, setShowDeletedTests] = useState(false);
     const lastLoadKeyRef = useRef<string | null>(null);
+
+    const deletedTestCount = tests.filter(t => !!t.deletedAt).length;
+    const visibleTests = showDeletedTests ? tests : tests.filter(t => !t.deletedAt);
 
     useEffect(() => {
         const key = `${knowledgeId}:${activeNodeId}`;
@@ -121,27 +125,24 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
         await reorderTests(knowledgeId, newOrder.map(t => t.id));
     };
 
-    // Move question(s) between tests — supports single & bulk (shift-select) moves
+    // Move question(s) between tests — updates TestId in-place, preserves SRS/history
     const handleMoveQuestion = async (item: QuestionDragItem, targetTestId: number) => {
         const allItems = item.items?.length ? item.items : [{ questionId: item.questionId, sourceTestId: item.sourceTestId }];
         const toMove = allItems.filter(i => i.sourceTestId !== targetTestId);
         if (!toMove.length) return;
 
-        // Group by source test
+        // Collect moved question objects for optimistic update
         const bySource = new Map<number, number[]>();
-        const questionsToAdd: { name: string; description: string | null }[] = [];
         const movedQuestions: KTestQuestion[] = [];
 
         for (const it of toMove) {
-            const srcDetail = detailsMap[it.sourceTestId];
-            const q = srcDetail?.questions.find(x => x.id === it.questionId);
+            const q = detailsMap[it.sourceTestId]?.questions.find(x => x.id === it.questionId);
             if (!q) continue;
             if (!bySource.has(it.sourceTestId)) bySource.set(it.sourceTestId, []);
             bySource.get(it.sourceTestId)!.push(it.questionId);
-            questionsToAdd.push({ name: q.question, description: q.answer });
             movedQuestions.push(q);
         }
-        if (!questionsToAdd.length) return;
+        if (!movedQuestions.length) return;
 
         // Optimistic update
         setDetailsMap(prev => {
@@ -155,14 +156,12 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
         setSelectedMap(new Map());
 
         try {
-            // Delete from all sources in parallel
-            await Promise.all(
-                Array.from(bySource.entries()).map(([srcId, qIds]) =>
-                    updateQuestions(knowledgeId, srcId, { addQuestions: [], updateQuestions: [], toggleQuestionIds: [], deleteQuestionIds: qIds, restoreQuestionIds: [] })
-                )
-            );
-            // Add to target
-            await updateQuestions(knowledgeId, targetTestId, { addQuestions: questionsToAdd, updateQuestions: [], toggleQuestionIds: [], deleteQuestionIds: [], restoreQuestionIds: [] });
+            // Single PATCH: update TestId on the existing rows — no new rows, SRS preserved
+            const moveItems = movedQuestions.map(q => ({ id: q.id, targetTestId }));
+            await updateQuestions(knowledgeId, targetTestId, {
+                addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
+                deleteQuestionIds: [], restoreQuestionIds: [], moveQuestions: moveItems,
+            });
 
             // Refresh all affected tests
             const affectedIds = [targetTestId, ...bySource.keys()];
@@ -216,6 +215,16 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
 
     const cancelCreateTest = () => { setCreatingTest(false); setNewTestTitle(""); };
 
+    const handleDeleteTest = async (testId: number) => {
+        await KTestService._deleteTest(knowledgeId, testId);
+        await loadTests(knowledgeId, activeNodeId ?? undefined);
+    };
+
+    const handleRestoreTest = async (testId: number) => {
+        await KTestService._restoreTest(knowledgeId, testId);
+        await loadTests(knowledgeId, activeNodeId ?? undefined);
+    };
+
     return (
         <div className="flex flex-col h-full">
             {/* Toolbar */}
@@ -250,7 +259,17 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
                 )}
                 <span className="text-xs text-zinc-600 ml-auto">
                     {selectedMap.size > 0 && <span className="text-blue-400 mr-2">{selectedMap.size} selected</span>}
-                    {tests.length} test{tests.length !== 1 ? "s" : ""}
+                    {visibleTests.length} test{visibleTests.length !== 1 ? "s" : ""}
+                    {deletedTestCount > 0 && (
+                        <button
+                            onClick={() => setShowDeletedTests(v => !v)}
+                            title={showDeletedTests ? "Hide deleted tests" : "Show deleted tests"}
+                            className={`ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded transition-colors ${showDeletedTests ? "text-red-400 bg-red-950/30" : "text-zinc-600 hover:text-zinc-400"}`}
+                        >
+                            <Trash2 className="w-3 h-3" />
+                            {deletedTestCount}
+                        </button>
+                    )}
                 </span>
             </div>
 
@@ -261,7 +280,7 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
                 </div>
             ) : (
                 <div className="flex gap-3 flex-1 overflow-x-auto px-4 py-4" onClick={handleClearSelection}>
-                    {tests.map((test, index) => {
+                    {visibleTests.map((test, index) => {
                         const detail = detailsMap[test.id];
                         const questions = detail?.questions ?? [];
 
@@ -290,6 +309,8 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
                                     await KTestService._updateTestStatus(knowledgeId, test.id, status);
                                     await loadTests(knowledgeId, activeNodeId ?? undefined);
                                 }}
+                                onDeleteTest={() => handleDeleteTest(test.id)}
+                                onRestoreTest={() => handleRestoreTest(test.id)}
                             />
                         );
                     })}
@@ -315,12 +336,14 @@ interface KanbanColumnProps {
     onRefresh: () => Promise<void>;
     onOptimisticUpdate: (questionId: number, patch: { name: string; description: string | null }) => void;
     onStatusChange: (status: string) => Promise<void>;
+    onDeleteTest: () => Promise<void>;
+    onRestoreTest: () => Promise<void>;
     selectedIds: Map<number, number>;
     onToggleSelect: (questionId: number, testId: number) => void;
     onClearSelection: () => void;
 }
 
-function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRecord, onRename, onDrop, onColumnDrop, onNewCardCreated, onRefresh, onOptimisticUpdate, onStatusChange, selectedIds, onToggleSelect, onClearSelection }: KanbanColumnProps) {
+function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRecord, onRename, onDrop, onColumnDrop, onNewCardCreated, onRefresh, onOptimisticUpdate, onStatusChange, onDeleteTest, onRestoreTest, selectedIds, onToggleSelect, onClearSelection }: KanbanColumnProps) {
     const { activeNodeId } = useKTestStore();
     const [editingTitle, setEditingTitle] = useState(false);
     const [titleDraft, setTitleDraft]     = useState("");
@@ -336,14 +359,14 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
     const dropSideRef = useRef<"left" | "right">("left");
 
     const isAnyEditing = editingTitle || showNewCard;
-
+    const isTestDeleted = !!test.deletedAt;
     // Drop zone for card moves (whole column)
     const [{ isOver, canDrop }, dropRef] = useDrop<QuestionDragItem, void, { isOver: boolean; canDrop: boolean }>(() => ({
         accept: KANBAN_DND,
-        canDrop: (item) => item.sourceTestId !== test.id && !isAnyEditing,
+        canDrop: (item) => item.sourceTestId !== test.id && !isAnyEditing && !isTestDeleted,
         drop: (item) => onDrop(item),
         collect: monitor => ({ isOver: monitor.isOver(), canDrop: monitor.canDrop() }),
-    }), [test.id, onDrop, isAnyEditing]);
+    }), [test.id, onDrop, isAnyEditing, isTestDeleted]);
     dropRef(columnRef);
 
     // Drag source for column reorder (header only)
@@ -357,7 +380,7 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
     // Drop zone for column reorder
     const [{ isColumnOver, canColumnDrop }, colDropRef] = useDrop<ColumnDragItem, void, { isColumnOver: boolean; canColumnDrop: boolean }>(() => ({
         accept: COLUMN_DND,
-        canDrop: (item) => item.testId !== test.id && !isAnyEditing,
+        canDrop: (item) => item.testId !== test.id && !isAnyEditing && !isTestDeleted,
         hover: (_, monitor) => {
             if (!monitor.canDrop()) return;
             const offset = monitor.getClientOffset();
@@ -375,7 +398,7 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
             isColumnOver:  monitor.isOver(),
             canColumnDrop: monitor.canDrop(),
         }),
-    }), [test.id, index, onColumnDrop, isAnyEditing]);
+    }), [test.id, index, onColumnDrop, isAnyEditing, isTestDeleted]);
 
     useEffect(() => { if (!isColumnOver) setDropSide(null); }, [isColumnOver]);
 
@@ -418,12 +441,14 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
         return () => document.removeEventListener("mousedown", handler);
     }, [ctxMenu]);
 
+
+
     const dropActive = isOver && canDrop;
 
     return (
         <div
             ref={columnRef}
-            className={`relative flex flex-col shrink-0 rounded-lg border transition-all ${isColumnDragging || isTreeDragging ? "!w-0 !min-w-0 overflow-hidden opacity-0 border-0" : "w-64"} ${dropActive ? "border-blue-500/60 bg-blue-950/20" : "border-zinc-800/60 bg-zinc-900/30"}`}
+            className={`relative flex flex-col shrink-0 rounded-lg border transition-all ${isColumnDragging || isTreeDragging ? "!w-0 !min-w-0 overflow-hidden opacity-0 border-0" : "w-64"} ${dropActive ? "border-blue-500/60 bg-blue-950/20" : isTestDeleted ? "border-zinc-800/40 bg-zinc-900/15 opacity-60" : "border-zinc-800/60 bg-zinc-900/30"}`}
             onContextMenu={openCtxMenu}
         >
             {/* Column insertion indicator */}
@@ -527,7 +552,7 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
             <ScrollArea className="flex-1">
                 <div className="flex flex-col gap-1.5 p-2">
                     {questions.filter(q => showDeleted || !q.deletedAt).map(q => (
-                        <DraggableQuestionCard key={q.id} question={q} testId={test.id} knowledgeId={knowledgeId} onRefresh={onRefresh} onOptimisticUpdate={onOptimisticUpdate} isSelected={selectedIds.has(q.id)} selectedIds={selectedIds} onToggleSelect={onToggleSelect} onClearSelection={onClearSelection} />
+                        <DraggableQuestionCard key={q.id} question={q} testId={test.id} knowledgeId={knowledgeId} onRefresh={onRefresh} onOptimisticUpdate={onOptimisticUpdate} isSelected={selectedIds.has(q.id)} selectedIds={selectedIds} onToggleSelect={onToggleSelect} onClearSelection={onClearSelection} isTestDeleted={isTestDeleted} />
                     ))}
                     {showNewCard && (
                         <KanbanQuestionInlineForm
@@ -574,6 +599,24 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
                         <Plus className="w-3.5 h-3.5 text-zinc-400" />
                         New Card
                     </button>
+                    <div className="my-1 border-t border-zinc-800" />
+                    {isTestDeleted ? (
+                        <button
+                            onClick={() => { closeCtxMenu(); onRestoreTest(); }}
+                            className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-green-400"
+                        >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            Restore Test
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => { closeCtxMenu(); onDeleteTest(); }}
+                            className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-red-400"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete Test
+                        </button>
+                    )}
                 </div>
             )}
         </div>
@@ -582,34 +625,7 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
 
 // ── DraggableQuestionCard ────────────────────────────────────────────────────
 
-function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOptimisticUpdate, isSelected, selectedIds, onToggleSelect, onClearSelection }: { question: KTestQuestion; testId: number; knowledgeId: number; onRefresh: () => Promise<void>; onOptimisticUpdate: (questionId: number, patch: { name: string; description: string | null }) => void; isSelected: boolean; selectedIds: Map<number, number>; onToggleSelect: (questionId: number, testId: number) => void; onClearSelection: () => void }) {
-    const wrapperRef  = useRef<HTMLDivElement>(null);
-    const ctxMenuRef  = useRef<HTMLDivElement>(null);
-    const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
-
-    const [{ isDragging }, dragRef] = useDrag<QuestionDragItem, void, { isDragging: boolean }>(() => ({
-        type: KANBAN_DND,
-        item: () => {
-            if (isSelected && selectedIds.size > 1) {
-                const items = Array.from(selectedIds.entries()).map(([qId, tId]) => ({ questionId: qId, sourceTestId: tId }));
-                return { questionId: question.id, sourceTestId: testId, items };
-            }
-            onClearSelection();
-            return { questionId: question.id, sourceTestId: testId };
-        },
-        canDrag: () => !question.deletedAt,
-        collect: monitor => ({ isDragging: monitor.isDragging() }),
-    }), [question.id, testId, question.deletedAt, isSelected, selectedIds, onClearSelection]);
-
-    dragRef(wrapperRef);
-
-    useEffect(() => {
-        if (!ctxMenu) return;
-        const handler = (e: MouseEvent) => { if (!ctxMenuRef.current?.contains(e.target as Node)) setCtxMenu(null); };
-        document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
-    }, [ctxMenu]);
-
+function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOptimisticUpdate, isSelected, selectedIds, onToggleSelect, onClearSelection, isTestDeleted }: { question: KTestQuestion; testId: number; knowledgeId: number; onRefresh: () => Promise<void>; onOptimisticUpdate: (questionId: number, patch: { name: string; description: string | null }) => void; isSelected: boolean; selectedIds: Map<number, number>; onToggleSelect: (questionId: number, testId: number) => void; onClearSelection: () => void; isTestDeleted: boolean }) {
     const node: KItemV2 = {
         id: question.id,
         knowledgeId,
@@ -636,6 +652,70 @@ function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOpt
         });
         await onRefresh();
     };
+
+    return (
+        <KNodeEditorProvider rootNode={node}>
+            <DraggableQuestionCardInner
+                question={question}
+                testId={testId}
+                knowledgeId={knowledgeId}
+                node={node}
+                onRefresh={onRefresh}
+                isSelected={isSelected}
+                selectedIds={selectedIds}
+                onToggleSelect={onToggleSelect}
+                onClearSelection={onClearSelection}
+                onSubmitEdit={handleSubmitEdit}
+                isTestDeleted={isTestDeleted}
+            />
+        </KNodeEditorProvider>
+    );
+}
+
+interface CardInnerProps {
+    question: KTestQuestion;
+    testId: number;
+    knowledgeId: number;
+    node: KItemV2;
+    onRefresh: () => Promise<void>;
+    isSelected: boolean;
+    selectedIds: Map<number, number>;
+    onToggleSelect: (questionId: number, testId: number) => void;
+    onClearSelection: () => void;
+    onSubmitEdit: (draft: { name: string; description: string; icon: string | null; color: string | null }) => Promise<void>;
+    isTestDeleted: boolean;
+}
+
+function DraggableQuestionCardInner({ question, testId, knowledgeId, node, onRefresh, isSelected, selectedIds, onToggleSelect, onClearSelection, onSubmitEdit, isTestDeleted }: CardInnerProps) {
+    const { editingNodeId } = useKNodeEditorStore();
+    const isEditing = editingNodeId === question.id;
+
+    const wrapperRef  = useRef<HTMLDivElement>(null);
+    const ctxMenuRef  = useRef<HTMLDivElement>(null);
+    const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
+
+    const [{ isDragging }, dragRef] = useDrag<QuestionDragItem, void, { isDragging: boolean }>(() => ({
+        type: KANBAN_DND,
+        item: () => {
+            if (isSelected && selectedIds.size > 1) {
+                const items = Array.from(selectedIds.entries()).map(([qId, tId]) => ({ questionId: qId, sourceTestId: tId }));
+                return { questionId: question.id, sourceTestId: testId, items };
+            }
+            onClearSelection();
+            return { questionId: question.id, sourceTestId: testId };
+        },
+        canDrag: () => !question.deletedAt && !isEditing && !isTestDeleted,
+        collect: monitor => ({ isDragging: monitor.isDragging() }),
+    }), [question.id, testId, question.deletedAt, isEditing, isTestDeleted, isSelected, selectedIds, onClearSelection]);
+
+    dragRef(wrapperRef);
+
+    useEffect(() => {
+        if (!ctxMenu) return;
+        const handler = (e: MouseEvent) => { if (!ctxMenuRef.current?.contains(e.target as Node)) setCtxMenu(null); };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, [ctxMenu]);
 
     const handleDelete = async () => {
         setCtxMenu(null);
@@ -668,16 +748,14 @@ function DraggableQuestionCard({ question, testId, knowledgeId, onRefresh, onOpt
     return (
         <div
             ref={wrapperRef}
-            className={` relative ${isSelected ? "ring-1 ring-blue-500/70 rounded-lg" : ""}`}
-            style={{ opacity: isDragging ? 0 : 1, cursor: question.deletedAt ? "default" : "grab" }}
+            className={`relative ${isSelected ? "ring-1 ring-blue-500/70 rounded-lg" : ""}`}
+            style={{ opacity: isDragging ? 0 : 1, cursor: question.deletedAt || isEditing ? "default" : "grab" }}
             onClick={e => {
                 if (e.shiftKey && !question.deletedAt) { e.stopPropagation(); onToggleSelect(question.id, testId); }
             }}
             onContextMenuCapture={e => { e.preventDefault(); e.stopPropagation(); setCtxMenu({ x: e.clientX, y: e.clientY }); }}
         >
-            <KNodeEditorProvider rootNode={node}>
-                <NodeCard node={node} compact onSubmitEdit={handleSubmitEdit} />
-            </KNodeEditorProvider>
+            <NodeCard node={node} compact onSubmitEdit={onSubmitEdit} />
 
             {/* Score history + SRS next review — overlaid at bottom-right */}
             {!question.deletedAt && (question.scoreHistory.length > 0 || question.srsNextReviewAt) && (
@@ -740,7 +818,7 @@ function KanbanQuestionInlineForm({ knowledgeId, testId, onDone, onCancel }: Kan
     const [name, setName]               = useState("");
     const [description, setDescription] = useState("");
     const [saving, setSaving]           = useState(false);
-    const inputRef                      = useRef<HTMLInputElement>(null);
+    const inputRef                      = useRef<HTMLTextAreaElement>(null);
     const { updateQuestions }           = useKTestLoader();
 
     useEffect(() => { setTimeout(() => inputRef.current?.focus(), 30); }, []);
@@ -798,13 +876,13 @@ function KanbanQuestionInlineForm({ knowledgeId, testId, onDone, onCancel }: Kan
 
             {/* Name */}
             <div className="px-4 shrink-0">
-                <input
+                <AutoResizeTextarea
                     ref={inputRef}
                     value={name}
-                    onChange={e => setName(e.target.value)}
+                    onChange={v => setName(v)}
                     placeholder="Question"
-                    disabled={saving}
-                    className="w-full bg-transparent text-sm font-semibold text-left outline-none border-b border-zinc-700 pb-0.5 text-white"
+                    rows={1}
+                    className="text-xs font-semibold text-left border-b border-zinc-700 text-white"
                     onKeyDown={e => { if (e.key === "Escape") onCancel(); }}
                 />
             </div>

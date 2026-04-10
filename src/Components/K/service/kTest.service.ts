@@ -167,6 +167,18 @@ const _getRetention = async (knowledgeId: number): Promise<KRetentionSummary> =>
     return Promise.reject(res);
 };
 
+const _deleteTest = async (knowledgeId: number, testId: number): Promise<ResultOptions> => {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/${testId}`, { method: "DELETE" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
+const _restoreTest = async (knowledgeId: number, testId: number): Promise<ResultOptions> => {
+    const res = await apiFetch(`${base(knowledgeId)}/tests/${testId}/restore`, { method: "PUT" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 const _getRetentionGraph = async (knowledgeId: number, days = 14): Promise<KRetentionGraph> => {
     const res = await apiFetch(`${base(knowledgeId)}/retention-graph?days=${days}`, { method: "GET" });
     if (res.ok) return res.json();
@@ -197,6 +209,8 @@ export const KTestService = {
     _getQuestionScores,
     _updateTest,
     _updateQuestions,
+    _deleteTest,
+    _restoreTest,
     _transcribeAudio,
     _getDailyQueue,
     _getGlobalDailyQueue,
