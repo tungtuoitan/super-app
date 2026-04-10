@@ -103,10 +103,13 @@ export const useTaskSectionHelper = () => {
 
     const doSwitchTab = useCallback((key: SectionTab) => {
         setActiveSection(key);
+        setOpenTabs((prev: BaseTab[]) =>
+            prev.map((t) => t.id === activeTabId ? { ...t, metadata: { ...t.metadata, activeSection: key } } : t),
+        );
         if (key === "desc") triggerDescFocus();
         if (key === "comment") triggerCommentFocus();
         if (isCustomTab(key)) triggerCustomFocus();
-    }, [setActiveSection, triggerDescFocus, triggerCommentFocus, triggerCustomFocus]);
+    }, [setActiveSection, setOpenTabs, activeTabId, triggerDescFocus, triggerCommentFocus, triggerCustomFocus]);
 
     const handleTabClick = useCallback((key: SectionTab) => {
         if (key === activeSection) return;
