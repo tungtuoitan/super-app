@@ -7,6 +7,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useCallback, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import CodeBlock from "@tiptap/extension-code-block";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
@@ -28,12 +29,15 @@ import {
     ListChecks,
     Palette,
     ChevronDown,
+    Code2,
 } from "lucide-react";
 import { fileService, UploadContext } from "@/services/file.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { constants } from "@/utils/constants";
 import "./RichTextEditor.css";
 import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 
@@ -57,6 +61,8 @@ interface RichTextEditorProps {
      * Without this prop, Enter behaves normally (creates paragraph).
      */
     onEnter?: () => void;
+    /** Show "Copy as plain text" on right-click — strips extra blank lines between paragraphs */
+    enableCopyPlainText?: boolean;
 }
 
 interface ToolbarButtonProps {
@@ -108,8 +114,10 @@ export function RichTextEditor({
     uploadContext,
     uploadContextId,
     onEnter,
+    enableCopyPlainText = false,
 }: RichTextEditorProps) {
     const { $user } = useAuthStore();
+    const { showContextMenu } = useOrchestratorContextMenuHelper();
     const [isUploading, setIsUploading] = useState(false);
     const onEnterRef = useRef<(() => void) | undefined>(onEnter);
     useLayoutEffect(() => { onEnterRef.current = onEnter; }, [onEnter]);
@@ -142,12 +150,35 @@ export function RichTextEditor({
                 }
                 return false;
             },
+            handlePaste: (view, event) => {
+                const clipData = event.clipboardData;
+                if (!clipData) return false;
+                // If clipboard has image, let the existing image paste handler handle it
+                for (const item of clipData.items) {
+                    if (item.type.startsWith("image/")) return false;
+                }
+                const plain = clipData.getData("text/plain");
+                const html = clipData.getData("text/html");
+                // If there's no HTML (plain text paste) and content has indentation → wrap in code block
+                if (!html && plain && /^[ \t]+\S/m.test(plain)) {
+                    event.preventDefault();
+                    view.dispatch(
+                        view.state.tr.replaceSelectionWith(
+                            view.state.schema.nodes.codeBlock.create(null, view.state.schema.text(plain))
+                        )
+                    );
+                    return true;
+                }
+                return false;
+            },
         },
         extensions: [
             StarterKit.configure({
-                heading: {
-                    levels: [1, 2],
-                },
+                heading: { levels: [1, 2] },
+                codeBlock: false,
+            }),
+            CodeBlock.configure({
+                HTMLAttributes: { class: "rich-text-codeblock" },
             }),
             Placeholder.configure({
                 placeholder,
@@ -194,6 +225,22 @@ export function RichTextEditor({
 
     // Load images with data-file-id via proxy
     useProxyImageLoader({ editor, token: $user.userToken || null });
+
+    // Copy as plain text — joins paragraphs with \n instead of \n\n
+    const handleCopyPlainText = useCallback(() => {
+        if (!editor) return;
+        const { from, to, empty } = editor.state.selection;
+        const text = empty
+            ? editor.getText({ blockSeparator: '\n' })
+            : editor.state.doc.textBetween(from, to, '\n');
+        navigator.clipboard.writeText(text);
+    }, [editor]);
+
+    const handleContextMenu = useCallback((e: React.MouseEvent) => {
+        showContextMenu(e, constants.contextMenu.contextMenuTypes.richTextEditor, {
+            onCopyPlainText: handleCopyPlainText,
+        });
+    }, [showContextMenu, handleCopyPlainText]);
 
     // Focus when focusTrigger changes (for tab-switch scenarios)
     useEffect(() => {
@@ -469,6 +516,7 @@ export function RichTextEditor({
         <div
             ref={editorContainerRef}
             className={cn("overflow-hidden bg-background relative", disabled && "opacity-60", className)}
+            onContextMenu={enableCopyPlainText ? handleContextMenu : undefined}
         >
             {/* Hidden file inputs */}
             <input
@@ -571,6 +619,15 @@ export function RichTextEditor({
                         title="Checklist"
                     >
                         <ListChecks className="h-4 w-4" />
+                    </ToolbarButton>
+
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+                        isActive={editor.isActive("codeBlock")}
+                        disabled={disabled}
+                        title="Code Block"
+                    >
+                        <Code2 className="h-4 w-4" />
                     </ToolbarButton>
 
                     <div className="w-px h-5 bg-border mx-0.5" />

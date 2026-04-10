@@ -150,6 +150,7 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
                     focusTrigger={isActiveTab ? customFocusTrigger : 0}
                     uploadContext="project"
                     uploadContextId={selectedTask?.projectId}
+                    enableCopyPlainText
                 />
             </div>
         </div>

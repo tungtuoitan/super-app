@@ -20,6 +20,7 @@ import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu
 import {KNodeMenu} from "../../Components/K/contexts/menu/KNodeMenu";
 import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
 import { KNodePanelCardMenu } from "../../Components/K/contexts/menu/KNodePanelCardMenu";
+import { RichTextEditorMenu } from "./menus/RichTextEditorMenu";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -81,6 +82,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case constants.contextMenu.contextMenuTypes.kKnowledgeSelector:
                 return <KKnowledgeMenu />;
+
+            case constants.contextMenu.contextMenuTypes.richTextEditor:
+                return <RichTextEditorMenu />;
 
             default:
                 return (
