@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useTaskDetailSectionStore } from "@/store/task/useTaskDetailSection.store";
+import { SectionTab, useTaskDetailSectionStore } from "@/store/task/useTaskDetailSection.store";
 import { useTaskSectionStore } from "@/store/task/useTaskSection.store";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { useTaskDetailSelector } from "@/Selectors/task/TaskDetailSelector";
@@ -17,7 +17,7 @@ import { useEditorTabsStore } from "@/store/index";
 export function TaskSectionHeadless() {
     const { setActiveSection } = useTaskDetailSectionStore();
     const { selectedTask } = useTaskDetailSelector();
-    const { activeTabId } = useEditorTabsStore();
+    const { openTabs, activeTabId } = useEditorTabsStore();
     const { isSectionDirty } = useTaskSectionSelector();
     const { handleSectionSave, handleSectionDiscard } = useTaskSectionHelper();
     const { savedNoteRef, setDescDirty, setDescKey } = useTaskSectionStore();
@@ -28,7 +28,9 @@ export function TaskSectionHeadless() {
     useEffect(() => {
         if (!selectedTask || selectedTask.id === lastTaskIdRef.current) return;
         lastTaskIdRef.current = selectedTask.id;
-        setActiveSection(selectedTask.id <= 0 ? "desc" : "process");
+        const activeTab = openTabs.find((t) => t.id === activeTabId);
+        const savedSection = activeTab?.metadata?.activeSection as SectionTab | undefined;
+        setActiveSection(savedSection ?? (selectedTask.id <= 0 ? "desc" : "process"));
     }, [selectedTask?.id]);
 
     // ── Reset desc state when task changes ────────────────────────────────────
