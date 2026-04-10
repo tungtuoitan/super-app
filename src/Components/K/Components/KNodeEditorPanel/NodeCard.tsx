@@ -53,7 +53,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
 
     const [showIconPicker, setShowIconPicker] = useState(false);
     const iconPickerRef = useRef<HTMLDivElement>(null);
-    const nameInputRef = useRef<HTMLInputElement>(null);
+    const nameInputRef = useRef<HTMLTextAreaElement>(null);
     const focusFieldRef = useRef<"name" | "description">("name");
     const isEditing = editingNodeId === node.id;
 
@@ -63,7 +63,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
         e.stopPropagation();
         setCardSize(s => s === "1x1" ? "2x1" : s === "2x1" ? "2x2" : "1x1");
     };
-    const heightClass = compact && !isEditing ? "h-16" : cardSize === "2x2" ? "h-[26.75rem]" : CARD_HEIGHT;
+    const heightClass = compact ? "" : cardSize === "2x2" ? "h-[26.75rem]" : CARD_HEIGHT;
     const spanClass   = cardSize !== "1x1"  ? "col-span-2"  : "";
     const rowClass    = cardSize === "2x2"  ? "row-span-2"  : "";
 
@@ -322,27 +322,26 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
 
 
             {/* Name */}
-            <div className={compact && !isEditing ? "px-3 flex items-center h-full" : " mt-4 px-2 shrink-0 h-6"}
-            
+            <div className={compact && !isEditing ? "px-2 pt-2.5 pb-2" : "mt-4 px-2 shrink-0"}
+
             >
                 {isEditing ? (
-                    <input
+                    <AutoResizeTextarea
                         ref={nameInputRef}
                         value={editDraft.name}
-                        onChange={(e) => setDraft("name", e.target.value)}
+                        onChange={(v) => setDraft("name", v)}
                         placeholder="Name"
-                        className="w-full bg-transparent text-sm font-semibold text-left outline-none border-b border-zinc-700 pb-0.5"
+                        rows={1}
+                        className={`${compact ? "text-xs" : "text-sm"} font-semibold text-left border-b border-zinc-700 pb-2`}
                         style={{ color:"#808080" }}
-                        // style={{ color: isQuestion ? "#808080" : (editDraft.color || node.color || "#f4f4f5") }}
                         onKeyDown={(e) => {
                             if (e.key === "Escape") { e.preventDefault(); handleCancelEdit(); }
                             if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); submitEdit(node, editDraft); }
-                            if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); } // block accidental save
                         }}
                     />
                 ) :
                     <button
-                        className="text-sm cursor-text font-semibold text-left leading-snug line-clamp-2 mt-[3px] w-full "
+                        className={`${compact ? "text-xs" : "text-sm"} cursor-text font-semibold text-left leading-snug mt-[3px] w-full whitespace-pre-wrap`}
                         // style={{ color: isQuestion ? "#808080" : (node.color || "#f4f4f5") }}
                         style={{ color:"#808080" }}
                         onDoubleClick={(e) => {
@@ -364,7 +363,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
 
             {/* Description */}
             {(!compact || isEditing) && (
-                <div className="px-4 pt-1.5 flex-1 min-h-0 text-left overflow-y-auto">
+                <div className={`px-2 pt-1.5 ${compact ? "pb-2" : "flex-1 min-h-0 overflow-y-auto"} text-left`}>
                     {isEditing ? (
                         <AutoResizeTextarea
                             ref={descRef}
