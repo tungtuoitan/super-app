@@ -138,7 +138,7 @@ export function buildTaskFlowLayout(
 /** Status column order for orphan node grouping */
 const STATUS_ORDER: string[] = [
     "open", "in_progress", "background_progress", "paused",
-    "on_hold", "completed", "cancelled",
+    "on_hold", "completed", "cancelled", "failed",
 ];
 
 /** Estimate rendered height of a node based on its task content. */

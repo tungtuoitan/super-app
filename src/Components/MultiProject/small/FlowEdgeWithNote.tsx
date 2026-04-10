@@ -36,7 +36,7 @@ export function FlowEdgeWithNote({
     const edgeLocked = isEdgeLocked(id);
 
     const isDimmed = useMemo(() => {
-        const DIMMED = new Set(["completed", "cancelled"]);
+        const DIMMED = new Set(["completed", "cancelled", "failed"]);
         const sNode = flowNodes.find((n) => n.id === source);
         const tNode = flowNodes.find((n) => n.id === target);
         const sStatus = (sNode?.data as TaskFlowNodeData)?.task?.status;
