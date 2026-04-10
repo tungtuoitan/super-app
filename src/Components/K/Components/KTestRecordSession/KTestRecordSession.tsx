@@ -312,8 +312,19 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
                         <span className="text-xs text-muted-foreground">{currentIndex + 1}/{totalQuestions}</span>
                     </div>
                 </div>
-                <div className="h-1 rounded-full bg-muted overflow-hidden max-w-lg mx-auto">
-                    <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                <div className="flex items-center gap-2 max-w-lg mx-auto">
+                    <div className="h-1 rounded-full bg-muted overflow-hidden flex-1">
+                        <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                    </div>
+                    {!isTransitioning && (
+                        <button
+                            onClick={enterReviewPhase}
+                            className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-700 hover:bg-zinc-600 transition-colors shrink-0 px-2.5 py-1 rounded-md font-medium"
+                        >
+                            <PenLine className="w-3 h-3" />
+                            Preview
+                        </button>
+                    )}
                 </div>
             </div>
 

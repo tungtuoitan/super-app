@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { ArrowLeft, Mic, MicOff, ChevronRight, Loader2, CheckCircle2, XCircle, Type, BookOpen, KeyRound, Send, PenLine } from "lucide-react";
+import { ArrowLeft, Mic, MicOff, ChevronRight, Loader2, CheckCircle2, XCircle, Type, KeyRound, Send, PenLine, Check } from "lucide-react";
 import { KReviewEditor } from "../small/KReviewEditor";
 import { Button } from "@/Components/ui/button";
 import { KTestService } from "../../service/kTest.service";
+import { AutoResizeTextarea } from "../KNodeEditorPanel/AutoResizeTextarea";
+import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import type { KDailySessionQuestion, KDailyAnswerItem, KSubmitAnswersResult, KQuestionGrade } from "../../types/kTest.type";
 
 interface KDailyReviewSessionProps {
@@ -32,6 +34,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
     const [countdown, setCountdown]         = useState(0);
     const [isSubmitting, setIsSubmitting]   = useState(false);
     const [result, setResult]               = useState<KSubmitAnswersResult | null>(null);
+    const [editingGradeId, setEditingGradeId] = useState<number | null>(null);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef        = useRef<Blob[]>([]);
@@ -308,7 +311,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                         <p className="text-sm text-muted-foreground mt-0.5">{totalPoints} / {maxPoints} pts</p>
                     </div>
                     <div className="w-full flex flex-col gap-2.5">
-                        {grades.map((g, i) => <GradeCard key={g.questionId} index={i + 1} grade={g} />)}
+                        {grades.map((g, i) => <GradeCard key={g.questionId} index={i + 1} grade={g} knowledgeId={knowledgeId} testId={testId} editingGradeId={editingGradeId} onSetEditing={setEditingGradeId} />)}
                     </div>
                     <Button onClick={onComplete} className="w-full">Done</Button>
                 </div>
@@ -386,9 +389,19 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                             <span className="text-xs text-muted-foreground">{currentIndex + 1}/{totalQuestions}</span>
                         </div>
                     </div>
-                    <div className="h-1 rounded-full bg-muted overflow-hidden
-                     mx-auto">
-                        <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                    <div className="flex items-center gap-2 mx-auto">
+                        <div className="h-1 rounded-full bg-muted overflow-hidden flex-1">
+                            <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                        </div>
+                        {!isTransitioning && (
+                            <button
+                                onClick={enterReviewPhase}
+                                className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-700 hover:bg-zinc-600 transition-colors shrink-0 px-2.5 py-1 rounded-md font-medium"
+                            >
+                                <PenLine className="w-3 h-3" />
+                                Preview
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -533,51 +546,116 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
 
 // ── GradeCard ──────────────────────────────────────────────────────────────
 
-function GradeCard({ index, grade }: { index: number; grade: KQuestionGrade }) {
-    const [showAnswer, setShowAnswer] = useState(false);
-    const isWeak = grade.point <= 4;
+function GradeCard({ index, grade, knowledgeId, testId, editingGradeId, onSetEditing }: { index: number; grade: KQuestionGrade; knowledgeId: number; testId: number; editingGradeId: number | null; onSetEditing: (id: number | null) => void }) {
+    const isEditing = editingGradeId === grade.questionId;
+    const [answerDraft, setAnswerDraft]     = useState(grade.expectedAnswer ?? "");
+    const [displayAnswer, setDisplayAnswer] = useState(grade.expectedAnswer ?? "");
+    const [saving, setSaving]               = useState(false);
+
+    const handleSaveAnswer = async () => {
+        if (saving) return;
+        setSaving(true);
+        const trimmed = answerDraft.trim();
+        setDisplayAnswer(trimmed);   // optimistic
+        onSetEditing(null);
+        try {
+            await KTestService._updateQuestions(knowledgeId, testId, {
+                addQuestions: [],
+                updateQuestions: [{ id: grade.questionId, name: grade.question, description: trimmed || null }],
+                toggleQuestionIds: [],
+                deleteQuestionIds: [],
+                restoreQuestionIds: [],
+            });
+        } catch {
+            setDisplayAnswer(grade.expectedAnswer ?? ""); // rollback
+        } finally { setSaving(false); }
+    };
+
+    const handleStartEdit = () => { setAnswerDraft(displayAnswer); onSetEditing(grade.questionId); };
+    const handleCancel    = () => { onSetEditing(null); setAnswerDraft(displayAnswer); };
+
+    useGlobalShortcut("ctrl+s", { id: `grade-card-save-${grade.questionId}`, priority: 90, enabled: isEditing && !saving }, () => {
+        handleSaveAnswer();
+        return true;
+    });
+
+    const isCorrect = grade.point >= 4;
 
     return (
-        <div className={`rounded-lg border p-2.5 flex flex-col gap-1.5 text-left ${grade.point >= 4 ? "border-green-500/30 bg-green-500/5" : "border-red-500/30 bg-red-500/5"}`}>
+        <div className={`rounded-lg border p-2.5 flex flex-col gap-2 text-left ${isCorrect ? "border-green-500/30 bg-green-500/5" : "border-red-500/30 bg-red-500/5"}`}>
+
+            {/* Question + score */}
             <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium flex-1 min-w-0">{index}. {grade.question}</p>
+                <p className="text-sm font-medium flex-1 min-w-0 whitespace-pre-wrap">{index}. {grade.question}</p>
                 <div className="flex items-center gap-1.5 shrink-0">
-                    {grade.expectedAnswer && (
-                        <button onClick={() => setShowAnswer(v => !v)}
-                            className={`transition-colors ${showAnswer ? "text-primary" : "text-muted-foreground/40 hover:text-muted-foreground"}`}
-                            title="View expected answer">
-                            <BookOpen className="w-3.5 h-3.5" />
-                        </button>
-                    )}
-                    {grade.point >= 4
+                    {isCorrect
                         ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
                         : <XCircle className="w-3.5 h-3.5 text-red-500" />
                     }
-                    <span className={`text-[11px] font-semibold ${grade.point >= 4 ? "text-green-500" : "text-red-500"}`}>{grade.point}pt</span>
+                    <span className={`text-[11px] font-semibold ${isCorrect ? "text-green-500" : "text-red-500"}`}>{grade.point}pt</span>
                 </div>
             </div>
-            {grade.point !== 5 && (
+
+            {/* User's answer */}
+            {grade.answerText ? (
                 <div className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground/70">You: </span>
-                    {grade.answerText ? grade.answerText : <span className="italic opacity-50">no answer</span>}
+                    <span className="font-medium text-foreground/50">You: </span>
+                    <span className="whitespace-pre-wrap">{grade.answerText}</span>
                 </div>
+            ) : (
+                <p className="text-xs italic text-muted-foreground/40">No answer</p>
             )}
-            {isWeak && grade.comment && (
-                <div className="mt-1.5 rounded-md bg-amber-500/10 border border-amber-500/20 px-2.5 py-2">
-                    <p className="text-[13px] font-medium text-amber-400 leading-relaxed">
+
+            {/* AI comment */}
+            {grade.comment && (
+                isCorrect ? (
+                    <p className="text-xs italic text-muted-foreground/60 flex items-start gap-1.5">
+                        <KeyRound className="w-3 h-3 shrink-0 mt-0.5 opacity-50" />
                         {grade.comment}
                     </p>
+                ) : (
+                    <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5">
+                        <p className="text-[13px] font-medium text-amber-400 leading-relaxed">{grade.comment}</p>
+                    </div>
+                )
+            )}
+
+            {/* Expected answer — always visible, double-click to edit */}
+            <div className="border-t border-border/30 pt-2 mt-0.5">
+                <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wide">Expected</span>
+                    {isEditing && (
+                        <div className="flex items-center gap-1.5">
+                            {saving
+                                ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground/40" />
+                                : <button onClick={handleSaveAnswer} className="text-green-500 hover:text-green-400">
+                                    <Check className="w-3 h-3" />
+                                </button>
+                            }
+                            <button onClick={handleCancel} className="text-muted-foreground/40 hover:text-muted-foreground">
+                                <XCircle className="w-3 h-3" />
+                            </button>
+                        </div>
+                    )}
                 </div>
-            )}
-            {!isWeak && grade.comment && (
-                <p className="text-xs mt-2 text-right italic text-muted-foreground/70 flex items-start gap-1.5">
-                    <KeyRound className="w-3 h-3 shrink-0 mt-0.5 opacity-50" />
-                    {grade.comment}
-                </p>
-            )}
-            {showAnswer && grade.expectedAnswer && (
-                <div className="text-xs text-primary/80 border-t border-border/30 pt-1.5 mt-0.5">{grade.expectedAnswer}</div>
-            )}
+                {isEditing ? (
+                    <AutoResizeTextarea
+                        value={answerDraft}
+                        onChange={setAnswerDraft}
+                        placeholder="Expected answer…"
+                        className="text-xs text-primary/80 w-full"
+                        onKeyDown={e => { if (e.key === "Escape") handleCancel(); }}
+                    />
+                ) : (
+                    <p
+                        className="text-xs text-primary/80 whitespace-pre-wrap cursor-text"
+                        onDoubleClick={handleStartEdit}
+                        title="Double-click to edit"
+                    >
+                        {displayAnswer || <span className="italic text-muted-foreground/30">No expected answer</span>}
+                    </p>
+                )}
+            </div>
         </div>
     );
 }

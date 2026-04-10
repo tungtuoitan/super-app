@@ -20,7 +20,7 @@ function toMarkdown(questions: KReviewEditorQuestion[], answers: Record<number, 
     return questions
         .map((q, i) => {
             const answer = answers[q.id] ?? "";
-            return `# ${i + 1}. ${q.question}\n${answer}`;
+            return `# ${i + 1}. ${q.question.replace(/\n/g, " ")}\n${answer}`;
         })
         .join("\n\n");
 }
@@ -38,7 +38,7 @@ function parseMarkdown(
         if (i >= questions.length) return;
         const firstNewline = section.indexOf("\n");
         const heading = firstNewline === -1 ? section.trim() : section.slice(0, firstNewline).trim();
-        const expectedHeading = `# ${i + 1}. ${questions[i].question}`;
+        const expectedHeading = `# ${i + 1}. ${questions[i].question.replace(/\n/g, " ")}`;
         if (heading !== expectedHeading) headingsChanged = true;
         const answer = firstNewline === -1 ? "" : section.slice(firstNewline + 1);
         answers[questions[i].id] = answer;
