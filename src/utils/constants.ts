@@ -121,6 +121,7 @@ export const constants = {
             kNodePanelCard: "k-node-panel-card",
             workspaceSelector: "workspace-selector",
             taskFlow: "task-flow",
+            richTextEditor: "richtext-editor",
         } as const,
     },
 
