@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Check, Loader2, Pencil, Play, Plus, X, HelpCircle, Mic, Trash2, RotateCcw, Eye, EyeOff, BookX, GripVertical } from "lucide-react";
+import { BookOpen, Check, Loader2, Pencil, Play, Plus, X, HelpCircle, Mic, Trash2, RotateCcw, Eye, EyeOff, BookX, GripVertical, PenLine } from "lucide-react";
 import { useDrag, useDrop } from "react-dnd";
 import { Button } from "@/Components/ui/button";
 import { ScrollArea } from "@/Components/ui/scroll-area";
@@ -689,6 +689,7 @@ interface CardInnerProps {
 function DraggableQuestionCardInner({ question, testId, knowledgeId, node, onRefresh, isSelected, selectedIds, onToggleSelect, onClearSelection, onSubmitEdit, isTestDeleted }: CardInnerProps) {
     const { editingNodeId } = useKNodeEditorStore();
     const isEditing = editingNodeId === question.id;
+    const isDraft   = !question.deletedAt && (!question.answer?.trim() || question.answer.trim().includes("DRAFT"));
 
     const wrapperRef  = useRef<HTMLDivElement>(null);
     const ctxMenuRef  = useRef<HTMLDivElement>(null);
@@ -756,6 +757,13 @@ function DraggableQuestionCardInner({ question, testId, knowledgeId, node, onRef
             onContextMenuCapture={e => { e.preventDefault(); e.stopPropagation(); setCtxMenu({ x: e.clientX, y: e.clientY }); }}
         >
             <NodeCard node={node} compact onSubmitEdit={onSubmitEdit} />
+
+            {/* Draft indicator — answer empty or contains "DRAFT" */}
+            {isDraft && !isEditing && (
+                <div className="absolute top-1.5 right-1.5 pointer-events-none">
+                    <PenLine className="w-3 h-3 text-amber-500/70" />
+                </div>
+            )}
 
             {/* Score history + SRS next review — overlaid at bottom-right */}
             {!question.deletedAt && (question.scoreHistory.length > 0 || question.srsNextReviewAt) && (
