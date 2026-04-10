@@ -5,11 +5,13 @@ interface AutoResizeTextareaProps {
     onChange: (v: string) => void;
     placeholder?: string;
     className?: string;
+    style?: React.CSSProperties;
+    rows?: number;
     onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
 export const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, AutoResizeTextareaProps>(
-    ({ value, onChange, placeholder, className, onKeyDown }, forwardedRef) => {
+    ({ value, onChange, placeholder, className, style, rows = 5, onKeyDown }, forwardedRef) => {
         const localRef = useRef<HTMLTextAreaElement>(null);
 
         useLayoutEffect(() => {
@@ -26,10 +28,11 @@ export const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, AutoResizeText
                     if (typeof forwardedRef === "function") forwardedRef(el);
                     else if (forwardedRef) forwardedRef.current = el;
                 }}
-                rows={5}
+                rows={rows}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
+                style={style}
                 onKeyDown={onKeyDown}
                 className={`resize-none overflow-hidden bg-transparent placeholder:opacity-20 outline-none w-full ${className}`}
             />

@@ -22,6 +22,7 @@ export interface KTestSummary {
     lastSubmittedAt: string | null;
     createdAt: string | null;
     sortOrder: number;
+    deletedAt?: string | null;
     /** Last ≤10 submission percentages oldest→newest — for sparkline */
     scoreHistory: number[];
 }
@@ -84,6 +85,8 @@ export interface KUpdateQuestionsRequest {
     restoreQuestionIds: number[];
     /** k.question IDs to reset SRS state */
     resetSrsQuestionIds?: number[];
+    /** Move questions to a different test (preserves SRS/history) */
+    moveQuestions?: Array<{ id: number; targetTestId: number }>;
 }
 
 // ── Submit answers + grading result ──────────────────────────────────────────
