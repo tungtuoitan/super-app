@@ -7,7 +7,7 @@ import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useTabKeyboardShortcuts } from "@/hooks/vsCode/useTabKeyboardShortcuts";
 import { BaseTab } from "@/types/editor/tab.types";
 import { ICON_MAP, IconType } from "@/shared/icons";
-import { Note } from "@/types/note.types";
+import { Note } from "@/features/note/types/note.types";
 import { Ws } from "@/types/workspace.types";
 import { useTabBarHelper } from "@/hooks/vsCode/useTabBarHelper";
 import { useMobileStore } from "@/store/mobile/Mobile.store";

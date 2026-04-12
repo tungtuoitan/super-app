@@ -11,10 +11,10 @@ import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
-import { noteService } from "@/services/note.service";
+import { noteService } from "@/features/note/service/note.service";
 import { parseKeywordLink } from "@/utils/keyword-link.utils";
 import { constants } from "@/utils/constants";
-import { Note } from "@/types/note.types";
+import { Note } from "@/features/note/types/note.types";
 import { WorkspaceNoteItem, WorkspaceFolderItem } from "@/types/workspace-v2.types";
 import { WorkspaceDTO } from "@/types/workspace-dto.types";
 import { Keyword } from "@/types/keyword.types";

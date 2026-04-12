@@ -74,7 +74,6 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const editorRef = useRef<_monaco.editor.IStandaloneCodeEditor | null>(null);
     const decorationsRef = useRef<string[]>([]);
     const disposablesRef = useRef<_monaco.IDisposable[]>([]);
-    // const $miRef = useRef<any>(useMonaco()); // khởi tạo ở đây vẫn bị null
     const $miRef = useRef<any>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [editorMountCount, setEditorMountCount] = useState(0);
@@ -82,17 +81,11 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     return (
         <NoteDetailContext.Provider
             value={{
-                // Container refs
                 noteNameRef,
-
-                // Focus state
                 shouldFocusNoteName,
                 setShouldFocusNoteName,
-
-                // Validation state
                 nameError,
                 setNameError,
-
                 displayDesc,
                 setDisplayDesc,
                 editorRef,

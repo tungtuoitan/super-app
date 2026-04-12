@@ -7,7 +7,7 @@ import { useActivityBarStore } from "@/store/index";
 import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
-import { useKStore } from "@/Components/K/store/K.store";
+import { useKStore } from "@/features/K/store/K.store";
 
 const activityModules = [
     { id: constants.modules.workspace, icon: Boxes, label: constants.vscode.displayNames.workspace },

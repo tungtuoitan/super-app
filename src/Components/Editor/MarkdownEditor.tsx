@@ -9,7 +9,7 @@ import type * as _monaco from "monaco-editor";
 import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useWorkspaceStore, useEditorStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { useNoteDetailHelper } from "@/hooks/note/useNoteDetail.helper";
+import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
 import { Loader2 } from "lucide-react";
@@ -23,8 +23,8 @@ import {
     setupMarkdownFolding,
     updateDecorations,
 } from "@/utils/markdown.utils";
-import { Note } from "@/types/note.types";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { Note } from "@/features/note/types/note.types";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useSnackbar } from "notistack";
 import { MarkdownEditorNavigationTracker } from "@/HeadlessComponents/markdownEditor/MarkdownEditorNavigationTracker";
 import { MarkdownEditorViewStateSync } from "@/HeadlessComponents/markdownEditor/MarkdownEditorViewStateSync";

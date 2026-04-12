@@ -1,22 +1,21 @@
 /**
  * NoteGridPopup - Dialog for adding existing notes to workspace folder
- * Reuses NoteGrid component completely with GridControlBar
  */
 
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Loader2, FileText } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
-import { useNoteGridPopupStore } from "@/store/workspace/NoteGridPopup.store";
-import { useNoteGridPopupHelper } from "@/hooks/workspace/useNoteGridPopup.helper";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
+import { useNoteGridPopupStore } from "../../store/useNoteGridPopup.store";
+import { useNoteGridPopupHelper } from "../../hooks/useNoteGridPopup.helper";
+import { useNoteGridStore } from "../../store/useNoteGrid.store";
+import { NoteGrid } from "../NoteGrid";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useKeyboardShortcut } from "@/shared/hooks";
-import { NoteGrid } from "@/Components/Note/NoteGrid";
 import { GridControlBar } from "@/Components/shared/GridControlBar";
 import { isNote } from "@/types/workspace-v2.types";
-import {useGridControlStore} from "@/store/grid/useGridControl.store";
-import {constants} from "@/utils/constants";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { constants } from "@/utils/constants";
 
 export function NoteGridPopup() {
     const {
@@ -24,8 +23,7 @@ export function NoteGridPopup() {
         targetFolder,
         isSubmitting,
     } = useNoteGridPopupStore();
-        const { setModuleName, setFilterViewKey, setSearchQuery } = useGridControlStore();
-    
+    const { setModuleName, setFilterViewKey, setSearchQuery } = useGridControlStore();
 
     const {
         closeNoteGridPopup,
@@ -35,34 +33,26 @@ export function NoteGridPopup() {
     const { notes, noteGridRowSelection } = useNoteGridStore();
     const { currentWorkspace } = useWorkspaceStore();
 
-    // Count selected notes
     const selectedCount = useMemo(() => {
         return Object.keys(noteGridRowSelection).filter(key => noteGridRowSelection[key]).length;
     }, [noteGridRowSelection]);
 
-    // useEffect(() => {
-    //     setFilterViewKey(constants.filters.views.noteGrid)
-    // }, [])
-
-    // Get existing note IDs in workspace (for info display)
     const existingNoteIds = useMemo(() => {
         if (!currentWorkspace?.flatData) return new Set<number>();
-        
+
         const noteIds = currentWorkspace.flatData
             .filter(item => isNote(item))
             .map(item => item.entityId);
-        
+
         return new Set(noteIds);
     }, [currentWorkspace]);
 
-    // Count available notes (not in workspace and not deleted)
     const availableNotesCount = useMemo(() => {
-        return notes.filter(note => 
+        return notes.filter(note =>
             !existingNoteIds.has(note.id) && !note.deletedAt
         ).length;
     }, [notes, existingNoteIds]);
 
-    // Get disabled row IDs (already in workspace or deleted)
     const disabledRowIds = useMemo(() => {
         const disabled = new Set<number>();
         notes.forEach(note => {
@@ -73,7 +63,6 @@ export function NoteGridPopup() {
         return disabled;
     }, [notes, existingNoteIds]);
 
-    // Keyboard Shortcuts
     useKeyboardShortcut({
         key: "Enter",
         enabled: isNoteGridPopupOpen && !isSubmitting && selectedCount > 0,
@@ -86,7 +75,6 @@ export function NoteGridPopup() {
         callback: closeNoteGridPopup,
     });
 
-    // Handle dialog close
     const handleClose = () => {
         if (!isSubmitting) {
             closeNoteGridPopup();
@@ -108,14 +96,13 @@ export function NoteGridPopup() {
                     </div>
                 </DialogHeader>
 
-                {/* Reuse NoteGrid component - with visible pagination */}
                 <div className="flex-1 overflow-hidden px-6 flex flex-col">
                     <NoteGrid source={constants.modules.workspace} disabledRowIds={disabledRowIds} />
                 </div>
 
                 <DialogFooter className="mx-6 py-4 gap-2 flex-row items-center">
                     <div className="flex-1 text-sm text-muted-foreground">
-                        {selectedCount > 0 
+                        {selectedCount > 0
                             ? `${selectedCount} note(s) selected`
                             : `${availableNotesCount} available notes (${notes.length - availableNotesCount} already in workspace or deleted)`
                         }

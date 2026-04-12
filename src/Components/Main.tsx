@@ -6,7 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { AuthStoreProvider, useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceProvider } from "@/store/workspace/Workspace.store";
 import { FolderDialogProvider } from "@/store/workspace/FolderDialog.store";
-import { NoteGridPopupProvider } from "@/store/workspace/NoteGridPopup.store";
+import { NoteGridPopupProvider, NoteDetailProvider, NoteGridProvider } from "@/features/note";
 import { MovingTreeProvider } from "@/store/workspace/MovingTree.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
@@ -14,8 +14,6 @@ import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
 import MainNav from "./MainNav/MainNav"; 
 import { DialogProvider, EditorTabProvider, EditorProvider, GeneralProvider, CommandPaletteProvider, ConsoleProvider } from "@/store/index";
 import { EditorToolbarProvider } from "@/store/editor/EditorToolbar.store";
-import { NoteDetailProvider } from "@/store/note/useNoteDetail.store"; 
-import { NoteGridProvider } from "@/store/note/useNoteGrid.store";
 import { NavProvider } from "@/contexts/NavigationContext";
 import { WsProvider } from "@/store/ws/useWs.store";
 import { WsDetailProvider } from "@/store/ws/useWsDetail.store";
@@ -40,9 +38,9 @@ import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
 import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
-import {KProvider} from "./K/store/K.store";
-import {KFolderDialogProvider} from "./K/store/KNodeDialog.store";
-import {KMovingTreeProvider} from "./K/store/KMovingTree.store";
+import {KProvider} from "@/features/K/store/K.store";
+import {KFolderDialogProvider} from "@/features/K/store/KNodeDialog.store";
+import {KMovingTreeProvider} from "@/features/K/store/KMovingTree.store";
 
 /**
  * Main application layout component.

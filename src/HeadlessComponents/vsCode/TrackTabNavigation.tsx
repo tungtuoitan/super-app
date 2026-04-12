@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 
 /**
  * VSEditorArea - Main editor area for note content

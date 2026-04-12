@@ -8,7 +8,7 @@ import { useGeneralStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } 
 import { constants } from "@/utils/constants";
 import { updateDecorations } from "@/utils/markdown.utils";
 import "@/styles/keywords.css";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {Note} from "@/types/index";
 import {useEditorTabHelper} from "@/hooks/vsCode/useEditorTab.helper";
 

@@ -3,14 +3,11 @@
  * Helper functions for note data transformation and manipulation
  */
 
-import { Note, NoteDTO } from "@/types/note.types";
+import { Note, NoteDTO } from "../types/note.types";
 
 /**
  * Transform NoteDTO from API to Note domain model
  * Converts string dates to Date objects and maps tags to hashtags
- *
- * @param dto - Note DTO from API
- * @returns Note domain model
  */
 export const transformANote = (dto: NoteDTO): Note => {
     return {
@@ -18,7 +15,7 @@ export const transformANote = (dto: NoteDTO): Note => {
         name: dto.name,
         userId: dto.userId,
         description: dto.description,
-        hashtags: dto.hashtags, // Map 'hashtags' from backend to 'hashtags' in domain model
+        hashtags: dto.hashtags,
         type: dto.type,
         icon: dto.icon,
         color: dto.color,
@@ -33,9 +30,6 @@ export const transformANote = (dto: NoteDTO): Note => {
 
 /**
  * Transform array of NoteDTOs from API to Note domain models
- *
- * @param dtos - Array of NoteDTOs from API
- * @returns Array of Note domain models with transformed dates
  */
 export const transformNotes = (dtos: NoteDTO[]): Note[] => {
     return dtos.map(transformANote);
@@ -44,9 +38,6 @@ export const transformNotes = (dtos: NoteDTO[]): Note[] => {
 /**
  * Format date for display
  * Handles both Date objects and ISO strings
- *
- * @param date - Date object or ISO string
- * @returns Formatted date string or '-' if invalid
  */
 export const formatNoteDate = (date: Date | string | undefined): string => {
     if (!date) return "-";

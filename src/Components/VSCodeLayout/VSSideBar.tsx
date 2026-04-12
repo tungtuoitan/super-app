@@ -1,6 +1,6 @@
 import { Panel, PanelGroup } from "react-resizable-panels";
 import type { ActivityBarView } from "@/utils/constants";
-import { NoteGrid } from "../Note/NoteGrid";
+import { NoteGrid } from "@/features/note";
 import { VSCodeResizeHandle } from "@/Components/VSCodeLayout/VSCodeResizeHandle";
 import { WorkspaceView } from "./WorkspaceView";
 import { GridControlBar } from "@/Components/shared/GridControlBar";
@@ -12,7 +12,7 @@ import { ProjectView } from "./ProjectView";
 import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { Console } from "./Console";
-import {KView} from "../K/Components/KView";
+import {KView} from "@/features/K/Components/KView";
 
 interface VSSideBarProps {
     moduleName: string;

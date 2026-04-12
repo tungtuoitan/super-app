@@ -1,23 +1,20 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { flexRender } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { useNoteGridStore } from "../store/useNoteGrid.store";
+import { useNoteGridHelper } from "../hooks/useNoteGrid.helper";
+import { useNoteGridTableHelper } from "../hooks/useNoteGrid.table.helper";
+import { Note } from "../types/note.types";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
-import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
 import { useAuthStore, useEditorTabsStore } from "@/store/index";
-import { useNoteGridTableHelper } from "@/hooks/note/useNoteGrid.table.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import { Note } from "@/types/note.types";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
- * VSCode-style dark theme table for notes
- *
- * @param disabledRowIds - Set of note IDs to disable (for selection mode in popup)
  */
 export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { source?: string; disabledRowIds?: Set<number> } = {}) {
     const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef, noteGridPagination, totalCount } = useNoteGridStore();
@@ -28,7 +25,6 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
     const { filterViewKey, searchQuery } = useGridControlStore();
     const { openTabs, activeTabId } = useEditorTabsStore();
 
-    // Update container width on resize
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -42,26 +38,21 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
         return () => resizeObserver.disconnect();
     }, []);
 
-    // Load data when user is ready
-    //TODO: chỗ này bị rerender nhiều lần, do component cha rerender, cần tối ưu lại
     useEffect(() => {
         if (!$user.userId || !$user.filters || Object.keys($user.filters).length === 0 || !filterViewKey) {
             return;
         }
-        // Load with current pagination state from store
         loadNotes();
     }, [$user.userId, $user.userToken, $user.filters, filterViewKey, noteGridPagination.pageIndex, noteGridPagination.pageSize, searchQuery]);
 
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
-            {/* Loading Overlay */}
             {noteGridIsLoading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
             )}
 
-            {/* Error Overlay */}
             {noteGridError && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Alert variant="destructive" className="max-w-md">
@@ -70,11 +61,9 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
                 </div>
             )}
 
-            {/* Table */}
             <div
                 className="flex-1 overflow-auto rounded-md border"
                 onContextMenu={(e) => {
-                    // Only show context menu if clicking on empty area (not on a row)
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest("tr[data-row]");
                     if (!isClickedOnRow && source === constants.modules.note) {
@@ -84,7 +73,6 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
             >
                 <table className="w-full">
                     <thead className="bg-muted/50 sticky top-0 z-10">
-                        {/* Column Headers */}
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className="border-b bg-[rgb(37,37,38)]">
                                 {headerGroup.headers.map((header) => (
@@ -97,12 +85,10 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => {
-                            // Get active note from tab to determine selection
                             const activeTab = openTabs.length > 0 && activeTabId ? openTabs.find((t: BaseTab) => t.id === activeTabId) : null;
                             const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
                             const isSelected = activeNote?.id === row.original.id && source === constants.modules.note;
 
-                            // Handle row click based on source
                             const handleRowClick = () => {
                                 if (source === constants.modules.note) {
                                     openTab(row.original, constants.vscode.tab.tabTypes.note);
@@ -136,7 +122,6 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
                 </table>
             </div>
 
-            {/* Pagination */}
             <div className="flex items-center justify-between px-4 py-1 bg-background">
                 <div className="flex-1 text-sm text-left text-muted-foreground">
                     Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} total)

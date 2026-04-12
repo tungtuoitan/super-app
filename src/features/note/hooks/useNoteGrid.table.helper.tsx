@@ -1,31 +1,14 @@
 import React, { useEffect, useMemo, useCallback } from "react";
-import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
-import { Loader2, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "@/Components/ui/button";
-import { Checkbox } from "@/Components/ui/checkbox";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
-import { Note } from "@/types/note.types";
-import { noteService } from "@/services/note.service";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
-import { useNoteGridHelper } from "@/hooks/note/useNoteGrid.helper";
-import { constants } from "@/utils/constants";
-import { useAuthStore } from "@/store/index";
+import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef } from "@tanstack/react-table";
+import { useNoteGridStore } from "../store/useNoteGrid.store";
+import { Note } from "../types/note.types";
+import { WorkspaceLinksCell } from "../Components/WorkspaceLinksCell";
 import { useGeneralStore } from "@/store/index";
-import { WorkspaceLinksCell } from "@/Components/Note/WorkspaceLinksCell";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useWorkspaceStore } from "@/store/index";
-import {useTreeHelper2} from "../workspace";
+import { constants } from "@/utils/constants";
+import { useNavigate, useLocation } from "react-router-dom";
 
-/**
- * NoteGrid - A flexible layout panel for displaying notes in a data table
- * VSCode-style dark theme table for notes
- *
- * @param onNoteClick - Callback when a note is clicked
- * @param sidebarMode - If true, shows only name column for compact sidebar view
- */
 export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<number>) {
-    // State từ centralized store
     const {
         notes,
         noteGridSorting,
@@ -44,53 +27,41 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
     const location = useLocation();
     const { setSelectedWorkspaceId, setScrollToItem, setSelectedItemIds } = useWorkspaceStore();
 
-    // Handle workspace navigation with highlight
     const handleWorkspaceNavigation = useCallback((workspaceId: number, workspaceItemId: number) => {
         if (!workspaceItemId) {
             return;
         }
 
-        // Set workspace (will trigger load/expand)
         setSelectedWorkspaceId(workspaceId);
-
-        // Set target item to scroll to (will be selected when tree renders)
         setSelectedItemIds([workspaceItemId]);
         setScrollToItem(true);
 
-        // Navigate if not already at /workspace
         if (!location.pathname.includes('/workspace')) {
             navigate('/workspace');
         }
     }, [location.pathname, navigate, setSelectedWorkspaceId, setSelectedItemIds, setScrollToItem]);
 
-    // Calculate which optional columns to show based on container width
-    // Base columns width: select (36) + id (36) + name (280) = 352
-    const showWorkspaceLinksColumn = containerWidth >= 462; // 352 + 110
-    const showStatusColumn = containerWidth >= 572; // 352 + 110 + 110
-    const showCreatedDateColumn = containerWidth >= 682; // 352 + 110 + 110 + 110
-    const showDeletedColumn = containerWidth >= 742; // 352 + 110 + 110 + 110 + 60
+    const showWorkspaceLinksColumn = containerWidth >= 462;
+    const showStatusColumn = containerWidth >= 572;
+    const showCreatedDateColumn = containerWidth >= 682;
+    const showDeletedColumn = containerWidth >= 742;
 
-    // Define columns for the data table
     const columns = useMemo<ColumnDef<Note>[]>(() => {
-        // Get status description from standardRegistry
         const getStatusDescription = (statusCode: string | undefined): string => {
             if (!statusCode) return "-";
             const status = registries.find((r) => r.code === statusCode && r.type === constants.standardRegistryFE.types.noteStatus);
             return status?.description || statusCode;
         };
 
-        // Base columns (always visible - không bị ảnh hưởng bởi responsive)
         const baseColumns: ColumnDef<Note>[] = [
             {
                 id: "select",
                 header: ({ table }) => {
-                    // Calculate if all selectable rows are selected
                     const selectableRows = table.getRowModel().rows.filter(row => !disabledRowIds?.has(row.original.id));
                     const selectedSelectableRows = selectableRows.filter(row => row.getIsSelected());
                     const isAllSelectableSelected = selectableRows.length > 0 && selectedSelectableRows.length === selectableRows.length;
                     const isSomeSelectableSelected = selectedSelectableRows.length > 0 && selectedSelectableRows.length < selectableRows.length;
 
-                    // Determine checked state: true, false, or 'indeterminate'
                     let checkedState: boolean | 'indeterminate' = false;
                     if (isAllSelectableSelected) {
                         checkedState = true;
@@ -100,12 +71,13 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
 
                     return (
                         <div className="flex items-center justify-center">
-                            <Checkbox
-                                checked={checkedState}
-                                onCheckedChange={(value) => {
-                                    // Toggle only selectable rows
+                            <input
+                                type="checkbox"
+                                checked={checkedState === true}
+                                ref={(el) => { if (el) el.indeterminate = checkedState === 'indeterminate'; }}
+                                onChange={(e) => {
                                     selectableRows.forEach(row => {
-                                        row.toggleSelected(!!value);
+                                        row.toggleSelected(!!e.target.checked);
                                     });
                                 }}
                                 aria-label="Select all"
@@ -117,11 +89,12 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
                     const isDisabled = disabledRowIds?.has(row.original.id) || false;
                     return (
                         <div className={`flex items-center justify-center ${isDisabled ? "opacity-30 cursor-pointer" : ""}`}>
-                            <Checkbox
+                            <input
+                                type="checkbox"
                                 checked={row.getIsSelected()}
-                                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                                onChange={(e) => row.toggleSelected(!!e.target.checked)}
                                 aria-label="Select row"
-                                onClick={(e) => e.stopPropagation()} // Prevent row click
+                                onClick={(e) => e.stopPropagation()}
                                 disabled={isDisabled}
                             />
                         </div>
@@ -150,25 +123,23 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
                 minSize: 280,
                 maxSize: 280,
                 enableResizing: false,
-                cell: ({ getValue, row }) => <div className="pl-1 text-sm text-primary text-left cursor-pointer hover:text-primary/80">{(getValue() as string) || "—"}</div>,
+                cell: ({ getValue }) => <div className="pl-1 text-sm text-primary text-left cursor-pointer hover:text-primary/80">{(getValue() as string) || "—"}</div>,
             },
         ];
 
-        // Optional columns (hiển thị khi có đủ chỗ, sắp xếp từ trái sang phải)
         const optionalColumns: ColumnDef<Note>[] = [];
 
-        // Cột Location (Workspace Links) - đưa lên đầu tiên
         if (showWorkspaceLinksColumn) {
             optionalColumns.push({
                 accessorKey: "workspaceLinks",
                 header: () => <div className="text-left text-sm">Location</div>,
                 size: 40,
                 enableSorting: false,
-                cell: ({ row, table }) => {
+                cell: ({ row }) => {
                     const links = row.original.workspaceLinks || [];
                     const count = links.length;
                     const rowIndex = row.index;
-                    const isFirstRows = rowIndex < 3; // First 3 rows show tooltip below
+                    const isFirstRows = rowIndex < 3;
                     return (
                         <WorkspaceLinksCell
                             count={count}
@@ -182,7 +153,6 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
             });
         }
 
-        // Cột Status (statusCode)
         if (showStatusColumn) {
             optionalColumns.push({
                 accessorKey: "statusCode",
@@ -195,7 +165,6 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
             });
         }
 
-        // Cột Created Date
         if (showCreatedDateColumn) {
             optionalColumns.push({
                 accessorKey: "createdAt",
@@ -210,7 +179,6 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
             });
         }
 
-        // Cột Deleted (di chuyển ra cuối cùng)
         if (showDeletedColumn) {
             optionalColumns.push({
                 accessorKey: "deletedAt",
@@ -225,7 +193,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
                     if (filterValue === "notNull") {
                         return deletedAt !== null && deletedAt !== undefined;
                     }
-                    return true; // 'all' - show everything
+                    return true;
                 },
                 cell: ({ getValue }) => {
                     const deletedAt = getValue() as Date | null | undefined;
@@ -246,7 +214,6 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         return [...baseColumns, ...optionalColumns];
     }, [containerWidth, showStatusColumn, showWorkspaceLinksColumn, showCreatedDateColumn, showDeletedColumn, registries, handleWorkspaceNavigation]);
 
-    // Create table instance
     const table = useReactTable({
         data: notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         columns,

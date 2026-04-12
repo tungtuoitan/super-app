@@ -1,25 +1,24 @@
 import { useCallback } from "react";
-import { useSnackbar } from "notistack";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
-import { Note, UpsertNoteDTO } from "@/types/note.types";
-import { noteService } from "@/services/note.service";
+import { useNoteDetailStore } from "../store/useNoteDetail.store";
+import { useNoteGridStore } from "../store/useNoteGrid.store";
+import { noteService } from "../service/note.service";
+import { transformANote } from "../utils/note.utils";
+import { Note, UpsertNoteDTO } from "../types/note.types";
+import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { keywordService } from "@/services/keyword.service";
 import { workspaceService } from "@/services/workspace.service";
 import { constants } from "@/utils/constants";
-import { useNoteGridHelper } from "./useNoteGrid.helper";
-import { useWorkspaceLoader } from "../workspace/useWorkspace.loader";
+import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { transformANote } from "@/utils/note.utils";
 import { extractExternalLinks } from "@/utils/markdown.utils";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
+import { useStandardRegistryHelper } from "@/hooks/standardRegistry/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 export const useNoteDetailHelper = () => {
@@ -35,56 +34,42 @@ export const useNoteDetailHelper = () => {
     const { loadKeywords } = useStandardRegistryHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
-        // Get current note from active tab
         const activeTab = getActiveTab();
         if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
             return;
         }
 
         const activeNote = activeTab.data as Note;
-        // console.log("[Helper] Current note:", { id: activeNote.id, name: activeNote.name });
 
-        // Extract value based on field type
         let _value;
         if (field === "statusCode") {
-            // value is synthetic event with structure: { target: { value: { id, label, ... } } }
             _value = value?.target?.value?.id || null;
         } else {
             _value = value;
         }
 
-        // Auto capitalize first letter for note name
         if (field === "name" && typeof _value === "string") {
             _value = _value.charAt(0).toUpperCase() + _value.slice(1);
         }
 
         if (field === 'icon') {
-            // Handle icon selection
             const _value = value.iconType;
             const defaultColor = value.defaultColor;
         }
         let updated = { ...activeNote, [field]: _value };
 
-        //* Special
         if (field === 'icon') {
             updated = { ...activeNote, icon: value.iconType, color: value.defaultColor };
         }
-        
 
-        // console.log("[Helper] Updated note:", { field, newValue: typeof _value === "string" ? _value.substring(0, 50) : _value });
-
-        // Update tab data directly (hasUnsavedChanges will be auto-calculated in NoteEditorPanel)
         setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated } : t)));
-        // console.log("[Helper] Tabs updated");
     };
 
     /**
      * Save current note (create or update using Upsert pattern)
-     * @param tabId - Current tab ID to update after save
      */
     const upsertNote = useCallback(
         async (tabId?: string): Promise<Note | null> => {
-            // Get current note from active tab
             const activeTab = getActiveTab();
             if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
                 _console.warning("⚠️ No note tab active to upsert");
@@ -93,48 +78,33 @@ export const useNoteDetailHelper = () => {
 
             const activeNote = activeTab.data as Note;
 
-            // ============================================================
-            // Step 1.5: Validate name field
-            // ============================================================
             if (!activeNote.name || activeNote.name.trim() === "") {
                 _console.error("Note name is required");
                 return null;
             }
 
-            // ============================================================
-            // Step 2: Determine operation mode (create/update/restore)
-            // ============================================================
             const isCreateMode = activeNote.id <= 0;
             const originalNote = activeTab.data0 as Note | undefined;
             const isRestoreMode = activeNote.id > 0 && originalNote?.deletedAt && !activeNote.deletedAt;
             const token = $user.userToken;
 
             try {
-                // ============================================================
-                // Step 3: Prepare upsert data with proper hashtag handling
-                // ============================================================
                 const upsertData: UpsertNoteDTO = {
-                    id: isCreateMode ? 0 : activeNote.id, // Always use 0 for create
+                    id: isCreateMode ? 0 : activeNote.id,
                     name: activeNote.name,
                     description: activeNote.description,
                     type: activeNote.type,
-                    statusCode: activeNote.statusCode, // Include status code
-                    icon: activeNote.icon, // Include icon type
-                    color: activeNote.color, // Include icon color
-                    deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch
+                    statusCode: activeNote.statusCode,
+                    icon: activeNote.icon,
+                    color: activeNote.color,
+                    deletedAt: isRestoreMode ? null : undefined,
                 };
 
-                // ============================================================
-                // Step 4: Call batch API to upsert note
-                // ============================================================
                 const result = await noteService._upsertNotes(token, [upsertData]);
                 if (!result.success) {
                     throw new Error(result.message || "Failed to save note");
                 }
 
-                // ============================================================
-                // Step 6: Extract and validate saved note from response
-                // ============================================================
                 const savedNote = result?.data?.[0];
 
                 if (!savedNote) {
@@ -142,10 +112,6 @@ export const useNoteDetailHelper = () => {
                 }
                 const transformedNote = transformANote(savedNote);
 
-                // ============================================================
-                // Step 10: Update tab data with server response
-                // ============================================================
-                // _console.(isCreateMode ? "Note created successfully" : "Note saved successfully");
                 _console.success(isCreateMode ? "Note created successfully" : "Note saved successfully");
 
                 if (tabId) {
@@ -155,11 +121,10 @@ export const useNoteDetailHelper = () => {
                                 return {
                                     ...tab,
                                     data: transformedNote,
-                                    data0: transformedNote, // Update data0 to new saved state
+                                    data0: transformedNote,
                                     noteId: transformedNote.id,
                                     title: transformedNote.name || "Unsaved Note",
                                     note: transformedNote,
-                                    // hasUnsavedChanges will be auto-calculated in NoteEditorPanel
                                 };
                             }
                             return tab;
@@ -167,8 +132,6 @@ export const useNoteDetailHelper = () => {
                     );
                 }
 
-                // reload
-                //TODO: chỉ reload khi thay đổi tên/status hoặc khi insert, ta sẽ triển khai sau khi đổi sang dùng
                 if (moduleName === constants.modules.note) {
                     loadNotes();
                 } else if (moduleName === constants.modules.workspace) {
@@ -203,7 +166,6 @@ export const useNoteDetailHelper = () => {
         }));
 
     const handleHashTagsChange = (hashtagsString: string) => {
-        // Convert comma-separated string of IDs back to hashtags array
         const hashtagIds = hashtagsString
             ? hashtagsString
                   .split(",")
@@ -211,7 +173,6 @@ export const useNoteDetailHelper = () => {
                   .filter((id) => id)
             : [];
 
-        // Convert hashtag IDs to Hashtag objects by finding them in the options
         const hashtagObjects = hashtagIds
             .map((hashtagId) => {
                 const foundOption = hashtagOptions.find((option: IAutoCompleteOptions) => option.id === hashtagId);

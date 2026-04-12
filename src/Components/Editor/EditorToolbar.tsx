@@ -10,7 +10,7 @@ import { Button } from "@/Components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { constants } from "@/utils/constants";

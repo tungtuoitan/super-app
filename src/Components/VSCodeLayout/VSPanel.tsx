@@ -1,19 +1,19 @@
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note";
 import { X, FileText, Settings, ArrowRightLeft, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
 import { useActivityBarStore, useMovingTreeStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
-import { Note } from "@/types/note.types";
+import { Note } from "@/features/note";
 import { MovingTab } from "../VSPanel/MovingTab";
 import { useConsoleStore } from "@/store/console/useConsole.store";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
-import { NoteDetailTab } from "../Note/NoteDetailTab";
+import { NoteDetailTab } from "@/features/note";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
-import {kconstants} from "../K/utils/K.Constants";
-import {KMovingTab} from "../K/Components/VSPanel/KMovingTab";
+import {kconstants} from "@/features/K/utils/K.Constants";
+import {KMovingTab} from "@/features/K/Components/VSPanel/KMovingTab";
 
 interface VSPanelProps {
     onClose: () => void;

@@ -11,7 +11,7 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { WorkspaceNoteItem } from "@/types/workspace-v2.types";
-import { Note } from "@/types/note.types";
+import { Note } from "@/features/note/types/note.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { StatusDot } from "./StatusDot";

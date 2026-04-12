@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import { useNavigationHistoryStore } from "@/store/index";
 import { EDITOR_LINE_DISTANCE_THRESHOLD } from "@/hooks/vsCode/useNavigationHistory.helper";

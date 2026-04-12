@@ -1,10 +1,10 @@
-import { noteService } from "@/services/note.service";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { Note } from "@/types/note.types";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName, transformNotes } from "../../utils";
-import { useSnackbar } from "notistack";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
+import { noteService } from "../service/note.service";
+import { useNoteDetailStore } from "../store/useNoteDetail.store";
+import { useNoteGridStore } from "../store/useNoteGrid.store";
+import { transformNotes } from "../utils/note.utils";
+import { Note } from "../types/note.types";
+import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
@@ -13,7 +13,7 @@ import { useEditorTabsStore, useNavigationHistoryStore, useGeneralStore } from "
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
@@ -30,19 +30,17 @@ export const useNoteGridHelper = () => {
 
     // Create new note (temporary with negative ID)
     const __createNewNote = () => {
-        // Generate sequential temporary negative ID from open tabs
         const existingIds = collectIdsFromTabs(openTabs);
         const tempId = generateTempId(existingIds);
         const name = generateUnsavedName(tempId);
 
-        // Create temporary note
         const newNote: Note = {
             id: tempId,
             name: name,
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: constants.standardRegistryFE.activeStatus.active, // Default to active status
+            statusCode: constants.standardRegistryFE.activeStatus.active,
             type: "idea",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -50,45 +48,32 @@ export const useNoteGridHelper = () => {
             deletedAt: null,
         };
 
-        // Insert at the beginning of notes array
         setNotes([newNote, ...notes]);
-
-        // Open note tab for editing
         openTab(newNote, constants.vscode.tab.tabTypes.note);
-
-        // Focus vào Note Name field sau khi tab mở
         setShouldFocusNoteName(true);
     };
 
     /**
      * Toggle delete/restore for selected notes (soft delete)
-     * - type = 'soft-delete': Set deletedAt timestamp (soft delete)
-     * - type = 'restore': Clear deletedAt (restore)
      */
     const __deleteRestore_SelectedNotes = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
-        // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(noteGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
-        // Separate temporary notes (negative IDs) from persisted notes (positive IDs)
         const tempNoteIds = selectedIds.filter((id) => id < 0);
         const persistedNoteIds = selectedIds.filter((id) => id > 0);
 
         try {
             const token = $user.userToken;
 
-            // Handle temporary notes - only for delete (remove from grid locally)
             if (type === "soft-delete" && tempNoteIds.length > 0) {
                 setNotes((prevNotes) => prevNotes.filter((note) => !tempNoteIds.includes(note.id)));
-
                 _console.success(`Removed ${tempNoteIds.length} unsaved note(s)`);
             }
 
-            // Determine deletedAt value based on action
             const deletedAt = type === "soft-delete" ? new Date().toISOString() : null;
-            // Handle persisted notes - call API
+
             if (persistedNoteIds.length > 0) {
-                // Build batch requests
                 const batchRequests = persistedNoteIds.map((id) => {
                     const note = notes.find((n) => n.id === id);
                     if (!note) {
@@ -102,12 +87,11 @@ export const useNoteGridHelper = () => {
                         type: note.type,
                         icon: note.icon,
                         color: note.color,
-                        deletedAt: deletedAt, // Set or clear soft delete timestamp
+                        deletedAt: deletedAt,
                         statusCode: note.statusCode,
                     };
                 });
 
-                // Call batch upsert API
                 const result = await noteService._upsertNotes(token, batchRequests);
 
                 if (!result.success) {
@@ -117,15 +101,12 @@ export const useNoteGridHelper = () => {
                 _console.success(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedNoteIds.length} note(s)`);
 
                 if(type === "soft-delete") {
-                    // Process tabs and navigation history
                     processTabAfterDelete(persistedNoteIds, "note");
                 }
 
-                // Reload notes from API
                 await loadNotes();
             }
 
-            // Clear selection
             setNoteGridRowSelection({});
         } catch (error) {
             console.error(`Failed to ${type === "soft-delete" ? "delete" : "restore"} notes:`, error);
@@ -141,21 +122,17 @@ export const useNoteGridHelper = () => {
 
     /**
      * Permanently delete selected notes (hard delete)
-     * Uses DELETE API to remove from database completely
      */
     const __hardDeleteSelectedNotes = async (ids?: number[]) => {
-        // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(noteGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
-        // Only hard delete persisted notes (positive IDs)
         const persistedNoteIds = selectedIds.filter((id) => id > 0);
 
         try {
             const token = $user.userToken;
 
             if (persistedNoteIds.length > 0) {
-                // Use DELETE API (permanently remove)
                 const result = await noteService._deleteNote(token, persistedNoteIds.join(","));
 
                 if (!result.success) {
@@ -166,11 +143,9 @@ export const useNoteGridHelper = () => {
 
                 processTabAfterDelete(persistedNoteIds, "note");
 
-                // Reload notes from API
                 await loadNotes();
             }
 
-            // Clear selection
             setNoteGridRowSelection({});
         } catch (error) {
             console.error("Failed to hard delete notes:", error);
@@ -184,15 +159,12 @@ export const useNoteGridHelper = () => {
         }
     };
 
-    // Handle context menu
     const openNoteContextMenu = (event: React.MouseEvent, row?: any) => {
         event.preventDefault();
         event.stopPropagation();
 
-        // Use current selection from store, or use hovered row if no selection
         let selectedIds = Object.keys(noteGridRowSelection).map((id) => parseInt(id));
-        
-        // If no selection and row provided, use the hovered row
+
         if (selectedIds.length === 0 && row) {
             selectedIds = [parseInt(row.id)];
         }
@@ -209,8 +181,6 @@ export const useNoteGridHelper = () => {
             onAddNote: __createNewNote,
         });
     };
-    // =============================================================================
-    // =============================================================================
 
     // Load notes with filters from user state
     const loadNotes = async () => {
@@ -218,13 +188,10 @@ export const useNoteGridHelper = () => {
             setNoteGridIsLoading(true);
             const token = $user.userToken;
 
-            // Get filters from user state
             const noteGridFilters = $user.filters?.noteGrid;
 
-            // Parse date range filters
             const createdAtRange = filterUtils._parseDateRange(noteGridFilters?.createdAt);
 
-            // Build filter params for API
             const filterParams = {
                 searchText: searchQuery || undefined,
                 statusCode: noteGridFilters?.statusCode,
@@ -237,12 +204,10 @@ export const useNoteGridHelper = () => {
 
             const result = await noteService._getNotes(token, filterParams);
 
-            // Check API response success
             if (!result.success) {
                 throw new Error(result.message || "Failed to load notes");
             }
 
-            // Transform dates from API strings to Date objects
             const transformedData = transformNotes(result.data || []);
             setNotes(transformedData);
             setTotalCount(result.totalCount || transformedData.length);
@@ -251,7 +216,6 @@ export const useNoteGridHelper = () => {
             const errorMessage = await parseApiError(err);
             setNoteGridError(new Error(errorMessage));
 
-            // Show snackbar for unauthorized errors
             if (isUnauthorizedError(err)) {
                 _console.success("Unauthorized. Please login again.");
             }

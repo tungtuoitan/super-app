@@ -1,22 +1,19 @@
 /**
- * Note Detail Dialog Content Component
- * Modern card-based layout with ClickUp theme
- * Clean, organized design with shadcn/ui components
+ * Note Detail Tab Component
  */
 
-import React, { useEffect, useRef } from "react";
-import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker } from "@/shared/components";
-import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import { Note } from "../../types/note.types";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
-import { formatNoteDate } from "@/utils/note.utils";
-import { useEditorTabHelper, useNoteDetailHelper } from "@/hooks/index";
+import React, { useEffect } from "react";
+import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker } from "@/shared/components";
+import { CardContent } from "@/Components/ui/card";
+import { Note } from "../types/note.types";
+import { useNoteDetailStore } from "../store/useNoteDetail.store";
+import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
+import { formatNoteDate } from "../utils/note.utils";
+import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useEditorTabsStore, useGeneralStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
-import { MarkdownEditor } from "../Editor/MarkdownEditor";
+import { MarkdownEditor } from "@/Components/Editor/MarkdownEditor";
 import { MarkdownEditorSync } from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync";
 import { MarkdownEditorTheme } from "@/HeadlessComponents/markdownEditor/MarkdownEditorTheme";
 import { useMonaco } from "@monaco-editor/react";
@@ -36,24 +33,12 @@ export function NoteDetailTab() {
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
 
-    // Get standard registry data from global state
     const { registries, registriesLoading, allKeywords } = useGeneralStore();
 
-    // Check if note is deleted (soft deleted)
     let isDeleted = activeNote?.deletedAt !== null;
     let isHardDeleted = activeNote?.isHardDeleted;
     const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
 
-    const hashtagOptions = registries
-        .filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
-        .map((item) => ({
-            id: item.code,
-            label: item.code,
-            desc: item.description || item.code,
-            active: item.isActive,
-        }));
-
-    // Get note status options from standard registry
     const noteStatusOptions = registries
         .filter((r) => r.type === constants.standardRegistryFE.types.noteStatus && r.isActive)
         .map((item) => ({
@@ -65,23 +50,15 @@ export function NoteDetailTab() {
 
     useEffect(() => {
         if (activeNote) {
-            // Don't increment noteKey - let components sync via props instead
-            // setNoteKey((prev) => prev + 1);
-            setNameError(""); // Reset error khi chuyển note
+            setNameError("");
         }
     }, [activeNote?.id]);
 
-    // useEffect(() => {
-    //     isDeleted = activeNote?.deletedAt !== null;
-    //     isHardDeleted = activeTab?.data && (activeTab.data as Note).isHardDeleted;
-    // }, [activeNote, openTabs]);
-
-    // Focus vào Note Name field khi tạo note mới
     useEffect(() => {
         if (shouldFocusNoteName && noteNameRef.current) {
             setTimeout(() => {
                 noteNameRef.current?.focus();
-                setShouldFocusNoteName(false); // Reset flag sau khi focus
+                setShouldFocusNoteName(false);
             }, 100);
         }
     }, [shouldFocusNoteName, noteNameRef]);
@@ -96,7 +73,6 @@ export function NoteDetailTab() {
                 {/* Left Column - Note Details */}
                 <div className="border-none">
                     <CardContent className="p-0 space-y-2">
-                        {/* Note Name */}
                         <GenericTextField
                             ref={noteNameRef}
                             id="note-name-field"
@@ -114,7 +90,6 @@ export function NoteDetailTab() {
                             helperText={nameError}
                         />
 
-                        {/* Status */}
                         <div className="space-y-2">
                             <GenericAutoComplete
                                 allOptions={noteStatusOptions}
@@ -128,20 +103,6 @@ export function NoteDetailTab() {
                                 disabled={isDisabled || registriesLoading}
                             />
                         </div>
-
-                        {/* HashTags */}
-                        {/* <div className="space-y-2">
-                            <GenericTagAutoComplete
-                                options={hashtagOptions as unknown as IAutoCompleteOptions[]}
-                                value={currentHashTagsValue}
-                                onChange={handleHashTagsChange}
-                                label="HashTags"
-                                placeholder={registriesLoading ? "Loading hashtags..." : "+ Add HashTag"}
-                                size="small"
-                                data-testid="note-tags"
-                                disabled={isDeleted || isHardDeleted || registriesLoading}
-                            />
-                        </div> */}
                     </CardContent>
                 </div>
 
@@ -154,7 +115,6 @@ export function NoteDetailTab() {
 
                         <GenericTextField label="Created by" value={activeNote?.createdBy || "-"} disabled size="small" />
 
-                        {/* Icon Picker */}
                         <IconPicker
                             value={(activeNote?.icon as IconType) || null}
                             onChange={(iconType, defaultColor) => {

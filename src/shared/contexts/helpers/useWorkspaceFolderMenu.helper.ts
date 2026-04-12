@@ -26,10 +26,9 @@ import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useGeneralStore } from "@/store/index";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore, useNoteGridPopupHelper } from "@/features/note";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
-import { Note } from "@/types/note.types";
-import { useNoteGridPopupHelper } from "@/hooks/workspace/useNoteGridPopup.helper";
+import { Note } from "@/features/note";
 import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 
 // --------------------------------

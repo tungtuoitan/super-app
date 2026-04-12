@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useTrackingGraphStore } from "@/store/tracking/TrackingGraph.store";
-import { noteService } from "@/services/note.service";
+import { noteService } from "@/features/note/service/note.service";
 import { parseNoteToDailyTracking, extractUniqueItems, getAvailableYears } from "@/utils/tracking-parser.utils";
 import type { DailyTracking } from "@/types/tracking.types";
 import type { WorkspaceNoteItem } from "@/types/workspace-v2.types";

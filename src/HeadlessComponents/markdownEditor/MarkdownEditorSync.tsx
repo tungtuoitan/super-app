@@ -8,9 +8,9 @@ import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
 import { useGeneralStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, updateDecorations } from "@/utils/markdown.utils";
-import { Note } from "@/types/note.types";
+import { Note } from "@/features/note/types/note.types";
 import "@/styles/keywords.css";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 
 export function MarkdownEditorSync() {
     const { getActiveTab, openTab } = useEditorTabHelper();

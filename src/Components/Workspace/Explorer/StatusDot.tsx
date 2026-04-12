@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { WorkspaceLink } from "@/types/note.types";
+import type { WorkspaceLink } from "@/features/note/types/note.types";
 import {useWorkspaceStore} from "@/store/index";
 
 interface StatusDotProps {

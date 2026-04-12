@@ -17,9 +17,9 @@ import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import {KNodeMenu} from "../../Components/K/contexts/menu/KNodeMenu";
+import {KNodeMenu} from "@/features/K/contexts/menu/KNodeMenu";
 import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
-import { KNodePanelCardMenu } from "../../Components/K/contexts/menu/KNodePanelCardMenu";
+import { KNodePanelCardMenu } from "@/features/K/contexts/menu/KNodePanelCardMenu";
 import { RichTextEditorMenu } from "./menus/RichTextEditorMenu";
 
 interface ContextMenuProviderProps {

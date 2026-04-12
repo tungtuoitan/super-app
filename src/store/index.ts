@@ -23,8 +23,6 @@ export type { WorkspaceContextData } from "./workspace/Workspace.store";
 export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from "./workspace/FolderDialog.store";
 export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from "./workspace/FolderDialog.store";
 
-export { NoteGridPopupProvider, useNoteGridPopupStore } from "./workspace/NoteGridPopup.store";
-export type { NoteGridPopupContextData } from "./workspace/NoteGridPopup.store";
 
 export { MovingTreeProvider, useMovingTreeStore } from "./workspace/MovingTree.store";
 export type { MovingTreeContextData } from "./workspace/MovingTree.store";

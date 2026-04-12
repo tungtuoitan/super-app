@@ -10,7 +10,7 @@ import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "../Workspace/Explorer/FolderDialog/FolderDialog";
-import { NoteGridPopup } from "../Workspace/NoteGridPopup";
+import { NoteGridPopup } from "@/features/note";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";

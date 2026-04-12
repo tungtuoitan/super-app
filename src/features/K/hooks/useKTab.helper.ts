@@ -7,8 +7,8 @@ import { useCallback } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
-import type { KWsResponse } from "@/Components/K/types/K.types";
-import { useKStore } from "@/Components/K/store/K.store";
+import type { KWsResponse } from "../types/K.types";
+import { useKStore } from "../store/K.store";
 
 export function useKTabHelper() {
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
@@ -61,7 +61,7 @@ export function useKTabHelper() {
             updatedAt: undefined,
             deletedAt: null,
         };
-        setAllK((prev) => [...prev, tempKnowledge]);
+        setAllK((prev: KWsResponse[]) => [...prev, tempKnowledge]);
 
         const existing = openTabs.find(
             (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge

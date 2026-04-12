@@ -14,8 +14,6 @@ export * from "./useAuth.helpers";
 export { useAuthHelper } from "./useAuth.helpers";
 
 // UI helpers
-export * from "./note/useNoteDetail.helper";
-export * from "./note/useNoteGrid.helper";
 export * from "./vsCode/useEditorTab.helper";
 export * from "./vsCode/useEditorToolbar.helper";
 export { useNavigationHistoryHelper, STORAGE_KEY_PREFIX, MAX_PAST_SIZE, getStorageKey } from "./vsCode/useNavigationHistory.helper";

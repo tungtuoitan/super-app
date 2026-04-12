@@ -17,7 +17,7 @@ import { WsView } from "./WsView";
 import { WorkspaceView } from "./WorkspaceView";
 import { ProjectView } from "./ProjectView";
 import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
-import { NoteGrid } from "@/Components/Note/NoteGrid";
+import { NoteGrid } from "@/features/note/Components/NoteGrid";
 import { GridControlBar } from "@/Components/shared/GridControlBar";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
 

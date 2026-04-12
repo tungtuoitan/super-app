@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorStore } from "@/store/index";
 import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";

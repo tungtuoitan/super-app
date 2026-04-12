@@ -3,8 +3,8 @@
  * Centralized state management for note grid panel
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
-import { Note } from "../../types/note.types";
+import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
+import { Note } from "../types/note.types";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
 
 export interface PaginationState {

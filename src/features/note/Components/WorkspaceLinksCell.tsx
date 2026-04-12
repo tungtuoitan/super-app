@@ -4,9 +4,9 @@
  */
 
 import React, { useState } from "react";
-import type { WorkspaceLink } from "@/types/note.types";
+import type { WorkspaceLink } from "../types/note.types";
 import { constants } from "@/utils/constants";
-import {useWorkspaceStore} from "@/store/index";
+import { useWorkspaceStore } from "@/store/index";
 
 interface WorkspaceLinksCellProps {
     source?: string;
@@ -18,7 +18,7 @@ interface WorkspaceLinksCellProps {
 
 export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, tooltipPosition = "top" }: WorkspaceLinksCellProps) {
     const [showTooltip, setShowTooltip] = useState(false);
-    const {selectedWorkspaceId} = useWorkspaceStore();
+    const { selectedWorkspaceId } = useWorkspaceStore();
 
     if (count === 0 || !links || links.length === 0) {
         return <span className="text-sm text-muted-foreground"></span>;
@@ -28,14 +28,12 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
 
     return (
         <div className="relative inline-flex items-center justify-center cursor-pointer pl-2" onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
-            {/* Count Badge */}
             <div className="flex items-center gap-1 text-center">
                 <span className="text-sm text-gray-400">{count}</span>
             </div>
 
-            {/* Tooltip with clickable workspace list */}
             {showTooltip && (
-                <div 
+                <div
                     className={`absolute ${isTop ? "bottom-full" : "top-[0px] mt-2"} right-[12px] bottom-[-50px] z-50 pointer-events-auto border border-gray-700 rounded`}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -59,8 +57,7 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
                         </div>
                         {source === constants.modules.note && <div className="text-gray-400 text-xs mt-2 italic border-t border-gray-700 pt-1">Click to navigate to workspace</div>}
                     </div>
-                    {/* Arrow */}
-                    <div 
+                    <div
                         className={`absolute ${isTop ? "top-full -mt-[1px]" : "bottom-full -mb-[1px]"} right-3`}
                         onClick={(e) => e.stopPropagation()}
                     >

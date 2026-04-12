@@ -3,14 +3,14 @@
  * Supports multiple tab types: Note, Folder, etc.
  */
 
-import { Note } from "@/types/note.types";
+import { Note } from "@/features/note/types/note.types";
 import { Ws } from "@/types/workspace.types";
 import { TrackingGraphTabData } from "@/types/tracking.types";
 import { Project } from "@/store/project/useProject.store";
 import { Task } from "@/store/task/useTask.store";
 import { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
-import { KWsResponse } from "@/Components/K/types/K.types";
-import { KItemV2 } from "@/Components/K/types/K-v2.types";
+import { KWsResponse } from "@/features/K/types/K.types";
+import { KItemV2 } from "@/features/K/types/K-v2.types";
 import { constants } from "@/utils/constants";
 import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
 

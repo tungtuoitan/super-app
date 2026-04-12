@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
-import type { KItemV2 } from "@/Components/K/types/K-v2.types";
+import type { KItemV2 } from "../types/K-v2.types";
 
 
 export function useKNodeTabHelper() {

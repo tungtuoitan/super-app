@@ -6,13 +6,13 @@
 
 import { useCallback } from "react";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import type { Note } from "@/types/note.types";
+import type { Note } from "@/features/note/types/note.types";
 import { type Task } from "@/store/task/useTask.store";
 import { type TaskFolderItem } from "@/types/task/taskDetail.types";
 import { useTaskStore } from "@/store/task/useTask.store";
 import { useGeneralStore } from "@/store/index";
 import { useEditorTabsStore } from "@/store/index";
-import { useNoteDetailStore } from "@/store/note/useNoteDetail.store";
+import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { constants } from "@/utils/constants";
 import { workspaceService } from "@/services/workspace.service";

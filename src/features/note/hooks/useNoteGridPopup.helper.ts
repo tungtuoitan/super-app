@@ -1,13 +1,12 @@
-import { useSnackbar } from "notistack";
-import { useNoteGridPopupStore } from "@/store/workspace/NoteGridPopup.store";
+import { useNoteGridPopupStore } from "../store/useNoteGridPopup.store";
+import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { useNoteGridStore } from "@/store/note/useNoteGrid.store";
 import { workspaceService } from "@/services/workspace.service";
-import { useWorkspaceLoader } from "./useWorkspace.loader";
+import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import type { UpsertWorkspaceItemRequest } from "@/types/workspace.types";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 /**
  * Hook for NoteGridPopup business logic
@@ -17,7 +16,6 @@ export function useNoteGridPopupHelper() {
     const _console = useConsoleHelper();
     const { loadTree } = useWorkspaceLoader();
 
-    // Store state
     const {
         targetFolder,
         setIsSubmitting,
@@ -25,19 +23,13 @@ export function useNoteGridPopupHelper() {
         setTargetFolder,
     } = useNoteGridPopupStore();
 
-    // Note grid state (reuse existing data)
     const { notes, noteGridRowSelection, setNoteGridRowSelection } = useNoteGridStore();
 
-    // Workspace state
     const { currentWorkspace } = useWorkspaceStore();
 
-    // Auth
     const { $user } = useAuthStore();
     const token = $user.userToken;
 
-    /**
-     * Open popup (reuse existing notes data)
-     */
     const openNoteGridPopup = (folderInfo: {
         id: number;
         name: string;
@@ -48,26 +40,18 @@ export function useNoteGridPopupHelper() {
         setIsNoteGridPopupOpen(true);
     };
 
-    /**
-     * Close popup and reset state
-     */
     const closeNoteGridPopup = () => {
         setIsNoteGridPopupOpen(false);
         setTargetFolder(null);
         setNoteGridRowSelection({});
     };
 
-    /**
-     * Add selected notes to target folder
-     */
     const addNotesToFolder = async () => {
         if (!targetFolder) {
             _console.error("No target folder selected");
             return;
         }
 
-        // Get selected note IDs from row selection
-        // noteGridRowSelection keys are note IDs (as strings), not array indices
         const selectedNoteIds = Object.keys(noteGridRowSelection)
             .filter(key => noteGridRowSelection[key])
             .map(id => parseInt(id))
@@ -85,7 +69,6 @@ export function useNoteGridPopupHelper() {
 
         setIsSubmitting(true);
         try {
-            // Build batch requests for ADD action
             const requests: UpsertWorkspaceItemRequest[] = selectedNoteIds.map(noteId => ({
                 action: WorkspaceItemAction.Add,
                 entityType: 3,
@@ -93,7 +76,6 @@ export function useNoteGridPopupHelper() {
                 parentId: targetFolder.id,
             }));
 
-            // Call batch API
             const result = await workspaceService._upsertWorkspaceItems(
                 token,
                 currentWorkspace.id,
