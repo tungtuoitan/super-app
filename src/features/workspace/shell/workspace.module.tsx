@@ -1,8 +1,8 @@
 import { Boxes, Box, BarChart3, ArrowRightLeft } from "lucide-react";
-import { WorkspaceView } from "@/shell/components/WorkspaceView";
+import { WorkspaceView } from "../Components/WorkspaceView";
 import { WsEditorPanel } from "@/Components/Workspace/WsEditorPanel";
 import { TrackingGraphPanel } from "@/Components/TrackingGraph/TrackingGraphPanel";
-import { MovingTab } from "@/Components/VSPanel/MovingTab";
+import { MovingTab } from "../Components/VSPanel/MovingTab";
 import { constants } from "@/utils/constants";
 import type { ModuleDefinition } from "@/shell/moduleRegistry";
 

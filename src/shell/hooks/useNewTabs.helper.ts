@@ -5,7 +5,7 @@
 
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
-import type { WorkspaceDTO } from "@/types/workspace-dto.types";
+import type { WorkspaceDTO } from "@/features/workspace/types/workspace-dto.types";
 
 /**
  * Check if any tab has unsaved changes and belongs to current workspace

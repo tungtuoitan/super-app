@@ -3,12 +3,12 @@
  */
 
 import { useCallback } from "react";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
-import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper";
-import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
+import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
+import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 import { noteService } from "@/features/note/service/note.service";
@@ -16,12 +16,12 @@ import { parseKeywordLink } from "@/utils/keyword-link.utils";
 import { constants } from "@/utils/constants";
 import { Note } from "@/features/note/types/note.types";
 import { WorkspaceNoteItem, WorkspaceFolderItem } from "@/types/workspace-v2.types";
-import { WorkspaceDTO } from "@/types/workspace-dto.types";
+import { WorkspaceDTO } from "@/features/workspace/types/workspace-dto.types";
 import { Keyword } from "@/types/keyword.types";
 import { isValidUrl } from "@/utils/url.utils";
-import { useWorkspaceHelper } from "../workspace/useWorkspaceHelper";
+import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
 import { useConsoleHelper } from "../console/useConsole.helper";
-import { treeMiniHelper } from "../workspace/tree.miniHelper";
+import { treeMiniHelper } from "@/features/workspace/hooks/tree.miniHelper";
 import { projectService } from "@/services/project.service";
 import { taskService } from "@/services/task.service";
 import { lifeLogService } from "@/services/lifeLog.service";

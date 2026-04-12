@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "./useEditorTab.helper";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/store/ws/useWs.store";

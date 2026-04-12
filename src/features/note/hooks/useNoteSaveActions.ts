@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 import { constants } from "@/utils/constants";
 import { useNoteDetailHelper } from "./useNoteDetail.helper";
-import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
-import { WorkspaceItemAction } from "@/types/workspace.types";
+import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
+import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
 import { useProjectTaskFolderHelper } from "@/features/project/hooks/useProjectTaskFolderHelper";
 import type { SaveActions } from "@/shell/hooks/useSaveActions.types";
 import type { BaseTab } from "@/types/editor/tab.types";

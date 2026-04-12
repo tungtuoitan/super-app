@@ -10,7 +10,7 @@ import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useWork
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
-import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
 import { Loader2 } from "lucide-react";
 import {

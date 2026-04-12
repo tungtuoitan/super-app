@@ -3,5 +3,5 @@
  * Export all menu helper hooks
  */
 
-export { useWorkspaceFolderMenuHelper } from "./useWorkspaceFolderMenu.helper";
-export { useWorkspaceChildMenuHelper } from "./useWorkspaceChildMenu.helper";
+export { useWorkspaceFolderMenuHelper } from "@/features/workspace/contexts/helpers/useWorkspaceFolderMenu.helper";
+export { useWorkspaceChildMenuHelper } from "@/features/workspace/contexts/helpers/useWorkspaceChildMenu.helper";

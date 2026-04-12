@@ -12,7 +12,7 @@ import { formatNoteDate } from "../utils/note.utils";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore, useGeneralStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
+import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
 import { MarkdownEditor } from "@/Components/Editor/MarkdownEditor";
 import { MarkdownEditorSync } from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync";
 import { MarkdownEditorTheme } from "@/HeadlessComponents/markdownEditor/MarkdownEditorTheme";

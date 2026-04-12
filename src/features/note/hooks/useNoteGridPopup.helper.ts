@@ -1,11 +1,11 @@
 import { useNoteGridPopupStore } from "../store/useNoteGridPopup.store";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { workspaceService } from "@/services/workspace.service";
-import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
-import { WorkspaceItemAction } from "@/types/workspace.types";
-import type { UpsertWorkspaceItemRequest } from "@/types/workspace.types";
+import { workspaceService } from "@/features/workspace/service/workspace.service";
+import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
+import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
+import type { UpsertWorkspaceItemRequest } from "@/features/workspace/types/workspace.types";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 
 /**

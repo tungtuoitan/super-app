@@ -10,7 +10,7 @@ import { useNoteGridPopupStore } from "../../store/useNoteGridPopup.store";
 import { useNoteGridPopupHelper } from "../../hooks/useNoteGridPopup.helper";
 import { useNoteGridStore } from "../../store/useNoteGrid.store";
 import { NoteGrid } from "../NoteGrid";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useKeyboardShortcut } from "@/shared/hooks";
 import { GridControlBar } from "@/Components/shared/GridControlBar";
 import { isNote } from "@/types/workspace-v2.types";

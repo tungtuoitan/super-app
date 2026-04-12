@@ -4,10 +4,10 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { AuthStoreProvider, useAuthStore } from "@/store/auth/Auth.store";
-import { WorkspaceProvider } from "@/store/workspace/Workspace.store";
-import { FolderDialogProvider } from "@/store/workspace/FolderDialog.store";
+import { WorkspaceProvider } from "@/features/workspace/store/Workspace.store";
+import { FolderDialogProvider } from "@/features/workspace/store/FolderDialog.store";
 import { NoteGridPopupProvider, NoteDetailProvider, NoteGridProvider } from "@/features/note";
-import { MovingTreeProvider } from "@/store/workspace/MovingTree.store";
+import { MovingTreeProvider } from "@/features/workspace/store/MovingTree.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";

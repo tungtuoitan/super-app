@@ -1,5 +1,5 @@
 import { Cuboid, Layers, CheckSquare } from "lucide-react";
-import { ProjectView } from "@/shell/components/ProjectView";
+import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "@/Components/Project/ProjectEditorPanel";
 import { MultiProjectEditorPanel } from "@/Components/MultiProject/MultiProjectEditorPanel";
 import { TaskEditorPanel } from "@/Components/Task/TaskEditorPanel";

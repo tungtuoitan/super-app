@@ -15,7 +15,7 @@ import { useEditorTabsStore } from "@/store/index";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { constants } from "@/utils/constants";
-import { workspaceService } from "@/services/workspace.service";
+import { workspaceService } from "@/features/workspace/service/workspace.service";
 import { WorkspaceNoteItem, WorkspaceFileItem } from "@/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 

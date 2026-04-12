@@ -3,7 +3,7 @@ import { X, FileText, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useTabKeyboardShortcuts } from "@/shell/hooks/useTabKeyboardShortcuts";
 import { useTabBarHelper } from "@/shell/hooks/useTabBarHelper";
 import { useMobileStore } from "@/store/mobile/Mobile.store";

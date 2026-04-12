@@ -17,15 +17,15 @@ export type { EditorContextData } from "./editor/Editor.store";
 export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./hashtagUI/HashtagUI.store";
 export type { HashtagUIStoreData } from "./hashtagUI/HashtagUI.store";
 
-export { WorkspaceStore, WorkspaceProvider, useWorkspaceStore } from "./workspace/Workspace.store";
-export type { WorkspaceContextData } from "./workspace/Workspace.store";
+export { WorkspaceStore, WorkspaceProvider, useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
+export type { WorkspaceContextData } from "@/features/workspace/store/Workspace.store";
 
-export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from "./workspace/FolderDialog.store";
-export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from "./workspace/FolderDialog.store";
+export { FolderDialogStore, FolderDialogProvider, useFolderDialogStore } from "@/features/workspace/store/FolderDialog.store";
+export type { FolderDialogContextData, FolderDialogFormErrors, ItemType } from "@/features/workspace/store/FolderDialog.store";
 
 
-export { MovingTreeProvider, useMovingTreeStore } from "./workspace/MovingTree.store";
-export type { MovingTreeContextData } from "./workspace/MovingTree.store";
+export { MovingTreeProvider, useMovingTreeStore } from "@/features/workspace/store/MovingTree.store";
+export type { MovingTreeContextData } from "@/features/workspace/store/MovingTree.store";
 
 export { ActivityBarProvider, useActivityBarStore } from "./activityBar/ActivityBar.store";
 export type { ActivityBarContextData } from "./activityBar/ActivityBar.store";

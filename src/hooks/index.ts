@@ -29,11 +29,11 @@ export * from "./ws/useWsDetail.helper";
 export * from "./ws/useWsTab.helper";
 
 // Workspace helpers
-export * from "./workspace/useWorkspace.loader";
-export * from "./workspace/useFolderDialog.helper";
-export * from "./workspace/useTreeHelper2";
-export * from "./workspace/useTreeHelper";
-export * from "./workspace/tree.miniHelper";
+export * from "@/features/workspace/hooks/useWorkspace.loader";
+export * from "@/features/workspace/hooks/useFolderDialog.helper";
+export * from "@/features/workspace/hooks/useTreeHelper2";
+export * from "@/features/workspace/hooks/useTreeHelper";
+export * from "@/features/workspace/hooks/tree.miniHelper";
 
 // Standard Registry helpers
 export * from "./standardRegistry/useStandardRegistry.helper";
