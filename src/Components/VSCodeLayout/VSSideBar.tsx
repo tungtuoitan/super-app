@@ -1,45 +1,30 @@
 import { Panel, PanelGroup } from "react-resizable-panels";
-import type { ActivityBarView } from "@/utils/constants";
-import { NoteGrid } from "@/features/note";
 import { VSCodeResizeHandle } from "@/Components/VSCodeLayout/VSCodeResizeHandle";
-import { WorkspaceView } from "./WorkspaceView";
 import { GridControlBar } from "@/Components/shared/GridControlBar";
-import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
-import { WsView } from "./WsView";
-import { ProjectView } from "./ProjectView";
-import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
 import { Console } from "./Console";
-import {KView} from "@/features/K/Components/KView";
+import { moduleRegistry } from "@/shell/moduleRegistry";
 
 interface VSSideBarProps {
     moduleName: string;
 }
 
 /**
- * VSSideBar - Sidebar content for VS Code style layout
- *
- * Now wraps itself in a Panel for direct integration with PanelGroup.
- * This allows the sidebar and main content to be siblings in the panel hierarchy.
- *
- * Views:
- * - Explorer: WorkspaceTree component for workspace navigation
- * - Workspace: Workspace management (currently same as Explorer)
- * - Notes: Notes list interface with search
- *
- * Collapse behavior:
- * - When collapsed, panel size goes to 0 but resize handle remains visible
- * - User can drag the resize handle to expand the panel again (like VSCode)
+ * VSSideBar — sidebar content for VS Code style layout.
+ * Reads SidebarView from the module registry — no direct feature imports.
  */
 export function VSSideBar({ moduleName }: VSSideBarProps) {
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useMobileStore();
 
-    // On mobile: default 50%, max 50% | On desktop: default 20%, max 40%
     const defaultSize = isMobile ? 70 : 20;
     const maxSize = isMobile ? 70 : 40;
+
+    const module = moduleRegistry.getById(moduleName);
+    const SidebarView = module?.SidebarView;
+    const viewTitle = module?.label ?? moduleName;
 
     return (
         <Panel
@@ -52,73 +37,28 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
             onCollapse={() => setIsSideBarVisible(false)}
             onExpand={() => setIsSideBarVisible(true)}
         >
-            {/* Only render inner panels when visible to avoid mounting when hidden */}
             {isSideBarVisible && (
-                <>
-                    {/* Use a vertical PanelGroup to split the sidebar into two stacked panels */}
-                    <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
-                        {/* Top panel: original sidebar content */}
-                        <Panel defaultSize={70} minSize={20}>
-                            <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
-                                {/* Header */}
-                                <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
-                                    <span>{getViewTitle(moduleName)}</span>
-                                    <GridControlBar hideFilter={moduleName === constants.modules.lifeLog} />
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 overflow-hidden">
-                                    {moduleName === constants.modules.ws && <WsView />}
-                                    {moduleName === constants.modules.workspace && <WorkspaceView />}
-                                    {moduleName === constants.modules.k && <KView />}
-                                    {moduleName === constants.modules.note && <NotesView />}
-                                    {moduleName === constants.modules.project && <ProjectView />}
-                                    {moduleName === constants.modules.lifeLog && <LifeLogView />}
-                                </div>
+                <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
+                    <Panel defaultSize={70} minSize={20}>
+                        <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
+                            {/* Header */}
+                            <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
+                                <span>{viewTitle}</span>
+                                <GridControlBar hideFilter={moduleName === constants.modules.lifeLog} />
                             </div>
-                        </Panel>
 
-                        <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
+                            {/* Content — delegated to feature module */}
+                            <div className="flex-1 overflow-hidden">
+                                {SidebarView ? <SidebarView /> : null}
+                            </div>
+                        </div>
+                    </Panel>
 
-                        {/* Bottom panel: secondary area (e.g., quick actions, details) */}
-                        {!isMobile && <Console />}
-                    </PanelGroup>
-                </>
+                    <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
+
+                    {!isMobile && <Console />}
+                </PanelGroup>
             )}
         </Panel>
     );
-}
-
-/**
- * Notes View - Notes list interface with grid
- * Shows full note grid with all columns
- */
-function NotesView() {
-    return (
-        <div className="h-full flex flex-col overflow-hidden">
-            <NoteGrid source={constants.modules.note} />
-        </div>
-    );
-}
-
-/**
- * Get view title for header
- */
-function getViewTitle(moduleName: string): string {
-    switch (moduleName) {
-        case constants.modules.workspace:
-            return constants.modules.workspace;
-        case constants.modules.ws:
-            return "Ws";
-        case constants.modules.note:
-            return constants.modules.note;
-        case constants.modules.project:
-            return constants.modules.project;
-        case constants.modules.lifeLog:
-            return constants.modules.lifeLog;
-        case constants.modules.k:
-            return constants.modules.k;
-        default:
-            return "View";
-    }
 }

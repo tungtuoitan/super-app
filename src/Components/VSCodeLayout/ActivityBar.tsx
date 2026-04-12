@@ -1,21 +1,54 @@
-import { FileText, Settings, Boxes, UserCircle, Cuboid, Feather, Footprints, AudioWaveform, Spline, RulerDimensionLine, Ruler, Clover, Shell, BookIcon, LibraryBig } from "lucide-react";
+import { Settings, UserCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { SettingsDialog } from "./SettingsDialog";
 import { AccountsDialog } from "./AccountsDialog";
-import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
 import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import {useGridControlStore} from "@/store/grid/useGridControl.store";
-import { useKStore } from "@/features/K/store/K.store";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { moduleRegistry, type ModuleDefinition } from "@/shell/moduleRegistry";
+import type { ActivityBarView } from "@/utils/constants";
 
-const activityModules = [
-    { id: constants.modules.workspace, icon: Boxes, label: constants.vscode.displayNames.workspace },
-    { id: constants.modules.project, icon: Cuboid, label: constants.vscode.displayNames.project },
-    { id: constants.modules.k, icon: LibraryBig, label: constants.vscode.displayNames.k },
-    // { id: constants.modules.note, icon: FileText, label: constants.vscode.displayNames.notes },
-    { id: constants.modules.lifeLog, icon: Shell, label: constants.vscode.displayNames.lifeLog },
-];
+// ─── Per-module button (own component so hooks inside useBadge work) ─────────
+
+function ModuleButton({ module, isActive, horizontal, onClick }: {
+    module: ModuleDefinition;
+    isActive: boolean;
+    horizontal: boolean;
+    onClick: () => void;
+}) {
+    const badge = module.useBadge?.() ?? 0;
+    const Icon = module.icon;
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={onClick}
+                        className={`relative w-12 h-12 rounded-none transition-colors border-transparent ${
+                            isActive
+                                ? "text-editor-white border-editor-active"
+                                : "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
+                        }`}
+                    >
+                        <Icon className="w-6 h-6 mx-auto" />
+                        {badge > 0 && (
+                            <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
+                                {badge > 99 ? "99+" : badge}
+                            </span>
+                        )}
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent side={horizontal ? "bottom" : "right"}>
+                    <p>{module.label}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
+}
+
+// ─── ActivityBar ─────────────────────────────────────────────────────────────
 
 interface ActivityBarProps {
     horizontal?: boolean;
@@ -26,82 +59,71 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { handleActivityClick } = useActivityBarHelper();
     const { isAuthenticated } = useAuthStore();
     const { moduleName } = useGridControlStore();
-    const { dailyReviewDueCount } = useKStore();
 
-    const getBadge = (moduleId: string) => {
-        if (moduleId === constants.modules.k && dailyReviewDueCount > 0) return dailyReviewDueCount;
-        return 0;
-    };
+    // Only show modules that have a defined sidebar view (i.e. intended for ActivityBar)
+    // note and ws are registered but hidden by default (no activityBar flag)
+    const visibleModules = moduleRegistry.getAll().filter(
+        (m) => m.id !== "Note" && m.id !== "Ws"
+    );
+
+    const accountButton = (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={() => setAccountsOpen(true)}
+                        className={`w-12 h-12 rounded-none hover:text-white hover:bg-transparent transition-colors ${
+                            isAuthenticated ? "text-[#6a6a6a]" : "text-red-500"
+                        }`}
+                    >
+                        <UserCircle className="w-6 h-6 mx-auto" />
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent side={horizontal ? "bottom" : "right"}>
+                    <p>Accounts</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
+
+    const settingsButton = (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={() => setSettingsOpen(true)}
+                        className="w-12 h-12 rounded-none text-[#6a6a6a] hover:text-white hover:bg-transparent transition-colors"
+                    >
+                        <Settings className="w-6 h-6 mx-auto" />
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent side={horizontal ? "bottom" : "right"}>
+                    <p>Settings</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
 
     if (horizontal) {
         return (
             <>
                 <div className="w-full h-12 bg-editor-activitybar flex flex-row items-center border-b border-editor-border px-1">
-                    {/* Activity icons */}
                     <div className="flex flex-row flex-1">
-                        <TooltipProvider>
-                            {activityModules.map((activity) => {
-                                const Icon = activity.icon;
-                                const isActive = moduleName === activity.id;
-                                const badge = getBadge(activity.id);
-
-                                return (
-                                    <button
-                                        key={activity.id}
-                                        onClick={() => handleActivityClick(activity.id)}
-                                        className={`relative w-12 h-12 rounded-none transition-colors border-transparent ${
-                                            isActive ? "text-editor-white border-editor-active" : "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
-                                        }`}
-                                    >
-                                        <Icon className="w-6 h-6 mx-auto" />
-                                        {badge > 0 && (
-                                            <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
-                                                {badge > 99 ? "99+" : badge}
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </TooltipProvider>
+                        {visibleModules.map((m) => (
+                            <ModuleButton
+                                key={m.id}
+                                module={m}
+                                isActive={moduleName === m.id}
+                                horizontal
+                                onClick={() => handleActivityClick(m.id as ActivityBarView)}
+                            />
+                        ))}
                     </div>
-
-                    {/* Accounts + Settings on the right */}
                     <div className="flex flex-row">
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        onClick={() => setAccountsOpen(true)}
-                                        className={`w-12 h-12 rounded-none hover:text-white hover:bg-transparent transition-colors ${
-                                            isAuthenticated ? "text-[#6a6a6a]" : "text-red-500"
-                                        }`}
-                                    >
-                                        <UserCircle className="w-6 h-6 mx-auto" />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom">
-                                    <p>Accounts</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        onClick={() => setSettingsOpen(true)}
-                                        className="w-12 h-12 rounded-none text-[#6a6a6a] hover:text-white hover:bg-transparent transition-colors"
-                                    >
-                                        <Settings className="w-6 h-6 mx-auto" />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom">
-                                    <p>Settings</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                        {accountButton}
+                        {settingsButton}
                     </div>
                 </div>
-
                 <AccountsDialog />
                 <SettingsDialog />
             </>
@@ -111,79 +133,21 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
     return (
         <>
             <div className="w-12 h-full bg-editor-activitybar flex flex-col items-center border-r border-editor-border">
-                {/* Activity icons */}
                 <div className="flex-1">
-                    <TooltipProvider>
-                        {activityModules.map((activity) => {
-                            const Icon = activity.icon;
-                            const isActive = moduleName === activity.id;
-                            const badge = getBadge(activity.id);
-
-                            return (
-                                <button
-                                    key={activity.id}
-                                    onClick={() => handleActivityClick(activity.id)}
-                                    className={`relative w-12 h-12 rounded-none transition-colors border-transparent ${
-                                        isActive ? "text-editor-white border-editor-active": "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
-                                    }`}
-                                >
-                                    <Icon className="w-6 h-6 mx-auto" />
-                                    {badge > 0 && (
-                                        <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
-                                            {badge > 99 ? "99+" : badge}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </TooltipProvider>
+                    {visibleModules.map((m) => (
+                        <ModuleButton
+                            key={m.id}
+                            module={m}
+                            isActive={moduleName === m.id}
+                            horizontal={false}
+                            onClick={() => handleActivityClick(m.id as ActivityBarView)}
+                        />
+                    ))}
                 </div>
-
-                {/* Accounts at bottom */}
-                <div className="pb-1">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <button
-                                    onClick={() => setAccountsOpen(true)}
-                                    className={`w-12 h-12 rounded-none hover:text-white hover:bg-transparent transition-colors ${
-                                        isAuthenticated ? "text-[#6a6a6a]" : "text-red-500"
-                                    }`}
-                                >
-                                    <UserCircle className="w-6 h-6 mx-auto" />
-                                </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="right">
-                                <p>Accounts</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
-
-                {/* Settings at bottom */}
-                <div className="pb-1">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <button
-                                    onClick={() => setSettingsOpen(true)}
-                                    className="w-12 h-12 rounded-none text-[#6a6a6a] hover:text-white hover:bg-transparent transition-colors"
-                                >
-                                    <Settings className="w-6 h-6 mx-auto" />
-                                </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="right">
-                                <p>Settings</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
+                <div className="pb-1">{accountButton}</div>
+                <div className="pb-1">{settingsButton}</div>
             </div>
-
-            {/* Accounts Dialog */}
             <AccountsDialog />
-
-            {/* Settings Dialog */}
             <SettingsDialog />
         </>
     );

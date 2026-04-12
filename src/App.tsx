@@ -1,5 +1,8 @@
 import { Main } from "./Components/Main";
 
+// Register all feature modules into the VSCode shell (side-effect import)
+import "./shell/modules.config";
+
 import "./App.css";
 
 /**
