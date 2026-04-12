@@ -9,7 +9,7 @@ import { useEffect, useRef } from "react";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorStore } from "@/store/index";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import type * as _monaco from "monaco-editor";
 

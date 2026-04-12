@@ -13,11 +13,11 @@
 export * from "./useAuth.helpers";
 export { useAuthHelper } from "./useAuth.helpers";
 
-// UI helpers
-export * from "./vsCode/useEditorTab.helper";
-export * from "./vsCode/useEditorToolbar.helper";
-export { useNavigationHistoryHelper, STORAGE_KEY_PREFIX, MAX_PAST_SIZE, getStorageKey } from "./vsCode/useNavigationHistory.helper";
-export type { HistoryStorage } from "./vsCode/useNavigationHistory.helper";
+// Shell hooks (re-exported for backward compatibility)
+export * from "@/shell/hooks/useEditorTab.helper";
+export * from "@/shell/hooks/useEditorToolbar.helper";
+export { useNavigationHistoryHelper, STORAGE_KEY_PREFIX, MAX_PAST_SIZE, getStorageKey } from "@/shell/hooks/useNavigationHistory.helper";
+export type { HistoryStorage } from "@/shell/hooks/useNavigationHistory.helper";
 export * from "./useActivityBar.helper";
 
 // Context menu helpers

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useSnackbar } from "notistack";
 import type { Note } from "@/features/note/types/note.types";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useAuthStore } from "@/store/auth/Auth.store";

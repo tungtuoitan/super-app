@@ -24,6 +24,7 @@ module.exports = {
             "@/pages": path.resolve(__dirname, "src/pages"),
             "@/store": path.resolve(__dirname, "src/store"),
             "@/styles": path.resolve(__dirname, "src/styles"),
+            "@/shell": path.resolve(__dirname, "src/shell"),
         },
         configure: (webpackConfig, { env, paths }) => {
             // Fix source-map-loader issues with MUI

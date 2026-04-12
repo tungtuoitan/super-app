@@ -8,7 +8,7 @@ import { CardContent } from "@/Components/ui/card";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore, useGeneralStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";

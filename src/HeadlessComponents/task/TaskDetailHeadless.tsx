@@ -12,7 +12,7 @@ import { useTaskDetailFormHelper } from "@/hooks/task/useTaskDetailForm.helper";
 import { useTaskLinkedKeywordsHelper } from "@/hooks/task/useTaskLinkedKeywords.helper";
 import { useTaskWorkspaceItemHelper } from "@/hooks/task/useTaskWorkspaceItem.helper";
 import { useEditorTabsStore } from "@/store/index";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import type { BaseTab } from "@/types/editor/tab.types";
 
 export function TaskDetailHeadless() {

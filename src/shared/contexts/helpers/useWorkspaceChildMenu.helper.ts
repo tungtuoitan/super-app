@@ -20,7 +20,7 @@ import type { UpsertWorkspaceItemRequest } from "@/types/workspace.types";
 import { WorkspaceItemAction } from "@/types/workspace.types";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import type { WorkspaceDTO } from "@/types/workspace-dto.types";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 
 export const useWorkspaceChildMenuHelper = () => {

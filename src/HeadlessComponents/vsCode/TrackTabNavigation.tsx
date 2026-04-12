@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
-import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
+import { useNavigationHistoryHelper } from "@/shell/hooks/useNavigationHistory.helper";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 
 /**

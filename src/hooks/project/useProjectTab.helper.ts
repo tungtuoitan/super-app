@@ -7,7 +7,7 @@ import { Project } from "@/store/project/useProject.store";
 import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "../../store";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 
 export const useProjectTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();

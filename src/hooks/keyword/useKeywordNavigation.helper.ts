@@ -5,7 +5,7 @@
 import { useCallback } from "react";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useWorkspaceItemHelper } from "@/hooks/workspace/useWorkspaceItemHelper";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";

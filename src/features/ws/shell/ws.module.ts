@@ -1,5 +1,5 @@
 import { RulerDimensionLine } from "lucide-react";
-import { WsView } from "@/Components/VSCodeLayout/WsView";
+import { WsView } from "@/shell/components/WsView";
 import { constants } from "@/utils/constants";
 import type { ModuleDefinition } from "@/shell/moduleRegistry";
 

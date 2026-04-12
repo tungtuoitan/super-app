@@ -7,7 +7,7 @@ import { Ws, WsResponse } from "@/types/workspace.types";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "../../store";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsStore } from "@/store/ws/useWs.store";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "../../utils";

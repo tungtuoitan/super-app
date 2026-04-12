@@ -20,7 +20,7 @@ import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
-import {useGridAutoRegisterHelper} from "./vsCode/useGridAutoRegister.helper";
+import {useGridAutoRegisterHelper} from "@/shell/hooks/useGridAutoRegister.helper";
 import {useConsoleHelper} from "./console/useConsole.helper";
 import { debugLog } from "@/hooks/debugLog/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";

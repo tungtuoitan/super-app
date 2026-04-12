@@ -9,9 +9,9 @@
 
 import { useEffect, useRef } from "react";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
+import { useNavigationHistoryHelper } from "@/shell/hooks/useNavigationHistory.helper";
 import { useNavigationHistoryStore } from "@/store/index";
-import { EDITOR_LINE_DISTANCE_THRESHOLD } from "@/hooks/vsCode/useNavigationHistory.helper";
+import { EDITOR_LINE_DISTANCE_THRESHOLD } from "@/shell/hooks/useNavigationHistory.helper";
 
 export function MarkdownEditorNavigationTracker() {
     const { editorRef } = useNoteDetailStore();

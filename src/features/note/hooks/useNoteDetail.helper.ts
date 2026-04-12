@@ -16,7 +16,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useStandardRegistryHelper } from "@/hooks/standardRegistry/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";

@@ -7,7 +7,7 @@
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
 import {buildTreeFromV2Items, filterTopLevelParents, useKNodeDialogHelper} from "../../hooks";
 import {useKStore} from "../../store/K.store";

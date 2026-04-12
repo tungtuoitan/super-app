@@ -8,7 +8,7 @@
 import React from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { ProjectDetailContent } from "./ProjectDetailContent";
 import { ProjectEditorPanelHeadless } from "@/HeadlessComponents/project/ProjectEditorPanelHeadless";
 import {useProjectDetailStore} from "@/store/project/useProjectDetail.store";

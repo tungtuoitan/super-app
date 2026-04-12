@@ -7,7 +7,7 @@ import { Task, useTaskStore } from "@/store/task/useTask.store";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "../../store";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useProjectStore } from "@/store/project/useProject.store";
 
 export const useTaskTabHelper = () => {

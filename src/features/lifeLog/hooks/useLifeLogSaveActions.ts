@@ -1,0 +1,87 @@
+import { useCallback } from "react";
+import { constants } from "@/utils/constants";
+import { useLifeLogLogHelper } from "@/hooks/lifeLog/useLifeLogLog.helper";
+import { useLifeLogTrackHelper } from "@/hooks/lifeLog/useLifeLogTrack.helper";
+import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useEditorTabsStore } from "@/store/index";
+import { toLocalISOString } from "@/utils/date.utils";
+import type { SaveActions } from "@/shell/hooks/useSaveActions.types";
+import type { BaseTab } from "@/types/editor/tab.types";
+import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+
+export function useLifeLogSaveActions(): SaveActions {
+    const { upsertLog } = useLifeLogLogHelper();
+    const { upsertTrack } = useLifeLogTrackHelper();
+    const { setLogs, setTracks } = useLifeLogStore();
+    const { setOpenTabs, setActiveTabId } = useEditorTabsStore();
+
+    const handles = (tabType: string) =>
+        tabType === constants.vscode.tab.tabTypes.lifeLog ||
+        tabType === constants.vscode.tab.tabTypes.lifeLogTrack;
+
+    const onSave = useCallback(async (tab: BaseTab) => {
+        if (tab.type === constants.vscode.tab.tabTypes.lifeLog) {
+            const log = tab.data as LifeLogLog;
+            const isNew = log.id <= 0;
+            const tempId = log.id;
+            const saved = await upsertLog({
+                id: isNew ? 0 : log.id,
+                type: log.type,
+                trackId: log.trackId,
+                title: log.title,
+                description: log.description,
+                isSensitive: log.isSensitive,
+                location: log.location,
+                occurAt: log.occurAt ? toLocalISOString(log.occurAt) ?? undefined : undefined,
+            });
+            if (saved) {
+                if (isNew) {
+                    const newTabId = `lifelog-tab-${saved.id}-${Date.now()}`;
+                    setLogs((prev) => prev.map((l) => l.id === tempId ? saved : l));
+                    setOpenTabs((prev) =>
+                        prev.map((t) => t.id === tab.id
+                            ? { ...t, id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false }
+                            : t
+                        )
+                    );
+                    setActiveTabId(newTabId);
+                } else {
+                    setOpenTabs((prev) =>
+                        prev.map((t) => t.id === tab.id ? { ...t, data0: t.data, hasUnsavedChanges: false } : t)
+                    );
+                }
+            }
+        } else if (tab.type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+            const track = tab.data as LifeLogTrack;
+            const isNew = track.id <= 0;
+            const tempId = track.id;
+            const saved = await upsertTrack({
+                id: isNew ? 0 : track.id,
+                name: track.name,
+                description: track.description,
+                emoji: track.emoji,
+                color: track.color,
+                isSensitive: track.isSensitive,
+            });
+            if (saved) {
+                if (isNew) {
+                    const newTabId = `lifelog-track-tab-${saved.id}-${Date.now()}`;
+                    setTracks((prev) => prev.map((t) => t.id === tempId ? saved : t));
+                    setOpenTabs((prev) =>
+                        prev.map((t) => t.id === tab.id
+                            ? { ...t, id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false }
+                            : t
+                        )
+                    );
+                    setActiveTabId(newTabId);
+                } else {
+                    setOpenTabs((prev) =>
+                        prev.map((t) => t.id === tab.id ? { ...t, data0: t.data, hasUnsavedChanges: false } : t)
+                    );
+                }
+            }
+        }
+    }, [upsertLog, upsertTrack, setLogs, setTracks, setOpenTabs, setActiveTabId]);
+
+    return { handles, onSave };
+}

@@ -10,7 +10,7 @@ import { updateDecorations } from "@/utils/markdown.utils";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {Note} from "@/types/index";
-import {useEditorTabHelper} from "@/hooks/vsCode/useEditorTab.helper";
+import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
 
 export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
     const { registries, allKeywords } = useGeneralStore();

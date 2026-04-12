@@ -8,7 +8,7 @@
 import { useEffect } from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { Project } from "@/store/project/useProject.store";
 import { useProjectDetailStore } from "@/store/project/useProjectDetail.store";
 

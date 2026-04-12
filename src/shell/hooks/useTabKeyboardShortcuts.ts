@@ -9,7 +9,7 @@
 
 import { useEffect, useRef } from "react";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
 import { constants } from "@/utils/constants";
 import type { Task } from "@/store/task/useTask.store";

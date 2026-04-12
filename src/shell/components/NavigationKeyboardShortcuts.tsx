@@ -5,7 +5,7 @@
  */
 
 import { useEffect } from "react";
-import { useNavigationHistoryHelper } from "@/hooks/vsCode/useNavigationHistory.helper";
+import { useNavigationHistoryHelper } from "@/shell/hooks/useNavigationHistory.helper";
 import {useEditorTabsStore, useNavigationHistoryStore} from "@/store/index";
 
 export const NavigationKeyboardShortcuts = () => {

@@ -7,7 +7,7 @@ import { useWorkspaceStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "@/store/workspace/MovingTree.store";
 import { useTreeHelper2 } from "@/hooks/workspace/useTreeHelper2";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { treeMiniHelper, TreeFolder } from "@/hooks/workspace/tree.miniHelper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { WorkspaceNoteItem } from "@/types/workspace-v2.types";

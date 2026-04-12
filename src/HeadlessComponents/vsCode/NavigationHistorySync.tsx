@@ -9,7 +9,7 @@
 import { useEffect } from "react";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { getStorageKey, HistoryStorage } from "@/hooks/vsCode/useNavigationHistory.helper";
+import { getStorageKey, HistoryStorage } from "@/shell/hooks/useNavigationHistory.helper";
 
 export const NavigationHistorySync = () => {
     const { past, setPast, present, setPresent, future, setFuture } = useNavigationHistoryStore();

@@ -4,7 +4,7 @@ import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { transformNotes } from "../utils/note.utils";
 import { Note } from "../types/note.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/auth/Auth.store";

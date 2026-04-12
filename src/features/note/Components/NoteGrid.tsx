@@ -7,7 +7,7 @@ import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { useNoteGridHelper } from "../hooks/useNoteGrid.helper";
 import { useNoteGridTableHelper } from "../hooks/useNoteGrid.table.helper";
 import { Note } from "../types/note.types";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useAuthStore, useEditorTabsStore } from "@/store/index";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";

@@ -1,6 +1,6 @@
 import React from "react";
 import { ConfirmCloseDialog, EditorToolbar } from "@/Components/Editor";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";

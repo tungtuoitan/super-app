@@ -13,7 +13,7 @@ import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsDetailHelper } from "@/hooks/ws/useWsDetail.helper";
 import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 
 /**

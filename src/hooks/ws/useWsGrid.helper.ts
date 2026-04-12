@@ -3,7 +3,7 @@ import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "../../utils";
 import { useSnackbar } from "notistack";
-import { useEditorTabHelper } from "../vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWsStore } from "@/store/ws/useWs.store";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";

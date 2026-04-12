@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useEditorTabsStore, useGeneralStore } from "../../store/index";
+import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "./useEditorTab.helper";
-import { useWorkspaceStore } from "../../store/workspace/Workspace.store";
-import { useGridControlStore } from "../../store/grid/useGridControl.store";
+import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
+import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
-import { useWsStore } from "../../store/ws/useWs.store";
-import { useConfirmationPopoverHelper } from "../useConfirmationPopover.helper";
+import { useWsStore } from "@/store/ws/useWs.store";
+import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
-import { useOrchestratorContextMenuHelper } from "../../shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useTabKeyboardShortcuts } from "./useTabKeyboardShortcuts";
-import { BaseTab } from "../../types/editor/tab.types";
-import { constants } from "../../utils/constants";
+import { BaseTab } from "@/types/editor/tab.types";
+import { constants } from "@/utils/constants";
 
 /**
  * TabBar - VS Code style tab bar component

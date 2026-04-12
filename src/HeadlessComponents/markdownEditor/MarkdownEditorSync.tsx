@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useGeneralStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, updateDecorations } from "@/utils/markdown.utils";

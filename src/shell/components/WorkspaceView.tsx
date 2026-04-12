@@ -5,11 +5,11 @@
 
 import { useEffect, useCallback } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
-import { WorkspaceTree } from "../Workspace/Explorer/WorkspaceTree";
+import { WorkspaceTree } from "@/Components/Workspace/Explorer/WorkspaceTree";
 import { useWorkspaceLoader } from "@/hooks/workspace/useWorkspace.loader";
 import { useWorkspaceStore } from "@/store/workspace/Workspace.store";
 import { Loader2 } from "lucide-react";
-import { FolderDialog } from "../Workspace/Explorer/FolderDialog/FolderDialog";
+import { FolderDialog } from "@/Components/Workspace/Explorer/FolderDialog/FolderDialog";
 import { NoteGridPopup } from "@/features/note";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useWorkspaceHelper } from "@/hooks/workspace/useWorkspaceHelper";

@@ -21,7 +21,7 @@ import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, 
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "@/types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "@/types/workspace.types";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {WorkspaceDTO} from "@/types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";

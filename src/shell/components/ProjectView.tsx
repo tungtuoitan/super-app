@@ -3,7 +3,7 @@
  * Shows all projects with filtering and management capabilities
  */
 
-import { ProjectGrid } from "../Project/ProjectGrid";
+import { ProjectGrid } from "@/Components/Project/ProjectGrid";
 
 export function ProjectView() {
     return (

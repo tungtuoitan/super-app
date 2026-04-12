@@ -3,6 +3,6 @@
  */
 
 export { NoteEditorPanel } from "@/features/note";
-export { EditorToolbar } from "./EditorToolbar";
-export { ConfirmCloseDialog } from "./ConfirmCloseDialog";
+export { EditorToolbar } from "@/shell/components/EditorToolbar";
+export { ConfirmCloseDialog } from "@/shell/components/ConfirmCloseDialog";
 export type { TabType } from "../../types/editor/tab.types";

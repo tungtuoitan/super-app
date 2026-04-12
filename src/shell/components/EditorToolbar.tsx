@@ -8,10 +8,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Save, RotateCcw, Undo2 } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
-import { useEditorTabsStore } from "@/store/index";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
-import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { useEditorToolbarHelper } from "@/hooks/vsCode/useEditorToolbar.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorToolbarHelper } from "@/shell/hooks/useEditorToolbar.helper";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { constants } from "@/utils/constants";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
@@ -20,64 +18,66 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { projectService } from "@/services/project.service";
 import { Breadcrumb } from "./Breadcrumb";
 import { BackButton } from "./BackButton";
-import type { Task } from "@/store/task/useTask.store";
+import { moduleRegistry } from "@/shell/moduleRegistry";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();
-    const { isSaving, setIsSaving } = useEditorToolbarStore();
+    const { isSaving } = useEditorToolbarStore();
     const { projects } = useProjectStore();
     const { $user } = useAuthStore();
 
-    // Get active tab
     const activeTab = getActiveTab();
 
-    // For task tabs without openedBy, derive back button pointing to their project
-    const [taskProjectOpenedBy, setTaskProjectOpenedBy] = useState<{ link: string; label: string } | undefined>(undefined);
+    // ── Back button via registry (sync) + async fallback ─────────────────────
+    const registryBackButton = activeTab && !activeTab.openedBy
+        ? moduleRegistry.getBackButton(activeTab, { projects })
+        : null;
 
+    // Async fallback: if registry can't resolve (project not in store), fetch from API
+    const [asyncBackButton, setAsyncBackButton] = useState<{ link: string; label: string } | undefined>(undefined);
     useEffect(() => {
-        if (activeTab?.type !== constants.vscode.tab.tabTypes.task || activeTab.openedBy) {
-            setTaskProjectOpenedBy(undefined);
+        if (registryBackButton || activeTab?.openedBy) {
+            setAsyncBackButton(undefined);
             return;
         }
-        const task = activeTab.data as Task;
-        const fromStore = projects.find(p => p.id === task.projectId);
-        if (fromStore) {
-            setTaskProjectOpenedBy({ link: `sa/p${task.projectId}`, label: fromStore.name });
+        // Only project module uses getBackButton — if it returned null, project might not be loaded yet
+        if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.task) {
+            setAsyncBackButton(undefined);
             return;
         }
+        const task = activeTab.data as { projectId: number };
         let cancelled = false;
         projectService._getProjectById($user.userToken, task.projectId).then(res => {
             if (!cancelled && res.success && res.data?.[0]) {
-                setTaskProjectOpenedBy({ link: `sa/p${task.projectId}`, label: res.data[0].name });
+                setAsyncBackButton({ link: `sa/p${task.projectId}`, label: res.data[0].name });
             }
         }).catch(() => {});
         return () => { cancelled = true; };
-    }, [activeTab?.id, activeTab?.openedBy]);
+    }, [activeTab?.id, registryBackButton]);
 
-    const effectiveOpenedBy = activeTab?.openedBy ?? taskProjectOpenedBy;
+    const effectiveOpenedBy = activeTab?.openedBy ?? registryBackButton ?? asyncBackButton;
 
-    // Get toolbar actions for active tab
-    const { upsertOrchestraitor, commonCancel, _deleteStatusText, _itemId } = useEditorToolbarHelper();
+    // ── Toolbar actions ──────────────────────────────────────────────────────
+    const { upsertOrchestraitor, commonCancel } = useEditorToolbarHelper();
 
-    // ── Keyboard shortcut: Ctrl+S or Alt+S → save ────────────────────────────
-    // Refs ensure callback is always fresh without re-registering the listener.
+    // ── Keyboard shortcut: Ctrl+S / Alt+S → save ────────────────────────────
     const activeTabRef = useRef(activeTab);
     const isSavingRef = useRef(isSaving);
-    const upsertOrchestraitorRef = useRef(upsertOrchestraitor);
+    const upsertRef = useRef(upsertOrchestraitor);
     activeTabRef.current = activeTab;
     isSavingRef.current = isSaving;
-    upsertOrchestraitorRef.current = upsertOrchestraitor;
+    upsertRef.current = upsertOrchestraitor;
 
     useGlobalShortcut("ctrl+s", { id: "editor-toolbar-save", priority: 50 }, () => {
         if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
-            upsertOrchestraitorRef.current();
+            upsertRef.current();
         }
-        return true; // always claim — prevent browser Save dialog
+        return true;
     });
 
     useGlobalShortcut("alt+s", { id: "editor-toolbar-save-alt", priority: 50 }, () => {
         if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
-            upsertOrchestraitorRef.current();
+            upsertRef.current();
         }
         return true;
     });
@@ -98,7 +98,6 @@ export function EditorToolbar() {
             <TooltipProvider>
                 <div className="flex gap-1">
                     {(activeTab?.data as any)?.deletedAt && !(activeTab?.data as any).isHardDeleted ? (
-                        // Show Restore button for soft deleted items only
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <span>
@@ -114,16 +113,12 @@ export function EditorToolbar() {
                                 </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>
-                                    Restore {activeTab?.type === constants.vscode.tab.tabTypes.note ? constants.vscode.displayNames.note : constants.vscode.displayNames.workspace}
-                                </p>
+                                <p>Restore</p>
                             </TooltipContent>
                         </Tooltip>
                     ) : activeTab && (activeTab.data as any).isHardDeleted ? (
-                        // Show message for hard deleted items
                         <span className="text-xs text-red-500 flex items-center px-2">Permanently deleted - cannot restore</span>
                     ) : (
-                        // Show Save button for normal items
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <span>
@@ -144,7 +139,6 @@ export function EditorToolbar() {
                         </Tooltip>
                     )}
 
-                    {/* Cancel/Discard Changes */}
                     {activeTab && !(activeTab.data as any).isHardDeleted && (
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -163,7 +157,7 @@ export function EditorToolbar() {
                             <TooltipContent>
                                 <p>
                                     {(activeTab?.data as any)?.deletedAt
-                                        ? `Cannot edit deleted ${activeTab.type === constants.vscode.tab.tabTypes.note ? constants.vscode.displayNames.note : constants.vscode.displayNames.workspace}`
+                                        ? "Cannot edit deleted item"
                                         : "Discard Changes"}
                                 </p>
                             </TooltipContent>

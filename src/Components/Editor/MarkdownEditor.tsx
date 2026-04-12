@@ -8,7 +8,7 @@ import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
 import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useWorkspaceStore, useEditorStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
-import { useEditorTabHelper } from "@/hooks/vsCode/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
 import { useTreeStatusHelper } from "@/hooks/workspace/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
