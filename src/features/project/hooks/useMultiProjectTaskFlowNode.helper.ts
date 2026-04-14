@@ -16,6 +16,7 @@ import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/task/types/task.types";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
+import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
 import { debugLog } from "@/hooks/debugLog/useDebugLog";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
@@ -25,6 +26,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { isNodeLocked } = useMultiProjectTaskFlowHelper();
+    const { createTaskFolder } = useProjectTaskFolderHelper();
 
     // ── Rename ──────────────────────────────────────────────────────────────
 
@@ -82,7 +84,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                         taskId: newTask.id,
                         folderWorkspaceItemId: newTask.folderWorkspaceItemId,
                         title: trimmed,
-                        source: "useMultiProjectTaskFlowNode (no _createTaskFolder called)",
+                        source: "useMultiProjectTaskFlowNode",
                     });
 
                     setFlowNodes((prev) =>
@@ -97,6 +99,8 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     flowService._upsertPositions($user.userToken, [
                         { nodeId: newTask.id, nodeType: "task", x: tempNode.position.x, y: tempNode.position.y },
                     ]).catch(() => {});
+
+                    await createTaskFolder(newTask);
 
                     _console.success("Task created");
                     debugLog.flush();
@@ -156,7 +160,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 _console.error("Failed to rename task");
             }
         },
-        [tasks, currentFlowNodes, setTasks, setFlowNodes, setEditingNodeId, $user.userToken, _console, isNodeLocked],
+        [tasks, currentFlowNodes, setTasks, setFlowNodes, setEditingNodeId, $user.userToken, _console, isNodeLocked, createTaskFolder],
     );
 
     // ── Add task at position (right-click canvas) ─────────────────────────
