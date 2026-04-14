@@ -8,8 +8,8 @@
 import React from "react";
 import { GenericTextField, StatusAutoComplete, RichTextEditor } from "@/shared/components";
 import { DateRangePicker } from "@/shared/components/DateTimePicker";
-import { CardContent } from "@/Components/ui/card";
-import { ScrollArea } from "@/Components/ui/scroll-area";
+import { CardContent } from "@/shared/components/ui/card";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";

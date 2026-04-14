@@ -7,8 +7,8 @@
 
 import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
-import { Button } from "@/Components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Button } from "@/shared/components/ui/Button";
 import { GenericTextField, IconPicker } from "@/shared/components";
 import { useKeyboardShortcut } from "@/shared/hooks";
 import { useKNodeDialogHelper as useKFolderDialogHelper } from "../../../hooks/useKNodeDialog.helper";

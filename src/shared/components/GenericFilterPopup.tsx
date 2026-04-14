@@ -7,12 +7,12 @@
 
 import React, { useEffect } from "react";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
-import { Button } from "@/Components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
-import { Checkbox } from "@/Components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/Components/ui/radio-group";
-import { Slider } from "@/Components/ui/slider";
-import { Label } from "@/Components/ui/label";
+import { Button } from "@/shared/components/ui/Button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
+import { Slider } from "@/shared/components/ui/slider";
+import { Label } from "@/shared/components/ui/label";
 import type { UserFilters, FilterFieldConfig, ViewFilter } from "@/types/common.types";
 import { constants } from "@/utils/constants";
 import { useGenericFilterHelper } from "@/hooks/index";

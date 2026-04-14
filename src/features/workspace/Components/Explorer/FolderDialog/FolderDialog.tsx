@@ -7,9 +7,9 @@
 
 import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
-import { Button } from "@/Components/ui/button";
-import { Textarea } from "@/Components/ui/textarea";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Button } from "@/shared/components/ui/Button";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { GenericTextField, IconPicker } from "@/shared/components";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { isFolder } from "@/types/workspace-v2.types";

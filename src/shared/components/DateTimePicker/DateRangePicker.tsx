@@ -9,11 +9,11 @@ import React, { useState, useEffect, useMemo } from "react";
 import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, isSameDay, differenceInDays } from "date-fns";
 import { Calendar as CalendarIcon, Clock, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/Components/ui/button";
-import { Calendar } from "@/Components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
-import { Label } from "@/Components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { Button } from "@/shared/components/ui/Button";
+import { Calendar } from "@/shared/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import { Label } from "@/shared/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { Matcher, DateRange } from "react-day-picker";
 
 /**

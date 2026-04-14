@@ -6,8 +6,8 @@
 
 import React, { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
-import { Label } from "@/Components/ui/label";
-import { Input } from "@/Components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Input } from "@/shared/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
     IconType,

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Check, Loader2, Pencil, Play, Plus, X, HelpCircle, Mic, Trash2, RotateCcw, Eye, EyeOff, BookX, GripVertical, PenLine } from "lucide-react";
 import { useDrag, useDrop } from "react-dnd";
-import { Button } from "@/Components/ui/button";
-import { ScrollArea } from "@/Components/ui/scroll-area";
+import { Button } from "@/shared/components/ui/Button";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useKTestStore } from "../../store/useKTest.store";
 import { useKTestLoader } from "../../hooks/useKTest.loader";
 import { KTestService } from "../../service/kTest.service";

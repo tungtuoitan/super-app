@@ -8,8 +8,8 @@
 import { useState, useEffect } from "react";
 import { format, isToday, isSameYear } from "date-fns";
 import { CalendarIcon, X, Clock, ChevronUp, ChevronDown } from "lucide-react";
-import { Calendar } from "@/Components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
+import { Calendar } from "@/shared/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface SingleDatePickerProps {

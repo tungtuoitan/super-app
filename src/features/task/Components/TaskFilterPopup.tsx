@@ -5,10 +5,10 @@
 
 import React from "react";
 import { Filter, RotateCcw } from "lucide-react";
-import { Button } from "@/Components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
-import { Checkbox } from "@/Components/ui/checkbox";
-import { Label } from "@/Components/ui/label";
+import { Button } from "@/shared/components/ui/Button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Label } from "@/shared/components/ui/label";
 import { constants } from "@/utils/constants";
 import { filterUtils } from "@/utils/filter.utils";
 import { useAuthStore, useGeneralStore } from "@/store/index";

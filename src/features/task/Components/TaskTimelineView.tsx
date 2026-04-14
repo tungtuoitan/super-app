@@ -9,10 +9,10 @@
 
 import React from "react";
 import { Loader2, ZoomIn, ZoomOut, Calendar, CornerDownRight } from "lucide-react";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
-import { ScrollArea } from "@/Components/ui/scroll-area";
-import { Button } from "@/Components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Button } from "@/shared/components/ui/Button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { useTaskStore } from "../store/useTask.store";
 import { useTaskTabHelper } from "../hooks/useTaskTab.helper";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";

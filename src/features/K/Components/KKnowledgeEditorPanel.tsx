@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Settings, Columns, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CardContent } from "@/Components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
+import { CardContent } from "@/shared/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
 import { useEditorTabsStore } from "@/store/index";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
 import { KTestKanbanView } from "./KTestKanbanView/KTestKanbanView";

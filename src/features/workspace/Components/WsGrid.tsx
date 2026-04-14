@@ -6,9 +6,9 @@
 import React, { useEffect, useMemo } from "react";
 import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "@/Components/ui/button";
-import { Checkbox } from "@/Components/ui/checkbox";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Button } from "@/shared/components/ui/Button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useWsStore } from "@/store/ws/useWs.store";
 import { Ws } from "@/types/workspace.types";
 import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";

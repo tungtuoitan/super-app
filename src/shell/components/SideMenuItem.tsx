@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
 import { useNavigationStore } from "../../contexts/NavigationContext";
 import { getIcon } from "./AllIcon";

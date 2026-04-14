@@ -38,7 +38,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 <div className="p-6 text-center min-h-[200px] flex flex-col justify-center items-center">
                     <h2 className="text-2xl font-semibold text-destructive mb-4">Something went wrong</h2>
                     <p className="text-sm text-muted-foreground mt-2 mb-4">{this.state.error?.message || "An unexpected error occurred"}</p>
-                    <Button onClick={() => window.location.reload()} variant="primary">
+                    <Button onClick={() => window.location.reload()} variant="default">
                         Reload Page
                     </Button>
                 </div>

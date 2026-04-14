@@ -5,7 +5,7 @@
 
 import React, { useRef } from "react";
 import { useDrop, DropTargetMonitor } from "react-dnd";
-import { ScrollArea } from "@/Components/ui/scroll-area";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { getTaskStatusColors } from "@/features/task/utils/TaskDetail.utils";
 import { cn } from "@/lib/utils";
 import { KANBAN_TASK } from "../../../utils/multiProjectDetail.constants";

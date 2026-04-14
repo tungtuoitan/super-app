@@ -1,6 +1,6 @@
 import { forwardRef, useState } from "react";
-import { Input } from "@/Components/ui/input";
-import { Label } from "@/Components/ui/label";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/lib/utils";
 
 /**

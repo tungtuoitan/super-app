@@ -3,7 +3,7 @@
  * Shows all workspaces with filtering and management capabilities
  */
 
-import { WsGrid } from "@/Components/Workspace/WsGrid";
+import { WsGrid } from "@/features/workspace/Components/WsGrid";
 
 export function WsView() {
     return (

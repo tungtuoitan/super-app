@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/shared/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 

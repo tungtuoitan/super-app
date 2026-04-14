@@ -11,7 +11,7 @@ import { HighlightedText } from "./HighlightedText";
 import { CommandPaletteKeyDown } from "@/HeadlessComponents/vsCode/CommandPaletteKeyDown";
 import { useGeneralStore } from "@/store/general/General.store";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { Keyword, KeywordType } from "@/types/keyword.types";
 
 const ALL_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];

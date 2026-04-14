@@ -16,10 +16,10 @@ import {
     DateRangePicker,
     GenericAutoComplete,
 } from "@/shared/components";
-import { CardContent } from "@/Components/ui/card";
+import { CardContent } from "@/shared/components/ui/card";
 import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon } from "lucide-react";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
-import { KeywordIconRenderer } from "@/Components/shared/KeywordIconRenderer";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { KeywordIconRenderer } from "@/shared/components/KeywordIconRenderer";
 import { TaskDetailSection } from "./TaskDetailSection";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailKeywordSelector } from "../Selectors/TaskDetailKeywordSelector";

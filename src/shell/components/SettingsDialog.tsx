@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/Components/ui/dialog";
-import { Label } from "@/Components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/components/ui/dialog";
+import { Label } from "@/shared/components/ui/label";
 import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useActivityBarStore, useAuthStore } from "@/store/index";
-import { ScrollArea } from "@/Components/ui/scroll-area";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { keywordService } from "@/services/keyword.service";
 import type { KeywordSyncReport } from "@/types/keyword.types";
 import {useStandardRegistryHelper} from "@/hooks/index";

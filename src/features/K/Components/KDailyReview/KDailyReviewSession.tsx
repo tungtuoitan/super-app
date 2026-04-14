@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ArrowLeft, Mic, MicOff, ChevronRight, Loader2, CheckCircle2, XCircle, Type, KeyRound, Send, PenLine, Check } from "lucide-react";
 import { KReviewEditor } from "../small/KReviewEditor";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/shared/components/ui/Button";
 import { KTestService } from "../../service/kTest.service";
 import { AutoResizeTextarea } from "../KNodeEditorPanel/AutoResizeTextarea";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";

@@ -1,5 +1,6 @@
 import React from "react";
-import { ConfirmCloseDialog, EditorToolbar } from "@/Components/Editor";
+import { ConfirmCloseDialog } from "@/shell/components/ConfirmCloseDialog";
+import { EditorToolbar } from "@/shell/components/EditorToolbar";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
