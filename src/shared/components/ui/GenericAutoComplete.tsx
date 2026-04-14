@@ -1,10 +1,10 @@
 import { CSSProperties, useEffect, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/Components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/Components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
-import { Label } from "@/Components/ui/label";
+import { Button } from "@/shared/components/ui/Button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shared/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import { Label } from "@/shared/components/ui/label";
 
 /**
  * Utility function to check if a value is empty.

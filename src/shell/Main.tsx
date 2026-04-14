@@ -10,8 +10,8 @@ import { NoteGridPopupProvider, NoteDetailProvider, NoteGridProvider } from "@/f
 import { MovingTreeProvider } from "@/features/workspace/store/MovingTree.store";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/confirmationPopover/ConfirmationPopover.store";
-import { ConfirmationPopoverContainer } from "@/Components/ConfirmationPopover";
-import MainNav from "./MainNav/MainNav"; 
+import { ConfirmationPopoverContainer } from "@/shell/components/ConfirmationPopoverContainer";
+import MainNav from "./components/MainNav"; 
 import { DialogProvider, EditorTabProvider, EditorProvider, GeneralProvider, CommandPaletteProvider, ConsoleProvider } from "@/store/index";
 import { EditorToolbarProvider } from "@/store/editor/EditorToolbar.store";
 import { NavProvider } from "@/contexts/NavigationContext";
@@ -30,7 +30,7 @@ import { MultiTimelineProvider } from "@/features/task/store/useMultiTimeline.st
 import { TaskCommentProvider } from "@/features/task/store/useTaskComment.store";
 import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";
-import { AuthGuard } from "@/Components/Auth/AuthGuard";
+import { AuthGuard } from "@/shell/auth/AuthGuard";
 import { OrchestratorContextMenuStoreProvider } from "@/store/contextMenu/ContextMenu.store";
 import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.store";

@@ -3,9 +3,9 @@
  */
 
 import { useCallback, useRef, useEffect } from "react";
-import { Label } from "@/Components/ui/label";
-import { Input } from "@/Components/ui/input";
-import { Checkbox } from "@/Components/ui/checkbox";
+import { Label } from "@/shared/components/ui/label";
+import { Input } from "@/shared/components/ui/input";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { useEditorTabsStore } from "@/store/index";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import type { LifeLogTrack } from "@/types/lifeLog.types";

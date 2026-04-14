@@ -7,7 +7,7 @@
 import React from "react";
 import { ListTodo, Columns, GanttChartSquare, CalendarRange, GitBranch } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ScrollArea, ScrollBar } from "@/Components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/shared/components/ui/scroll-area";
 import { MultiProjectTaskList } from "./MultiProjectTaskList";
 import { MultiProjectKanbanView } from "./MultiProjectKanbanView";
 import { MultiProjectProTimelineView } from "./MultiProjectProTimelineView";

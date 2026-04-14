@@ -1,4 +1,4 @@
-import { Main } from "./Components/Main";
+import { Main } from "./shell/Main";
 
 // Register all feature modules into the VSCode shell (side-effect import)
 import "./shell/modules.config";

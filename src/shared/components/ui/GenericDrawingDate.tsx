@@ -2,10 +2,10 @@ import React, { forwardRef, useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/Components/ui/button";
-import { Calendar } from "@/Components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
-import { Label } from "@/Components/ui/label";
+import { Button } from "@/shared/components/ui/Button";
+import { Calendar } from "@/shared/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import { Label } from "@/shared/components/ui/label";
 
 /**
  * Props interface for the GenericDrawingDate component.

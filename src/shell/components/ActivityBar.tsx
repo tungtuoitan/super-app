@@ -1,5 +1,5 @@
 import { Settings, UserCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { SettingsDialog } from "./SettingsDialog";
 import { AccountsDialog } from "./AccountsDialog";
 import { useActivityBarStore } from "@/store/index";

@@ -5,8 +5,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
-import { Input } from "@/Components/ui/input";
-import { Button } from "@/Components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/shared/components/ui/Button";
 import { GenericFilterPopup } from "./GenericFilterPopup";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMobileStore } from "@/store/mobile/Mobile.store";

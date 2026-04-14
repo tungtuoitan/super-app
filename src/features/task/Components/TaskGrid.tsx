@@ -10,8 +10,8 @@
 import React from "react";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { Loader2, CornerDownRight } from "lucide-react";
-import { Checkbox } from "@/Components/ui/checkbox";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useTaskGridHelper } from "../hooks/useTaskGrid.helper";
 import { useTaskTabHelper } from "../hooks/useTaskTab.helper";

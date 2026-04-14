@@ -1,13 +1,13 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 
 import { useNavigationStore } from "../../contexts/NavigationContext";
-import { TopNav } from "../TopNav";
+import { TopNav } from "./TopNav";
 import { VSCodeLayout } from "@/shell/components";
 import { AuthCallback } from "@/pages/AuthCallback";
 import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { NavigationKeyboardShortcuts } from "@/shell/components/NavigationKeyboardShortcuts";
-import { DebugPanel } from "@/Components/DebugPanel";
+import { DebugPanel } from "@/shell/components/DebugPanel";
 import {useMobileStore} from "@/store/mobile/Mobile.store";
 
 /**

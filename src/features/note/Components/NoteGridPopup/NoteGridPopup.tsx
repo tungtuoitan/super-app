@@ -4,15 +4,15 @@
 
 import React, { useMemo } from "react";
 import { Loader2, FileText } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
-import { Button } from "@/Components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Button } from "@/shared/components/ui/Button";
 import { useNoteGridPopupStore } from "../../store/useNoteGridPopup.store";
 import { useNoteGridPopupHelper } from "../../hooks/useNoteGridPopup.helper";
 import { useNoteGridStore } from "../../store/useNoteGrid.store";
 import { NoteGrid } from "../NoteGrid";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useKeyboardShortcut } from "@/shared/hooks";
-import { GridControlBar } from "@/Components/shared/GridControlBar";
+import { GridControlBar } from "@/shared/components/GridControlBar";
 import { isNote } from "@/types/workspace-v2.types";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { constants } from "@/utils/constants";

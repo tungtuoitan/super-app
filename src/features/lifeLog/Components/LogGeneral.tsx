@@ -3,11 +3,11 @@
  */
 
 import { useCallback } from "react";
-import { Label } from "@/Components/ui/label";
-import { Input } from "@/Components/ui/input";
-import { Textarea } from "@/Components/ui/textarea";
-import { Checkbox } from "@/Components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
+import { Label } from "@/shared/components/ui/label";
+import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useEditorTabsStore } from "@/store/index";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { LOG_TYPES, LOG_TYPE_CONFIG, type LifeLogLog, type LogType } from "@/types/lifeLog.types";

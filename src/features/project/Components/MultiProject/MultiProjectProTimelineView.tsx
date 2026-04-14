@@ -10,9 +10,9 @@
 
 import React, { useEffect } from "react";
 import { ZoomIn, ZoomOut, Calendar } from "lucide-react";
-import { ScrollArea } from "@/Components/ui/scroll-area";
-import { Button } from "@/Components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Button } from "@/shared/components/ui/Button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { useProjectTabHelper } from "../../hooks/useProjectTab.helper";
 import { cn } from "@/lib/utils";
 import { getProjectStatusColors } from "../ProjectStatusBadge";

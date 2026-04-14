@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { flexRender } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "@/Components/ui/button";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Button } from "@/shared/components/ui/Button";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { useNoteGridHelper } from "../hooks/useNoteGrid.helper";
 import { useNoteGridTableHelper } from "../hooks/useNoteGrid.table.helper";

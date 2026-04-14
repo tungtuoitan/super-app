@@ -9,10 +9,10 @@
 import React, { useRef, useState } from "react";
 import { useDrag, useDrop, DragSourceMonitor, DropTargetMonitor } from "react-dnd";
 import { Loader2, CornerDownRight } from "lucide-react";
-import { Checkbox } from "@/Components/ui/checkbox";
-import { Label } from "@/Components/ui/label";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
-import { ScrollArea } from "@/Components/ui/scroll-area";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Label } from "@/shared/components/ui/label";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useTaskTabHelper } from "../hooks/useTaskTab.helper";
 import { cn } from "@/lib/utils";

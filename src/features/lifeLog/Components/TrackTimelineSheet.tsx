@@ -5,8 +5,8 @@
  */
 
 import { useMemo, useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
-import { Checkbox } from "@/Components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import {

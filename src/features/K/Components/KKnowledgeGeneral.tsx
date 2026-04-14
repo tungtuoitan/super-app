@@ -4,9 +4,9 @@
  */
 
 import { useCallback } from "react";
-import { Label } from "@/Components/ui/label";
-import { Input } from "@/Components/ui/input";
-import { Button } from "@/Components/ui/button";
+import { Label } from "@/shared/components/ui/label";
+import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/shared/components/ui/Button";
 import { useEditorTabsStore } from "@/store/index";
 import { useKLoader } from "../hooks";
 import { useKStore } from "../store/K.store";

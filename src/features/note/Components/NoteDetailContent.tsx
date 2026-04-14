@@ -4,7 +4,7 @@
 
 import React, { useEffect } from "react";
 import { GenericAutoComplete, GenericTagAutoComplete, GenericTextField, IAutoCompleteOptions } from "@/shared/components";
-import { CardContent } from "@/Components/ui/card";
+import { CardContent } from "@/shared/components/ui/card";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
@@ -12,7 +12,7 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore, useGeneralStore, useWorkspaceStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
-import { MarkdownEditor } from "@/Components/Editor/MarkdownEditor";
+import { MarkdownEditor } from "@/features/note/Components/MarkdownEditor";
 import { MarkdownEditorSync } from "@/HeadlessComponents/markdownEditor/MarkdownEditorSync";
 import { MarkdownEditorTheme } from "@/HeadlessComponents/markdownEditor/MarkdownEditorTheme";
 import { useMonaco } from "@monaco-editor/react";

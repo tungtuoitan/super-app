@@ -6,8 +6,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Save, RotateCcw, Undo2 } from "lucide-react";
-import { Button } from "@/Components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { Button } from "@/shared/components/ui/Button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorToolbarHelper } from "@/shell/hooks/useEditorToolbar.helper";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";

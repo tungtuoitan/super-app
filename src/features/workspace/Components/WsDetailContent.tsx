@@ -5,9 +5,9 @@
 
 import React, { useEffect } from "react";
 import { GenericTextField, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
-import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import { Textarea } from "@/Components/ui/textarea";
-import { ScrollArea } from "@/Components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { useWsDetailHelper } from "@/hooks/ws/useWsDetail.helper";

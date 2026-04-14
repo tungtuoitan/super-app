@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarClock, Loader2, Play, RefreshCw, Eye, EyeOff } from "lucide-react";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/shared/components/ui/Button";
 import { KTestService } from "../../service/kTest.service";
 import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../../store/K.store";

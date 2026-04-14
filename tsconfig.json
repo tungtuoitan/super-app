@@ -23,8 +23,6 @@
             "@/contexts/*": ["contexts/*"],
             "@/types/*": ["types/*"],
             "@/utils/*": ["utils/*"],
-            "@/components/*": ["Components/*"],
-            "@/Components/*": ["Components/*"],
             "@/shared/*": ["shared/*"],
             "@/lib/*": ["lib/*"],
             "@/features/*": ["features/*"],
