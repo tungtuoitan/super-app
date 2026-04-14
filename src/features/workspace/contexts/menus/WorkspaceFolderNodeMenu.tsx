@@ -15,7 +15,6 @@ import { useWorkspaceFolderMenuHelper } from "../helpers/useWorkspaceFolderMenu.
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
-import { useTrackingGraphHelper } from "@/hooks/tracking/useTrackingGraph.helper";
 
 /**
  * WorkspaceFolderNodeMenu
@@ -31,7 +30,6 @@ export function WorkspaceFolderNodeMenu() {
     const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
     const { createFolder, editFolder, dhr_items, createNewNote, openAddExistingNotePopup } = useWorkspaceFolderMenuHelper();
     const _TREESTATUS = useTreeStatusHelper();
-    const { openTrackingGraphTab } = useTrackingGraphHelper();
 
     // Calculate derived values
     const entityId = contextData?.entityId
@@ -80,24 +78,6 @@ export function WorkspaceFolderNodeMenu() {
 
                     <MenuDivider />
 
-                    {/* Open Tracking Graph */}
-                    <MenuItem
-                        onClick={() => {
-                            if (contextData && currentWorkspace) {
-                                openTrackingGraphTab(
-                                    contextData.entityId,
-                                    contextData.data?.name || "Folder",
-                                    currentWorkspace.id
-                                );
-                            }
-                        }}
-                        disabled={_TREESTATUS.selectedItemStatuses.isMultiple}
-                    >
-                        <TrackingIcon className="w-4 h-4 mr-2" />
-                        Open Tracking Graph
-                    </MenuItem>
-
-                    <MenuDivider />
 
                     {/* Edit - disabled if multiple items selected or deleted */}
                     <MenuItem onClick={() => editFolder(contextData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>

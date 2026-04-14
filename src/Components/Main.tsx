@@ -36,7 +36,6 @@ import { GridControlProvider } from "@/store/grid/useGridControl.store";
 import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.store";
 import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
-import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
 import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import {KProvider} from "@/features/K/store/K.store";
 import {KFolderDialogProvider} from "@/features/K/store/KNodeDialog.store";
@@ -101,7 +100,6 @@ export function Main() {
                                                                                                                                 <NoteDetailProvider>
                                                                                                                                     <NoteGridProvider>
                                                                                                                                         <EditorTabProvider>
-                                                                                                                                            <TrackingGraphProvider>
                                                                                                                                                 <EditorProvider>
                                                                                                                                                     <EditorToolbarProvider>
                                                                                                                                                         <DialogProvider>
@@ -120,7 +118,6 @@ export function Main() {
                                                                                                                                                         </DialogProvider>
                                                                                                                                                     </EditorToolbarProvider>
                                                                                                                                                 </EditorProvider>
-                                                                                                                                            </TrackingGraphProvider>
                                                                                                                                         </EditorTabProvider>
                                                                                                                                     </NoteGridProvider>
                                                                                                                                 </NoteDetailProvider>
