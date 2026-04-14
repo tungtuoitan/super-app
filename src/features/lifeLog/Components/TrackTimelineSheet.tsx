@@ -7,7 +7,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
 import { Checkbox } from "@/Components/ui/checkbox";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useLifeLogStore } from "../store/useLifeLog.store";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import {
     BarChart, Bar, ScatterChart, Scatter,

@@ -37,7 +37,7 @@ import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.stor
 import { MobileProvider } from "@/store/mobile/Mobile.store";
 import { DebugLoggerProvider } from "store/debug/DebugLogger.store";
 import { TrackingGraphProvider } from "@/store/tracking/TrackingGraph.store";
-import { LifeLogProvider } from "@/store/lifeLog/useLifeLog.store";
+import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import {KProvider} from "@/features/K/store/K.store";
 import {KFolderDialogProvider} from "@/features/K/store/KNodeDialog.store";
 import {KMovingTreeProvider} from "@/features/K/store/KMovingTree.store";

@@ -6,13 +6,13 @@
 
 import { useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { useLifeLogLogHelper } from "@/hooks/lifeLog/useLifeLogLog.helper";
-import { useLifeLogTrackHelper } from "@/hooks/lifeLog/useLifeLogTrack.helper";
-import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
+import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
+import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
+import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { useMobileStore } from "@/store/mobile/Mobile.store";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";
 import type { LifeLogTrack } from "@/types/lifeLog.types";

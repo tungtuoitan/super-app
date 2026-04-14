@@ -9,7 +9,7 @@ import { Textarea } from "@/Components/ui/textarea";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
 import { useEditorTabsStore } from "@/store/index";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useLifeLogStore } from "../store/useLifeLog.store";
 import { LOG_TYPES, LOG_TYPE_CONFIG, type LifeLogLog, type LogType } from "@/types/lifeLog.types";
 import { format } from "date-fns";
 import { LogTypeIcon } from "./LogTypeIcon";

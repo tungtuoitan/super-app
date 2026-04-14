@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { constants } from "@/utils/constants";
-import { useLifeLogLogHelper } from "@/hooks/lifeLog/useLifeLogLog.helper";
-import { useLifeLogTrackHelper } from "@/hooks/lifeLog/useLifeLogTrack.helper";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
+import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
+import { useLifeLogStore } from "../store/useLifeLog.store";
 import { useEditorTabsStore } from "@/store/index";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { SaveActions } from "@/shell/hooks/useSaveActions.types";

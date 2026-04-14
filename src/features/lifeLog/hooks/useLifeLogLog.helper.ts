@@ -4,11 +4,11 @@
  */
 
 import { useCallback } from "react";
-import { lifeLogService } from "@/services/lifeLog.service";
+import { lifeLogService } from "../service/lifeLog.service";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/types/lifeLog.types";
 import { useSnackbar } from "notistack";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useLifeLogStore } from "../store/useLifeLog.store";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { debugLog } from "@/hooks/debugLog/useDebugLog";
 

@@ -9,8 +9,8 @@ import { ProjectGridMenu } from "@/features/project/contexts/menus/ProjectGridMe
 import { TaskGridMenu } from "./menus/TaskGridMenu";
 import { TaskFlowMenu } from "./menus/TaskFlowMenu";
 import { TabBarMenu } from "./menus/TabBarMenu";
-import { LogListMenu } from "./menus/LogListMenu";
-import { TrackPanelMenu } from "./menus/TrackPanelMenu";
+import { LogListMenu } from "@/features/lifeLog/contexts/menus/LogListMenu";
+import { TrackPanelMenu } from "@/features/lifeLog/contexts/menus/TrackPanelMenu";
 import { KKnowledgeMenu } from "./menus/KKnowledgeMenu";
 import { WorkspaceSelectorMenu } from "@/features/workspace/contexts/menus/WorkspaceSelectorMenu";
 import { constants } from "@/utils/constants";

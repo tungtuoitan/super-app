@@ -7,7 +7,7 @@ import { Label } from "@/Components/ui/label";
 import { Input } from "@/Components/ui/input";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { useEditorTabsStore } from "@/store/index";
-import { useLifeLogTrackHelper } from "@/hooks/lifeLog/useLifeLogTrack.helper";
+import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import type { LifeLogTrack } from "@/types/lifeLog.types";
 import { TrackIconPicker } from "./TrackIconPicker";
 import { TRACK_COLORS } from "./trackColors";

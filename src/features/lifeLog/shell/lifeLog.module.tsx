@@ -1,11 +1,11 @@
 import { Shell, BarChart3, FileText } from "lucide-react";
-import { LifeLogView } from "@/Components/LifeLog/LifeLogView";
-import { LogEditorPanel } from "@/Components/LifeLog/LogEditorPanel";
-import { LifeLogGraphPanel } from "@/Components/LifeLog/LifeLogGraphPanel";
-import { TrackEditorPanel } from "@/Components/LifeLog/TrackEditorPanel";
-import { LogTypeIcon } from "@/Components/LifeLog/LogTypeIcon";
-import { TrackIconDisplay } from "@/Components/LifeLog/TrackIconDisplay";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { LifeLogView } from "../Components/LifeLogView";
+import { LogEditorPanel } from "../Components/LogEditorPanel";
+import { LifeLogGraphPanel } from "../Components/LifeLogGraphPanel";
+import { TrackEditorPanel } from "../Components/TrackEditorPanel";
+import { LogTypeIcon } from "../Components/LogTypeIcon";
+import { TrackIconDisplay } from "../Components/TrackIconDisplay";
+import { useLifeLogStore } from "../store/useLifeLog.store";
 import { constants } from "@/utils/constants";
 import type { LifeLogLog } from "@/types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell/moduleRegistry";

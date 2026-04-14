@@ -6,8 +6,8 @@
  */
 
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText } from "lucide-react";
-import { LogTypeIcon } from "@/Components/LifeLog/LogTypeIcon";
-import { TrackIconDisplay } from "@/Components/LifeLog/TrackIconDisplay";
+import { LogTypeIcon } from "@/features/lifeLog/Components/LogTypeIcon";
+import { TrackIconDisplay } from "@/features/lifeLog/Components/TrackIconDisplay";
 import type { KeywordType } from "@/types/keyword.types";
 import type { LogType } from "@/types/lifeLog.types";
 
