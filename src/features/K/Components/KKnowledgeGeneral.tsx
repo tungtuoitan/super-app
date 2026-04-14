@@ -11,7 +11,7 @@ import { useEditorTabsStore } from "@/store/index";
 import { useKLoader } from "../hooks";
 import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
-import { TrackIconPicker } from "@/Components/LifeLog/TrackIconPicker";
+import { TrackIconPicker } from "@/features/lifeLog/Components/TrackIconPicker";
 
 interface KKnowledgeGeneralProps {
     knowledgeId: number;

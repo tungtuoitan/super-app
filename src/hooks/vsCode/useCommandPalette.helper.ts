@@ -9,14 +9,14 @@ import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useTaskStore } from "@/features/task/store/useTask.store";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import { Keyword } from "@/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
 import { targetKeywordService } from "@/services/targetKeyword.service";
 import { projectService } from "@/features/project/service/project.service";
 import { taskService } from "@/features/task/service/task.service";
-import { lifeLogService } from "@/services/lifeLog.service";
+import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";
 
 export const useCommandPaletteHelper = () => {
     const { allKeywords } = useGeneralStore();

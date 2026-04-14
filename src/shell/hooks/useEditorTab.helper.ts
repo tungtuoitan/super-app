@@ -18,7 +18,7 @@ import {
     buildBreadcrumbFromTree,
     BreadcrumbItem,
 } from "@/utils/breadcrumb.utils";
-import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
+import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
 import type { Project } from "@/features/project/store/useProject.store";
 import type { Task } from "@/features/task/store/useTask.store";

@@ -7,7 +7,6 @@ import { OpenTabsSync } from "../../HeadlessComponents/vsCode/OpenTabsSync";
 import { TrackTabNavigation } from "@/HeadlessComponents/vsCode/TrackTabNavigation";
 import { TabBar } from "./TabBar";
 import { moduleRegistry } from "@/shell/moduleRegistry";
-import type { Note } from "@/features/note/types/note.types";
 import type { BaseTab } from "@/types/editor/tab.types";
 
 /**

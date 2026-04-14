@@ -3,7 +3,7 @@
  */
 
 import { TrackGraphContent } from "./TrackTimelineSheet";
-import { useLifeLogTabHelper } from "@/hooks/lifeLog/useLifeLogTab.helper";
+import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 import type { LifeLogLog } from "@/types/lifeLog.types";
 
 export function LifeLogGraphPanel() {
