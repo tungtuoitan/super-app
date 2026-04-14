@@ -20,8 +20,8 @@ import {
 } from "@/utils/breadcrumb.utils";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
-import type { Project } from "@/store/project/useProject.store";
-import type { Task } from "@/store/task/useTask.store";
+import type { Project } from "@/features/project/store/useProject.store";
+import type { Task } from "@/features/task/store/useTask.store";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();

@@ -19,8 +19,8 @@
  */
 
 import type { StandardRegistry } from "@/types/standardRegistry.types";
-import type { ChecklistItem, ChecklistGroup, ChecklistJSON, ChecklistType, EnvCheckState, ValidationResult } from "@/types/task/checklist.types";
-import { TESTCASE_ENVIRONMENTS } from "@/types/task/checklist.constants";
+import type { ChecklistItem, ChecklistGroup, ChecklistJSON, ChecklistType, EnvCheckState, ValidationResult } from "@/features/task/types/checklist.types";
+import { TESTCASE_ENVIRONMENTS } from "@/features/task/types/checklist.constants";
 
 // ─── Suffix parsing helper ───────────────────────────────────────────────────
 

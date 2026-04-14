@@ -7,12 +7,12 @@
 import { useRef, useEffect } from "react";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
-import { useProjectStore, type Project } from "@/store/project/useProject.store";
-import { useTaskStore, type Task } from "@/store/task/useTask.store";
+import { useProjectStore, type Project } from "../store/useProject.store";
+import { useTaskStore, type Task } from "@/features/task/store/useTask.store";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import { workspaceService } from "@/features/workspace/service/workspace.service";
-import { taskService } from "@/services/task.service";
-import { projectService, type ProjectDTO } from "@/services/project.service";
+import { taskService } from "@/features/task/service/task.service";
+import { projectService, type ProjectDTO } from "../service/project.service";
 import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";

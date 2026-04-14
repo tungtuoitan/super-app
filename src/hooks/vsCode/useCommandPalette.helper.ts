@@ -7,15 +7,15 @@ import { useMemo } from "react";
 import { useCommandPaletteStore, useGeneralStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { useProjectStore } from "@/store/project/useProject.store";
-import { useTaskStore } from "@/store/task/useTask.store";
+import { useProjectStore } from "@/features/project/store/useProject.store";
+import { useTaskStore } from "@/features/task/store/useTask.store";
 import { useLifeLogStore } from "@/store/lifeLog/useLifeLog.store";
 import { Keyword } from "@/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
 import { targetKeywordService } from "@/services/targetKeyword.service";
-import { projectService } from "@/services/project.service";
-import { taskService } from "@/services/task.service";
+import { projectService } from "@/features/project/service/project.service";
+import { taskService } from "@/features/task/service/task.service";
 import { lifeLogService } from "@/services/lifeLog.service";
 
 export const useCommandPaletteHelper = () => {

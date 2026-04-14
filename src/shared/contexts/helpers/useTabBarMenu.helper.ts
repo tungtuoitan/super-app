@@ -8,7 +8,7 @@ import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { constants } from "@/utils/constants";
-import type { Task } from "@/store/task/useTask.store";
+import type { Task } from "@/features/task/store/useTask.store";
 import type { BaseTab } from "@/types/editor/tab.types";
 
 /** Returns the task group link for a task tab, or null if not a task tab */

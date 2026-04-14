@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 import { constants } from "@/utils/constants";
-import { useProjectDetailHelper } from "@/hooks/project/useProjectDetail.helper";
-import { useTaskDetailHelper } from "@/hooks/task/useTaskDetail.helper";
+import { useProjectDetailHelper } from "./useProjectDetail.helper";
+import { useTaskDetailHelper } from "@/features/task/hooks/useTaskDetail.helper";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
 import { debugLog } from "@/hooks/debugLog/useDebugLog";
 import type { SaveActions } from "@/shell/hooks/useSaveActions.types";
 import type { BaseTab } from "@/types/editor/tab.types";
-import type { Task } from "@/store/task/useTask.store";
+import type { Task } from "@/features/task/store/useTask.store";
 
 export function useProjectSaveActions(): SaveActions {
     const { upsertProject } = useProjectDetailHelper();

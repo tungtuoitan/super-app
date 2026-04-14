@@ -5,7 +5,7 @@ import { WorkspaceFolderNodeMenu } from "@/features/workspace/contexts/menus/Wor
 import { WorkspaceChildNodeMenu } from "@/features/workspace/contexts/menus/WorkspaceChildNodeMenu";
 import { NoteGridMenu } from "./menus/NoteGridMenu";
 import { WsGridMenu } from "./menus/WsGridMenu";
-import { ProjectGridMenu } from "./menus/ProjectGridMenu";
+import { ProjectGridMenu } from "@/features/project/contexts/menus/ProjectGridMenu";
 import { TaskGridMenu } from "./menus/TaskGridMenu";
 import { TaskFlowMenu } from "./menus/TaskFlowMenu";
 import { TabBarMenu } from "./menus/TabBarMenu";

@@ -16,8 +16,8 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useStandardRegistryHelper } from "@/hooks/standardRegistry/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
 import type { Ws } from "@/types/workspace.types";
-import type { Project } from "@/store/project/useProject.store";
-import type { Task } from "@/store/task/useTask.store";
+import type { Project } from "@/features/project/store/useProject.store";
+import type { Task } from "@/features/task/store/useTask.store";
 
 // Feature save actions
 import { useNoteSaveActions } from "@/features/note/hooks/useNoteSaveActions";
