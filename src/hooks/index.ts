@@ -23,17 +23,10 @@ export * from "./useActivityBar.helper";
 // Context menu helpers
 export * from "./useConfirmationPopover.helper";
 
-// Workspace helpers
+// Ws helpers
 export * from "./ws/useWsGrid.helper";
 export * from "./ws/useWsDetail.helper";
 export * from "./ws/useWsTab.helper";
-
-// Workspace helpers
-export * from "@/features/workspace/hooks/useWorkspace.loader";
-export * from "@/features/workspace/hooks/useFolderDialog.helper";
-export * from "@/features/workspace/hooks/useTreeHelper2";
-export * from "@/features/workspace/hooks/useTreeHelper";
-export * from "@/features/workspace/hooks/tree.miniHelper";
 
 // Standard Registry helpers
 export * from "./standardRegistry/useStandardRegistry.helper";

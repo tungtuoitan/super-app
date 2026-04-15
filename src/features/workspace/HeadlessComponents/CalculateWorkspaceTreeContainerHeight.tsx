@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from "react";
-import { useWorkspaceStore } from "@/store/index";
+import { useWorkspaceStore } from "../store/Workspace.store";
 
 export function CalculateWorkspaceTreeContainerHeight() {
     const { treeContainerRef, setContainerHeight } = useWorkspaceStore();

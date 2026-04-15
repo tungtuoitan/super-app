@@ -6,7 +6,8 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
-import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useWorkspaceStore, useEditorStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useEditorStore } from "@/store/index";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";

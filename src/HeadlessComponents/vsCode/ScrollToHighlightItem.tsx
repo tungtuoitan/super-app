@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import {useWorkspaceStore} from "../../store";
+import {useWorkspaceStore} from "@/features/workspace/store/Workspace.store";
 
 export function ScrollToHighlightItem() {
     const { selectedItemIds, _treeRef, scrollToItem, setScrollToItem, currentWorkspace, setIsLoadingTree, isLoadingTree } = useWorkspaceStore();

@@ -4,7 +4,7 @@ import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { Note } from "../types/note.types";
 import { WorkspaceLinksCell } from "../Components/WorkspaceLinksCell";
 import { useGeneralStore } from "@/store/index";
-import { useWorkspaceStore } from "@/store/index";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { useNavigate, useLocation } from "react-router-dom";
 

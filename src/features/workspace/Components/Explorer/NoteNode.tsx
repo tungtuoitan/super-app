@@ -3,7 +3,7 @@ import { NodeApi } from "react-arborist";
 import { FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ICON_MAP, IconType, ICON_COLORS } from "@/shared/icons";
-import { useWorkspaceStore } from "@/store/index";
+import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";

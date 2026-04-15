@@ -7,7 +7,7 @@ import { constants } from "@/utils/constants";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
 import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
-import { useWorkspaceStore } from "@/store/index";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useGeneralStore } from "@/store/index";

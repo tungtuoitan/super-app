@@ -14,7 +14,7 @@ import { GenericTextField, IconPicker } from "@/shared/components";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { isFolder } from "@/types/workspace-v2.types";
 import { useKeyboardShortcut } from "@/shared/hooks";
-import { useWorkspaceStore } from "@/store/index";
+import { useWorkspaceStore } from "../../../store/Workspace.store";
 import { useFolderDialogStore } from "../../../store/FolderDialog.store";
 import { useFolderDialogHelper } from "../../../hooks/useFolderDialog.helper";
 import { constants } from "@/utils/constants";

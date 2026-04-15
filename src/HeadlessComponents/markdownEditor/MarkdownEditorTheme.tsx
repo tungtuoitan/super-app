@@ -4,7 +4,8 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
-import { useGeneralStore, useWorkspaceStore, useEditorTabsStore, useAuthStore } from "@/store/index";
+import { useGeneralStore, useEditorTabsStore, useAuthStore } from "@/store/index";
+import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { updateDecorations } from "@/utils/markdown.utils";
 import "@/styles/keywords.css";
