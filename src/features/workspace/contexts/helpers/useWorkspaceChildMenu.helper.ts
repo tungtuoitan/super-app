@@ -14,7 +14,7 @@ import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import {workspaceService} from "../../service/workspace.service";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
-import { useWorkspaceLoader } from "@/hooks/index";
+import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader";
 import { filterTopLevelParents, buildTreeFromV2Items } from "../../hooks/tree.miniHelper";
 import type { UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { WorkspaceItemAction } from "../../types/workspace.types";

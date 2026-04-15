@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
-import { useWorkspaceStore } from "@/store/index";
+import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useTreeHelper } from "../../hooks/useTreeHelper";

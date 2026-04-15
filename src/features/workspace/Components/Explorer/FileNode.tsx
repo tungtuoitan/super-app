@@ -1,7 +1,7 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
-import { useWorkspaceStore } from "@/store/index";
+import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";

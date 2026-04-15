@@ -1,7 +1,8 @@
 import { X, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { useActivityBarStore, useMovingTreeStore } from "@/store/index";
+import { useActivityBarStore } from "@/store/index";
+import { useMovingTreeStore } from "@/features/workspace/store/MovingTree.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useConsoleStore } from "@/store/console/useConsole.store";
 import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
