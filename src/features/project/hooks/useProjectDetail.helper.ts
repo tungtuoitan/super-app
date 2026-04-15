@@ -14,7 +14,7 @@ import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/index";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";

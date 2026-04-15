@@ -13,7 +13,7 @@ import { useEditorTabsStore, useNavigationHistoryStore, useGeneralStore } from "
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();

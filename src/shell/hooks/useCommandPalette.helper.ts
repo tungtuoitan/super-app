@@ -5,7 +5,7 @@
 
 import { useMemo } from "react";
 import { useCommandPaletteStore, useGeneralStore } from "@/store/index";
-import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useTaskStore } from "@/features/task/store/useTask.store";

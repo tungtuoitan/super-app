@@ -8,7 +8,7 @@
  *   await flush();   // optional — fires-and-forgets by default
  *
  * Outside React (services, utils):
- *   import { debugLog } from "@/hooks/debugLog/useDebugLog";
+ *   import { debugLog } from "@/shell/hooks/useDebugLog";
  *   debugLog.log("auth", "google-redirect", { redirectUri });
  *   debugLog.flush();
  */

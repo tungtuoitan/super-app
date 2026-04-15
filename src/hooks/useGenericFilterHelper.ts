@@ -16,7 +16,7 @@ import { envConfig } from "../config";
 import { STORAGE_KEYS, storageService } from "@/services/storage.service";
 import { parseApiError } from "../utils";
 import { set } from "lodash";
-import {useConsoleHelper} from "./console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 /**
  * Generic filter helper hook for filter operations

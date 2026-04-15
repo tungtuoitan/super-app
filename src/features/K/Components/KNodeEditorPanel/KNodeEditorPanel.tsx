@@ -10,7 +10,7 @@ import { NodeCard } from "./NodeCard";
 import { InlineNewNodeCard } from "./InlineNewNodeCard";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { KtreeMiniHelper } from "../../hooks/Ktree.miniHelper";
 import { kconstants } from "../../utils/K.Constants";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";

@@ -13,7 +13,7 @@ import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.ty
 import { constants } from "@/utils/constants";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 export const useMovingTreeHelper = () => {
     const {

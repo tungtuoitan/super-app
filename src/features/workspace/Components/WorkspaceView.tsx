@@ -14,7 +14,7 @@ import { NoteGridPopup } from "@/features/note";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
-import { useWsTabHelper } from "@/hooks/ws/useWsTab.helper";
+import { useWsTabHelper } from "@/features/ws/hooks/useWsTab.helper";
 import { constants } from "@/utils/constants";
 
 /**

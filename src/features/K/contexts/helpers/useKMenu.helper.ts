@@ -8,7 +8,7 @@ import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.hel
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {buildTreeFromV2Items, filterTopLevelParents, useKNodeDialogHelper} from "../../hooks";
 import {useKStore} from "../../store/K.store";
 import {KService} from "../../service/K.service";

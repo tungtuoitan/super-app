@@ -20,7 +20,7 @@ import { WorkspaceDTO } from "@/features/workspace/types/workspace-dto.types";
 import { Keyword } from "@/types/keyword.types";
 import { isValidUrl } from "@/utils/url.utils";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
-import { useConsoleHelper } from "../console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { treeMiniHelper } from "@/features/workspace/hooks/tree.miniHelper";
 import { projectService } from "@/features/project/service/project.service";
 import { taskService } from "@/features/task/service/task.service";

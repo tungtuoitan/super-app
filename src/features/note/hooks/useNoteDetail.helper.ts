@@ -18,8 +18,8 @@ import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
-import { useStandardRegistryHelper } from "@/hooks/standardRegistry/useStandardRegistry.helper";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();

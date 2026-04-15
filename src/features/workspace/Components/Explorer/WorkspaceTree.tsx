@@ -17,7 +17,7 @@ import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "
 import { constants } from "@/utils/constants";
 import { CalculateWorkspaceTreeContainerHeight } from "../../HeadlessComponents/CalculateWorkspaceTreeContainerHeight";
 import { CalculateWorkspaceTreeDropZoneHeight } from "../../HeadlessComponents/CalculateWorkspaceTreeDropZoneHeight";
-import { ScrollToHighlightItem } from "@/HeadlessComponents/vsCode/ScrollToHighlightItem";
+import { ScrollToHighlightItem } from "../../HeadlessComponents/ScrollToHighlightItem";
 
 export function WorkspaceTree() {
     const { isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } =

@@ -15,7 +15,7 @@ import { Button } from "@/shared/components/ui/Button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { useTaskStore } from "../store/useTask.store";
 import { useTaskTabHelper } from "../hooks/useTaskTab.helper";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { cn } from "@/lib/utils";
 import { TaskBar } from "./TaskBar";
 import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";

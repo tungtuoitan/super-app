@@ -17,7 +17,7 @@ import { flowService } from "@/services/flow.service";
 import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/services/flow.service";
 import type { FlowEdgeData } from "../types/multiProjectTaskFlow.type";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 import type { Edge } from "@xyflow/react";
 import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
 

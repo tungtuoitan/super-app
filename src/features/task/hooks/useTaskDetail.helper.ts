@@ -18,15 +18,15 @@ import { useGeneralStore } from "@/store/general/General.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { useTaskLinkedKeywordsHelper } from "../hooks/useTaskLinkedKeywords.helper";
 import { useCommandPaletteHelper } from "@/hooks/index";
-import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 // Re-export utils for backward compatibility
 export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../utils/TaskDetail.utils";

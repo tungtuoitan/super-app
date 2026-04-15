@@ -21,7 +21,7 @@ import { WorkspaceItemAction } from "../../types/workspace.types";
 import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import type { WorkspaceDTO } from "../../types/workspace-dto.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();

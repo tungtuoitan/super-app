@@ -10,7 +10,7 @@ import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 export function transformLog(dto: LifeLogLogDTO): LifeLogLog {
     const result = {

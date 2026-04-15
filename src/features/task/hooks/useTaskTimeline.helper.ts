@@ -8,7 +8,7 @@ import { useCallback } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useAuthStore, useEditorTabsStore } from "@/store/index";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";

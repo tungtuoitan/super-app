@@ -9,7 +9,7 @@ import { useKLoader } from "./useK.loader";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, KItemV2 } from "../types/K-v2.types";
-import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {KDTO} from "../types/K-dto.types";
 import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../utils/K.Constants";
