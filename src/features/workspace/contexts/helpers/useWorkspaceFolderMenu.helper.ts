@@ -29,7 +29,7 @@ import { useGeneralStore } from "@/store/index";
 import { useNoteDetailStore, useNoteGridPopupHelper } from "@/features/note";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/features/note";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS

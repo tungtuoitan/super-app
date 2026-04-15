@@ -1,7 +1,7 @@
 import { wsService, WsDTO } from "@/services/ws.service";
 import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "../../utils";
+import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
 import { useSnackbar } from "notistack";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWsStore } from "@/store/ws/useWs.store";
@@ -12,7 +12,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabsStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import {filterUtils} from "@/utils/filter.utils";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)

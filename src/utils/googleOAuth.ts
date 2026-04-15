@@ -6,7 +6,7 @@
 import { envConfig } from "@/config/env.config";
 import { constants } from "@/utils/constants";
 import { generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "@/utils/pkce.utils";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 /**
  * Get redirect URI based on environment

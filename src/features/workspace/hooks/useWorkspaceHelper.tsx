@@ -9,10 +9,10 @@ import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import { BaseTab } from "@/types/editor/tab.types";
-import { findNoteByEntityId } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { findNoteByEntityId } from "@/shared/hooks/useKeywordNavigation.helper";
 import { Note } from "@/types/index";
 import { WorkspaceItemAction } from "../types/workspace.types";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection

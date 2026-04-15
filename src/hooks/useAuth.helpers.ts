@@ -21,8 +21,8 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import {useGridControlStore} from "@/store/grid/useGridControl.store";
 import {useGridAutoRegisterHelper} from "@/shell/hooks/useGridAutoRegister.helper";
-import {useConsoleHelper} from "./console/useConsole.helper";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 
 const DEFAULT_USER: User = {

@@ -10,7 +10,7 @@ import { Task, useTaskStore } from "@/features/task/store/useTask.store";
 import { useMultiProjectTaskGridHelper } from "./useMultiProjectTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
 import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/task/service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
 import { getSubtasksOutsideRange } from "@/features/task/utils/TaskGrid.utils";

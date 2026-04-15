@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { KService } from "../service/K.service";
 import { KTestService } from "../service/kTest.service";
 import { useKLoader } from "./useK.loader";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { useKStore } from "../store/K.store";
 import type { KMdParsed, KExistingTestAddition } from "../types/kMarkdownImport.type";
 import type { KTestSummary } from "../types/kTest.type";

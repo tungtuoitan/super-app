@@ -6,7 +6,7 @@ import { workspaceService } from "@/features/workspace/service/workspace.service
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
 import type { UpsertWorkspaceItemRequest } from "@/features/workspace/types/workspace.types";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 
 /**
  * Hook for NoteGridPopup business logic

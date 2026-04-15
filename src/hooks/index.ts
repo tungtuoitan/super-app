@@ -18,21 +18,21 @@ export * from "@/shell/hooks/useEditorTab.helper";
 export * from "@/shell/hooks/useEditorToolbar.helper";
 export { useNavigationHistoryHelper, STORAGE_KEY_PREFIX, MAX_PAST_SIZE, getStorageKey } from "@/shell/hooks/useNavigationHistory.helper";
 export type { HistoryStorage } from "@/shell/hooks/useNavigationHistory.helper";
-export * from "./useActivityBar.helper";
+export * from "@/shell/hooks/useActivityBar.helper";
 
 // Context menu helpers
 export * from "./useConfirmationPopover.helper";
 
-// Ws helpers
-export * from "./ws/useWsGrid.helper";
-export * from "./ws/useWsDetail.helper";
-export * from "./ws/useWsTab.helper";
+// Ws helpers (re-exported for backward compatibility)
+export * from "@/features/ws/hooks/useWsGrid.helper";
+export * from "@/features/ws/hooks/useWsDetail.helper";
+export * from "@/features/ws/hooks/useWsTab.helper";
 
 // Standard Registry helpers
-export * from "./standardRegistry/useStandardRegistry.helper";
+export * from "@/shared/hooks/useStandardRegistry.helper";
 
 // Filter helpers
 export { useGenericFilterHelper } from "./useGenericFilterHelper";
 
 // Command Palette helpers
-export * from "./vsCode/useCommandPalette.helper";
+export * from "@/shell/hooks/useCommandPalette.helper";

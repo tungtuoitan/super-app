@@ -17,7 +17,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import {KDTO} from "../types/K-dto.types";
 import { KItemV2 } from "../types/K-v2.types";
 import {useKMovingTreeStore} from "../store/KMovingTree.store";
-import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {ResultOptions} from "../types";
 import { KTestService } from "../service/kTest.service";
 

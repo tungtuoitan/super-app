@@ -12,8 +12,8 @@ import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { KItemV2 } from "../types/K-v2.types";
-import {useConsoleHelper} from "../../../hooks/console/useConsole.helper";
-import {useStandardRegistryHelper} from "../../../hooks/standardRegistry/useStandardRegistry.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
 import {kconstants} from "../utils/K.Constants";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 

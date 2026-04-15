@@ -6,7 +6,7 @@
 import { config } from "@/config/app.config";
 import { getLocaleLanguage } from "@/utils/locale";
 import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 
 export const authApi = {

@@ -3,7 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { useNavigationStore } from "../../contexts/NavigationContext";
 import { TopNav } from "./TopNav";
 import { VSCodeLayout } from "@/shell/components";
-import { AuthCallback } from "@/pages/AuthCallback";
+import { AuthCallback } from "@/shell/components/AuthCallback";
 import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { NavigationKeyboardShortcuts } from "@/shell/components/NavigationKeyboardShortcuts";

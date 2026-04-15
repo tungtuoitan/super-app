@@ -1,6 +1,6 @@
 import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
-import { useCommandPaletteHelper } from "@/hooks/vsCode/useCommandPalette.helper";
+import { useCommandPaletteHelper } from "@/shell/hooks/useCommandPalette.helper";
 
 export function CommandPaletteKeyDown() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef } = useCommandPaletteStore();

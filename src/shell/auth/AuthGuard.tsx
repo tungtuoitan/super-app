@@ -15,8 +15,8 @@ import { useActivityBarStore } from "@/store/activityBar/ActivityBar.store";
 import { useStandardRegistryHelper } from "@/hooks/index";
 import { useAuthHelper } from "@/hooks/useAuth.helpers";
 import { configureApiClient } from "@/services/apiClient";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {

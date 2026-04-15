@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { constants } from "@/utils/constants";
-import { useWsDetailHelper } from "@/hooks/ws/useWsDetail.helper";
-import { useWsGridHelper } from "@/hooks/ws/useWsGrid.helper";
+import { useWsDetailHelper } from "./useWsDetail.helper";
+import { useWsGridHelper } from "./useWsGrid.helper";
 import type { SaveActions } from "@/shell/hooks/useSaveActions.types";
 import type { BaseTab } from "@/types/editor/tab.types";
 

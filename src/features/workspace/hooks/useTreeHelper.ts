@@ -17,8 +17,8 @@ import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import {SPECIAL_IDS} from "@/utils/temp-id.utils";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
-import {useStandardRegistryHelper} from "@/hooks/standardRegistry/useStandardRegistry.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
 
 export const useTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace } = useWorkspaceStore();

@@ -9,7 +9,7 @@ import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.st
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
 import { useTaskGridStore } from "@/features/task/store/useTask.store";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/task/service/task.service";
 import { flowService } from "@/services/flow.service";
 import { toLocalISOString } from "@/utils/date.utils";
@@ -17,7 +17,7 @@ import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/task/types/task.types";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();

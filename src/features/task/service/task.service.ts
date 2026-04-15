@@ -6,7 +6,7 @@ import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import { ResultOptions } from "@/types/index";
 import type { TaskDTO } from "../types/task.types";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 // Re-export for backward compatibility
 export type { TaskDTO } from "../types/task.types";

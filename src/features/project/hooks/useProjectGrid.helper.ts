@@ -9,7 +9,7 @@ import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/utils/date.utils";

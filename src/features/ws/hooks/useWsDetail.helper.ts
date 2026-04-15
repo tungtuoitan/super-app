@@ -7,7 +7,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
-import { useConsoleHelper } from "../console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { Ws } from "@/types/workspace.types";
 
 export const useWsDetailHelper = () => {

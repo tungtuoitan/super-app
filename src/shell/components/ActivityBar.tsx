@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shar
 import { SettingsDialog } from "./SettingsDialog";
 import { AccountsDialog } from "./AccountsDialog";
 import { useActivityBarStore } from "@/store/index";
-import { useActivityBarHelper } from "@/hooks/useActivityBar.helper";
+import { useActivityBarHelper } from "@/shell/hooks/useActivityBar.helper";
 import { useAuthStore } from "@/store/auth/Auth.store";
 import { useGridControlStore } from "@/store/grid/useGridControl.store";
 import { moduleRegistry, type ModuleDefinition } from "@/shell/moduleRegistry";

@@ -6,7 +6,7 @@
 import React from "react";
 import { Layers, FileText } from "lucide-react";
 import { BreadcrumbItem } from "@/utils/breadcrumb.utils";
-import { useKeywordNavigationHelper } from "@/hooks/keyword/useKeywordNavigation.helper";
+import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useGeneralStore } from "@/store/index";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { ICON_MAP, IconType } from "@/shared/icons";

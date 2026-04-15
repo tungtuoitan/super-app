@@ -5,7 +5,7 @@
  */
 
 import { authApi } from "@/services/auth.service";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 
 type ApiClientConfig = {

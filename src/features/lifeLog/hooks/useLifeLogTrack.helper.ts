@@ -10,7 +10,7 @@ import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/typ
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/utils/date.utils";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 function transformTrack(dto: LifeLogTrackDTO): LifeLogTrack {
     return {

@@ -4,40 +4,90 @@
  */
 
 import React from "react";
-import { Button as ShadcnButton } from "@/Components/ui/button";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    children: React.ReactNode;
-    onClick?: () => void;
-    variant?: "primary" | "secondary" | "danger" | "text" | "ghost";
+// ============================================
+// SHADCN BUTTON (base component)
+// ============================================
+
+const buttonVariants = cva(
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+    {
+        variants: {
+            variant: {
+                default: "bg-primary text-primary-foreground hover:bg-primary/90",
+                destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+                outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+                ghost: "hover:bg-accent hover:text-accent-foreground",
+                link: "text-primary underline-offset-4 hover:underline",
+            },
+            size: {
+                default: "h-10 px-4 py-2",
+                sm: "h-9 rounded-md px-3",
+                lg: "h-11 rounded-md px-8",
+                icon: "h-10 w-10",
+            },
+        },
+        defaultVariants: {
+            variant: "default",
+            size: "default",
+        },
+    },
+);
+
+export interface ShadcnButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+    asChild?: boolean;
+}
+
+const ShadcnButton = React.forwardRef<HTMLButtonElement, ShadcnButtonProps>(({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+});
+ShadcnButton.displayName = "ShadcnButton";
+
+export { ShadcnButton, buttonVariants };
+
+// ============================================
+// WRAPPER BUTTON (app-level component)
+// ============================================
+
+type AppVariant = "primary" | "secondary" | "danger" | "text" | "ghost";
+type ShadcnVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+
+export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {
+    children?: React.ReactNode;
+    onClick?: (() => void) | (() => Promise<void>) | React.MouseEventHandler<HTMLButtonElement>;
+    variant?: AppVariant | ShadcnVariant;
+    size?: "default" | "sm" | "lg" | "icon";
     disabled?: boolean;
     loading?: boolean;
     fullWidth?: boolean;
+    asChild?: boolean;
 }
 
-export function Button({ children, onClick, variant = "primary", disabled = false, loading = false, fullWidth = false, className, ...props }: ButtonProps) {
-    const getShadcnVariant = () => {
-        switch (variant) {
-            case "primary":
-                return "default";
-            case "secondary":
-                return "outline";
-            case "danger":
-                return "destructive";
-            case "text":
-                return "link";
-            case "ghost":
-                return "ghost";
-            default:
-                return "default";
-        }
-    };
+const variantMap: Record<AppVariant, ShadcnVariant> = {
+    primary: "default",
+    danger: "destructive",
+    text: "link",
+    secondary: "outline",
+    ghost: "ghost",
+};
 
+function resolveVariant(variant: AppVariant | ShadcnVariant): ShadcnVariant {
+    return (variantMap as Record<string, ShadcnVariant>)[variant as string] ?? (variant as ShadcnVariant);
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ children, onClick, variant = "primary", size, disabled = false, loading = false, fullWidth = false, className, asChild, ...props }, ref) => {
     return (
-        <ShadcnButton variant={getShadcnVariant()} onClick={onClick} disabled={disabled || loading} className={cn("min-w-[100px]", fullWidth && "w-full", className)} {...props}>
+        <ShadcnButton ref={ref} variant={resolveVariant(variant)} size={size} onClick={onClick as React.MouseEventHandler<HTMLButtonElement>} disabled={disabled || loading} asChild={asChild} className={cn(fullWidth && "w-full", className)} {...props}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
         </ShadcnButton>
     );
-}
+});
+Button.displayName = "Button";
+
+export { Button, resolveVariant };

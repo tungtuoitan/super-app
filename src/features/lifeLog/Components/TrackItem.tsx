@@ -16,7 +16,7 @@ import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";
 import type { LifeLogTrack } from "@/types/lifeLog.types";
-import {useStandardRegistryHelper} from "@/hooks/standardRegistry/useStandardRegistry.helper";
+import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
 
 const LONG_PRESS_MS = 500;
 

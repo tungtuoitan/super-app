@@ -39,7 +39,7 @@ import { useProxyImageLoader } from "./useProxyImageLoader";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import "./RichTextEditor.css";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 interface RichTextEditorProps {
     value: string;

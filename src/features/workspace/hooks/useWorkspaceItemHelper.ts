@@ -12,7 +12,7 @@ import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { isNumber } from "lodash";
-import {useConsoleHelper} from "@/hooks/console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 export const useWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();

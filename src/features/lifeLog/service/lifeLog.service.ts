@@ -5,7 +5,7 @@
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { LifeLogTrackDTO, LifeLogLogDTO, UpsertLifeLogTrackDTO, UpsertLifeLogLogDTO } from "@/types/lifeLog.types";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 interface ResultOptions<T = unknown> {
     success: boolean;

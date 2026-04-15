@@ -14,7 +14,7 @@ import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.st
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import { useAuthStore } from "@/store/auth/Auth.store";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { flowService } from "@/services/flow.service";
 import { taskService } from "@/features/task/service/task.service";
 import type { TaskDTO } from "@/features/task/service/task.service";
@@ -22,7 +22,7 @@ import type { Task } from "@/features/task/types/task.types";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
 import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "../utils/multiProjectTaskFlow.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
-import { debugLog } from "@/hooks/debugLog/useDebugLog";
+import { debugLog } from "@/shell/hooks/useDebugLog";
 
 const transformTaskData = (dtos: TaskDTO[]): Task[] =>
     dtos.map((dto) => ({

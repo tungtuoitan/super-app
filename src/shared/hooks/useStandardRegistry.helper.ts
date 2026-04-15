@@ -12,7 +12,7 @@ import { useAuthStore } from "@/store/auth/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { StandardRegistry } from "@/types/standardRegistry.types";
 import { IAutoCompleteOptions } from "@/shared/components";
-import {useConsoleHelper} from "../console/useConsole.helper";
+import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 /**
  * Transform DTO date strings to Date objects

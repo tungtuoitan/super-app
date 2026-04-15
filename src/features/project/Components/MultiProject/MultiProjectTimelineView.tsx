@@ -16,7 +16,7 @@ import { Button } from "@/shared/components/ui/Button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { useTaskStore } from "@/features/task/store/useTask.store";
 import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
-import { useConsoleHelper } from "@/hooks/console/useConsole.helper";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { cn } from "@/lib/utils";
 import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/task/utils/TaskGrid.utils";
 import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
