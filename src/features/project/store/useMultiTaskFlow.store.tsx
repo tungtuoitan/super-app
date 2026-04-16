@@ -7,7 +7,7 @@
 import React, { createContext, useContext, useState, Dispatch, SetStateAction } from "react";
 import type { Node, Edge } from "@xyflow/react";
 import type { TaskFlowNodeData, FlowEdgeData } from "@/features/project/types/multiProjectTaskFlow.type";
-import type { Task } from "../types/task.types";
+import type { Task } from "@/features/task/types/task.types";
 
 export interface MultiTaskFlowContextData {
     /** Parent-child + user-created edges (rendered by React Flow) */

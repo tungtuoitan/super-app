@@ -19,7 +19,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Wand2, Scan, Crosshair, RefreshCw, Focus, Lock, Unlock, Map } from "lucide-react";
-import { MultiTaskFlowProvider, useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.store";
+import { MultiTaskFlowProvider, useMultiTaskFlowStore } from "@/features/project/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowHeadless } from "../../HeadlessComponents/useMultiProjectTaskFlow.headless";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "../../hooks/useMultiProjectTaskFlow.helper";

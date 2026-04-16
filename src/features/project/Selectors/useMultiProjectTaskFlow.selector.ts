@@ -5,7 +5,7 @@
 
 import { useMemo } from "react";
 import { useProjectStore } from "../store/useProject.store";
-import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.store";
+import { useMultiTaskFlowStore } from "@/features/project/store/useMultiTaskFlow.store";
 import { useMultiProjectDetailSelector } from "./useMultiProjectDetail.selector";
 
 export const useMultiProjectTaskFlowSelector = () => {

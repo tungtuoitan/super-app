@@ -8,7 +8,7 @@
  */
 
 import { useEffect } from "react";
-import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.store";
+import { useMultiTaskFlowStore } from "@/features/project/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "../hooks/useMultiProjectTaskFlow.helper";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";

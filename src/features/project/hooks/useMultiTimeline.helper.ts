@@ -12,7 +12,7 @@ import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/task/service/task.service";
 import { projectService } from "../service/project.service";
 import { toLocalISOString } from "@/utils/date.utils";
-import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/project/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/task/utils/TaskGrid.utils";
 

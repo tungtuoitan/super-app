@@ -1,3 +1,4 @@
+import { useGridControlStore } from "@/store/useGridControl.store";
 /**
  * Task Tab Helper
  * Helper functions for managing task editor tabs
@@ -8,12 +9,11 @@ import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useProjectStore } from "@/features/project/store/useProject.store";
 
 export const useTaskTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { updateActiveTab, setNewTabAnd } = useEditorTabHelper();
-    const { projects } = useProjectStore();
+    const { projects } = useGridControlStore();
     const { tasks } = useTaskStore();
 
     /**

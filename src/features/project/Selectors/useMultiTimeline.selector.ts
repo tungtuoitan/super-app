@@ -6,7 +6,7 @@
 
 import { useMemo } from "react";
 import { Task, useTaskStore } from "@/features/task/store/useTask.store";
-import { useMultiTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/project/store/useMultiTimeline.store";
 import { generateDateRange, formatMonthHeader } from "@/features/task/utils/TaskGrid.utils";
 
 export const useMultiTimelineSelector = () => {

@@ -5,20 +5,9 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
+import type { Project } from "@/types/project.types";
 
-export interface Project {
-    id: number;
-    name: string;
-    description?: string | null;
-    status: string;
-    startDate?: Date | null;
-    endDate?: Date | null;
-    createdAt: Date;
-    updatedAt?: Date | null;
-    deletedAt?: Date | null;
-    workspaceId?: number | null;
-    image?: string | null;
-}
+export type { Project };
 
 export interface PaginationState {
     pageIndex: number;

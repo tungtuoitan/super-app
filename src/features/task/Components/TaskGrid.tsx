@@ -18,7 +18,7 @@ import { useTaskTabHelper } from "../hooks/useTaskTab.helper";
 import { useTaskListSelector } from "../Selectors/TaskListSelector";
 import { useTaskGrid2Helper } from "../hooks/useTaskGrid2.helper";
 import { TaskListHeadless } from "../HeadlessComponents/TaskListHeadless";
-import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { StatusCell, PriorityCell } from "@/features/project/Components/MultiProject/small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "@/features/project/Components/MultiProject/small/MultiProjectTaskListRow";
 import { MakeIndependentDropZone } from "@/features/project/Components/MultiProject/small/MakeIndependentDropZone";
@@ -39,7 +39,7 @@ export function TaskGrid() {
         taskContainerRef,
     } = useTaskStore();
 
-    const { projectId } = useProjectDetailStore();
+    const { projectId } = useGridControlStore();
     const { openTaskContextMenu } = useTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
     const { statusOptions, priorityOptions, filteredTasks, sortedTasks } = useTaskListSelector();
@@ -47,7 +47,7 @@ export function TaskGrid() {
 
     // Handle context menu
     const handleContextMenu = (event: React.MouseEvent, row?: any) => {
-        openTaskContextMenu(event, row, projectId, (task: Task) => {
+        openTaskContextMenu(event, row, projectId ?? undefined, (task: Task) => {
             openTaskTab(task);
         });
     };

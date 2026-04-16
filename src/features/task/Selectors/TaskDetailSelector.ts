@@ -1,3 +1,4 @@
+import { useGridControlStore } from "@/store/useGridControl.store";
 /**
  * Task Detail Selector
  * Derived / computed values from global store state.
@@ -9,7 +10,6 @@
 
 import { useMemo } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
-import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useGeneralStore } from "@/store/General.store";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
@@ -17,7 +17,7 @@ import { IStatusOption } from "@/shared/components";
 
 export const useTaskDetailSelector = () => {
     const { openTabs, activeTabId } = useEditorTabsStore();
-    const { projects } = useProjectStore();
+    const { projects } = useGridControlStore();
     const { tasks } = useTaskStore();
     const { registriesByType } = useGeneralStore();
 

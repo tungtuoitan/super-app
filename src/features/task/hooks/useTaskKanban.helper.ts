@@ -1,3 +1,4 @@
+import { useGridControlStore } from "@/store/useGridControl.store";
 /**
  * Task Kanban Helper
  * Callbacks only (useCallback). Handles status transition validation and drag-drop API calls.
@@ -8,7 +9,6 @@
 import { useCallback } from "react";
 import { useTaskStore } from "../store/useTask.store";
 import { useAuthStore } from "@/store/index";
-import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
@@ -17,7 +17,7 @@ import { useTaskKanbanSelector } from "../Selectors/TaskKanbanSelector";
 export const useTaskKanbanHelper = () => {
     const { tasks, setTasks } = useTaskStore();
     const { $user } = useAuthStore();
-    const { projectId } = useProjectDetailStore();
+    const { projectId } = useGridControlStore();
     const _console = useConsoleHelper();
 
     // Call selector directly

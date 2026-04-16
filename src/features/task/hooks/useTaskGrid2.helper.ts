@@ -1,3 +1,4 @@
+import { useGridControlStore } from "@/store/useGridControl.store";
 /**
  * Task Grid 2 Helper
  * Callbacks only (useCallback). Handles inline updates, drag & drop, API calls.
@@ -9,7 +10,6 @@ import { useCallback } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useTaskGridHelper } from "../hooks/useTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
-import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
@@ -19,7 +19,7 @@ export const useTaskGrid2Helper = () => {
     const { tasks, setTasks } = useTaskStore();
     const { loadTasks } = useTaskGridHelper();
     const { $user } = useAuthStore();
-    const { projectId } = useProjectDetailStore();
+    const { projectId } = useGridControlStore();
     const _console = useConsoleHelper();
 
     // Handle inline field update (status / priority) — optimistic
@@ -172,7 +172,7 @@ export const useTaskGrid2Helper = () => {
                         _console.warning(warningMessage);
                     }
                     // Reload to get updated parent/child limit dates from backend
-                    await loadTasks(projectId);
+                    await loadTasks(projectId ?? undefined);
                 } else {
                     // Revert
                     setTasks((prev) =>
@@ -226,7 +226,7 @@ export const useTaskGrid2Helper = () => {
                 if (result.success) {
                     _console.success(`Task "${task.title || "Untitled"}" is now an independent task`);
                     // Reload to get updated limit dates from backend
-                    await loadTasks(projectId);
+                    await loadTasks(projectId ?? undefined);
                 } else {
                     // Revert
                     setTasks((prev) =>

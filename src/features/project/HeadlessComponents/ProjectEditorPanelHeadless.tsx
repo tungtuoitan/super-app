@@ -9,13 +9,16 @@ import { useEffect } from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { Project } from "../store/useProject.store";
+import { Project, useProjectStore } from "../store/useProject.store";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 
 export function ProjectEditorPanelHeadless() {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
-    const { setProjectId, setTabId,contentRef } = useProjectDetailStore();
+    const { setProjectId, setTabId, contentRef } = useProjectDetailStore();
+    const { projects } = useProjectStore();
+    const { setProjectId: setGridProjectId, setCurrentProject, setProjects: setGridProjects } = useGridControlStore();
 
     const activeTab = getActiveTab();
     const project = activeTab?.data as Project | undefined;
@@ -25,8 +28,16 @@ export function ProjectEditorPanelHeadless() {
         if (activeTab && project) {
             setProjectId(project.id);
             setTabId(activeTab.id);
+            // Sync to GridControlStore so task selectors/helpers can read without importing project stores
+            setGridProjectId(project.id);
+            setCurrentProject(project);
         }
-    }, [activeTab?.id, project?.id, setProjectId, setTabId]);
+    }, [activeTab?.id, project?.id, setProjectId, setTabId, setGridProjectId, setCurrentProject]);
+
+    // Sync projects list to GridControlStore when projects load/change
+    useEffect(() => {
+        setGridProjects(projects);
+    }, [projects, setGridProjects]);
 
     // Effect 2: Sync hasUnsavedChanges
     useEffect(() => {

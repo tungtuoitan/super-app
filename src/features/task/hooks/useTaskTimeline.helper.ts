@@ -1,3 +1,4 @@
+import { useGridControlStore } from "@/store/useGridControl.store";
 /**
  * Task Timeline Helper
  * Callbacks only (useCallback). Handles date changes, scroll, zoom, and API calls.
@@ -7,7 +8,6 @@
 import { useCallback } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useAuthStore, useEditorTabsStore } from "@/store/index";
-import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
@@ -20,7 +20,7 @@ export const useTaskTimelineHelper = () => {
     const { setTasks } = useTaskStore();
     const { $user } = useAuthStore();
     const { setOpenTabs } = useEditorTabsStore();
-    const { projectId } = useProjectDetailStore();
+    const { projectId } = useGridControlStore();
     const _console = useConsoleHelper();
 
     // Call stores/selectors directly

@@ -9,6 +9,7 @@ import { useContext, createContext, Dispatch, SetStateAction, useState } from "r
 import type { UserFilters, ViewFilter } from "@/types/common.types";
 import {constants} from "@/utils/index";
 import {STORAGE_KEYS, storageService} from "@/services/storage.service";
+import type { Project } from "@/types/project.types";
 
 export interface GridControlContextData {
     // Search query
@@ -26,6 +27,14 @@ export interface GridControlContextData {
     // Pending filters (local state for filter popup)
     uiFilters: ViewFilter;
     setUIFilters: Dispatch<SetStateAction<ViewFilter>>;
+
+    // Current project context (set by project feature when a project is opened)
+    projectId: number | null;
+    setProjectId: Dispatch<SetStateAction<number | null>>;
+    currentProject: Project | null;
+    setCurrentProject: Dispatch<SetStateAction<Project | null>>;
+    projects: Project[];
+    setProjects: Dispatch<SetStateAction<Project[]>>;
 }
 
 export const gridControlContextDefaultValue: GridControlContextData = {
@@ -37,6 +46,12 @@ export const gridControlContextDefaultValue: GridControlContextData = {
     setFilterViewKey: () => {},
     uiFilters: {},
     setUIFilters: () => {},
+    projectId: null,
+    setProjectId: () => {},
+    currentProject: null,
+    setCurrentProject: () => {},
+    projects: [],
+    setProjects: () => {},
 };
 
 export const GridControlStore = createContext<GridControlContextData>(gridControlContextDefaultValue);
@@ -49,6 +64,9 @@ export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = (
 
     const [filterViewKey, setFilterViewKey] = useState<keyof UserFilters | null>(null);
     const [uiFilters, setUIFilters] = useState<ViewFilter>({});
+    const [projectId, setProjectId] = useState<number | null>(null);
+    const [currentProject, setCurrentProject] = useState<Project | null>(null);
+    const [projects, setProjects] = useState<Project[]>([]);
 
     return (
         <GridControlStore.Provider
@@ -61,6 +79,12 @@ export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = (
                 setFilterViewKey,
                 uiFilters,
                 setUIFilters,
+                projectId,
+                setProjectId,
+                currentProject,
+                setCurrentProject,
+                projects,
+                setProjects,
             }}
         >
             {children}

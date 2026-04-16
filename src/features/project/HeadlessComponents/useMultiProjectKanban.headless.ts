@@ -7,7 +7,7 @@
 import { useEffect } from "react";
 import { useMultiProjectTaskGridHelper } from "../hooks/useMultiProjectTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
-import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore } from "@/features/project/store/useMultiTimeline.store";
 
 export function useMultiProjectKanbanHeadless() {
     const { loadTasksForProjects } = useMultiProjectTaskGridHelper();

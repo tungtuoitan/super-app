@@ -7,7 +7,7 @@
 
 import { useEffect } from "react";
 import { useProjectStore } from "../store/useProject.store";
-import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore } from "@/features/project/store/useMultiTimeline.store";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import { useMultiProjectDetailHelper } from "../hooks/useMultiProjectDetail.helper";
 import { useMultiProjectTaskGridHelper } from "../hooks/useMultiProjectTaskGrid.helper";

@@ -8,7 +8,7 @@ import { getSmoothStepPath, EdgeLabelRenderer, BaseEdge } from "@xyflow/react";
 import type { EdgeProps, Edge } from "@xyflow/react";
 import { MessageSquarePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.store";
+import { useMultiTaskFlowStore } from "@/features/project/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowHelper } from "../../../hooks/useMultiProjectTaskFlow.helper";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../../../types/multiProjectTaskFlow.type";
 

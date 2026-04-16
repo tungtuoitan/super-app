@@ -1,3 +1,4 @@
+import { useGridControlStore } from "@/store/useGridControl.store";
 /**
  * Task Grid Helper Hook
  * Business logic for task grid operations
@@ -5,7 +6,6 @@
 
 import { taskService, TaskDTO } from "../service/task.service";
 import { Task, useTaskStore } from "../store/useTask.store";
-import { useProjectStore } from "@/features/project/store/useProject.store";
 import { generateTempId } from "@/utils/index";
 import { useAuthStore } from "@/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -50,7 +50,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
 export const useTaskGridHelper = () => {
     const { $user } = useAuthStore();
     const { tasks, setTasks, setAllTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } = useTaskStore();
-    const { projects } = useProjectStore();
+    
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const _console = useConsoleHelper();
 

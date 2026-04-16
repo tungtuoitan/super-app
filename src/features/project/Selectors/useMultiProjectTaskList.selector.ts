@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { useTaskStore } from "@/features/task/store/useTask.store";
 import { useGeneralStore } from "@/store/General.store";
 import { useProjectStore } from "../store/useProject.store";
-import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore } from "@/features/project/store/useMultiTimeline.store";
 import { IStatusOption } from "@/shared/components";
 import { getTaskStatusColors, getTaskPriorityColors } from "@/features/task/utils/TaskDetail.utils";
 import { sortTasksHierarchically } from "@/features/task/utils/TaskGrid.utils";

@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { useMultiProjectTaskListSelector } from "../../Selectors/useMultiProjectTaskList.selector";
 import { useMultiProjectTaskListHelper } from "../../hooks/useMultiProjectTaskList.helper";
 import { useMultiProjectTaskListHeadless } from "../../HeadlessComponents/useMultiProjectTaskList.headless";
-import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore } from "@/features/project/store/useMultiTimeline.store";
 import { StatusCell, PriorityCell } from "./small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "./small/MultiProjectTaskListRow";
 import { MakeIndependentDropZone } from "./small/MakeIndependentDropZone";

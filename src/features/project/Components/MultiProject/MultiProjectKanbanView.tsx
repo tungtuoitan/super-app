@@ -14,7 +14,7 @@ import { Label } from "@/shared/components/ui/label";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useTaskStore } from "@/features/task/store/useTask.store";
 import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
-import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore } from "@/features/project/store/useMultiTimeline.store";
 import { useMultiProjectKanbanSelector } from "../../Selectors/useMultiProjectKanban.selector";
 import { useMultiProjectKanbanHelper } from "../../hooks/useMultiProjectKanban.helper";
 import { useMultiProjectKanbanHeadless } from "../../HeadlessComponents/useMultiProjectKanban.headless";

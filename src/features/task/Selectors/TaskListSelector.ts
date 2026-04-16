@@ -1,3 +1,4 @@
+import { useGridControlStore } from "@/store/useGridControl.store";
 /**
  * Task List Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
@@ -7,8 +8,6 @@
 import { useMemo } from "react";
 import { useTaskStore } from "../store/useTask.store";
 import { useGeneralStore } from "@/store/General.store";
-import { useProjectStore } from "@/features/project/store/useProject.store";
-import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { IStatusOption } from "@/shared/components";
 import { getTaskStatusColors, getTaskPriorityColors } from "../utils/TaskDetail.utils";
 import { sortTasksHierarchically } from "../utils/TaskGrid.utils";
@@ -17,8 +16,7 @@ import { constants } from "@/utils/constants";
 export const useTaskListSelector = () => {
     const { tasks, taskSearchQuery } = useTaskStore();
     const { registriesByType } = useGeneralStore();
-    const { projects } = useProjectStore();
-    const { projectId } = useProjectDetailStore();
+    const { projects, projectId } = useGridControlStore();
 
     // Get current project for date constraints
     const currentProject = useMemo(() => {

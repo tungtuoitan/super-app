@@ -10,7 +10,7 @@
 import { useCallback, useRef } from "react";
 import { applyNodeChanges, applyEdgeChanges } from "@xyflow/react";
 import type { NodeChange, EdgeChange, Connection, Edge } from "@xyflow/react";
-import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.store";
+import { useMultiTaskFlowStore } from "@/features/project/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import { useAuthStore } from "@/store/Auth.store";

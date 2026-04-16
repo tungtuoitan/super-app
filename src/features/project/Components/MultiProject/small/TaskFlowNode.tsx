@@ -12,7 +12,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Handle, Position, useViewport } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
 import { cn } from "@/lib/utils";
-import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.store";
+import { useMultiTaskFlowStore } from "@/features/project/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowNodeHelper } from "../../../hooks/useMultiProjectTaskFlowNode.helper";
 import { useMultiProjectTaskFlowSelector } from "../../../Selectors/useMultiProjectTaskFlow.selector";
 import { useGeneralStore } from "@/store/General.store";

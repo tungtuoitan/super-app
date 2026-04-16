@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
-import { Project } from "@/features/project/store/useProject.store";
+import { Project } from "./useProject.store";
 import { storageService } from "@/services/storage.service";
 
 // Constants

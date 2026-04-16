@@ -17,7 +17,7 @@ import { useProjectTabHelper } from "../../hooks/useProjectTab.helper";
 import { cn } from "@/lib/utils";
 import { getProjectStatusColors } from "../ProjectStatusBadge";
 import { TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/task/utils/TaskGrid.utils";
-import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
+import { useMultiTimelineStore } from "@/features/project/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "../../hooks/useMultiTimeline.helper";
 import { useMultiTimelineHeadless } from "../../HeadlessComponents/useMultiTimeline.headless";
