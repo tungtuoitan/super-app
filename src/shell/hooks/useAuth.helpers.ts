@@ -9,7 +9,7 @@ import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { authApi } from "@/services/auth.service";
 import { acquireRefreshToken } from "@/services/apiClient";
 import { userProfileService } from "@/services/userProfile.service";
-import { envConfig } from "@/config/env.config";
+import { envConfig } from "@/utils/config/env.config";
 import { constants } from "@/utils/constants";
 import type { LoginRequest } from "@/types/index";
 import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";

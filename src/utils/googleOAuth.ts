@@ -3,7 +3,7 @@
  * Handles Google OAuth 2.0 Authorization Code Flow with PKCE
  */
 
-import { envConfig } from "@/config/env.config";
+import { envConfig } from "@/utils/config/env.config";
 import { constants } from "@/utils/constants";
 import { generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "@/utils/pkce.utils";
 import { debugLog } from "@/shell/hooks/useDebugLog";

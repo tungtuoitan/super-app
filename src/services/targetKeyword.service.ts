@@ -2,7 +2,7 @@
  * TargetKeyword Service - API communication for linking keywords to target entities
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import { ResultOptions } from "../types";
 

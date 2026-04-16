@@ -14,7 +14,7 @@
  */
 
 import { debugLogStore, type DebugLogEntry } from "@/store/debugLog.store";
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 
 const FLUSH_URL = `${config.api.baseURL}/api/diagnostic/logs`;
 

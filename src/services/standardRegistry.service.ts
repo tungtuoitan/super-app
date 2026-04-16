@@ -2,7 +2,7 @@
  * Standard Registry Service - API communication for standard registry operations
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { ResultOptions } from "@/types/common.types";
 import type { StandardRegistryDTO } from "@/types/standardRegistry.types";

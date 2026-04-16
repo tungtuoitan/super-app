@@ -19,9 +19,9 @@ import { useTaskListSelector } from "../Selectors/TaskListSelector";
 import { useTaskGrid2Helper } from "../hooks/useTaskGrid2.helper";
 import { TaskListHeadless } from "../HeadlessComponents/TaskListHeadless";
 import { useGridControlStore } from "@/store/useGridControl.store";
-import { StatusCell, PriorityCell } from "@/features/project/Components/MultiProject/small/MultiProjectTaskListCells";
-import { DateRangeCell, DraggableRow } from "@/features/project/Components/MultiProject/small/MultiProjectTaskListRow";
-import { MakeIndependentDropZone } from "@/features/project/Components/MultiProject/small/MakeIndependentDropZone";
+import { StatusCell, PriorityCell } from "@/features/multiProject/Components/small/MultiProjectTaskListCells";
+import { DateRangeCell, DraggableRow } from "@/features/multiProject/Components/small/MultiProjectTaskListRow";
+import { MakeIndependentDropZone } from "@/features/multiProject/Components/small/MakeIndependentDropZone";
 
 /**
  * TaskGrid - task grid with table display

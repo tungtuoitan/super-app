@@ -1,6 +1,6 @@
 import { MouseEvent, useEffect, useState } from "react";
 import { constants } from "@/utils/constants";
-import { envConfig } from "@/config/env.config";
+import { envConfig } from "@/utils/config/env.config";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
 import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
 import { useMobileStore } from "@/store/Mobile.store";

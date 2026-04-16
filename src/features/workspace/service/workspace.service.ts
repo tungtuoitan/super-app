@@ -2,7 +2,7 @@
  * Workspace Service - API communication for workspace operations
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse, UpsertWorkspaceItemRequest } from "../types/workspace.types";
 import { constants } from "@/utils/constants";

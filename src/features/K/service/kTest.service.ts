@@ -1,5 +1,5 @@
-import { config } from "@/config/app.config";
-import { envConfig } from "@/config/env.config";
+import { config } from "@/utils/config/app.config";
+import { envConfig } from "@/utils/config/env.config";
 import { apiFetch } from "@/services/apiClient";
 import type {
     KTestSummary,

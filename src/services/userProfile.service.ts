@@ -2,7 +2,7 @@
  * UserProfile Service - API communication for user profile operations
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { UpdateUserProfileRequest, ResultOptions } from "@/types/common.types";
 

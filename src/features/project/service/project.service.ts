@@ -2,7 +2,7 @@
  * Project Service - API communication for project operations
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import { ResultOptions } from "@/types/index";
 

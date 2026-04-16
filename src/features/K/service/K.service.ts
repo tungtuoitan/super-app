@@ -8,7 +8,7 @@
  *   DELETE /api/k/{knowledgeId}/nodes          — delete nodes (and descendants)
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
 import { ResultOptions } from "../../../types";

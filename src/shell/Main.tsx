@@ -26,7 +26,7 @@ import { TaskProcessProvider } from "@/features/task/store/useTaskProcess.store"
 import { TaskDetailSectionProvider } from "@/features/task/store/useTaskDetailSection.store";
 import { TaskSectionProvider } from "@/features/task/store/useTaskSection.store";
 import { TaskTimelineProvider } from "@/features/task/store/useTaskTimeline.store";
-import { MultiTimelineProvider } from "@/features/project/store/useMultiTimeline.store";
+import { MultiTimelineProvider } from "@/features/multiProject/store/useMultiTimeline.store";
 import { TaskCommentProvider } from "@/features/task/store/useTaskComment.store";
 import { ActivityBarProvider } from "@/store/index";
 import { AuthCallbackProvider } from "@/store/index";

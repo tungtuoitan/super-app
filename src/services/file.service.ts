@@ -4,7 +4,7 @@
  * Files are uploaded to Google Drive with automatic store selection
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 
 export interface UploadImageResponse {

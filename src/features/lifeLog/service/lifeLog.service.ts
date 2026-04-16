@@ -2,7 +2,7 @@
  * LifeLog Service - API communication for tracks and logs
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { LifeLogTrackDTO, LifeLogLogDTO, UpsertLifeLogTrackDTO, UpsertLifeLogLogDTO } from "@/types/lifeLog.types";
 import { debugLog } from "@/shell/hooks/useDebugLog";

@@ -3,7 +3,7 @@ import { WorkspaceItemV2, WorkspaceFolderItem, isFolder as isFolderV2, canHaveCh
 import { Folder } from "@/types/index";
 import { transformBackendItems, BackendWorkspaceItem } from "../utils/workspace-mapper";
 import { constants } from "@/utils/constants";
-import {featureFlags} from "@/config/features.config";
+import {featureFlags} from "@/utils/config/features.config";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 
 // ============================================

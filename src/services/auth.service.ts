@@ -3,7 +3,7 @@
  * Uses native fetch API without apiClient
  */
 
-import { config } from "@/config/app.config";
+import { config } from "@/utils/config/app.config";
 import { getLocaleLanguage } from "@/utils/locale";
 import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
 import { debugLog } from "@/shell/hooks/useDebugLog";
