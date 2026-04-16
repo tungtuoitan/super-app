@@ -10,7 +10,7 @@
 import { useMemo } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
-import { useGeneralStore } from "@/store/general/General.store";
+import { useGeneralStore } from "@/store/General.store";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { IStatusOption } from "@/shared/components";

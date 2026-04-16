@@ -6,7 +6,7 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useTabKeyboardShortcuts } from "@/shell/hooks/useTabKeyboardShortcuts";
 import { useTabBarHelper } from "@/shell/hooks/useTabBarHelper";
-import { useMobileStore } from "@/store/mobile/Mobile.store";
+import { useMobileStore } from "@/store/Mobile.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { Note } from "@/features/note/types/note.types";

@@ -2,7 +2,7 @@ import React from "react";
 import { useSnackbar } from "notistack";
 import { useKMovingTreeStore } from "../store/KMovingTree.store";
 import { useKStore } from "../store/K.store";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { KService } from "../service/K.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../types/K.types";
 import { useKLoader } from "./useK.loader";

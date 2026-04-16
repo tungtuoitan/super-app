@@ -8,9 +8,9 @@
 
 import { useEffect, useState } from "react";
 import { useEditorTabsStore } from "@/store/index";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
-import { useWsStore } from "@/store/ws/useWs.store";
+import { useWsStore } from "@/features/ws/store/useWs.store";
 import { useProjectStore, Project } from "@/features/project/store/useProject.store";
 import { useTaskStore, Task } from "@/features/task/store/useTask.store";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
@@ -19,13 +19,13 @@ import { constants } from "@/utils/constants";
 import { Note, NoteDTO } from "@/features/note/types/note.types";
 import { Ws } from "@/types/workspace.types";
 import { noteService } from "@/features/note/service/note.service";
-import { wsService, WsDTO } from "@/services/ws.service";
+import { wsService, WsDTO } from "@/features/ws/service/ws.service";
 import { projectService, ProjectDTO } from "@/features/project/service/project.service";
 import { taskService, TaskDTO } from "@/features/task/service/task.service";
 import { transformNotes } from "@/features/note/utils/note.utils";
 import { transformWs } from "@/utils/ws.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
-import {useEditorTabHelper} from "@/hooks/index";
+import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
 
 // Storage types
 export interface TabStorage {

@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/task/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowNodeHelper } from "../../../hooks/useMultiProjectTaskFlowNode.helper";
 import { useMultiProjectTaskFlowSelector } from "../../../Selectors/useMultiProjectTaskFlow.selector";
-import { useGeneralStore } from "@/store/general/General.store";
+import { useGeneralStore } from "@/store/General.store";
 import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
 import { getStatusBorderColor, getStatusNodeBackground } from "../../../utils/multiProjectTaskFlow.utils";
 import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/utils/checklist.utils";
@@ -23,7 +23,7 @@ import { constants } from "@/utils/constants";
 import { ExternalLink, ChevronDown, ChevronRight, Circle, CheckSquare2, Square } from "lucide-react";
 import { useTaskGridStore } from "@/features/task/store/useTaskGrid.store";
 import { taskService } from "@/features/task/service/task.service";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "../../../types/multiProjectTaskFlow.type";
 

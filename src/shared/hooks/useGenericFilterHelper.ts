@@ -4,18 +4,16 @@
  * Pattern: Separate business logic from component
  */
 
-import { useAuthStore } from "@/store/auth/Auth.store";
-import { useAuthHelper } from "@/hooks/useAuth.helpers";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useAuthStore } from "@/store/Auth.store";
+import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { constants } from "@/utils/constants";
 import type { ViewFilter, UserFilters, FilterFieldConfig, UpdateUserProfileRequest } from "@/types/common.types";
 import { filterUtils } from "@/utils/filter.utils";
-import { useSnackbar } from "notistack";
 import { userProfileService } from "@/services/userProfile.service";
-import { envConfig } from "../config";
+import { envConfig } from "@/config/env.config";
 import { STORAGE_KEYS, storageService } from "@/services/storage.service";
-import { parseApiError } from "../utils";
-import { set } from "lodash";
+import { parseApiError } from "@/utils/api-error.utils";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 
 /**

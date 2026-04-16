@@ -13,7 +13,7 @@
 
 import { useKStore } from "../store/K.store";
 import { KService } from "../service/K.service";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import {KDTO} from "../types/K-dto.types";
 import { KItemV2 } from "../types/K-v2.types";
 import {useKMovingTreeStore} from "../store/KMovingTree.store";

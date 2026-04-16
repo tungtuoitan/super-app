@@ -8,7 +8,7 @@ import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { NavigationKeyboardShortcuts } from "@/shell/components/NavigationKeyboardShortcuts";
 import { DebugPanel } from "@/shell/components/DebugPanel";
-import {useMobileStore} from "@/store/mobile/Mobile.store";
+import {useMobileStore} from "@/store/Mobile.store";
 
 /**
  * Main navigation component.

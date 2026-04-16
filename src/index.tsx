@@ -5,7 +5,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { applyShadcnTheme } from "./lib/theme/shadcn";
 
 import "./index.css";
-import { validateEnvironmentConfig } from "./config";
+import { validateEnvironmentConfig } from "@/config/index";
 
 // Validate environment configuration on app startup
 validateEnvironmentConfig();

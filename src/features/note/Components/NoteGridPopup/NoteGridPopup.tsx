@@ -14,7 +14,7 @@ import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useKeyboardShortcut } from "@/shared/hooks";
 import { GridControlBar } from "@/shared/components/GridControlBar";
 import { isNote } from "@/types/workspace-v2.types";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { constants } from "@/utils/constants";
 
 export function NoteGridPopup() {

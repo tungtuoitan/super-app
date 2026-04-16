@@ -6,7 +6,7 @@
 
 import { useCallback } from "react";
 import { targetKeywordService, TargetKeywordTargetType } from "@/services/targetKeyword.service";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useGeneralStore } from "@/store/index";

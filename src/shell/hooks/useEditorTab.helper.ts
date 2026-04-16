@@ -4,11 +4,11 @@ import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { BaseTab, TabType } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
+import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
 import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useGeneralStore } from "@/store/index";
 import {

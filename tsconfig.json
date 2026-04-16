@@ -17,9 +17,8 @@
         "jsx": "react-jsx",
         "baseUrl": "src",
         "paths": {
-            "@/config/*": ["config/*"],
+            "@/config/*": ["utils/config/*"],
             "@/services/*": ["services/*"],
-            "@/hooks/*": ["hooks/*"],
             "@/contexts/*": ["contexts/*"],
             "@/types/*": ["types/*"],
             "@/utils/*": ["utils/*"],

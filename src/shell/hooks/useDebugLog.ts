@@ -13,7 +13,7 @@
  *   debugLog.flush();
  */
 
-import { debugLogStore, type DebugLogEntry } from "@/store/debugLog/debugLog.store";
+import { debugLogStore, type DebugLogEntry } from "@/store/debugLog.store";
 import { config } from "@/config/app.config";
 
 const FLUSH_URL = `${config.api.baseURL}/api/diagnostic/logs`;

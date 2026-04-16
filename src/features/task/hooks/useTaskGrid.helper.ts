@@ -7,7 +7,7 @@ import { taskService, TaskDTO } from "../service/task.service";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { generateTempId } from "@/utils/index";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";

@@ -5,7 +5,7 @@
 
 import { config } from "@/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import {ResultOptions} from "../types";
+import {ResultOptions} from "../../../types";
 
 
 /**

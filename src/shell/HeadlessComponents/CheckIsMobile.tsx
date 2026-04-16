@@ -1,4 +1,4 @@
-import { useMobileStore } from "@/store/mobile/Mobile.store";
+import { useMobileStore } from "@/store/Mobile.store";
 import { useEffect } from "react";
 
 /**

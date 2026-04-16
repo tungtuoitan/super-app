@@ -15,9 +15,9 @@ import { Slider } from "@/shared/components/ui/slider";
 import { Label } from "@/shared/components/ui/label";
 import type { UserFilters, FilterFieldConfig, ViewFilter } from "@/types/common.types";
 import { constants } from "@/utils/constants";
-import { useGenericFilterHelper } from "@/hooks/index";
+import { useGenericFilterHelper } from "@/shared/hooks/useGenericFilterHelper";
 import { useAuthStore, useGeneralStore } from "@/store/index";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/utils/formatters";
 
 export function GenericFilterPopup() {

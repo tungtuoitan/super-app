@@ -1,5 +1,5 @@
 import { Panel } from "react-resizable-panels";
-import { useConsoleStore, ConsoleMessageType } from "@/store/console/useConsole.store";
+import { useConsoleStore, ConsoleMessageType } from "@/store/useConsole.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { Trash2, X } from "lucide-react";
 import { useEffect, useRef } from "react";

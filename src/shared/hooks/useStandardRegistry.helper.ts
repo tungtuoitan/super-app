@@ -5,10 +5,10 @@
  */
 
 import { useSnackbar } from "notistack";
-import { useGeneralStore } from "@/store/general/General.store";
+import { useGeneralStore } from "@/store/General.store";
 import { standardRegistryService } from "@/services/standardRegistry.service";
 import { keywordService } from "@/services/keyword.service";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { StandardRegistry } from "@/types/standardRegistry.types";
 import { IAutoCompleteOptions } from "@/shared/components";

@@ -1,6 +1,6 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { ClipboardCopy } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 
 export function RichTextEditorMenu() {
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();

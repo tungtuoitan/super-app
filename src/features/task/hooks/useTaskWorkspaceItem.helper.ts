@@ -5,7 +5,7 @@
  */
 
 import { useCallback } from "react";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import type { Note } from "@/features/note/types/note.types";
 import { type Task } from "../store/useTask.store";
 import { type TaskFolderItem } from "../types/taskDetail.types";

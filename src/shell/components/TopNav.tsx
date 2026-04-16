@@ -3,7 +3,7 @@ import { constants } from "@/utils/constants";
 import { envConfig } from "@/config/env.config";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
 import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
-import { useMobileStore } from "@/store/mobile/Mobile.store";
+import { useMobileStore } from "@/store/Mobile.store";
 import { CommandPalette } from "@/shared/components/CommandPalette";
 
 /**

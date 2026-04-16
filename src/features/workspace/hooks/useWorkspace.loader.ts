@@ -13,8 +13,8 @@
 
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
-import { wsService } from "@/services/ws.service";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { wsService } from "@/features/ws/service/ws.service";
+import { useAuthStore } from "@/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import {ResultOptions} from "@/types/common.types";

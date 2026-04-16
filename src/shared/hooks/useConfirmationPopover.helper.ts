@@ -5,7 +5,7 @@
  */
 
 import { useCallback } from "react";
-import { useConfirmationPopoverStore, ConfirmationPopoverOptions } from "@/store/confirmationPopover/ConfirmationPopover.store";
+import { useConfirmationPopoverStore, ConfirmationPopoverOptions } from "@/store/ConfirmationPopover.store";
 
 export const useConfirmationPopoverHelper = () => {
     const { isOpen, setIsOpen, options, setOptions } = useConfirmationPopoverStore();

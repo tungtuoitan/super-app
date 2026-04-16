@@ -11,7 +11,7 @@ import { useWorkspaceStore } from "../store/Workspace.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
 import { NoteGridPopup } from "@/features/note";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useWsTabHelper } from "@/features/ws/hooks/useWsTab.helper";

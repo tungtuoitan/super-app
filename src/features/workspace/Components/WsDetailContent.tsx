@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui
 import { Textarea } from "@/shared/components/ui/textarea";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Briefcase, FileText, Calendar } from "lucide-react";
-import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
+import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
 import { useWsDetailHelper } from "@/features/ws/hooks/useWsDetail.helper";
 import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";

@@ -11,7 +11,7 @@ import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { TrackIconDisplay } from "./TrackIconDisplay";
-import { useMobileStore } from "@/store/mobile/Mobile.store";
+import { useMobileStore } from "@/store/Mobile.store";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";

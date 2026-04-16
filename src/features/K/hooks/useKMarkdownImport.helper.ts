@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { KService } from "../service/K.service";
 import { KTestService } from "../service/kTest.service";
 import { useKLoader } from "./useK.loader";

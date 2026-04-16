@@ -4,9 +4,9 @@
  * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
  */
 
-import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
-import { useAuthStore } from "@/store/auth/Auth.store";
-import { useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { useAuthStore } from "@/store/Auth.store";
+import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {buildTreeFromV2Items, filterTopLevelParents, useKNodeDialogHelper} from "../../hooks";

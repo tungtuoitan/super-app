@@ -4,7 +4,7 @@
  * Pattern: Separate business logic from store (similar to useTagUIHelper)
  */
 
-import { useAuthStore, User } from "@/store/auth/Auth.store";
+import { useAuthStore, User } from "@/store/Auth.store";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { authApi } from "@/services/auth.service";
 import { acquireRefreshToken } from "@/services/apiClient";
@@ -16,10 +16,10 @@ import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types
 import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl, GOOGLE_OAUTH_CONFIG } from "@/utils/googleOAuth";
 import { retrieveAndClearPkceValues, validateState } from "@/utils/pkce.utils";
-import { useAuthCallbackStore } from "@/store/authCallback/AuthCallback.store";
+import { useAuthCallbackStore } from "@/store/AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
-import {useGridControlStore} from "@/store/grid/useGridControl.store";
+import {useGridControlStore} from "@/store/useGridControl.store";
 import {useGridAutoRegisterHelper} from "@/shell/hooks/useGridAutoRegister.helper";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import { debugLog } from "@/shell/hooks/useDebugLog";

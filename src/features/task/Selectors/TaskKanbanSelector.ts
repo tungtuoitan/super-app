@@ -6,7 +6,7 @@
 
 import { useMemo } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
-import { useGeneralStore } from "@/store/general/General.store";
+import { useGeneralStore } from "@/store/General.store";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { constants } from "@/utils/constants";
 

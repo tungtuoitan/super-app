@@ -4,12 +4,12 @@
 
 import { useCallback } from "react";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 import { noteService } from "@/features/note/service/note.service";
 import { parseKeywordLink } from "@/utils/keyword-link.utils";

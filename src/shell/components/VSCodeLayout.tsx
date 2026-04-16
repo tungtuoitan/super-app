@@ -8,11 +8,11 @@ import { VSEditorArea } from "./VSEditorArea";
 import { useActivityBarStore } from "@/store/index";
 import { useGridAutoRegisterHelper } from "@/shell/hooks/useGridAutoRegister.helper";
 import { useLocation } from "react-router-dom";
-import { useMobileStore } from "@/store/mobile/Mobile.store";
-import { CheckIsMobile } from "@/hooks/CheckIsMobile";
+import { useMobileStore } from "@/store/Mobile.store";
+import { CheckIsMobile } from "@/shell/HeadlessComponents/CheckIsMobile";
 import { constants } from "@/utils/constants";
 import { GridControlBar } from "@/shared/components/GridControlBar";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 
 interface VSCodeLayoutProps {

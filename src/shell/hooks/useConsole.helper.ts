@@ -1,4 +1,4 @@
-import { useConsoleStore, ConsoleMessageType } from "@/store/console/useConsole.store";
+import { useConsoleStore, ConsoleMessageType } from "@/store/useConsole.store";
 import { useCallback } from "react";
 
 export const useConsoleHelper = () => {

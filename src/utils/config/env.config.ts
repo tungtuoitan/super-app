@@ -3,8 +3,6 @@
  * All environment variables are centralized here for easy management and validation
  */
 
-import { constants } from "../utils";
-
 export const envConfig = {
     // Environment
     REACT_APP_ENVIRONMENT: process.env.REACT_APP_ENVIRONMENT,

@@ -7,7 +7,7 @@ import { useActivityBarStore, useAuthStore } from "@/store/index";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { keywordService } from "@/services/keyword.service";
 import type { KeywordSyncReport } from "@/types/keyword.types";
-import {useStandardRegistryHelper} from "@/hooks/index";
+import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];
 

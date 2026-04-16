@@ -1,13 +1,13 @@
-import { wsService, WsDTO } from "@/services/ws.service";
-import { useWsDetailStore } from "@/store/ws/useWsDetail.store";
+import { wsService, WsDTO } from "@/features/ws/service/ws.service";
+import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
 import { useSnackbar } from "notistack";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useWsStore } from "@/store/ws/useWs.store";
+import { useWsStore } from "@/features/ws/store/useWs.store";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabsStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";

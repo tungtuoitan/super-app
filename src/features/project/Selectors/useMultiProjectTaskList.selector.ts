@@ -6,7 +6,7 @@
 
 import { useMemo } from "react";
 import { useTaskStore } from "@/features/task/store/useTask.store";
-import { useGeneralStore } from "@/store/general/General.store";
+import { useGeneralStore } from "@/store/General.store";
 import { useProjectStore } from "../store/useProject.store";
 import { useMultiTimelineStore } from "@/features/task/store/useMultiTimeline.store";
 import { IStatusOption } from "@/shared/components";

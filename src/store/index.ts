@@ -3,35 +3,35 @@
  * Central export point for all application stores
  */
 
-export { AuthStore, AuthStoreProvider, useAuthStore } from "./auth/Auth.store";
-export type { AuthStoreData, User } from "./auth/Auth.store";
+export { AuthStore, AuthStoreProvider, useAuthStore } from "./Auth.store";
+export type { AuthStoreData, User } from "./Auth.store";
 
-export { DialogStore, DialogProvider, useDialogStore } from "./dialog/Dialog.store";
-export type { DialogContextData } from "./dialog/Dialog.store";
+export { DialogStore, DialogProvider, useDialogStore } from "./Dialog.store";
+export type { DialogContextData } from "./Dialog.store";
 
 export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "./editor/EditorTab.store";
 
 export { EditorStore, EditorProvider, useEditorStore } from "./editor/Editor.store";
 export type { EditorContextData } from "./editor/Editor.store";
 
-export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./hashtagUI/HashtagUI.store";
-export type { HashtagUIStoreData } from "./hashtagUI/HashtagUI.store";
+export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./HashtagUI.store";
+export type { HashtagUIStoreData } from "./HashtagUI.store";
 
-export { ActivityBarProvider, useActivityBarStore } from "./activityBar/ActivityBar.store";
-export type { ActivityBarContextData } from "./activityBar/ActivityBar.store";
+export { ActivityBarProvider, useActivityBarStore } from "./ActivityBar.store";
+export type { ActivityBarContextData } from "./ActivityBar.store";
 
-export { AuthCallbackProvider, useAuthCallbackStore } from "./authCallback/AuthCallback.store";
-export type { AuthCallbackContextData } from "./authCallback/AuthCallback.store";
+export { AuthCallbackProvider, useAuthCallbackStore } from "./AuthCallback.store";
+export type { AuthCallbackContextData } from "./AuthCallback.store";
 
-export { GeneralStore, GeneralProvider, useGeneralStore } from "./general/General.store";
+export { GeneralStore, GeneralProvider, useGeneralStore } from "./General.store";
 
 export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "./editor/NavigationHistory.store";
 export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "./editor/NavigationHistory.store";
 
-export { CommandPaletteStore, CommandPaletteProvider, useCommandPaletteStore } from "./commandPalette/useCommandPalette.store";
-export type { CommandPaletteContextData } from "./commandPalette/useCommandPalette.store";
+export { CommandPaletteStore, CommandPaletteProvider, useCommandPaletteStore } from "./useCommandPalette.store";
+export type { CommandPaletteContextData } from "./useCommandPalette.store";
 
-export { ConsoleStore, ConsoleProvider, useConsoleStore } from "./console/useConsole.store";
-export type { ConsoleContextData, ConsoleMessage, ConsoleMessageType } from "./console/useConsole.store";
+export { ConsoleStore, ConsoleProvider, useConsoleStore } from "./useConsole.store";
+export type { ConsoleContextData, ConsoleMessage, ConsoleMessageType } from "./useConsole.store";
 
 

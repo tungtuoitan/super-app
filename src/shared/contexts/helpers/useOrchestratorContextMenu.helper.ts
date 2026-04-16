@@ -3,8 +3,8 @@
  * Shared utilities for context menu operations across different entity types
  */
 
-import { useConfirmationPopoverHelper } from "@/hooks/useConfirmationPopover.helper";
-import { OrchestratorContextMenuType, useOrchestratorContextMenuStore } from "@/store/contextMenu/ContextMenu.store";
+import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { OrchestratorContextMenuType, useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 import { Folder } from "@/types/folder.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 

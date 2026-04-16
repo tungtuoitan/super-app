@@ -4,7 +4,7 @@
 
 import React, { useState } from "react";
 import { X, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
-import {useDebugLogger} from "store/debug/DebugLogger.store";
+import {useDebugLogger} from "@/store/DebugLogger.store";
 
 export function DebugPanel() {
     const { logs, clearLogs, isEnabled, setIsEnabled } = useDebugLogger();

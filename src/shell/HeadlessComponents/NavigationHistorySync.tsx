@@ -8,7 +8,7 @@
 
 import { useEffect } from "react";
 import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
-import { useAuthStore } from "@/store/auth/Auth.store";
+import { useAuthStore } from "@/store/Auth.store";
 import { getStorageKey, HistoryStorage } from "@/shell/hooks/useNavigationHistory.helper";
 
 export const NavigationHistorySync = () => {

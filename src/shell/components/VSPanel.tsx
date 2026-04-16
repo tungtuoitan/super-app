@@ -4,10 +4,10 @@ import { Panel } from "react-resizable-panels";
 import { useActivityBarStore } from "@/store/index";
 import { useMovingTreeStore } from "@/features/workspace/store/MovingTree.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useConsoleStore } from "@/store/console/useConsole.store";
+import { useConsoleStore } from "@/store/useConsole.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { useMobileStore } from "@/store/mobile/Mobile.store";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useMobileStore } from "@/store/Mobile.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell/moduleRegistry";
 
 interface VSPanelProps {

@@ -2,7 +2,7 @@ import { useNavigationStore } from "@/contexts/NavigationContext";
 import { useActivityBarStore } from "@/store/index";
 import { constants, type ActivityBarView } from "@/utils/constants";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
-import {useGridControlStore} from "@/store/grid/useGridControl.store";
+import {useGridControlStore} from "@/store/useGridControl.store";
 import {STORAGE_KEYS, storageService} from "@/services/storage.service";
 
 export interface UseActivityBarHelperReturn {

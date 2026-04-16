@@ -14,7 +14,7 @@ import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
 import { KHighlightText } from "../KExplorer/KHighlightText";
-import { useGridControlStore } from "@/store/grid/useGridControl.store";
+import { useGridControlStore } from "@/store/useGridControl.store";
 import {useGlobalShortcut} from "@/shared/hooks/useGlobalShortcut";
 
 export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV2; isRoot?: boolean; compact?: boolean; onSubmitEdit?: (draft: { name: string; description: string; icon: string | null; color: string | null }) => Promise<void> }) {
