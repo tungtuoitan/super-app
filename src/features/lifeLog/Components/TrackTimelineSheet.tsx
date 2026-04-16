@@ -17,7 +17,7 @@ import { format, subDays, startOfDay, differenceInCalendarDays } from "date-fns"
 import { BarChart2, Activity, ChevronDown, Check, ZoomIn, ZoomOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveTrackColor } from "./trackColors";
-import type { LifeLogLog } from "@/types/lifeLog.types";
+import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
 type GraphMode = "frequency" | "count";
 

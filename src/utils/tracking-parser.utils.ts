@@ -3,7 +3,7 @@
  * Parse markdown checkbox items for tracking visualization
  */
 
-import type { TrackingItem, DailyTracking, UniqueTrackingItem, ChartDataPoint, GroupedTrackingItems } from "@/types/tracking.types";
+import type { TrackingItem, DailyTracking, UniqueTrackingItem, ChartDataPoint, GroupedTrackingItems } from "@/utils/tracking.types";
 
 /**
  * Parse date from note name in DD-MM-YYYY format

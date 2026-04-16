@@ -6,7 +6,7 @@ import { SensitiveOverlay } from "./SensitiveOverlay";
 import { cn } from "@/lib/utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
-import type { LifeLogLog } from "@/types/lifeLog.types";
+import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
 const LONG_PRESS_MS = 500;
 

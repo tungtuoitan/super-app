@@ -8,7 +8,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { useEditorTabsStore } from "@/store/index";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
-import type { LifeLogTrack } from "@/types/lifeLog.types";
+import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { TrackIconPicker } from "./TrackIconPicker";
 import { TRACK_COLORS } from "./trackColors";
 import { Check, ChevronDown } from "lucide-react";

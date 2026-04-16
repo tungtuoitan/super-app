@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
-import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 
 export function useLifeLogTabHelper() {

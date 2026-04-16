@@ -13,8 +13,8 @@ import {
     LoaderCircle,
     type LucideProps,
 } from "lucide-react";
-import { LOG_TYPE_CONFIG } from "@/types/lifeLog.types";
-import type { LogType } from "@/types/lifeLog.types";
+import { LOG_TYPE_CONFIG } from "@/features/lifeLog/types/lifeLog.types";
+import type { LogType } from "@/features/lifeLog/types/lifeLog.types";
 
 const ICON_MAP: Record<string, React.FC<LucideProps>> = {
     Zap,

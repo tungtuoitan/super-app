@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useState, Dispatch, SetStateAction } from "react";
-import type { LifeLogTrack, LifeLogLog } from "@/types/lifeLog.types";
+import type { LifeLogTrack, LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
 export interface LifeLogContextData {
     // Data

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { TrackGeneral } from "./TrackGeneral";
 import type { BaseTab } from "@/types/editor/tab.types";
-import type { LifeLogTrack } from "@/types/lifeLog.types";
+import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 
 interface TrackEditorPanelProps {
     tab: BaseTab;

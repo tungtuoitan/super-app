@@ -3,7 +3,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { LOG_TYPE_CONFIG, type LogType } from "@/types/lifeLog.types";
+import { LOG_TYPE_CONFIG, type LogType } from "@/features/lifeLog/types/lifeLog.types";
 import { LogTypeIcon } from "./LogTypeIcon";
 
 interface LogTypeBadgeProps {

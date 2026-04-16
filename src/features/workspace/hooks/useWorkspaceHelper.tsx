@@ -10,7 +10,7 @@ import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import { BaseTab } from "@/types/editor/tab.types";
 import { findNoteByEntityId } from "@/shared/hooks/useKeywordNavigation.helper";
-import { Note } from "@/types/index";
+import type { Note } from "@/features/note/types/note.types";
 import { WorkspaceItemAction } from "../types/workspace.types";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 

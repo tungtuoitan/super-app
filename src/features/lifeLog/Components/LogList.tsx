@@ -10,7 +10,7 @@ import { LogItem } from "./LogItem";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { useMobileStore } from "@/store/Mobile.store";
-import type { LifeLogLog } from "@/types/lifeLog.types";
+import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 
 export function LogList() {

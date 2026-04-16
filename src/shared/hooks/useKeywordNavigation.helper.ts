@@ -30,7 +30,7 @@ import { useTaskStore } from "@/features/task/store/useTask.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import type { Project } from "@/features/project/store/useProject.store";
 import type { Task } from "@/features/task/store/useTask.store";
-import type { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 
 import { targetKeywordService } from "@/services/targetKeyword.service";
 import type { TargetKeywordTargetType } from "@/services/targetKeyword.service";

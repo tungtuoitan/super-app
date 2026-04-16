@@ -5,10 +5,10 @@
 
 import { Note } from "@/features/note/types/note.types";
 import { Ws } from "@/types/workspace.types";
-import { TrackingGraphTabData } from "@/types/tracking.types";
+import { TrackingGraphTabData } from "@/utils/tracking.types";
 import { Project } from "@/features/project/store/useProject.store";
 import { Task } from "@/features/task/store/useTask.store";
-import { LifeLogLog, LifeLogTrack } from "@/types/lifeLog.types";
+import { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { KWsResponse } from "@/features/K/types/K.types";
 import { KItemV2 } from "@/features/K/types/K-v2.types";
 import { constants } from "@/utils/constants";

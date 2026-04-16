@@ -5,7 +5,7 @@
 
 import { config } from "@/utils/config/app.config";
 import { getLocaleLanguage } from "@/utils/locale";
-import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "@/types/index";
+import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "@/types/auth.types";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 

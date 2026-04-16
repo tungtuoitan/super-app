@@ -4,7 +4,7 @@
 
 import { TrackGraphContent } from "./TrackTimelineSheet";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
-import type { LifeLogLog } from "@/types/lifeLog.types";
+import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
 export function LifeLogGraphPanel() {
     const { openLogTab } = useLifeLogTabHelper();

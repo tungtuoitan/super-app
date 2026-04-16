@@ -7,7 +7,7 @@ import { LogTypeIcon } from "../Components/LogTypeIcon";
 import { TrackIconDisplay } from "../Components/TrackIconDisplay";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { constants } from "@/utils/constants";
-import type { LifeLogLog } from "@/types/lifeLog.types";
+import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell/moduleRegistry";
 import type { BaseTab } from "@/types/editor/tab.types";
 

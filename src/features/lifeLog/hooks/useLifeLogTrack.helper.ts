@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import { lifeLogService } from "../service/lifeLog.service";
 import { useAuthStore } from "@/store/Auth.store";
-import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/types/lifeLog.types";
+import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/utils/date.utils";

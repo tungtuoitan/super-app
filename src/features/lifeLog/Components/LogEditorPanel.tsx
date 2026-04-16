@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { LogDetailContent } from "./LogDetailContent";
 import type { BaseTab } from "@/types/editor/tab.types";
-import type { LifeLogLog } from "@/types/lifeLog.types";
+import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
 interface LogEditorPanelProps {
     tab: BaseTab;

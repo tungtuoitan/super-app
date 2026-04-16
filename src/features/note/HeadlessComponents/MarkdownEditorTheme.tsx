@@ -10,7 +10,7 @@ import { constants } from "@/utils/constants";
 import { updateDecorations } from "@/utils/markdown.utils";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import {Note} from "@/types/index";
+import type { Note } from "@/features/note/types/note.types";
 import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
 
 export function MarkdownEditorTheme({ $mi }: { $mi: any }) {
