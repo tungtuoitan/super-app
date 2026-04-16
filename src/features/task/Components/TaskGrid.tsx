@@ -18,7 +18,7 @@ import { useTaskTabHelper } from "../hooks/useTaskTab.helper";
 import { useTaskListSelector } from "../Selectors/TaskListSelector";
 import { useTaskGrid2Helper } from "../hooks/useTaskGrid2.helper";
 import { TaskListHeadless } from "../HeadlessComponents/TaskListHeadless";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 import { StatusCell, PriorityCell } from "@/features/multiProject/Components/small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "@/features/multiProject/Components/small/MultiProjectTaskListRow";
 import { MakeIndependentDropZone } from "@/features/multiProject/Components/small/MakeIndependentDropZone";
@@ -39,7 +39,7 @@ export function TaskGrid() {
         taskContainerRef,
     } = useTaskStore();
 
-    const { projectId } = useGridControlStore();
+    const { projectId } = useCurrentProjectStore();
     const { openTaskContextMenu } = useTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
     const { statusOptions, priorityOptions, filteredTasks, sortedTasks } = useTaskListSelector();

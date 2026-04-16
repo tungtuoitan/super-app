@@ -1,4 +1,4 @@
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Timeline Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
@@ -12,7 +12,7 @@ import { sortTasksHierarchically, formatMonthHeader, generateDateRange } from ".
 
 export const useTaskTimelineSelector = () => {
     const { tasks } = useTaskStore();
-    const { projects, projectId } = useGridControlStore();
+    const { projects, projectId } = useCurrentProjectStore();
     const { timelineRange, dayWidth } = useTaskTimelineStore();
 
     // Get current project

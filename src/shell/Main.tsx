@@ -33,6 +33,7 @@ import { AuthCallbackProvider } from "@/store/index";
 import { AuthGuard } from "@/shell/auth/AuthGuard";
 import { OrchestratorContextMenuStoreProvider } from "@/store/ContextMenu.store";
 import { GridControlProvider } from "@/store/useGridControl.store";
+import { CurrentProjectProvider } from "@/store/useCurrentProject.store";
 import { NavigationHistoryProvider } from "@/store/editor/NavigationHistory.store";
 import { MobileProvider } from "@/store/Mobile.store";
 import { DebugLoggerProvider } from "@/store/DebugLogger.store";
@@ -108,7 +109,9 @@ export function Main() {
                                                                                                                                                                     <OrchestratorContextMenu>
                                                                                                                                                                         <AuthGuard>
                                                                                                                                                                             <GridControlProvider>
+                                                                                                                                                                                <CurrentProjectProvider>
                                                                                                                                                                                 <MainNav />
+                                                                                                                                                                            </CurrentProjectProvider>
                                                                                                                                                                             </GridControlProvider>
                                                                                                                                                                         </AuthGuard>
                                                                                                                                                                     </OrchestratorContextMenu>

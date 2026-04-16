@@ -1,4 +1,4 @@
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Timeline Helper
  * Callbacks only (useCallback). Handles date changes, scroll, zoom, and API calls.
@@ -20,7 +20,7 @@ export const useTaskTimelineHelper = () => {
     const { setTasks } = useTaskStore();
     const { $user } = useAuthStore();
     const { setOpenTabs } = useEditorTabsStore();
-    const { projectId } = useGridControlStore();
+    const { projectId } = useCurrentProjectStore();
     const _console = useConsoleHelper();
 
     // Call stores/selectors directly

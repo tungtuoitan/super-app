@@ -1,4 +1,4 @@
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Detail Selector
  * Derived / computed values from global store state.
@@ -17,7 +17,7 @@ import { IStatusOption } from "@/shared/components";
 
 export const useTaskDetailSelector = () => {
     const { openTabs, activeTabId } = useEditorTabsStore();
-    const { projects } = useGridControlStore();
+    const { projects } = useCurrentProjectStore();
     const { tasks } = useTaskStore();
     const { registriesByType } = useGeneralStore();
 

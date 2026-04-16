@@ -1,4 +1,4 @@
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task List Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
@@ -16,7 +16,7 @@ import { constants } from "@/utils/constants";
 export const useTaskListSelector = () => {
     const { tasks, taskSearchQuery } = useTaskStore();
     const { registriesByType } = useGeneralStore();
-    const { projects, projectId } = useGridControlStore();
+    const { projects, projectId } = useCurrentProjectStore();
 
     // Get current project for date constraints
     const currentProject = useMemo(() => {

@@ -1,4 +1,4 @@
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Grid 2 Helper
  * Callbacks only (useCallback). Handles inline updates, drag & drop, API calls.
@@ -19,7 +19,7 @@ export const useTaskGrid2Helper = () => {
     const { tasks, setTasks } = useTaskStore();
     const { loadTasks } = useTaskGridHelper();
     const { $user } = useAuthStore();
-    const { projectId } = useGridControlStore();
+    const { projectId } = useCurrentProjectStore();
     const _console = useConsoleHelper();
 
     // Handle inline field update (status / priority) — optimistic

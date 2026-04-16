@@ -1,4 +1,4 @@
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Kanban Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
@@ -13,7 +13,7 @@ import { constants } from "@/utils/constants";
 export const useTaskKanbanSelector = () => {
     const { tasks } = useTaskStore();
     const { registriesByType } = useGeneralStore();
-    const { projectId } = useGridControlStore();
+    const { projectId } = useCurrentProjectStore();
 
     // Get status options from registriesByType
     const statusOptions = useMemo(() => {

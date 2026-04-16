@@ -11,14 +11,14 @@ import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { Project, useProjectStore } from "../store/useProject.store";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 
 export function ProjectEditorPanelHeadless() {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
     const { setProjectId, setTabId, contentRef } = useProjectDetailStore();
     const { projects } = useProjectStore();
-    const { setProjectId: setGridProjectId, setCurrentProject, setProjects: setGridProjects } = useGridControlStore();
+    const { setProjectId: setGridProjectId, setCurrentProject, setProjects: setGridProjects } = useCurrentProjectStore();
 
     const activeTab = getActiveTab();
     const project = activeTab?.data as Project | undefined;
