@@ -99,16 +99,16 @@ export function MarkdownEditor() {
         setEditorMountCount((c) => c + 1);
 
         // Setup providers
-        const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
-        // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
-        const linkCleanup = setupLinkProvider($miRef.current, editor, allKeywords, navigateLink, _console, currentNoteId);
+        // const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
+        // // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
+        // const linkCleanup = setupLinkProvider($miRef.current, editor, allKeywords, navigateLink, _console, currentNoteId);
         // const definitionCleanup = setupDefinitionProvider($mi, editor, _allKeywords, currentNoteId);
         const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
         // Store disposables for cleanup
         disposablesRef.current = [
-            { dispose: autocompleteCleanup },
-            // { dispose: hoverCleanup },
-            { dispose: linkCleanup },
+            // { dispose: autocompleteCleanup },
+            // // { dispose: hoverCleanup },
+            // { dispose: linkCleanup },
             // { dispose: definitionCleanup },
             { dispose: foldingCleanup },
         ];
