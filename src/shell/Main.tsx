@@ -41,6 +41,7 @@ import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import {KProvider} from "@/features/K/store/K.store";
 import {KFolderDialogProvider} from "@/features/K/store/KNodeDialog.store";
 import {KMovingTreeProvider} from "@/features/K/store/KMovingTree.store";
+import { WikiProvider } from "@/features/Wiki/store/useWiki.store";
 
 /**
  * Main application layout component.
@@ -98,6 +99,7 @@ export function Main() {
                                                                                                                                     <TaskTimelineProvider>
                                                                                                                                         <MultiTimelineProvider>
                                                                                                                                 <LifeLogProvider>
+                                                                                                                                <WikiProvider>
                                                                                                                                 <NoteDetailProvider>
                                                                                                                                     <NoteGridProvider>
                                                                                                                                         <EditorTabProvider>
@@ -124,6 +126,7 @@ export function Main() {
                                                                                                                                         </EditorTabProvider>
                                                                                                                                     </NoteGridProvider>
                                                                                                                                 </NoteDetailProvider>
+                                                                                                                                </WikiProvider>
                                                                                                                             </LifeLogProvider>
                                                                                                                             </MultiTimelineProvider>
                                                                                                                                     </TaskTimelineProvider>

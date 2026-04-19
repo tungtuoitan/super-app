@@ -13,12 +13,14 @@ import { projectModule } from "@/features/project/shell/project.module";
 import { lifeLogModule } from "@/features/lifeLog/shell/lifeLog.module";
 import { noteModule } from "@/features/note/shell/note.module";
 import { wsModule } from "@/features/ws/shell/ws.module";
+import { wikiModule } from "@/features/Wiki/shell/wiki.module";
 
 // Registration order = ActivityBar display order
 moduleRegistry.register(workspaceModule);
 moduleRegistry.register(projectModule);
 moduleRegistry.register(kModule);
 moduleRegistry.register(lifeLogModule);
+moduleRegistry.register(wikiModule);
 // noteModule and wsModule are available but not shown in ActivityBar by default
 // (they can still have editor panels registered for tab rendering)
 moduleRegistry.register(noteModule);

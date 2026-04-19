@@ -21,6 +21,7 @@ import {KNodeMenu} from "@/features/K/contexts/menu/KNodeMenu";
 import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
 import { KNodePanelCardMenu } from "@/features/K/contexts/menu/KNodePanelCardMenu";
 import { RichTextEditorMenu } from "./menus/RichTextEditorMenu";
+import { WikiGraphNodeMenu } from "./menus/WikiGraphNodeMenu";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
@@ -85,6 +86,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case constants.contextMenu.contextMenuTypes.richTextEditor:
                 return <RichTextEditorMenu />;
+
+            case constants.contextMenu.contextMenuTypes.wikiGraphNode:
+                return <WikiGraphNodeMenu />;
 
             default:
                 return (

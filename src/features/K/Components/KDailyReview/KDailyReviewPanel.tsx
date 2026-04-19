@@ -286,7 +286,7 @@ function DailyTestCard({ card, isLoading, onStart, onNavigate }: {
     const isActive = card.status === "learning" || card.status === "mastered";
 
     return (
-        <div className={`group rounded-lg border p-2.5 transition-colors ${
+        <div className={`group rounded-lg border p-2.5 transition-colors ${totalDue > 0 ? 'opacity-100' : 'opacity-30'} ${
             isActive ? "border-border bg-card hover:border-zinc-600" : "border-zinc-800/40 bg-zinc-900/20 opacity-60 hover:opacity-80"
         }`}>
             {/* Row 1: title + status + review button */}

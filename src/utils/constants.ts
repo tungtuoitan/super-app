@@ -44,6 +44,7 @@ export const constants = {
                 kKnowledge: "k-knowledge",
                 kNode: "k-node",
                 kDailyReview: "k-daily-review",
+                wikiInfo: "wiki-info",
             } as const,
         },
         viewTypes: {
@@ -54,6 +55,7 @@ export const constants = {
             notes: "notes",
             project: "project",
             lifeLog: "lifeLog",
+            wiki: "wiki",
         } as const,
         displayNames: {
             note: "Note",
@@ -66,6 +68,7 @@ export const constants = {
             notes: "Notes",
             project: "Projects",
             lifeLog: "LifeLog",
+            wiki: "Wiki",
         } as const,
         tabTitles: {
             unsavedNote: "Unsaved Note",
@@ -122,6 +125,7 @@ export const constants = {
             workspaceSelector: "workspace-selector",
             taskFlow: "task-flow",
             richTextEditor: "richtext-editor",
+            wikiGraphNode: "wiki-graph-node",
         } as const,
     },
 
@@ -162,6 +166,7 @@ export const constants = {
         task: "Task",
         project: "Project",
         lifeLog: "LifeLog",
+        wiki: "Wiki",
     } as const,
 
     // Status and Priority colors (GitHub-style)
