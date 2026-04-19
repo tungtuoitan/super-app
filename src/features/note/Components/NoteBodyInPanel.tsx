@@ -14,14 +14,10 @@ import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
-import { MarkdownEditor } from "@/features/note/Components/MarkdownEditor";
-import { MarkdownEditorSync } from "../HeadlessComponents/MarkdownEditorSync";
-import { MarkdownEditorTheme } from "../HeadlessComponents/MarkdownEditorTheme";
 import { useMonaco } from "@monaco-editor/react";
-import { Loader2 } from "lucide-react";
 import { IconType } from "@/shared/icons";
 
-export function NoteDetailTab() {
+export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabsStore();

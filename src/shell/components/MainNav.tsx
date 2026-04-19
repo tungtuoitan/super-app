@@ -45,7 +45,7 @@ export default function MainNav() {
             onContextMenu={handleGlobalRightClick} // Global right-click handler
         >
             {/* Global navigation keyboard shortcuts (Alt + Arrow) */}
-            <NavigationKeyboardShortcuts />
+            {/* <NavigationKeyboardShortcuts /> */}
             
             {/* Debug Panel for mobile debugging */}
             {/* <DebugPanel /> */}

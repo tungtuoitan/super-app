@@ -7,7 +7,6 @@
 // Components (used by VSEditorArea, VSSideBar)
 export { NoteGrid } from "./Components/NoteGrid";
 export { NoteDetailContent } from "./Components/NoteDetailContent";
-export { NoteDetailTab } from "./Components/NoteDetailTab";
 export { NoteEditorPanel } from "./Components/NoteEditorPanel";
 export { NoteGridPopup } from "./Components/NoteGridPopup";
 

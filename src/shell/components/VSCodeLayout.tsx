@@ -3,7 +3,7 @@ import { Panel, PanelGroup, type ImperativePanelHandle } from "react-resizable-p
 import { ActivityBar } from "./ActivityBar";
 import { VSCodeResizeHandle } from "./VSCodeResizeHandle";
 import { VSSideBar } from "./VSSideBar";
-import { VSPanel } from "./VSPanel";
+import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
 import { useActivityBarStore } from "@/store/index";
 import { useGridAutoRegisterHelper } from "@/shell/hooks/useGridAutoRegister.helper";

@@ -1,14 +1,14 @@
 import { FileText } from "lucide-react";
 import { NoteGrid } from "../Components/NoteGrid";
 import { NoteEditorPanel } from "../Components/NoteEditorPanel";
-import { NoteDetailTab } from "../Components/NoteDetailTab";
 import { constants } from "@/utils/constants";
 import { ICON_MAP, type IconType } from "@/shared/icons";
 import type { ModuleDefinition } from "@/shell/moduleRegistry";
 import type { Note } from "../types/note.types";
 import type { BaseTab } from "@/types/editor/tab.types";
+import {NoteBodyInPanel} from "../Components/NoteBodyInPanel";
 
-const NoteDetailTabAdapter = () => <NoteDetailTab />;
+const NoteDetailTabAdapter = () => <NoteBodyInPanel />;
 
 function getNoteTabIcon(tab: BaseTab) {
     const note = tab.data0 as Note | undefined;
@@ -32,12 +32,12 @@ export const noteModule: ModuleDefinition = {
         color: (tab.data0 as Note | undefined)?.color ?? "#60a5fa",
     }),
 
-    panelTabs: [
-        {
-            id: "noteDetail",
-            label: "Note Detail",
-            icon: FileText,
-            Content: NoteDetailTabAdapter,
-        },
-    ],
+    // panelTabs: [ NOTEDETAIL IS USED WHEN ACTIVETAB = NOTE
+    //     {
+    //         id: "noteDetail",
+    //         label: "Note Detail",
+    //         icon: FileText,
+    //         Content: NoteDetailTabAdapter,
+    //     },
+    // ],
 };

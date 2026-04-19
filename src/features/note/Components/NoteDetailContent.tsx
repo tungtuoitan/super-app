@@ -21,8 +21,6 @@ import { Loader2 } from "lucide-react";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
-    const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
-    const { activeTabId } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
     const { getItemStatus } = useTreeStatusHelper();
@@ -34,9 +32,9 @@ export function NoteDetailContent() {
 
     const { registries, registriesLoading, allKeywords } = useGeneralStore();
 
-    let isDeleted = activeNote?.deletedAt !== null;
-    let isHardDeleted = activeNote?.isHardDeleted;
-    const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
+    // let isDeleted = activeNote?.deletedAt !== null;
+    // let isHardDeleted = activeNote?.isHardDeleted;
+    // const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
 
     useEffect(() => {
         if (activeNote) {
@@ -61,7 +59,7 @@ export function NoteDetailContent() {
         <div className="h-full">
             <CardContent className="p-0 h-full">
                 {$miRef.current && <MarkdownEditorSync />}
-                {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />}
+                {/* {$miRef.current && displayDesc !== null && allKeywords && allKeywords.length > 0 && <MarkdownEditorTheme $mi={$miRef.current} />} */}
                 {displayDesc !== null && allKeywords && allKeywords.length > 0 ? (
                     <MarkdownEditor />
                 ) : (

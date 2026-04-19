@@ -151,7 +151,7 @@ export function MarkdownEditor() {
 
         // Initial decorations with keywords only (NOT headings)
         // Headings should not have decorations/underlines
-        updateDecorations(editor, displayDesc ?? "", _allKeywords, decorationsRef);
+        // updateDecorations(editor, displayDesc ?? "", _allKeywords, decorationsRef);
     };
 
     // Re-setup providers when keywords change (fix stale closures)
@@ -177,16 +177,16 @@ export function MarkdownEditor() {
             disposablesRef.current = [];
 
             // Re-setup providers with fresh keywords
-            const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
+            // const autocompleteCleanup = setupAutocomplete($miRef.current, editor, _allKeywords, currentNoteId);
             // const hoverCleanup = setupHoverProvider($miRef.current, editor, _allKeywords, currentNoteId);
-            const linkCleanup = setupLinkProvider($miRef.current, editor, allKeywords, navigateLink, _console, currentNoteId);
+            // const linkCleanup = setupLinkProvider($miRef.current, editor, allKeywords, navigateLink, _console, currentNoteId);
             // const definitionCleanup = setupDefinitionProvider($miRef.current, editor, _allKeywords, currentNoteId);
             const foldingCleanup = setupMarkdownFolding($miRef.current, editor);
 
             disposablesRef.current = [
-                { dispose: autocompleteCleanup },
+                // { dispose: autocompleteCleanup },
                 // { dispose: hoverCleanup },
-                { dispose: linkCleanup },
+                // { dispose: linkCleanup },
                 // { dispose: definitionCleanup },
                 { dispose: foldingCleanup },
             ];
@@ -232,8 +232,8 @@ export function MarkdownEditor() {
     return (
         <div className="relative w-full h-[calc(100%-118px)]">
             {/* //* phải mounted thì mới có editor để gắn listener */}
-            {isMounted && <MarkdownEditorNavigationTracker />}
-            {isMounted && <MarkdownEditorViewStateSync />}
+            {/* {isMounted && <MarkdownEditorNavigationTracker />} */}
+            {/* {isMounted && <MarkdownEditorViewStateSync />} */}
 
             <Editor
                 height={"100%"}
