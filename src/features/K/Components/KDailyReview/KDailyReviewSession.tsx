@@ -5,6 +5,7 @@ import { Button } from "@/shared/components/ui/Button";
 import { KTestService } from "../../service/kTest.service";
 import { AutoResizeTextarea } from "../KNodeEditorPanel/AutoResizeTextarea";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
+import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import type { KDailySessionQuestion, KDailyAnswerItem, KSubmitAnswersResult, KQuestionGrade } from "../../types/kTest.type";
 
 interface KDailyReviewSessionProps {
@@ -23,6 +24,7 @@ type Phase = "answering" | "reviewing";
 const TRANSITION_SECS = 2;
 
 export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions, onComplete, onBack }: KDailyReviewSessionProps) {
+    const _console = useConsoleHelper();
     const [mode, setMode]                   = useState<Mode>("record");
     const [phase, setPhase]                 = useState<Phase>("answering");
     const [currentIndex, setCurrentIndex]   = useState(0);
@@ -99,6 +101,20 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
         setIsRecording(false);
     }, []);
 
+    // Stop recording and discard audio (no transcription) — used when entering review phase manually
+    const stopRecordingOnly = useCallback(() => {
+        const recorder = mediaRecorderRef.current;
+        if (!recorder || recorder.state === "inactive") { mediaRecorderRef.current = null; return; }
+        mediaRecorderRef.current = null;
+        recorder.onstop = () => {
+            streamRef.current?.getTracks().forEach(t => t.stop());
+            streamRef.current = null;
+            chunksRef.current = [];
+        };
+        recorder.stop();
+        setIsRecording(false);
+    }, []);
+
     const startRecording = useCallback(async () => {
         if (mediaRecorderRef.current) return;
         try {
@@ -154,9 +170,9 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
 
     const enterReviewPhase = useCallback(() => {
         recordTiming();
-        if (isRecording && currentQuestion) stopAndTranscribeBg(currentQuestion.id);
+        if (isRecording) stopRecordingOnly();
         setPhase("reviewing");
-    }, [recordTiming, isRecording, currentQuestion, stopAndTranscribeBg]);
+    }, [recordTiming, isRecording, stopRecordingOnly]);
 
     // ── Submit ─────────────────────────────────────────────────────────────────
 
@@ -164,17 +180,29 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
         setIsSubmitting(true);
         // Give background transcriptions a brief chance to land
         await new Promise(r => { const t = setTimeout(r, 800); timersRef.current.push(t); });
+        const dailyAnswers: KDailyAnswerItem[] = questions.map(q => ({
+            questionId: q.id,
+            answerText: answersRef.current[q.id]?.trim() || null,
+            responseTimeMs: timings[q.id] ?? null,
+        }));
+
+        console.log("[KGrading] model: backend | payload:", dailyAnswers);
+
         try {
-            const dailyAnswers: KDailyAnswerItem[] = questions.map(q => ({
-                questionId: q.id,
-                answerText: answersRef.current[q.id]?.trim() || null,
-                responseTimeMs: timings[q.id] ?? null,
-            }));
             const res = await KTestService._submitDailyAnswers(knowledgeId, testId, { answers: dailyAnswers });
-            if (res.success && res.object) setResult(res.object);
-        } catch { /* silent */ }
-        finally { setIsSubmitting(false); }
-    }, [questions, knowledgeId, testId, timings]);
+            if (res.success && res.object) {
+                console.log("[KGrading] result:", res.object);
+                setResult(res.object);
+            } else {
+                throw new Error("No grading result");
+            }
+        } catch (err) {
+            console.error("[KGrading] failed:", err);
+            _console.error("Grading failed — please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [questions, knowledgeId, testId, timings, _console]);
 
     // ── Advance ────────────────────────────────────────────────────────────────
 
@@ -229,6 +257,12 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
         return () => window.removeEventListener("keydown", onKey);
     }, [advance, isSubmitting, result, mode]);
 
+    // Ctrl+Shift+Enter → submit for grading (reviewing phase)
+    useGlobalShortcut("ctrl+shift+enter", { id: "kdaily-submit-grading", enabled: phase === "reviewing" && !isSubmitting && !result }, () => {
+        handleSubmit();
+        return true;
+    });
+
     // Touch: swipe left → advance (record mode)
     const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
     const handleTouchEnd   = (e: React.TouchEvent) => {
@@ -270,7 +304,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 px-3 py-3 border-t border-zinc-800/60 flex justify-center">
+                <div className="shrink-0 px-3 py-3 border-t border-zinc-800/60 flex flex-col items-center gap-1">
                     <Button
                         className="gap-1.5 w-full max-w-lg"
                         onClick={handleSubmit}
@@ -279,6 +313,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                         {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                         Submit for grading
                     </Button>
+                    <span className="text-[10px] text-muted-foreground/30">Ctrl+Shift+Enter</span>
                 </div>
             </div>
         );

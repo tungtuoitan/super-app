@@ -21,6 +21,9 @@ export const envConfig = {
 
     // Groq
     REACT_APP_GROQ_API_KEY: process.env.REACT_APP_GROQ_API_KEY,
+
+    // OpenRouter (fallback grading model)
+    REACT_APP_OPENROUTER_API_KEY: process.env.REACT_APP_OPENROUTER_API_KEY,
 } as const;
 
 /**

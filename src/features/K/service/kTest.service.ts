@@ -14,6 +14,7 @@ import type {
     KDailySubmitRequest,
     KRetentionSummary,
     KRetentionGraph,
+    KQuestionGrade,
 } from "../types/kTest.type";
 import type { ResultOptions } from "../../../types";
 
