@@ -41,7 +41,7 @@ export function FlowEdgeWithNote({
         const tNode = flowNodes.find((n) => n.id === target);
         const sStatus = (sNode?.data as TaskFlowNodeData)?.task?.status;
         const tStatus = (tNode?.data as TaskFlowNodeData)?.task?.status;
-        return (sStatus && DIMMED.has(sStatus)) || (tStatus && DIMMED.has(tStatus));
+        return !!(sStatus && DIMMED.has(sStatus) && tStatus && DIMMED.has(tStatus));
     }, [flowNodes, source, target]);
 
     const edgeData = data as FlowEdgeData;
@@ -95,8 +95,8 @@ export function FlowEdgeWithNote({
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [selected, isEditing, edgeLocked, id, handleEdgeDelete]);
 
-    const strokeColor = selected ? "hsl(var(--primary))" : isDimmed ? "#6b728030" : "#6b728099";
-    const strokeWidth = selected ? 2 : 1.5;
+    const strokeColor = selected ? "hsl(var(--primary))" : isDimmed ? "#6b728040" : "#6b7280cc";
+    const strokeWidth = selected ? 2.2 : 1.8;
 
     // Flow animation: dashes move along the path to indicate direction
     const speed = selected ? 0.5 : isDimmed ? 1.8 : 0.9; // seconds per period

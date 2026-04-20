@@ -7,9 +7,12 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useMobileStore } from "@/store/Mobile.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell/moduleRegistry";
-import {ConsoleTab} from "./MobileConsole/ConsoleTab";
-import {NoteBodyInPanel} from "@/features/note/Components/NoteBodyInPanel";
-import {TabNameList} from "./TabNameList";
+import { ConsoleTab } from "./MobileConsole/ConsoleTab";
+import { NoteBodyInPanel } from "@/features/note/Components/NoteBodyInPanel";
+import { TabNameList } from "./TabNameList";
+import { constants } from "@/utils/constants";
+
+const NoteBodyInPanelContent = () => <NoteBodyInPanel />;
 
 interface VSPanelProps {
     onClose: () => void;
@@ -26,32 +29,27 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const { isMobile } = useMobileStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
-    
+    const isNoteTab = activeTab?.type === constants.vscode.tab.tabTypes.note;
+
     const changeTab = (id: string) => {
         if (id !== "moving") setTargetWorkspace(null);
         setActiveTabId(id);
     };
 
     const modulePanelTabs = moduleRegistry.getPanelTabs(moduleName);
-    
-    // Build full tab list: module tabs + console (mobile only)
+
+    // Build full tab list: module tabs + noteDetail (only when active tab is note) + console (mobile only)
     const allTabs: Array<PanelTabDefinition | { id: "console"; label: "Console"; icon: typeof Terminal }> = [
         ...modulePanelTabs,
-        {
+        ...(isNoteTab ? [{
             id: "noteDetail",
             label: "Note Detail",
             icon: FileText,
-            Content: () => <NoteBodyInPanel />,
-        },
-        // {
-        //     id: "moving",
-        //     label: "Moving",
-        //     icon: ArrowRightLeft,
-        //     Content: () => <KMovingTab />,
-        // },
+            Content: NoteBodyInPanelContent,
+        }] : []),
         ...(isMobile ? [{ id: "console" as const, label: "Console" as const, icon: Terminal }] : [])
-    ]
-    
+    ];
+
     const [activeTabId, setActiveTabId] = useState<string>(allTabs[0]?.id ?? "");
 
     // If module changed and current tab doesn't exist in new module, reset to first
@@ -87,13 +85,10 @@ export function VSPanel({ onClose }: VSPanelProps) {
 
                     {/* Tab content */}
                     <div className={`flex-1 overflow-auto ${resolvedTabId === "moving" || resolvedTabId === "console" ? "" : "p-3"}`}>
-                        {
-                        resolvedTabId === "console" && isMobile 
-                        ? <ConsoleTab /> 
-                        : 
-                        // current tab body
-                        allTabs.filter((t): t is PanelTabDefinition => t.id === resolvedTabId && "Content" in t)
-                            .map((t) => <t.Content key={t.id} activeTab={activeTab} />)
+                        {resolvedTabId === "console" && isMobile
+                            ? <ConsoleTab />
+                            : allTabs.filter((t): t is PanelTabDefinition => t.id === resolvedTabId && "Content" in t)
+                                .map((t) => <t.Content key={t.id} activeTab={activeTab} />)
                         }
                     </div>
                 </div>

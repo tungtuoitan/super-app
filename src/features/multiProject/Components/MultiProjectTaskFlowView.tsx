@@ -89,16 +89,15 @@ function TaskFlowCanvas() {
         if (!el) return;
 
         const onWheel = (e: WheelEvent) => {
-            // Let scrollable popups (e.g. checklist) handle their own scroll
+            if (!el.contains(e.target as HTMLElement)) return;
             const target = e.target as HTMLElement;
-            if (target.closest?.(".nopan")) return;
+            if (target.closest?.(".taskflow-scroll-popup")) return;
 
             e.preventDefault();
-            e.stopPropagation(); // prevent React Flow from also handling this event
+            e.stopImmediatePropagation();
             const { x, y, zoom } = rfInstance.getViewport();
 
             if (e.ctrlKey) {
-                // Zoom toward cursor
                 const factor = e.deltaY > 0 ? 0.92 : 1.08;
                 const newZoom = Math.min(Math.max(zoom * factor, dynMinZoomRef.current), MAX_ZOOM);
                 const rect = el.getBoundingClientRect();
@@ -110,17 +109,15 @@ function TaskFlowCanvas() {
                     zoom: newZoom,
                 });
             } else if (e.shiftKey) {
-                // Pan left/right
                 rfInstance.setViewport({ x: x - e.deltaY * PAN_SPEED, y, zoom });
             } else {
-                // Pan up/down
                 rfInstance.setViewport({ x, y: y - e.deltaY * PAN_SPEED, zoom });
             }
         };
 
-        // capture:true → fires before React Flow's bubble-phase listener
-        el.addEventListener("wheel", onWheel, { passive: false, capture: true });
-        return () => el.removeEventListener("wheel", onWheel, { capture: true } as EventListenerOptions);
+        // document-level capture fires before @xyflow/react's own wheel listeners (including those on nodes)
+        document.addEventListener("wheel", onWheel, { passive: false, capture: true });
+        return () => document.removeEventListener("wheel", onWheel, { capture: true } as EventListenerOptions);
     }, [rfInstance]);
 
     const isEmpty = flowNodes.length === 0 && !isTaskFlowLoading;

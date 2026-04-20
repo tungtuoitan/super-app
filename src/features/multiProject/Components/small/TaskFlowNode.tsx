@@ -329,7 +329,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                             {/* Checklist popup */}
                             {showProgressPopup && parsedProcess && (
                                 <div
-                                    className="absolute left-1/2 z-50 nodrag nopan"
+                                    className="absolute left-1/2 z-50 nodrag nopan taskflow-scroll-popup"
                                     style={{ top: "100%", marginTop: 4, transform: `translateX(-50%) scale(${1 / zoom})`, transformOrigin: "top center" }}
                                     onMouseEnter={handleProgressEnter}
                                     onMouseLeave={handleProgressLeave}

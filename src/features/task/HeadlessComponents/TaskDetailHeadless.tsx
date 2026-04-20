@@ -5,7 +5,7 @@
  * Renders nothing (returns null).
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTaskStore } from "../store/useTask.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
@@ -22,6 +22,8 @@ export function TaskDetailHeadless() {
     const { loadFolderItems } = useTaskWorkspaceItemHelper();
     const { setParentTaskOptions, taskDetailContentRef } = useTaskStore();
     const { setOpenTabs, openTabs } = useEditorTabsStore();
+    const openTabsRef = useRef(openTabs);
+    openTabsRef.current = openTabs;
     const { getActiveTab } = useEditorTabHelper();
 
     const tab = getActiveTab();
@@ -80,11 +82,12 @@ export function TaskDetailHeadless() {
     // Effect 6: Restore scroll position when tab becomes active (UI-local ref)
     useEffect(() => {
         if (!tab || !taskDetailContentRef?.current) return;
-        const viewState = openTabs.find((t: BaseTab) => t.id === tab.id)?.viewState;
+        const viewState = openTabsRef.current.find((t: BaseTab) => t.id === tab.id)?.viewState;
         if (viewState?.scrollTop !== undefined) {
             taskDetailContentRef.current.scrollTop = viewState.scrollTop;
         }
-    }, [tab?.id, openTabs, taskDetailContentRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tab?.id, taskDetailContentRef]);
 
     return null;
 }

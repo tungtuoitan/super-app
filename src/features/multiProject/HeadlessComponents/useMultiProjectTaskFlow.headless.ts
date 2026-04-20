@@ -111,7 +111,7 @@ export function useMultiProjectTaskFlowHeadless() {
                 const locked = lockOldNodes && (status === "completed" || status === "cancelled" || status === "failed");
                 return {
                     ...n,
-                    position: prevPositions[n.id] ?? savedPositions[n.id] ?? n.position,
+                    position: savedPositions[n.id] ?? prevPositions[n.id] ?? n.position,
                     draggable: !locked,
                 };
             });
