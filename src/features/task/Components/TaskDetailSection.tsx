@@ -1,15 +1,12 @@
 import React, { useMemo } from "react";
 import { Save, X, Star, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
+import { BuiltinTab, SectionTab, useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
-import { useTaskChecklistHelper } from "../hooks/useTaskChecklist.helper";
 import { useTaskSectionSelector } from "../Selectors/TaskSectionSelector";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { useTaskSectionHelper } from "../hooks/useTaskSection.helper";
 import { useTaskCustomTabSelector } from "../Selectors/TaskCustomTabSelector";
-import { isCustomTab } from "../utils/taskDetailSection.utils";
 import { TaskProcess } from "./TaskProcess";
 import { TaskChecklist } from "./TaskChecklist";
 import { TaskComment } from "./TaskComment";
@@ -21,11 +18,62 @@ import { TaskSectionHeadless } from "../HeadlessComponents/TaskSectionHeadless";
 import { RichTextEditor } from "@/shared/components";
 import { BUILTIN_TABS, TAB_COLORS } from "../types/taskDetailSection.constants";
 
+function SectionNameList({ activeKey, onTabClick } : {activeKey: string, onTabClick: (key: SectionTab) => void }) {
+  return (
+    <>
+      {BUILTIN_TABS.map((tab) => {
+        const Icon = tab.icon;
+        const isActive = activeKey === tab.key;
+
+        return (
+          <button
+            key={tab.key}
+            onClick={() => onTabClick(tab.key)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+              isActive
+                ? TAB_COLORS[tab.key].active
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {tab.label}
+          </button>
+        );
+      })}
+    </>
+  );
+}
+
+function SaveAndDiscard({
+  onSave,
+  onDiscard,
+}: {
+    onSave: () => void,
+    onDiscard: () => void,
+
+}) {
+  return (
+    <div className="absolute right-0 flex items-center gap-1.5 pr-1 shrink-0 py-1 bg-background">
+      <button
+        onClick={onSave}
+        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+      >
+        <Save className="h-3 w-3" /> Save
+      </button>
+
+      <button
+        onClick={onDiscard}
+        className="flex items-center gap-1 text-xs px-2 py-1 rounded hover:bg-muted transition-colors text-muted-foreground"
+      >
+        <X className="h-3 w-3" /> Discard
+      </button>
+    </div>
+  );
+}
 export function TaskDetailSection() {
     const { activeSection } = useTaskDetailSectionStore();
     const { selectedTask, isDisabled } = useTaskDetailSelector();
-    const { isChecklistEditing, settingDefault } = useTaskChecklistStore();
-    const { handleSetAsDefault } = useTaskChecklistHelper();
     const { isSectionDirty } = useTaskSectionSelector();
     const { descKey, descFocusTrigger, commentFilter, commentShowDetail, setCommentFilter, setCommentShowDetail } = useTaskSectionStore();
     const { handleTabClick, handleAddCustomTab, handleSectionSave, handleSectionDiscard, handleDescChange } = useTaskSectionHelper();
@@ -44,24 +92,10 @@ export function TaskDetailSection() {
             {/* ── Tab Bar ── */}
             <div className="flex items-start shrink-0 gap-1 relative">
                 <div className="flex flex-wrap items-center min-w-0 flex-1">
-                    {BUILTIN_TABS.map((tab) => {
-                        const Icon = tab.icon;
-                        const isActive = activeSection === tab.key;
-                        return (
-                            <button
-                                key={tab.key}
-                                onClick={() => handleTabClick(tab.key)}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
-                                    isActive ? TAB_COLORS[tab.key].active : "border-transparent text-muted-foreground hover:text-foreground",
-                                )}
-                            >
-                                <Icon className="h-3.5 w-3.5" />
-                                {tab.label}
-                            </button>
-                        );
-                    })}
-
+                    <SectionNameList
+                        activeKey={activeSection}
+                        onTabClick={handleTabClick}
+                    />
                     {customTabs.tabs.map((tab) => (
                         <CustomTabButton key={tab.id} tabId={tab.id} />
                     ))}
@@ -79,31 +113,10 @@ export function TaskDetailSection() {
 
                 {/* Right: Save/Discard or Filter */}
                 {isSectionDirty && !isDisabled && (
-                    <div className="absolute right-0 flex items-center gap-1.5 pr-1 shrink-0 py-1 bg-background">
-                        <button
-                            onClick={handleSectionSave}
-                            className="flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                        >
-                            <Save className="h-3 w-3" /> Save
-                        </button>
-                        {activeSection === "checklist" && isChecklistEditing && (
-                            <button
-                                onClick={handleSetAsDefault}
-                                disabled={settingDefault}
-                                className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
-                                title="Save as default template for this task type"
-                            >
-                                <Star className="h-3 w-3" />
-                                {settingDefault ? "Saving…" : "Default"}
-                            </button>
-                        )}
-                        <button
-                            onClick={handleSectionDiscard}
-                            className="flex items-center gap-1 text-xs px-2 py-1 rounded hover:bg-muted transition-colors text-muted-foreground"
-                        >
-                            <X className="h-3 w-3" /> Discard
-                        </button>
-                    </div>
+                    <SaveAndDiscard 
+                        onSave={handleSectionSave} 
+                        onDiscard={handleSectionDiscard} 
+                    />
                 )}
 
                 {activeSection === "comment" && !isSectionDirty && (

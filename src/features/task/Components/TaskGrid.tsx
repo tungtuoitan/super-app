@@ -23,6 +23,85 @@ import { StatusCell, PriorityCell } from "@/features/multiProject/Components/sma
 import { DateRangeCell, DraggableRow } from "@/features/multiProject/Components/small/MultiProjectTaskListRow";
 import { MakeIndependentDropZone } from "@/features/multiProject/Components/small/MakeIndependentDropZone";
 
+
+type TaskTableProps = {
+  table: ReturnType<typeof useReactTable<Task>>;
+  columns: ColumnDef<Task>[];
+  filteredTasks: Task[];
+  handleContextMenu: (e: React.MouseEvent, row?: any) => void;
+  handleDropTaskOntoTask: any;
+  handleMakeIndependent: any;
+  openTaskTab: (task: Task) => void;
+  showDropError: (message: string) => void;
+};
+
+function TaskTable({
+  table,
+  columns,
+  filteredTasks,
+  handleContextMenu,
+  handleDropTaskOntoTask,
+  handleMakeIndependent,
+  openTaskTab,
+  showDropError,
+}: TaskTableProps) {
+  return (
+        <div
+        className="flex-1 overflow-auto rounded-md border"
+        onContextMenu={(e) => {
+            const target = e.target as HTMLElement;
+            const isClickedOnRow = target.closest("tr[data-row]");
+            if (!isClickedOnRow) {
+                handleContextMenu(e);
+            }
+        }}
+    >
+
+      <table className="w-full" style={{ tableLayout: "fixed" }}>
+        <thead className="bg-muted/50 sticky top-0 z-10">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id} className="border-b">
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground"
+                  style={{ width: header.getSize() }}
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+
+        <tbody>
+          {table.getRowModel().rows.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                {/* Empty state */}
+              </td>
+            </tr>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <DraggableRow
+                key={row.id}
+                row={row}
+                allTasks={filteredTasks}
+                onDrop={handleDropTaskOntoTask}
+                onMakeIndependent={handleMakeIndependent}
+                onRowClick={openTaskTab}
+                onContextMenu={handleContextMenu}
+                showError={showDropError}
+              />
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 /**
  * TaskGrid - task grid with table display
  */
@@ -166,57 +245,16 @@ export function TaskGrid() {
                 </div>
             )}
 
-            {/* Table */}
-            <div
-                className="flex-1 overflow-auto rounded-md border"
-                onContextMenu={(e) => {
-                    const target = e.target as HTMLElement;
-                    const isClickedOnRow = target.closest("tr[data-row]");
-                    if (!isClickedOnRow) {
-                        handleContextMenu(e);
-                    }
-                }}
-            >
-                <table className="w-full" style={{ tableLayout: "fixed" }}>
-                    <thead className="bg-muted/50 sticky top-0 z-10">
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className="border-b">
-                                {headerGroup.headers.map((header) => (
-                                    <th
-                                        key={header.id}
-                                        className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground"
-                                        style={{ width: header.getSize() }}
-                                    >
-                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                                    {/* Empty state - no text to avoid flicker on tab switch */}
-                                </td>
-                            </tr>
-                        ) : (
-                            table.getRowModel().rows.map((row) => (
-                                <DraggableRow
-                                    key={row.id}
-                                    row={row}
-                                    allTasks={filteredTasks}
-                                    onDrop={handleDropTaskOntoTask}
-                                    onMakeIndependent={handleMakeIndependent}
-                                    onRowClick={openTaskTab}
-                                    onContextMenu={handleContextMenu}
-                                    showError={showDropError}
-                                />
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            <TaskTable
+                table={table}
+                columns={columns}
+                filteredTasks={filteredTasks}
+                handleContextMenu={handleContextMenu}
+                handleDropTaskOntoTask={handleDropTaskOntoTask}
+                handleMakeIndependent={handleMakeIndependent}
+                openTaskTab={openTaskTab}
+                showDropError={showDropError}
+                />
 
             {/* Make Independent Drop Zone */}
             <MakeIndependentDropZone onDrop={handleMakeIndependent} showError={showDropError} />

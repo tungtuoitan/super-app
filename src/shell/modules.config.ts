@@ -20,7 +20,7 @@ moduleRegistry.register(workspaceModule);
 moduleRegistry.register(projectModule);
 moduleRegistry.register(kModule);
 moduleRegistry.register(lifeLogModule);
-moduleRegistry.register(wikiModule);
+// moduleRegistry.register(wikiModule);
 // noteModule and wsModule are available but not shown in ActivityBar by default
 // (they can still have editor panels registered for tab rendering)
 moduleRegistry.register(noteModule);
