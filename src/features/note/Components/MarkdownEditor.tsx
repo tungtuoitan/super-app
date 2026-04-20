@@ -26,10 +26,8 @@ import {
 } from "@/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { useSnackbar } from "notistack";
-import { MarkdownEditorNavigationTracker } from "../HeadlessComponents/MarkdownEditorNavigationTracker";
-import { MarkdownEditorViewStateSync } from "../HeadlessComponents/MarkdownEditorViewStateSync";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {MarkdownEditorViewStateSync} from "../HeadlessComponents/MarkdownEditorViewStateSync";
 
 export function MarkdownEditor() {
     const { registries, allKeywords } = useGeneralStore();
@@ -232,8 +230,7 @@ export function MarkdownEditor() {
     return (
         <div className="relative w-full h-[calc(100%-118px)]">
             {/* //* phải mounted thì mới có editor để gắn listener */}
-            {/* {isMounted && <MarkdownEditorNavigationTracker />} */}
-            {/* {isMounted && <MarkdownEditorViewStateSync />} */}
+            {isMounted && <MarkdownEditorViewStateSync />}
 
             <Editor
                 height={"100%"}

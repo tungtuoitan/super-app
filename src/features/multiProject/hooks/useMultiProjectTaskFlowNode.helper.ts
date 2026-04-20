@@ -11,6 +11,8 @@ import { useTaskGridStore } from "@/features/task/store/useTask.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/task/service/task.service";
+import type { TaskDTO } from "@/features/task/service/task.service";
+import { transformTaskData } from "@/features/task/utils/TaskDetail.utils";
 import { flowService } from "@/features/multiProject/service/flow.service";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
@@ -77,7 +79,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     }]);
 
                     if (!taskResult.success || !taskResult.data?.length) throw new Error(taskResult.message);
-                    const newTask = taskResult.data[0] as unknown as Task;
+                    const [newTask] = transformTaskData([taskResult.data[0] as unknown as TaskDTO]);
                     const realId = String(newTask.id);
 
                     debugLog.log("task-upsert", "flow-task-created", {

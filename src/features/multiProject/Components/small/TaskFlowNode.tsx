@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Handle, Position, useViewport } from "@xyflow/react";
+import { Handle, Position, useStore } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
@@ -35,7 +35,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const { allProjects } = useMultiProjectTaskFlowSelector();
     const { registriesByType } = useGeneralStore();
     const { openTaskTab } = useTaskTabHelper();
-    const { zoom } = useViewport();
+    const zoom = useStore((s) => s.transform[2]);
     const { setTasks } = useTaskGridStore();
     const { $user } = useAuthStore();
     const statusOptions = registriesByType["task_status"] ?? [];
@@ -439,7 +439,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                     style={{ top: "100%", marginTop: 6, transform: `translateX(-50%) scale(${1 / zoom})` }}
                 >
                     {/* Status pills from registry */}
-                    {statusOptions.filter((s) => s.isActive).map((opt) => {
+                    {statusOptions.map((opt) => {
                         const isActive = data.task.status === opt.code;
                         const color = (constants.optionColor.taskStatus.colors[opt.code] ?? constants.optionColor.taskStatus.default).bg;
                         return (

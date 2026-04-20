@@ -24,17 +24,17 @@ export function MarkdownEditorSync() {
     // Track previous note ID to detect tab switches
     const prevNoteIdRef = useRef<number | null>(null);
 
-    const _allKeywords = allKeywords.map((k) => ({
-            // REMOVED: nameIndex no longer in keyword
-            // text: `[${k.name}]${k.nameIndex}`,
-            text: `[${k.name}]`,
-            type: k.type,
-            link: k.link,
-            longLink: k.longLink,
-            name: k.name,
-            // nameIndex: k.nameIndex, // REMOVED
-            hardDeletedAt: k.hardDeletedAt,
-        }))
+    // const _allKeywords = allKeywords.map((k) => ({
+    //         // REMOVED: nameIndex no longer in keyword
+    //         // text: `[${k.name}]${k.nameIndex}`,
+    //         text: `[${k.name}]`,
+    //         type: k.type,
+    //         link: k.link,
+    //         longLink: k.longLink,
+    //         name: k.name,
+    //         // nameIndex: k.nameIndex, // REMOVED
+    //         hardDeletedAt: k.hardDeletedAt,
+    //     }))
 
     // Sync when external activeNote.description changes - convert [id] to [name][nameIndex]
     useEffect(() => {
