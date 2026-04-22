@@ -14,7 +14,9 @@ import { TaskDetailProvider, useTaskDetailStore } from "./useTaskDetail.store";
 import { TaskChecklistProvider } from "./useTaskChecklist.store";
 import { TaskProcessProvider } from "./useTaskProcess.store";
 import { TaskDetailSectionProvider } from "./useTaskDetailSection.store";
+import { TaskSectionProvider } from "./useTaskSection.store";
 import { TaskCommentProvider } from "./useTaskComment.store";
+import { TaskTimelineProvider } from "./useTaskTimeline.store";
 
 // ── Re-export shared types ─────────────────────────────────────────────────
 
@@ -44,9 +46,13 @@ export const TaskProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
             <TaskChecklistProvider>
                 <TaskProcessProvider>
                     <TaskDetailSectionProvider>
-                        <TaskCommentProvider>
-                            {children}
-                        </TaskCommentProvider>
+                        <TaskSectionProvider>
+                            <TaskCommentProvider>
+                                <TaskTimelineProvider>
+                                    {children}
+                                </TaskTimelineProvider>
+                            </TaskCommentProvider>
+                        </TaskSectionProvider>
                     </TaskDetailSectionProvider>
                 </TaskProcessProvider>
             </TaskChecklistProvider>

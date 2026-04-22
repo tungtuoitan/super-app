@@ -6,8 +6,6 @@
 export { AuthStore, AuthStoreProvider, useAuthStore } from "./Auth.store";
 export type { AuthStoreData, User } from "./Auth.store";
 
-export { DialogStore, DialogProvider, useDialogStore } from "./Dialog.store";
-export type { DialogContextData } from "./Dialog.store";
 
 export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "./editor/EditorTab.store";
 
