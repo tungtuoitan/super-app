@@ -22,6 +22,7 @@ import { useTaskDetailProcessSelector } from "../Selectors/TaskDetailProcessSele
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailProcessHelper } from "../hooks/useTaskDetailProcess.helper";
 import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
+import { useTaskSectionStore } from "../store/useTaskSection.store";
 
 export const useTaskProcessHelper = () => {
     // ── Read from selectors ───────────────────────────────────────────────────
@@ -37,6 +38,7 @@ export const useTaskProcessHelper = () => {
         setIsExpanded, setIsEditing,
         setCollapsedGroups,
     } = useTaskProcessStore();
+    const { setIsProcessDirty } = useTaskSectionStore();
 
     // ── Read from task-level process helper (persistence) ─────────────────────
     const { handleProcessChange, handleProcessSave } = useTaskDetailProcessHelper();
@@ -87,7 +89,8 @@ export const useTaskProcessHelper = () => {
         setEditCursorPos(-1);
         setIsEditing(true);
         setIsExpanded(true);
-    }, [parsedProcess, setEditText, setEditErrors, setEditCursorPos, setIsEditing, setIsExpanded]);
+        setIsProcessDirty(true);
+    }, [parsedProcess, setEditText, setEditErrors, setEditCursorPos, setIsEditing, setIsExpanded, setIsProcessDirty]);
 
     /** Double-click on a row → edit with cursor at that line */
     const handleStartEditAt = useCallback(
@@ -98,8 +101,9 @@ export const useTaskProcessHelper = () => {
             setEditCursorPos(findItemCursorOffset(text, gi, ii));
             setIsEditing(true);
             setIsExpanded(true);
+            setIsProcessDirty(true);
         },
-        [parsedProcess, setEditText, setEditErrors, setEditCursorPos, setIsEditing, setIsExpanded],
+        [parsedProcess, setEditText, setEditErrors, setEditCursorPos, setIsEditing, setIsExpanded, setIsProcessDirty],
     );
 
     const handleEditChange = useCallback(
@@ -120,13 +124,15 @@ export const useTaskProcessHelper = () => {
         submitVersionComment("process", oldText, newText);
         handleProcessSave(newChecklist);
         setIsEditing(false);
+        setIsProcessDirty(false);
         setEditErrors([]);
-    }, [editText, parsedProcess, handleProcessSave, submitVersionComment, setEditErrors, setIsEditing]);
+    }, [editText, parsedProcess, handleProcessSave, submitVersionComment, setEditErrors, setIsEditing, setIsProcessDirty]);
 
     const handleProcessCancelEdit = useCallback(() => {
         setIsEditing(false);
+        setIsProcessDirty(false);
         setEditErrors([]);
-    }, [setIsEditing, setEditErrors]);
+    }, [setIsEditing, setIsProcessDirty, setEditErrors]);
 
     return {
         handleToggle,

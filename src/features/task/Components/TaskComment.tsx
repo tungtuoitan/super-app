@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Send, Loader2 } from "lucide-react";
 import { RichTextEditor } from "@/shared/components";
 import { useTaskCommentSelector } from "../Selectors/TaskCommentSelector";
-import { useTaskCommentStore } from "../store/useTaskComment.store";
+import { TaskCommentProvider, useTaskCommentStore } from "../store/useTaskComment.store";
 import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
@@ -12,11 +12,15 @@ import { CommentThread } from "./small/CommentThread";
 import { NewTaskPlaceholder } from "./small/NewTaskPlaceholder";
 
 export function TaskComment() {
-    useTaskCommentHeadless();
-    return <TaskCommentInner />;
+    return (
+        <TaskCommentProvider>
+            <TaskCommentInner />
+        </TaskCommentProvider>
+    );
 }
 
 function TaskCommentInner() {
+    useTaskCommentHeadless();
     const { threadedComments } = useTaskCommentSelector();
     const { isLoadingComments } = useTaskCommentStore();
     const { submitComment } = useTaskCommentHelper();

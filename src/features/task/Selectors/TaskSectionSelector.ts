@@ -5,23 +5,19 @@
 
 import { useMemo } from "react";
 import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
-import { useTaskProcessStore } from "../store/useTaskProcess.store";
-import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { isCustomTab } from "../utils/taskDetailSection.utils";
 
 export const useTaskSectionSelector = () => {
     const { activeSection } = useTaskDetailSectionStore();
-    const { isProcessEditing } = useTaskProcessStore();
-    const { isChecklistEditing } = useTaskChecklistStore();
-    const { descDirty, customTabDirty } = useTaskSectionStore();
+    const { descDirty, customTabDirty, isChecklistDirty, isProcessDirty } = useTaskSectionStore();
 
     const isSectionDirty = useMemo(() =>
-        (activeSection === "process" && isProcessEditing) ||
-        (activeSection === "checklist" && isChecklistEditing) ||
+        (activeSection === "process" && isProcessDirty) ||
+        (activeSection === "checklist" && isChecklistDirty) ||
         (activeSection === "desc" && descDirty) ||
         (isCustomTab(activeSection) && customTabDirty),
-        [activeSection, isProcessEditing, isChecklistEditing, descDirty, customTabDirty],
+        [activeSection, isProcessDirty, isChecklistDirty, descDirty, customTabDirty],
     );
 
     return { isSectionDirty };

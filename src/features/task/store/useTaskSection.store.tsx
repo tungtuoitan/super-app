@@ -42,6 +42,12 @@ export interface TaskSectionContextData {
     /** Mutable ref — custom tabs register/unregister their save/discard handlers */
     customTabHandlersRef: React.MutableRefObject<Record<string, CustomTabHandler>>;
 
+    // ── Section dirty flags (set by local checklist/process providers) ────────
+    isChecklistDirty: boolean;
+    setIsChecklistDirty: (v: boolean) => void;
+    isProcessDirty: boolean;
+    setIsProcessDirty: (v: boolean) => void;
+
     // ── Comment scroll container ref ─────────────────────────────────────────
     scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
@@ -67,6 +73,10 @@ export const taskSectionContextDefaultValue: TaskSectionContextData = {
     customTabDirty: false,
     setCustomTabDirty: () => {},
     customTabHandlersRef: nullRef({}),
+    isChecklistDirty: false,
+    setIsChecklistDirty: () => {},
+    isProcessDirty: false,
+    setIsProcessDirty: () => {},
     scrollContainerRef: nullRef(null),
 };
 
@@ -94,6 +104,9 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const customTabHandlersRef = useRef<Record<string, CustomTabHandler>>({});
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
+    const [isChecklistDirty, setIsChecklistDirtyState] = useState(false);
+    const [isProcessDirty, setIsProcessDirtyState] = useState(false);
+
     const setDescDirty = useCallback((v: boolean) => setDescDirtyState(v), []);
     const triggerDescFocus = useCallback(() => setDescFocusTrigger((p) => p + 1), []);
     const triggerCommentFocus = useCallback(() => setCommentFocusTrigger((p) => p + 1), []);
@@ -110,6 +123,8 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
     }, []);
 
     const setCustomTabDirty = useCallback((v: boolean) => setCustomTabDirtyState(v), []);
+    const setIsChecklistDirty = useCallback((v: boolean) => setIsChecklistDirtyState(v), []);
+    const setIsProcessDirty = useCallback((v: boolean) => setIsProcessDirtyState(v), []);
 
     return (
         <TaskSectionStore.Provider value={{
@@ -123,6 +138,8 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
             commentShowDetail, setCommentShowDetail,
             customTabDirty, setCustomTabDirty,
             customTabHandlersRef,
+            isChecklistDirty, setIsChecklistDirty,
+            isProcessDirty, setIsProcessDirty,
             scrollContainerRef,
         }}>
             {children}

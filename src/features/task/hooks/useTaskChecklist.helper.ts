@@ -26,6 +26,7 @@ import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklist
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailChecklistHelper } from "../hooks/useTaskDetailChecklist.helper";
 import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
+import { useTaskSectionStore } from "../store/useTaskSection.store";
 
 export const useTaskChecklistHelper = () => {
     // ── Read from selectors ───────────────────────────────────────────────────
@@ -43,6 +44,7 @@ export const useTaskChecklistHelper = () => {
         editChecklistType, setEditChecklistType,
         activeEnv,
     } = useTaskChecklistStore();
+    const { setIsChecklistDirty } = useTaskSectionStore();
 
     // ── Read from task-level checklist helper (persistence) ───────────────────
     const { handleChecklistChange, handleChecklistSave, persistDefaultTemplate } =
@@ -104,7 +106,8 @@ export const useTaskChecklistHelper = () => {
         setEditChecklistType(parsedChecklist?.checklistType ?? "checklist");
         setIsEditing(true);
         setIsExpanded(true);
-    }, [parsedChecklist, checklistTemplate, setEditText, setEditErrors, setEditCursorPos, setEditChecklistType, setIsEditing, setIsExpanded]);
+        setIsChecklistDirty(true);
+    }, [parsedChecklist, checklistTemplate, setEditText, setEditErrors, setEditCursorPos, setEditChecklistType, setIsEditing, setIsExpanded, setIsChecklistDirty]);
 
     /** Double-click on a row → edit with cursor at that line */
     const handleStartEditAt = useCallback(
@@ -116,8 +119,9 @@ export const useTaskChecklistHelper = () => {
             setEditChecklistType(parsedChecklist?.checklistType ?? "checklist");
             setIsEditing(true);
             setIsExpanded(true);
+            setIsChecklistDirty(true);
         },
-        [parsedChecklist, checklistTemplate, setEditText, setEditErrors, setEditCursorPos, setEditChecklistType, setIsEditing, setIsExpanded],
+        [parsedChecklist, checklistTemplate, setEditText, setEditErrors, setEditCursorPos, setEditChecklistType, setIsEditing, setIsExpanded, setIsChecklistDirty],
     );
 
     const handleEditChange = useCallback(
@@ -153,8 +157,9 @@ export const useTaskChecklistHelper = () => {
 
         handleChecklistSave(result);
         setIsEditing(false);
+        setIsChecklistDirty(false);
         setEditErrors([]);
-    }, [editText, editChecklistType, parsedChecklist, activeEnv, handleChecklistSave, submitVersionComment, setEditErrors, setIsEditing]);
+    }, [editText, editChecklistType, parsedChecklist, activeEnv, handleChecklistSave, submitVersionComment, setEditErrors, setIsEditing, setIsChecklistDirty]);
 
     const handleSetAsDefault = useCallback(async () => {
         const v = validateChecklistText(editText);
@@ -166,8 +171,9 @@ export const useTaskChecklistHelper = () => {
 
     const handleChecklistCancelEdit = useCallback(() => {
         setIsEditing(false);
+        setIsChecklistDirty(false);
         setEditErrors([]);
-    }, [setIsEditing, setEditErrors]);
+    }, [setIsEditing, setIsChecklistDirty, setEditErrors]);
 
     return {
         handleToggle,

@@ -22,7 +22,7 @@ import {
     Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
+import { TaskChecklistProvider, useTaskChecklistStore } from "../store/useTaskChecklist.store";
 import { useTaskChecklistSelector } from "../Selectors/TaskChecklistSelector";
 import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklistSelector";
 import { useTaskChecklistHelper } from "../hooks/useTaskChecklist.helper";
@@ -30,11 +30,15 @@ import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskChecklistHeadless } from "../HeadlessComponents/useTaskChecklist.headless";
 
 export function TaskChecklist() {
-    useTaskChecklistHeadless();
-    return <TaskChecklistInner />;
+    return (
+        <TaskChecklistProvider>
+            <TaskChecklistInner />
+        </TaskChecklistProvider>
+    );
 }
 
 function TaskChecklistInner() {
+    useTaskChecklistHeadless();
     const {
         progress, allDone, nextRequiredIndex,
     } = useTaskChecklistSelector();
