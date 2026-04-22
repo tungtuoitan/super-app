@@ -1,9 +1,9 @@
 import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
- * Task Grid 2 Helper
- * Callbacks only (useCallback). Handles inline updates, drag & drop, API calls.
+ * Task Grid Update Helper
+ * Optimistic update callbacks for inline edits and drag & drop.
  * Uses optimistic updates — local state updated immediately, API called in background.
- * Gets projectId from useProjectDetailStore — NO params.
+ * Gets projectId from useCurrentProjectStore — NO params.
  */
 
 import { useCallback } from "react";
@@ -15,19 +15,17 @@ import { taskService } from "../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
 import { getSubtasksOutsideRange } from "../utils/TaskGrid.utils";
 
-export const useTaskGrid2Helper = () => {
+export const useTaskGridUpdateHelper = () => {
     const { tasks, setTasks } = useTaskStore();
     const { loadTasks } = useTaskGridHelper();
     const { $user } = useAuthStore();
     const { projectId } = useCurrentProjectStore();
     const _console = useConsoleHelper();
 
-    // Handle inline field update (status / priority) — optimistic
     const handleInlineUpdate = useCallback(
         async (task: Task, field: "status" | "priority", newValue: string) => {
             if (task[field] === newValue) return;
 
-            // Optimistic: update local state immediately
             setTasks((prev) =>
                 prev.map((t) => (t.id === task.id ? { ...t, [field]: newValue } : t)),
             );
@@ -54,14 +52,12 @@ export const useTaskGrid2Helper = () => {
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
 
                 if (!result.success) {
-                    // Revert on failure
                     setTasks((prev) =>
                         prev.map((t) => (t.id === task.id ? { ...t, [field]: task[field] } : t)),
                     );
                     _console.error("Failed to update task");
                 }
             } catch (error) {
-                // Revert on error
                 setTasks((prev) =>
                     prev.map((t) => (t.id === task.id ? { ...t, [field]: task[field] } : t)),
                 );
@@ -71,7 +67,6 @@ export const useTaskGrid2Helper = () => {
         [$user.userToken, projectId],
     );
 
-    // Handle inline date update — optimistic
     const handleInlineDateUpdate = useCallback(
         async (task: Task, field: "startDate" | "endDate", newValue: Date | null) => {
             const currentValue = task[field];
@@ -80,7 +75,6 @@ export const useTaskGrid2Helper = () => {
                 (currentValue && newValue && currentValue.getTime() === newValue.getTime());
             if (isSame) return;
 
-            // Check if this is a parent task and if any subtasks will fall outside the new range
             if (!task.parentTaskId) {
                 const newStartDate = field === "startDate" ? newValue : (task.startDate ?? null);
                 const newEndDate = field === "endDate" ? newValue : (task.endDate ?? null);
@@ -93,7 +87,6 @@ export const useTaskGrid2Helper = () => {
                 }
             }
 
-            // Optimistic: update local state immediately
             setTasks((prev) =>
                 prev.map((t) => (t.id === task.id ? { ...t, [field]: newValue } : t)),
             );
@@ -120,14 +113,12 @@ export const useTaskGrid2Helper = () => {
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
 
                 if (!result.success) {
-                    // Revert on failure
                     setTasks((prev) =>
                         prev.map((t) => (t.id === task.id ? { ...t, [field]: currentValue } : t)),
                     );
                     _console.error("Failed to update task date");
                 }
             } catch (error) {
-                // Revert on error
                 setTasks((prev) =>
                     prev.map((t) => (t.id === task.id ? { ...t, [field]: currentValue } : t)),
                 );
@@ -137,10 +128,8 @@ export const useTaskGrid2Helper = () => {
         [$user.userToken, projectId, tasks, _console],
     );
 
-    // Handle drop task onto another task (make subtask) — needs reload for parent/child structure
     const handleDropTaskOntoTask = useCallback(
         async (dragTask: Task, dropTask: Task, warningMessage?: string) => {
-            // Optimistic: update parentTaskId locally
             setTasks((prev) =>
                 prev.map((t) => (t.id === dragTask.id ? { ...t, parentTaskId: dropTask.id } : t)),
             );
@@ -171,17 +160,14 @@ export const useTaskGrid2Helper = () => {
                     if (warningMessage) {
                         _console.warning(warningMessage);
                     }
-                    // Reload to get updated parent/child limit dates from backend
                     await loadTasks(projectId ?? undefined);
                 } else {
-                    // Revert
                     setTasks((prev) =>
                         prev.map((t) => (t.id === dragTask.id ? { ...t, parentTaskId: dragTask.parentTaskId } : t)),
                     );
                     _console.error("Failed to make task a subtask");
                 }
             } catch (error) {
-                // Revert
                 setTasks((prev) =>
                     prev.map((t) => (t.id === dragTask.id ? { ...t, parentTaskId: dragTask.parentTaskId } : t)),
                 );
@@ -192,12 +178,10 @@ export const useTaskGrid2Helper = () => {
         [$user.userToken, projectId, _console],
     );
 
-    // Handle making a subtask independent (remove parent) — needs reload for structure
     const handleMakeIndependent = useCallback(
         async (task: Task) => {
             const oldParentTaskId = task.parentTaskId;
 
-            // Optimistic: remove parentTaskId locally
             setTasks((prev) =>
                 prev.map((t) => (t.id === task.id ? { ...t, parentTaskId: null } : t)),
             );
@@ -225,17 +209,14 @@ export const useTaskGrid2Helper = () => {
 
                 if (result.success) {
                     _console.success(`Task "${task.title || "Untitled"}" is now an independent task`);
-                    // Reload to get updated limit dates from backend
                     await loadTasks(projectId ?? undefined);
                 } else {
-                    // Revert
                     setTasks((prev) =>
                         prev.map((t) => (t.id === task.id ? { ...t, parentTaskId: oldParentTaskId } : t)),
                     );
                     _console.error("Failed to make task independent");
                 }
             } catch (error) {
-                // Revert
                 setTasks((prev) =>
                     prev.map((t) => (t.id === task.id ? { ...t, parentTaskId: oldParentTaskId } : t)),
                 );
@@ -246,7 +227,6 @@ export const useTaskGrid2Helper = () => {
         [$user.userToken, projectId, _console],
     );
 
-    // Show error message
     const showDropError = useCallback(
         (message: string) => {
             _console.error(message);

@@ -1,29 +1,18 @@
-/**
- * Task Timeline Headless
- * Side-effects only (useEffect). Handles timeline initialization, persistence, scroll.
- * Task loading is handled by ProjectDetailHeadless at the parent level.
- * Gets projectId from useProjectDetailStore — NO params.
- * Renders nothing (returns null).
- */
-
 import { useEffect } from "react";
 import { useTaskTimelineStore, STORAGE_KEY_ZOOM } from "../store/useTaskTimeline.store";
 import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
 import { useTaskTimelineHelper } from "../hooks/useTaskTimeline.helper";
 import { storageService } from "@/services/storage.service";
 
-export function TaskTimelineHeadless() {
-    // Call stores/selectors/helpers directly
+export function useTaskTimelineHeadless() {
     const { timelineRange, setTimelineRange, dayWidth, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef } = useTaskTimelineStore();
     const { filteredTasks, todayPosition } = useTaskTimelineSelector();
     const { checkTodayVisibility } = useTaskTimelineHelper();
 
-    // Effect 0: Reset scroll flag on mount so Effect 3 re-scrolls to today
     useEffect(() => {
         setHasScrolledToToday(false);
     }, []);
 
-    // Effect 1: Initialize timeline range from task dates
     useEffect(() => {
         if (timelineRange) return;
 
@@ -63,12 +52,10 @@ export function TaskTimelineHeadless() {
         setTimelineRange({ start, end });
     }, [filteredTasks, timelineRange]);
 
-    // Effect 2: Persist dayWidth to localStorage
     useEffect(() => {
         storageService.set(STORAGE_KEY_ZOOM, dayWidth);
     }, [dayWidth]);
 
-    // Effect 3: Scroll to today on initial load
     useEffect(() => {
         if (!hasScrolledToToday && timelineScrollRef.current && timelineRange) {
             const clientWidth = timelineScrollRef.current.clientWidth;
@@ -77,10 +64,7 @@ export function TaskTimelineHeadless() {
         }
     }, [hasScrolledToToday, todayPosition, timelineRange, timelineScrollRef]);
 
-    // Effect 4: Recheck today visibility on dayWidth change
     useEffect(() => {
         checkTodayVisibility();
     }, [checkTodayVisibility, dayWidth]);
-
-    return null;
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CommentFilterType } from "../../types/taskComment.types";
-import { COMMENT_FILTERS } from "../../types/taskComment.constants";
+import { COMMENT_FILTERS } from "../../task.constants";
 
 export function CommentFilterDropdown({ value, onChange, showDetail, onShowDetailChange }: {
     value: CommentFilterType; onChange: (v: CommentFilterType) => void;

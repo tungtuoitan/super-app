@@ -11,8 +11,8 @@
 
 import { flatItemIndex, getChecklistTypeLabel, getItemCheckState, checklistProgress } from "@/utils/checklist.utils";
 import type { ChecklistType } from "../types/checklist.types";
-import { REQUIRED_ENVIRONMENTS, OPTIONAL_ENVIRONMENTS } from "../types/checklist.constants";
-import type { TestcaseEnvironment } from "../types/checklist.constants";
+import { REQUIRED_ENVIRONMENTS, OPTIONAL_ENVIRONMENTS } from "../task.constants";
+import type { TestcaseEnvironment } from "../task.constants";
 import {
     CheckSquare2,
     Square,
@@ -27,15 +27,11 @@ import { useTaskChecklistSelector } from "../Selectors/TaskChecklistSelector";
 import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklistSelector";
 import { useTaskChecklistHelper } from "../hooks/useTaskChecklist.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { TaskChecklistHeadless } from "../HeadlessComponents/TaskChecklistHeadless";
+import { useTaskChecklistHeadless } from "../HeadlessComponents/useTaskChecklist.headless";
 
 export function TaskChecklist() {
-    return (
-        <>
-            <TaskChecklistHeadless />
-            <TaskChecklistInner />
-        </>
-    );
+    useTaskChecklistHeadless();
+    return <TaskChecklistInner />;
 }
 
 function TaskChecklistInner() {

@@ -21,15 +21,11 @@ import { useTaskProcessSelector } from "../Selectors/TaskProcessSelector";
 import { useTaskDetailProcessSelector } from "../Selectors/TaskDetailProcessSelector";
 import { useTaskProcessHelper } from "../hooks/useTaskProcess.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { TaskProcessHeadless } from "../HeadlessComponents/TaskProcessHeadless";
+import { useTaskProcessHeadless } from "../HeadlessComponents/useTaskProcess.headless";
 
 export function TaskProcess() {
-    return (
-        <>
-            <TaskProcessHeadless />
-            <TaskProcessInner />
-        </>
-    );
+    useTaskProcessHeadless();
+    return <TaskProcessInner />;
 }
 
 function TaskProcessInner() {

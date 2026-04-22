@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { COLLAPSE_HEIGHT } from "../../types/versionComment.constants";
+import { COLLAPSE_HEIGHT } from "../../task.constants";
 
 export function CollapsibleContent({ children }: { children: React.ReactNode }) {
     const ref = useRef<HTMLDivElement>(null);

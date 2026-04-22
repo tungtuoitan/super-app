@@ -40,16 +40,7 @@ Validate all new/modified code against these rules before committing.
   - Bad: helper file re-exports a function from another helper
   - Bad: selector file re-exports state/selector from another store/selector
 
-## No Passing state/helper/selector as Params
 
-- Do NOT pass state, helper, or selector as parameters into helper/selector/UI files
-- Exception: Reusable components may accept these as props
-- If a helper/selector/UI/headless needs data, call the corresponding headless hook directly
-
-## Headless & Params
-
-- helper, selector, UI, and headless files MUST NOT accept params
-- If they need data, call headless hooks directly inside
 
 ## Destructuring
 
@@ -69,15 +60,3 @@ Validate all new/modified code against these rules before committing.
 
 ## UI file rule
 - each UI file contain max 1 big component
-
-## Vị trí lưu file
-src/
-├── Components/                      # chỉ chứa file UI
-├── hooks/                           # chỉ chứa file helper
-├── HeadlessComponents/              # chỉ chứa file headless
-├── Selectors/                       # chỉ chứa file selectors
-├── store/                           # chỉ chứa file store
-├── services/                        # chỉ chứa file service
-├── types/                           # chỉ chứa file type
-│
-├── utils/                           # Pure utility functions

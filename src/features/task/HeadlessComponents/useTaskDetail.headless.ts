@@ -1,10 +1,3 @@
-/**
- * Task Detail Headless
- * Side-effects only (useEffect). Triggers data loading based on state changes.
- * NO props — reads tab from useEditorTabHelper, contentRef from store.
- * Renders nothing (returns null).
- */
-
 import { useEffect, useRef } from "react";
 import { useTaskStore } from "../store/useTask.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
@@ -15,7 +8,7 @@ import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import type { BaseTab } from "@/types/editor/tab.types";
 
-export function TaskDetailHeadless() {
+export function useTaskDetailHeadless() {
     const { selectedTask, currentProject } = useTaskDetailSelector();
     const { loadProjectOptions, loadParentTaskOptions } = useTaskDetailFormHelper();
     const { loadLinkedKeywords } = useTaskLinkedKeywordsHelper();
@@ -28,12 +21,10 @@ export function TaskDetailHeadless() {
 
     const tab = getActiveTab();
 
-    // Effect 1: Load project options on mount
     useEffect(() => {
         loadProjectOptions();
     }, [loadProjectOptions]);
 
-    // Effect 2: Load parent task options when project changes
     useEffect(() => {
         if (selectedTask?.projectId && selectedTask.projectId > 0) {
             loadParentTaskOptions(selectedTask.projectId, selectedTask.id);
@@ -42,22 +33,20 @@ export function TaskDetailHeadless() {
         }
     }, [selectedTask?.projectId, selectedTask?.id, loadParentTaskOptions, setParentTaskOptions]);
 
-    // Effect 3: Load linked keywords when task changes
     useEffect(() => {
         if (selectedTask?.id && selectedTask.id > 0) {
             loadLinkedKeywords(selectedTask.id);
         }
     }, [selectedTask?.id, loadLinkedKeywords]);
 
-    // Effect 4: Load folder items when task/folder changes
     useEffect(() => {
         if (selectedTask?.id && selectedTask.id > 0 && selectedTask.folderWorkspaceItemId && currentProject?.workspaceId) {
             loadFolderItems(selectedTask, currentProject.workspaceId);
         }
     }, [selectedTask?.id, selectedTask?.folderWorkspaceItemId, currentProject?.workspaceId, loadFolderItems]);
 
-    // Effect 5: Sync hasUnsavedChanges for editor tab
-    // Exclude section fields (note, checklistJson, processJson, customTabsJson)
+    // Sync hasUnsavedChanges for editor tab.
+    // Excludes section fields (note, checklistJson, processJson, customTabsJson)
     // because those are saved independently via section Save buttons.
     useEffect(() => {
         if (!tab) return;
@@ -79,7 +68,6 @@ export function TaskDetailHeadless() {
         );
     }, [tab?.id, tab?.data, setOpenTabs]);
 
-    // Effect 6: Restore scroll position when tab becomes active (UI-local ref)
     useEffect(() => {
         if (!tab || !taskDetailContentRef?.current) return;
         const viewState = openTabsRef.current.find((t: BaseTab) => t.id === tab.id)?.viewState;
@@ -88,6 +76,4 @@ export function TaskDetailHeadless() {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab?.id, taskDetailContentRef]);
-
-    return null;
 }

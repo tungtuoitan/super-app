@@ -4,7 +4,7 @@
  * Day view only with zoom controls
  *
  * Pure UI — logic lives in useTaskTimelineSelector, useTaskTimelineHelper,
- * useTaskTimelineStore (context), TaskTimelineHeadless, TaskBar
+ * useTaskTimelineStore (context), useTaskTimelineHeadless, TaskBar
  */
 
 import React from "react";
@@ -21,7 +21,7 @@ import { TaskBar } from "./TaskBar";
 import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
 import { useTaskTimelineHelper } from "../hooks/useTaskTimeline.helper";
 import { useTaskTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../store/useTaskTimeline.store";
-import { TaskTimelineHeadless } from "../HeadlessComponents/TaskTimelineHeadless";
+import { useTaskTimelineHeadless } from "../HeadlessComponents/useTaskTimeline.headless";
 import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "../utils/TaskGrid.utils";
 
 /**
@@ -32,6 +32,7 @@ function TaskTimelineViewInner() {
     const { taskGridIsLoading, taskGridError } = useTaskStore();
     const { openTaskTab } = useTaskTabHelper();
     const _console = useConsoleHelper();
+    useTaskTimelineHeadless();
 
     // Call stores/selectors/helpers directly — no params passing
     const { hoveredTaskId, setHoveredTaskId, isTodayVisible, dayWidth, timelineScrollRef } = useTaskTimelineStore();
@@ -43,7 +44,6 @@ function TaskTimelineViewInner() {
 
     return (
         <div className="w-full h-full flex flex-col relative">
-            <TaskTimelineHeadless />
 
             {/* Loading Overlay */}
             {taskGridIsLoading && (

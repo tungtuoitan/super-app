@@ -4,7 +4,7 @@
  * Shows tasks for a specific project
  * Supports inline status/priority editing and drag & drop for subtask management
  *
- * Pure UI — logic lives in useTaskListSelector, useTaskGrid2Helper, TaskListHeadless
+ * Pure UI — logic lives in useTaskListSelector, useTaskGridUpdateHelper, useTaskListHeadless
  */
 
 import React from "react";
@@ -16,8 +16,8 @@ import { Task, useTaskStore } from "../store/useTask.store";
 import { useTaskGridHelper } from "../hooks/useTaskGrid.helper";
 import { useTaskTabHelper } from "../hooks/useTaskTab.helper";
 import { useTaskListSelector } from "../Selectors/TaskListSelector";
-import { useTaskGrid2Helper } from "../hooks/useTaskGrid2.helper";
-import { TaskListHeadless } from "../HeadlessComponents/TaskListHeadless";
+import { useTaskGridUpdateHelper } from "../hooks/useTaskGridUpdate.helper";
+import { useTaskListHeadless } from "../HeadlessComponents/useTaskList.headless";
 import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 import { StatusCell, PriorityCell } from "@/features/multiProject/Components/small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "@/features/multiProject/Components/small/MultiProjectTaskListRow";
@@ -106,6 +106,7 @@ function TaskTable({
  * TaskGrid - task grid with table display
  */
 export function TaskGrid() {
+    useTaskListHeadless();
     const {
         taskGridIsLoading,
         taskGridError,
@@ -122,7 +123,7 @@ export function TaskGrid() {
     const { openTaskContextMenu } = useTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
     const { statusOptions, priorityOptions, filteredTasks, sortedTasks } = useTaskListSelector();
-    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, showDropError } = useTaskGrid2Helper();
+    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, showDropError } = useTaskGridUpdateHelper();
 
     // Handle context menu
     const handleContextMenu = (event: React.MouseEvent, row?: any) => {
@@ -227,7 +228,6 @@ export function TaskGrid() {
 
     return (
         <div ref={taskContainerRef} className="w-full h-full bg-background flex flex-col relative">
-            <TaskListHeadless />
 
             {/* Loading Overlay */}
             {taskGridIsLoading && (

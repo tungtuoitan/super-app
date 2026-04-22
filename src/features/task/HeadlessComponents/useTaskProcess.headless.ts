@@ -1,15 +1,9 @@
-/**
- * Task Process Headless
- * Side effects only (useEffect). Renders nothing (returns null).
- */
-
 import { useEffect } from "react";
 import { useTaskProcessStore } from "../store/useTaskProcess.store";
 
-export function TaskProcessHeadless() {
+export function useTaskProcessHeadless() {
     const { isExpanded, setIsExpanded, setIsEditing, setEditErrors, barRef, popupRef } = useTaskProcessStore();
 
-    // Close popup on outside click
     useEffect(() => {
         if (!isExpanded) return;
         const handler = (e: MouseEvent) => {
@@ -25,6 +19,4 @@ export function TaskProcessHeadless() {
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
     }, [isExpanded, barRef, popupRef, setIsExpanded, setIsEditing, setEditErrors]);
-
-    return null;
 }

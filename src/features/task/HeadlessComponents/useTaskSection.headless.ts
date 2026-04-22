@@ -1,10 +1,3 @@
-/**
- * Task Section Headless
- * Side-effects for the task section: task-change resets, keyboard shortcuts,
- * auto-discard on editor tab switch.
- * No UI — returns null.
- */
-
 import { useEffect, useRef } from "react";
 import { SectionTab, useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
@@ -14,7 +7,7 @@ import { useTaskSectionSelector } from "../Selectors/TaskSectionSelector";
 import { useTaskSectionHelper } from "../hooks/useTaskSection.helper";
 import { useEditorTabsStore } from "@/store/index";
 
-export function TaskSectionHeadless() {
+export function useTaskSectionHeadless() {
     const { setActiveSection } = useTaskDetailSectionStore();
     const { selectedTask } = useTaskDetailSelector();
     const { openTabs, activeTabId } = useEditorTabsStore();
@@ -24,7 +17,6 @@ export function TaskSectionHeadless() {
 
     const lastTaskIdRef = useRef<number | null>(null);
 
-    // ── Auto-set default section when task changes ────────────────────────────
     useEffect(() => {
         if (!selectedTask || selectedTask.id === lastTaskIdRef.current) return;
         lastTaskIdRef.current = selectedTask.id;
@@ -33,7 +25,6 @@ export function TaskSectionHeadless() {
         setActiveSection(savedSection ?? (selectedTask.id <= 0 ? "desc" : "process"));
     }, [selectedTask?.id]);
 
-    // ── Reset desc state when task changes ────────────────────────────────────
     useEffect(() => {
         if (!selectedTask) return;
         setDescKey((p) => p + 1);
@@ -41,7 +32,6 @@ export function TaskSectionHeadless() {
         savedNoteRef.current = selectedTask.note ?? "";
     }, [selectedTask?.id]);
 
-    // ── Keyboard shortcuts — register ONCE, read latest values via refs ───────
     const isSectionDirtyRef = useRef(isSectionDirty);
     const handleSectionSaveRef = useRef(handleSectionSave);
     const handleSectionDiscardRef = useRef(handleSectionDiscard);
@@ -64,13 +54,10 @@ export function TaskSectionHeadless() {
             handleSectionDiscardRef.current();
             return true;
         }
-        return false; // not dirty → let other handlers handle Escape
+        return false;
     });
 
-    // ── Auto-discard when user switches editor tabs ───────────────────────────
     useEffect(() => {
         if (isSectionDirty) handleSectionDiscard();
     }, [activeTabId]);
-
-    return null;
 }

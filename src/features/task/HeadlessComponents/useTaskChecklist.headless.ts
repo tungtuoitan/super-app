@@ -1,15 +1,9 @@
-/**
- * Task Checklist Headless
- * Side effects only (useEffect). Renders nothing (returns null).
- */
-
 import { useEffect } from "react";
 import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
 
-export function TaskChecklistHeadless() {
+export function useTaskChecklistHeadless() {
     const { isExpanded, setIsExpanded, setIsEditing, setEditErrors, barRef, popupRef } = useTaskChecklistStore();
 
-    // Close popup on outside click
     useEffect(() => {
         if (!isExpanded) return;
         const handler = (e: MouseEvent) => {
@@ -25,6 +19,4 @@ export function TaskChecklistHeadless() {
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
     }, [isExpanded, barRef, popupRef, setIsExpanded, setIsEditing, setEditErrors]);
-
-    return null;
 }

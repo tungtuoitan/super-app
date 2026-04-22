@@ -1,17 +1,9 @@
-/**
- * Task List Headless
- * Side-effects only (useEffect). Handles resize observation.
- * Task loading is handled by ProjectDetailHeadless at the parent level.
- * Renders nothing (returns null).
- */
-
 import { useEffect } from "react";
 import { useTaskStore } from "../store/useTask.store";
 
-export function TaskListHeadless() {
+export function useTaskListHeadless() {
     const { taskContainerRef, setTaskContainerWidth } = useTaskStore();
 
-    // Update container width on resize
     useEffect(() => {
         if (!taskContainerRef.current) return;
 
@@ -24,6 +16,4 @@ export function TaskListHeadless() {
         resizeObserver.observe(taskContainerRef.current);
         return () => resizeObserver.disconnect();
     }, [taskContainerRef, setTaskContainerWidth]);
-
-    return null;
 }

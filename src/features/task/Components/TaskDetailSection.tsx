@@ -14,9 +14,9 @@ import { TaskCustomTab } from "./TaskCustomTab";
 import { CommentFilterDropdown } from "./small/CommentFilterDropdown";
 import { CustomTabButton } from "./small/CustomTabButton";
 import { NewTaskPlaceholder } from "./small/NewTaskPlaceholder";
-import { TaskSectionHeadless } from "../HeadlessComponents/TaskSectionHeadless";
+import { useTaskSectionHeadless } from "../HeadlessComponents/useTaskSection.headless";
 import { RichTextEditor } from "@/shared/components";
-import { BUILTIN_TABS, TAB_COLORS } from "../types/taskDetailSection.constants";
+import { BUILTIN_TABS, TAB_COLORS } from "../task.constants";
 
 function SectionNameList({ activeKey, onTabClick } : {activeKey: string, onTabClick: (key: SectionTab) => void }) {
   return (
@@ -78,6 +78,7 @@ export function TaskDetailSection() {
     const { descKey, descFocusTrigger, commentFilter, commentShowDetail, setCommentFilter, setCommentShowDetail } = useTaskSectionStore();
     const { handleTabClick, handleAddCustomTab, handleSectionSave, handleSectionDiscard, handleDescChange } = useTaskSectionHelper();
     const { customTabs } = useTaskCustomTabSelector();
+    useTaskSectionHeadless();
 
     const isNewTask = !selectedTask || selectedTask.id <= 0;
 
@@ -87,7 +88,6 @@ export function TaskDetailSection() {
 
     return (
         <div className="flex flex-col h-full">
-            <TaskSectionHeadless />
 
             {/* ── Tab Bar ── */}
             <div className="flex items-start shrink-0 gap-1 relative">

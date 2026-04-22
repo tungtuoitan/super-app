@@ -4,7 +4,7 @@ import { useTaskDetailSectionStore } from "../../store/useTaskDetailSection.stor
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector";
 import { useTaskSectionHelper } from "../../hooks/useTaskSection.helper";
-import { TAB_COLORS } from "../../types/taskDetailSection.constants";
+import { TAB_COLORS } from "../../task.constants";
 import type { SectionTab } from "../../store/useTaskDetailSection.store";
 
 /** Rendered per custom tab in the tab bar — only accepts a tabId. */

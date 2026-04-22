@@ -6,18 +6,14 @@ import { useTaskCommentStore } from "../store/useTaskComment.store";
 import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
-import { TaskCommentHeadless } from "../HeadlessComponents/TaskCommentHeadless";
+import { useTaskCommentHeadless } from "../HeadlessComponents/useTaskComment.headless";
 import { matchesFilter } from "../utils/taskComment.utils";
 import { CommentThread } from "./small/CommentThread";
 import { NewTaskPlaceholder } from "./small/NewTaskPlaceholder";
 
 export function TaskComment() {
-    return (
-        <>
-            <TaskCommentHeadless />
-            <TaskCommentInner />
-        </>
-    );
+    useTaskCommentHeadless();
+    return <TaskCommentInner />;
 }
 
 function TaskCommentInner() {

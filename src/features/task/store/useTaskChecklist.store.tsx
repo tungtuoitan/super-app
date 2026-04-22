@@ -5,8 +5,8 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import type { ChecklistType } from "../types/checklist.types";
-import type { TestcaseEnvironment } from "../types/checklist.constants";
-import { DEFAULT_ENV } from "../types/checklist.constants";
+import type { TestcaseEnvironment } from "../task.constants";
+import { DEFAULT_ENV } from "../task.constants";
 
 export interface TaskChecklistContextData {
     isExpanded: boolean;
