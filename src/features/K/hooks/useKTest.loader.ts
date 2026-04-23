@@ -6,7 +6,6 @@ export const useKTestLoader = () => {
     const { setTests, setIsLoadingTests } = useKTestStore();
 
     const loadTests = async (knowledgeId: number, nodeId?: number) => {
-        if (!nodeId) { setTests([]); return; }
         setIsLoadingTests(true);
         try {
             const tests = await KTestService._getTests(knowledgeId, nodeId);

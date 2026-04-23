@@ -8,6 +8,7 @@ import { WsGridMenu } from "./menus/WsGridMenu";
 import { ProjectGridMenu } from "@/features/project/contexts/ProjectGridMenu";
 import { TaskGridMenu } from "./menus/TaskGridMenu";
 import { TaskFlowMenu } from "./menus/TaskFlowMenu";
+import { KTestFlowMenu } from "./menus/KTestFlowMenu";
 import { TabBarMenu } from "./menus/TabBarMenu";
 import { LogListMenu } from "@/features/lifeLog/contexts/menus/LogListMenu";
 import { TrackPanelMenu } from "@/features/lifeLog/contexts/menus/TrackPanelMenu";
@@ -71,6 +72,9 @@ export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) 
 
             case constants.contextMenu.contextMenuTypes.taskFlow:
                 return <TaskFlowMenu />;
+
+            case constants.contextMenu.contextMenuTypes.kTestFlow:
+                return <KTestFlowMenu />;
 
             case "tab":
                 return <TabBarMenu />;

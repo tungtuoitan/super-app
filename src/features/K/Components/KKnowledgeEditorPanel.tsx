@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { Settings, Columns, CalendarClock } from "lucide-react";
+import { Settings, GitBranch, CalendarClock, LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardContent } from "@/shared/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
 import { useEditorTabsStore } from "@/store/index";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
-import { KTestKanbanView } from "./KTestKanbanView/KTestKanbanView";
+import { KTestList } from "./KTestList";
 import { KTestSession } from "./KTestSession/KTestSession";
 import { KTestRecordSession } from "./KTestRecordSession/KTestRecordSession";
-import { KTestDetail } from "./KTestDetail/KTestDetail";
 import { KMarkdownImportPanel } from "./KMarkdownImportPanel/KMarkdownImportPanel";
 import { KDailyReviewPanel } from "./KDailyReview/KDailyReviewPanel";
 import { KRetentionBadge } from "./small/KRetentionBadge";
@@ -19,6 +18,8 @@ import type { BaseTab } from "@/types/editor/tab.types";
 import type { KWsResponse } from "../types/K.types";
 import type { KTestDetail as KTestDetailType } from "../types/kTest.type";
 import type { KItemV2 } from "../types/K-v2.types";
+import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
+import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
 
 interface KKnowledgeEditorPanelProps {
     tab: BaseTab;
@@ -30,11 +31,13 @@ type PanelView =
     | { kind: "none" }
     | { kind: "testDetail"; testId: number };
 
-type KTab = "testKanban" | "general" | "dailyReview";
+type KTab = "questionFlow" | "general" | "testList" | "dailyReview" | "testKanban";
 
 const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
     { id: "general", label: "GENERAL", icon: <Settings className="h-4 w-4" /> },
-    { id: "testKanban", label: "TESTS", icon: <Columns className="h-4 w-4" /> },
+    { id: "testList", label: "TEST LIST", icon: <List className="h-4 w-4" /> },
+    { id: "testKanban", label: "TEST KANBAN", icon: <LayoutGrid className="h-4 w-4" /> },
+    { id: "questionFlow", label: "Q FLOW", icon: <GitBranch className="h-4 w-4" /> },
     { id: "dailyReview", label: "DAILY", icon: <CalendarClock className="h-4 w-4" /> },
 ];
 
@@ -47,13 +50,14 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
 
     const [activeTab, setActiveTabLocal]           = useState<KTab>(() => {
         const saved = tab.metadata?.activeKTab as KTab | undefined;
-        return saved ?? (isNew ? "general" : "testKanban");
+        return saved ?? (isNew ? "general" : "questionFlow");
     });
     const [session, setSession]                   = useState<SessionState>(null);
     const [view, setView]                         = useState<PanelView>({ kind: "none" });
     const [isImportOpen, setIsImportOpen]         = useState(false);
     const [importParentNode, setImportParentNode] = useState<KItemV2 | null>(null);
-    const [dailyDueCount, setDailyDueCount]      = useState(0);
+    const [dailyDueCount, setDailyDueCount]       = useState(0);
+    const [initialFlowTestId, setInitialFlowTestId] = useState<number | null>(null);
 
     // Load daily due count for badge (global — all knowledges)
     useEffect(() => {
@@ -81,7 +85,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
     useEffect(() => {
         setSession(null);
         setView({ kind: "none" });
-        const defaultTab = isNew ? "general" : "testKanban";
+        const defaultTab = isNew ? "general" : "questionFlow";
         setActiveTabLocal(defaultTab);
         setOpenTabs((prev) =>
             prev.map((t) =>
@@ -109,7 +113,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
         // Cancel any ongoing test session / detail view
         setSession(null);
         setView({ kind: "none" });
-        setActiveTab("testKanban");
+        setActiveTab("questionFlow");
         // Only set the activeNodeId — KTestKanbanView's own effect will call loadTests
         kTestStoreValues.setActiveNodeId(nodeId ?? null);
     }, [pendingQuizTabSwitch]);
@@ -156,18 +160,29 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
         switch (activeTab) {
             case "general":
                 return <KKnowledgeGeneral knowledgeId={knowledge.id} tabId={tab.id} />;
+            case "testList":
+                if (isNew) return null;
+                return (
+                    <KTestList
+                        knowledgeId={knowledge.id}
+                        onSelectTest={(testId) => {
+                            setInitialFlowTestId(testId);
+                            setActiveTab("questionFlow");
+                        }}
+                    />
+                );
+            case "questionFlow":
+                if (isNew) return null;
+                return (
+                    <KTestFlowView
+                        knowledgeId={knowledge.id}
+                        onStartTest={handleStartTest}
+                        onStartRecordTest={handleStartRecordTest}
+                        initialSelectedTestId={initialFlowTestId}
+                    />
+                );
             case "testKanban":
                 if (isNew) return null;
-                // if (view.kind === "testDetail") {
-                //     return (
-                //         <KTestDetail
-                //             knowledgeId={knowledge.id}
-                //             testId={view.testId}
-                //             onBack={() => setView({ kind: "none" })}
-                //             onStart={(detail) => handleStartTest(detail)}
-                //         />
-                //     );
-                // }
                 return (
                     <KTestKanbanView
                         knowledgeId={knowledge.id}
@@ -180,7 +195,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                 return (
                     <KDailyReviewPanel
                         onComplete={() => {
-                            setActiveTab("testKanban");
+                            setActiveTab("questionFlow");
                             KTestService._getGlobalDailyQueue()
                                 .then(res => {
                                     if (res.success && res.object) setDailyDueCount(res.object.filter(q => q.dueCount + q.newCount > 0).length);
@@ -191,7 +206,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                             if (targetKnowledgeId === knowledge.id) {
                                 // Same knowledge — switch sub-tab + reset node filter
                                 kTestStoreValues.setActiveNodeId(null);
-                                setActiveTab("testKanban");
+                                setActiveTab("questionFlow");
                             } else {
                                 // Different knowledge — swap tab data, then pendingQuizTabSwitch triggers testKanban
                                 const targetK = allK.find(k => k.id === targetKnowledgeId);

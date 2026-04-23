@@ -5,6 +5,7 @@ import { KTestService } from "../../service/kTest.service";
 import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../../store/K.store";
 import { ScoreSparkline } from "../small/ScoreSparkline";
+import { sortQuestionsByFlowOrder } from "../../utils/kTestFlow.utils";
 import type { KTestSummary, KDailyQueueItem, KDailySessionQuestion } from "../../types/kTest.type";
 
 interface KDailyReviewPanelProps {
@@ -157,7 +158,8 @@ export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }:
         try {
             const res = await KTestService._getDailySession(card.knowledgeId, card.testId);
             if (res.success && res.object && res.object.length > 0) {
-                setSession({ knowledgeId: card.knowledgeId, testId: card.testId, testTitle: card.title, questions: res.object });
+                const sorted = await sortQuestionsByFlowOrder(res.object);
+                setSession({ knowledgeId: card.knowledgeId, testId: card.testId, testTitle: card.title, questions: sorted });
             }
         } catch { /* silent */ }
         finally { setLoadingTestId(null); }
