@@ -8,6 +8,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { QuestionFlowNode } from "./small/QuestionFlowNode";
 import { KQuestionFlowEdge } from "./small/KQuestionFlowEdge";
 import { constants } from "@/utils/constants";
+import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import type { KTestQuestion } from "@/features/K/types/kTest.type";
 import type { QuestionFlowNodeData } from "@/features/K/types/kTestFlow.type";
 import type { Node } from "@xyflow/react";
@@ -39,9 +40,22 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         handleNodesChange, handleEdgesChange,
         handleNodeDragStop, handleConnect,
         handleConnectStart, handleConnectEnd,
+        handleReconnect, handleReconnectStart, handleReconnectEnd,
         handleDeleteQuestion,
+        handleEdgeDelete
     } = useKTestFlowHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
+
+    // Delete selected edges with Delete/Backspace
+    const selectedEdgeIds = flowEdges.filter((e) => e.selected).map((e) => e.id);
+    useGlobalShortcut("delete", { id: "kflow-delete-edge", priority: 60, enabled: selectedEdgeIds.length > 0 }, () => {
+        selectedEdgeIds.forEach((id) => handleEdgeDelete(id));
+        return true;
+    });
+    useGlobalShortcut("backspace", { id: "kflow-backspace-edge", priority: 60, enabled: selectedEdgeIds.length > 0 }, () => {
+        selectedEdgeIds.forEach((id) => handleEdgeDelete(id));
+        return true;
+    });
 
     useEffect(() => { setKnowledgeId(knowledgeId); }, [knowledgeId, setKnowledgeId]);
     useEffect(() => { setActiveTestId(selectedTestId); }, [selectedTestId, setActiveTestId]);
@@ -155,6 +169,9 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
                 onConnect={handleConnect}
                 onConnectStart={handleConnectStart}
                 onConnectEnd={handleConnectEnd}
+                onReconnectStart={handleReconnectStart}
+                onReconnectEnd={handleReconnectEnd}
+                onReconnect={handleReconnect}
                 onPaneContextMenu={handlePaneContextMenu}
                 connectionMode={ConnectionMode.Loose}
                 connectionRadius={80}

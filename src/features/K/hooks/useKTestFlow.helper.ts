@@ -33,6 +33,7 @@ export function useKTestFlowHelper() {
     useEffect(() => { flowNodesRef.current = flowNodes; }, [flowNodes]);
     useEffect(() => { knowledgeIdRef.current = knowledgeId; }, [knowledgeId]);
     useEffect(() => { activeTestIdRef.current = activeTestId; }, [activeTestId]);
+    const reconnectingRef = useRef(false);
 
     // ── Node change / edge change ───────────────────────────────────────────
 
@@ -41,7 +42,16 @@ export function useKTestFlowHelper() {
     }, [setFlowNodes]);
 
     const handleEdgesChange = useCallback((changes: EdgeChange<Edge<KFlowEdgeData>>[]) => {
-        setFlowEdges((prev) => applyEdgeChanges(changes, prev) as Edge<KFlowEdgeData>[]);
+        setFlowEdges((prev) => {
+            // Block any select change while reconnecting — keeps edge selected + nubs visible
+            if (reconnectingRef.current) return prev;
+            const updated = applyEdgeChanges(changes, prev) as Edge<KFlowEdgeData>[];
+            const hasSelectChange = changes.some((c) => c.type === 'select');
+            if (!hasSelectChange) return updated;
+            return updated.map((e) =>
+                e.type === 'kQuestionEdge' ? { ...e, reconnectable: !!e.selected } : e,
+            );
+        });
     }, [setFlowEdges]);
 
     // ── Node drag stop — persist positions ─────────────────────────────────
@@ -316,6 +326,46 @@ export function useKTestFlowHelper() {
         [setConnectingSourceId],
     );
     const handleConnectEnd = useCallback(() => setConnectingSourceId(null), [setConnectingSourceId]);
+    // ── Reconnect (drag edge endpoint to new node) ─────────────────────────
+
+    const handleReconnectStart = useCallback(() => { reconnectingRef.current = true; }, []);
+    const handleReconnectEnd = useCallback(() => {
+        // Delay clear so handleEdgesChange's final deselect-after-drop is blocked
+        setTimeout(() => { reconnectingRef.current = false; }, 80);
+    }, []);
+
+    const handleReconnect = useCallback(async (oldEdge: Edge<KFlowEdgeData>, newConnection: Connection) => {
+        if (!newConnection.source || !newConnection.target) return;
+        if (newConnection.source.startsWith('temp-node-') || newConnection.target.startsWith('temp-node-')) return;
+
+        const { sourceHandle, targetHandle } = resolveHandles(
+            newConnection.source, newConnection.target,
+            newConnection.sourceHandle, newConnection.targetHandle,
+        );
+
+        const updatedEdge: Edge<KFlowEdgeData> = {
+            ...oldEdge,
+            source: newConnection.source,
+            target: newConnection.target,
+            sourceHandle,
+            targetHandle,
+            reconnectable: true,  // keep nubs visible — edge stays selected
+        };
+
+        setFlowEdges((prev) => prev.map((e: Edge<KFlowEdgeData>) => e.id === oldEdge.id ? updatedEdge : e));
+        setSavedEdges((prev) => prev.map((e: Edge<KFlowEdgeData>) => e.id === oldEdge.id ? updatedEdge : e));
+
+        const backendId = oldEdge.data?.edgeId;
+        if (!backendId) return;
+
+        try {
+            await flowService._upsertEdges('', [{
+                id: backendId,
+                sourceId: parseInt(newConnection.source, 10), sourceType: 'kQuestion', sourceHandle,
+                targetId: parseInt(newConnection.target, 10), targetType: 'kQuestion', targetHandle,
+            }]);
+        } catch { /* silent */ }
+    }, [setFlowEdges, setSavedEdges, resolveHandles]);
 
     return {
         flowNodes, flowEdges, editingNodeId,
@@ -323,6 +373,7 @@ export function useKTestFlowHelper() {
         handleNodeDragStop,
         handleConnect, handleEdgeDelete, handleEdgeToggleDirection,
         handleConnectStart, handleConnectEnd,
+        handleReconnect, handleReconnectStart, handleReconnectEnd,
         handleRenameStart, handleRenameConfirm, handleRenameCancel,
         handleDeleteQuestion, handleRestoreQuestion,
     };

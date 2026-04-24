@@ -63,6 +63,17 @@ export function KQuestionFlowEdge({
                 <style>{`
                     @keyframes flow-fwd-kq { from { stroke-dashoffset: ${FLOW_PERIOD}; } to { stroke-dashoffset: 0; } }
                     @keyframes flow-bwd-kq { from { stroke-dashoffset: 0; } to { stroke-dashoffset: ${FLOW_PERIOD}; } }
+                    .react-flow__edge.selected .react-flow__edgeupdater {
+                        fill: hsl(var(--primary));
+                        stroke: hsl(var(--background));
+                        stroke-width: 2.5;
+                        r: 8;
+                        cursor: crosshair;
+                    }
+                    .react-flow__edge.selected .react-flow__edgeupdater:hover {
+                        fill: hsl(var(--primary) / 0.8);
+                        r: 10;
+                    }
                 `}</style>
             </defs>
 

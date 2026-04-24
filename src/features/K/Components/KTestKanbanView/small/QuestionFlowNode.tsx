@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
@@ -6,6 +6,7 @@ import { Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { QuestionScoreBar } from "../../small/QuestionScoreBar";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
 import { useKTestFlowHelper } from "@/features/K/hooks/useKTestFlow.helper";
+import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import type { QuestionFlowNodeData } from "@/features/K/types/kTestFlow.type";
 
 const HANDLES = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -14,8 +15,12 @@ const HANDLE_ID: Record<Position, string> = {
     [Position.Bottom]: "bottom", [Position.Left]: "left",
 };
 
+// Ghost div and textarea share these classes — must be identical to prevent jitter on mode switch
+const Q_TEXT = "w-full text-xs font-semibold text-zinc-100 leading-relaxed";
+const A_TEXT = "w-full text-[11px] text-zinc-400 leading-relaxed";
+
 export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<QuestionFlowNodeData>>) {
-    const { editingNodeId, connectingSourceId } = useKTestFlowStore();
+    const { editingNodeId, connectingSourceId, flowEdges } = useKTestFlowStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleDeleteQuestion, handleRestoreQuestion } = useKTestFlowHelper();
 
     const { question } = data as QuestionFlowNodeData;
@@ -23,29 +28,38 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
     const isTempNode = id.startsWith("temp-node-");
     const isEditing = editingNodeId === id;
     const isDeleted = !!question.deletedAt;
+    const anyEdgeSelected = flowEdges.some((e) => e.selected);
 
     const [draftQ, setDraftQ] = useState(question.question);
     const [draftA, setDraftA] = useState(question.answer ?? "");
-    const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
+    const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
+    const [isFlashing, setIsFlashing] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const cardRef = useRef<HTMLDivElement>(null);
     const qRef = useRef<HTMLTextAreaElement>(null);
     const aRef = useRef<HTMLTextAreaElement>(null);
     const ctxMenuRef = useRef<HTMLDivElement>(null);
+    const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
 
-    useLayoutEffect(() => {
-        for (const el of [qRef.current, aRef.current]) {
-            if (!el) continue;
-            el.style.height = "0px";
-            el.style.height = `${el.scrollHeight}px`;
-        }
-    });
+    // Stable refs for callbacks
+    const draftQRef = useRef(draftQ);
+    const draftARef = useRef(draftA);
+    const idRef = useRef(id);
+    draftQRef.current = draftQ;
+    draftARef.current = draftA;
+    idRef.current = id;
 
+    // Sync drafts when question changes (but not while editing)
     useEffect(() => {
         if (!isEditing) {
             setDraftQ(question.question);
             setDraftA(question.answer ?? "");
+            setShowUnsavedPrompt(false);
         }
     }, [question.question, question.answer, isEditing]);
 
+    // Auto-focus question field on edit start
     useEffect(() => {
         if (!isEditing) return;
         let tries = 0;
@@ -57,6 +71,31 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
         setTimeout(attempt, 50);
     }, [isEditing]);
 
+    // Click-outside while editing: show unsaved prompt if dirty, else cancel
+    useEffect(() => {
+        if (!isEditing) return;
+        const handler = (e: MouseEvent) => {
+            if (cardRef.current?.contains(e.target as globalThis.Node)) return;
+            if (showUnsavedPrompt) {
+                // Already showing prompt — flash it
+                setIsFlashing(true);
+                setTimeout(() => setIsFlashing(false), 500);
+                return;
+            }
+            const isDirty = draftQRef.current !== question.question || draftARef.current !== (question.answer ?? "");
+            if (isDirty) {
+                setShowUnsavedPrompt(true);
+                setIsFlashing(true);
+                setTimeout(() => setIsFlashing(false), 500);
+            } else {
+                handleRenameCancel(isTempNode ? id : null);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, [isEditing, showUnsavedPrompt, id, isTempNode, question.question, question.answer, handleRenameCancel]);
+
+    // Context menu outside-click
     useEffect(() => {
         if (!ctxMenu) return;
         const handler = (e: MouseEvent) => {
@@ -66,8 +105,9 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
         return () => document.removeEventListener("mousedown", handler);
     }, [ctxMenu]);
 
-    const handleSave = () => handleRenameConfirm(id, draftQ, draftA);
+    const handleSave = () => handleRenameConfirm(idRef.current, draftQRef.current, draftARef.current);
     const handleCancel = () => {
+        setShowUnsavedPrompt(false);
         if (isTempNode) { handleRenameCancel(id); return; }
         setDraftQ(question.question);
         setDraftA(question.answer ?? "");
@@ -78,42 +118,74 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
         if (e.key === "Enter" && e.ctrlKey) { e.preventDefault(); handleSave(); }
     };
 
+    // Ctrl+S — save while editing (priority 100 matches NodeCard)
+    useGlobalShortcut("ctrl+s", { id: "kflow-node-save", priority: 100, enabled: isEditing }, () => {
+        handleRenameConfirm(idRef.current, draftQRef.current, draftARef.current);
+        return true;
+    });
+
     const isDraft = !isDeleted && (!question.answer?.trim() || question.answer.trim().includes("DRAFT"));
 
     return (
         <div
-            className={`group relative flex flex-col rounded-lg border ${isEditing ? "nodrag" : ""} ${
+            ref={cardRef}
+            className={`group text-left relative flex flex-col rounded-lg border ${isEditing ? "nodrag" : ""} ${
                 isDeleted
                     ? "border-zinc-800/40 bg-zinc-900/20 opacity-50"
                     : selected
                     ? "border-zinc-600/70 bg-zinc-900/80 shadow-[0_0_0_2px_rgba(59,130,246,0.2)]"
                     : "border-zinc-700/60 bg-zinc-900/80"
-            }`}
+            } ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125 transition-all duration-150" : ""}`}
             style={{ width: 280 }}
             onDoubleClick={(e) => {
-                if (!isEditing && !isDeleted) {
+                if (!isDeleted && editingNodeId === null) {
                     e.stopPropagation();
                     setDraftQ(question.question);
                     setDraftA(question.answer ?? "");
                     handleRenameStart(id);
                 }
             }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             onContextMenu={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setCtxMenu({ x: e.clientX, y: e.clientY });
             }}
         >
-            {HANDLES.map((pos) => (
+            {/* Unsaved changes prompt overlay */}
+            {isEditing && showUnsavedPrompt && (
+                <div
+                    className="absolute inset-0 rounded-lg bg-zinc-950/96 flex flex-col items-center justify-center gap-3 z-30 nodrag nopan"
+                    onMouseDown={(e) => e.stopPropagation()}
+                >
+                    <p className="text-xs text-zinc-400 font-medium">Save changes?</p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSave}
+                            className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
+                        >
+                            Save
+                        </button>
+                        <button
+                            onClick={handleCancel}
+                            className="text-xs px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+                        >
+                            Discard
+                        </button>
+                    </div>
+                </div>
+            )}
+
+                        {HANDLES.map((pos) => (
                 <Handle key={pos} type="source" position={pos} id={HANDLE_ID[pos]}
-                    className={`!w-2 !h-2 !bg-zinc-500 !border-zinc-400 !transition-opacity ${
-                        selected || isConnectingTarget ? "!opacity-100" : "!opacity-0 group-hover:!opacity-100"
-                    }`}
+                    className="!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150"
+                    style={{ opacity: (!anyEdgeSelected && !isEditing && (isHovered || !!selected)) ? 1 : 0, transition: 'opacity 0.15s' }}
                 />
             ))}
 
-            {/* Save/Cancel — absolute so they don't shift layout */}
-            {isEditing && (
+            {/* Save/Cancel toolbar — hidden when unsaved prompt is showing */}
+            {isEditing && !showUnsavedPrompt && (
                 <div className="absolute top-1.5 right-1.5 flex gap-1 z-10 nodrag nopan">
                     <button
                         onMouseDown={(e) => { e.preventDefault(); handleCancel(); }}
@@ -130,36 +202,52 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                 </div>
             )}
 
-            <div className="px-3 pt-3 pb-1">
-                <textarea
-                    ref={qRef}
-                    value={isEditing ? draftQ : question.question}
-                    onChange={isEditing ? (e) => setDraftQ(e.target.value) : undefined}
-                    onKeyDown={isEditing ? handleKeyDown : undefined}
-                    readOnly={!isEditing}
-                    placeholder={isEditing ? "Question…" : ""}
-                    rows={1}
-                    className={`nodrag w-full text-xs font-semibold text-zinc-100 leading-relaxed bg-transparent outline-none resize-none overflow-hidden ${
-                        isEditing ? "nopan cursor-text placeholder:text-zinc-600" : "cursor-default pointer-events-none"
-                    }`}
-                />
+            {/*
+             * Ghost div always lives in DOM → drives container height.
+             * Textarea (edit) or display div (view) is absolute on top.
+             * No DOM swap = no height recalc = no React Flow jitter.
+             */}
+            <div className="px-3 pt-3 pb-1 relative">
+                <div aria-hidden className={`${Q_TEXT} whitespace-pre-wrap break-words invisible`}>
+                    {(isEditing ? draftQ : question.question) || "\u00A0"}
+                </div>
+                {isEditing ? (
+                    <textarea
+                        ref={qRef}
+                        value={draftQ}
+                        onChange={(e) => setDraftQ(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Question…"
+                        className={`nodrag nopan absolute inset-0 ${Q_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
+                    />
+                ) : (
+                    <div className={`absolute inset-0 ${Q_TEXT} whitespace-pre-wrap break-words select-none`}>
+                        {question.question || <span className="text-zinc-600">—</span>}
+                    </div>
+                )}
             </div>
 
             <div className="border-t border-zinc-800/60" />
 
-            <div className="px-3 pt-1.5 pb-2">
-                <textarea
-                    ref={aRef}
-                    value={isEditing ? draftA : (question.answer ?? "")}
-                    onChange={isEditing ? (e) => setDraftA(e.target.value) : undefined}
-                    onKeyDown={isEditing ? handleKeyDown : undefined}
-                    readOnly={!isEditing}
-                    placeholder={isEditing ? "Answer… (Ctrl+Enter to save)" : ""}
-                    rows={1}
-                    className={`nodrag w-full text-[11px] text-zinc-400 leading-relaxed bg-transparent outline-none resize-none overflow-hidden ${
-                        isEditing ? "nopan cursor-text placeholder:text-zinc-600" : "cursor-default pointer-events-none"
-                    }`}
-                />
+            {/* Answer field — same ghost pattern */}
+            <div className="px-3 pt-1.5 pb-2 relative">
+                <div aria-hidden className={`${A_TEXT} whitespace-pre-wrap break-words invisible`}>
+                    {(isEditing ? draftA : (question.answer ?? "")) || "\u00A0"}
+                </div>
+                {isEditing ? (
+                    <textarea
+                        ref={aRef}
+                        value={draftA}
+                        onChange={(e) => setDraftA(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Answer… (Ctrl+Enter to save)"
+                        className={`nodrag nopan absolute inset-0 ${A_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
+                    />
+                ) : (
+                    <div className={`absolute inset-0 ${A_TEXT} whitespace-pre-wrap break-words select-none`}>
+                        {question.answer || <span className="text-zinc-700 italic">no answer</span>}
+                    </div>
+                )}
             </div>
 
             <div className="flex items-center px-3 pb-2 pt-0.5">
@@ -167,7 +255,6 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                 {isDraft && <span className="text-[9px] text-amber-500/70 font-mono ml-auto">draft</span>}
             </div>
 
-            {/* Context menu — portalled to body to escape React Flow's CSS transform */}
             {ctxMenu && createPortal(
                 <div
                     ref={ctxMenuRef}
