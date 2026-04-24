@@ -10,8 +10,6 @@ import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskCustomTabSelector } from "../Selectors/TaskCustomTabSelector";
 import { useTaskSectionSelector } from "../Selectors/TaskSectionSelector";
-import { useTaskProcessHelper } from "../hooks/useTaskProcess.helper";
-import { useTaskChecklistHelper } from "../hooks/useTaskChecklist.helper";
 import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
 import { useAuthStore } from "@/store/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
@@ -32,13 +30,11 @@ export const useTaskSectionHelper = () => {
     const { setOpenTabs, activeTabId } = useEditorTabsStore();
     const { submitVersionComment, submitComment } = useTaskCommentHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { handleProcessSaveEdit, handleProcessCancelEdit } = useTaskProcessHelper();
-    const { handleChecklistSaveEdit, handleChecklistCancelEdit } = useTaskChecklistHelper();
 
     const {
         descDirty, setDescDirty, savedNoteRef, setDescKey,
-        triggerDescFocus, triggerCommentFocus, triggerCustomFocus,
-        customTabHandlersRef,
+        triggerDescFocus, triggerCommentFocus, triggerCommentLoad, triggerCustomFocus,
+        customTabHandlersRef, builtinSectionHandlersRef,
     } = useTaskSectionStore();
 
     /** Update a field in the active editor tab's data without marking hasUnsavedChanges */
@@ -88,18 +84,18 @@ export const useTaskSectionHelper = () => {
     }, [activeSection, customTabHandlersRef]);
 
     const handleSectionSave = useCallback(async () => {
-        if (activeSection === "process") handleProcessSaveEdit();
-        else if (activeSection === "checklist") handleChecklistSaveEdit();
+        if (activeSection === "process") await builtinSectionHandlersRef.current.process?.save();
+        else if (activeSection === "checklist") await builtinSectionHandlersRef.current.checklist?.save();
         else if (activeSection === "desc") await handleDescSave();
         else if (isCustomTab(activeSection)) await handleCustomTabSave();
-    }, [activeSection, handleProcessSaveEdit, handleChecklistSaveEdit, handleDescSave, handleCustomTabSave]);
+    }, [activeSection, builtinSectionHandlersRef, handleDescSave, handleCustomTabSave]);
 
     const handleSectionDiscard = useCallback(() => {
-        if (activeSection === "process") handleProcessCancelEdit();
-        else if (activeSection === "checklist") handleChecklistCancelEdit();
+        if (activeSection === "process") builtinSectionHandlersRef.current.process?.discard();
+        else if (activeSection === "checklist") builtinSectionHandlersRef.current.checklist?.discard();
         else if (activeSection === "desc") handleDescDiscard();
         else if (isCustomTab(activeSection)) handleCustomTabDiscard();
-    }, [activeSection, handleProcessCancelEdit, handleChecklistCancelEdit, handleDescDiscard, handleCustomTabDiscard]);
+    }, [activeSection, builtinSectionHandlersRef, handleDescDiscard, handleCustomTabDiscard]);
 
     const doSwitchTab = useCallback((key: SectionTab) => {
         setActiveSection(key);
@@ -107,9 +103,9 @@ export const useTaskSectionHelper = () => {
             prev.map((t) => t.id === activeTabId ? { ...t, metadata: { ...t.metadata, activeSection: key } } : t),
         );
         if (key === "desc") triggerDescFocus();
-        if (key === "comment") triggerCommentFocus();
+        if (key === "comment") { triggerCommentFocus(); triggerCommentLoad(); }
         if (isCustomTab(key)) triggerCustomFocus();
-    }, [setActiveSection, setOpenTabs, activeTabId, triggerDescFocus, triggerCommentFocus, triggerCustomFocus]);
+    }, [setActiveSection, setOpenTabs, activeTabId, triggerDescFocus, triggerCommentFocus, triggerCommentLoad, triggerCustomFocus]);
 
     const handleTabClick = useCallback((key: SectionTab) => {
         if (key === activeSection) return;

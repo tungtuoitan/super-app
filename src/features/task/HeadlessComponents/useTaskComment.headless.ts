@@ -2,11 +2,13 @@ import { useEffect } from "react";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
 import { useTaskCommentStore } from "../store/useTaskComment.store";
+import { useTaskSectionStore } from "../store/useTaskSection.store";
 
 export function useTaskCommentHeadless() {
     const { selectedTask } = useTaskDetailSelector();
     const { loadComments } = useTaskCommentHelper();
     const { setComments, setDraftContent, setReplyingTo, setEditingCommentId } = useTaskCommentStore();
+    const { commentLoadTrigger } = useTaskSectionStore();
 
     useEffect(() => {
         if (!selectedTask || selectedTask.id <= 0) {
@@ -14,7 +16,7 @@ export function useTaskCommentHeadless() {
             return;
         }
         loadComments(selectedTask.id);
-    }, [selectedTask?.id]);
+    }, [selectedTask?.id, commentLoadTrigger]);
 
     useEffect(() => {
         setDraftContent("");

@@ -27,6 +27,8 @@ export interface TaskSectionContextData {
     triggerDescFocus: () => void;
     commentFocusTrigger: number;
     triggerCommentFocus: () => void;
+    commentLoadTrigger: number;
+    triggerCommentLoad: () => void;
     customFocusTrigger: number;
     triggerCustomFocus: () => void;
 
@@ -41,6 +43,8 @@ export interface TaskSectionContextData {
     setCustomTabDirty: (v: boolean) => void;
     /** Mutable ref — custom tabs register/unregister their save/discard handlers */
     customTabHandlersRef: React.MutableRefObject<Record<string, CustomTabHandler>>;
+    /** Mutable ref — process/checklist providers register their save/discard handlers */
+    builtinSectionHandlersRef: React.MutableRefObject<Partial<Record<'process' | 'checklist', CustomTabHandler>>>;
 
     // ── Section dirty flags (set by local checklist/process providers) ────────
     isChecklistDirty: boolean;
@@ -64,6 +68,8 @@ export const taskSectionContextDefaultValue: TaskSectionContextData = {
     triggerDescFocus: () => {},
     commentFocusTrigger: 0,
     triggerCommentFocus: () => {},
+    commentLoadTrigger: 0,
+    triggerCommentLoad: () => {},
     customFocusTrigger: 0,
     triggerCustomFocus: () => {},
     commentFilter: "all",
@@ -73,6 +79,7 @@ export const taskSectionContextDefaultValue: TaskSectionContextData = {
     customTabDirty: false,
     setCustomTabDirty: () => {},
     customTabHandlersRef: nullRef({}),
+    builtinSectionHandlersRef: nullRef({}),
     isChecklistDirty: false,
     setIsChecklistDirty: () => {},
     isProcessDirty: false,
@@ -91,6 +98,7 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
 
     const [descFocusTrigger, setDescFocusTrigger] = useState(0);
     const [commentFocusTrigger, setCommentFocusTrigger] = useState(0);
+    const [commentLoadTrigger, setCommentLoadTrigger] = useState(0);
     const [customFocusTrigger, setCustomFocusTrigger] = useState(0);
 
     const [commentFilter, setCommentFilterState] = useState<CommentFilterType>(
@@ -102,6 +110,7 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
 
     const [customTabDirty, setCustomTabDirtyState] = useState(false);
     const customTabHandlersRef = useRef<Record<string, CustomTabHandler>>({});
+    const builtinSectionHandlersRef = useRef<Partial<Record<'process' | 'checklist', CustomTabHandler>>>({});
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
     const [isChecklistDirty, setIsChecklistDirtyState] = useState(false);
@@ -110,6 +119,7 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const setDescDirty = useCallback((v: boolean) => setDescDirtyState(v), []);
     const triggerDescFocus = useCallback(() => setDescFocusTrigger((p) => p + 1), []);
     const triggerCommentFocus = useCallback(() => setCommentFocusTrigger((p) => p + 1), []);
+    const triggerCommentLoad = useCallback(() => setCommentLoadTrigger((p) => p + 1), []);
     const triggerCustomFocus = useCallback(() => setCustomFocusTrigger((p) => p + 1), []);
 
     const setCommentFilter = useCallback((v: CommentFilterType) => {
@@ -133,11 +143,13 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
             savedNoteRef,
             descFocusTrigger, triggerDescFocus,
             commentFocusTrigger, triggerCommentFocus,
+            commentLoadTrigger, triggerCommentLoad,
             customFocusTrigger, triggerCustomFocus,
             commentFilter, setCommentFilter,
             commentShowDetail, setCommentShowDetail,
             customTabDirty, setCustomTabDirty,
             customTabHandlersRef,
+            builtinSectionHandlersRef,
             isChecklistDirty, setIsChecklistDirty,
             isProcessDirty, setIsProcessDirty,
             scrollContainerRef,

@@ -1,8 +1,20 @@
 import { useEffect } from "react";
 import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
+import { useTaskSectionStore } from "../store/useTaskSection.store";
+import { useTaskChecklistHelper } from "../hooks/useTaskChecklist.helper";
 
 export function useTaskChecklistHeadless() {
     const { isExpanded, setIsExpanded, setIsEditing, setEditErrors, barRef, popupRef } = useTaskChecklistStore();
+    const { builtinSectionHandlersRef } = useTaskSectionStore();
+    const { handleChecklistSaveEdit, handleChecklistCancelEdit } = useTaskChecklistHelper();
+
+    useEffect(() => {
+        builtinSectionHandlersRef.current.checklist = {
+            save: async () => { handleChecklistSaveEdit(); },
+            discard: handleChecklistCancelEdit,
+        };
+        return () => { delete builtinSectionHandlersRef.current.checklist; };
+    }, [handleChecklistSaveEdit, handleChecklistCancelEdit, builtinSectionHandlersRef]);
 
     useEffect(() => {
         if (!isExpanded) return;
