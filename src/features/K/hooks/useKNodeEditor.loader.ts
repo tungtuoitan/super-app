@@ -35,17 +35,20 @@ export const useKNodeEditorLoader = () => {
     const { $user } = useAuthStore();
     const { loadTree } = useKLoader();
 
-    const allNodes = currentK?.id === rootNode.knowledgeId ? currentK.flatData : []
+    const allNodes = useMemo(
+        () => (currentK?.id === rootNode.knowledgeId ? currentK.flatData : []),
+        [currentK, rootNode.knowledgeId]
+    );
 
     const current = breadcrumb[breadcrumb.length - 1];
 
     // Depth of the current scope node (card 0) — used to compute relative levels in cards
-    const scopeDepth = (() => {
+    const scopeDepth = useMemo(() => {
         if (!current?.id || current.id < 0) return 0;
         return allNodes.find(n => n.id === current.id)?.pathDepth ?? 0;
-    })()
+    }, [current?.id, allNodes]);
 
-    const scopedNodes = (() => {
+    const scopedNodes = useMemo(() => {
         const deletedFilter = (n: KItemV2) => showDeleted || n.deletedAt == null;
 
         if (current.id === null && rootNode.id < 0) {
@@ -66,7 +69,7 @@ export const useKNodeEditorLoader = () => {
 
         const descIds = getDescendantIds(scopeId, allNodes);
         return allNodes.filter(n => descIds.has(n.id) && deletedFilter(n));
-    })()
+    }, [current.id, rootNode.id, allNodes, showDeleted, showAllChild]);
 
     const handleDrillDown = (node: KItemV2) => {
         if (editingNodeId != null) return;

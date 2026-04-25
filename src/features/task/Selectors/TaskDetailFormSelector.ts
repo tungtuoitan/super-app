@@ -13,7 +13,7 @@ export const useTaskDetailFormSelector = () => {
     const { selectedTask } = useTaskDetailSelector();
     const { projectOptions, parentTaskOptions } = useTaskStore();
 
-    const currentProjectValue: IAutoCompleteOptions | null = (() => {
+    const currentProjectValue: IAutoCompleteOptions | null = useMemo(() => {
         const projectId = selectedTask?.projectId;
         if (!projectId) return null;
         return projectOptions.find((p) => p.id === projectId) ?? {
@@ -22,9 +22,9 @@ export const useTaskDetailFormSelector = () => {
             desc: `Project #${projectId}`,
             isActive: true,
         };
-    })()
+    }, [selectedTask?.projectId, projectOptions]);
 
-    const currentParentTaskValue: IAutoCompleteOptions | null = (() => {
+    const currentParentTaskValue: IAutoCompleteOptions | null = useMemo(() => {
         const parentTaskId = selectedTask?.parentTaskId;
         if (!parentTaskId) return null;
         return parentTaskOptions.find((t) => t.id === parentTaskId) ?? {
@@ -33,7 +33,7 @@ export const useTaskDetailFormSelector = () => {
             desc: `Task #${parentTaskId}`,
             isActive: true,
         };
-    })()
+    }, [selectedTask?.parentTaskId, parentTaskOptions]);
 
     return {
         currentProjectValue,

@@ -13,7 +13,10 @@ import { useTaskDetailSelector } from "./TaskDetailSelector";
 export const useTaskDetailProcessSelector = () => {
     const { selectedTask } = useTaskDetailSelector();
 
-    const parsedProcess = parseChecklistJson(selectedTask?.processJson ?? null)
+    const parsedProcess = useMemo(
+        () => parseChecklistJson(selectedTask?.processJson ?? null),
+        [selectedTask?.processJson],
+    );
 
     return {
         parsedProcess,

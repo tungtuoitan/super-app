@@ -104,13 +104,13 @@ export function KMarkdownImportPanel({ knowledgeId, initialParentNode, onSuccess
         }
     }, [initialParentNode]);
 
-    const nodeOptions: IAutoCompleteOptions[] = (() => {
+    const nodeOptions: IAutoCompleteOptions[] = useMemo(() => {
         if (!currentK?.flatData) return [];
         return currentK.flatData
             .filter(n => n.id > 0)
             .sort((a, b) => a.pathDepth - b.pathDepth || a.name.localeCompare(b.name))
             .map(n => ({ id: n.id, label: "\u00a0\u00a0".repeat(n.pathDepth) + n.name, level: n.pathDepth }));
-    })()
+    }, [currentK?.flatData]);
 
     const selectedOption = parentNode ? (nodeOptions.find(o => o.id === parentNode.id) ?? null) : null;
 
@@ -127,7 +127,7 @@ export function KMarkdownImportPanel({ knowledgeId, initialParentNode, onSuccess
         [markdown]
     );
 
-    const issues   = parsed ? validate(parsed, parentNode?.name ?? null) : []
+    const issues   = useMemo(() => (parsed ? validate(parsed, parentNode?.name ?? null) : []), [parsed, parentNode]);
     const errors   = issues.filter(i => i.type === "error");
     const warnings = issues.filter(i => i.type === "warn");
 

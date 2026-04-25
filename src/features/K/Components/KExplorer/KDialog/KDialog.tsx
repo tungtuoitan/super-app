@@ -60,13 +60,13 @@ export function KDialog() {
     const parentFolderId = parentNode?.id;
 
     // Find parent folder info for display (VS Code-like)
-    const parentFolderInfo = (() => {
+    const parentFolderInfo = React.useMemo(() => {
         if (!parentFolderId || !currentK?.flatData || currentK.flatData.length === 0) return null;
 
         // Search for parent folder in the flat list
         const found = currentK.flatData.find(item => isFolder(item) && item.id === parentFolderId);
         return found || null;
-    })();
+    }, [parentFolderId, currentK]);
 
     // Get sibling folders to check for duplicate names
     const siblingFolders = () => {
@@ -84,10 +84,10 @@ export function KDialog() {
                 // When editing, exclude the current folder being edited
                 (mode === "create" || item.id !== editingNode?.id)
         );
-    }
+    };
 
     // Check if name is duplicate
-    const isDuplicateName = (() => {
+    const isDuplicateName = React.useMemo(() => {
         if (!newNodeName.trim()) return false;
 
         return siblingFolders().some((folder: KItemV2) => {
@@ -96,7 +96,7 @@ export function KDialog() {
             }
             return false;
         });
-    })()
+    }, [newNodeName]);
 
     // Handle dialog close
     const handleClose = () => {
@@ -125,11 +125,14 @@ export function KDialog() {
     };
 
     // Keyword suggestions for autocomplete (only for folders)
-    const keywordSuggestions: IAutoCompleteOptions[] = getAllIconLabel().map((l) => ({
+    const keywordSuggestions: IAutoCompleteOptions[] = React.useMemo(() => {
+        return getAllIconLabel().map((l) => ({
             id: l.id,
             label: l.label,
             type: l.iconType,
-        }))
+        }));
+    }, []);
+
     
 
     // Handle keyword suggestion selection

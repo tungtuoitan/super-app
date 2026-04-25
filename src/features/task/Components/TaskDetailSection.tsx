@@ -82,7 +82,7 @@ export function TaskDetailSection() {
 
     const isNewTask = !selectedTask || selectedTask.id <= 0;
 
-    const descContent = selectedTask?.note ?? ""
+    const descContent = useMemo(() => selectedTask?.note ?? "", [selectedTask?.note]);
 
     if (!selectedTask) return null;
 

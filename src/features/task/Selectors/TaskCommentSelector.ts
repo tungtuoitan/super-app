@@ -11,14 +11,14 @@ export const useTaskCommentSelector = () => {
     const { comments } = useTaskCommentStore();
 
     /** Flat map of all comments (including replies) keyed by id */
-    const commentsById = (() => {
+    const commentsById = useMemo(() => {
         const map = new Map<number, TaskComment>();
         for (const c of comments) map.set(c.id, c);
         return map;
-    })()
+    }, [comments]);
 
     /** Replies keyed by parentCommentId */
-    const repliesByParentId = (() => {
+    const repliesByParentId = useMemo(() => {
         const map = new Map<number, TaskComment[]>();
         for (const c of comments) {
             if (c.parentCommentId) {
@@ -28,10 +28,10 @@ export const useTaskCommentSelector = () => {
             }
         }
         return map;
-    })()
+    }, [comments]);
 
     /** Build threaded tree: top-level comments with nested replies (1 level) */
-    const threadedComments = (() => {
+    const threadedComments = useMemo(() => {
         const topLevel: TaskComment[] = [];
         for (const c of comments) {
             if (!c.parentCommentId) topLevel.push(c);
@@ -40,9 +40,9 @@ export const useTaskCommentSelector = () => {
             ...c,
             replies: repliesByParentId.get(c.id) ?? [],
         }));
-    })()
+    }, [comments, repliesByParentId]);
 
-    const commentCount = comments.length
+    const commentCount = useMemo(() => comments.length, [comments]);
 
     return { threadedComments, commentsById, repliesByParentId, commentCount };
 };

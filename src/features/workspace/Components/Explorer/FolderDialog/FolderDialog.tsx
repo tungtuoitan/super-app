@@ -56,13 +56,13 @@ export function FolderDialog() {
     const parentFolderId = parentFolder?.id;
 
     // Find parent folder info for display (VS Code-like)
-    const parentFolderInfo = (() => {
+    const parentFolderInfo = React.useMemo(() => {
         if (!parentFolderId || !currentWorkspace?.flatData || currentWorkspace.flatData.length === 0) return null;
 
         // Search for parent folder in the flat list
         const found = currentWorkspace.flatData.find(item => isFolder(item) && item.entityId === parentFolderId);
         return found || null;
-    })()
+    }, [parentFolderId, currentWorkspace]);
 
     // Get sibling folders to check for duplicate names
     const siblingFolders = () => {
@@ -83,7 +83,7 @@ export function FolderDialog() {
     };
 
     // Check if name is duplicate
-    const isDuplicateName = (() => {
+    const isDuplicateName = React.useMemo(() => {
         if (!newFolderName.trim()) return false;
 
         return siblingFolders().some((folder: WorkspaceItemV2) => {
@@ -92,7 +92,7 @@ export function FolderDialog() {
             }
             return false;
         });
-    })()
+    }, [newFolderName]);
 
     // Handle dialog close
     const handleClose = () => {
@@ -121,11 +121,13 @@ export function FolderDialog() {
     };
 
     // Keyword suggestions for autocomplete (only for folders)
-    const keywordSuggestions: IAutoCompleteOptions[] = getAllIconLabel().map((l) => ({
+    const keywordSuggestions: IAutoCompleteOptions[] = React.useMemo(() => {
+        return getAllIconLabel().map((l) => ({
             id: l.id,
             label: l.label,
             type: l.iconType,
         }));
+    }, []);
 
     
 

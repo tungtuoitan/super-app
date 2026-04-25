@@ -20,25 +20,30 @@ export const useProjectDetailSelector = () => {
     const { registriesByType } = useGeneralStore();
 
     // Current editor tab
-    const currentTab = openTabs.find((t) => t.id === tabId) || null;
+    const currentTab = useMemo(() => {
+        return openTabs.find((t) => t.id === tabId) || null;
+    }, [openTabs, tabId]);
 
     // Active inner tab from editor tab metadata
-    const activeTab: TabType = (currentTab?.metadata?.innerTab as TabType) || "general";
+    const activeTab: TabType = useMemo(() => {
+        return (currentTab?.metadata?.innerTab as TabType) || "general";
+    }, [currentTab?.metadata?.innerTab]);
 
     // Get project data from the open tab
-    const selectedProject = (() => {
+    const selectedProject = useMemo(() => {
         const projectTab = openTabs.find(
             (tab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId,
         );
         return projectTab ? (projectTab.data as Project) : undefined;
-    })()
+    }, [openTabs, projectId]);
 
     // Whether to show task filter button
-    const showTaskFilter = activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline";
-    
+    const showTaskFilter = useMemo(() => {
+        return activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline";
+    }, [activeTab]);
 
     // Project status options for autocomplete
-    const statusOptions: IStatusOption[] = (() => {
+    const statusOptions: IStatusOption[] = useMemo(() => {
         const projectStatuses = registriesByType["project_status"] || [];
         return projectStatuses
             .map((reg) => {
@@ -54,22 +59,24 @@ export const useProjectDetailSelector = () => {
             .sort((a, b) =>
                 (constants.optionOrder.projectStatuses[a.label] ?? 999) - (constants.optionOrder.projectStatuses[b.label] ?? 999),
             );
-    })()
+    }, [registriesByType]);
 
     // Current status value for autocomplete
-    const currentStatusValue: IStatusOption | null = statusOptions.find((option) => option.code === selectedProject?.status) || null;
+    const currentStatusValue: IStatusOption | null = useMemo(() => {
+        return statusOptions.find((option) => option.code === selectedProject?.status) || null;
+    }, [statusOptions, selectedProject?.status]);
 
     // Check if project is inactive (soft deleted, completed, or dropped)
-    const isDisabled = (() => {
+    const isDisabled = useMemo(() => {
         const isDeleted = selectedProject?.deletedAt !== null && selectedProject?.deletedAt !== undefined;
         const isCompleted = selectedProject?.status === "completed" || selectedProject?.status === "dropped";
         return isDeleted || isCompleted;
-    })()
+    }, [selectedProject?.deletedAt, selectedProject?.status]);
 
     // Whether the project is soft-deleted (for disabling status only)
-    const isDeleted = (() => {
+    const isDeleted = useMemo(() => {
         return selectedProject?.deletedAt !== null && selectedProject?.deletedAt !== undefined;
-    })()
+    }, [selectedProject?.deletedAt]);
 
     return {
         currentTab,

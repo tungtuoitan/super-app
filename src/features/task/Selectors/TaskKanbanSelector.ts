@@ -16,7 +16,7 @@ export const useTaskKanbanSelector = () => {
     const { projectId } = useCurrentProjectStore();
 
     // Get status options from registriesByType
-    const statusOptions = (() => {
+    const statusOptions = useMemo(() => {
         const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg) => ({
@@ -28,13 +28,15 @@ export const useTaskKanbanSelector = () => {
                     (constants.optionOrder.taskStatuses[a.label] ?? 999) -
                     (constants.optionOrder.taskStatuses[b.label] ?? 999),
             );
-    })();
+    }, [registriesByType]);
 
     // Filter tasks by projectId, exclude deleted
-    const filteredTasks = tasks.filter((task) => task.projectId === projectId && !task.deletedAt);
+    const filteredTasks = useMemo(() => {
+        return tasks.filter((task) => task.projectId === projectId && !task.deletedAt);
+    }, [tasks, projectId]);
 
     // Group tasks by status
-    const tasksByStatus = (() => {
+    const tasksByStatus = useMemo(() => {
         const grouped: Record<string, Task[]> = {};
         statusOptions.forEach((status) => {
             grouped[status.code] = [];
@@ -55,7 +57,7 @@ export const useTaskKanbanSelector = () => {
             grouped[status].sort((a, b) => a.orderIndex - b.orderIndex);
         });
         return grouped;
-    })()
+    }, [filteredTasks, statusOptions]);
 
     return {
         statusOptions,

@@ -7,7 +7,9 @@ export function CommandPaletteKeyDown() {
     const { getFilteredKeywords, handleSelectKeyword, getKeywordIcon, close } = useCommandPaletteHelper();
 
     // Get filtered keywords using helper function
-    const filteredKeywords = getFilteredKeywords(searchQuery)
+    const filteredKeywords = useMemo(() => {
+        return getFilteredKeywords(searchQuery);
+    }, [searchQuery]);
 
 
     // Handle keyboard navigation

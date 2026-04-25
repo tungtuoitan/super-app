@@ -29,14 +29,14 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
     const isDragDisabled = task.deletedAt || isStatusNonDraggable(task.status);
 
     // ── Position from dates ──────────────────────────────
-    const { left, width, hasValidDates } = (() => {
+    const { left, width, hasValidDates } = useMemo(() => {
         if (!task.startDate && !task.endDate) return { left: 0, width: TIMELINE_MIN_BAR_WIDTH, hasValidDates: false };
         const start = task.startDate || task.endDate || new Date();
         const end = task.endDate || task.startDate || new Date();
         const startDiff = Math.floor((start.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
         const duration = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
         return { left: startDiff * dayWidth, width: Math.max(TIMELINE_MIN_BAR_WIDTH, duration * dayWidth - 4), hasValidDates: true };
-    })();
+    }, [task.startDate, task.endDate, timelineStart, dayWidth]);
 
     // ── Drag state ───────────────────────────────────────
     const [isDragging, setIsDragging] = useState(false);
@@ -61,7 +61,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
     useEffect(() => { setCurrentLeft(left); setCurrentWidth(width); }, [left, width]);
 
     // ── Constraint bounds ────────────────────────────────
-    const constraints = (() => {
+    const constraints = useMemo(() => {
         let outerMin: Date | null = null;
         let outerMax: Date | null = null;
         if (isSubtask && parentTask) { outerMin = parentTask.startDate || null; outerMax = parentTask.endDate || null; }
@@ -69,7 +69,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
         const minLeft = outerMin ? Math.floor((outerMin.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24)) * dayWidth : null;
         const maxRight = outerMax ? (Math.floor((outerMax.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24)) + 1) * dayWidth : null;
         return { minLeft, maxRight };
-    })();
+    }, [isSubtask, parentTask, project, timelineStart, dayWidth]);
 
     // ── Mouse down ───────────────────────────────────────
     const handleMouseDown = (e: React.MouseEvent, type: "move" | "resize-left" | "resize-right") => {

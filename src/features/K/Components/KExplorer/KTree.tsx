@@ -25,7 +25,7 @@ export function KTree() {
     const manager = useDragDropManager();
 
     // Always hide question nodes and their descendants — only entity nodes in the tree
-    const filteredK = (() => {
+    const filteredK = useMemo(() => {
         if (!currentK) return currentK;
         const questionIds = new Set([]);
         const hiddenIds = new Set<number>(questionIds);
@@ -40,7 +40,7 @@ export function KTree() {
             }
         }
         return { ...currentK, flatData: currentK.flatData.filter(n => !hiddenIds.has(n.id)) };
-    })();
+    }, [currentK]);
 
     // Transform workspace data to tree format
     const treeData = useMemo(() => {
@@ -93,7 +93,10 @@ export function KTree() {
     useEffect(() => { setTreeData(treeData); }, [treeData]);
 
     // Get all visible folder IDs for keyboard navigation
-    const allVisibleFolderIds = KtreeMiniHelper.getAllVisibleNodeIds(treeData)
+    const allVisibleFolderIds = useMemo(() => {
+        return KtreeMiniHelper.getAllVisibleNodeIds(treeData);
+    }, [treeData]);
+
     // ── Mark helpers ────────────────────────────────────────────────────────────
 
     /** Collect the numeric IDs of a node and all its descendants */
@@ -103,7 +106,7 @@ export function KTree() {
     }
 
     /** Numeric IDs of marked node + all descendants (null when no mark) */
-    const markedVisibleIds = ((): Set<number> | null => {
+    const markedVisibleIds = useMemo((): Set<number> | null => {
         if (!markedNodeId) return null;
         function find(nodes: KTreeNode[]): Set<number> | null {
             for (const node of nodes) {
@@ -118,7 +121,7 @@ export function KTree() {
             return null;
         }
         return find(treeData);
-    })()
+    }, [markedNodeId, treeData]);
 
     // Load saved mark from storage when workspace changes
     useEffect(() => {

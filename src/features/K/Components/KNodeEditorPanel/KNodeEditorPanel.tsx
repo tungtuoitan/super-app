@@ -29,17 +29,17 @@ function KNodeEditorContent() {
     const kName = allK.find(k => k.id === rootNode.knowledgeId)?.name ?? "";
 
     // Compute card-0 from breadcrumb last item (not from tab.data directly)
-    const currentScopeNode = (() => {
+    const currentScopeNode = useMemo(() => {
         const last = breadcrumb[breadcrumb.length - 1];
         if (!last?.id || last.id < 0) return rootNode;
         return allNodes.find(n => n.id === last.id) ?? rootNode;
-    })()
+    }, [breadcrumb, allNodes, rootNode]);
 
     // ── Warning: > 12 direct children ────────────────────────────────────────
-    const directChildrenCount = (() => {
+    const directChildrenCount = useMemo(() => {
         const scopeId = currentScopeNode.id < 0 ? null : currentScopeNode.id;
         return allNodes.filter(n => n.parentId === scopeId && !n.deletedAt).length;
-    })();
+    }, [currentScopeNode.id, allNodes]);
 
     const warnedScopeRef = useRef<number | null>(null);
     useEffect(() => {
@@ -122,16 +122,19 @@ function KNodeEditorContent() {
         showContextMenu(e, constants.contextMenu.contextMenuTypes.kNodePanelBlank, currentScopeNode);
     };
 
-    const sortedNodes = [...scopedNodes].sort((a, b) => (a.pathDepth ?? 0) - (b.pathDepth ?? 0))
+    const sortedNodes = useMemo(
+        () => [...scopedNodes].sort((a, b) => (a.pathDepth ?? 0) - (b.pathDepth ?? 0)),
+        [scopedNodes]
+    );
 
     // Filter by search query — diacritic-insensitive match on name or description
-    const filteredNodes = (() => {
+    const filteredNodes = useMemo(() => {
         if (!searchQuery.trim()) return sortedNodes;
         return sortedNodes.filter(n =>
             containsNormalized(n.name, searchQuery) ||
             (n.description ? containsNormalized(stripHtmlToText(n.description), searchQuery) : false)
         );
-    })();
+    }, [sortedNodes, searchQuery]);
 
     if (currentK?.id !== rootNode.knowledgeId) {
         return (

@@ -62,7 +62,7 @@ export const useKTreeStatusHelper = () => {
      * Get selected items statuses
      * Gom các thuộc tính liên quan đến selectedItems vào 1 object
      */
-    const selectedItemStatuses = (() => {
+    const selectedItemStatuses = useMemo(() => {
         // 1.isMultiple: Kiểm tra xem có nhiều hơn 1 item được chọn không
         const isMultiple = selectedCount > 1;
 
@@ -113,8 +113,8 @@ export const useKTreeStatusHelper = () => {
             hasAnyDeletedItem,
             hasDeletedAncestor,
         };
-    })();
-    
+    }, [selectedCount, selectedItemIds, currentK?.flatData, getItemStatus]);
+
     return {
         selectedItemStatuses,
         getItemStatus,

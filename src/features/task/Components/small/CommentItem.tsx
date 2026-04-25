@@ -24,13 +24,19 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
     const comment = commentsById.get(commentId);
 
     // ── All hooks before early return (R7) ──────────────────────────────────
-    const timeAgo = comment ? formatTimeAgo(comment.createdAt) : ""
-    const wasEdited = !!(comment?.updatedAt && comment.updatedAt > comment.createdAt)
-    const versionPayload = comment ? parseVersionComment(comment.content) : null
-    const displayName = (() => {
+    const timeAgo = useMemo(() => (comment ? formatTimeAgo(comment.createdAt) : ""), [comment?.createdAt]);
+    const wasEdited = useMemo(
+        () => !!(comment?.updatedAt && comment.updatedAt > comment.createdAt),
+        [comment?.updatedAt, comment?.createdAt],
+    );
+    const versionPayload = useMemo(
+        () => (comment ? parseVersionComment(comment.content) : null),
+        [comment?.content],
+    );
+    const displayName = useMemo(() => {
         if ($user.firstName && $user.lastName) return `${$user.firstName} ${$user.lastName}`;
         return $user.userName || "User";
-    })()
+    }, [$user.firstName, $user.lastName, $user.userName]);
 
     if (!comment) return null;
 

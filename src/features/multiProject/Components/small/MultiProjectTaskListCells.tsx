@@ -10,7 +10,7 @@ import { StatusAutoComplete, IStatusOption } from "@/shared/components";
 /**
  * Memoized Status Cell
  */
-export const StatusCell = function StatusCell({
+export const StatusCell = React.memo(function StatusCell({
     task,
     statusOptions,
     onUpdate,
@@ -38,12 +38,12 @@ export const StatusCell = function StatusCell({
             />
         </div>
     );
-}
+});
 
 /**
  * Memoized Priority Cell
  */
-export const PriorityCell = function PriorityCell({
+export const PriorityCell = React.memo(function PriorityCell({
     task,
     priorityOptions,
     onUpdate,
@@ -71,4 +71,4 @@ export const PriorityCell = function PriorityCell({
             />
         </div>
     );
-}
+});

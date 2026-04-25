@@ -67,7 +67,7 @@ export const GeneralProvider: React.FC<React.PropsWithChildren<unknown>> = ({ ch
     const [keywordsError, setKeywordsError] = useState<Error | null>(null);
 
     // Group registries by type for easy lookup
-    const registriesByType = (() => {
+    const registriesByType = useMemo(() => {
         const grouped: Record<string, StandardRegistry[]> = {};
         registries.forEach((registry) => {
             if (!grouped[registry.type]) {
@@ -76,7 +76,7 @@ export const GeneralProvider: React.FC<React.PropsWithChildren<unknown>> = ({ ch
             grouped[registry.type].push(registry);
         });
         return grouped;
-    })()
+    }, [registries]);
 
     return (
         <GeneralStore.Provider

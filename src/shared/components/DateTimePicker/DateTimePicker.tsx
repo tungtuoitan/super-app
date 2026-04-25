@@ -227,13 +227,13 @@ export function DateTimePicker({
     };
 
     // Create disabled matcher for Calendar component
-    const disabledMatcher = (() => {
+    const disabledMatcher = useMemo((): Matcher | undefined => {
         if (!minDate && !maxDate) return undefined;
         return (date: Date) => isDateDisabled(date);
-    })();
+    }, [minDate, maxDate]);
 
     // Create modifiers for constraint dates (minDate/maxDate indicators)
-    const calendarModifiers = (() => {
+    const calendarModifiers = useMemo(() => {
         const modifiers: Record<string, Matcher> = {};
         if (minDate) {
             modifiers.constraintStart = (date: Date) => isSameDay(date, minDate);
@@ -244,21 +244,22 @@ export function DateTimePicker({
         // Today modifier (only when not selected)
         modifiers.todayHighlight = (date: Date) => isToday(date) && (!selectedDate || !isSameDay(date, selectedDate));
         return modifiers;
-    })()
+    }, [minDate, maxDate, selectedDate]);
 
     // Custom class names for modifiers
-    const modifiersClassNames = {
+    const modifiersClassNames = useMemo(() => ({
         constraintStart: "constraint-start-date",
         constraintEnd: "constraint-end-date",
         todayHighlight: "today-highlight",
-    }
+    }), []);
+
     // Filter quick options based on min/max dates
-    const filteredQuickOptions = (() => {
+    const filteredQuickOptions = useMemo(() => {
         return QUICK_OPTIONS.filter((option) => {
             const date = option.getValue();
             return !isDateDisabled(date);
         });
-    })()
+    }, [minDate, maxDate]);
 
     // Check if picker should be fully disabled due to constraints
     const isConstraintDisabled = disabled || (disabledReason !== undefined && disabledReason !== null);
