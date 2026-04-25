@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Settings, GitBranch, CalendarClock, LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/shared/hooks/useIsMobile";
 import { CardContent } from "@/shared/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
 import { useEditorTabsStore } from "@/store/index";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
 import { KTestList } from "./KTestList";
-import { KTestSession } from "./KTestSession/KTestSession";
-import { KTestRecordSession } from "./KTestRecordSession/KTestRecordSession";
+import { KDailyReviewSession } from "./KDailyReview/KDailyReviewSession";
 import { KMarkdownImportPanel } from "./KMarkdownImportPanel/KMarkdownImportPanel";
 import { KDailyReviewPanel } from "./KDailyReview/KDailyReviewPanel";
 import { KRetentionBadge } from "./small/KRetentionBadge";
@@ -16,7 +16,7 @@ import { KTestService } from "../service/kTest.service";
 import { useKStore } from "../store/K.store";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { KWsResponse } from "../types/K.types";
-import type { KTestDetail as KTestDetailType } from "../types/kTest.type";
+import type { KTestDetail as KTestDetailType, KDailySessionQuestion } from "../types/kTest.type";
 import type { KItemV2 } from "../types/K-v2.types";
 import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
 import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
@@ -25,7 +25,12 @@ interface KKnowledgeEditorPanelProps {
     tab: BaseTab;
 }
 
-type SessionState = { detail: KTestDetailType; mode: "standard" | "record" } | null;
+type SessionState = {
+    knowledgeId: number;
+    testId: number;
+    testTitle: string;
+    questions: KDailySessionQuestion[];
+} | null;
 
 type PanelView =
     | { kind: "none" }
@@ -45,6 +50,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
     const { setOpenTabs } = useEditorTabsStore();
     const knowledge = tab.data as unknown as KWsResponse;
     const isNew     = knowledge.id < 0;
+    const isMobile  = useIsMobile();
     const kTestStoreValues = useKTestStoreValues();
     const { currentK, pendingImportNodeId, setPendingImportNodeId, pendingQuizTabSwitch, setPendingQuizTabSwitch, allK } = useKStore();
 
@@ -129,35 +135,37 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
         setPendingImportNodeId(undefined);
     }, [pendingImportNodeId]);
 
-    const handleStartTest       = (testDetail: KTestDetailType) => setSession({ detail: testDetail, mode: "standard" });
-    const handleStartRecordTest = (testDetail: KTestDetailType) => setSession({ detail: testDetail, mode: "record" });
-    const handleSessionEnd      = () => setSession(null);
+    const handleStartQuickTest = (testDetail: KTestDetailType) => {
+        const questions: KDailySessionQuestion[] = testDetail.questions.map(q => ({
+            id: q.id,
+            question: q.question,
+            answer: q.answer,
+        }));
+        setSession({ knowledgeId: knowledge.id, testId: testDetail.id, testTitle: testDetail.title, questions });
+    };
+    const handleSessionEnd = () => setSession(null);
 
     // ── Tab content ───────────────────────────────────────────────────────────
+
+    const effectiveTab: KTab = isMobile ? "dailyReview" : activeTab;
 
     const renderTabContent = () => {
         // Active test session overlays everything
         if (!isNew && session) {
-            return session.mode === "record" ? (
-                <KTestRecordSession
-                    knowledgeId={knowledge.id}
-                    testId={session.detail.id}
-                    questions={session.detail.questions}
-                    onComplete={handleSessionEnd}
-                    onBack={handleSessionEnd}
-                />
-            ) : (
-                <KTestSession
-                    knowledgeId={knowledge.id}
-                    testId={session.detail.id}
-                    questions={session.detail.questions}
+            return (
+                <KDailyReviewSession
+                    knowledgeId={session.knowledgeId}
+                    testId={session.testId}
+                    testTitle={session.testTitle}
+                    questions={session.questions}
+                    isQuickTest
                     onComplete={handleSessionEnd}
                     onBack={handleSessionEnd}
                 />
             );
         }
 
-        switch (activeTab) {
+        switch (effectiveTab) {
             case "general":
                 return <KKnowledgeGeneral knowledgeId={knowledge.id} tabId={tab.id} />;
             case "testList":
@@ -176,8 +184,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                 return (
                     <KTestFlowView
                         knowledgeId={knowledge.id}
-                        onStartTest={handleStartTest}
-                        onStartRecordTest={handleStartRecordTest}
+                        onQuickTest={handleStartQuickTest}
                         initialSelectedTestId={initialFlowTestId}
                     />
                 );
@@ -186,8 +193,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                 return (
                     <KTestKanbanView
                         knowledgeId={knowledge.id}
-                        onStartTest={handleStartTest}
-                        onStartRecordTest={handleStartRecordTest}
+                        onQuickTest={handleStartQuickTest}
                     />
                 );
             case "dailyReview":
@@ -233,7 +239,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                 {/* Tab bar */}
                 <div className="flex items-center border-b-2 border-primary/20 bg-muted/20 shrink-0">
                     <div className="flex flex-1">
-                        {TABS.map((t) => (
+                        {(isMobile ? TABS.filter(t => t.id === "dailyReview") : TABS).map((t) => (
                             <button
                                 key={t.id}
                                 onClick={() => setActiveTab(t.id)}
@@ -241,7 +247,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                                 className={cn(
                                     "relative flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
                                     "border-b-3 -mb-[2px]",
-                                    activeTab === t.id
+                                    effectiveTab === t.id
                                         ? "border-primary text-primary bg-primary/5"
                                         : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
                                     t.id !== "general" && isNew && "opacity-50 cursor-not-allowed"

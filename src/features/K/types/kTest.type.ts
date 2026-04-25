@@ -143,6 +143,9 @@ export interface KDailySessionQuestion {
     id: number;
     question: string;
     answer: string | null;
+    srsInterval?: number;
+    srsRepetitions?: number;
+    srsEaseFactor?: number;
 }
 
 export interface KDailyAnswerItem {

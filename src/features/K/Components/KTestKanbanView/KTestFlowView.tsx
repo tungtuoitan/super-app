@@ -11,8 +11,7 @@ import type { KTestDetail, KTestQuestion, KTestSummary } from "../../types/kTest
 
 interface KTestFlowViewProps {
     knowledgeId: number;
-    onStartTest: (detail: KTestDetail) => void;
-    onStartRecordTest: (detail: KTestDetail) => void;
+    onQuickTest: (detail: KTestDetail) => void;
     initialSelectedTestId?: number | null;
 }
 
@@ -24,7 +23,7 @@ export function KTestFlowView(props: KTestFlowViewProps) {
     );
 }
 
-function KTestFlowContent({ knowledgeId, onStartTest, onStartRecordTest, initialSelectedTestId }: KTestFlowViewProps) {
+function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: KTestFlowViewProps) {
     const { tests, isLoadingTests, activeNodeId } = useKTestStore();
     const { loadTests, createEmptyTest } = useKTestLoader();
     const lastLoadKeyRef = useRef<string | null>(null);
@@ -99,7 +98,7 @@ function KTestFlowContent({ knowledgeId, onStartTest, onStartRecordTest, initial
         if (res.success && res.object) {
             const active = res.object.questions.filter((q) => !q.deletedAt && q.isActive);
             const sorted = await sortQuestionsByFlowOrder(active);
-            onStartTest({ ...res.object, questions: sorted });
+            onQuickTest({ ...res.object, questions: sorted });
         }
     };
 
@@ -188,7 +187,7 @@ function KTestFlowContent({ knowledgeId, onStartTest, onStartRecordTest, initial
                         onClick={() => handleStart(selectedTest)}
                         className="h-7 px-2 flex items-center gap-1 text-xs text-zinc-400 hover:text-green-400 border border-zinc-700 hover:border-green-700 rounded transition-colors"
                     >
-                        <Play className="w-3 h-3" /> Start
+                        <Play className="w-3 h-3" /> Quick Test
                     </button>
                 )}
 

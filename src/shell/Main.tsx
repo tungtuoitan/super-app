@@ -56,38 +56,37 @@ export function Main() {
                                                         <CommandPaletteProvider>
                                                             <OrchestratorContextMenuStoreProvider>
                                                                 <ConfirmationPopoverProvider>
-                                                                    <OrchestratorContextMenu>
-                                                                        <AuthGuard>
-                                                                            <GridControlProvider>
-                                                                                {/* Main application content */}
+                                                                    <AuthGuard>
+                                                                        <GridControlProvider>
+                                                                            {/* Main application content */}
 
-                                                                                <WorkspaceProviders>
-                                                                                    <KProviders>
-                                                                                        <WsProviders>
-                                                                                            <ProjectProviders>
-                                                                                                <TaskProvider>
-                                                                                                    <MultiTimelineProvider>
-                                                                                                        <LifeLogProvider>
-                                                                                                            <WikiProvider>
-                                                                                                                <NoteProviders>
-                                                                                                                    <EditorProviders>
-                                                                                                                        <CurrentProjectProvider>
+                                                                            <WorkspaceProviders>
+                                                                                <KProviders>
+                                                                                    <WsProviders>
+                                                                                        <ProjectProviders>
+                                                                                            <TaskProvider>
+                                                                                                <MultiTimelineProvider>
+                                                                                                    <LifeLogProvider>
+                                                                                                        <WikiProvider>
+                                                                                                            <NoteProviders>
+                                                                                                                <EditorProviders>
+                                                                                                                    <CurrentProjectProvider>
+                                                                                                                        <OrchestratorContextMenu>
                                                                                                                             <MainNav />
-                                                                                                                        </CurrentProjectProvider>
-                                                                                                                    </EditorProviders>
-                                                                                                                </NoteProviders>
-                                                                                                            </WikiProvider>
-                                                                                                        </LifeLogProvider>
-                                                                                                    </MultiTimelineProvider>
-                                                                                                </TaskProvider>
-                                                                                            </ProjectProviders>
-                                                                                        </WsProviders>
-                                                                                    </KProviders>
-                                                                                </WorkspaceProviders>
-
-                                                                            </GridControlProvider>
-                                                                        </AuthGuard>
-                                                                    </OrchestratorContextMenu>
+                                                                                                                        </OrchestratorContextMenu>
+                                                                                                                    </CurrentProjectProvider>
+                                                                                                                </EditorProviders>
+                                                                                                            </NoteProviders>
+                                                                                                        </WikiProvider>
+                                                                                                    </LifeLogProvider>
+                                                                                                </MultiTimelineProvider>
+                                                                                            </TaskProvider>
+                                                                                        </ProjectProviders>
+                                                                                    </WsProviders>
+                                                                                </KProviders>
+                                                                            </WorkspaceProviders>
+                                                                        </GridControlProvider>
+                                                                    </AuthGuard>
                                                                     <ConfirmationPopoverContainer />
                                                                 </ConfirmationPopoverProvider>
                                                             </OrchestratorContextMenuStoreProvider>

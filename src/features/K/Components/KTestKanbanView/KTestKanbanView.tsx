@@ -25,11 +25,10 @@ interface ColumnDragItem   { testId: number; index: number; }
 
 interface KTestKanbanViewProps {
     knowledgeId: number;
-    onStartTest: (detail: KTestDetail) => void;
-    onStartRecordTest: (detail: KTestDetail) => void;
+    onQuickTest: (detail: KTestDetail) => void;
 }
 
-export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }: KTestKanbanViewProps) {
+export function KTestKanbanView({ knowledgeId, onQuickTest }: KTestKanbanViewProps) {
     const { tests, isLoadingTests, activeNodeId } = useKTestStore();
     const { loadTests, updateQuestions, createEmptyTest, reorderTests } = useKTestLoader();
     const [detailsMap, setDetailsMap] = useState<Record<number, KTestDetail>>({});
@@ -80,19 +79,11 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
         }).finally(() => setLoadingDetails(false));
     }, [knowledgeId, tests]);
 
-    const handleStart = async (test: KTestSummary) => {
+    const handleQuickTest = async (test: KTestSummary) => {
         const res = await KTestService._getTestDetail(knowledgeId, test.id);
         if (res.success && res.object) {
             const filtered = { ...res.object, questions: res.object.questions.filter(q => !q.deletedAt && q.isActive) };
-            onStartTest(filtered);
-        }
-    };
-
-    const handleStartRecord = async (test: KTestSummary) => {
-        const res = await KTestService._getTestDetail(knowledgeId, test.id);
-        if (res.success && res.object) {
-            const filtered = { ...res.object, questions: res.object.questions.filter(q => !q.deletedAt && q.isActive) };
-            onStartRecordTest(filtered);
+            onQuickTest(filtered);
         }
     };
 
@@ -291,8 +282,7 @@ export function KTestKanbanView({ knowledgeId, onStartTest, onStartRecordTest }:
                                 test={test}
                                 questions={questions}
                                 knowledgeId={knowledgeId}
-                                onStart={() => handleStart(test)}
-                                onStartRecord={() => handleStartRecord(test)}
+                                onQuickTest={() => handleQuickTest(test)}
                                 onRename={async (title) => {
                                     await KTestService._updateTest(knowledgeId, test.id, { title });
                                     await loadTests(knowledgeId, activeNodeId ?? undefined);
@@ -327,8 +317,7 @@ interface KanbanColumnProps {
     test: KTestSummary;
     questions: KTestQuestion[];
     knowledgeId: number;
-    onStart: () => void;
-    onStartRecord: () => void;
+    onQuickTest: () => void;
     onRename: (title: string) => Promise<void>;
     onDrop: (item: QuestionDragItem) => void;
     onColumnDrop: (draggedIndex: number, insertIndex: number) => void;
@@ -343,7 +332,7 @@ interface KanbanColumnProps {
     onClearSelection: () => void;
 }
 
-function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRecord, onRename, onDrop, onColumnDrop, onNewCardCreated, onRefresh, onOptimisticUpdate, onStatusChange, onDeleteTest, onRestoreTest, selectedIds, onToggleSelect, onClearSelection }: KanbanColumnProps) {
+function KanbanColumn({ index, test, questions, knowledgeId, onQuickTest, onRename, onDrop, onColumnDrop, onNewCardCreated, onRefresh, onOptimisticUpdate, onStatusChange, onDeleteTest, onRestoreTest, selectedIds, onToggleSelect, onClearSelection }: KanbanColumnProps) {
     const { activeNodeId } = useKTestStore();
     const [editingTitle, setEditingTitle] = useState(false);
     const [titleDraft, setTitleDraft]     = useState("");
@@ -578,18 +567,11 @@ function KanbanColumn({ index, test, questions, knowledgeId, onStart, onStartRec
                     style={{ top: ctxMenu.y, left: ctxMenu.x }}
                 >
                     <button
-                        onClick={() => { closeCtxMenu(); onStart(); }}
+                        onClick={() => { closeCtxMenu(); onQuickTest(); }}
                         className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200"
                     >
                         <Play className="w-3.5 h-3.5 text-zinc-400" />
-                        Start Test
-                    </button>
-                    <button
-                        onClick={() => { closeCtxMenu(); onStartRecord(); }}
-                        className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200"
-                    >
-                        <Mic className="w-3.5 h-3.5 text-zinc-400" />
-                        Record Mode
+                        Quick Test
                     </button>
                     <div className="my-1 border-t border-zinc-800" />
                     <button
