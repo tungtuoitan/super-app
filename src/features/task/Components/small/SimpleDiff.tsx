@@ -124,16 +124,16 @@ function DiffLineRow({ line, showUnchanged }: { line: DiffLine; showUnchanged: b
 
 export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentExpand, stripHtml = false }: SimpleDiffProps) {
     const [showUnchanged, setShowUnchanged] = useState(false);
-    const displayOld = useMemo(() => stripHtml ? htmlToPlainText(oldText) : oldText, [oldText, stripHtml]);
-    const displayNew = useMemo(() => stripHtml ? htmlToPlainText(newText) : newText, [newText, stripHtml]);
-    const lines = useMemo(() => computeDiff(displayOld.split("\n"), displayNew.split("\n")), [displayOld, displayNew]);
+    const displayOld = stripHtml ? htmlToPlainText(oldText) : oldText
+    const displayNew = stripHtml ? htmlToPlainText(newText) : newText
+    const lines = computeDiff(displayOld.split("\n"), displayNew.split("\n"))
 
-    const imageDiff = useMemo(() => {
+    const imageDiff = (() => {
         if (!showImageDiff) return null;
         const diff = computeImageDiff(oldText, newText);
         if (diff.added.length === 0 && diff.removed.length === 0) return null;
         return diff;
-    }, [oldText, newText, showImageDiff]);
+    })()
 
     const hasTextChanges = lines.some((l) => l.type !== "equal");
     const hasImageChanges = imageDiff !== null;

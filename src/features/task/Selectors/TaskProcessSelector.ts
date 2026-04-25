@@ -17,17 +17,11 @@ import { useTaskDetailProcessSelector } from "./TaskDetailProcessSelector";
 export const useTaskProcessSelector = () => {
     const { parsedProcess } = useTaskDetailProcessSelector();
 
-    const progress = useMemo(
-        () => (parsedProcess ? checklistProgress(parsedProcess) : null),
-        [parsedProcess],
-    );
+    const progress = parsedProcess ? checklistProgress(parsedProcess) : null
 
-    const allDone = useMemo(
-        () => (parsedProcess ? isChecklistAllDone(parsedProcess) : false),
-        [parsedProcess],
-    );
+    const allDone = parsedProcess ? isChecklistAllDone(parsedProcess) : false
 
-    const nextRequiredIndex = useMemo(() => {
+    const nextRequiredIndex = (() => {
         if (!parsedProcess) return 0;
         const flat = getFlatItems(parsedProcess);
         for (let i = 0; i < flat.length; i++) {
@@ -36,22 +30,22 @@ export const useTaskProcessSelector = () => {
             if (!flat[i].isChecked && !flat[i].isSkipped) return i;
         }
         return flat.length;
-    }, [parsedProcess]);
+    })()
 
-    const lastCheckedName = useMemo(() => {
+    const lastCheckedName = (() => {
         if (!parsedProcess) return null;
         const flat = getFlatItems(parsedProcess);
         for (let i = flat.length - 1; i >= 0; i--) {
             if (flat[i].isChecked || flat[i].isSkipped) return flat[i].name;
         }
         return null;
-    }, [parsedProcess]);
+    })()
 
-    const nextPendingName = useMemo(() => {
+    const nextPendingName = (() => {
         if (!parsedProcess) return null;
         const flat = getFlatItems(parsedProcess);
         return flat[nextRequiredIndex]?.name ?? null;
-    }, [parsedProcess, nextRequiredIndex]);
+    })()
 
     return {
         progress,

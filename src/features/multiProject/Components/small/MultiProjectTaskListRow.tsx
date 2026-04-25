@@ -17,7 +17,7 @@ import type { DraggableRowProps } from "@/features/multiProject/types/multiProje
 /**
  * Memoized Date Range Cell with optional limit dates
  */
-export const DateRangeCell = React.memo(function DateRangeCell({
+export const DateRangeCell = function DateRangeCell({
     task,
     onStartDateUpdate,
     onEndDateUpdate,
@@ -41,7 +41,7 @@ export const DateRangeCell = React.memo(function DateRangeCell({
             />
         </div>
     );
-});
+}
 
 /**
  * Draggable & Droppable Table Row for Multi-Project view

@@ -18,7 +18,7 @@ export function KMovingTree() {
     const manager = useDragDropManager();
 
     // Transform target workspace data to tree format
-    const targetTreeData = useMemo(() => {
+    const targetTreeData = (() => {
         if (!targetWorkspace) return [];
         const baseTree = KtreeMiniHelper.transformToTreeData(targetWorkspace, "");
 
@@ -49,7 +49,7 @@ export function KMovingTree() {
         }
 
         return baseTree;
-    }, [targetWorkspace]);
+    })()
 
     return (
         <div ref={treeContainerRef} className="h-full pl-4 py-2">

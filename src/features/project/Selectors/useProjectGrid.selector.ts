@@ -15,16 +15,16 @@ export const useProjectGridSelector = () => {
     const { registriesByType } = useGeneralStore();
 
     // Get status label from registry
-    const getStatusLabel = useMemo(() => {
+    const getStatusLabel = (() => {
         const projectStatuses = registriesByType["project_status"] || [];
         return (statusCode: string) => {
             const status = projectStatuses.find((s) => s.code === statusCode);
             return status?.description || statusCode;
         };
-    }, [registriesByType]);
+    })()
 
     // Filter data by search query
-    const filteredData = useMemo(() => {
+    const filteredData = (() => {
         const sorted = [...projects].sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
@@ -36,7 +36,7 @@ export const useProjectGridSelector = () => {
                 p.description?.toLowerCase().includes(query) ||
                 String(p.id).includes(query),
         );
-    }, [projects, searchQuery]);
+    })()
 
     return {
         getStatusLabel,

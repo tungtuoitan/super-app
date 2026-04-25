@@ -70,7 +70,7 @@ export function IconPicker({
     const iconGroups = getIconsGrouped();
 
     // Filter icons based on search query
-    const filteredGroups = useMemo(() => {
+    const filteredGroups = (() => {
         if (!searchQuery.trim()) {
             return iconGroups;
         }
@@ -94,7 +94,7 @@ export function IconPicker({
                 }),
             }))
             .filter((group) => group.icons.length > 0);
-    }, [iconGroups, searchQuery]);
+    })()
 
     // Check if we have any results
     const hasResults = filteredGroups.some((g) => g.icons.length > 0);

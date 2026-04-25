@@ -278,10 +278,7 @@ function TaskFlowCanvas() {
     }, [handleF1Toggle, handleBackToCenter]);
 
     // Persist viewport across tab switches
-    const savedViewport = useMemo(
-        () => storageService.get<Viewport>(STORAGE_KEYS.TASK_FLOW_VIEWPORT),
-        [],
-    );
+    const savedViewport = storageService.get<Viewport>(STORAGE_KEYS.TASK_FLOW_VIEWPORT)
 
     const handleMoveEnd = (_: unknown, viewport: Viewport) => {
         storageService.set(STORAGE_KEYS.TASK_FLOW_VIEWPORT, viewport);

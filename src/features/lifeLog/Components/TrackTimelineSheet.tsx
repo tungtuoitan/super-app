@@ -41,15 +41,15 @@ interface TrackGraphContentProps {
 export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
     const { tracks, logs } = useLifeLogStore();
 
-    const activeTracks = useMemo(() => tracks.filter((t) => !t.deletedAt), [tracks]);
+    const activeTracks = tracks.filter((t) => !t.deletedAt);
 
-    const tracksByUsage = useMemo(() => {
+    const tracksByUsage = (() => {
         const usageMap = new Map<number, number>();
         for (const log of logs) {
             if (log.trackId && !log.deletedAt) usageMap.set(log.trackId, (usageMap.get(log.trackId) ?? 0) + 1);
         }
         return [...activeTracks].sort((a, b) => (usageMap.get(b.id) ?? 0) - (usageMap.get(a.id) ?? 0));
-    }, [activeTracks, logs]);
+    })()
 
     const [selectedIds, setSelectedIds] = useState<Set<number>>(() =>
         new Set(tracksByUsage.slice(0, 5).map((t) => t.id))
@@ -86,7 +86,7 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
 
     const selectedTracks = tracksByUsage.filter((t) => selectedIds.has(t.id));
 
-    const days = useMemo(() => {
+    const days = (() => {
         if (dateRangeDays === null) {
             const earliest = logs.reduce((min, l) => {
                 if (l.deletedAt) return min;
@@ -96,9 +96,9 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
             return Math.max(differenceInCalendarDays(new Date(), new Date(earliest)) + 1, 1);
         }
         return dateRangeDays;
-    }, [dateRangeDays, logs]);
+    })()
 
-    const countData = useMemo(() => Array.from({ length: days }, (_, i) => {
+    const countData = Array.from({ length: days }, (_, i) => {
         const d = startOfDay(subDays(new Date(), days - 1 - i));
         const dayStart = d.getTime();
         const dayEnd = dayStart + 86_400_000;
@@ -111,10 +111,10 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
             }).length;
         }
         return point;
-    }), [logs, selectedTracks, days]);
+    })
 
     // freqData: points include logIds for click-through
-    const freqData = useMemo(() => {
+    const freqData = (() => {
         const startMs = startOfDay(subDays(new Date(), days - 1)).getTime();
         return selectedTracks.map((track, trackIdx) => {
             const dayMap = new Map<number, { count: number; logIds: number[] }>();
@@ -134,9 +134,9 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
             });
             return { track, trackIdx, points };
         });
-    }, [logs, selectedTracks, days]);
+    })()
 
-    const freqXTicks = useMemo(() => {
+    const freqXTicks = (() => {
         const step = days <= 14 ? 1 : days <= 30 ? 3 : days <= 90 ? 7 : 14;
         return Array.from({ length: Math.ceil(days / step) }, (_, i) => {
             const idx = i * step;
@@ -146,7 +146,7 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
             const label = isMonthEdge ? format(date, "d/M") : format(date, "d");
             return { idx, label };
         });
-    }, [days]);
+    })()
 
     const allChecked = selectedIds.size === activeTracks.length;
     const someChecked = selectedIds.size > 0 && !allChecked;

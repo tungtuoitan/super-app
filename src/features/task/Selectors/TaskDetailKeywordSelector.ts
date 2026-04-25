@@ -15,10 +15,7 @@ const KEYWORD_TYPE_ORDER: Record<string, number> = {
 export const useTaskDetailKeywordSelector = () => {
     const { linkedKeywords } = useTaskStore();
 
-    const sortedLinkedKeywords = useMemo(
-        () => [...linkedKeywords].sort((a, b) => (KEYWORD_TYPE_ORDER[a.type] ?? 6) - (KEYWORD_TYPE_ORDER[b.type] ?? 6)),
-        [linkedKeywords],
-    );
+    const sortedLinkedKeywords = [...linkedKeywords].sort((a, b) => (KEYWORD_TYPE_ORDER[a.type] ?? 6) - (KEYWORD_TYPE_ORDER[b.type] ?? 6))
 
     return {
         sortedLinkedKeywords,

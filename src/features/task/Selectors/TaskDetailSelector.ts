@@ -25,22 +25,15 @@ export const useTaskDetailSelector = () => {
 
     // ── Tab & task ────────────────────────────────────────────────────────────
 
-    const taskTab = useMemo(
-        () => openTabs.find((tab) => tab.id === activeTabId),
-        [openTabs, activeTabId],
-    );
+    const taskTab = openTabs.find((tab) => tab.id === activeTabId);
 
     const selectedTask = taskTab ? (taskTab.data as Task) : undefined;
 
     // ── Project ───────────────────────────────────────────────────────────────
 
-    const currentProject = useMemo(
-        () => (selectedTask?.projectId
+    const currentProject = selectedTask?.projectId
             ? (projects.find((p) => p.id === selectedTask.projectId) ?? allProjects.find((p) => p.id === selectedTask.projectId) ?? null)
-            : null),
-        [selectedTask?.projectId, projects, allProjects],
-    );
-
+            : null
     // ── Disabled flags ────────────────────────────────────────────────────────
 
     const isDeleted = selectedTask?.deletedAt != null;
@@ -58,28 +51,20 @@ export const useTaskDetailSelector = () => {
 
     // ── Subtask check ─────────────────────────────────────────────────────────
 
-    const hasSubtasks = useMemo(
-        () => (selectedTask ? tasks.some((t) => t.parentTaskId === selectedTask.id) : false),
-        [selectedTask, tasks],
-    );
+    const hasSubtasks = selectedTask ? tasks.some((t) => t.parentTaskId === selectedTask.id) : false
 
     // ── Dropdown options ──────────────────────────────────────────────────────
 
-    const taskTypeOptions: IStatusOption[] = useMemo(
-        () =>
-            (registriesByType["taskType"] ?? []).map((reg) => ({
+    const taskTypeOptions: IStatusOption[] = (registriesByType["taskType"] ?? []).map((reg) => ({
                 id: reg.code,
                 code: reg.code,
                 label: reg.description || reg.code,
                 bgColor: "",
                 textColor: "",
-            })),
-        [registriesByType],
-    );
+            }))
 
-    const statusOptions: IStatusOption[] = useMemo(() => {
-        const colors = (code: string) =>
-            constants.optionColor.taskStatus.colors[code] ?? constants.optionColor.taskStatus.default;
+    const colors = (code: string) => constants.optionColor.taskStatus.colors[code] ?? constants.optionColor.taskStatus.default;
+    const statusOptions: IStatusOption[] = (() => {
         return (registriesByType["task_status"] ?? [])
             .map((reg) => ({
                 id: reg.code,
@@ -93,11 +78,9 @@ export const useTaskDetailSelector = () => {
                     (constants.optionOrder.taskStatuses[a.label] ?? 999) -
                     (constants.optionOrder.taskStatuses[b.label] ?? 999),
             );
-    }, [registriesByType]);
+    })()
 
-    const priorityOptions: IStatusOption[] = useMemo(() => {
-        const colors = (code: string) =>
-            constants.optionColor.taskPriority.colors[code] ?? constants.optionColor.taskPriority.default;
+    const priorityOptions: IStatusOption[] = (() => {
         return (registriesByType["task_priority"] ?? [])
             .map((reg) => ({
                 id: reg.code,
@@ -111,7 +94,7 @@ export const useTaskDetailSelector = () => {
                     (constants.optionOrder.taskPriorities[a.label] ?? 999) -
                     (constants.optionOrder.taskPriorities[b.label] ?? 999),
             );
-    }, [registriesByType]);
+    })()
 
     // ── Current selected option values ────────────────────────────────────────
 
@@ -126,7 +109,7 @@ export const useTaskDetailSelector = () => {
 
     // ── Date limit bounds (for DateRangePicker warnings) ──────────────────────
 
-    const limitDates = useMemo(() => {
+    const limitDates = (() => {
         if (selectedTask?.parentTaskId) {
             return {
                 limitStartDate: selectedTask.parentStartDate ?? null,
@@ -137,13 +120,7 @@ export const useTaskDetailSelector = () => {
             limitStartDate: selectedTask?.projectStartDate ?? null,
             limitEndDate: selectedTask?.projectEndDate ?? null,
         };
-    }, [
-        selectedTask?.parentTaskId,
-        selectedTask?.parentStartDate,
-        selectedTask?.parentEndDate,
-        selectedTask?.projectStartDate,
-        selectedTask?.projectEndDate,
-    ]);
+    })()
 
     // ── Return ────────────────────────────────────────────────────────────────
 

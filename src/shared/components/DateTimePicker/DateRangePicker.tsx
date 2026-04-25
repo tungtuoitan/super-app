@@ -412,13 +412,13 @@ export function DateRangePicker({
     };
 
     // Create disabled matcher for Calendar component
-    const disabledMatcher = useMemo((): Matcher | undefined => {
+    const disabledMatcher = (() => {
         if (!minDate && !maxDate) return undefined;
         return (date: Date) => isDateDisabled(date);
-    }, [minDate, maxDate]);
+    })();
 
     // Create modifiers for today highlight and range display
-    const calendarModifiers = useMemo(() => {
+    const calendarModifiers = (() => {
         const modifiers: Record<string, Matcher> = {};
         // Today modifier - always show indicator
         modifiers.todayMarker = (date: Date) => isToday(date);
@@ -448,25 +448,24 @@ export function DateRangePicker({
             modifiers.limitEnd = (date: Date) => isSameDay(date, limitEndDate);
         }
         return modifiers;
-    }, [startDate, endDate, limitStartDate, limitEndDate]);
+    })()
 
     // Custom class names for modifiers
-    const modifiersClassNames = useMemo(() => ({
+    const modifiersClassNames = {
         todayMarker: "today-marker",
         rangeStart: "range-start",
         rangeEnd: "range-end",
         rangeMiddle: "range-middle",
         limitStart: "limit-start",
         limitEnd: "limit-end",
-    }), []);
+    }
 
     // Filter quick options based on min/max dates
-    const filteredQuickDateOptions = useMemo(() => {
-        return QUICK_DATE_OPTIONS.filter((option) => {
+    const filteredQuickDateOptions = QUICK_DATE_OPTIONS.filter((option) => {
             const date = option.getValue();
             return !isDateDisabled(date);
         });
-    }, [minDate, maxDate]);
+    
 
     // Check if picker should be fully disabled
     const isConstraintDisabled = disabled || (disabledReason !== undefined && disabledReason !== null);
@@ -480,9 +479,7 @@ export function DateRangePicker({
     const isEndToday = endDate && isToday(endDate);
 
     // Calculate date warning
-    const dateWarning = useMemo(() => {
-        return checkDateWarning(startDate, endDate, limitStartDate, limitEndDate);
-    }, [startDate, endDate, limitStartDate, limitEndDate]);
+    const dateWarning = checkDateWarning(startDate, endDate, limitStartDate, limitEndDate)
 
     return (
         <div className={cn("space-y-2", className)}>

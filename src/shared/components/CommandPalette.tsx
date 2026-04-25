@@ -36,11 +36,11 @@ export function CommandPalette() {
     const [selectedType, setSelectedType] = useState<KeywordType | null>(null);
 
     // Get filtered keywords using helper function
-    const filteredKeywords = useMemo(() => {
+    const filteredKeywords = (() => {
         const bySearch = getFilteredKeywords(searchQuery) as Array<{ keyword: Keyword; matchedIndices: { name: number[]; link: number[] }; displayLink: string }>;
         if (!selectedType) return bySearch;
         return bySearch.filter((m) => m.keyword.type === selectedType);
-    }, [searchQuery, allKeywords.length, selectedType]);
+    })()
 
     // Reset selection when filtered list changes
     useEffect(() => {

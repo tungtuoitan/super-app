@@ -16,7 +16,7 @@ export const useMultiProjectKanbanSelector = () => {
     const { projectIds } = useMultiTimelineStore();
 
     // Get status options from registriesByType
-    const statusOptions = useMemo(() => {
+    const statusOptions = (() => {
         const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg) => ({
@@ -28,15 +28,14 @@ export const useMultiProjectKanbanSelector = () => {
                     (constants.optionOrder.taskStatuses[a.label] ?? 999) -
                     (constants.optionOrder.taskStatuses[b.label] ?? 999),
             );
-    }, [registriesByType]);
+    })()
 
     // Filter tasks by projectIds, exclude deleted
-    const filteredTasks = useMemo(() => {
-        return tasks.filter((task) => projectIds.includes(task.projectId) && !task.deletedAt);
-    }, [tasks, projectIds]);
+    const filteredTasks = tasks.filter((task) => projectIds.includes(task.projectId) && !task.deletedAt);
+
 
     // Group tasks by status
-    const tasksByStatus = useMemo(() => {
+    const tasksByStatus = (() => {
         const grouped: Record<string, Task[]> = {};
         statusOptions.forEach((status) => {
             grouped[status.code] = [];
@@ -55,7 +54,7 @@ export const useMultiProjectKanbanSelector = () => {
             grouped[status].sort((a, b) => a.orderIndex - b.orderIndex);
         });
         return grouped;
-    }, [filteredTasks, statusOptions]);
+    })()
 
     return {
         statusOptions,

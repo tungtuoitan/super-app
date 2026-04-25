@@ -15,15 +15,9 @@ export const useTaskDetailChecklistSelector = () => {
     const { selectedTask } = useTaskDetailSelector();
     const { registriesByType } = useGeneralStore();
 
-    const parsedChecklist = useMemo(
-        () => parseChecklistJson(selectedTask?.checklistJson ?? null),
-        [selectedTask?.checklistJson],
-    );
+    const parsedChecklist = parseChecklistJson(selectedTask?.checklistJson ?? null)
 
-    const checklistTemplate = useMemo(
-        () => getChecklistTemplate(selectedTask?.taskType ?? "personal", registriesByType),
-        [selectedTask?.taskType, registriesByType],
-    );
+    const checklistTemplate = getChecklistTemplate(selectedTask?.taskType ?? "personal", registriesByType)
 
     return {
         parsedChecklist,

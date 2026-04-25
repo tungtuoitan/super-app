@@ -12,13 +12,11 @@ export const useTaskSectionSelector = () => {
     const { activeSection } = useTaskDetailSectionStore();
     const { descDirty, customTabDirty, isChecklistDirty, isProcessDirty } = useTaskSectionStore();
 
-    const isSectionDirty = useMemo(() =>
+    const isSectionDirty = (() =>
         (activeSection === "process" && isProcessDirty) ||
         (activeSection === "checklist" && isChecklistDirty) ||
         (activeSection === "desc" && descDirty) ||
-        (isCustomTab(activeSection) && customTabDirty),
-        [activeSection, isProcessDirty, isChecklistDirty, descDirty, customTabDirty],
-    );
+        (isCustomTab(activeSection) && customTabDirty))()
 
     return { isSectionDirty };
 };

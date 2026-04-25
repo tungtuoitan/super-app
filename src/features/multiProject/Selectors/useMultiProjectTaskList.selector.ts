@@ -21,7 +21,7 @@ export const useMultiProjectTaskListSelector = () => {
     const { projectIds } = useMultiTimelineStore();
 
     // Create a map of projectId -> projectName for display
-    const projectNameMap = useMemo(() => {
+    const projectNameMap = (() => {
         const map: Record<number, string> = {};
         projects
             .filter((p) => projectIds.includes(p.id))
@@ -29,10 +29,10 @@ export const useMultiProjectTaskListSelector = () => {
                 map[p.id] = p.name;
             });
         return map;
-    }, [projects, projectIds]);
+    })();
 
     // Get status options from registriesByType with colors
-    const statusOptions: IStatusOption[] = useMemo(() => {
+    const statusOptions: IStatusOption[] = (() => {
         const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg) => {
@@ -46,10 +46,10 @@ export const useMultiProjectTaskListSelector = () => {
                 };
             })
             .sort((a, b) => (constants.optionOrder.taskStatuses[a.label] ?? 999) - (constants.optionOrder.taskStatuses[b.label] ?? 999));
-    }, [registriesByType]);
+    })();
 
     // Get priority options from registriesByType with colors
-    const priorityOptions: IStatusOption[] = useMemo(() => {
+    const priorityOptions: IStatusOption[] = (() => {
         const taskPriorities = registriesByType["task_priority"] || [];
         return taskPriorities
             .map((reg) => {
@@ -63,10 +63,10 @@ export const useMultiProjectTaskListSelector = () => {
                 };
             })
             .sort((a, b) => (constants.optionOrder.taskPriorities[a.label] ?? 999) - (constants.optionOrder.taskPriorities[b.label] ?? 999));
-    }, [registriesByType]);
+    })()
 
     // Filter tasks by projectIds and search query
-    const filteredTasks = useMemo(() => {
+    const filteredTasks = (() => {
         let result = tasks.filter((task) => projectIds.includes(task.projectId));
         if (taskSearchQuery) {
             const query = taskSearchQuery.toLowerCase();
@@ -77,12 +77,10 @@ export const useMultiProjectTaskListSelector = () => {
             );
         }
         return result;
-    }, [tasks, projectIds, taskSearchQuery]);
+    })()
 
     // Sort tasks hierarchically
-    const sortedTasks = useMemo(() => {
-        return sortTasksHierarchically(filteredTasks);
-    }, [filteredTasks]);
+    const sortedTasks = sortTasksHierarchically(filteredTasks);
 
     return {
         projectNameMap,

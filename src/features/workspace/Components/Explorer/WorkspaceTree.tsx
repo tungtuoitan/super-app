@@ -81,9 +81,7 @@ export function WorkspaceTree() {
     // Root will be hidden via CSS, not by removing from data
 
     // Get all visible folder IDs for keyboard navigation
-    const allVisibleFolderIds = useMemo(() => {
-        return treeMiniHelper.getAllVisibleFolderIds(treeData);
-    }, [treeData]);
+    const allVisibleFolderIds = treeMiniHelper.getAllVisibleFolderIds(treeData);
 
     // Keyboard navigation (VS Code-like)
     useEffect(() => {

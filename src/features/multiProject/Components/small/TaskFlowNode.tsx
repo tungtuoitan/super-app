@@ -52,26 +52,26 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const [isHovered, setIsHovered] = useState(false);
     const [projectPickerOpen, setProjectPickerOpen] = useState(false);
     const isDragging = draggingNodeId === id;
-    const multiSelected = useMemo(() => flowNodes.filter((n) => n.selected).length > 1, [flowNodes]);
+    const multiSelected = flowNodes.filter((n) => n.selected).length > 1
     const inputRef = useRef<HTMLInputElement>(null);
     const nodeRef = useRef<HTMLDivElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
 
     const borderColor = getStatusBorderColor(data.task.status);
     const bgColor = getStatusNodeBackground(data.task.status);
-    const anyEdgeSelected = useMemo(() => flowEdges.some((e) => e.selected), [flowEdges]);
+    const anyEdgeSelected = flowEdges.some((e) => e.selected)
     const isConnectingDrag = !!connectingSourceId;
     const showHandles = !anyEdgeSelected && !nodeLocked && !isConnectingDrag && (isHovered || (!!selected && !multiSelected));
     const handleOpacity: React.CSSProperties = { opacity: showHandles ? 1 : 0, transition: "opacity 0.15s" };
 
     // Process progress (checked / total)
-    const parsedProcess = useMemo(() => parseChecklistJson(data.task.processJson ?? null), [data.task.processJson]);
-    const progress = useMemo(() => {
+    const parsedProcess = parseChecklistJson(data.task.processJson ?? null)
+    const progress = (() => {
         if (!parsedProcess) return null;
         const { done, total } = checklistProgress(parsedProcess);
         if (total === 0) return null;
         return { done, total, percent: Math.round((done / total) * 100) };
-    }, [parsedProcess]);
+    })()
 
     const [showProgressPopup, setShowProgressPopup] = useState(false);
     const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

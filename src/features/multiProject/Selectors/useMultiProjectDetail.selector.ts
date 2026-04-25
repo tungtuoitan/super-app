@@ -14,40 +14,29 @@ export const useMultiProjectDetailSelector = () => {
     const { projects } = useProjectStore();
 
     // Current editor tab
-    const currentTab = useMemo(() => {
-        return openTabs.find((t) => t.id === activeTabId) || null;
-    }, [openTabs, activeTabId]);
+    const currentTab = openTabs.find((t) => t.id === activeTabId) || null;
 
     // Active inner tab
-    const activeTab = useMemo(() => {
-        return (currentTab?.metadata?.innerTab as TabType) || "taskFlow";
-    }, [currentTab?.metadata?.innerTab]);
+    const activeTab = (currentTab?.metadata?.innerTab as TabType) || "taskFlow";
+
 
     // All available projects (not deleted)
-    const availableProjects = useMemo(
-        () => projects.filter((p) => !p.deletedAt),
-        [projects],
-    );
+    const availableProjects = projects.filter((p) => !p.deletedAt)
+
 
     // Selected project IDs from editor tab metadata
-    const selectedProjectIds: number[] = useMemo(() => {
+    const selectedProjectIds: number[] = (() => {
         const saved = currentTab?.metadata?.selectedProjectIds as number[] | undefined;
         if (saved && saved.length > 0) return saved;
         const activeProjects = projects.filter((p) => p.status === "active" && !p.deletedAt);
         return activeProjects.map((p) => p.id);
-    }, [currentTab?.metadata?.selectedProjectIds, projects]);
+    })()
 
     // Filtered projects based on selection
-    const filteredProjects = useMemo(
-        () => availableProjects.filter((p) => selectedProjectIds.includes(p.id)),
-        [availableProjects, selectedProjectIds],
-    );
+    const filteredProjects = availableProjects.filter((p) => selectedProjectIds.includes(p.id))
 
     // Filtered project IDs
-    const filteredProjectIds = useMemo(
-        () => filteredProjects.map((p) => p.id),
-        [filteredProjects],
-    );
+    const filteredProjectIds = filteredProjects.map((p) => p.id)
 
     return {
         currentTab,

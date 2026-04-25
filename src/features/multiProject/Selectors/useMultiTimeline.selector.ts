@@ -14,7 +14,7 @@ export const useMultiTimelineSelector = () => {
     const { tasks } = useTaskStore();
 
     // ── Filtered & sorted tasks (for mode === "task") ────
-    const filteredTasks = useMemo(() => {
+    const filteredTasks = (() => {
         if (mode !== "task") return [];
 
         const projectTasks = tasks.filter((t) => projectIds.includes(t.projectId) && !t.deletedAt);
@@ -45,10 +45,10 @@ export const useMultiTimelineSelector = () => {
         const usedSubtaskIds = new Set(result.filter((t) => t.parentTaskId).map((t) => t.id));
         result.push(...subtasks.filter((s) => !usedSubtaskIds.has(s.id)));
         return result;
-    }, [mode, tasks, projectIds]);
+    })()
 
     // ── Filtered & sorted projects (for mode === "project") ──
-    const filteredProjects = useMemo(() => {
+    const filteredProjects = (() => {
         if (mode !== "project") return [];
 
         return projects
@@ -59,27 +59,27 @@ export const useMultiTimelineSelector = () => {
                 if (b.startDate) return 1;
                 return (a.name || "").localeCompare(b.name || "");
             });
-    }, [mode, projects]);
+    })()
 
     // ── Items for range computation (generic) ────────────
     const items = mode === "task" ? filteredTasks : filteredProjects;
 
     // ── Dates from range ─────────────────────────────────
-    const { timelineStart, dates } = useMemo(() => {
+    const { timelineStart, dates } = (() => {
         if (!timelineRange) return { timelineStart: new Date(), dates: [] as Date[] };
         return { timelineStart: timelineRange.start, dates: generateDateRange(timelineRange.start, timelineRange.end) };
-    }, [timelineRange]);
+    })()
 
     // ── Today line position ──────────────────────────────
-    const todayPosition = useMemo(() => {
+    const todayPosition = (() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const diffDays = Math.floor((today.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
         return diffDays * dayWidth + dayWidth / 2;
-    }, [timelineStart, dayWidth]);
+    })()
 
     // ── Month groups for header ──────────────────────────
-    const monthGroups = useMemo(() => {
+    const monthGroups = (() => {
         const groups: { month: string; days: number; startIndex: number }[] = [];
         let currentMonth = "";
         let currentCount = 0;
@@ -99,7 +99,7 @@ export const useMultiTimelineSelector = () => {
 
         if (currentMonth) groups.push({ month: currentMonth, days: currentCount, startIndex });
         return groups;
-    }, [dates]);
+    })()
 
     // ── Zoom info ────────────────────────────────────────
     const timelineWidth = dates.length * dayWidth;

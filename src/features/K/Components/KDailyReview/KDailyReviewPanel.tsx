@@ -81,7 +81,7 @@ export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }:
 
     // ── Merge tests + queue into cards ─────────────────────────────────────
 
-    const cards: DailyCardData[] = useMemo(() => {
+    const cards: DailyCardData[] = (() => {
         const queueMap = new Map(queue.map(q => [q.testId, q]));
         const kNameMap = new Map(allK.map(k => [k.id, k.name]));
         const nodeNameMap = new Map<number, string>();
@@ -145,10 +145,10 @@ export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }:
         });
 
         return merged;
-    }, [allTests, queue, knowledgeId, allK]);
+    })();
 
     const visibleCards = showAll ? cards : cards.filter(c => c.status === "learning" || c.status === "mastered");
-    const dueTotal = cards.reduce((sum, c) => sum + c.dueCount + c.newCount, 0);
+    // const dueTotal = cards.reduce((sum, c) => sum + c.dueCount + c.newCount, 0);
     const inactiveCount = cards.filter(c => c.status !== "learning" && c.status !== "mastered").length;
 
     // ── Session handlers ─────────────────────────────────────────────────────

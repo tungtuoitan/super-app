@@ -36,15 +36,9 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
     const { activeSection } = useTaskDetailSectionStore();
     const { customFocusTrigger, customTabHandlersRef, setCustomTabDirty } = useTaskSectionStore();
 
-    const customTabs = useMemo(
-        () => parseCustomTabs(selectedTask?.customTabsJson),
-        [selectedTask?.customTabsJson],
-    );
+    const customTabs = parseCustomTabs(selectedTask?.customTabsJson)
 
-    const tab = useMemo(
-        () => customTabs.tabs.find((t) => t.id === tabId),
-        [customTabs.tabs, tabId],
-    );
+    const tab = customTabs.tabs.find((t) => t.id === tabId)
 
     const [editContent, setEditContent] = useState(tab?.content ?? "");
     const [validationError, setValidationError] = useState<string | null>(null);
