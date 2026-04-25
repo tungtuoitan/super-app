@@ -3,7 +3,7 @@
  * Manages opening/closing log editor tabs
  */
 
-import { useCallback } from "react";
+
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
@@ -14,7 +14,7 @@ export function useLifeLogTabHelper() {
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
     const { setLogs, setTracks } = useLifeLogStore();
 
-    const openLogTab = useCallback((log: LifeLogLog) => {
+    const openLogTab = (log: LifeLogLog) => {
         const existing = openTabs.find(
             (t) => t.type === constants.vscode.tab.tabTypes.lifeLog && (t.data as LifeLogLog).id === log.id
         );
@@ -33,10 +33,10 @@ export function useLifeLogTabHelper() {
             setActiveTabId(newTab.id);
         }
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }, [openTabs, setOpenTabs, setActiveTabId]);
+    }
 
     /** Create temp log (negative ID), push to store, open tab — no API call */
-    const openNewLogTab = useCallback(() => {
+    const openNewLogTab = () => {
         const tempId = -Date.now();
         const now = new Date();
         const tempLog: LifeLogLog = {
@@ -64,9 +64,9 @@ export function useLifeLogTabHelper() {
         setOpenTabs((prev) => [...prev, newTab]);
         setActiveTabId(newTab.id);
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }, [setLogs, setOpenTabs, setActiveTabId]);
+    }
 
-    const openTrackTab = useCallback((track: LifeLogTrack) => {
+    const openTrackTab = (track: LifeLogTrack) => {
         const existing = openTabs.find(
             (t) => t.type === constants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === track.id
         );
@@ -85,10 +85,10 @@ export function useLifeLogTabHelper() {
             setActiveTabId(newTab.id);
         }
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }, [openTabs, setOpenTabs, setActiveTabId]);
+    }
 
     /** Create temp track (negative ID), push to store, open tab — no API call */
-    const openNewTrackTab = useCallback(() => {
+    const openNewTrackTab = () => {
         const tempId = -Date.now();
         const now = new Date();
         const tempTrack: LifeLogTrack = {
@@ -114,9 +114,9 @@ export function useLifeLogTabHelper() {
         setOpenTabs((prev) => [...prev, newTab]);
         setActiveTabId(newTab.id);
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }, [setTracks, setOpenTabs, setActiveTabId]);
+    }
 
-    const openGraphTab = useCallback(() => {
+    const openGraphTab = () => {
         const existing = openTabs.find((t) => t.type === constants.vscode.tab.tabTypes.lifeLogGraph);
         if (existing) {
             setActiveTabId(existing.id);
@@ -133,13 +133,13 @@ export function useLifeLogTabHelper() {
             setActiveTabId(newTab.id);
         }
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }, [openTabs, setOpenTabs, setActiveTabId]);
+    }
 
-    const closeLogTab = useCallback((tabId: string) => {
+    const closeLogTab = (tabId: string) => {
         setOpenTabs((prev) => prev.filter((t) => t.id !== tabId));
-    }, [setOpenTabs]);
+    }
 
-    const updateLogInTabs = useCallback((logId: number, updatedFields: Partial<LifeLogLog>) => {
+    const updateLogInTabs = (logId: number, updatedFields: Partial<LifeLogLog>) => {
         setOpenTabs((prev) =>
             prev.map((t) => {
                 if (t.type !== constants.vscode.tab.tabTypes.lifeLog) return t;
@@ -149,7 +149,7 @@ export function useLifeLogTabHelper() {
                 return { ...t, data: updated, title: updated.title || updated.type || "Log" };
             })
         );
-    }, [setOpenTabs]);
+    }
 
     return { openLogTab, openNewLogTab, openTrackTab, openNewTrackTab, openGraphTab, closeLogTab, updateLogInTabs };
 }

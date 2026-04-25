@@ -6,7 +6,7 @@
  * @returns {Object} Selection action functions only (no state)
  */
 
-import { useCallback } from "react";
+
 import type { NodeApi } from "react-arborist";
 import type { TreeFolder } from "./tree.miniHelper";
 import { treeMiniHelper } from "./tree.miniHelper";
@@ -75,7 +75,7 @@ export const useTreeHelper2 = () => {
      *
      * ⚡ Performance optimized with useCallback
      */
-    const handleKeyDown = useCallback(
+    const handleKeyDown = 
         (e: KeyboardEvent, allVisibleFolderIds: number[]) => {
             if (e.target !== document.body && !(e.target as Element).closest("[data-workspace-tree]")) {
                 return; // Only handle when tree is focused
@@ -196,9 +196,7 @@ export const useTreeHelper2 = () => {
                     setLastSelectedItemId(null);
                     break;
             }
-        },
-        [selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace]
-    );
+        }
 
     const selectItem = (itemsToSelect: number[]) => {
         const tree = _treeRef?.current;

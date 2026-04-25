@@ -87,13 +87,13 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
 
     // nodesSelectionActive overlay intercepts pointer events — pointer-events:none via CSS
     // so onNodeClick fires normally; we only need to manually deselect on Shift+click
-    const handleNodeClick = useCallback((e: React.MouseEvent, node: Node) => {
+    const handleNodeClick = (e: React.MouseEvent, node: Node) => {
         if (e.shiftKey && node.selected) {
             handleNodesChange([{ id: node.id, type: "select" as const, selected: false }]);
         }
-    }, [handleNodesChange]);
+    }
 
-    const handleSelectionChange = useCallback(({ nodes: selNodes, edges: selEdges }: { nodes: Node[]; edges: { id: string }[] }) => {
+    const handleSelectionChange = ({ nodes: selNodes, edges: selEdges }: { nodes: Node[]; edges: { id: string }[] }) => {
         if (isDragSelecting.current && selEdges.length > 0) {
             handleEdgesChange(selEdges.map((e) => ({ id: e.id, type: "select" as const, selected: false })));
         }
@@ -104,7 +104,7 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         } else if (selNodes.length <= 1 && store.nodesSelectionActive) {
             storeApi.setState({ nodesSelectionActive: false });
         }
-    }, [handleEdgesChange, storeApi]);
+    }
 
     useEffect(() => { setKnowledgeId(knowledgeId); }, [knowledgeId, setKnowledgeId]);
     useEffect(() => { setActiveTestId(selectedTestId); }, [selectedTestId, setActiveTestId]);
@@ -161,8 +161,7 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         return () => window.removeEventListener("kflow:questions-changed", handler);
     }, [onQuestionsChanged]);
 
-    const handlePaneContextMenu = useCallback(
-        (event: MouseEvent | React.MouseEvent) => {
+    const handlePaneContextMenu = (event: MouseEvent | React.MouseEvent) => {
             event.preventDefault();
             const flowPos = rfInstance.screenToFlowPosition({
                 x: (event as React.MouseEvent).clientX,
@@ -193,9 +192,7 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
                     selectedIds,
                 },
             );
-        },
-        [rfInstance, flowNodes, selectedTestId, setFlowNodes, setEditingNodeId, showContextMenu, handleDeleteQuestion],
-    );
+        }
 
     if (!selectedTestId) {
         return (

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { constants } from "@/utils/constants";
 import { useWsDetailHelper } from "./useWsDetail.helper";
 import { useWsGridHelper } from "./useWsGrid.helper";
@@ -11,10 +11,10 @@ export function useWsSaveActions(): SaveActions {
 
     const handles = (tabType: string) => tabType === constants.vscode.tab.tabTypes.workspace;
 
-    const onSave = useCallback(async (tab: BaseTab) => {
+    const onSave = async (tab: BaseTab) => {
         await upsertWorkspace(tab.id);
         loadWorkspaces();
-    }, [upsertWorkspace, loadWorkspaces]);
+    }
 
     return { handles, onSave };
 }

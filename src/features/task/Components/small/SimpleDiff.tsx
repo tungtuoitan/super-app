@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fileService } from "@/services/file.service";
@@ -39,12 +39,12 @@ function DiffImageThumb({ img, type }: { img: ImageInfo; type: "add" | "remove" 
 
 function CopyButton({ text, label }: { text: string; label: string }) {
     const [copied, setCopied] = useState(false);
-    const handleCopy = useCallback(() => {
+    const handleCopy = () => {
         navigator.clipboard.writeText(text).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
         });
-    }, [text]);
+    };
 
     return (
         <button onClick={handleCopy} title={`Copy ${label}`}

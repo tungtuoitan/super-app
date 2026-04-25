@@ -4,7 +4,7 @@
  * Replaces the inline useCallback logic that was previously in the UI file.
  */
 
-import { useCallback } from "react";
+
 import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
@@ -38,20 +38,20 @@ export const useTaskSectionHelper = () => {
     } = useTaskSectionStore();
 
     /** Update a field in the active editor tab's data without marking hasUnsavedChanges */
-    const updateTabDataSilent = useCallback((field: string, value: unknown) => {
+    const updateTabDataSilent = (field: string, value: unknown) => {
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((t) =>
                 t.id === activeTabId ? { ...t, data: { ...(t.data as Task), [field]: value } } : t,
             ),
         );
-    }, [activeTabId, setOpenTabs]);
+    }
 
-    const handleDescChange = useCallback((value: string) => {
+    const handleDescChange = (value: string) => {
         updateTabDataSilent("note", value);
         setDescDirty(value !== savedNoteRef.current);
-    }, [updateTabDataSilent, savedNoteRef, setDescDirty]);
+    }
 
-    const handleDescSave = useCallback(async () => {
+    const handleDescSave = async () => {
         if (!selectedTask || selectedTask.id <= 0) return;
         const currentNote = selectedTask.note ?? "";
         const oldNote = savedNoteRef.current;
@@ -62,42 +62,37 @@ export const useTaskSectionHelper = () => {
         if (oldNote !== currentNote) submitVersionComment("desc", oldNote, currentNote);
         savedNoteRef.current = currentNote;
         setDescDirty(false);
-    }, [selectedTask, $user.userToken, activeTabId, setOpenTabs, submitVersionComment, savedNoteRef, setDescDirty]);
-
-    const handleDescDiscard = useCallback(() => {
+    }
+    
+    const handleDescDiscard = () => {
         if (!selectedTask) return;
         updateTabDataSilent("note", savedNoteRef.current);
         setDescDirty(false);
         setDescKey((p) => p + 1);
-    }, [selectedTask, updateTabDataSilent, savedNoteRef, setDescDirty, setDescKey]);
-
-    const handleCustomTabSave = useCallback(async () => {
+    }
+    const handleCustomTabSave = async () => {
         const tabId = getCustomTabId(activeSection);
         if (!tabId) return;
         await customTabHandlersRef.current[tabId]?.save();
-    }, [activeSection, customTabHandlersRef]);
-
-    const handleCustomTabDiscard = useCallback(() => {
+    }
+    const handleCustomTabDiscard = () => {
         const tabId = getCustomTabId(activeSection);
         if (!tabId) return;
         customTabHandlersRef.current[tabId]?.discard();
-    }, [activeSection, customTabHandlersRef]);
-
-    const handleSectionSave = useCallback(async () => {
+    }
+    const handleSectionSave = async () => {
         if (activeSection === "process") await builtinSectionHandlersRef.current.process?.save();
         else if (activeSection === "checklist") await builtinSectionHandlersRef.current.checklist?.save();
         else if (activeSection === "desc") await handleDescSave();
         else if (isCustomTab(activeSection)) await handleCustomTabSave();
-    }, [activeSection, builtinSectionHandlersRef, handleDescSave, handleCustomTabSave]);
-
-    const handleSectionDiscard = useCallback(() => {
+    }
+    const handleSectionDiscard = () => {
         if (activeSection === "process") builtinSectionHandlersRef.current.process?.discard();
         else if (activeSection === "checklist") builtinSectionHandlersRef.current.checklist?.discard();
         else if (activeSection === "desc") handleDescDiscard();
         else if (isCustomTab(activeSection)) handleCustomTabDiscard();
-    }, [activeSection, builtinSectionHandlersRef, handleDescDiscard, handleCustomTabDiscard]);
-
-    const doSwitchTab = useCallback((key: SectionTab) => {
+    }
+    const doSwitchTab = (key: SectionTab) => {
         setActiveSection(key);
         setOpenTabs((prev: BaseTab[]) =>
             prev.map((t) => t.id === activeTabId ? { ...t, metadata: { ...t.metadata, activeSection: key } } : t),
@@ -105,15 +100,13 @@ export const useTaskSectionHelper = () => {
         if (key === "desc") triggerDescFocus();
         if (key === "comment") { triggerCommentFocus(); triggerCommentLoad(); }
         if (isCustomTab(key)) triggerCustomFocus();
-    }, [setActiveSection, setOpenTabs, activeTabId, triggerDescFocus, triggerCommentFocus, triggerCommentLoad, triggerCustomFocus]);
-
-    const handleTabClick = useCallback((key: SectionTab) => {
+    }
+    const handleTabClick = (key: SectionTab) => {
         if (key === activeSection) return;
         if (isSectionDirty) handleSectionDiscard();
         doSwitchTab(key);
-    }, [activeSection, isSectionDirty, handleSectionDiscard, doSwitchTab]);
-
-    const handleAddCustomTab = useCallback(() => {
+    }
+    const handleAddCustomTab = () => {
         if (!selectedTask) return;
         const tabNumber = customTabs.tabs.length + 1;
         const newTab = {
@@ -127,9 +120,8 @@ export const useTaskSectionHelper = () => {
         const updated = { tabs: [...customTabs.tabs, newTab] };
         updateTabDataSilent("customTabsJson", serializeCustomTabs(updated));
         setTimeout(() => setActiveSection(`custom:${newTab.id}`), 50);
-    }, [selectedTask, customTabs, updateTabDataSilent, setActiveSection]);
-
-    const handleDeleteCustomTab = useCallback((tabId: string, anchorEl: HTMLElement | null) => {
+    }
+    const handleDeleteCustomTab = (tabId: string, anchorEl: HTMLElement | null) => {
         if (!selectedTask) return;
         const tabToDelete = customTabs.tabs.find((t) => t.id === tabId);
         if (!tabToDelete) return;
@@ -148,8 +140,7 @@ export const useTaskSectionHelper = () => {
                 submitComment(`[Deleted tab "${tabToDelete.name}" v${tabToDelete.version}]`);
             },
         });
-    }, [selectedTask, customTabs, updateTabDataSilent, activeSection, setActiveSection, showConfirmation, submitComment]);
-
+    }
     return {
         updateTabDataSilent,
         handleDescChange,

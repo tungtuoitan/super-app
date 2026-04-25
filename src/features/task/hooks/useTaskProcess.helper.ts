@@ -6,7 +6,7 @@
  * Mirrors useTaskChecklist.helper — same pattern, uses process store/selectors.
  */
 
-import { useCallback } from "react";
+
 import {
     validateChecklistText,
     parseTextToChecklist,
@@ -46,7 +46,7 @@ export const useTaskProcessHelper = () => {
 
     // ── Handlers ──────────────────────────────────────────────────────────────
 
-    const handleToggle = useCallback(
+    const handleToggle = 
         (gi: number, ii: number, action: "check" | "skip") => {
             if (isDisabled) return;
             // Transform fn: always applied to the LATEST process state inside
@@ -68,32 +68,27 @@ export const useTaskProcessHelper = () => {
                 }
                 return toggleChecklistItem(current, gi, ii, action);
             });
-        },
-        [isDisabled, handleProcessChange],
-    );
+        }
 
-    const toggleGroup = useCallback(
+    const toggleGroup = 
         (name: string) => {
             setCollapsedGroups((prev) => {
                 const next = new Set(prev);
                 next.has(name) ? next.delete(name) : next.add(name);
                 return next;
             });
-        },
-        [setCollapsedGroups],
-    );
+        }
 
-    const handleStartEdit = useCallback(() => {
+    const handleStartEdit = () => {
         setEditText(parsedProcess ? checklistToText(parsedProcess) : "");
         setEditErrors([]);
         setEditCursorPos(-1);
         setIsEditing(true);
         setIsExpanded(true);
         setIsProcessDirty(true);
-    }, [parsedProcess, setEditText, setEditErrors, setEditCursorPos, setIsEditing, setIsExpanded, setIsProcessDirty]);
-
+    }
     /** Double-click on a row → edit with cursor at that line */
-    const handleStartEditAt = useCallback(
+    const handleStartEditAt = 
         (gi: number, ii: number) => {
             const text = parsedProcess ? checklistToText(parsedProcess) : "";
             setEditText(text);
@@ -102,19 +97,15 @@ export const useTaskProcessHelper = () => {
             setIsEditing(true);
             setIsExpanded(true);
             setIsProcessDirty(true);
-        },
-        [parsedProcess, setEditText, setEditErrors, setEditCursorPos, setIsEditing, setIsExpanded, setIsProcessDirty],
-    );
+        }
 
-    const handleEditChange = useCallback(
+    const handleEditChange = 
         (text: string) => {
             setEditText(text);
             if (editErrors.length > 0) setEditErrors(validateChecklistText(text).errors);
-        },
-        [editErrors.length, setEditText, setEditErrors],
-    );
+        }
 
-    const handleProcessSaveEdit = useCallback(() => {
+    const handleProcessSaveEdit = () => {
         const v = validateChecklistText(editText);
         if (!v.valid) { setEditErrors(v.errors); return; }
         const newChecklist = parseTextToChecklist(editText, parsedProcess ?? undefined);
@@ -126,14 +117,13 @@ export const useTaskProcessHelper = () => {
         setIsEditing(false);
         setIsProcessDirty(false);
         setEditErrors([]);
-    }, [editText, parsedProcess, handleProcessSave, submitVersionComment, setEditErrors, setIsEditing, setIsProcessDirty]);
+    }
 
-    const handleProcessCancelEdit = useCallback(() => {
+    const handleProcessCancelEdit = () => {
         setIsEditing(false);
         setIsProcessDirty(false);
         setEditErrors([]);
-    }, [setIsEditing, setIsProcessDirty, setEditErrors]);
-
+    }
     return {
         handleToggle,
         toggleGroup,

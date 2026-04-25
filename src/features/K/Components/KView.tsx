@@ -59,7 +59,7 @@ export function KView() {
     };
 
     // Right-click context menu on the selector area
-    const handleContextMenu = useCallback(
+    const handleContextMenu = 
         (e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
@@ -74,9 +74,8 @@ export function KView() {
                     }
                 },
             });
-        },
-        [showContextMenu, selectedKId, allK, openNewKnowledgeTab, openKnowledgeTab, softDeleteKnowledge],
-    );
+        }
+        
 
     return (
         <div className="h-full overflow-auto flex flex-col">

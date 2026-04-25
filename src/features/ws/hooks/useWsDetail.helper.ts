@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { useSnackbar } from "notistack";
 import { useWsStore } from "@/features/ws/store/useWs.store";
 import { wsService } from "@/features/ws/service/ws.service";
@@ -37,7 +37,7 @@ export const useWsDetailHelper = () => {
      * Save current workspace (create or update using Upsert pattern)
      * @param tabId - Current tab ID to update after save
      */
-    const upsertWorkspace = useCallback(
+    const upsertWorkspace = 
         async (tabId?: string): Promise<Ws | null> => {
             // Get workspace data from active tab
             const activeTab = openTabs.find((tab) => tab.id === (tabId || activeTabId));
@@ -144,9 +144,7 @@ export const useWsDetailHelper = () => {
                 }
                 return null;
             }
-        },
-        [openTabs, activeTabId, loadWorkspaces, $user, _console, setOpenTabs]
-    );
+        }
 
     return {
         upsertWorkspace,

@@ -69,7 +69,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     const noteColor = noteItem.data.color;
 
     // Handle workspace navigation with highlight
-    const handleWorkspaceNavigation = useCallback(
+    const handleWorkspaceNavigation = 
         (workspaceId: number, workspaceItemId: number) => {
             if (workspaceItemId === null) {
                 return;
@@ -86,9 +86,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
             if (!location.pathname.includes("/workspace")) {
                 navigate("/workspace");
             }
-        },
-        [location.pathname, navigate, setSelectedWorkspaceId, setSelectedItemIds, setScrollToItem]
-    );
+        }
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();

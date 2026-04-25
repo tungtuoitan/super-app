@@ -4,7 +4,7 @@
  * - Long press / right-click: context menu (edit, delete)
  */
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
@@ -39,14 +39,14 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
     const didLongPressRef = useRef(false);
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-    const openMenu = useCallback((e: React.MouseEvent) => {
+    const openMenu = (e: React.MouseEvent) => {
         showContextMenu(e, constants.contextMenu.contextMenuTypes.lifeLogTrack, {
             onEdit: () => openTrackTab(track),
             onDelete: () => deleteTrack(track.id),
         });
-    }, [showContextMenu, track, openTrackTab, deleteTrack]);
+    };
 
-    const startPress = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const startPress = (e: React.MouseEvent | React.TouchEvent) => {
         didLongPressRef.current = false;
         const clientX = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
@@ -55,14 +55,14 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
             didLongPressRef.current = true;
             openMenu({ preventDefault: () => {}, stopPropagation: () => {}, clientX, clientY } as React.MouseEvent);
         }, LONG_PRESS_MS);
-    }, [openMenu]);
+    };
 
-    const cancelPress = useCallback(() => {
+    const cancelPress = () => {
         if (timerRef.current) clearTimeout(timerRef.current);
         touchStartRef.current = null;
-    }, []);
+    };
 
-    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const handleTouchMove = (e: React.TouchEvent) => {
         if (!touchStartRef.current || !timerRef.current) return;
         const dx = e.touches[0].clientX - touchStartRef.current.x;
         const dy = e.touches[0].clientY - touchStartRef.current.y;
@@ -70,9 +70,9 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
             clearTimeout(timerRef.current);
             timerRef.current = null;
         }
-    }, []);
+    };
 
-    const handleClick = useCallback(async () => {
+    const handleClick = async () => {
         if (didLongPressRef.current) return;
         setFlashing(true);
         const occurAt = toLocalISOString(new Date()) ?? undefined;
@@ -89,7 +89,7 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
         loadKeywords();
         setTimeout(() => setFlashing(false), 600);
         onClick?.();
-    }, [createLog, logs, track, onClick]);
+    };
 
     return (
         <button

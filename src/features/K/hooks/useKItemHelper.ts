@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/index";
 import { useAuthStore } from "@/store/Auth.store";
@@ -20,8 +20,7 @@ export const KuseWorkspaceItemHelper = () => {
     const { loadTree } = useKLoader();
 
     //* hàm này phục vụ cho save button trong Editor Toolbar và batch save
-    const upsertWorkspaceItem = useCallback(
-        async (action: KItemAction, tabIds?: string[]): Promise<boolean> => {
+    const upsertWorkspaceItem = async (action: KItemAction, tabIds?: string[]): Promise<boolean> => {
             const token = $user.userToken;
 
             switch (action) {
@@ -149,9 +148,8 @@ export const KuseWorkspaceItemHelper = () => {
                     _console.error(`Unsupported action: ${action}`);
                     return false;
             }
-        },
-        [getActiveTab, currentK, $user, loadTree, setOpenTabs]
-    );
+        }
+        
 
     return {
         upsertWorkspaceItem,

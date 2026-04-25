@@ -3,7 +3,7 @@
  * Opens knowledge editor tabs (create new / edit existing)
  */
 
-import { useCallback } from "react";
+
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
@@ -15,7 +15,7 @@ export function useKNodeTabHelper() {
 
     const SINGLETON_ID = "k-node-tab";
 
-    const openKNodeTab = useCallback((node: KItemV2) => {
+    const openKNodeTab = (node: KItemV2) => {
         const existing = openTabs.find((t) => t.type === constants.vscode.tab.tabTypes.kNode);
         if (existing) {
             // Update the singleton tab with the new node data
@@ -39,7 +39,7 @@ export function useKNodeTabHelper() {
             setOpenTabs((prev) => [...prev, newTab]);
             setActiveTabId(newTab.id);
         }
-    }, [openTabs, setOpenTabs, setActiveTabId]);
+    };
 
     return { openKNodeTab };
 }

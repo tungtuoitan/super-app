@@ -5,7 +5,7 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-import { useCallback } from "react";
+
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useAuthStore, useEditorTabsStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
@@ -28,15 +28,15 @@ export const useTaskTimelineHelper = () => {
     const { filteredTasks, currentProject, todayPosition } = useTaskTimelineSelector();
 
     // Check if today is visible
-    const checkTodayVisibility = useCallback(() => {
+    const checkTodayVisibility = () => {
         if (!timelineScrollRef.current) return;
         const { scrollLeft, clientWidth } = timelineScrollRef.current;
         const isVisible = todayPosition >= scrollLeft && todayPosition <= scrollLeft + clientWidth;
         setIsTodayVisible(isVisible);
-    }, [todayPosition, setIsTodayVisible, timelineScrollRef]);
+    }
 
     // Handle date change from drag with validation
-    const handleDateChange = useCallback(
+    const handleDateChange = 
         async (taskId: number, startDate: Date | null, endDate: Date | null) => {
             const task = filteredTasks.find((t) => t.id === taskId);
             if (!task) return;
@@ -129,12 +129,10 @@ export const useTaskTimelineHelper = () => {
                 );
                 console.error("Failed to update task dates:", error);
             }
-        },
-        [filteredTasks, currentProject, $user.userToken, projectId, _console],
-    );
+        }
 
     // Handle scroll to extend timeline and check today visibility
-    const handleScroll = useCallback(() => {
+    const handleScroll = () => {
         if (!timelineScrollRef.current || !timelineRange) return;
 
         const { scrollLeft, scrollWidth, clientWidth } = timelineScrollRef.current;
@@ -158,17 +156,16 @@ export const useTaskTimelineHelper = () => {
             newEnd.setDate(newEnd.getDate() + TIMELINE_EXTEND_DAYS);
             setTimelineRange(prev => prev ? { ...prev, end: newEnd } : null);
         }
-    }, [timelineRange, dayWidth, checkTodayVisibility, setTimelineRange, timelineScrollRef]);
-
+    }
     // Scroll to today
-    const scrollToToday = useCallback(() => {
+    const scrollToToday = () => {
         if (!timelineScrollRef.current) return;
         const clientWidth = timelineScrollRef.current.clientWidth;
         timelineScrollRef.current.scrollLeft = todayPosition - clientWidth / 2;
-    }, [todayPosition, timelineScrollRef]);
+    }
 
     // Zoom handlers - maintain center point
-    const handleZoom = useCallback((newDayWidth: number) => {
+    const handleZoom = (newDayWidth: number) => {
         if (!timelineScrollRef.current) {
             setDayWidth(newDayWidth);
             return;
@@ -186,15 +183,15 @@ export const useTaskTimelineHelper = () => {
                 timelineScrollRef.current.scrollLeft = newCenterX - clientWidth / 2;
             }
         }, 0);
-    }, [dayWidth, setDayWidth, timelineScrollRef]);
+    }
 
-    const handleZoomIn = useCallback(() => {
+    const handleZoomIn = () => {
         handleZoom(Math.min(dayWidth + TIMELINE_ZOOM_STEP, MAX_DAY_WIDTH));
-    }, [dayWidth, handleZoom]);
+    }
 
-    const handleZoomOut = useCallback(() => {
+    const handleZoomOut = () => {
         handleZoom(Math.max(dayWidth - TIMELINE_ZOOM_STEP, MIN_DAY_WIDTH));
-    }, [dayWidth, handleZoom]);
+    }
 
     return {
         handleDateChange,

@@ -6,7 +6,7 @@
  * Registers save/discard handlers in customTabHandlersRef on mount.
  */
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { RichTextEditor } from "@/shared/components";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
@@ -67,12 +67,12 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
         if (isActiveTab) setCustomTabDirty(editContent !== savedContentRef.current);
     }, [editContent, isActiveTab, setCustomTabDirty]);
 
-    const handleContentChange = useCallback((value: string) => {
+    const handleContentChange = (value: string) => {
         setEditContent(value);
         setValidationError(null);
-    }, []);
+    };
 
-    const save = useCallback(async () => {
+    const save = async () => {
         if (!tab || !selectedTask) return;
         const error = validateCustomTabFormat(editContent);
         if (error) { setValidationError(error); return; }
@@ -110,13 +110,13 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
         savedContentRef.current = editContent;
         setValidationError(null);
         if (isActiveTab) setCustomTabDirty(false);
-    }, [tab, selectedTask, customTabs, tabId, editContent, isActiveTab, handleFieldChange, submitVersionComment, $user.userToken, activeTabId, setOpenTabs, setCustomTabDirty]);
+    };
 
-    const discard = useCallback(() => {
+    const discard = () => {
         setEditContent(savedContentRef.current);
         setValidationError(null);
         if (isActiveTab) setCustomTabDirty(false);
-    }, [isActiveTab, setCustomTabDirty]);
+    };
 
     // ── Register handlers in store (replaces forwardRef + useImperativeHandle) ──
     useEffect(() => {

@@ -53,13 +53,13 @@ export function LogItem({ log, trackEmoji, trackColor, onClick, onDelete }: LogI
     const didLongPressRef = useRef(false);
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-    const openMenu = useCallback((e: React.MouseEvent) => {
+    const openMenu = (e: React.MouseEvent) => {
         showContextMenu(e, constants.contextMenu.contextMenuTypes.lifeLogLog, {
             onDelete: () => onDelete?.(log),
         });
-    }, [showContextMenu, log, onDelete]);
+    }
 
-    const startPress = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const startPress = (e: React.MouseEvent | React.TouchEvent) => {
         didLongPressRef.current = false;
         const clientX = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
@@ -68,14 +68,14 @@ export function LogItem({ log, trackEmoji, trackColor, onClick, onDelete }: LogI
             didLongPressRef.current = true;
             openMenu({ preventDefault: () => {}, stopPropagation: () => {}, clientX, clientY } as React.MouseEvent);
         }, LONG_PRESS_MS);
-    }, [openMenu]);
+    }
 
-    const cancelPress = useCallback(() => {
+    const cancelPress = () => {
         if (timerRef.current) clearTimeout(timerRef.current);
         touchStartRef.current = null;
-    }, []);
+    }
 
-    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const handleTouchMove = (e: React.TouchEvent) => {
         if (!touchStartRef.current || !timerRef.current) return;
         const dx = e.touches[0].clientX - touchStartRef.current.x;
         const dy = e.touches[0].clientY - touchStartRef.current.y;
@@ -83,12 +83,12 @@ export function LogItem({ log, trackEmoji, trackColor, onClick, onDelete }: LogI
             clearTimeout(timerRef.current);
             timerRef.current = null;
         }
-    }, []);
+    }
 
-    const handleClick = useCallback(() => {
+    const handleClick = () => {
         if (didLongPressRef.current) return;
         onClick?.(log);
-    }, [onClick, log]);
+    }
 
     const title = log.isSensitive ? (
         <SensitiveOverlay>

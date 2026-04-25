@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { GitCompare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { VersionPayload } from "../../types/taskComment.types";
@@ -28,16 +28,16 @@ export function VersionCommentCard({
     const isHtmlSection = payload.section === "desc" || payload.section.startsWith("custom:");
     const Icon = meta.icon;
 
-    const handleMouseEnter = useCallback(() => {
+    const handleMouseEnter = () => {
         hoverTimeout.current = setTimeout(() => setHoverDiff(true), 300);
-    }, []);
+    };
 
-    const handleMouseLeave = useCallback(() => {
+    const handleMouseLeave = () => {
         if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
         setHoverDiff(false);
-    }, []);
+    };
 
-    const handleToggleDiff = useCallback(() => {
+    const handleToggleDiff = () => {
         const nextShow = !showDiff;
         setShowDiff(nextShow);
         setHoverDiff(false);
@@ -54,7 +54,7 @@ export function VersionCommentCard({
                 }
             });
         }
-    }, [showDiff, scrollContainer]);
+    };
 
     return (
         <div ref={cardRef} className="group rounded border border-border/50 bg-muted/10 px-3 py-2 space-y-2">

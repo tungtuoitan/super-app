@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { noteService } from "../service/note.service";
@@ -68,7 +68,7 @@ export const useNoteDetailHelper = () => {
     /**
      * Save current note (create or update using Upsert pattern)
      */
-    const upsertNote = useCallback(
+    const upsertNote = 
         async (tabId?: string): Promise<Note | null> => {
             const activeTab = getActiveTab();
             if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
@@ -152,9 +152,7 @@ export const useNoteDetailHelper = () => {
                 }
                 return null;
             }
-        },
-        [loadNotes, loadTree, currentWorkspace, getActiveTab]
-    );
+        }
 
     const hashtagOptions = registries
         .filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)

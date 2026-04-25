@@ -3,7 +3,7 @@
  * Scroll=pan, Shift+scroll=horizontal, Ctrl+scroll=zoom.
  */
 
-import React, { useRef, useEffect, useCallback, useMemo, useState } from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import {
     ReactFlow,
     ReactFlowProvider,
@@ -53,27 +53,26 @@ function TaskFlowCanvas() {
 
     // Drag-select only nodes — deselect edges caught in the selection box
     const storeApi = useStoreApi();
-    const handleSelectionChange = useCallback(({ nodes: selectedNodes, edges: selectedEdges }: { nodes: any[]; edges: any[] }) => {
+    const handleSelectionChange = ({ nodes: selectedNodes, edges: selectedEdges }: { nodes: any[]; edges: any[] }) => {
         if (isDragSelecting.current && selectedEdges.length > 0) {
             handleEdgesChange(selectedEdges.map((e: any) => ({ id: e.id, type: "select" as const, selected: false })));
         }
         const store = storeApi.getState() as any;
         if (selectedNodes.length > 1 && !store.nodesSelectionActive) storeApi.setState({ nodesSelectionActive: true });
         else if (selectedNodes.length <= 1 && store.nodesSelectionActive) storeApi.setState({ nodesSelectionActive: false });
-    }, [handleEdgesChange, storeApi]);
+    };
 
-    const handleSelectionStart = useCallback(() => { isDragSelecting.current = true; }, []);
-    const handleSelectionEnd = useCallback(() => { isDragSelecting.current = false; }, []);
+    const handleSelectionStart = () => { isDragSelecting.current = true; };
+    const handleSelectionEnd = () => { isDragSelecting.current = false; };
 
-    const handleNodeClick = useCallback((e: React.MouseEvent, node: any) => {
+    const handleNodeClick = (e: React.MouseEvent, node: any) => {
         if (e.shiftKey && node.selected) {
             handleNodesChange([{ id: node.id, type: "select" as const, selected: false }]);
         }
-    }, [handleNodesChange]);
+    };
 
     // ── Right-click context menu (orchestrator) ─────────────────────────────
-    const handlePaneContextMenu = useCallback(
-        (event: MouseEvent | React.MouseEvent) => {
+    const handlePaneContextMenu = (event: MouseEvent | React.MouseEvent) => {
             event.preventDefault();
             const flowPos = rfInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
             showContextMenu(
@@ -81,9 +80,7 @@ function TaskFlowCanvas() {
                 constants.contextMenu.contextMenuTypes.taskFlow,
                 { onAddTask: () => handleAddTaskAtPosition(flowPos.x, flowPos.y) },
             );
-        },
-        [rfInstance, showContextMenu, handleAddTaskAtPosition],
-    );
+        };
 
     useEffect(() => {
         const el = containerRef.current;
@@ -131,15 +128,15 @@ function TaskFlowCanvas() {
     const [showMiniMap, setShowMiniMap] = useState(false);
 
     /** Get in-progress/background_progress nodes */
-    const getActiveNodes = useCallback(() => {
+    const getActiveNodes = () => {
         return flowNodes.filter((n) => {
             const status = (n.data as { task?: { status: string } }).task?.status;
             return status === "in_progress" || status === "background_progress";
         });
-    }, [flowNodes]);
+    };
 
     /** Mode 1: Focus close-up on in-progress nodes */
-    const handleFocusClose = useCallback(() => {
+    const handleFocusClose = () => {
         const activeNodes = getActiveNodes();
         if (activeNodes.length === 0) {
             rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
@@ -181,10 +178,10 @@ function TaskFlowCanvas() {
             { duration: 300 },
         );
         setViewMode("focusClose");
-    }, [rfInstance, getActiveNodes, containerRef]);
+    };
 
     /** Mode 2: Bird's eye — fit ALL nodes but center on in-progress area */
-    const handleBirdEye = useCallback(() => {
+    const handleBirdEye = () => {
         const activeNodes = getActiveNodes();
 
         if (flowNodes.length === 0) {
@@ -237,9 +234,9 @@ function TaskFlowCanvas() {
             dynMinZoomRef.current = Math.max(MIN_ZOOM, fitZoom);
         }, 320);
         setViewMode("birdEye");
-    }, [rfInstance, flowNodes, getActiveNodes, containerRef]);
+    };
 
-    const handleBackToCenter = useCallback(() => {
+    const handleBackToCenter = () => {
         const activeNodes = getActiveNodes();
         if (activeNodes.length === 0) {
             rfInstance.fitView({ padding: 0.15, maxZoom: 1, duration: 300 });
@@ -257,13 +254,13 @@ function TaskFlowCanvas() {
             node.position.y + 38,
             { zoom: 1, duration: 300 },
         );
-    }, [rfInstance, getActiveNodes]);
+    };
 
     // F1 toggles between 2 modes
-    const handleF1Toggle = useCallback(() => {
+    const handleF1Toggle = () => {
         if (viewMode === "focusClose") handleBirdEye();
         else handleFocusClose();
-    }, [viewMode, handleBirdEye, handleFocusClose]);
+    };
 
     // F1 = Toggle views, F2 = Back to Center, M = Toggle MiniMap
     useEffect(() => {
@@ -286,17 +283,17 @@ function TaskFlowCanvas() {
         [],
     );
 
-    const handleMoveEnd = useCallback((_: unknown, viewport: Viewport) => {
+    const handleMoveEnd = (_: unknown, viewport: Viewport) => {
         storageService.set(STORAGE_KEYS.TASK_FLOW_VIEWPORT, viewport);
-    }, []);
+    };
 
-    const handleRefresh = useCallback(() => {
+    const handleRefresh = () => {
         loadTaskFlowTasks();
-    }, [loadTaskFlowTasks]);
+    };
 
     // Auto re-lock after 30s when user turns lock off
     const relockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const handleToggleLock = useCallback(() => {
+    const handleToggleLock = () => {
         if (lockOldNodes) {
             // Turning OFF → start 30s re-lock timer
             setLockOldNodes(false);
@@ -306,7 +303,7 @@ function TaskFlowCanvas() {
             if (relockTimerRef.current) { clearTimeout(relockTimerRef.current); relockTimerRef.current = null; }
             setLockOldNodes(true);
         }
-    }, [lockOldNodes, setLockOldNodes]);
+    };
     useEffect(() => () => { if (relockTimerRef.current) clearTimeout(relockTimerRef.current); }, []);
 
     return (

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { useSnackbar } from "notistack";
 import type { Note } from "@/features/note/types/note.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
@@ -23,7 +23,7 @@ export const useWorkspaceItemHelper = () => {
     const { loadTree } = useWorkspaceLoader();
 
     //* hàm này phục vụ cho save button trong Editor Toolbar và batch save
-    const upsertWorkspaceItem = useCallback(
+    const upsertWorkspaceItem = 
         async (action: WorkspaceItemAction, tabIds?: string[]): Promise<boolean> => {
             const token = $user.userToken;
 
@@ -154,9 +154,7 @@ export const useWorkspaceItemHelper = () => {
                     _console.error(`Unsupported action: ${action}`);
                     return false;
             }
-        },
-        [getActiveTab, currentWorkspace, $user, loadTree, setOpenTabs]
-    );
+        }
 
     return {
         upsertWorkspaceItem,

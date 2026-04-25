@@ -62,23 +62,22 @@ export const useMultiProjectTaskFlowHelper = () => {
     const lastSnappedRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
     // ── Lock guards ────────────────────────────────────────────────────────
-    const isNodeLocked = useCallback((nodeId: string): boolean => {
+    const isNodeLocked = (nodeId: string): boolean => {
         if (!lockOldNodes) return false;
         const node = flowNodes.find((n) => n.id === nodeId);
         const status = (node?.data as TaskFlowNodeData)?.task?.status;
         return status === "completed" || status === "cancelled" || status === "failed";
-    }, [lockOldNodes, flowNodes]);
+    }
 
-    const isEdgeLocked = useCallback((edgeId: string): boolean => {
+    const isEdgeLocked = (edgeId: string): boolean => {
         if (!lockOldNodes) return false;
         const edge = flowEdges.find((e) => e.id === edgeId);
         if (!edge) return false;
         return isNodeLocked(edge.source) || isNodeLocked(edge.target);
-    }, [lockOldNodes, flowEdges, isNodeLocked]);
-
+    }
     // ── Node changes (drag/select) ──────────────────────────────────────────
 
-    const handleNodesChange = useCallback(
+    const handleNodesChange = 
         (changes: NodeChange[]) => {
             setFlowNodes((prev) => {
                 // Build a set of locked node IDs for fast lookup
@@ -109,13 +108,11 @@ export const useMultiProjectTaskFlowHelper = () => {
                 });
                 return applyNodeChanges(patched, prev) as typeof prev;
             });
-        },
-        [setFlowNodes, lockOldNodes],
-    );
+        }
 
     // ── Edge changes (select → toggle reconnectable) ──────────────────────
 
-    const handleEdgesChange = useCallback(
+    const handleEdgesChange = 
         (changes: EdgeChange[]) => {
             setFlowEdges((prev) => {
                 const updated = applyEdgeChanges(changes, prev);
@@ -125,13 +122,11 @@ export const useMultiProjectTaskFlowHelper = () => {
                     e.type === "flowEdgeWithNote" ? { ...e, reconnectable: !!e.selected } : e,
                 );
             });
-        },
-        [setFlowEdges],
-    );
+        }
 
     // ── Save positions on drag stop ─────────────────────────────────────────
 
-    const handleNodeDragStart = useCallback(
+    const handleNodeDragStart = 
         (_event: React.MouseEvent, node: { id: string }) => {
             setDraggingNodeId(node.id);
             dragStartRef.current.clear();
@@ -147,16 +142,14 @@ export const useMultiProjectTaskFlowHelper = () => {
                 }
                 return prev;
             });
-        },
-        [setDraggingNodeId, setFlowNodes],
-    );
+        }
 
     // ── Live drag: center-snap + Shift axis constraint ─────────────────────
 
     const SNAP_THRESHOLD = 20;   // px — magnetic snap range
     const AXIS_LOCK_MIN  = 8;    // px — minimum movement before axis is decided
 
-    const handleNodeDrag = useCallback(
+    const handleNodeDrag = 
         (event: React.MouseEvent, _node: { id: string }, draggedNodes: { id: string; position: { x: number; y: number } }[]) => {
             if (draggedNodes.length === 0) return;
             // Exclude locked nodes from drag calculation
@@ -226,11 +219,9 @@ export const useMultiProjectTaskFlowHelper = () => {
                     return { ...n, position: { x, y } };
                 });
             });
-        },
-        [setFlowNodes, lockOldNodes, isNodeLocked],
-    );
+        }
 
-    const handleNodeDragStop = useCallback(
+    const handleNodeDragStop = 
         (_event: React.MouseEvent, _node: { id: string }, draggedNodes: { id: string; position: { x: number; y: number } }[]) => {
             setDraggingNodeId(null);
             dragAxisRef.current.clear();
@@ -271,26 +262,21 @@ export const useMultiProjectTaskFlowHelper = () => {
                     return updated;
                 });
             });
-        },
-        [setDraggingNodeId, setFlowNodes, setSavedPositions, $user.userToken, isNodeLocked],
-    );
+        }
 
     // ── Connection drag tracking ────────────────────────────────────────────
 
-    const handleConnectStart = useCallback(
+    const handleConnectStart = 
         (_: unknown, params: { nodeId?: string | null }) => {
             setConnectingSourceId(params.nodeId ?? null);
-        },
-        [setConnectingSourceId],
-    );
+        }
 
-    const handleConnectEnd = useCallback(() => {
+    const handleConnectEnd = () => {
         setConnectingSourceId(null);
-    }, [setConnectingSourceId]);
-
+    }
     // ── Resolve handles: use RF value when explicit, compute nearest otherwise ─
 
-    const resolveHandles = useCallback(
+    const resolveHandles = 
         (sourceId: string, targetId: string, sourceHandle?: string | null, targetHandle?: string | null) => {
             if (sourceHandle && targetHandle) return { sourceHandle, targetHandle };
             const srcNode = flowNodes.find((n) => n.id === sourceId);
@@ -306,13 +292,10 @@ export const useMultiProjectTaskFlowHelper = () => {
                 sourceHandle: sourceHandle ?? pair.sourceHandle,
                 targetHandle: targetHandle ?? pair.targetHandle,
             };
-        },
-        [flowNodes],
-    );
-
+        }
     // ── Custom edge connect ─────────────────────────────────────────────────
 
-    const handleConnect = useCallback(
+    const handleConnect = 
         async (connection: Connection) => {
             if (reconnectingRef.current) return;
             if (!connection.source || !connection.target) return;
@@ -366,13 +349,10 @@ export const useMultiProjectTaskFlowHelper = () => {
                 setFlowEdges((prev) => prev.filter((e) => e.id !== tempId));
                 _console.error("Failed to save connection");
             }
-        },
-        [$user.userToken, resolveHandles, setFlowEdges, setSavedEdges, _console, isNodeLocked],
-    );
-
+        }
     // ── Edge note editing ───────────────────────────────────────────────────
 
-    const handleEdgeNoteConfirm = useCallback(
+    const handleEdgeNoteConfirm = 
         async (edgeId: string, note: string, arrowDirection: ArrowDirection) => {
             if (isEdgeLocked(edgeId)) {
                 debugLog.log("taskflow", "locked-node-blocked", { action: "edgeNote", edgeId });
@@ -409,11 +389,9 @@ export const useMultiProjectTaskFlowHelper = () => {
             } catch {
                 _console.error("Failed to save note");
             }
-        },
-        [savedEdges, setFlowEdges, setSavedEdges, setEditingEdgeId, $user.userToken, _console, isEdgeLocked],
-    );
+        }
 
-    const handleEdgeDelete = useCallback(
+    const handleEdgeDelete = 
         async (edgeId: string) => {
             if (isEdgeLocked(edgeId)) {
                 debugLog.log("taskflow", "locked-node-blocked", { action: "edgeDelete", edgeId });
@@ -441,16 +419,14 @@ export const useMultiProjectTaskFlowHelper = () => {
             } catch {
                 _console.error("Failed to delete connection");
             }
-        },
-        [savedEdges, setFlowEdges, setSavedEdges, setEditingEdgeId, $user.userToken, _console, isEdgeLocked],
-    );
+        }
 
     // ── Reconnect (drag edge endpoint to new node) ──────────────────────────
 
-    const handleReconnectStart = useCallback(() => { reconnectingRef.current = true; }, []);
-    const handleReconnectEnd = useCallback(() => { reconnectingRef.current = false; }, []);
+    const handleReconnectStart = () => { reconnectingRef.current = true; }
+    const handleReconnectEnd = () => { reconnectingRef.current = false; }
 
-    const handleReconnect = useCallback(
+    const handleReconnect = 
         async (oldEdge: Edge, newConnection: Connection) => {
             if (!newConnection.source || !newConnection.target) return;
 
@@ -489,13 +465,11 @@ export const useMultiProjectTaskFlowHelper = () => {
                 note: edgeData.note,
                 arrowDirection: edgeData.arrowDirection,
             }]).catch(() => _console.error("Failed to update connection"));
-        },
-        [resolveHandles, setFlowEdges, setSavedEdges, $user.userToken, _console, isEdgeLocked, isNodeLocked],
-    );
+        }
 
     // ── Auto layout ─────────────────────────────────────────────────────────
 
-    const handleAutoLayout = useCallback(() => {
+    const handleAutoLayout = () => {
         setFlowNodes((prev) => {
             const subEdges = savedEdges.map((e) => ({ source: e.source, target: e.target }));
 
@@ -517,10 +491,10 @@ export const useMultiProjectTaskFlowHelper = () => {
             if (payload.length > 0) flowService._upsertPositions($user.userToken, payload).catch(() => {});
 
             return [...adjusted, ...frozen];
-        });
-    }, [savedEdges, setFlowNodes, setSavedPositions, $user.userToken, lockOldNodes]);
+        })
+    }
 
-    const loadTaskFlowTasks = useCallback(async () => {
+    const loadTaskFlowTasks = async () => {
         if (!$user.userToken) return;
         setIsTaskFlowLoading(true);
         try {
@@ -533,7 +507,7 @@ export const useMultiProjectTaskFlowHelper = () => {
         } finally {
             setIsTaskFlowLoading(false);
         }
-    }, [$user.userToken, setTaskFlowTasks, setIsTaskFlowLoading, _console]);
+    }
 
     return {
         handleNodesChange,

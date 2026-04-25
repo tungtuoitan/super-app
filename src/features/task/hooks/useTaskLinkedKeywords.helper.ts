@@ -4,7 +4,7 @@
  * State lives in useTaskStore.
  */
 
-import { useCallback } from "react";
+
 import { targetKeywordService, TargetKeywordTargetType } from "@/services/targetKeyword.service";
 import { useAuthStore } from "@/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
@@ -23,7 +23,7 @@ export const useTaskLinkedKeywordsHelper = () => {
     /**
      * Load linked keywords for a task, resolve keyword details from allKeywords
      */
-    const loadLinkedKeywords = useCallback(async (taskId: number) => {
+    const loadLinkedKeywords = async (taskId: number) => {
         if (taskId <= 0) {
             setLinkedKeywords([]);
             return;
@@ -65,12 +65,12 @@ export const useTaskLinkedKeywordsHelper = () => {
         } finally {
             setIsLoadingLinkedKeywords(false);
         }
-    }, [$user.userToken, allKeywords, setLinkedKeywords, setIsLoadingLinkedKeywords]);
+    }
 
     /**
      * Link a keyword to a task
      */
-    const linkKeyword = useCallback(async (taskId: number, keywordId: number) => {
+    const linkKeyword = async (taskId: number, keywordId: number) => {
         try {
             const token = $user.userToken;
             const result = await targetKeywordService._linkTargetKeyword(token, {
@@ -94,12 +94,12 @@ export const useTaskLinkedKeywordsHelper = () => {
                 _console.error(`Failed to link keyword: ${errorMessage}`);
             }
         }
-    }, [$user.userToken, _console, loadLinkedKeywords]);
-
+    }
+    
     /**
      * Unlink a keyword from a task
      */
-    const unlinkKeyword = useCallback(async (taskId: number, linkId: number) => {
+    const unlinkKeyword = async (taskId: number, linkId: number) => {
         try {
             const token = $user.userToken;
             const result = await targetKeywordService._unlinkTargetKeyword(token, linkId);
@@ -119,8 +119,7 @@ export const useTaskLinkedKeywordsHelper = () => {
                 _console.error(`Failed to unlink keyword: ${errorMessage}`);
             }
         }
-    }, [$user.userToken, _console, setLinkedKeywords]);
-
+    }
     return {
         loadLinkedKeywords,
         linkKeyword,

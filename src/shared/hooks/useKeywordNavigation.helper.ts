@@ -2,7 +2,6 @@
  * Hook for handling keyword navigation in markdown editor
  */
 
-import { useCallback } from "react";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
@@ -51,8 +50,7 @@ export const useKeywordNavigationHelper = () => {
     const { tasks } = useTaskStore();
     const { logs, tracks } = useLifeLogStore();
 
-    const navigateLink = useCallback(
-        async (keyword: Keyword, openedBy?: { link: string; label: string }) => {
+    const navigateLink = async (keyword: Keyword, openedBy?: { link: string; label: string }) => {
             try {
                 const parsed = parseKeywordLink(keyword);
 
@@ -376,23 +374,7 @@ export const useKeywordNavigationHelper = () => {
                 console.error("Error navigating to keyword:", error);
                 _console.error("Failed to navigate to keyword");
             }
-        },
-        [
-            currentWorkspace,
-            $user,
-            openTab,
-            openTabs,
-            upsertWorkspaceItem,
-            setSelectedWorkspaceId,
-            setSelectedItemIds,
-            setLastSelectedItemId,
-            _treeRef,
-            setIsLoadingTreeByOpeningFolder,
-            loadTree,
-            moduleName,
-            navigateToView,
-        ]
-    );
+        };
 
     return { navigateLink };
 };

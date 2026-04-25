@@ -7,7 +7,6 @@
  *             TaskDetailChecklistHelper — no params from outside.
  */
 
-import { useCallback } from "react";
 import {
     validateChecklistText,
     parseTextToChecklist,
@@ -56,8 +55,7 @@ export const useTaskChecklistHelper = () => {
 
     // ── Handlers ──────────────────────────────────────────────────────────────
 
-    const handleToggle = useCallback(
-        (gi: number, ii: number, action: "check" | "skip") => {
+    const handleToggle = (gi: number, ii: number, action: "check" | "skip") => {
             if (isDisabled) return;
             // Pass a transform fn so the update is applied to the LATEST checklist
             // state inside setOpenTabs' functional updater — prevents stale-closure
@@ -84,22 +82,17 @@ export const useTaskChecklistHelper = () => {
                 }
                 return toggleChecklistItem(current, gi, ii, action, currentEnv);
             });
-        },
-        [isDisabled, handleChecklistChange, activeEnv],
-    );
+        };
 
-    const toggleGroup = useCallback(
-        (name: string) => {
+    const toggleGroup = (name: string) => {
             setCollapsedGroups((prev) => {
                 const next = new Set(prev);
                 next.has(name) ? next.delete(name) : next.add(name);
                 return next;
             });
-        },
-        [setCollapsedGroups],
-    );
+        };
 
-    const handleStartEdit = useCallback(() => {
+    const handleStartEdit = () => {
         setEditText(parsedChecklist ? checklistToText(parsedChecklist) : checklistTemplate);
         setEditErrors([]);
         setEditCursorPos(-1);
@@ -107,11 +100,10 @@ export const useTaskChecklistHelper = () => {
         setIsEditing(true);
         setIsExpanded(true);
         setIsChecklistDirty(true);
-    }, [parsedChecklist, checklistTemplate, setEditText, setEditErrors, setEditCursorPos, setEditChecklistType, setIsEditing, setIsExpanded, setIsChecklistDirty]);
+    };
 
     /** Double-click on a row → edit with cursor at that line */
-    const handleStartEditAt = useCallback(
-        (gi: number, ii: number) => {
+    const handleStartEditAt = (gi: number, ii: number) => {
             const text = parsedChecklist ? checklistToText(parsedChecklist) : checklistTemplate;
             setEditText(text);
             setEditErrors([]);
@@ -120,19 +112,14 @@ export const useTaskChecklistHelper = () => {
             setIsEditing(true);
             setIsExpanded(true);
             setIsChecklistDirty(true);
-        },
-        [parsedChecklist, checklistTemplate, setEditText, setEditErrors, setEditCursorPos, setEditChecklistType, setIsEditing, setIsExpanded, setIsChecklistDirty],
-    );
+        };
 
-    const handleEditChange = useCallback(
-        (text: string) => {
+    const handleEditChange = (text: string) => {
             setEditText(text);
             if (editErrors.length > 0) setEditErrors(validateChecklistText(text).errors);
-        },
-        [editErrors.length, setEditText, setEditErrors],
-    );
+        };
 
-    const handleChecklistSaveEdit = useCallback(() => {
+    const handleChecklistSaveEdit = () => {
         const v = validateChecklistText(editText);
         if (!v.valid) { setEditErrors(v.errors); return; }
 
@@ -159,21 +146,21 @@ export const useTaskChecklistHelper = () => {
         setIsEditing(false);
         setIsChecklistDirty(false);
         setEditErrors([]);
-    }, [editText, editChecklistType, parsedChecklist, activeEnv, handleChecklistSave, submitVersionComment, setEditErrors, setIsEditing, setIsChecklistDirty]);
+    };
 
-    const handleSetAsDefault = useCallback(async () => {
+    const handleSetAsDefault = async () => {
         const v = validateChecklistText(editText);
         if (!v.valid) { setEditErrors(v.errors); return; }
         setSettingDefault(true);
         try { await persistDefaultTemplate(editText); }
         finally { setSettingDefault(false); }
-    }, [editText, persistDefaultTemplate, setEditErrors, setSettingDefault]);
+    };
 
-    const handleChecklistCancelEdit = useCallback(() => {
+    const handleChecklistCancelEdit = () => {
         setIsEditing(false);
         setIsChecklistDirty(false);
         setEditErrors([]);
-    }, [setIsEditing, setIsChecklistDirty, setEditErrors]);
+    };
 
     return {
         handleToggle,

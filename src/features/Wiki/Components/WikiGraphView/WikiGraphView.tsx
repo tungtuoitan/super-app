@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, RefreshCw, Plus, ScanLine, Bookmark, BookmarkCheck } from "lucide-react";
 import { useWikiStore } from "../../store/useWiki.store";
 import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
@@ -138,7 +138,7 @@ export default function WikiGraphView() {
     }, []);
 
     // ── Draw ──────────────────────────────────────────────────────────────────
-    const draw = useCallback(() => {
+    const draw = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
@@ -356,7 +356,7 @@ export default function WikiGraphView() {
         });
 
         ctx.restore();
-    }, [searchText, infoCountRange, familiarityRange]);
+    };
 
     // ── Animation loop (draw only — no simulation) ────────────────────────────
     useEffect(() => {

@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { constants } from "@/utils/constants";
 import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/task/hooks/useTaskDetail.helper";
@@ -17,7 +16,7 @@ export function useProjectSaveActions(): SaveActions {
         tabType === constants.vscode.tab.tabTypes.project ||
         tabType === constants.vscode.tab.tabTypes.task;
 
-    const onSave = useCallback(async (tab: BaseTab) => {
+    const onSave = async (tab: BaseTab) => {
         if (tab.type === constants.vscode.tab.tabTypes.project) {
             await upsertProject(tab.id);
         } else if (tab.type === constants.vscode.tab.tabTypes.task) {
@@ -33,7 +32,7 @@ export function useProjectSaveActions(): SaveActions {
                 await createTaskFolder(savedTask);
             }
         }
-    }, [upsertProject, upsertTask, createTaskFolder]);
+    };
 
     return { handles, onSave };
 }

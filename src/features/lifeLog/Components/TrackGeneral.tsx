@@ -2,7 +2,7 @@
  * TrackGeneral - Form to view/edit a LifeLog Track's fields
  */
 
-import { useCallback, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -36,31 +36,15 @@ export function TrackGeneral({ trackId, tabId }: TrackGeneralProps) {
         return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    const handleFieldChange = useCallback(
-        <K extends keyof LifeLogTrack>(field: K, value: LifeLogTrack[K]) => {
-            setOpenTabs((prev) =>
-                prev.map((t) =>
-                    t.id === tabId
-                        ? { ...t, data: { ...(t.data as LifeLogTrack), [field]: value }, title: field === "name" ? (value as string) || "Track" : t.title, hasUnsavedChanges: true }
-                        : t,
-                ),
-            );
-        },
-        [tabId, setOpenTabs],
-    );
-
-    const handleSave = useCallback(async () => {
-        if (!track) return;
-        await upsertTrack({
-            id: track.id,
-            name: track.name,
-            description: track.description,
-            emoji: track.emoji,
-            color: track.color,
-            isSensitive: track.isSensitive,
-        });
-        setOpenTabs((prev) => prev.map((t) => (t.id === tabId ? { ...t, data0: t.data, hasUnsavedChanges: false } : t)));
-    }, [track, tabId, upsertTrack, setOpenTabs]);
+    const handleFieldChange = <K extends keyof LifeLogTrack>(field: K, value: LifeLogTrack[K]) => {
+        setOpenTabs((prev) =>
+            prev.map((t) =>
+                t.id === tabId
+                    ? { ...t, data: { ...(t.data as LifeLogTrack), [field]: value }, title: field === "name" ? (value as string) || "Track" : t.title, hasUnsavedChanges: true }
+                    : t,
+            ),
+        );
+    };
 
     if (!track) return null;
 

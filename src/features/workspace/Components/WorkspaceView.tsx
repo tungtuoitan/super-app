@@ -69,7 +69,7 @@ export function WorkspaceView() {
     };
 
     // Right-click context menu on the selector area
-    const handleContextMenu = useCallback(
+    const handleContextMenu = 
         (e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
@@ -84,9 +84,7 @@ export function WorkspaceView() {
                     }
                 },
             });
-        },
-        [showContextMenu, selectedWorkspaceId, allWorkspaces, openNewWorkspaceTab, openWorkspaceTab, softDeleteWorkspace],
-    );
+        }
 
     return (
         <div className="h-full overflow-auto flex flex-col">

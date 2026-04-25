@@ -61,18 +61,16 @@ export function KReviewEditor({ questions, answers, onAnswersChange }: KReviewEd
     const initialMd = useRef(toMarkdown(questions, answers));
     const isInternalChange = useRef(false);
 
-    const handleChange = useCallback(
+    const handleChange = 
         (value: string | undefined) => {
             if (value === undefined) return;
             isInternalChange.current = true;
             const result = parseMarkdown(value, questions);
             setHeadingsChanged(result.headingsChanged);
             onAnswersChange(result.answers);
-        },
-        [questions, onAnswersChange],
-    );
+        }
 
-    const handleMount = useCallback((editor: _monaco.editor.IStandaloneCodeEditor, monaco: any) => {
+    const handleMount = (editor: _monaco.editor.IStandaloneCodeEditor, monaco: any) => {
         editorRef.current = editor;
         // Register theme if not yet
         try {
@@ -90,7 +88,7 @@ export function KReviewEditor({ questions, answers, onAnswersChange }: KReviewEd
             });
             monaco.editor.setTheme("review-dark");
         } catch { /* theme may already exist */ }
-    }, []);
+    }
 
     // Sync external answer changes (e.g. transcription landing) into editor
     useEffect(() => {

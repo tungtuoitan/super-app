@@ -3,7 +3,7 @@
  * Shows a note badge in the middle. Click to edit inline. Arrow toggle when selected.
  */
 
-import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { getSmoothStepPath, EdgeLabelRenderer, BaseEdge } from "@xyflow/react";
 import type { EdgeProps, Edge } from "@xyflow/react";
 import { MessageSquarePlus } from "lucide-react";
@@ -79,11 +79,11 @@ export function FlowEdgeWithNote({
         }
     }, [isEditing, note, editSize]);
 
-    const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setEditValue(e.target.value);
         e.target.style.height = "auto";
         e.target.style.height = `${e.target.scrollHeight}px`;
-    }, []);
+    };
 
     // Delete key removes selected edge (not when locked)
     useEffect(() => {
@@ -103,30 +103,30 @@ export function FlowEdgeWithNote({
     const animFwd = `flow-fwd ${speed}s linear infinite`;
     const animBwd = `flow-bwd ${speed}s linear infinite`;
 
-    const handleLabelClick = useCallback((e: React.MouseEvent) => {
+    const handleLabelClick = (e: React.MouseEvent) => {
         if (edgeLocked) return;
         e.stopPropagation();
         const el = labelRef.current;
         if (el) setEditSize({ width: el.offsetWidth, height: el.offsetHeight });
         setEditingEdgeId(id);
-    }, [id, edgeLocked, setEditingEdgeId]);
+    };
 
-    const handleConfirm = useCallback(() => {
+    const handleConfirm = () => {
         handleEdgeNoteConfirm(id, editValue, currentArrow);
-    }, [id, editValue, currentArrow, handleEdgeNoteConfirm]);
+    };
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleConfirm(); }
         if (e.key === "Escape") setEditingEdgeId(null);
-    }, [handleConfirm, setEditingEdgeId]);
+    };
 
-    const handleToggleArrow = useCallback((e: React.MouseEvent) => {
+    const handleToggleArrow = (e: React.MouseEvent) => {
         if (edgeLocked) return;
         e.stopPropagation();
         const idx = ARROW_CYCLE.indexOf(currentArrow);
         const next = ARROW_CYCLE[(idx + 1) % ARROW_CYCLE.length];
         handleEdgeNoteConfirm(id, note, next);
-    }, [id, edgeLocked, note, currentArrow, handleEdgeNoteConfirm]);
+    };
 
     // ── Render label content ────────────────────────────────────────────────
 

@@ -9,7 +9,7 @@
  *   Server saves are debounced (300 ms) so rapid toggles produce one network call.
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { taskService } from "../service/task.service";
 import { standardRegistryService } from "@/services/standardRegistry.service";
@@ -48,8 +48,7 @@ export const useTaskDetailChecklistHelper = () => {
     }, []);
 
     /** Persist checklistJson to server (no auto-complete — only process controls completion) */
-    const saveChecklistToServer = useCallback(
-        async (json: ChecklistJSON, task: Task) => {
+    const saveChecklistToServer = async (json: ChecklistJSON, task: Task) => {
             if (task.id <= 0 || !$user.userToken) return;
             const newChecklistJson = JSON.stringify(json);
             await taskService._patchTask($user.userToken, task.id, { checklistJson: newChecklistJson });
@@ -65,12 +64,10 @@ export const useTaskDetailChecklistHelper = () => {
                         : t,
                 ),
             );
-        },
-        [$user.userToken, activeTabId, setOpenTabs],
-    );
+        };
 
     /** Schedule a debounced flush of the latest pending checklist to the server */
-    const scheduleSave = useCallback(() => {
+    const scheduleSave = () => {
         if (serverSaveTimerRef.current) clearTimeout(serverSaveTimerRef.current);
         serverSaveTimerRef.current = setTimeout(() => {
             const task = selectedTaskRef.current;
@@ -80,7 +77,7 @@ export const useTaskDetailChecklistHelper = () => {
                 pendingChecklistRef.current = null;
             }
         }, 300);
-    }, [saveChecklistToServer]);
+    };
 
     /**
      * Apply a checklist update (optimistic) and schedule a server save.
@@ -91,8 +88,7 @@ export const useTaskDetailChecklistHelper = () => {
      *     setOpenTabs functional updater so it always sees the freshest state,
      *     preventing rapid-click overwrites.
      */
-    const handleChecklistChange = useCallback(
-        (updater: ChecklistUpdater) => {
+    const handleChecklistChange = (updater: ChecklistUpdater) => {
             const task = selectedTaskRef.current;
             if (!task) return;
             const isNewTask = task.id <= 0;
@@ -114,31 +110,23 @@ export const useTaskDetailChecklistHelper = () => {
             );
 
             if (!isNewTask) scheduleSave();
-        },
-        [activeTabId, setOpenTabs, scheduleSave],
-    );
+        };
 
     /** Checklist saved from edit mode (full replacement, not a toggle) */
-    const handleChecklistSave = useCallback(
-        (json: ChecklistJSON) => {
+    const handleChecklistSave = (json: ChecklistJSON) => {
             const task = selectedTaskRef.current;
             if (task) handleChecklistChange(json);
-        },
-        [handleChecklistChange],
-    );
+        };
 
     /** Save current checklist as the default template for the task's type */
-    const persistDefaultTemplate = useCallback(
-        async (templateText: string) => {
+    const persistDefaultTemplate = async (templateText: string) => {
             if (!selectedTask?.taskType || !$user.userToken) return;
             await standardRegistryService._setChecklistTemplate(
                 $user.userToken,
                 selectedTask.taskType,
                 templateText,
             );
-        },
-        [selectedTask?.taskType, $user.userToken],
-    );
+        };
 
     return {
         saveChecklistToServer,

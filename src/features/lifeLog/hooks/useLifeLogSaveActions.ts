@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { constants } from "@/utils/constants";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
@@ -19,7 +19,7 @@ export function useLifeLogSaveActions(): SaveActions {
         tabType === constants.vscode.tab.tabTypes.lifeLog ||
         tabType === constants.vscode.tab.tabTypes.lifeLogTrack;
 
-    const onSave = useCallback(async (tab: BaseTab) => {
+    const onSave = async (tab: BaseTab) => {
         if (tab.type === constants.vscode.tab.tabTypes.lifeLog) {
             const log = tab.data as LifeLogLog;
             const isNew = log.id <= 0;
@@ -81,7 +81,7 @@ export function useLifeLogSaveActions(): SaveActions {
                 }
             }
         }
-    }, [upsertLog, upsertTrack, setLogs, setTracks, setOpenTabs, setActiveTabId]);
-
+    }
+    
     return { handles, onSave };
 }

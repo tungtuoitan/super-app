@@ -41,7 +41,7 @@ export function useKTestFlowHelper() {
         setFlowNodes((prev) => applyNodeChanges(changes, prev) as Node<QuestionFlowNodeData>[]);
     }
 
-    const handleEdgesChange = useCallback((changes: EdgeChange<Edge<KFlowEdgeData>>[]) => {
+    const handleEdgesChange = (changes: EdgeChange<Edge<KFlowEdgeData>>[]) => {
         setFlowEdges((prev) => {
             // Block any select change while reconnecting — keeps edge selected + nubs visible
             if (reconnectingRef.current) return prev;
@@ -52,11 +52,11 @@ export function useKTestFlowHelper() {
                 e.type === 'kQuestionEdge' ? { ...e, reconnectable: !!e.selected } : e,
             );
         });
-    }, [setFlowEdges]);
+    }
 
     // ── Node drag stop — persist positions ─────────────────────────────────
 
-    const handleNodeDragStop = useCallback(
+    const handleNodeDragStop = 
         (_event: React.MouseEvent, _node: Node, draggedNodes: Node[]) => {
             if (!draggedNodes.length) return;
             requestAnimationFrame(() => {
@@ -76,13 +76,11 @@ export function useKTestFlowHelper() {
                     return updated;
                 });
             });
-        },
-        [setFlowNodes, setSavedPositions],
-    );
+        }
 
     // ── Resolve nearest handle pair when connecting ────────────────────────
 
-    const resolveHandles = useCallback(
+    const resolveHandles = 
         (sourceId: string, targetId: string, sourceHandle?: string | null, targetHandle?: string | null) => {
             if (sourceHandle && targetHandle) return { sourceHandle, targetHandle };
             const srcNode = flowNodesRef.current.find((n) => n.id === sourceId);
@@ -97,13 +95,10 @@ export function useKTestFlowHelper() {
                 ? (dx >= 0 ? { sourceHandle: "right", targetHandle: "left" } : { sourceHandle: "left", targetHandle: "right" })
                 : (dy >= 0 ? { sourceHandle: "bottom", targetHandle: "top" } : { sourceHandle: "top", targetHandle: "bottom" });
             return { sourceHandle: sourceHandle ?? pair.sourceHandle, targetHandle: targetHandle ?? pair.targetHandle };
-        },
-        [],
-    );
-
+        }
     // ── Edge connect — persist ─────────────────────────────────────────────
 
-    const handleConnect = useCallback(async (connection: Connection) => {
+    const handleConnect = async (connection: Connection) => {
         if (!connection.source || !connection.target) return;
         if (connection.source.startsWith("temp-node-") || connection.target.startsWith("temp-node-")) return;
 
@@ -139,11 +134,10 @@ export function useKTestFlowHelper() {
         } catch {
             setFlowEdges((prev) => prev.filter((e) => e.id !== tempId));
         }
-    }, [setFlowEdges, setSavedEdges]);
-
+    }
     // ── Edge delete ────────────────────────────────────────────────────────
 
-    const handleEdgeDelete = useCallback(async (edgeId: string) => {
+    const handleEdgeDelete = async (edgeId: string) => {
         const edge = savedEdgesRef.current.find((e) => e.id === edgeId);
         setFlowEdges((prev) => prev.filter((e) => e.id !== edgeId));
         setSavedEdges((prev) => prev.filter((e) => e.id !== edgeId));
@@ -158,11 +152,11 @@ export function useKTestFlowHelper() {
                 deletedAt: new Date().toISOString(),
             }]);
         } catch { /* silent */ }
-    }, [setFlowEdges, setSavedEdges]);
+    }
 
     // ── Edge direction toggle ─────────────────────────────────────────────
 
-    const handleEdgeToggleDirection = useCallback(async (edgeId: string, nextDir: ArrowDirection) => {
+    const handleEdgeToggleDirection = async (edgeId: string, nextDir: ArrowDirection) => {
         const update = (prev: Edge<KFlowEdgeData>[]) =>
             prev.map((e) => e.id === edgeId ? { ...e, data: { ...(e.data as KFlowEdgeData), arrowDirection: nextDir } } : e);
         setFlowEdges(update);
@@ -178,25 +172,24 @@ export function useKTestFlowHelper() {
                 arrowDirection: nextDir,
             }]);
         } catch { /* silent */ }
-    }, [setFlowEdges, setSavedEdges]);
+    }
 
     // ── Rename: start / cancel ─────────────────────────────────────────────
 
-    const handleRenameStart = useCallback((nodeId: string) => {
+    const handleRenameStart = (nodeId: string) => {
         if (editingNodeId !== null) return;
         setEditingNodeId(nodeId);
-    }, [setEditingNodeId, editingNodeId]);
-
-    const handleRenameCancel = useCallback((nodeId: string | null) => {
+    }
+    const handleRenameCancel = (nodeId: string | null) => {
         setEditingNodeId(null);
         if (nodeId?.startsWith("temp-node-")) {
             setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
         }
-    }, [setEditingNodeId, setFlowNodes]);
+    }
 
     // ── Rename confirm — create or update question ─────────────────────────
 
-    const handleRenameConfirm = useCallback(async (nodeId: string, questionText: string, answerText: string) => {
+    const handleRenameConfirm = async (nodeId: string, questionText: string, answerText: string) => {
         const kId = knowledgeIdRef.current;
         const testId = activeTestIdRef.current;
         const trimmedQ = questionText.trim();
@@ -277,11 +270,10 @@ export function useKTestFlowHelper() {
             });
             window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
         } catch { /* silent — optimistic already applied */ }
-    }, [setEditingNodeId, setFlowNodes, setSavedPositions]);
-
+    }
     // ── Delete / restore question ──────────────────────────────────────────
 
-    const handleDeleteQuestion = useCallback(async (questionId: number) => {
+    const handleDeleteQuestion = async (questionId: number) => {
         const kId = knowledgeIdRef.current;
         const testId = activeTestIdRef.current;
         if (!testId) return;
@@ -297,9 +289,8 @@ export function useKTestFlowHelper() {
             });
             window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
         } catch { /* silent — optimistic applied */ }
-    }, [setFlowNodes]);
-
-    const handleRestoreQuestion = useCallback(async (questionId: number) => {
+    }
+    const handleRestoreQuestion = async (questionId: number) => {
         const kId = knowledgeIdRef.current;
         const testId = activeTestIdRef.current;
         if (!testId) return;
@@ -315,24 +306,22 @@ export function useKTestFlowHelper() {
             });
             window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
         } catch { /* silent — optimistic applied */ }
-    }, [setFlowNodes]);
-
+    }
     // ── Connection tracking ────────────────────────────────────────────────
 
-    const handleConnectStart = useCallback(
-        (_: unknown, params: { nodeId?: string | null }) => setConnectingSourceId(params.nodeId ?? null),
-        [setConnectingSourceId],
-    );
-    const handleConnectEnd = useCallback(() => setConnectingSourceId(null), [setConnectingSourceId]);
+    const handleConnectStart = 
+        (_: unknown, params: { nodeId?: string | null }) => setConnectingSourceId(params.nodeId ?? null)
+        
+    const handleConnectEnd = () => setConnectingSourceId(null)
     // ── Reconnect (drag edge endpoint to new node) ─────────────────────────
 
-    const handleReconnectStart = useCallback(() => { reconnectingRef.current = true; }, []);
-    const handleReconnectEnd = useCallback(() => {
+    const handleReconnectStart = () => { reconnectingRef.current = true; }
+    const handleReconnectEnd = () => {
         // Delay clear so handleEdgesChange's final deselect-after-drop is blocked
         setTimeout(() => { reconnectingRef.current = false; }, 80);
-    }, []);
+    }
 
-    const handleReconnect = useCallback(async (oldEdge: Edge<KFlowEdgeData>, newConnection: Connection) => {
+    const handleReconnect = async (oldEdge: Edge<KFlowEdgeData>, newConnection: Connection) => {
         if (!newConnection.source || !newConnection.target) return;
         if (newConnection.source.startsWith('temp-node-') || newConnection.target.startsWith('temp-node-')) return;
 
@@ -363,8 +352,7 @@ export function useKTestFlowHelper() {
                 targetId: parseInt(newConnection.target, 10), targetType: 'kQuestion', targetHandle,
             }]);
         } catch { /* silent */ }
-    }, [setFlowEdges, setSavedEdges, resolveHandles]);
-
+    }
     return {
         flowNodes, flowEdges, editingNodeId,
         handleNodesChange, handleEdgesChange,

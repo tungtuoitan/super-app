@@ -73,13 +73,13 @@ function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: K
         setSelected(visibleTests[0]?.id ?? null);
     }, [isLoadingTests, tests]);
 
-    const loadDetail = useCallback(async (testId: number) => {
+    const loadDetail = async (testId: number) => {
         setLoadingDetail(true);
         try {
             const res = await KTestService._getTestDetail(knowledgeId, testId);
             if (res.success && res.object) setQuestions(res.object.questions);
         } finally { setLoadingDetail(false); }
-    }, [knowledgeId]);
+    }
 
     useEffect(() => {
         if (!selectedTestId) { setQuestions([]); return; }
@@ -113,11 +113,9 @@ function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: K
         } finally { setCreating(false); }
     };
 
-    const cancelCreateTest = () => { setCreatingTest(false); setNewTestTitle(""); };
-
-    const handleQuestionsChanged = useCallback(() => {
+    const handleQuestionsChanged = () => {
         if (selectedTestId) loadDetail(selectedTestId);
-    }, [selectedTestId, loadDetail]);
+    }
 
     return (
         <div className="flex flex-col h-full">

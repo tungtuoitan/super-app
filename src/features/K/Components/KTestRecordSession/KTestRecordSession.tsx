@@ -47,7 +47,7 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
 
     // ── Recording helpers ──────────────────────────────────────────────────────
 
-    const stopAndTranscribeBg = useCallback((qId: number) => {
+    const stopAndTranscribeBg = (qId: number) => {
         const recorder = mediaRecorderRef.current;
         if (!recorder || recorder.state === "inactive") { mediaRecorderRef.current = null; return; }
 
@@ -77,9 +77,9 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
 
         recorder.stop();
         setIsRecording(false);
-    }, []);
+    }
 
-    const startRecording = useCallback(async () => {
+    const startRecording = async () => {
         if (mediaRecorderRef.current) return;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -91,7 +91,7 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
             mediaRecorderRef.current = recorder;
             setIsRecording(true);
         } catch { /* no mic — session continues silently */ }
-    }, []);
+    }
 
     // Auto-start recording on each new question (answering phase only)
     useEffect(() => {
@@ -112,15 +112,14 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
 
     // ── Enter review phase ──────────────────────────────────────────────────────
 
-    const enterReviewPhase = useCallback(() => {
+    const enterReviewPhase = () => {
         const qId = currentQuestion?.id;
         if (qId !== undefined) stopAndTranscribeBg(qId);
         setPhase("reviewing");
-    }, [currentQuestion, stopAndTranscribeBg]);
-
+    };
     // ── Submit ─────────────────────────────────────────────────────────────────
 
-    const handleSubmit = useCallback(async () => {
+    const handleSubmit = async () => {
         setIsSubmitting(true);
         // Give background transcriptions a brief chance to land
         await new Promise(r => { const t = setTimeout(r, 800); timersRef.current.push(t); });
@@ -143,11 +142,11 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
         } finally {
             setIsSubmitting(false);
         }
-    }, [questions, knowledgeId, testId, submitAnswers]);
+    }
 
     // ── Advance ────────────────────────────────────────────────────────────────
 
-    const advance = useCallback(() => {
+    const advance = () => {
         if (isTransitioning || isSubmitting || result) return;
         const qId = currentQuestion?.id;
         if (qId !== undefined) stopAndTranscribeBg(qId);
@@ -174,8 +173,8 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
         }, TRANSITION_SECS * 1000);
 
         timersRef.current.push(done);
-    }, [isTransitioning, isSubmitting, result, currentQuestion, currentIndex, totalQuestions, stopAndTranscribeBg, enterReviewPhase]);
-
+    }
+    
     // Keyboard: Enter → advance
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {

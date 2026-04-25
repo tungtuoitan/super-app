@@ -6,7 +6,7 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  * Gets projectId from useCurrentProjectStore — NO params.
  */
 
-import { useCallback } from "react";
+
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useTaskGridHelper } from "../hooks/useTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
@@ -22,7 +22,7 @@ export const useTaskGridUpdateHelper = () => {
     const { projectId } = useCurrentProjectStore();
     const _console = useConsoleHelper();
 
-    const handleInlineUpdate = useCallback(
+    const handleInlineUpdate = 
         async (task: Task, field: "status" | "priority", newValue: string) => {
             if (task[field] === newValue) return;
 
@@ -63,11 +63,9 @@ export const useTaskGridUpdateHelper = () => {
                 );
                 console.error("Failed to update task:", error);
             }
-        },
-        [$user.userToken, projectId],
-    );
+        }
 
-    const handleInlineDateUpdate = useCallback(
+    const handleInlineDateUpdate = 
         async (task: Task, field: "startDate" | "endDate", newValue: Date | null) => {
             const currentValue = task[field];
             const isSame =
@@ -124,11 +122,9 @@ export const useTaskGridUpdateHelper = () => {
                 );
                 console.error("Failed to update task date:", error);
             }
-        },
-        [$user.userToken, projectId, tasks, _console],
-    );
+        }
 
-    const handleDropTaskOntoTask = useCallback(
+    const handleDropTaskOntoTask = 
         async (dragTask: Task, dropTask: Task, warningMessage?: string) => {
             setTasks((prev) =>
                 prev.map((t) => (t.id === dragTask.id ? { ...t, parentTaskId: dropTask.id } : t)),
@@ -174,11 +170,9 @@ export const useTaskGridUpdateHelper = () => {
                 console.error("Failed to update task parent:", error);
                 _console.error("Failed to make task a subtask");
             }
-        },
-        [$user.userToken, projectId, _console],
-    );
+        }
 
-    const handleMakeIndependent = useCallback(
+    const handleMakeIndependent = 
         async (task: Task) => {
             const oldParentTaskId = task.parentTaskId;
 
@@ -223,16 +217,12 @@ export const useTaskGridUpdateHelper = () => {
                 console.error("Failed to make task independent:", error);
                 _console.error("Failed to make task independent");
             }
-        },
-        [$user.userToken, projectId, _console],
-    );
+        }
 
-    const showDropError = useCallback(
+    const showDropError = 
         (message: string) => {
             _console.error(message);
-        },
-        [_console],
-    );
+        }
 
     return {
         handleInlineUpdate,

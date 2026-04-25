@@ -6,7 +6,7 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-import { useCallback } from "react";
+
 import { useTaskStore } from "../store/useTask.store";
 import { useAuthStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
@@ -26,7 +26,7 @@ export const useTaskKanbanHelper = () => {
     /**
      * Check if a task can be dropped to a target status column.
      */
-    const canDropToColumn = useCallback(
+    const canDropToColumn = 
         (taskId: number, targetStatus: string): boolean => {
             const task = tasks.find((t) => t.id === taskId);
             if (!task) return false;
@@ -43,15 +43,13 @@ export const useTaskKanbanHelper = () => {
             }
 
             return true;
-        },
-        [tasks, filteredTasks],
-    );
+        }
 
     /**
      * Handle drop task to new column with cascade status changes for subtasks.
      * Uses optimistic update — UI updates immediately, API call in background.
      */
-    const handleDropTask = useCallback(
+    const handleDropTask = 
         async (taskId: number, newStatus: string) => {
             const task = tasks.find((t) => t.id === taskId);
             if (!task || task.status === newStatus) return;
@@ -155,9 +153,7 @@ export const useTaskKanbanHelper = () => {
                 );
                 console.error("Failed to update task status:", error);
             }
-        },
-        [tasks, filteredTasks, $user.userToken, projectId],
-    );
+        }
 
     return {
         canDropToColumn,

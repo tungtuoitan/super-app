@@ -24,9 +24,9 @@ export function LogList() {
         loadLogs();
     }, [loadLogs]);
 
-    const handleAddLog = useCallback(() => {
+    const handleAddLog = () => {
         openNewLogTab();
-    }, [openNewLogTab]);
+    }
 
     const activeLogs = logs.filter((l) => !l.deletedAt);
     const filtered = searchQuery.trim()
@@ -43,9 +43,9 @@ export function LogList() {
         loadTracks();
     }, [loadTracks]);
 
-    const handleAddTrack = useCallback(() => {
+    const handleAddTrack = () => {
         openNewTrackTab();
-    }, [openNewTrackTab]);
+    }
 
     return (
         <div className="flex flex-col h-full overflow-hidden relative">

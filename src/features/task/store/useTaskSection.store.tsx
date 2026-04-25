@@ -116,25 +116,25 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const [isChecklistDirty, setIsChecklistDirtyState] = useState(false);
     const [isProcessDirty, setIsProcessDirtyState] = useState(false);
 
-    const setDescDirty = useCallback((v: boolean) => setDescDirtyState(v), []);
-    const triggerDescFocus = useCallback(() => setDescFocusTrigger((p) => p + 1), []);
-    const triggerCommentFocus = useCallback(() => setCommentFocusTrigger((p) => p + 1), []);
-    const triggerCommentLoad = useCallback(() => setCommentLoadTrigger((p) => p + 1), []);
-    const triggerCustomFocus = useCallback(() => setCustomFocusTrigger((p) => p + 1), []);
+    const setDescDirty = (v: boolean) => setDescDirtyState(v)
+    const triggerDescFocus = () => setDescFocusTrigger((p) => p + 1)
+    const triggerCommentFocus = () => setCommentFocusTrigger((p) => p + 1)
+    const triggerCommentLoad = () => setCommentLoadTrigger((p) => p + 1)
+    const triggerCustomFocus = () => setCustomFocusTrigger((p) => p + 1)
 
-    const setCommentFilter = useCallback((v: CommentFilterType) => {
+    const setCommentFilter = (v: CommentFilterType) => {
         setCommentFilterState(v);
         storageService.set(STORAGE_KEYS.COMMENT_FILTER, v);
-    }, []);
+    }
 
-    const setCommentShowDetail = useCallback((v: boolean) => {
+    const setCommentShowDetail = (v: boolean) => {
         setCommentShowDetailState(v);
         storageService.set(STORAGE_KEYS.COMMENT_SHOW_DETAIL, v);
-    }, []);
+    }
 
-    const setCustomTabDirty = useCallback((v: boolean) => setCustomTabDirtyState(v), []);
-    const setIsChecklistDirty = useCallback((v: boolean) => setIsChecklistDirtyState(v), []);
-    const setIsProcessDirty = useCallback((v: boolean) => setIsProcessDirtyState(v), []);
+    const setCustomTabDirty = (v: boolean) => setCustomTabDirtyState(v)
+    const setIsChecklistDirty = (v: boolean) => setIsChecklistDirtyState(v)
+    const setIsProcessDirty = (v: boolean) => setIsProcessDirtyState(v)
 
     return (
         <TaskSectionStore.Provider value={{

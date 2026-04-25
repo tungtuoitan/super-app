@@ -5,7 +5,6 @@
  * Gets projectIds from useMultiTimelineStore — NO params.
  */
 
-import { useCallback } from "react";
 import { useTaskStore } from "@/features/task/store/useTask.store";
 import { useAuthStore } from "@/store/index";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
@@ -26,8 +25,7 @@ export const useMultiProjectKanbanHelper = () => {
     /**
      * Check if a task can be dropped to a target status column.
      */
-    const canDropToColumn = useCallback(
-        (taskId: number, targetStatus: string): boolean => {
+    const canDropToColumn = (taskId: number, targetStatus: string): boolean => {
             const task = tasks.find((t) => t.id === taskId);
             if (!task) return false;
 
@@ -45,16 +43,13 @@ export const useMultiProjectKanbanHelper = () => {
             }
 
             return true;
-        },
-        [tasks, filteredTasks],
-    );
+        };
 
     /**
      * Handle drop task to new column with cascade status changes for subtasks.
      * Uses optimistic update — UI updates immediately, API call in background.
      */
-    const handleDropTask = useCallback(
-        async (taskId: number, newStatus: string) => {
+    const handleDropTask = async (taskId: number, newStatus: string) => {
             const task = tasks.find((t) => t.id === taskId);
             if (!task || task.status === newStatus) return;
 
@@ -157,9 +152,7 @@ export const useMultiProjectKanbanHelper = () => {
                 );
                 console.error("Failed to update task status:", error);
             }
-        },
-        [tasks, filteredTasks, $user.userToken, projectIds],
-    );
+        };
 
     return {
         canDropToColumn,

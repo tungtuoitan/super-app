@@ -1,5 +1,4 @@
 import { useConsoleStore, ConsoleMessageType } from "@/store/useConsole.store";
-import { useCallback } from "react";
 
 export const useConsoleHelper = () => {
     const { messages, setMessages, maxMessages } = useConsoleStore();
@@ -9,8 +8,7 @@ export const useConsoleHelper = () => {
      * @param message - The message text to display
      * @param type - The message type (error, warning, info, success)
      */
-    const addMessage = useCallback(
-        (message: string, type: ConsoleMessageType = "info") => {
+    const addMessage = (message: string, type: ConsoleMessageType = "info") => {
             const newMessage = {
                 id: `${Date.now()}-${Math.random()}`,
                 type,
@@ -26,35 +24,30 @@ export const useConsoleHelper = () => {
                 }
                 return updated;
             });
-        },
-        [setMessages, maxMessages]
-    );
+        };
 
     /**
      * Clear all console messages
      */
-    const clearMessages = useCallback(() => {
+    const clearMessages = () => {
         setMessages([]);
-    }, [setMessages]);
+    };
 
     /**
      * Remove a specific message by ID
      */
-    const removeMessage = useCallback(
-        (id: string) => {
+    const removeMessage = (id: string) => {
             setMessages((prev) => prev.filter((msg) => msg.id !== id));
-        },
-        [setMessages]
-    );
+        };
 
     /**
      * Convenience methods for different message types
      */
-    const error = useCallback((message: string, error?: any) => addMessage(message, "error"), [addMessage]);
-    const warning = useCallback((message: string) => addMessage(message, "warning"), [addMessage]);
-    const info = useCallback((message: string) => addMessage(message, "info"), [addMessage]);
-    const success = useCallback((message: string) => addMessage(message, "success"), [addMessage]);
-    const specialSuccess = useCallback((message: string) => addMessage(message, "special-success"), [addMessage]);
+    const error = (message: string, error?: any) => addMessage(message, "error");
+    const warning = (message: string) => addMessage(message, "warning");
+    const info = (message: string) => addMessage(message, "info");
+    const success = (message: string) => addMessage(message, "success");
+    const specialSuccess = (message: string) => addMessage(message, "special-success");
 
     return {
         messages,

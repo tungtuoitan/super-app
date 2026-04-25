@@ -27,7 +27,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
     const location = useLocation();
     const { setSelectedWorkspaceId, setScrollToItem, setSelectedItemIds } = useWorkspaceStore();
 
-    const handleWorkspaceNavigation = useCallback((workspaceId: number, workspaceItemId: number) => {
+    const handleWorkspaceNavigation = (workspaceId: number, workspaceItemId: number) => {
         if (!workspaceItemId) {
             return;
         }
@@ -39,8 +39,8 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         if (!location.pathname.includes('/workspace')) {
             navigate('/workspace');
         }
-    }, [location.pathname, navigate, setSelectedWorkspaceId, setSelectedItemIds, setScrollToItem]);
-
+    }
+    
     const showWorkspaceLinksColumn = containerWidth >= 462;
     const showStatusColumn = containerWidth >= 572;
     const showCreatedDateColumn = containerWidth >= 682;

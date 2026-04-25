@@ -3,7 +3,7 @@
  * Fields: name, description, image (TrackIconPicker-style)
  */
 
-import { useCallback } from "react";
+
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/Button";
@@ -26,8 +26,7 @@ export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps
     const tab = openTabs.find((t) => t.id === tabId);
     const knowledge = tab?.data as KWsResponse | undefined;
 
-    const handleFieldChange = useCallback(
-        <K extends keyof KWsResponse>(field: K, value: KWsResponse[K]) => {
+    const handleFieldChange = <K extends keyof KWsResponse>(field: K, value: KWsResponse[K]) => {
             setOpenTabs((prev) =>
                 prev.map((t) =>
                     t.id === tabId
@@ -40,11 +39,9 @@ export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps
                         : t,
                 ),
             );
-        },
-        [tabId, setOpenTabs],
-    );
+        }
 
-    const handleSave = useCallback(async () => {
+    const handleSave = async () => {
         if (!knowledge) return;
         const isNew = knowledge.id < 0;
         const payload = {
@@ -78,7 +75,7 @@ export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps
                 prev.map((t) => (t.id === tabId ? { ...t, data0: t.data, hasUnsavedChanges: false } : t)),
             );
         }
-    }, [knowledge, tabId, createKnowledge, updateKnowledge, setOpenTabs, setSelectedKId]);
+    };
 
     if (!knowledge) return null;
 

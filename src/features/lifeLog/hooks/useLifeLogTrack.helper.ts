@@ -3,7 +3,7 @@
  * Business logic for track operations
  */
 
-import { useCallback } from "react";
+
 import { lifeLogService } from "../service/lifeLog.service";
 import { useAuthStore } from "@/store/Auth.store";
 import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/features/lifeLog/types/lifeLog.types";
@@ -33,7 +33,7 @@ export function useLifeLogTrackHelper() {
     const { enqueueSnackbar } = useSnackbar();
     const token = $user.userToken;
 
-    const loadTracks = useCallback(async () => {
+    const loadTracks = async () => {
         if (!token) return;
         setIsLoading(true);
         setError(null);
@@ -49,9 +49,9 @@ export function useLifeLogTrackHelper() {
         } finally {
             setIsLoading(false);
         }
-    }, [token, setTracks, setIsLoading, setError]);
+    }
 
-    const upsertTrack = useCallback(async (data: UpsertLifeLogTrackDTO): Promise<LifeLogTrack | null> => {
+    const upsertTrack = async (data: UpsertLifeLogTrackDTO): Promise<LifeLogTrack | null> => {
         if (!token) {
             debugLog.log("lifelog", "upsertTrack:noToken", {});
             return null;
@@ -74,9 +74,9 @@ export function useLifeLogTrackHelper() {
             console.error(err);
             return null;
         }
-    }, [token, loadTracks, enqueueSnackbar]);
+    }
 
-    const deleteTrack = useCallback(async (id: number) => {
+    const deleteTrack = async (id: number) => {
         if (!token) return;
         const existing = tracks.find((t) => t.id === id);
         if (!existing) {
@@ -102,7 +102,7 @@ export function useLifeLogTrackHelper() {
             enqueueSnackbar("Failed to delete track", { variant: "error" });
             console.error(err);
         }
-    }, [token, tracks, loadTracks, enqueueSnackbar]);
+    }
 
     return { loadTracks, upsertTrack, deleteTrack };
 }

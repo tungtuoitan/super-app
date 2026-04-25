@@ -2,7 +2,7 @@
  * LogGeneral - Form to view/edit a log entry's fields
  */
 
-import { useCallback } from "react";
+
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
@@ -28,7 +28,7 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
     const tab = openTabs.find((t) => t.id === tabId);
     const log = tab?.data as LifeLogLog | undefined;
 
-    const handleFieldChange = useCallback(<K extends keyof LifeLogLog>(field: K, value: LifeLogLog[K]) => {
+    const handleFieldChange = <K extends keyof LifeLogLog>(field: K, value: LifeLogLog[K]) => {
         setOpenTabs((prev) =>
             prev.map((t) =>
                 t.id === tabId
@@ -36,7 +36,7 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
                     : t
             )
         );
-    }, [tabId, setOpenTabs]);
+    }
 
     if (!log) return null;
 

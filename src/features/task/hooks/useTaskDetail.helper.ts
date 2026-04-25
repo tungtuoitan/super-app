@@ -10,7 +10,7 @@
  * Side-effects (useEffect) live in TaskDetailHeadless.
  */
 
-import React, { useCallback } from "react";
+import React from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { taskService } from "../service/task.service";
 import { useAuthStore } from "@/store/Auth.store";
@@ -51,7 +51,7 @@ export const useTaskDetailHelper = () => {
     const { navigateLink } = useKeywordNavigationHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
 
-    const handleOpenLinkPalette = useCallback(() => {
+    const handleOpenLinkPalette = () => {
         if (!selectedTask) return;
         const linkedIds = new Set(linkedKeywords.map((lk) => lk.keywordId));
         const folderWsItemIds = new Set(folderItems.map((fi) => fi.workspaceItemId));
@@ -61,20 +61,16 @@ export const useTaskDetailHelper = () => {
             }
         });
         openForLink((keyword) => linkKeyword(selectedTask.id, keyword.id), linkedIds);
-    }, [selectedTask, openForLink, linkKeyword, linkedKeywords, folderItems, allKeywords]);
+    };
 
-    const handleNavigateKeyword = useCallback(
-        (keyword: { link: string; longLink: string; name: string; type: any; id: number; hardDeletedAt: null }) => {
+    const handleNavigateKeyword = (keyword: { link: string; longLink: string; name: string; type: any; id: number; hardDeletedAt: null }) => {
             navigateLink(keyword as any, {
                 link: `sa/p${selectedTask?.projectId}/t${selectedTask?.id}`,
                 label: selectedTask?.title ?? "",
             });
-        },
-        [navigateLink, selectedTask],
-    );
+        };
 
-    const handleUnlinkKeyword = useCallback(
-        (event: React.MouseEvent, linkId: number, name: string) => {
+    const handleUnlinkKeyword = (event: React.MouseEvent, linkId: number, name: string) => {
             if (!selectedTask) return;
             showConfirmation({
                 title: name,
@@ -88,14 +84,11 @@ export const useTaskDetailHelper = () => {
                     await unlinkKeyword(selectedTask.id, linkId);
                 },
             });
-        },
-        [selectedTask, unlinkKeyword, showConfirmation],
-    );
+        };
 
     // ── Save task (upsert) ────────────────────────────────────────────────────
 
-    const upsertTask = useCallback(
-        async (tabId?: string): Promise<Task | null> => {
+    const upsertTask = async (tabId?: string): Promise<Task | null> => {
             const activeTab = openTabs.find((tab) => tab.id === (tabId ?? activeTabId));
             const taskToSave = activeTab?.data as Task | undefined;
 
@@ -213,25 +206,20 @@ export const useTaskDetailHelper = () => {
                 _console.error(isUnauthorizedError(err) ? "Unauthorized. Please login again." : `Failed to save task: ${errorMessage}`);
                 return null;
             }
-        },
-        [openTabs, activeTabId, $user, _console, setOpenTabs, setTasks, submitVersionComment],
-    );
+        };
 
     /**
      * @deprecated Use handleFieldChange instead.
      * Targets the active tab via store's activeTabId — kept for backward compatibility.
      */
-    const handleTaskFieldChange = useCallback(
-        (field: keyof Task, value: any) => {
+    const handleTaskFieldChange = (field: keyof Task, value: any) => {
             setOpenTabs((prev: BaseTab[]) =>
                 prev.map((t: BaseTab) => {
                     if (t.id !== activeTabId) return t;
                     return { ...t, data: { ...(t.data as Task), [field]: value }, hasUnsavedChanges: true };
                 }),
             );
-        },
-        [activeTabId, setOpenTabs],
-    );
+        };
 
     // ── Return ────────────────────────────────────────────────────────────────
     return {

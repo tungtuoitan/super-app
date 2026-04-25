@@ -4,7 +4,7 @@
  * State lives in useTaskStore. Derived values live in Selectors.
  */
 
-import React, { useCallback } from "react";
+import React from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { TaskDTO, taskService } from "../service/task.service";
 import { projectService } from "@/features/project/service/project.service";
@@ -26,7 +26,7 @@ export const useTaskDetailFormHelper = () => {
 
     // ── Load functions ─────────────────────────────────────────────────────────
 
-    const loadProjectOptions = useCallback(async () => {
+    const loadProjectOptions = async () => {
         if (!$user.userToken) return;
         setIsLoadingProjects(true);
         try {
@@ -46,10 +46,9 @@ export const useTaskDetailFormHelper = () => {
         } finally {
             setIsLoadingProjects(false);
         }
-    }, [$user.userToken, setProjectOptions, setIsLoadingProjects]);
+    };
 
-    const loadParentTaskOptions = useCallback(
-        async (projectId: number, currentTaskId: number) => {
+    const loadParentTaskOptions = async (projectId: number, currentTaskId: number) => {
             if (!projectId || projectId < 0 || !$user.userToken) {
                 setParentTaskOptions([]);
                 return;
@@ -78,14 +77,11 @@ export const useTaskDetailFormHelper = () => {
             } finally {
                 setIsLoadingParentTasks(false);
             }
-        },
-        [$user.userToken, setParentTaskOptions, setIsLoadingParentTasks],
-    );
+        };
 
     // ── Field change handlers ─────────────────────────────────────────────────
 
-    const handleFieldChange = useCallback(
-        (field: keyof Task, value: any) => {
+    const handleFieldChange = (field: keyof Task, value: any) => {
             if (!taskTab || !selectedTask) return;
             setOpenTabs((prev: BaseTab[]) =>
                 prev.map((t) =>
@@ -99,12 +95,9 @@ export const useTaskDetailFormHelper = () => {
                         : t,
                 ),
             );
-        },
-        [taskTab, selectedTask, activeTabId, setOpenTabs],
-    );
+        };
 
-    const handleStatusChange = useCallback(
-        (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
+    const handleStatusChange = (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
             if (!newValue) return;
             if (newValue.code === "completed" && selectedTask?.checklistJson) {
                 const checklist = parseChecklistJson(selectedTask.checklistJson);
@@ -114,19 +107,13 @@ export const useTaskDetailFormHelper = () => {
                 }
             }
             handleFieldChange("status", newValue.code);
-        },
-        [selectedTask, handleFieldChange],
-    );
+        };
 
-    const handlePriorityChange = useCallback(
-        (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
+    const handlePriorityChange = (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
             if (newValue) handleFieldChange("priority", newValue.code);
-        },
-        [handleFieldChange],
-    );
+        };
 
-    const handleTaskTypeChange = useCallback(
-        (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
+    const handleTaskTypeChange = (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
             if (!newValue || !taskTab || !selectedTask) return;
             const newType = newValue.code;
             let newChecklistJson = selectedTask.checklistJson ?? null;
@@ -145,12 +132,9 @@ export const useTaskDetailFormHelper = () => {
                         : t,
                 ),
             );
-        },
-        [taskTab, selectedTask, activeTabId, registriesByType, setOpenTabs],
-    );
+        };
 
-    const handleProjectChange = useCallback(
-        (_e: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
+    const handleProjectChange = (_e: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
             if (!newValue || !taskTab || !selectedTask) return;
             const newProjectId = newValue.id as number;
             setOpenTabs((prev: BaseTab[]) =>
@@ -165,16 +149,11 @@ export const useTaskDetailFormHelper = () => {
                 ),
             );
             loadParentTaskOptions(newProjectId, selectedTask.id);
-        },
-        [taskTab, selectedTask, activeTabId, setOpenTabs, loadParentTaskOptions],
-    );
+        };
 
-    const handleParentTaskChange = useCallback(
-        (_e: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
+    const handleParentTaskChange = (_e: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
             handleFieldChange("parentTaskId", newValue ? (newValue.id as number) : null);
-        },
-        [handleFieldChange],
-    );
+        };
 
     return {
         // load functions

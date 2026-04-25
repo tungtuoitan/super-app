@@ -4,7 +4,7 @@
  * Supports bold, italic, underline, lists, headings, images, and file attachments
  */
 
-import React, { useEffect, useLayoutEffect, useRef, useCallback, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import CodeBlock from "@tiptap/extension-code-block";
@@ -227,20 +227,20 @@ export function RichTextEditor({
     useProxyImageLoader({ editor, token: $user.userToken || null });
 
     // Copy as plain text — joins paragraphs with \n instead of \n\n
-    const handleCopyPlainText = useCallback(() => {
+    const handleCopyPlainText = () => {
         if (!editor) return;
         const { from, to, empty } = editor.state.selection;
         const text = empty
             ? editor.getText({ blockSeparator: '\n' })
             : editor.state.doc.textBetween(from, to, '\n');
         navigator.clipboard.writeText(text);
-    }, [editor]);
+    };
 
-    const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    const handleContextMenu = (e: React.MouseEvent) => {
         showContextMenu(e, constants.contextMenu.contextMenuTypes.richTextEditor, {
             onCopyPlainText: handleCopyPlainText,
         });
-    }, [showContextMenu, handleCopyPlainText]);
+    };
 
     // Focus when focusTrigger changes (for tab-switch scenarios)
     useEffect(() => {
@@ -251,8 +251,7 @@ export function RichTextEditor({
     }, [focusTrigger, editor, disabled]);
 
     // Handle image upload
-    const handleImageUpload = useCallback(
-        async (file: File) => {
+    const handleImageUpload = async (file: File) => {
             if (!editor || !$user.userToken) return;
 
             try {
@@ -299,13 +298,10 @@ export function RichTextEditor({
             } finally {
                 setIsUploading(false);
             }
-        },
-        [editor, $user.userToken, uploadContext, uploadContextId]
-    );
+        };
 
     // Handle file attachment upload
-    const handleFileUpload = useCallback(
-        async (file: File) => {
+    const handleFileUpload = async (file: File) => {
             if (!editor || !$user.userToken) return;
 
             try {
@@ -351,9 +347,7 @@ export function RichTextEditor({
             } finally {
                 setIsUploading(false);
             }
-        },
-        [editor, $user.userToken, handleImageUpload, uploadContext, uploadContextId]
-    );
+        };
 
     // Handle paste event for images
     useEffect(() => {

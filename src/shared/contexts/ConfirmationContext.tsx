@@ -4,7 +4,7 @@
  * Following SuperApp architecture patterns
  */
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { ConfirmationPopover } from "@/shared/components/feedback/ConfirmationPopover";
 
 interface ConfirmationOptions {
@@ -31,21 +31,21 @@ export function ConfirmationProvider({ children }: { children: React.ReactNode }
     const [isOpen, setIsOpen] = useState(false);
     const [options, setOptions] = useState<ConfirmationOptions | null>(null);
 
-    const showConfirmation = useCallback((opts: ConfirmationOptions) => {
+    const showConfirmation = (opts: ConfirmationOptions) => {
         setOptions(opts);
         setIsOpen(true);
-    }, []);
+    };
 
-    const handleConfirm = useCallback(() => {
+    const handleConfirm = () => {
         options?.onConfirm();
         setIsOpen(false);
         setTimeout(() => setOptions(null), 200);
-    }, [options]);
+    };
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = () => {
         setIsOpen(false);
         setTimeout(() => setOptions(null), 200);
-    }, []);
+    };
 
     return (
         <ConfirmationContext.Provider value={{ showConfirmation }}>

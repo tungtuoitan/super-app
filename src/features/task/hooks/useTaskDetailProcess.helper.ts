@@ -7,7 +7,7 @@
  * always operate on the latest state (see useTaskDetailChecklist.helper for details).
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { taskService } from "../service/task.service";
 import { useAuthStore } from "@/store/Auth.store";
@@ -44,8 +44,7 @@ export const useTaskDetailProcessHelper = () => {
     }, []);
 
     /** Persist processJson to server — auto-completes task when all steps done */
-    const saveProcessToServer = useCallback(
-        async (json: ChecklistJSON, task: Task) => {
+    const saveProcessToServer = async (json: ChecklistJSON, task: Task) => {
             if (task.id <= 0 || !$user.userToken) return;
             const allDone = isChecklistAllDone(json);
             const newStatus = allDone
@@ -76,11 +75,9 @@ export const useTaskDetailProcessHelper = () => {
                     t.id === task.id ? { ...t, processJson: newProcessJson, status: newStatus } : t,
                 ),
             );
-        },
-        [$user.userToken, activeTabId, setOpenTabs, setTasks],
-    );
+        };
 
-    const scheduleSave = useCallback(() => {
+    const scheduleSave = () => {
         if (serverSaveTimerRef.current) clearTimeout(serverSaveTimerRef.current);
         serverSaveTimerRef.current = setTimeout(() => {
             const task = selectedTaskRef.current;
@@ -90,13 +87,13 @@ export const useTaskDetailProcessHelper = () => {
                 pendingProcessRef.current = null;
             }
         }, 300);
-    }, [saveProcessToServer]);
+    };
 
     /**
      * Apply a process update (optimistic) and schedule a debounced server save.
      * Accepts a ChecklistJSON (edit-mode save) or a transform fn (toggle).
      */
-    const handleProcessChange = useCallback(
+    const handleProcessChange = 
         (updater: ProcessUpdater) => {
             const task = selectedTaskRef.current;
             if (!task) return;
@@ -118,18 +115,13 @@ export const useTaskDetailProcessHelper = () => {
             );
 
             if (!isNewTask) scheduleSave();
-        },
-        [activeTabId, setOpenTabs, scheduleSave],
-    );
+        }
 
     /** Process saved from edit mode (full replacement) */
-    const handleProcessSave = useCallback(
-        (json: ChecklistJSON) => {
+    const handleProcessSave = (json: ChecklistJSON) => {
             const task = selectedTaskRef.current;
             if (task) handleProcessChange(json);
-        },
-        [handleProcessChange],
-    );
+    }
 
     return {
         saveProcessToServer,

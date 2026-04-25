@@ -3,7 +3,7 @@
  * Tracks are sorted by usage count (desc) derived from logs in store
  */
 
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Plus, BarChart2 } from "lucide-react";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
@@ -22,10 +22,6 @@ export function TrackPanel() {
     useEffect(() => {
         loadTracks();
     }, [loadTracks]);
-
-    const handleAddTrack = useCallback(() => {
-        openNewTrackTab();
-    }, [openNewTrackTab]);
 
     const sortedTracks = useMemo(() => {
         const active = tracks.filter((t) => !t.deletedAt);

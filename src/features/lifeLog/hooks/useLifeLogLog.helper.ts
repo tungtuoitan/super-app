@@ -3,7 +3,7 @@
  * Business logic for log operations
  */
 
-import { useCallback } from "react";
+
 import { lifeLogService } from "../service/lifeLog.service";
 import { useAuthStore } from "@/store/Auth.store";
 import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/features/lifeLog/types/lifeLog.types";
@@ -37,7 +37,7 @@ export function useLifeLogLogHelper() {
     const token = $user.userToken;
     const { enqueueSnackbar } = useSnackbar();
 
-    const loadLogs = useCallback(async (params?: {
+    const loadLogs = async (params?: {
         type?: string;
         trackId?: number;
         createdAtFrom?: string;
@@ -58,9 +58,9 @@ export function useLifeLogLogHelper() {
         } finally {
             setIsLoading(false);
         }
-    }, [token, setLogs, setIsLoading, setError]);
+    }
 
-    const createLog = useCallback(async (data: UpsertLifeLogLogDTO): Promise<LifeLogLog | null> => {
+    const createLog = async (data: UpsertLifeLogLogDTO): Promise<LifeLogLog | null> => {
         if (!token) {
             debugLog.log("lifelog", "createLog:noToken", {});
             return null;
@@ -83,13 +83,12 @@ export function useLifeLogLogHelper() {
             console.error(err);
             return null;
         }
-    }, [token, loadLogs, enqueueSnackbar]);
+    }
 
-    const upsertLog = useCallback(async (data: UpsertLifeLogLogDTO): Promise<LifeLogLog | null> => {
+    const upsertLog = async (data: UpsertLifeLogLogDTO): Promise<LifeLogLog | null> => {
         return createLog(data);
-    }, [createLog]);
-
-    const deleteLog = useCallback(async (logId: number): Promise<void> => {
+    }
+    const deleteLog = async (logId: number): Promise<void> => {
         if (!token) return;
         const existing = logs.find((l) => l.id === logId);
         if (!existing) {
@@ -117,7 +116,7 @@ export function useLifeLogLogHelper() {
             enqueueSnackbar("Failed to delete log", { variant: "error" });
             console.error(err);
         }
-    }, [token, logs, setLogs, enqueueSnackbar]);
+    }
 
     return { loadLogs, createLog, upsertLog, deleteLog };
 }

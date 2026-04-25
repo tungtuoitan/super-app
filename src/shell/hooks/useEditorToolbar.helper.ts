@@ -5,19 +5,12 @@
  * Each feature owns its own save logic; this coordinator just dispatches.
  */
 
-import { useCallback } from "react";
-import type { BaseTab } from "@/types/editor/tab.types";
-import type { Note } from "@/features/note/types/note.types";
-import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import type { Ws } from "@/types/workspace.types";
-import type { Project } from "@/features/project/store/useProject.store";
-import type { Task } from "@/features/task/store/useTask.store";
 
 // Feature save actions
 import { useNoteSaveActions } from "@/features/note/hooks/useNoteSaveActions";
@@ -56,7 +49,7 @@ export const useEditorToolbarHelper = () => {
 
     // ── Save orchestrator ────────────────────────────────────────────────────
 
-    const upsertOrchestraitor = useCallback(async () => {
+    const upsertOrchestraitor = async () => {
         if (!activeTab) return;
         setIsSaving(true);
 
@@ -80,11 +73,11 @@ export const useEditorToolbarHelper = () => {
             loadKeywords();
             setIsSaving(false);
         }
-    }, [activeTab, ...handlers.map((h) => h.onSave), setIsSaving, loadKeywords, _console]);
+    }
 
     // ── Cancel / discard changes ─────────────────────────────────────────────
 
-    const commonCancel = useCallback(() => {
+    const commonCancel = () => {
         if (!activeTab) return;
 
         if (activeTab.data0) {
@@ -97,7 +90,7 @@ export const useEditorToolbarHelper = () => {
             );
             _console.info("Changes discarded");
         }
-    }, [activeTab, setOpenTabs, _console]);
+    }
 
     return {
         upsertOrchestraitor,

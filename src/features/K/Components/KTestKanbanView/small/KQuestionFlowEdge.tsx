@@ -46,16 +46,16 @@ export function KQuestionFlowEdge({
         return () => window.removeEventListener("keydown", onKey);
     }, [selected, id, handleEdgeDelete]);
 
-    const handleToggle = useCallback((e: React.MouseEvent) => {
+    const handleToggle = (e: React.MouseEvent) => {
         e.stopPropagation();
         const idx = ARROW_CYCLE.indexOf(currentArrow);
         handleEdgeToggleDirection(id, ARROW_CYCLE[(idx + 1) % ARROW_CYCLE.length]);
-    }, [id, currentArrow, handleEdgeToggleDirection]);
+    }
 
-    const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    const handleDeleteClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         handleEdgeDelete(id);
-    }, [id, handleEdgeDelete]);
+    }
 
     return (
         <>

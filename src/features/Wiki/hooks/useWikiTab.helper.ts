@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
@@ -10,7 +10,7 @@ export const useWikiTabHelper = () => {
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
 
     /** Open (or reuse) the singleton wiki tab, optionally focusing a keyword */
-    const openWikiTab = useCallback((keywordId: number | null = null) => {
+    const openWikiTab = (keywordId: number | null = null) => {
         const data: WikiTabData = { keywordId };
         const existing = openTabs.find(t => t.type === constants.vscode.tab.tabTypes.wikiInfo);
 
@@ -31,7 +31,7 @@ export const useWikiTabHelper = () => {
             setOpenTabs(prev => [...prev, newTab]);
             setActiveTabId(newTab.id);
         }
-    }, [openTabs, setOpenTabs, setActiveTabId]);
+    }
 
     return { openWikiTab };
 };

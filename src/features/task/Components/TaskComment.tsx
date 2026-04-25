@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send, Loader2 } from "lucide-react";
 import { RichTextEditor } from "@/shared/components";
 import { useTaskCommentSelector } from "../Selectors/TaskCommentSelector";
@@ -31,7 +31,7 @@ function TaskCommentInner() {
     const bottomRef = useRef<HTMLDivElement>(null);
     const prevLoadingRef = useRef(isLoadingComments);
 
-    const easedScrollTo = useCallback((container: HTMLElement, targetTop: number, duration = 400) => {
+    const easedScrollTo = (container: HTMLElement, targetTop: number, duration = 400) => {
         const start = container.scrollTop;
         const distance = targetTop - start;
         if (Math.abs(distance) < 2) return;
@@ -44,15 +44,15 @@ function TaskCommentInner() {
             if (t < 1) requestAnimationFrame(step);
         };
         requestAnimationFrame(step);
-    }, []);
+    };
 
-    const scrollToBottom = useCallback((duration = 400) => {
+    const scrollToBottom = (duration = 400) => {
         requestAnimationFrame(() => {
             const container = scrollContainerRef.current;
             if (!container) return;
             easedScrollTo(container, container.scrollHeight, duration);
         });
-    }, [easedScrollTo, scrollContainerRef]);
+    };
 
     useEffect(() => {
         if (commentFocusTrigger > 0) setTimeout(() => scrollToBottom(300), 50);

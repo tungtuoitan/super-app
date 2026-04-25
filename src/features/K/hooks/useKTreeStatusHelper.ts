@@ -18,7 +18,7 @@ export const useKTreeStatusHelper = () => {
      * - hasDeletedAncestor: true if this item OR any ancestor is deleted
      * - isDirectlyDeleted: true if THIS item is deleted (not inherited from parent)
      */
-    const getItemStatus = useCallback( 
+    const getItemStatus =  
         (item: KItemV2 | null | undefined): { hasDeletedAncestor: boolean; isDirectlyDeleted: boolean } => {
             // Handle null/undefined item
             if (!item) {
@@ -56,9 +56,7 @@ export const useKTreeStatusHelper = () => {
             }
 
             return { hasDeletedAncestor, isDirectlyDeleted };
-        },
-        [currentK?.flatData]
-    );
+        }
 
     /**
      * Get selected items statuses

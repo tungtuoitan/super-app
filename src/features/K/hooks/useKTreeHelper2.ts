@@ -7,7 +7,7 @@
  */
 
 import {useKStore} from "../store/K.store";
-import { useCallback } from "react";
+
 import type { NodeApi } from "react-arborist";
 import {KTreeNode} from ".";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
@@ -74,7 +74,7 @@ export const KuseTreeHelper2 = () => {
      *
      * ⚡ Performance optimized with useCallback
      */
-    const handleKeyDown = useCallback(
+    const handleKeyDown = 
         (e: KeyboardEvent, allVisibleFolderIds: number[]) => {
             if (e.target !== document.body && !(e.target as Element).closest("[data-workspace-tree]")) {
                 return; // Only handle when tree is focused
@@ -195,9 +195,7 @@ export const KuseTreeHelper2 = () => {
                     setLastSelectedItemId(null);
                     break;
             }
-        },
-        [selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentK]
-    );
+        }
 
     const selectItem = (itemsToSelect: number[]) => {
         const tree = _treeRef?.current;

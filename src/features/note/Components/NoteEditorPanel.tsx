@@ -45,7 +45,15 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
         }
     }, [tab.id]);
 
-    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    useEffect(() => {
+        return () => {
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+        };
+    }, []);
+    
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         if (isRestoringScrollRef.current) return;
 
         const scrollTop = e.currentTarget.scrollTop;
@@ -59,15 +67,8 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
                 prev.map((t) => (t.id === tab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t))
             );
         }, 100);
-    }, [tab.id, setOpenTabs]);
+    }
 
-    useEffect(() => {
-        return () => {
-            if (scrollTimeoutRef.current) {
-                clearTimeout(scrollTimeoutRef.current);
-            }
-        };
-    }, []);
 
     return (
         <div className="w-full h-[100vh] flex flex-col overflow-hidden bg-[#f6f6f6]">

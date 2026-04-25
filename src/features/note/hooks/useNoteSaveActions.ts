@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+
 import { constants } from "@/utils/constants";
 import { useNoteDetailHelper } from "./useNoteDetail.helper";
 import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
@@ -17,7 +17,7 @@ export function useNoteSaveActions(): SaveActions {
 
     const handles = (tabType: string) => tabType === constants.vscode.tab.tabTypes.note;
 
-    const onSave = useCallback(async (tab: BaseTab) => {
+    const onSave = async (tab: BaseTab) => {
         const data = tab.data as Note;
         const workspaceItem = currentWorkspace?.flatData.find(
             (item) => item.entityType === 3 && item.entityId === data.id
@@ -42,7 +42,6 @@ export function useNoteSaveActions(): SaveActions {
         } else {
             console.error("Unexpected case in note save");
         }
-    }, [upsertNote, _treeEditor, currentWorkspace, addNoteToTaskFolder]);
-
+    }
     return { handles, onSave };
 }

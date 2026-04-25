@@ -3,7 +3,7 @@
  * Node-specific callbacks: rename, create (temp → persist), change project/status.
  */
 
-import { useCallback } from "react";
+
 import type { Node } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
@@ -32,10 +32,10 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
 
     // ── Rename ──────────────────────────────────────────────────────────────
 
-    const handleRenameStart = useCallback((nodeId: string) => setEditingNodeId(nodeId), [setEditingNodeId]);
-    const handleRenameCancel = useCallback(() => setEditingNodeId(null), [setEditingNodeId]);
+    const handleRenameStart = (nodeId: string) => setEditingNodeId(nodeId)
+    const handleRenameCancel = () => setEditingNodeId(null)
 
-    const handleRenameConfirm = useCallback(
+    const handleRenameConfirm = 
         async (nodeId: string, newTitle: string) => {
             const isTempNode = nodeId.startsWith("temp-node-");
             const trimmed = newTitle.trim();
@@ -161,14 +161,12 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 );
                 _console.error("Failed to rename task");
             }
-        },
-        [tasks, currentFlowNodes, setTasks, setFlowNodes, setEditingNodeId, $user.userToken, _console, isNodeLocked, createTaskFolder],
-    );
+        }
 
     // ── Add task at position (right-click canvas) ─────────────────────────
     // Only creates a temp node — backend call happens on rename confirm.
 
-    const handleAddTaskAtPosition = useCallback(
+    const handleAddTaskAtPosition = 
         (posX: number, posY: number) => {
             if (filteredTasks.length === 0) return;
 
@@ -212,13 +210,11 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 tempNode,
             ]);
             setEditingNodeId(tempId);
-        },
-        [filteredTasks, currentFlowNodes, projectNameMap, setFlowNodes, setEditingNodeId],
-    );
+        }
 
     // ── Change project of a task node ──────────────────────────────────────
 
-    const handleChangeProject = useCallback(
+    const handleChangeProject = 
         async (nodeId: string, newProjectId: number) => {
             if (isNodeLocked(nodeId)) {
                 debugLog.log("taskflow", "locked-node-blocked", { action: "changeProject", nodeId });
@@ -265,13 +261,11 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 );
                 _console.error("Failed to change project");
             }
-        },
-        [tasks, projectNameMap, setTasks, setFlowNodes, $user.userToken, _console, isNodeLocked],
-    );
+        }
 
     // ── Change status of a task node ─────────────────────────────────────
 
-    const handleChangeStatus = useCallback(
+    const handleChangeStatus = 
         async (nodeId: string, newStatus: string) => {
             if (isNodeLocked(nodeId)) {
                 debugLog.log("taskflow", "locked-node-blocked", { action: "changeStatus", nodeId, newStatus });
@@ -318,10 +312,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 );
                 _console.error("Failed to change status");
             }
-        },
-        [tasks, setTasks, setFlowNodes, $user.userToken, _console, isNodeLocked],
-    );
-
+        }
     return {
         handleRenameStart,
         handleRenameCancel,

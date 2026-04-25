@@ -77,7 +77,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
 
     showResultRef.current = showResult;
 
-    const submitInBackground = useCallback((scoresSnap: Record<number, number>, timingsSnap: Record<number, number>) => {
+    const submitInBackground = (scoresSnap: Record<number, number>, timingsSnap: Record<number, number>) => {
         const dailyAnswers: KDailyAnswerItem[] = questions.map(q => ({
             questionId: q.id,
             answerText: null,
@@ -86,9 +86,9 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
         }));
         KTestService._submitDailyAnswers(knowledgeId, testId, { answers: dailyAnswers })
             .catch(err => console.error("[KDailyReview] submit failed:", err));
-    }, [questions, knowledgeId, testId]);
+    }
 
-    const advanceWithScore = useCallback((score: number) => {
+    const advanceWithScore = (score: number) => {
         if (isSubmitted) return;
         const qId = currentQuestion?.id;
         const elapsed = Date.now() - questionStartRef.current;
@@ -102,12 +102,11 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
         }
         setShowResult(false);
         setCurrentIndex(i => i + 1);
-    }, [isSubmitted, currentQuestion, currentIndex, totalQuestions, timings, selfScores, submitInBackground, isQuickTest]);
-
+    }
     advanceWithScoreRef.current = advanceWithScore;
 
     // Drag-to-score — only active after answer is revealed
-    const handleDragStart = useCallback((e: React.PointerEvent) => {
+    const handleDragStart = (e: React.PointerEvent) => {
         if (!showResultRef.current) return;
         e.preventDefault();
         const origin = { x: e.clientX, y: e.clientY };
@@ -154,7 +153,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
         document.addEventListener("pointermove", onMove);
         document.addEventListener("pointerup", onUp);
         document.addEventListener("pointercancel", onCancel);
-    }, []);
+    }
 
     // ── Summary screen ────────────────────────────────────────────────────────
 

@@ -3,7 +3,7 @@
  * Opens knowledge editor tabs (create new / edit existing)
  */
 
-import { useCallback } from "react";
+
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
@@ -15,7 +15,7 @@ export function useKTabHelper() {
     const { allK, setAllK } = useKStore();
 
     /** Open existing knowledge editor tab (reuse single tab) */
-    const openKnowledgeTab = useCallback((knowledge: KWsResponse) => {
+    const openKnowledgeTab = (knowledge: KWsResponse) => {
         const existing = openTabs.find(
             (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge
         );
@@ -44,10 +44,10 @@ export function useKTabHelper() {
             setOpenTabs((prev) => [...prev, newTab]);
             setActiveTabId(newTab.id);
         }
-    }, [openTabs, setOpenTabs, setActiveTabId]);
+    }
 
     /** Create temp knowledge (negative ID), push to store, open tab (reuse single tab) */
-    const openNewKnowledgeTab = useCallback(() => {
+    const openNewKnowledgeTab = () => {
         const tempId = -Date.now();
         const now = new Date().toISOString();
         const tempKnowledge: KWsResponse = {
@@ -87,10 +87,10 @@ export function useKTabHelper() {
             setOpenTabs((prev) => [...prev, newTab]);
             setActiveTabId(newTab.id);
         }
-    }, [setAllK, openTabs, setOpenTabs, setActiveTabId]);
+    }
 
     /** Open global daily review tab (singleton — reuse if already open) */
-    const openGlobalDailyReviewTab = useCallback(() => {
+    const openGlobalDailyReviewTab = () => {
         const existing = openTabs.find(
             (t) => t.type === constants.vscode.tab.tabTypes.kDailyReview
         );
@@ -108,7 +108,7 @@ export function useKTabHelper() {
             setOpenTabs((prev) => [...prev, newTab]);
             setActiveTabId(newTab.id);
         }
-    }, [openTabs, setOpenTabs, setActiveTabId]);
+    }
 
     return { openKnowledgeTab, openNewKnowledgeTab, openGlobalDailyReviewTab };
 }

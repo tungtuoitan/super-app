@@ -3,7 +3,6 @@
  * Handles comment CRUD operations, reply, edit mode.
  */
 
-import { useCallback } from "react";
 import { useAuthStore } from "@/store/Auth.store";
 import { useTaskCommentStore } from "../store/useTaskComment.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
@@ -35,8 +34,7 @@ export const useTaskCommentHelper = () => {
     } = useTaskCommentStore();
 
     /** Load all comments for the current task */
-    const loadComments = useCallback(
-        async (taskId?: number) => {
+    const loadComments = async (taskId?: number) => {
             const id = taskId ?? selectedTask?.id;
             if (!id || id <= 0 || !$user.userToken) return;
 
@@ -51,13 +49,10 @@ export const useTaskCommentHelper = () => {
             } finally {
                 setIsLoadingComments(false);
             }
-        },
-        [selectedTask?.id, $user.userToken, setComments, setIsLoadingComments],
-    );
+        };
 
     /** Submit a new comment or reply */
-    const submitComment = useCallback(
-        async (content: string, parentCommentId?: number | null) => {
+    const submitComment = async (content: string, parentCommentId?: number | null) => {
             if (!selectedTask || selectedTask.id <= 0 || !$user.userToken) return;
             if (!content.trim()) return;
 
@@ -78,13 +73,10 @@ export const useTaskCommentHelper = () => {
             } catch (err) {
                 console.error("Failed to submit comment:", err);
             }
-        },
-        [selectedTask, $user.userToken, setComments, setDraftContent, setReplyingTo],
-    );
+        };
 
     /** Update an existing comment's content */
-    const updateComment = useCallback(
-        async (commentId: number, content: string) => {
+    const updateComment = async (commentId: number, content: string) => {
             if (!selectedTask || !$user.userToken) return;
             if (!content.trim()) return;
 
@@ -108,13 +100,10 @@ export const useTaskCommentHelper = () => {
             } catch (err) {
                 console.error("Failed to update comment:", err);
             }
-        },
-        [selectedTask, $user.userToken, setComments, setEditingCommentId],
-    );
+        };
 
     /** Soft delete a comment */
-    const deleteComment = useCallback(
-        async (commentId: number) => {
+    const deleteComment = async (commentId: number) => {
             if (!$user.userToken) return;
 
             try {
@@ -128,35 +117,27 @@ export const useTaskCommentHelper = () => {
             } catch (err) {
                 console.error("Failed to delete comment:", err);
             }
-        },
-        [$user.userToken, setComments],
-    );
+        };
 
     /** Start replying to a comment */
-    const startReply = useCallback(
-        (commentId: number) => {
+    const startReply = (commentId: number) => {
             setReplyingTo(commentId);
             setEditingCommentId(null);
-        },
-        [setReplyingTo, setEditingCommentId],
-    );
+        };
 
     /** Start editing a comment */
-    const startEdit = useCallback(
-        (commentId: number, currentContent: string) => {
+    const startEdit = (commentId: number, currentContent: string) => {
             setEditingCommentId(commentId);
             setDraftContent(currentContent);
             setReplyingTo(null);
-        },
-        [setEditingCommentId, setDraftContent, setReplyingTo],
-    );
+        };
 
     /** Cancel reply or edit */
-    const cancelReplyOrEdit = useCallback(() => {
+    const cancelReplyOrEdit = () => {
         setReplyingTo(null);
         setEditingCommentId(null);
         setDraftContent("");
-    }, [setReplyingTo, setEditingCommentId, setDraftContent]);
+    };
 
     /**
      * Auto-create a version comment when process/checklist/desc structure changes.
@@ -165,8 +146,7 @@ export const useTaskCommentHelper = () => {
      * @param oldText - text representation of old version
      * @param newText - text representation of new version
      */
-    const submitVersionComment = useCallback(
-        (section: "process" | "checklist" | "desc", oldText: string, newText: string) => {
+    const submitVersionComment = (section: "process" | "checklist" | "desc", oldText: string, newText: string) => {
             if (!selectedTask || selectedTask.id <= 0 || !$user.userToken) return;
             // Skip if no meaningful change
             if (oldText.trim() === newText.trim()) return;
@@ -185,9 +165,7 @@ export const useTaskCommentHelper = () => {
             }).catch((err) => {
                 console.error("Failed to create version comment:", err);
             });
-        },
-        [selectedTask, $user.userToken, setComments],
-    );
+        };
 
     return {
         loadComments,

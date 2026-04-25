@@ -4,7 +4,7 @@
  * State lives in useTaskStore.
  */
 
-import { useCallback } from "react";
+
 import { useAuthStore } from "@/store/Auth.store";
 import type { Note } from "@/features/note/types/note.types";
 import { type Task } from "../store/useTask.store";
@@ -30,7 +30,7 @@ export const useTaskWorkspaceItemHelper = () => {
     /**
      * Load notes/files inside the task's workspace folder.
      */
-    const loadFolderItems = useCallback(async (task: Task, projectWorkspaceId: number) => {
+    const loadFolderItems = async (task: Task, projectWorkspaceId: number) => {
         if (!task.folderWorkspaceItemId || !projectWorkspaceId) {
             setFolderItems([]);
             return;
@@ -64,12 +64,12 @@ export const useTaskWorkspaceItemHelper = () => {
         } finally {
             setIsLoadingFolderItems(false);
         }
-    }, [$user, setFolderItems, setIsLoadingFolderItems]);
+    }
 
     /**
      * Open a note from the task's folder in an editor tab.
      */
-    const openFolderItem = useCallback((item: TaskFolderItem) => {
+    const openFolderItem = (item: TaskFolderItem) => {
         if (item.entityType !== 3 || !item.noteData) return;
         const note: Note = {
             id: item.entityId,
@@ -85,14 +85,14 @@ export const useTaskWorkspaceItemHelper = () => {
             deletedAt: item.noteData.deletedAt ? new Date(item.noteData.deletedAt) : null,
         };
         openTab(note, constants.vscode.tab.tabTypes.note);
-    }, [openTab]);
+    }
 
     /**
      * Create a new note for a task.
      * Opens a bare note tab. On save, upsertOrchestraitor will place the note
      * inside the task's workspace folder via parentId.
      */
-    const createTaskNote = useCallback((task: Task) => {
+    const createTaskNote = (task: Task) => {
         const existingIds = openTabs
             .filter((t) => t.type === constants.vscode.tab.tabTypes.note)
             .map((t) => (t.data as Note).id);
@@ -130,8 +130,7 @@ export const useTaskWorkspaceItemHelper = () => {
         }]);
         setActiveTabId(tabId);
         setShouldFocusNoteName(true);
-    }, [$user, registries, openTabs, setOpenTabs, setActiveTabId, setShouldFocusNoteName]);
-
+    }
     return {
         loadFolderItems,
         openFolderItem,

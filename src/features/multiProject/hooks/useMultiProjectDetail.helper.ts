@@ -4,7 +4,6 @@
  * Reads from stores directly — NO params.
  */
 
-import { useCallback } from "react";
 import { useEditorTabsStore } from "@/store/index";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import type { TabType } from "../types/multiProjectDetail.type";
@@ -14,16 +13,16 @@ export const useMultiProjectDetailHelper = () => {
     const { availableProjects } = useMultiProjectDetailSelector();
 
     // Update inner tab in editor tab metadata
-    const setActiveTab = useCallback((newTab: TabType) => {
+    const setActiveTab = (newTab: TabType) => {
         setOpenTabs((prev) =>
             prev.map((t) =>
                 t.id === activeTabId ? { ...t, metadata: { ...t.metadata, innerTab: newTab } } : t,
             ),
         );
-    }, [activeTabId, setOpenTabs]);
+    };
 
     // Update selected project IDs in editor tab metadata
-    const setSelectedProjectIds = useCallback((updater: number[] | ((prev: number[]) => number[])) => {
+    const setSelectedProjectIds = (updater: number[] | ((prev: number[]) => number[])) => {
         setOpenTabs((prev) =>
             prev.map((t) => {
                 if (t.id !== activeTabId) return t;
@@ -32,29 +31,29 @@ export const useMultiProjectDetailHelper = () => {
                 return { ...t, metadata: { ...t.metadata, selectedProjectIds: newSelected } };
             }),
         );
-    }, [activeTabId, setOpenTabs]);
+    };
 
     // Toggle a single project
-    const handleToggleProject = useCallback((projectId: number) => {
+    const handleToggleProject = (projectId: number) => {
         setSelectedProjectIds((prev) =>
             prev.includes(projectId) ? prev.filter((id) => id !== projectId) : [...prev, projectId],
         );
-    }, [setSelectedProjectIds]);
+    };
 
     // Select all active projects
-    const handleSelectAllActive = useCallback(() => {
+    const handleSelectAllActive = () => {
         setSelectedProjectIds(availableProjects.filter((p) => p.status === "active").map((p) => p.id));
-    }, [setSelectedProjectIds, availableProjects]);
+    };
 
     // Select all projects
-    const handleSelectAll = useCallback(() => {
+    const handleSelectAll = () => {
         setSelectedProjectIds(availableProjects.map((p) => p.id));
-    }, [setSelectedProjectIds, availableProjects]);
+    };
 
     // Clear all selections
-    const handleClearAll = useCallback(() => {
+    const handleClearAll = () => {
         setSelectedProjectIds([]);
-    }, [setSelectedProjectIds]);
+    };
 
     return {
         setActiveTab,

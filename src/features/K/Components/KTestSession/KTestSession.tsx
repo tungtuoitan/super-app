@@ -45,7 +45,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
 
     // ── Voice recording ────────────────────────────────────────────────────────
 
-    const startRecording = useCallback(async () => {
+    const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mediaRecorder = new MediaRecorder(stream);
@@ -81,29 +81,29 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
         } catch {
             alert("Cannot access microphone.");
         }
-    }, [currentQuestion?.id]);
+    }
 
-    const stopRecording = useCallback(() => {
+    const stopRecording = () => {
         mediaRecorderRef.current?.stop();
         setIsRecording(false);
-    }, []);
+    }
 
     // ── Navigation ─────────────────────────────────────────────────────────────
 
-    const goPrev = useCallback(() => {
+    const goPrev = () => {
         if (currentIndex > 0) setCurrentIndex((i) => i - 1);
-    }, [currentIndex]);
+    };
 
-    const goNext = useCallback(() => {
+    const goNext = () => {
         if (currentIndex < totalQuestions - 1) setCurrentIndex((i) => i + 1);
-    }, [currentIndex, totalQuestions]);
+    }
 
-    const toggleRecording = useCallback(() => {
+    const toggleRecording = () => {
         if (isRecording) stopRecording();
         else startRecording();
-    }, [isRecording, startRecording, stopRecording]);
+    }
 
-        const handleSubmit = useCallback(async () => {
+        const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
             const answerPayload = questions.map(q => ({
@@ -129,7 +129,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
         } finally {
             setIsSubmitting(false);
         }
-    }, [questions, knowledgeId, testId, submitAnswers]);
+    }
 
     // ── Keyboard shortcuts ────────────────────────────────────────────────────
     useEffect(() => {

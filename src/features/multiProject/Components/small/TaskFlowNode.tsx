@@ -8,7 +8,7 @@
  * - Delete key → set status to cancelled
  */
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Handle, Position, useStore } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
 import { cn } from "@/lib/utils";
@@ -79,26 +79,25 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const popupScrollRef = useRef<HTMLDivElement>(null);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
-    const toggleGroup = useCallback((name: string) => {
+    const toggleGroup = (name: string) => {
         setCollapsedGroups(prev => {
             const next = new Set(prev);
             if (next.has(name)) next.delete(name); else next.add(name);
             return next;
         });
-    }, []);
+    };
 
-    const handleProgressEnter = useCallback(() => {
+    const handleProgressEnter = () => {
         if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
         setShowProgressPopup(true);
-    }, []);
-    const handleProgressLeave = useCallback(() => {
+    };
+    const handleProgressLeave = () => {
         popupTimeoutRef.current = setTimeout(() => setShowProgressPopup(false), 200);
-    }, []);
+    };
 
     const canToggleProcess = (isInProgress || isBgProgress) && !nodeLocked;
 
-    const handleToggleProcess = useCallback(
-        async (gi: number, ii: number) => {
+    const handleToggleProcess = async (gi: number, ii: number) => {
             if (!parsedProcess || !canToggleProcess) return;
             const item = parsedProcess.groups[gi]?.items[ii];
             if (!item) return;
@@ -159,9 +158,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                 );
                 setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, processJson: oldProcessJson, ...(allDone ? { status: task.status } : {}) } : t)));
             }
-        },
-        [parsedProcess, canToggleProcess, id, data.task, setFlowNodes, setTasks, $user.userToken],
-    );
+        };
 
     // Focus input when entering edit mode (retry until mounted)
     useEffect(() => {
@@ -194,13 +191,13 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
         return () => document.removeEventListener("keydown", onKeyDown);
     }, [selected, isEditing, isTempNode, nodeLocked, id, handleChangeStatus]);
 
-    const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+    const handleDoubleClick = (e: React.MouseEvent) => {
         if (nodeLocked) return;
         e.stopPropagation();
         handleRenameStart(id);
-    }, [id, nodeLocked, handleRenameStart]);
+    };
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") handleRenameConfirm(id, editValue);
         if (e.key === "Escape") {
             if (isTempNode) {
@@ -209,24 +206,24 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                 handleRenameCancel();
             }
         }
-    }, [id, isTempNode, editValue, handleRenameConfirm, handleRenameCancel]);
+    };
 
-    const handleBlur = useCallback(() => {
+    const handleBlur = () => {
         if (isTempNode) {
             handleRenameConfirm(id, "");
         } else {
             handleRenameConfirm(id, editValue);
         }
-    }, [id, isTempNode, editValue, handleRenameConfirm]);
+    };
 
-    const onProjectChange = useCallback((projectId: number) => {
+    const onProjectChange = (projectId: number) => {
         handleChangeProject(id, projectId);
         setProjectPickerOpen(false);
-    }, [id, handleChangeProject]);
+    };
 
-    const onStatusClick = useCallback((status: string) => {
+    const onStatusClick = (status: string) => {
         handleChangeStatus(id, status);
-    }, [id, handleChangeStatus]);
+    };
 
     // Close project picker on click outside
     useEffect(() => {
