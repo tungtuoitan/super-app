@@ -10,7 +10,6 @@ import { useWorkspaceLoader } from "../hooks/useWorkspace.loader";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
-import { NoteGridPopup } from "@/features/note";
 import { useAuthStore } from "@/store/Auth.store";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
@@ -111,7 +110,6 @@ export function WorkspaceView() {
             <div className="flex-1 overflow-hidden relative">
                 <WorkspaceTree />
                 <FolderDialog />
-                <NoteGridPopup />
 
                 {/* Loading Overlay */}
                 {(isLoadingWorkspaces || isLoadingTree || isLoadingTreeByOpeningFolder) && (

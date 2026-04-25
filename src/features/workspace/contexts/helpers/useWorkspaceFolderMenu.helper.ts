@@ -26,7 +26,7 @@ import {WorkspaceDTO} from "../../types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
 import { useGeneralStore } from "@/store/index";
-import { useNoteDetailStore, useNoteGridPopupHelper } from "@/features/note";
+import { useNoteDetailStore } from "@/features/note";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/features/note";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
@@ -121,7 +121,6 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { openTabs } = useEditorTabsStore();
     const { registries } = useGeneralStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
-    const { openNoteGridPopup } = useNoteGridPopupHelper();
 
     const selectedCount = selectedItemIds.length;
     const isMultipleSelected = selectedCount > 1;
@@ -748,37 +747,11 @@ export const useWorkspaceFolderMenuHelper = () => {
         // With V2 flat structure, we can just find directly
         return items.find(item => item.id === targetId) || null;
     };
-/**
-     * Open popup to add existing notes to folder
-     */
-    const openAddExistingNotePopup = (folderData: any) => {
-        // Close context menu
-        setIsContextMenuOpen(false);
-
-        // Determine folder info
-        const folderId = folderData?.id; // workspace_items.id
-        const folderName = folderData?.name || folderData?.data?.name || "workspace root";
-        const folderEntityId = folderData?.entityId; // folder entity ID
-
-        if (!folderId) {
-            console.error("❌ Cannot open popup: missing folder ID");
-            _console.error("Cannot open popup: missing folder information");
-            return;
-        }
-
-        // Open popup
-        openNoteGridPopup({
-            id: folderId,
-            name: folderName,
-            entityId: folderEntityId,
-        });
-    };
 
     return {
         createFolder,
         editFolder,
         dhr_items,
         createNewNote,
-        openAddExistingNotePopup,
     };
 };

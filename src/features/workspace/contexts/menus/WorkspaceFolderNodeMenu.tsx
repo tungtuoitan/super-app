@@ -28,7 +28,7 @@ import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 export function WorkspaceFolderNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
     const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
-    const { createFolder, editFolder, dhr_items, createNewNote, openAddExistingNotePopup } = useWorkspaceFolderMenuHelper();
+    const { createFolder, editFolder, dhr_items, createNewNote } = useWorkspaceFolderMenuHelper();
     const _TREESTATUS = useTreeStatusHelper();
 
     // Calculate derived values
@@ -69,15 +69,6 @@ export function WorkspaceFolderNodeMenu() {
             {!isWorkspaceRoot && (
                 <>
                     <MenuDivider />
-
-                    {/* Add Existing Note */}
-                    <MenuItem onClick={() => openAddExistingNotePopup(contextData)} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple}>
-                        <AddIcon className="w-4 h-4 mr-2" />
-                        Existing Note
-                    </MenuItem>
-
-                    <MenuDivider />
-
 
                     {/* Edit - disabled if multiple items selected or deleted */}
                     <MenuItem onClick={() => editFolder(contextData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>

@@ -8,15 +8,12 @@
 export { NoteGrid } from "./Components/NoteGrid";
 export { NoteDetailContent } from "./Components/NoteDetailContent";
 export { NoteEditorPanel } from "./Components/NoteEditorPanel";
-export { NoteGridPopup } from "./Components/NoteGridPopup";
 
 // Stores/Providers (used by Main.tsx)
 export { NoteDetailProvider, useNoteDetailStore } from "./store/useNoteDetail.store";
 export { NoteGridProvider, useNoteGridStore } from "./store/useNoteGrid.store";
-export { NoteGridPopupProvider, useNoteGridPopupStore } from "./store/useNoteGridPopup.store";
 
 // Hooks (used by workspace feature - NoteGridPopup helper)
-export { useNoteGridPopupHelper } from "./hooks/useNoteGridPopup.helper";
 export { useNoteGridHelper } from "./hooks/useNoteGrid.helper";
 export { useNoteDetailHelper } from "./hooks/useNoteDetail.helper";
 
