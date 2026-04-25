@@ -37,9 +37,9 @@ export function useKTestFlowHelper() {
 
     // ── Node change / edge change ───────────────────────────────────────────
 
-    const handleNodesChange = useCallback((changes: NodeChange<Node<QuestionFlowNodeData>>[]) => {
+    const handleNodesChange = (changes: NodeChange<Node<QuestionFlowNodeData>>[]) => {
         setFlowNodes((prev) => applyNodeChanges(changes, prev) as Node<QuestionFlowNodeData>[]);
-    }, [setFlowNodes]);
+    }
 
     const handleEdgesChange = useCallback((changes: EdgeChange<Edge<KFlowEdgeData>>[]) => {
         setFlowEdges((prev) => {
@@ -244,14 +244,12 @@ export function useKTestFlowHelper() {
                 const realId = String(newQ.id);
                 const pos = tempNode.position;
 
-                setFlowNodes((prev) => prev.map((n) =>
-                    n.id === nodeId
-                        ? { ...n, id: realId, data: { question: newQ } as QuestionFlowNodeData }
-                        : n,
-                ));
+                // Save position for real ID so headless rebuilds the node at the right spot
                 setSavedPositions((p) => ({ ...p, [realId]: pos }));
                 flowService._upsertPositions("", [{ nodeId: newQ.id, nodeType: "kQuestion", x: pos.x, y: pos.y }]).catch(() => {});
 
+                // Remove temp node — headless will add the real node when questions reload
+                setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
                 window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
             } catch {
                 setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));

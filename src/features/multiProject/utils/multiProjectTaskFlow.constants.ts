@@ -34,6 +34,7 @@ export const TASK_FLOW_CSS = `
     background: rgba(59, 130, 246, 0.06) !important;
     border: 1.5px solid rgba(59, 130, 246, 0.4) !important;
     border-radius: 12px !important;
+    pointer-events: none !important;
 }
 /* Drag selection rectangle */
 .react-flow__selection {

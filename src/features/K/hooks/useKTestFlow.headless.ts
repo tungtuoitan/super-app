@@ -28,27 +28,36 @@ export function useKTestFlowHeadless(selectedTestId: number | null, questions: K
         positionsLoaded, setPositionsLoaded,
     } = useKTestFlowStore();
 
-    // Reset and reload when selected test changes
+    // Stable key derived from current question IDs — changes only when the question set changes
+    const questionIdsKey = questions.map(q => q.id).join(",");
+
+    // Reset immediately when the selected test changes
     useEffect(() => {
-        if (!selectedTestId) {
-            setFlowNodes([]);
-            setFlowEdges([]);
-            setSavedEdges([]);
-            setSavedPositions({});
-            setPositionsLoaded(false);
-            return;
-        }
+        setFlowNodes([]);
+        setFlowEdges([]);
+        setSavedEdges([]);
+        setSavedPositions({});
+        setPositionsLoaded(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedTestId]);
+
+    // Load positions + edges only after questions for this test are available
+    useEffect(() => {
+        if (!selectedTestId || !questionIdsKey) return;
 
         setPositionsLoaded(false);
         setSavedPositions({});
         setSavedEdges([]);
 
-        const questionIds = questions.map((q) => q.id);
+        let cancelled = false;
+        const questionIds = questions.map(q => q.id);
 
         Promise.all([
             flowService._getEdges(""),
             flowService._getPositions("", { nodeType: "kQuestion", nodeIds: questionIds.join(",") }),
         ]).then(([edgeRes, posRes]) => {
+            if (cancelled) return;
+
             const posDtos: FlowNodePositionDTO[] = (posRes.data as FlowNodePositionDTO[]) ?? [];
             const edgeDtos: FlowEdgeDTO[] = (edgeRes.data as FlowEdgeDTO[]) ?? [];
 
@@ -60,8 +69,8 @@ export function useKTestFlowHeadless(selectedTestId: number | null, questions: K
 
             const qIdSet = new Set(questionIds.map(String));
             const customEdges: Edge<KFlowEdgeData>[] = edgeDtos
-                .filter((e) => e.sourceType === "kQuestion" && e.targetType === "kQuestion" && qIdSet.has(String(e.sourceId)) && qIdSet.has(String(e.targetId)))
-                .map((e) => ({
+                .filter(e => e.sourceType === "kQuestion" && e.targetType === "kQuestion" && qIdSet.has(String(e.sourceId)) && qIdSet.has(String(e.targetId)))
+                .map(e => ({
                     id: `custom-${e.id}`,
                     source: String(e.sourceId),
                     target: String(e.targetId),
@@ -75,16 +84,18 @@ export function useKTestFlowHeadless(selectedTestId: number | null, questions: K
             setFlowEdges(customEdges);
             setPositionsLoaded(true);
         }).catch(() => {
-            setPositionsLoaded(true);
+            if (!cancelled) setPositionsLoaded(true);
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedTestId]);
 
-    // Rebuild nodes when questions or savedPositions change
+        return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedTestId, questionIdsKey]);
+
+    // Rebuild nodes whenever questions, positions or visibility changes
     useEffect(() => {
         if (!positionsLoaded) return;
 
-        const visibleQuestions = showDeleted ? questions : questions.filter((q) => !q.deletedAt);
+        const visibleQuestions = showDeleted ? questions : questions.filter(q => !q.deletedAt);
         const nodes: Node<QuestionFlowNodeData>[] = visibleQuestions.map((q, i) => ({
             id: String(q.id),
             type: "questionFlowNode",

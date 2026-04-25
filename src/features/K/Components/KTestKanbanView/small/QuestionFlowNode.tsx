@@ -20,7 +20,7 @@ const Q_TEXT = "w-full text-xs font-semibold text-zinc-100 leading-relaxed";
 const A_TEXT = "w-full text-[11px] text-zinc-400 leading-relaxed";
 
 export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<QuestionFlowNodeData>>) {
-    const { editingNodeId, connectingSourceId, flowEdges } = useKTestFlowStore();
+    const { editingNodeId, connectingSourceId, flowNodes, flowEdges } = useKTestFlowStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleDeleteQuestion, handleRestoreQuestion } = useKTestFlowHelper();
 
     const { question } = data as QuestionFlowNodeData;
@@ -29,19 +29,20 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
     const isEditing = editingNodeId === id;
     const isDeleted = !!question.deletedAt;
     const anyEdgeSelected = flowEdges.some((e) => e.selected);
-
+    const multiSelected = flowNodes.filter((n) => n.selected).length > 1;
+    
     const [draftQ, setDraftQ] = useState(question.question);
     const [draftA, setDraftA] = useState(question.answer ?? "");
     const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
     const [isFlashing, setIsFlashing] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-
+    
     const cardRef = useRef<HTMLDivElement>(null);
     const qRef = useRef<HTMLTextAreaElement>(null);
     const aRef = useRef<HTMLTextAreaElement>(null);
     const ctxMenuRef = useRef<HTMLDivElement>(null);
     const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
-
+    
     // Stable refs for callbacks
     const draftQRef = useRef(draftQ);
     const draftARef = useRef(draftA);
@@ -49,6 +50,8 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
     draftQRef.current = draftQ;
     draftARef.current = draftA;
     idRef.current = id;
+    
+    const showHandles = !isTempNode && !anyEdgeSelected && !isEditing && isHovered && !multiSelected;
 
     // Sync drafts when question changes (but not while editing)
     useEffect(() => {
@@ -133,7 +136,7 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                 isDeleted
                     ? "border-zinc-800/40 bg-zinc-900/20 opacity-50"
                     : selected
-                    ? "border-zinc-600/70 bg-zinc-900/80 shadow-[0_0_0_2px_rgba(59,130,246,0.2)]"
+                    ? "border-blue-500/50 bg-zinc-900/80 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
                     : "border-zinc-700/60 bg-zinc-900/80"
             } ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125 transition-all duration-150" : ""}`}
             style={{ width: 280 }}
@@ -177,10 +180,10 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                 </div>
             )}
 
-                        {HANDLES.map((pos) => (
+            {HANDLES.map((pos) => (
                 <Handle key={pos} type="source" position={pos} id={HANDLE_ID[pos]}
                     className="!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150"
-                    style={{ opacity: (!anyEdgeSelected && !isEditing && (isHovered || !!selected)) ? 1 : 0, transition: 'opacity 0.15s' }}
+                    style={{ opacity: showHandles ? 1 : 0, pointerEvents: showHandles ? "auto" : "none", transition: "opacity 0.15s" }}
                 />
             ))}
 
@@ -218,10 +221,10 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                         onChange={(e) => setDraftQ(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Question…"
-                        className={`nodrag nopan absolute inset-0 ${Q_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
+                        className={`nodrag nopan absolute inset-0 px-3 pt-3 pb-1 ${Q_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
                     />
                 ) : (
-                    <div className={`absolute inset-0 ${Q_TEXT} whitespace-pre-wrap break-words select-none`}>
+                    <div className={`absolute inset-0 px-3 pt-3 pb-1 ${Q_TEXT} whitespace-pre-wrap break-words select-none`}>
                         {question.question || <span className="text-zinc-600">—</span>}
                     </div>
                 )}
@@ -241,10 +244,10 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                         onChange={(e) => setDraftA(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Answer… (Ctrl+Enter to save)"
-                        className={`nodrag nopan absolute inset-0 ${A_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
+                        className={`nodrag nopan absolute inset-0 px-3 pt-1.5 pb-2 ${A_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
                     />
                 ) : (
-                    <div className={`absolute inset-0 ${A_TEXT} whitespace-pre-wrap break-words select-none`}>
+                    <div className={`absolute inset-0 px-3 pt-1.5 pb-2 ${A_TEXT} whitespace-pre-wrap break-words select-none`}>
                         {question.answer || <span className="text-zinc-700 italic">no answer</span>}
                     </div>
                 )}

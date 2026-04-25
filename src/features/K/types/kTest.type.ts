@@ -152,6 +152,7 @@ export interface KDailyAnswerItem {
     questionId: number;
     answerText: string | null;
     responseTimeMs: number | null;
+    selfScore: number | null;
 }
 
 export interface KDailySubmitRequest {

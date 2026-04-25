@@ -15,13 +15,13 @@ interface KDailyReviewSessionProps {
     isQuickTest?: boolean;
 }
 
-// right=5 (nhớ), left=0 (quên), top=4 (ổn), bottom=null (cancel)
+// right=5 (nhớ), left=0 (quên), top=3 (ổn), bottom=null (cancel)
 function getScoreFromDelta(dx: number, dy: number): number | null {
     const angle = Math.atan2(-dy, dx) * (180 / Math.PI);
     const abs = Math.abs(angle);
     if (abs < 45) return 5;
     if (abs > 135) return 0;
-    if (angle > 0) return 4;
+    if (angle > 0) return 3;
     return null; // dragging down = cancel
 }
 
@@ -32,10 +32,8 @@ function formatInterval(days: number | undefined | null): string {
 
 function computeNewInterval(interval: number, repetitions: number, easeFactor: number, score: number): string {
     if (score === 0) return "30 phút";
-    if (score === 4) {
-        const n = Math.max(1, interval * 0.8);
-        return interval === 0 ? "1 ngày" : `${Number.isInteger(n) ? n : n.toFixed(1)} ngày`;
-    }
+    if (score === 3) return "2 giờ";
+    // score === 5
     let n: number;
     if (repetitions === 0) n = 1;
     else if (repetitions === 1) n = 6;
@@ -45,14 +43,14 @@ function computeNewInterval(interval: number, repetitions: number, easeFactor: n
 
 const SCORE_BUTTONS = [
     { score: 0, label: "Quên", btnClass: "border-red-500/40 text-red-400 hover:bg-red-600/20" },
-    { score: 4, label: "Ổn",   btnClass: "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/20" },
+    { score: 3, label: "Quên Nhẹ",   btnClass: "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/20" },
     { score: 5, label: "Nhớ",  btnClass: "border-green-500/40 text-green-400 hover:bg-green-500/20" },
 ] as const;
 
 const SCORE_CONFIG: Record<number, { label: string; color: string; bg: string }> = {
-    5: { label: "Nhớ",  color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
-    4: { label: "Ổn",   color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30" },
     0: { label: "Quên", color: "text-red-400",    bg: "bg-red-500/10 border-red-500/30" },
+    3: { label: "Quên Nhẹ",   color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30" },
+    5: { label: "Nhớ",  color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
 };
 
 export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions, onComplete, onBack, isQuickTest }: KDailyReviewSessionProps) {
@@ -74,40 +72,37 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
     const currentQuestion = questions[currentIndex];
     const progress        = totalQuestions > 0 ? Math.round(((currentIndex + 1) / totalQuestions) * 100) : 0;
 
-    useEffect(() => { setShowResult(false); }, [currentIndex]);
     useEffect(() => { questionStartRef.current = Date.now(); }, [currentIndex]);
     useEffect(() => () => { timersRef.current.forEach(clearTimeout); }, []);
 
     showResultRef.current = showResult;
 
-    const recordTiming = useCallback(() => {
-        if (!currentQuestion) return;
-        const elapsed = Date.now() - questionStartRef.current;
-        setTimings(prev => ({ ...prev, [currentQuestion.id]: (prev[currentQuestion.id] ?? 0) + elapsed }));
-    }, [currentQuestion]);
-
-    const submitInBackground = useCallback(() => {
+    const submitInBackground = useCallback((scoresSnap: Record<number, number>, timingsSnap: Record<number, number>) => {
         const dailyAnswers: KDailyAnswerItem[] = questions.map(q => ({
             questionId: q.id,
             answerText: null,
-            responseTimeMs: timings[q.id] ?? null,
+            responseTimeMs: timingsSnap[q.id] ?? null,
+            selfScore: scoresSnap[q.id] ?? null,
         }));
         KTestService._submitDailyAnswers(knowledgeId, testId, { answers: dailyAnswers })
             .catch(err => console.error("[KDailyReview] submit failed:", err));
-    }, [questions, knowledgeId, testId, timings]);
+    }, [questions, knowledgeId, testId]);
 
     const advanceWithScore = useCallback((score: number) => {
         if (isSubmitted) return;
-        recordTiming();
         const qId = currentQuestion?.id;
-        if (qId !== undefined) setSelfScores(prev => ({ ...prev, [qId]: score }));
+        const elapsed = Date.now() - questionStartRef.current;
+        const newTimings = qId !== undefined ? { ...timings, [qId]: (timings[qId] ?? 0) + elapsed } : timings;
+        const newScores  = qId !== undefined ? { ...selfScores, [qId]: score } : selfScores;
+        if (qId !== undefined) { setTimings(newTimings); setSelfScores(newScores); }
         if (currentIndex >= totalQuestions - 1) {
             setIsSubmitted(true);
-            if (!isQuickTest) submitInBackground();
+            if (!isQuickTest) submitInBackground(newScores, newTimings);
             return;
         }
+        setShowResult(false);
         setCurrentIndex(i => i + 1);
-    }, [isSubmitted, currentQuestion, currentIndex, totalQuestions, recordTiming, submitInBackground, isQuickTest]);
+    }, [isSubmitted, currentQuestion, currentIndex, totalQuestions, timings, selfScores, submitInBackground, isQuickTest]);
 
     advanceWithScoreRef.current = advanceWithScore;
 
@@ -168,7 +163,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
         questions.forEach(q => {
             const s = selfScores[q.id];
             if (s === 5) stats.remember++;
-            else if (s === 4) stats.ok++;
+            else if (s === 3) stats.ok++;
             else stats.forgot++;
         });
 
@@ -182,9 +177,9 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
 
                     <div className="flex gap-2.5 w-full">
                         {[
-                            { count: stats.remember, label: "Nhớ",  cls: "text-green-400 bg-green-500/10 border-green-500/20" },
-                            { count: stats.ok,       label: "Ổn",   cls: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
                             { count: stats.forgot,   label: "Quên", cls: "text-red-400 bg-red-500/10 border-red-500/20" },
+                            { count: stats.ok,       label: "Quên Nhẹ",   cls: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
+                            { count: stats.remember, label: "Nhớ",  cls: "text-green-400 bg-green-500/10 border-green-500/20" },
                         ].map(s => (
                             <div key={s.label} className={cn("flex-1 text-center rounded-lg border py-3", s.cls)}>
                                 <p className="text-2xl font-bold">{s.count}</p>
@@ -195,14 +190,14 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
 
                     <div className="w-full flex flex-col gap-2">
                         {questions.map((q, i) => {
-                            const score = selfScores[q.id] ?? 4;
-                            const cfg = SCORE_CONFIG[score] ?? SCORE_CONFIG[4];
+                            const score = selfScores[q.id] ?? 3;
+                            const cfg = SCORE_CONFIG[score] ?? SCORE_CONFIG[3];
                             const hasIntervalData = q.srsInterval !== undefined;
                             const newIntervalStr = hasIntervalData
                                 ? computeNewInterval(q.srsInterval ?? 0, q.srsRepetitions ?? 0, q.srsEaseFactor ?? 2.5, score)
                                 : null;
                             return (
-                                <div key={q.id} className={cn("rounded-lg border p-2.5 flex flex-col gap-1.5", cfg.bg)}>
+                                <div key={q.id} className={cn(" text-left rounded-lg border p-2.5 flex flex-col gap-1.5", cfg.bg)}>
                                     <div className="flex items-start justify-between gap-2">
                                         <p className="text-sm font-medium flex-1 whitespace-pre-wrap">{i + 1}. {q.question}</p>
                                         <div className="flex flex-col items-end shrink-0 gap-0.5">
@@ -216,7 +211,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                                     </div>
                                     {q.answer && (
                                         <p className="text-xs text-muted-foreground/50 border-t border-border/20 pt-1.5 whitespace-pre-wrap">
-                                            <span className="font-medium text-foreground/30">Answer: </span>{q.answer}
+                                            <span className="font-medium text-foreground/30"></span>{q.answer}
                                         </p>
                                     )}
                                 </div>
@@ -237,6 +232,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
             className="relative flex flex-col h-full bg-background select-none w-full"
             style={{ touchAction: showResult ? "none" : undefined }}
             onPointerDown={handleDragStart}
+            onClick={!showResult ? () => setShowResult(true) : undefined}
         >
             {/* Drag-to-score overlay */}
             {isDragScoring && (
@@ -270,11 +266,11 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                         <span className={cn(
                             "text-5xl font-black tracking-widest transition-all duration-150 select-none",
                             hoveredScore === 0 ? "text-red-300" :
-                            hoveredScore === 4 ? "text-yellow-300" :
+                            hoveredScore === 3 ? "text-yellow-300" :
                             hoveredScore === 5 ? "text-green-300" :
                             "text-zinc-400"
                         )}>
-                            {hoveredScore === 0 ? "QUÊN" : hoveredScore === 4 ? "ỔN" : hoveredScore === 5 ? "NHỚ" : "HỦY"}
+                            {hoveredScore === 0 ? "QUÊN" : hoveredScore === 3 ? "QUÊN NHẸ" : hoveredScore === 5 ? "NHỚ" : "HỦY"}
                         </span>
                     </div>
 
@@ -308,7 +304,9 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
             </div>
 
             {/* Content */}
-            <div className="flex-1 flex flex-col px-4 pt-6 pb-4 gap-4 max-w-lg mx-auto w-full">
+            <div className="flex-1 flex flex-col px-4 pt-6 pb-4 gap-4 max-w-lg mx-auto w-full"
+                
+            >
                 {/* Question */}
                 <p className="text-lg font-semibold text-center leading-relaxed text-white shrink-0">
                     {currentQuestion.question}
@@ -325,7 +323,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                         userSelect: showResult ? "text" : "none",
                         height: "calc(10 * 1.6rem)",
                     }}
-                    onClick={!showResult ? () => setShowResult(true) : undefined}
+                    
                 >
                     {currentQuestion.answer
                         ? <p className="text-foreground/80 whitespace-pre-wrap leading-relaxed">{currentQuestion.answer}</p>
@@ -356,7 +354,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
             {/* Footer hint */}
             <div className="shrink-0 px-3 py-3 border-t border-border text-center">
                 <p className="text-xs text-muted-foreground/30">
-                    {showResult ? "← Quên  ↑ Ổn  → Nhớ  ↓ Hủy" : "Tap to reveal"}
+                    {showResult ? "← Quên  ↑ Quên Nhẹ  → Nhớ  ↓ Hủy" : "Tap to reveal"}
                 </p>
             </div>
         </div>

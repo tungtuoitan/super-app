@@ -45,7 +45,6 @@ function TaskFlowCanvas() {
     const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const rfInstance = useReactFlow();
-    const storeApi = useStoreApi();
     const containerRef = useRef<HTMLDivElement>(null);
     const isDragSelecting = useRef(false);
     const inProgressIndexRef = useRef(0);
@@ -53,22 +52,24 @@ function TaskFlowCanvas() {
     const dynMinZoomRef = useRef(MIN_ZOOM);
 
     // Drag-select only nodes — deselect edges caught in the selection box
-    // Also: activate nodesSelectionActive for Ctrl+Click multi-select so bounding box shows
+    const storeApi = useStoreApi();
     const handleSelectionChange = useCallback(({ nodes: selectedNodes, edges: selectedEdges }: { nodes: any[]; edges: any[] }) => {
         if (isDragSelecting.current && selectedEdges.length > 0) {
             handleEdgesChange(selectedEdges.map((e: any) => ({ id: e.id, type: "select" as const, selected: false })));
         }
-        // Show selection bounding box when ≥2 nodes are selected (Ctrl+Click or drag)
-        const store = storeApi.getState();
-        if (selectedNodes.length > 1 && !store.nodesSelectionActive) {
-            storeApi.setState({ nodesSelectionActive: true });
-        } else if (selectedNodes.length <= 1 && store.nodesSelectionActive && !isDragSelecting.current) {
-            storeApi.setState({ nodesSelectionActive: false });
-        }
+        const store = storeApi.getState() as any;
+        if (selectedNodes.length > 1 && !store.nodesSelectionActive) storeApi.setState({ nodesSelectionActive: true });
+        else if (selectedNodes.length <= 1 && store.nodesSelectionActive) storeApi.setState({ nodesSelectionActive: false });
     }, [handleEdgesChange, storeApi]);
 
     const handleSelectionStart = useCallback(() => { isDragSelecting.current = true; }, []);
     const handleSelectionEnd = useCallback(() => { isDragSelecting.current = false; }, []);
+
+    const handleNodeClick = useCallback((e: React.MouseEvent, node: any) => {
+        if (e.shiftKey && node.selected) {
+            handleNodesChange([{ id: node.id, type: "select" as const, selected: false }]);
+        }
+    }, [handleNodesChange]);
 
     // ── Right-click context menu (orchestrator) ─────────────────────────────
     const handlePaneContextMenu = useCallback(
@@ -328,6 +329,7 @@ function TaskFlowCanvas() {
                 onReconnect={handleReconnect}
                 onPaneContextMenu={handlePaneContextMenu}
                 onMoveEnd={handleMoveEnd}
+                onNodeClick={handleNodeClick}
                 onSelectionChange={handleSelectionChange}
                 onSelectionStart={handleSelectionStart}
                 onSelectionEnd={handleSelectionEnd}
@@ -339,6 +341,7 @@ function TaskFlowCanvas() {
                 minZoom={dynMinZoomRef.current}
                 maxZoom={MAX_ZOOM}
                 deleteKeyCode={null}
+                selectionKeyCode={null}
                 multiSelectionKeyCode="Shift"
                 selectionOnDrag
                 selectionMode={SelectionMode.Partial}
