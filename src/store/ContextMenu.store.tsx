@@ -1,7 +1,7 @@
 /**
  * Context Menu Store
  * React Context store for managing context menu state
- * Pattern: Separate store from business logic (similar to EditorTabStore)
+ * Pattern: Separate store from business logic (similar to EditorTabBarStore)
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";

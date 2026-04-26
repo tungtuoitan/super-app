@@ -4,14 +4,14 @@
  */
 
 
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { KWsResponse } from "../types/K.types";
 import { useKStore } from "../store/K.store";
 
 export function useKTabHelper() {
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { allK, setAllK } = useKStore();
 
     /** Open existing knowledge editor tab (reuse single tab) */

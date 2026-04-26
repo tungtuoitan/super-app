@@ -5,12 +5,12 @@ import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskSectionHelper } from "./useTaskSection.helper";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 
 export function useTaskSectionHeadless() {
     const { setActiveSection } = useTaskDetailSectionStore();
     const { selectedTask } = useTaskDetailSelector();
-    const { openTabs, activeTabId } = useEditorTabsStore();
+    const { openTabs, activeTabId } = useEditorTabBarStore();
     const { isSectionDirty } = useTaskSectionSelector();
     const { handleSectionSave, handleSectionDiscard } = useTaskSectionHelper();
     const { savedNoteRef, setDescDirty, setDescKey } = useTaskSectionStore();

@@ -7,14 +7,14 @@
 
 import React from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useTaskStore } from "../store/useTask.store";
 import { TaskDetailContent } from "./TaskDetailContent";
 import { useTaskDetailHeadless } from "../hooks/useTaskDetail.headless";
 
 export function TaskEditorPanel() {
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs } = useEditorTabBarStore();
     const { getActiveTab } = useEditorTabHelper();
     const { taskDetailContentRef } = useTaskStore();
     useTaskDetailHeadless();

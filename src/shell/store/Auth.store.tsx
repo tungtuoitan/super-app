@@ -1,7 +1,7 @@
 /**
  * Auth Store
  * React Context store for managing authentication state
- * Pattern: Separate store from business logic (similar to TagUIStore, EditorTabStore)
+ * Pattern: Separate store from business logic (similar to TagUIStore, EditorTabBarStore)
  */
 
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";

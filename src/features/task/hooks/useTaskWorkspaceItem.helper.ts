@@ -11,7 +11,7 @@ import { type Task } from "../store/useTask.store";
 import { type TaskFolderItem } from "../types/taskDetail.types";
 import { useTaskStore } from "../store/useTask.store";
 import { useGeneralStore } from "@/store/index";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { constants } from "@/utils/constants";
@@ -22,7 +22,7 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();
     const { registries } = useGeneralStore();
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { openTab } = useEditorTabHelper();
     const { setFolderItems, setIsLoadingFolderItems } = useTaskStore();

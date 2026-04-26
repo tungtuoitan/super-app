@@ -7,15 +7,15 @@
 
 import { useEffect, useRef } from "react";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import type * as _monaco from "monaco-editor";
 
 export function useMarkdownEditorViewStateSync() {
     const { editorRef, editorMountCount,isMounted } = useNoteDetailStore();
-    const { activeTabId, setOpenTabs } = useEditorTabsStore();
-    const { isLoadingTab, setIsLoadingTab } = useEditorTabsStore();
+    const { activeTabId, setOpenTabs } = useEditorTabBarStore();
+    const { isLoadingTab, setIsLoadingTab } = useEditorTabBarStore();
     const { getActiveTab } = useEditorTabHelper();
     
 

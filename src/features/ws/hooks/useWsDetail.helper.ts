@@ -6,7 +6,7 @@ import { useWsGridHelper } from "./useWsGrid.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { Ws } from "@/types/workspace.types";
 
@@ -15,7 +15,7 @@ export const useWsDetailHelper = () => {
     const { setWsGridPagination } = useWsStore();
     const { loadWorkspaces } = useWsGridHelper();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
 
     const handleWsFieldChange = (field: keyof Ws, value: any) => {
         setOpenTabs((prev: BaseTab[]) =>

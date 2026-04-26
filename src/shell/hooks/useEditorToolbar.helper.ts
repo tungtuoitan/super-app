@@ -6,7 +6,7 @@
  */
 
 import { useEditorTabHelper } from "./useEditorTab.helper";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
@@ -20,8 +20,8 @@ import { useLifeLogSaveActions } from "@/features/lifeLog/hooks/useLifeLogSaveAc
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabHelper();
-    const { isSaving, setIsSaving } = useEditorTabsStore();
-    const { setOpenTabs } = useEditorTabsStore();
+    const { isSaving, setIsSaving } = useEditorTabBarStore();
+    const { setOpenTabs } = useEditorTabBarStore();
     const { loadKeywords } = useStandardRegistryHelper();
 
     const activeTab = getActiveTab();

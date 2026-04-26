@@ -5,7 +5,7 @@
 
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { constants } from "@/utils/constants";
-import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import { BaseTab } from "@/types/editor/tab.types";
@@ -19,7 +19,7 @@ import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
  */
 export function useWorkspaceHelper() {
     const { currentWorkspace } = useWorkspaceStore();
-    const { openTabs } = useEditorTabsStore();
+    const { openTabs } = useEditorTabBarStore();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const _console = useConsoleHelper();
 

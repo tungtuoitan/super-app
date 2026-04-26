@@ -7,7 +7,7 @@ export { AuthStore, AuthStoreProvider, useAuthStore } from "../shell/store/Auth.
 export type { AuthStoreData, User } from "../shell/store/Auth.store";
 
 
-export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "../shell/store/EditorTab.store";
+export { EditorTabBarStore, EditorTabBarProvider, useEditorTabBarStore } from "../shell/store/EditorTab.store";
 
 export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./HashtagUI.store";
 export type { HashtagUIStoreData } from "./HashtagUI.store";

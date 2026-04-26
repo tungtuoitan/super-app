@@ -4,14 +4,14 @@
  */
 
 
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 
 export function useLifeLogTabHelper() {
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { setLogs, setTracks } = useLifeLogStore();
 
     const openLogTab = (log: LifeLogLog) => {

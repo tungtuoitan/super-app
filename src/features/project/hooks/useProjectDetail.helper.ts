@@ -8,7 +8,7 @@ import { projectService, ProjectDTO } from "../service/project.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
 import { useGridControlStore } from "@/store/useGridControl.store";
@@ -43,7 +43,7 @@ export const useProjectDetailHelper = () => {
     const { $user } = useAuthStore();
     const { setProjects, setProjectGridIsLoading, setProjectGridError, setTotalCount } = useProjectStore();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
     const { setSelectedWorkspaceId } = useWorkspaceStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
     const { setModuleName } = useGridControlStore();

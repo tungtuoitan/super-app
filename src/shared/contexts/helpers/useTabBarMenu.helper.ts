@@ -4,7 +4,7 @@
  * Handles pin/unpin, close all, and close all but pinned operations
  */
 
-import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 import { constants } from "@/utils/constants";
@@ -27,7 +27,7 @@ const isGroupChild = (tab: BaseTab, allTabs: BaseTab[]): boolean => {
 
 
 export const useTabBarMenuHelper = () => {
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { closeTabs } = useEditorTabHelper();
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
 

@@ -9,7 +9,7 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useEditorTabsStore, useGeneralStore } from "@/store/index";
+import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
 import { useGridControlStore } from "@/store/useGridControl.store";
@@ -23,7 +23,7 @@ export const useNoteGridHelper = () => {
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     const { openTab, processTabAfterDelete } = useEditorTabHelper();
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const _console = useConsoleHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { registries } = useGeneralStore();

@@ -7,12 +7,12 @@
 
 import React from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { MultiProjectDetailContent } from "./MultiProjectDetailContent";
 
 export function MultiProjectEditorPanel() {
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs } = useEditorTabBarStore();
     const { getActiveTab } = useEditorTabHelper();
     const contentRef = React.useRef<HTMLDivElement>(null);
 

@@ -4,14 +4,14 @@
  */
 
 
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { KItemV2 } from "../types/K-v2.types";
 
 
 export function useKNodeTabHelper() {
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
 
     const SINGLETON_ID = "k-node-tab";
 

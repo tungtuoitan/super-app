@@ -2,7 +2,7 @@ import React from "react";
 import { ConfirmCloseDialog } from "@/shell/components/ConfirmCloseDialog";
 import { EditorToolbar } from "@/shell/components/main/EditorToolbar";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useOpenTabSync } from "../../hooks/useOpenTabsSync";
 import { TabBar } from "./TabBar";
@@ -14,7 +14,7 @@ import type { BaseTab } from "@/types/editor/tab.types";
  * Renders editor panels via the module registry — no direct feature imports.
  */
 export function VSEditorArea() {
-    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, editorAreaRef } = useEditorTabsStore();
+    const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, editorAreaRef } = useEditorTabBarStore();
     const { closeTab, getActiveTab } = useEditorTabHelper();
     useOpenTabSync()
 

@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useCallback } from "react";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { NoteDetailContent } from "./NoteDetailContent";
 
@@ -13,7 +13,7 @@ interface NoteEditorPanelProps {
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { setOpenTabs, openTabs } = useEditorTabsStore();
+    const { setOpenTabs, openTabs } = useEditorTabBarStore();
     const contentRef = useRef<HTMLDivElement>(null);
     const isRestoringScrollRef = useRef(false);
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);

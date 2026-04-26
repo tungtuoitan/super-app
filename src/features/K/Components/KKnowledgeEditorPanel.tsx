@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/shared/hooks/useIsMobile";
 import { CardContent } from "@/shared/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
 import { KTestList } from "./KTestList";
 import { KDailyReviewSession } from "./KDailyReview/KDailyReviewSession";
@@ -44,7 +44,7 @@ const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export function KKnowledgeEditorPanel() {
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { getActiveTab } = useEditorTabHelper()
     const tab = getActiveTab(activeTabId ?? undefined)
     const knowledge = tab?.data as unknown as KWsResponse;

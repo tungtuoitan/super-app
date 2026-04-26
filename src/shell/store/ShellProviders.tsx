@@ -1,8 +1,8 @@
 import React from "react";
-import { EditorTabProvider } from "@/shell/store/EditorTab.store";
+import { EditorTabBarProvider } from "@/shell/store/EditorTab.store";
 
 export const ShellProviders: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
-    <EditorTabProvider>
+    <EditorTabBarProvider>
                 {children}
-    </EditorTabProvider>
+    </EditorTabBarProvider>
 );

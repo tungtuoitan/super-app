@@ -9,7 +9,7 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import {filterUtils} from "@/utils/filter.utils";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
@@ -36,7 +36,7 @@ export const useWsGridHelper = () => {
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     const { openTab } = useEditorTabHelper();
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const _console = useConsoleHelper();
     const { setShouldFocusWsName } = useWsDetailStore();
 

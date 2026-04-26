@@ -24,7 +24,7 @@ import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
-import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useGeneralStore } from "@/store/index";
 import { useNoteDetailStore } from "@/features/note";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
@@ -118,7 +118,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
     const { processTabAfterDelete, openTab } = useEditorTabHelper();
-    const { openTabs } = useEditorTabsStore();
+    const { openTabs } = useEditorTabBarStore();
     const { registries } = useGeneralStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 

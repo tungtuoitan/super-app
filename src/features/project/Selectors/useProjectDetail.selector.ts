@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from "react";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { Project } from "../store/useProject.store";
 import { useGeneralStore } from "@/store/General.store";
@@ -15,7 +15,7 @@ import type { IStatusOption } from "@/shared/components";
 import type { TabType } from "../types/projectDetail.type";
 
 export const useProjectDetailSelector = () => {
-    const { openTabs } = useEditorTabsStore();
+    const { openTabs } = useEditorTabBarStore();
     const { projectId, tabId } = useProjectDetailStore();
     const { registriesByType } = useGeneralStore();
 

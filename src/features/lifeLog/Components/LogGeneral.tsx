@@ -8,7 +8,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { LOG_TYPES, LOG_TYPE_CONFIG, type LifeLogLog, type LogType } from "@/features/lifeLog/types/lifeLog.types";
 import { format } from "date-fns";
@@ -22,7 +22,7 @@ interface LogGeneralProps {
 }
 
 export function LogGeneral({ logId, tabId }: LogGeneralProps) {
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { tracks } = useLifeLogStore();
 
     const tab = openTabs.find((t) => t.id === tabId);

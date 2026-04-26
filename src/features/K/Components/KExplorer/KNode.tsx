@@ -13,7 +13,7 @@ import { IconType } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { KWsResponse } from "../../types/K.types";
 import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
@@ -46,7 +46,7 @@ export default Folder2;
 
 export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds, markedNodeId, setMarkedNodeId, currentKId }: NodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, setPendingQuizTabSwitch } = useKStore();    const { searchQuery } = useGridControlStore();
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();
     const _TREESTATUS = useKTreeStatusHelper();

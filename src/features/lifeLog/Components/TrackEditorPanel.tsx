@@ -3,7 +3,7 @@
  */
 
 import { useEffect } from "react";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { TrackGeneral } from "./TrackGeneral";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
@@ -13,7 +13,7 @@ interface TrackEditorPanelProps {
 }
 
 export function TrackEditorPanel({ tab }: TrackEditorPanelProps) {
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs } = useEditorTabBarStore();
     const track = tab.data as LifeLogTrack;
 
     useEffect(() => {

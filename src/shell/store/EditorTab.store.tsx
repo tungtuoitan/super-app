@@ -7,7 +7,7 @@
 import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback, RefObject, useRef, MutableRefObject } from "react";
 import type { BaseTab, TabViewState } from "../../types/editor/tab.types";
 
-export interface EditorTabContextData {
+export interface EditorTabBarContextData {
     openTabs: BaseTab[];
     setOpenTabs: Dispatch<SetStateAction<BaseTab[]>>;
     activeTabId: string | null;
@@ -30,7 +30,7 @@ export interface EditorTabContextData {
     setIsSaving: Dispatch<SetStateAction<boolean>>;
 }
 
-export const editorTabContextDefaultValue: EditorTabContextData = {
+export const editorTabBarContextDefaultValue: EditorTabBarContextData = {
     openTabs: [],
     setOpenTabs: () => {},
     activeTabId: null,
@@ -54,11 +54,11 @@ export const editorTabContextDefaultValue: EditorTabContextData = {
 
 };
 
-export const EditorTabStore = createContext<EditorTabContextData>(editorTabContextDefaultValue);
+export const EditorTabBarStore = createContext<EditorTabBarContextData>(editorTabBarContextDefaultValue);
 
-export const useEditorTabsStore = () => useContext(EditorTabStore);
+export const useEditorTabBarStore = () => useContext(EditorTabBarStore);
 
-export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const EditorTabBarProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [openTabs, setOpenTabs] = useState<BaseTab[]>([]);
     const [activeTabId, setActiveTabId] = useState<string | null>(null);
     const [confirmCloseTabId, setConfirmCloseTabId] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [isSaving, setIsSaving] = useState<boolean>(false);
 
     return (
-        <EditorTabStore.Provider
+        <EditorTabBarStore.Provider
             value={{
                 openTabs,
                 setOpenTabs,
@@ -98,6 +98,6 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
             }}
         >
             {children}
-        </EditorTabStore.Provider>
+        </EditorTabBarStore.Provider>
     );
 };

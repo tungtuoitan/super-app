@@ -9,7 +9,7 @@ import { Task, useTaskStore } from "../store/useTask.store";
 import { TaskDTO, taskService } from "../service/task.service";
 import { projectService } from "@/features/project/service/project.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useGeneralStore } from "@/store/General.store";
 import { BaseTab } from "@/types/editor/tab.types";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared/components";
@@ -18,7 +18,7 @@ import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { registriesByType } = useGeneralStore();
     const { setProjectOptions, setIsLoadingProjects, setParentTaskOptions, setIsLoadingParentTasks } = useTaskStore();
 

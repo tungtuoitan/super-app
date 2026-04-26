@@ -12,7 +12,7 @@ import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector"
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { taskService } from "../../service/task.service";
 import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../../utils/customTab.utils";
@@ -27,7 +27,7 @@ export const useTaskSectionHelper = () => {
     const { customTabs } = useTaskCustomTabSelector();
     const { isSectionDirty } = useTaskSectionSelector();
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { submitVersionComment, submitComment } = useTaskCommentHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
 

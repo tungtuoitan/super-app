@@ -1,5 +1,5 @@
 
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { WikiTabData } from "../types/wiki.type";
@@ -7,7 +7,7 @@ import type { WikiTabData } from "../types/wiki.type";
 const WIKI_TAB_ID = "wiki-singleton-tab";
 
 export const useWikiTabHelper = () => {
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
 
     /** Open (or reuse) the singleton wiki tab, optionally focusing a keyword */
     const openWikiTab = (keywordId: number | null = null) => {

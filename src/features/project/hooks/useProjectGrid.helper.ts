@@ -13,7 +13,7 @@ import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/utils/date.utils";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/types/editor/tab.types";
 
@@ -52,7 +52,7 @@ export const useProjectGridHelper = () => {
     const _console = useConsoleHelper();
     const { openProjectTab, openMultiProjectTab } = useProjectTabHelper();
     const { setShouldFocusProjectName } = useProjectDetailStore();
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
 
     // Create new project (temporary with negative ID) and open tab
     const __createNewProject = () => {

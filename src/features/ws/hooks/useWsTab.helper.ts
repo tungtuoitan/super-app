@@ -5,7 +5,7 @@
 
 import { Ws, WsResponse } from "@/types/workspace.types";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
@@ -13,7 +13,7 @@ import { useWsStore } from "@/features/ws/store/useWs.store";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
 
 export const useWsTabHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
     const { updateActiveTab } = useEditorTabHelper();
     const { setNewTabAnd } = useEditorTabHelper();
     const { openTab } = useEditorTabHelper();

@@ -5,7 +5,7 @@
 
 import { useMemo, ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 
 interface UnsavedTabsTooltipProps {
     children: ReactNode;
@@ -26,7 +26,7 @@ export function UnsavedTabsTooltip({
     actionText = "Cannot switch",
     normalLabel
 }: UnsavedTabsTooltipProps) {
-    const { openTabs } = useEditorTabsStore();
+    const { openTabs } = useEditorTabBarStore();
     // const { currentWorkspace } = useWorkspaceStore();
 
     // Check if there are unsaved tabs (exclude multiProject tabs which don't have id)

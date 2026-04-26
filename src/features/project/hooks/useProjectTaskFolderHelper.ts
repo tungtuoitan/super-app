@@ -6,7 +6,7 @@
 
 import { useRef, useEffect } from "react";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useProjectStore, type Project } from "../store/useProject.store";
 import { useTaskStore, type Task } from "@/features/task/store/useTask.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
@@ -24,7 +24,7 @@ import type { Note } from "@/features/note/types/note.types";
 export function useProjectTaskFolderHelper() {
     const _console = useConsoleHelper();
     const { $user } = useAuthStore();
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs } = useEditorTabBarStore();
     const { projects, setProjects } = useProjectStore();
     const { setTasks } = useTaskStore();
 

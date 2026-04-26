@@ -18,11 +18,11 @@ import { projectService } from "@/features/project/service/project.service";
 import { Breadcrumb } from "../Breadcrumb";
 import { BackButton } from "../BackButton";
 import { moduleRegistry } from "@/shell/moduleRegistry";
-import {useEditorTabsStore} from "@/store/index";
+import {useEditorTabBarStore} from "@/store/index";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();
-    const { isSaving } = useEditorTabsStore();
+    const { isSaving } = useEditorTabBarStore();
     const { projects } = useProjectStore();
     const { $user } = useAuthStore();
 

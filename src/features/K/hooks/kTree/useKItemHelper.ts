@@ -1,6 +1,6 @@
 
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";
@@ -14,7 +14,7 @@ import {useKLoader} from "./useK.loader";
 export const KuseWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabHelper();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { $user } = useAuthStore();
     const { currentK } = useKStore();
     const { loadTree } = useKLoader();

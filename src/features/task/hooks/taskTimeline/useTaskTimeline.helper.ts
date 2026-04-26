@@ -7,7 +7,7 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 
 
 import { Task, useTaskStore } from "../../store/useTask.store";
-import { useAuthStore, useEditorTabsStore } from "@/store/index";
+import { useAuthStore, useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "../../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
@@ -19,7 +19,7 @@ import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "../../utils/TaskGrid.u
 export const useTaskTimelineHelper = () => {
     const { setTasks } = useTaskStore();
     const { $user } = useAuthStore();
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs } = useEditorTabBarStore();
     const { projectId } = useCurrentProjectStore();
     const _console = useConsoleHelper();
 

@@ -14,7 +14,7 @@ import { Task, useTaskStore } from "../../store/useTask.store";
 import { taskService } from "../../service/task.service";
 import { standardRegistryService } from "@/services/standardRegistry.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
@@ -30,7 +30,7 @@ function parseChecklist(raw: string | null | undefined): ChecklistJSON {
 
 export const useTaskDetailChecklistHelper = () => {
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { setTasks } = useTaskStore();
     const { selectedTask } = useTaskDetailSelector();
 

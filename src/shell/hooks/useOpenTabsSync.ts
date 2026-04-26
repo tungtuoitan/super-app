@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/ws/store/useWs.store";
@@ -85,7 +85,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
 };
 
 export const useOpenTabSync = () => {
-    const { openTabs, setOpenTabs, setActiveTabId, isLoadingTabs, setIsLoadingTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, setActiveTabId, isLoadingTabs, setIsLoadingTabs } = useEditorTabBarStore();
     const { $user } = useAuthStore();
     const { notes } = useNoteGridStore();
     const { workspaces } = useWsStore();

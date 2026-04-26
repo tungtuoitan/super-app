@@ -14,7 +14,7 @@ import { extractExternalLinks } from "@/utils/markdown.utils";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore, useGeneralStore } from "@/store/index";
+import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useGridControlStore } from "@/store/useGridControl.store";
@@ -27,7 +27,7 @@ export const useNoteDetailHelper = () => {
     const { loadTree } = useWorkspaceLoader();
     const { currentWorkspace } = useWorkspaceStore();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { registries, registriesLoading, allKeywords } = useGeneralStore();
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useGridControlStore();

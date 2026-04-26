@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import type { Note } from "@/features/note/types/note.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
@@ -17,7 +17,7 @@ import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 export const useWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabHelper();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { $user } = useAuthStore();
     const { currentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();

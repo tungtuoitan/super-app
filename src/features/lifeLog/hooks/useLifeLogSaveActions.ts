@@ -3,7 +3,7 @@ import { constants } from "@/utils/constants";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
@@ -13,7 +13,7 @@ export function useLifeLogSaveActions(): SaveActions {
     const { upsertLog } = useLifeLogLogHelper();
     const { upsertTrack } = useLifeLogTrackHelper();
     const { setLogs, setTracks } = useLifeLogStore();
-    const { setOpenTabs, setActiveTabId } = useEditorTabsStore();
+    const { setOpenTabs, setActiveTabId } = useEditorTabBarStore();
 
     const handles = (tabType: string) =>
         tabType === constants.vscode.tab.tabTypes.lifeLog ||

@@ -1,7 +1,7 @@
 /**
  * Hashtag UI Store
  * React Context store for managing hashtag UI state in notes
- * Pattern: Separate store from business logic (similar to EditorTabStore)
+ * Pattern: Separate store from business logic (similar to EditorTabBarStore)
  *
  * NOTE: This is different from WorkspaceStore which manages workspace folder tree
  */

@@ -5,12 +5,12 @@
 
 import { Project } from "../store/useProject.store";
 import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 
 export const useProjectTabHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
     const { updateActiveTab } = useEditorTabHelper();
     const { setNewTabAnd } = useEditorTabHelper();
 

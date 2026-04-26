@@ -7,7 +7,7 @@
 import React, { useEffect } from "react";
 import type { BaseTab } from "@/types/editor/tab.types";
 import { Ws } from "@/types/workspace.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { WsDetailContent } from "./WsDetailContent";
 
 interface WsEditorPanelProps {
@@ -15,7 +15,7 @@ interface WsEditorPanelProps {
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { setOpenTabs, openTabs } = useEditorTabsStore();
+    const { setOpenTabs, openTabs } = useEditorTabBarStore();
 
     const contentRef = React.useRef<HTMLDivElement>(null);
 

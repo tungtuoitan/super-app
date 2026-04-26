@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import { Task, useTaskStore } from "../../store/useTask.store";
 import { taskService } from "../../service/task.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { isChecklistAllDone } from "@/utils/checklist.utils";
@@ -28,7 +28,7 @@ function parseProcess(raw: string | null | undefined): ChecklistJSON {
 
 export const useTaskDetailProcessHelper = () => {
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { setTasks } = useTaskStore();
     const { selectedTask } = useTaskDetailSelector();
 

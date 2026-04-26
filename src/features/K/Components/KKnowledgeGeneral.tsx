@@ -7,7 +7,7 @@
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/Button";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
 import { TrackIconPicker } from "@/features/lifeLog/Components/TrackIconPicker";
@@ -19,7 +19,7 @@ interface KKnowledgeGeneralProps {
 }
 
 export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps) {
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { createKnowledge, updateKnowledge } = useKLoader();
     const { setSelectedKId } = useKStore();
 

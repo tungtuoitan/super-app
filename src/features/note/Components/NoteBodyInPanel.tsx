@@ -10,7 +10,7 @@ import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
 import { formatNoteDate } from "../utils/note.utils";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabsStore, useGeneralStore } from "@/store/index";
+import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
@@ -20,7 +20,7 @@ import { IconType } from "@/shared/icons";
 export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
-    const { activeTabId } = useEditorTabsStore();
+    const { activeTabId } = useEditorTabBarStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
     const { getItemStatus } = useTreeStatusHelper();

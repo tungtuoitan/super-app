@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
-import { useEditorTabsStore, useGeneralStore } from "@/store/index";
+import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useTabKeyboardShortcuts } from "@/shell/hooks/useTabKeyboardShortcuts";
@@ -49,7 +49,7 @@ export function TabBar() {
         dragOverPosition,
         setDragOverPosition,
         dragCounterRef,
-    } = useEditorTabsStore();
+    } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, generateBreadcrumbForTab } = useEditorTabHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const { allKeywords } = useGeneralStore();

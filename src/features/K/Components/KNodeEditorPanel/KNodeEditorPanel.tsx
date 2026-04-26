@@ -15,7 +15,7 @@ import { kconstants } from "../../utils/K.Constants";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { containsNormalized } from "../../utils/searchUtils";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import {KtreeMiniHelper} from "../../hooks";
 
 function KNodeEditorContent() {
@@ -81,7 +81,7 @@ function KNodeEditorContent() {
     const lastBreadcrumbId = breadcrumb[breadcrumb.length - 1]?.id ?? null;
     const lastBreadcrumbName = breadcrumb[breadcrumb.length - 1]?.name ?? null;
 
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs } = useEditorTabBarStore();
 
     useEffect(() => {
         if (lastBreadcrumbId && lastBreadcrumbId > 0) {

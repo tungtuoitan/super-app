@@ -16,7 +16,7 @@ import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { taskService } from "../service/task.service";
 import { Task } from "../store/useTask.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { type CustomTab } from "../types/customTab.types";
 import {
@@ -32,7 +32,7 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
     const { handleFieldChange } = useTaskDetailFormHelper();
     const { submitVersionComment } = useTaskCommentHelper();
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { activeSection } = useTaskDetailSectionStore();
     const { customFocusTrigger, customTabHandlersRef, setCustomTabDirty } = useTaskSectionStore();
 

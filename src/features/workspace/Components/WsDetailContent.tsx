@@ -14,7 +14,7 @@ import { useWsDetailHelper } from "@/features/ws/hooks/useWsDetail.helper";
 import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 
 /**
  * Workspace Detail Dialog Content

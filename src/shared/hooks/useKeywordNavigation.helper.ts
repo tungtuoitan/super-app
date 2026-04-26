@@ -5,7 +5,7 @@
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { useGridControlStore } from "@/store/useGridControl.store";
@@ -37,7 +37,7 @@ import type { TargetKeywordTargetType } from "@/services/targetKeyword.service";
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
     const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { openTab, updateActiveTab } = useEditorTabHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();

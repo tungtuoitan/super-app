@@ -5,12 +5,12 @@
  */
 
 import { useMemo } from "react";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import type { TabType } from "../types/multiProjectDetail.type";
 
 export const useMultiProjectDetailSelector = () => {
-    const { openTabs, activeTabId } = useEditorTabsStore();
+    const { openTabs, activeTabId } = useEditorTabBarStore();
     const { projects } = useProjectStore();
 
     // Current editor tab

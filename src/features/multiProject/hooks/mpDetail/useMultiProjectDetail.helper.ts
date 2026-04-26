@@ -4,12 +4,12 @@
  * Reads from stores directly — NO params.
  */
 
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import type { TabType } from "../../types/multiProjectDetail.type";
 
 export const useMultiProjectDetailHelper = () => {
-    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { availableProjects } = useMultiProjectDetailSelector();
 
     // Update inner tab in editor tab metadata

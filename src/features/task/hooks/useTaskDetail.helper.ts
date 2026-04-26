@@ -17,7 +17,7 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { useGeneralStore } from "@/store/General.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { useTaskLinkedKeywordsHelper } from "../hooks/useTaskLinkedKeywords.helper";
@@ -38,7 +38,7 @@ export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskDa
 export const useTaskDetailHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId, openTabs } = useEditorTabsStore();
+    const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
     const { setTasks, linkedKeywords, folderItems } = useTaskStore();
     const { allKeywords } = useGeneralStore();
 

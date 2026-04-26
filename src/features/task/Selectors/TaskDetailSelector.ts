@@ -12,12 +12,12 @@ import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useMemo } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { useGeneralStore } from "@/store/General.store";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { IStatusOption } from "@/shared/components";
 
 export const useTaskDetailSelector = () => {
-    const { openTabs, activeTabId } = useEditorTabsStore();
+    const { openTabs, activeTabId } = useEditorTabBarStore();
     const { projects } = useCurrentProjectStore();
     const { projects: allProjects } = useProjectStore();
     const { tasks } = useTaskStore();

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useEditorTabsStore, useGeneralStore } from "@/store/index";
+import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
@@ -28,7 +28,7 @@ export function useTabBarHelper() {
         dragOverPosition,
         setDragOverPosition,
         dragCounterRef,
-    } = useEditorTabsStore();
+    } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, getActiveTab } = useEditorTabHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();

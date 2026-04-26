@@ -2,7 +2,7 @@ import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { BaseTab, TabType } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { Ws } from "@/types/workspace.types";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
@@ -22,7 +22,7 @@ import type { Project } from "@/features/project/store/useProject.store";
 import type { Task } from "@/features/task/store/useTask.store";
 
 export const useEditorTabHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
     const { setNotes } = useNoteGridStore();
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();

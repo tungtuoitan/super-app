@@ -3,7 +3,7 @@
  */
 
 import { useEffect } from "react";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { LogDetailContent } from "./LogDetailContent";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
@@ -13,7 +13,7 @@ interface LogEditorPanelProps {
 }
 
 export function LogEditorPanel({ tab }: LogEditorPanelProps) {
-    const { setOpenTabs } = useEditorTabsStore();
+    const { setOpenTabs } = useEditorTabBarStore();
     const log = tab.data as LifeLogLog;
 
     // Track unsaved changes

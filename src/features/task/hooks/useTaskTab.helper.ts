@@ -6,12 +6,12 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 
 import { Task, useTaskStore } from "../store/useTask.store";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 
 export const useTaskTabHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
+    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
     const { updateActiveTab, setNewTabAnd } = useEditorTabHelper();
     const { projects } = useCurrentProjectStore();
     const { tasks } = useTaskStore();

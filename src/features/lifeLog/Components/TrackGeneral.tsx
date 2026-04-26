@@ -6,7 +6,7 @@ import { useRef, useEffect } from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { useEditorTabsStore } from "@/store/index";
+import { useEditorTabBarStore } from "@/store/index";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { TrackIconPicker } from "./TrackIconPicker";
@@ -20,7 +20,7 @@ interface TrackGeneralProps {
 }
 
 export function TrackGeneral({ trackId, tabId }: TrackGeneralProps) {
-    const { openTabs, setOpenTabs } = useEditorTabsStore();
+    const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { upsertTrack } = useLifeLogTrackHelper();
     const [colorOpen, setColorOpen] = useState(false);
     const colorRef = useRef<HTMLDivElement>(null);
