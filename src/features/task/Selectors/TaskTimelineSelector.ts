@@ -16,18 +16,16 @@ export const useTaskTimelineSelector = () => {
     const { timelineRange, dayWidth } = useTaskTimelineStore();
 
     // Get current project
-    const currentProject = useMemo(() => {
-        return projects.find((p) => p.id === projectId);
-    }, [projects, projectId]);
+    const currentProject = projects.find((p) => p.id === projectId)
 
     // Filter tasks by projectId and sort hierarchically (exclude deleted)
-    const filteredTasks = useMemo(() => {
+    const filteredTasks = (() => {
         const projectTasks = tasks.filter((task) => task.projectId === projectId && !task.deletedAt);
         return sortTasksHierarchically(projectTasks);
-    }, [tasks, projectId]);
+    })()
 
     // Calculate dates from range
-    const { timelineStart, dates } = useMemo(() => {
+    const { timelineStart, dates } = (() => {
         if (!timelineRange) {
             return { timelineStart: new Date(), dates: [] as Date[] };
         }
@@ -36,18 +34,18 @@ export const useTaskTimelineSelector = () => {
             timelineStart: timelineRange.start,
             dates: allDates,
         };
-    }, [timelineRange]);
+    })()
 
     // Calculate today line position
-    const todayPosition = useMemo(() => {
+    const todayPosition = (() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const diffDays = Math.floor((today.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
         return diffDays * dayWidth + dayWidth / 2;
-    }, [timelineStart, dayWidth]);
+    })()
 
     // Group dates by month for header
-    const monthGroups = useMemo(() => {
+    const monthGroups = (() => {
         const groups: { month: string; days: number; startIndex: number }[] = [];
         let currentMonth = "";
         let currentCount = 0;
@@ -72,7 +70,7 @@ export const useTaskTimelineSelector = () => {
         }
 
         return groups;
-    }, [dates]);
+    })()
 
     return {
         currentProject,

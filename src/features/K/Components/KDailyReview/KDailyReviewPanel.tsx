@@ -148,7 +148,7 @@ export function KDailyReviewPanel({ knowledgeId, onComplete, onNavigateToTest }:
     }, [allTests, queue, knowledgeId, allK]);
 
     const visibleCards = showAll ? cards : cards.filter(c => c.status === "learning" || c.status === "mastered");
-    const dueTotal = cards.reduce((sum, c) => sum + c.dueCount + c.newCount, 0);
+    // const dueTotal = cards.reduce((sum, c) => sum + c.dueCount + c.newCount, 0);
     const inactiveCount = cards.filter(c => c.status !== "learning" && c.status !== "mastered").length;
 
     // ── Session handlers ─────────────────────────────────────────────────────

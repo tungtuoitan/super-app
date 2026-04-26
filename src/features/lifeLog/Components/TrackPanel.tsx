@@ -23,14 +23,14 @@ export function TrackPanel() {
         loadTracks();
     }, [loadTracks]);
 
-    const sortedTracks = useMemo(() => {
+    const sortedTracks = (() => {
         const active = tracks.filter((t) => !t.deletedAt);
         const usageMap = new Map<number, number>();
         for (const log of logs) {
             if (log.trackId) usageMap.set(log.trackId, (usageMap.get(log.trackId) ?? 0) + 1);
         }
         return [...active].sort((a, b) => (usageMap.get(b.id) ?? 0) - (usageMap.get(a.id) ?? 0));
-    }, [tracks, logs]);
+    })()
 
     return (
         <div className="border-b border-border flex-shrink-0 flex items-center" style={{ borderTop: "1px solid rgb(63, 63, 70)" }}>

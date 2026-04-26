@@ -125,13 +125,13 @@ export function WsGrid() {
     }, []);
 
     // Filter data by search query
-    const filteredData = useMemo(() => {
+    const filteredData = (() => {
         if (!searchQuery) {
             return workspaces;
         }
         const query = searchQuery.toLowerCase();
         return workspaces.filter((ws) => ws.name?.toLowerCase().includes(query) || ws.description?.toLowerCase().includes(query) || String(ws.id).includes(query));
-    }, [workspaces, searchQuery]);
+    })()
 
     // Create table instance
     const table = useReactTable({

@@ -38,18 +38,14 @@ export function KView() {
     }, [$user.userId, $user.userToken, $user.filters, selectedKId]);
 
     // Convert workspaces to autocomplete options (include imageUrl)
-    const workspaceOptions: IAutoCompleteOptions[] = useMemo(
-        () =>
-            allK.map((ws) => ({
+    const workspaceOptions: IAutoCompleteOptions[] = allK.map((ws) => ({
                 id: ws.id.toString(),
                 label: ws.name,
                 desc: ws.description || ws.name,
                 active: !ws.deletedAt,
                 longDesc: ws.deletedAt ? "(deleted)" : undefined,
                 imageUrl: ws.imageBase64 || undefined,
-            })),
-        [allK],
-    );
+            }))
 
     // Handle workspace selection change
     const handleWorkspaceChange = async (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {

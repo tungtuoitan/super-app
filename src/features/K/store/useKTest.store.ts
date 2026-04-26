@@ -28,8 +28,6 @@ export function useKTestStoreValues(): KTestContextData {
     const [tests, setTests] = useState<KTestSummary[]>([]);
     const [isLoadingTests, setIsLoadingTests] = useState(false);
     const [activeNodeId, setActiveNodeId] = useState<number | null>(null);
-    return useMemo(
-        () => ({ tests, setTests, isLoadingTests, setIsLoadingTests, activeNodeId, setActiveNodeId }),
-        [tests, isLoadingTests, activeNodeId],
-    );
+    
+    return { tests, setTests, isLoadingTests, setIsLoadingTests, activeNodeId, setActiveNodeId }
 }

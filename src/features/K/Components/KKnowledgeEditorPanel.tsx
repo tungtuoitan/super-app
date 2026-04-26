@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Settings, GitBranch, CalendarClock, LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/shared/hooks/useIsMobile";
@@ -135,14 +135,14 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
         setPendingImportNodeId(undefined);
     }, [pendingImportNodeId]);
 
-    const handleStartQuickTest = (testDetail: KTestDetailType) => {
+    const handleStartQuickTest = useCallback((testDetail: KTestDetailType) => {
         const questions: KDailySessionQuestion[] = testDetail.questions.map(q => ({
             id: q.id,
             question: q.question,
             answer: q.answer,
         }));
         setSession({ knowledgeId: knowledge.id, testId: testDetail.id, testTitle: testDetail.title, questions });
-    };
+    }, [knowledge.id]);
     const handleSessionEnd = () => setSession(null);
 
     // ── Tab content ───────────────────────────────────────────────────────────

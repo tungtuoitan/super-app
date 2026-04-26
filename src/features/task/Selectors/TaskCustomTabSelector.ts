@@ -9,9 +9,6 @@ import { parseCustomTabs } from "../utils/customTab.utils";
 
 export const useTaskCustomTabSelector = () => {
     const { selectedTask } = useTaskDetailSelector();
-    const customTabs = useMemo(
-        () => parseCustomTabs(selectedTask?.customTabsJson),
-        [selectedTask?.customTabsJson],
-    );
+    const customTabs = parseCustomTabs(selectedTask?.customTabsJson)
     return { customTabs };
 };

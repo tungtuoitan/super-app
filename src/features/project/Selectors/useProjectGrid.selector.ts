@@ -15,13 +15,13 @@ export const useProjectGridSelector = () => {
     const { registriesByType } = useGeneralStore();
 
     // Get status label from registry
-    const getStatusLabel = useMemo(() => {
+    const getStatusLabel = (() => {
         const projectStatuses = registriesByType["project_status"] || [];
         return (statusCode: string) => {
             const status = projectStatuses.find((s) => s.code === statusCode);
             return status?.description || statusCode;
         };
-    }, [registriesByType]);
+    })()
 
     // Filter data by search query
     const filteredData = useMemo(() => {

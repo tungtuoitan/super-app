@@ -24,17 +24,10 @@ export const useTaskChecklistSelector = () => {
     /** Active env — only passed to utils when testcase */
     const env = parsedChecklist?.checklistType === "testcase" ? activeEnv : undefined;
 
-    const progress = useMemo(
-        () => (parsedChecklist ? checklistProgress(parsedChecklist, env) : null),
-        [parsedChecklist, env],
-    );
+    const progress = parsedChecklist ? checklistProgress(parsedChecklist, env) : null
+    const allDone = parsedChecklist ? isChecklistAllDone(parsedChecklist, env) : false
 
-    const allDone = useMemo(
-        () => (parsedChecklist ? isChecklistAllDone(parsedChecklist, env) : false),
-        [parsedChecklist, env],
-    );
-
-    const nextRequiredIndex = useMemo(() => {
+    const nextRequiredIndex = (() => {
         if (!parsedChecklist) return 0;
         const flat = getFlatItems(parsedChecklist);
         for (let i = 0; i < flat.length; i++) {
@@ -44,9 +37,9 @@ export const useTaskChecklistSelector = () => {
             if (!s.isChecked && !s.isSkipped) return i;
         }
         return flat.length;
-    }, [parsedChecklist, env]);
+    })()
 
-    const lastCheckedName = useMemo(() => {
+    const lastCheckedName = (() => {
         if (!parsedChecklist) return null;
         const flat = getFlatItems(parsedChecklist);
         for (let i = flat.length - 1; i >= 0; i--) {
@@ -54,13 +47,13 @@ export const useTaskChecklistSelector = () => {
             if (s.isChecked || s.isSkipped) return flat[i].name;
         }
         return null;
-    }, [parsedChecklist, env]);
+    })()
 
-    const nextPendingName = useMemo(() => {
+    const nextPendingName = (() => {
         if (!parsedChecklist) return null;
         const flat = getFlatItems(parsedChecklist);
         return flat[nextRequiredIndex]?.name ?? null;
-    }, [parsedChecklist, nextRequiredIndex]);
+    })();
 
     return {
         // Only derived values — no pass-through from parent selectors

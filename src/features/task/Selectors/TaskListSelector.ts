@@ -19,12 +19,10 @@ export const useTaskListSelector = () => {
     const { projects, projectId } = useCurrentProjectStore();
 
     // Get current project for date constraints
-    const currentProject = useMemo(() => {
-        return projects.find((p) => p.id === projectId);
-    }, [projects, projectId]);
+    const currentProject = projects.find((p) => p.id === projectId)
 
     // Get status options from registriesByType with colors
-    const statusOptions: IStatusOption[] = useMemo(() => {
+    const statusOptions: IStatusOption[] = (() => {
         const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg) => {
@@ -38,10 +36,10 @@ export const useTaskListSelector = () => {
                 };
             })
             .sort((a, b) => (constants.optionOrder.taskStatuses[a.label] ?? 999) - (constants.optionOrder.taskStatuses[b.label] ?? 999));
-    }, [registriesByType]);
+    })()
 
     // Get priority options from registriesByType with colors
-    const priorityOptions: IStatusOption[] = useMemo(() => {
+    const priorityOptions: IStatusOption[] = (() => {
         const taskPriorities = registriesByType["task_priority"] || [];
         return taskPriorities
             .map((reg) => {
@@ -55,10 +53,10 @@ export const useTaskListSelector = () => {
                 };
             })
             .sort((a, b) => (constants.optionOrder.taskPriorities[a.label] ?? 999) - (constants.optionOrder.taskPriorities[b.label] ?? 999));
-    }, [registriesByType]);
+    })()
 
     // Filter tasks by projectId and search query
-    const filteredTasks = useMemo(() => {
+    const filteredTasks = (() => {
         let result = tasks.filter((task) => task.projectId === projectId);
         if (taskSearchQuery) {
             const query = taskSearchQuery.toLowerCase();
@@ -69,12 +67,10 @@ export const useTaskListSelector = () => {
             );
         }
         return result;
-    }, [tasks, projectId, taskSearchQuery]);
+    })()
 
     // Sort tasks: parent tasks first, then subtasks immediately after their parent
-    const sortedTasks = useMemo(() => {
-        return sortTasksHierarchically(filteredTasks);
-    }, [filteredTasks]);
+    const sortedTasks = sortTasksHierarchically(filteredTasks)
 
     return {
         currentProject,

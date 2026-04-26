@@ -93,10 +93,7 @@ export function KTree() {
     useEffect(() => { setTreeData(treeData); }, [treeData]);
 
     // Get all visible folder IDs for keyboard navigation
-    const allVisibleFolderIds = useMemo(() => {
-        return KtreeMiniHelper.getAllVisibleNodeIds(treeData);
-    }, [treeData]);
-
+    const allVisibleFolderIds = KtreeMiniHelper.getAllVisibleNodeIds(treeData)
     // ── Mark helpers ────────────────────────────────────────────────────────────
 
     /** Collect the numeric IDs of a node and all its descendants */
@@ -106,7 +103,7 @@ export function KTree() {
     }
 
     /** Numeric IDs of marked node + all descendants (null when no mark) */
-    const markedVisibleIds = useMemo((): Set<number> | null => {
+    const markedVisibleIds = ((): Set<number> | null => {
         if (!markedNodeId) return null;
         function find(nodes: KTreeNode[]): Set<number> | null {
             for (const node of nodes) {
@@ -121,7 +118,7 @@ export function KTree() {
             return null;
         }
         return find(treeData);
-    }, [markedNodeId, treeData]);
+    })()
 
     // Load saved mark from storage when workspace changes
     useEffect(() => {

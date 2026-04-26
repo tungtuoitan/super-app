@@ -25,14 +25,14 @@ export function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onP
     const statusColors = getProjectStatusColors(project.status || "");
 
     // ── Position from dates ──────────────────────────────
-    const { left, width, hasValidDates } = useMemo(() => {
+    const { left, width, hasValidDates } = (() => {
         if (!project.startDate && !project.endDate) return { left: 0, width: TIMELINE_MIN_BAR_WIDTH, hasValidDates: false };
         const start = project.startDate || project.endDate || new Date();
         const end = project.endDate || project.startDate || new Date();
         const startDiff = Math.floor((start.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
         const duration = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
         return { left: startDiff * dayWidth, width: Math.max(TIMELINE_MIN_BAR_WIDTH, duration * dayWidth - 4), hasValidDates: true };
-    }, [project.startDate, project.endDate, timelineStart, dayWidth]);
+    })()
 
     // ── Drag state ───────────────────────────────────────
     const [isDragging, setIsDragging] = useState(false);

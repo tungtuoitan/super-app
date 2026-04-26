@@ -35,14 +35,14 @@ export function FlowEdgeWithNote({
     const { handleEdgeNoteConfirm, handleEdgeDelete, isEdgeLocked } = useMultiProjectTaskFlowHelper();
     const edgeLocked = isEdgeLocked(id);
 
-    const isDimmed = useMemo(() => {
+    const isDimmed = (() => {
         const DIMMED = new Set(["completed", "cancelled", "failed"]);
         const sNode = flowNodes.find((n) => n.id === source);
         const tNode = flowNodes.find((n) => n.id === target);
         const sStatus = (sNode?.data as TaskFlowNodeData)?.task?.status;
         const tStatus = (tNode?.data as TaskFlowNodeData)?.task?.status;
         return !!(sStatus && DIMMED.has(sStatus) && tStatus && DIMMED.has(tStatus));
-    }, [flowNodes, source, target]);
+    })();
 
     const edgeData = data as FlowEdgeData;
     const isEditing = editingEdgeId === id;
