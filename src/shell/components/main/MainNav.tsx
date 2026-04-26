@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 
-import { useNavigationStore } from "../../contexts/NavigationContext";
+import { useNavigationStore } from "../../../contexts/NavigationContext";
 import { TopNav } from "./TopNav";
 import { VSCodeLayout } from "@/shell/components";
 import { AuthCallback } from "@/shell/components/AuthCallback";

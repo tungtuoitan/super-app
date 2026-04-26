@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Panel, PanelGroup, type ImperativePanelHandle } from "react-resizable-panels";
 import { ActivityBar } from "./ActivityBar";
-import { VSCodeResizeHandle } from "./VSCodeResizeHandle";
+import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { VSSideBar } from "./VSSideBar";
 import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
@@ -13,7 +13,7 @@ import { constants } from "@/utils/constants";
 import { GridControlBar } from "@/shared/components/GridControlBar";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";
-import {useCheckIsMobile} from "../hooks/useCheckIsMobile";
+import {useCheckIsMobile} from "../../hooks/useCheckIsMobile";
 
 interface VSCodeLayoutProps {
     className?: string;

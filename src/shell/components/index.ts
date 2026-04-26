@@ -1,1 +1,1 @@
-export { VSCodeLayout } from "./VSCodeLayout";
+export { VSCodeLayout } from "./main/VSCodeLayout";

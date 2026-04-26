@@ -2,7 +2,7 @@ import { LibraryBig, CalendarClock, ArrowRightLeft } from "lucide-react";
 import { KView } from "../Components/KView";
 import { KKnowledgeEditorPanel } from "../Components/KKnowledgeEditorPanel";
 import { KNodeEditorPanel } from "../Components/KNodeEditorPanel/KNodeEditorPanel";
-import { KMovingTab } from "../Components/VSPanel/KMovingTab";
+import { KMovingTab } from "../Components/KMovingTree/KMovingTab";
 import { useKStore } from "../store/K.store";
 import { constants } from "@/utils/constants";
 import type { ModuleDefinition } from "@/shell/moduleRegistry";

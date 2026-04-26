@@ -16,8 +16,8 @@ import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { projectService } from "@/features/project/service/project.service";
-import { Breadcrumb } from "./Breadcrumb";
-import { BackButton } from "./BackButton";
+import { Breadcrumb } from "../Breadcrumb";
+import { BackButton } from "../BackButton";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 
 export function EditorToolbar() {

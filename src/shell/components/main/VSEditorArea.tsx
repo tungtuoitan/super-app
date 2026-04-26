@@ -1,11 +1,11 @@
 import React from "react";
 import { ConfirmCloseDialog } from "@/shell/components/ConfirmCloseDialog";
-import { EditorToolbar } from "@/shell/components/EditorToolbar";
+import { EditorToolbar } from "@/shell/components/main/EditorToolbar";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import { useOpenTabSync } from "../hooks/useOpenTabsSync";
-import { useTrackTabNavigation } from "../hooks/useTrackTabNavigation";
+import { useOpenTabSync } from "../../hooks/useOpenTabsSync";
+import { useTrackTabNavigation } from "../../hooks/useTrackTabNavigation";
 import { TabBar } from "./TabBar";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { BaseTab } from "@/types/editor/tab.types";

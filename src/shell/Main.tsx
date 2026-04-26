@@ -17,7 +17,7 @@ import { EditorProviders } from "@/store/editor/EditorProviders";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/shell/components/ConfirmationPopoverContainer";
-import MainNav from "./components/MainNav";
+import MainNav from "./components/main/MainNav";
 import { GeneralProvider, CommandPaletteProvider, ConsoleProvider, ActivityBarProvider, AuthCallbackProvider, NavigationHistoryProvider } from "@/store/index";
 import { NavProvider } from "@/contexts/NavigationContext";
 import { AuthGuard } from "@/shell/auth/AuthGuard";

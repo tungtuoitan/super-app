@@ -1,5 +1,5 @@
 import { Panel, PanelGroup } from "react-resizable-panels";
-import { VSCodeResizeHandle } from "./VSCodeResizeHandle";
+import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { GridControlBar } from "@/shared/components/GridControlBar";
 import { constants } from "@/utils/constants";
 import { useActivityBarStore } from "@/store/index";
