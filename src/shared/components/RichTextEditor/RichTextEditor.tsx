@@ -36,7 +36,7 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import "./RichTextEditor.css";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";

@@ -9,7 +9,7 @@ import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFileItem } from "@/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { StatusDot } from "./StatusDot";
 import { HighlightText } from "./HighlightText";
 

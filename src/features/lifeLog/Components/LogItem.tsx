@@ -4,7 +4,7 @@ import { LogTypeBadge } from "./LogTypeBadge";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { SensitiveOverlay } from "./SensitiveOverlay";
 import { cn } from "@/lib/utils";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 

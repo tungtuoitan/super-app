@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useKStore } from "../../store/K.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { KuseTreeHelper } from "../../hooks/kTree/useKTreeHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";

@@ -6,7 +6,7 @@ import {
     X as CloseIcon,
     XCircle as CloseAllIcon,
 } from "lucide-react";
-import { useTabBarMenuHelper } from "@/shared/contexts/helpers/useTabBarMenu.helper";
+import { useTabBarMenuHelper } from "@/shared/menuContexts/helpers/useTabBarMenu.helper";
 
 /**
  * TabBarMenu

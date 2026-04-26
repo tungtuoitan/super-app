@@ -8,7 +8,7 @@ import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEdito
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { NodeCard } from "./NodeCard";
 import { InlineNewNodeCard } from "./InlineNewNodeCard";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { kconstants } from "../../utils/K.Constants";

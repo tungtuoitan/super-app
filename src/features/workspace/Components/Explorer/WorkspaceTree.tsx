@@ -6,7 +6,7 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { FolderNode } from "./FolderNode";
 import { RootFolderNode } from "./RootFolderNode";

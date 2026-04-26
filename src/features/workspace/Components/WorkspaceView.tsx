@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { useWsTabHelper } from "@/features/ws/hooks/useWsTab.helper";
 import { constants } from "@/utils/constants";
 

@@ -7,7 +7,7 @@ import { useTreeHelper } from "../../hooks/useTreeHelper";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader"; 
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { FolderItem } from "../../types/workspace.types";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import { HighlightText } from "./HighlightText";
 

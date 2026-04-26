@@ -7,7 +7,7 @@ import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/ws/store/useWs.store";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { useTabKeyboardShortcuts } from "./useTabKeyboardShortcuts";
 import { BaseTab } from "@/shell/types/tab.types";
 import { constants } from "@/utils/constants";

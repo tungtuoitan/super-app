@@ -9,7 +9,7 @@ import { AutoResizeTextarea } from "./AutoResizeTextarea";
 import type { IconType } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { IconPicker } from "@/shared/components/ui/IconPicker";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";

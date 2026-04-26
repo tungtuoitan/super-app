@@ -10,7 +10,7 @@ import { BaseTab } from "@/shell/types/tab.types";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabBarStore } from "@/store/index";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import {filterUtils} from "@/utils/filter.utils";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 

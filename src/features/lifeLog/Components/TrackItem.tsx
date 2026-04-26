@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { useMobileStore } from "@/store/Mobile.store";
 import { useLifeLogStore } from "../store/useLifeLog.store";

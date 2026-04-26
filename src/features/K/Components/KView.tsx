@@ -11,7 +11,7 @@ import { useKStore } from "../store/K.store";
 import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";
 import { KDialog } from "./KExplorer/KDialog/KDialog";
-import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import {useKLoader} from "../hooks/kTree/useK.loader";
 
