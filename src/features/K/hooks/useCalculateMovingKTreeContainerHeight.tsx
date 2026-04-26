@@ -1,14 +1,14 @@
 /**
- * KTree - Tree component for Workspace Explorer
+ * CalculateMovingTreeContainerHeight - Headless component for MovingTree
  * Tracks container height changes and updates store
  */
 
-import React, { useEffect } from "react";
-import { useKStore } from "../store/K.store";
- 
-export function CalculateKTreeContainerHeight() { 
-    const { treeContainerRef, setContainerHeight } = useKStore();
+import { useEffect } from "react";
+import { useKMovingTreeStore } from "../store/KMovingTree.store";
 
+export function useCalculateKMovingTreeContainerHeight() { 
+    const { treeContainerRef, setContainerHeight,containerHeight } = useKMovingTreeStore();
+    
     // Track container height to make Tree component responsive
     useEffect(() => {
         const updateHeight = () => {
@@ -37,7 +37,9 @@ export function CalculateKTreeContainerHeight() {
             resizeObserver.disconnect();
             window.removeEventListener("resize", updateHeight);
         };
-    }, [treeContainerRef, setContainerHeight]);
+    }, [treeContainerRef]);
 
     return null;
 }
+
+ 

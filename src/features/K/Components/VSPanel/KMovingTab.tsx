@@ -16,14 +16,14 @@ import {useKStore} from "../../store/K.store";
 import {useKMovingTreeStore} from "../../store/KMovingTree.store";
 import {useKMovingTreeHelper} from "../../hooks/useKMovingTree.helper";
 import {KMovingTree} from "./KMovingTree";
-import {CalculateKMovingTreeContainerHeight} from "../../HeadlessComponents/CalculateMovingKTreeContainerHeight";
+import {useCalculateKMovingTreeContainerHeight} from "../../hooks/useCalculateMovingKTreeContainerHeight";
 
 export function KMovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useKMovingTreeStore();
     const { allK, currentK, selectedKId, selectedItemIds } = useKStore();
     const manager = useDragDropManager();
     const { handleWorkspaceChange, loadTargetWorkspaceTree, checkDraggingItemsAreDuplicate, checkAndHighlightDuplicates } = useKMovingTreeHelper();
-
+    useCalculateKMovingTreeContainerHeight();
     // Ensure targetWorkspaceId is not the same as selectedKId
     useEffect(() => {
         if (selectedKId === targetWorkspaceId) {
@@ -63,7 +63,7 @@ export function KMovingTab() {
 
     return (
         <div className="h-full flex overflow-hidden" ref={treeContainerRef} data-workspace-tree="true">
-            <CalculateKMovingTreeContainerHeight />
+
             {/* Left Panel - Workspace Selector & Status */}
             <div className="w-1/2 flex flex-col border-r border-editor-border">
                 <div className="px-4 py-3">

@@ -10,11 +10,11 @@ import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useO
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
 import { KTreeNode, KtreeMiniHelper, KuseTreeHelper2 } from "../../hooks";
-import { CalculateKTreeContainerHeight } from "../../HeadlessComponents/CalculateKTreeContainerHeight";
-import { CalculateKTreeDropZoneHeight } from "../../HeadlessComponents/CalculateKTreeDropZoneHeight";
 import { kconstants } from "../../utils/K.Constants";
-import { ScrollToHighlightItem } from "../../HeadlessComponents/ScrollToHighlightItem";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import {useCalculateKTreeContainerHeight} from "../../hooks/useCalculateKTreeContainerHeight";
+import {useCalculateKTreeDropZoneHeight} from "../../hooks/useCalculateKTreeDropZoneHeight";
+import {useScrollToHighlightItem} from "../../hooks/useScrollToHighlightItem";
 
 export function KTree() {
     const { isDragging, currentK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, markedNodeId, setMarkedNodeId, treeData: _storeTD, setTreeData } = useKStore();
@@ -23,6 +23,8 @@ export function KTree() {
     const { handleMove } = KuseTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const manager = useDragDropManager();
+    useCalculateKTreeContainerHeight()
+    useScrollToHighlightItem()
 
     // Always hide question nodes and their descendants — only entity nodes in the tree
     const filteredK = useMemo(() => {
@@ -88,6 +90,12 @@ export function KTree() {
 
         return baseTree;
     }, [filteredK, searchQuery]);
+    useCalculateKTreeDropZoneHeight({
+        treeData:treeData,
+        containerHeight:containerHeight,
+        treeRef:_treeRef,
+        setDropZoneHeight:setDropZoneHeight
+    })
 
     // Sync local treeData to store so other hooks (e.g. handleDrillDown) can use it
     useEffect(() => { setTreeData(treeData); }, [treeData]);
@@ -252,9 +260,8 @@ export function KTree() {
                 onContextMenu={handleContainerContextMenu}
                 className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
-                <CalculateKTreeContainerHeight />
-                <CalculateKTreeDropZoneHeight treeData={treeData} containerHeight={containerHeight} treeRef={_treeRef} setDropZoneHeight={setDropZoneHeight} />
-                <ScrollToHighlightItem />
+        
+
                 {/* Loading overlay when dragging */}
                 {isDragging && (
                     <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
