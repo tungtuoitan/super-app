@@ -95,7 +95,7 @@ export function WorkspaceTree() {
         return () => {
             document.removeEventListener("keydown", handleKeyDownWrapper);
         };
-    }, [handleKeyDown, allVisibleFolderIds]);
+    }, [allVisibleFolderIds]);
 
     // Auto-expand workspace root when workspace loads
     // Collapses everything, then opens only workspace root to show its direct children

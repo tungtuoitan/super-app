@@ -120,7 +120,7 @@ export function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onP
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
         return () => { document.removeEventListener("mousemove", handleMouseMove); document.removeEventListener("mouseup", handleMouseUp); };
-    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, project, dayWidth, onDateChange, onProjectClick]);
+    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, project, dayWidth]);
 
     // ── Render ───────────────────────────────────────────
     if (!hasValidDates) {

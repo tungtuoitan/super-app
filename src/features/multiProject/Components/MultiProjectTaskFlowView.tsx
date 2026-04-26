@@ -275,7 +275,7 @@ function TaskFlowCanvas() {
         };
         document.addEventListener("keydown", onKeyDown);
         return () => document.removeEventListener("keydown", onKeyDown);
-    }, [handleF1Toggle, handleBackToCenter]);
+    }, []);
 
     // Persist viewport across tab switches
     const savedViewport = storageService.get<Viewport>(STORAGE_KEYS.TASK_FLOW_VIEWPORT)

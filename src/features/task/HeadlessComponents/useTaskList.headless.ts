@@ -15,5 +15,5 @@ export function useTaskListHeadless() {
 
         resizeObserver.observe(taskContainerRef.current);
         return () => resizeObserver.disconnect();
-    }, [taskContainerRef, setTaskContainerWidth]);
+    }, [taskContainerRef]);
 }

@@ -206,7 +206,7 @@ export function KTree() {
         return () => {
             document.removeEventListener("keydown", handleKeyDownWrapper);
         };
-    }, [handleKeyDown, allVisibleFolderIds]);
+    }, [allVisibleFolderIds]);
 
     // Auto-expand workspace root on init — show direct children of root
     useEffect(() => {

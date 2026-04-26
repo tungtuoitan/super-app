@@ -173,7 +173,7 @@ export function KTestSession({ knowledgeId, testId, questions, onComplete, onBac
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [result, isSubmitting, currentIndex, totalQuestions, toggleRecording, goPrev, goNext, handleSubmit]);
+    }, [result, isSubmitting, currentIndex, totalQuestions]);
 
 
 

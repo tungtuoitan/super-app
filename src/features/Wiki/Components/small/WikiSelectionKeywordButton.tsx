@@ -108,7 +108,7 @@ export function WikiKeywordTooltip({ keyword, infoId, rect, onClose }: KeywordTo
         };
         document.addEventListener("mousedown", handleMouseDown);
         return () => document.removeEventListener("mousedown", handleMouseDown);
-    }, [onClose]);
+    }, []);
 
     const handleLink = async () => {
         if (loading) return;

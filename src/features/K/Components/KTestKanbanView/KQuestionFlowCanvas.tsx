@@ -106,8 +106,8 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         }
     }
 
-    useEffect(() => { setKnowledgeId(knowledgeId); }, [knowledgeId, setKnowledgeId]);
-    useEffect(() => { setActiveTestId(selectedTestId); }, [selectedTestId, setActiveTestId]);
+    useEffect(() => { setKnowledgeId(knowledgeId); }, [knowledgeId]);
+    useEffect(() => { setActiveTestId(selectedTestId); }, [selectedTestId]);
 
     // Scroll=pan, Shift+scroll=horizontal, Ctrl+scroll=zoom
     useEffect(() => {
@@ -153,7 +153,7 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         };
         window.addEventListener("kflow:add-question", handler);
         return () => window.removeEventListener("kflow:add-question", handler);
-    }, [selectedTestId, rfInstance, setFlowNodes, setEditingNodeId]);
+    }, [selectedTestId, rfInstance]);
 
     useEffect(() => {
         const handler = () => onQuestionsChanged();

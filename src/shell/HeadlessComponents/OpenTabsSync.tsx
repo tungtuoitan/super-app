@@ -389,7 +389,7 @@ export const OpenTabsSync = () => {
         };
 
         restoreTabs();
-    }, [$user.userId, setOpenTabs, setActiveTabId, setIsLoadingTabs]);
+    }, [$user.userId]);
 
     // Save tabs to localStorage whenever they change
     useEffect(() => {

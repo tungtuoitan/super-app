@@ -50,7 +50,7 @@ export function CalculateWorkspaceTreeDropZoneHeight({
 
         // Recalculate when tree data changes or container resizes
         calculateDropZoneHeight();
-    }, [treeData, containerHeight, treeRef, setDropZoneHeight]);
+    }, [treeData, containerHeight, treeRef]);
 
     return null;
 }

@@ -45,7 +45,7 @@ export function CommandPaletteKeyDown() {
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isOpen, filteredKeywords, selectedIndex, handleSelectKeyword]);
+    }, [isOpen, filteredKeywords, selectedIndex]);
 
     // Handle Ctrl+P to open command palette
     useEffect(() => {

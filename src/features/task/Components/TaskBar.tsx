@@ -161,7 +161,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
         return () => { document.removeEventListener("mousemove", handleMouseMove); document.removeEventListener("mouseup", handleMouseUp); };
-    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, task, dayWidth, constraints, onDateChange, onTaskClick, isSubtask, allTasks, onValidationError]);
+    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, task, dayWidth, constraints, isSubtask, allTasks]);
 
     // ── Render ───────────────────────────────────────────
     const taskBarColors = getTaskBarColors(task.status);

@@ -113,5 +113,5 @@ export const useTabKeyboardShortcuts = () => {
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [openTabs, activeTabId, setOpenTabs, closeTabs, openNewLogTab]);
+    }, [openTabs, activeTabId]);
 };

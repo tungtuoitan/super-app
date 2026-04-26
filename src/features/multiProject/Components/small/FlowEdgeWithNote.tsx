@@ -93,7 +93,7 @@ export function FlowEdgeWithNote({
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [selected, isEditing, edgeLocked, id, handleEdgeDelete]);
+    }, [selected, isEditing, edgeLocked, id]);
 
     const strokeColor = selected ? "hsl(var(--primary))" : isDimmed ? "#6b728040" : "#6b7280cc";
     const strokeWidth = selected ? 2.2 : 1.8;

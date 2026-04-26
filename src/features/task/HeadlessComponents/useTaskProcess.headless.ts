@@ -14,7 +14,7 @@ export function useTaskProcessHeadless() {
             discard: handleProcessCancelEdit,
         };
         return () => { delete builtinSectionHandlersRef.current.process; };
-    }, [handleProcessSaveEdit, handleProcessCancelEdit, builtinSectionHandlersRef]);
+    }, [builtinSectionHandlersRef]);
 
     useEffect(() => {
         if (!isExpanded) return;
@@ -30,5 +30,5 @@ export function useTaskProcessHeadless() {
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
-    }, [isExpanded, barRef, popupRef, setIsExpanded, setIsEditing, setEditErrors]);
+    }, [isExpanded, barRef, popupRef]);
 }

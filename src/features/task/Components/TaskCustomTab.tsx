@@ -59,7 +59,7 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
     // ── Track dirty state for the active tab only ─────────────────────────────
     useEffect(() => {
         if (isActiveTab) setCustomTabDirty(editContent !== savedContentRef.current);
-    }, [editContent, isActiveTab, setCustomTabDirty]);
+    }, [editContent, isActiveTab]);
 
     const handleContentChange = (value: string) => {
         setEditContent(value);
@@ -116,7 +116,7 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
     useEffect(() => {
         customTabHandlersRef.current[tabId] = { save, discard };
         return () => { delete customTabHandlersRef.current[tabId]; };
-    }, [tabId, save, discard, customTabHandlersRef]);
+    }, [tabId, customTabHandlersRef]);
 
     if (!tab) {
         return (

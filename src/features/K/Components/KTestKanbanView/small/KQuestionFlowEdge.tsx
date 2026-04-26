@@ -44,7 +44,7 @@ export function KQuestionFlowEdge({
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [selected, id, handleEdgeDelete]);
+    }, [selected, id]);
 
     const handleToggle = (e: React.MouseEvent) => {
         e.stopPropagation();

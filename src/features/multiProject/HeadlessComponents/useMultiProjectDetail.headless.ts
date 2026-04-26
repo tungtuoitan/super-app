@@ -34,7 +34,7 @@ export function useMultiProjectDetailHeadless() {
             const activeProjects = projects.filter((p) => p.status === "active" && !p.deletedAt);
             setSelectedProjectIds(activeProjects.map((p) => p.id));
         }
-    }, [projects, currentTab?.metadata?.selectedProjectIds, setSelectedProjectIds]);
+    }, [projects, currentTab?.metadata?.selectedProjectIds]);
 
     // Load tasks once at the parent level — shared by TaskList, Kanban, Timeline tabs
     useEffect(() => {

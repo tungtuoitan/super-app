@@ -21,7 +21,7 @@ export function TrackPanel() {
 
     useEffect(() => {
         loadTracks();
-    }, [loadTracks]);
+    }, []);
 
     const sortedTracks = (() => {
         const active = tracks.filter((t) => !t.deletedAt);

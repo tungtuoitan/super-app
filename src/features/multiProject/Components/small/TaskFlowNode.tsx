@@ -189,7 +189,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
         };
         document.addEventListener("keydown", onKeyDown);
         return () => document.removeEventListener("keydown", onKeyDown);
-    }, [selected, isEditing, isTempNode, nodeLocked, id, handleChangeStatus]);
+    }, [selected, isEditing, isTempNode, nodeLocked, id]);
 
     const handleDoubleClick = (e: React.MouseEvent) => {
         if (nodeLocked) return;

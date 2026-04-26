@@ -56,12 +56,12 @@ function TaskCommentInner() {
 
     useEffect(() => {
         if (commentFocusTrigger > 0) setTimeout(() => scrollToBottom(300), 50);
-    }, [commentFocusTrigger, scrollToBottom]);
+    }, [commentFocusTrigger]);
 
     useEffect(() => {
         if (prevLoadingRef.current && !isLoadingComments) scrollToBottom(300);
         prevLoadingRef.current = isLoadingComments;
-    }, [isLoadingComments, scrollToBottom]);
+    }, [isLoadingComments]);
 
     const isNewTask = !selectedTask || selectedTask.id <= 0;
     if (isNewTask) return <NewTaskPlaceholder />;

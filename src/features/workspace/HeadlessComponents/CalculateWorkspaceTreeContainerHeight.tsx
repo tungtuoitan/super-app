@@ -37,7 +37,7 @@ export function CalculateWorkspaceTreeContainerHeight() {
             resizeObserver.disconnect();
             window.removeEventListener("resize", updateHeight);
         };
-    }, [treeContainerRef, setContainerHeight]);
+    }, [treeContainerRef]);
 
     return null;
 }

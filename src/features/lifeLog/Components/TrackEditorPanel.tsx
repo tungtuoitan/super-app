@@ -24,7 +24,7 @@ export function TrackEditorPanel({ tab }: TrackEditorPanelProps) {
                     : t
             )
         );
-    }, [tab.data, tab.id, setOpenTabs]);
+    }, [tab.data, tab.id]);
 
     return (
         <div className="flex-1 flex flex-col bg-editor-bg overflow-hidden">

@@ -182,7 +182,7 @@ export function KTestRecordSession({ knowledgeId, testId, questions, onComplete,
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [advance, isSubmitting, result]);
+    }, [isSubmitting, result]);
 
     // Touch: swipe left → advance
     const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };

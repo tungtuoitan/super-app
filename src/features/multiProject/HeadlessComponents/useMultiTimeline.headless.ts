@@ -92,5 +92,5 @@ export function useMultiTimelineHeadless() {
     // Effect 5: Recheck today visibility on dayWidth change
     useEffect(() => {
         checkTodayVisibility();
-    }, [checkTodayVisibility, dayWidth]);
+    }, [ dayWidth]);
 }

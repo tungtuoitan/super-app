@@ -32,12 +32,12 @@ export function ProjectEditorPanelHeadless() {
             setGridProjectId(project.id);
             setCurrentProject(project);
         }
-    }, [activeTab?.id, project?.id, setProjectId, setTabId, setGridProjectId, setCurrentProject]);
+    }, [activeTab?.id, project?.id]);
 
     // Sync projects list to GridControlStore when projects load/change
     useEffect(() => {
         setGridProjects(projects);
-    }, [projects, setGridProjects]);
+    }, [projects]);
 
     // Effect 2: Sync hasUnsavedChanges
     useEffect(() => {

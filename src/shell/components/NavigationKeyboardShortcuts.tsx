@@ -72,7 +72,7 @@ export const NavigationKeyboardShortcuts = () => {
         return () => {
             window.removeEventListener("keydown", handleKeyDown, { capture: true });
         };
-    }, [handleGoBack, handleGoForward, canGoBack, canGoForward]);
+    }, []);
 
     // This component doesn't render anything
     return null;

@@ -23,7 +23,7 @@ export function useTaskDetailHeadless() {
 
     useEffect(() => {
         loadProjectOptions();
-    }, [loadProjectOptions]);
+    }, []);
 
     useEffect(() => {
         if (selectedTask?.projectId && selectedTask.projectId > 0) {
@@ -31,19 +31,19 @@ export function useTaskDetailHeadless() {
         } else {
             setParentTaskOptions([]);
         }
-    }, [selectedTask?.projectId, selectedTask?.id, loadParentTaskOptions, setParentTaskOptions]);
+    }, [selectedTask?.projectId, selectedTask?.id]);
 
     useEffect(() => {
         if (selectedTask?.id && selectedTask.id > 0) {
             loadLinkedKeywords(selectedTask.id);
         }
-    }, [selectedTask?.id, loadLinkedKeywords]);
+    }, [selectedTask?.id]);
 
     useEffect(() => {
         if (selectedTask?.id && selectedTask.id > 0 && selectedTask.folderWorkspaceItemId && currentProject?.workspaceId) {
             loadFolderItems(selectedTask, currentProject.workspaceId);
         }
-    }, [selectedTask?.id, selectedTask?.folderWorkspaceItemId, currentProject?.workspaceId, loadFolderItems]);
+    }, [selectedTask?.id, selectedTask?.folderWorkspaceItemId, currentProject?.workspaceId]);
 
     // Sync hasUnsavedChanges for editor tab.
     // Excludes section fields (note, checklistJson, processJson, customTabsJson)
@@ -66,7 +66,7 @@ export function useTaskDetailHeadless() {
                 return { ...t, hasUnsavedChanges: hasChanges };
             }),
         );
-    }, [tab?.id, tab?.data, setOpenTabs]);
+    }, [tab?.id, tab?.data]);
 
     useEffect(() => {
         if (!tab || !taskDetailContentRef?.current) return;

@@ -108,7 +108,7 @@ export function KKnowledgeEditorPanel() {
                     : t,
             ),
         );
-    }, [tab?.data, tab?.id, setOpenTabs]);
+    }, [tab?.data, tab?.id]);
 
     // pendingQuizTabSwitch set by tree node click → reload tests filtered by that node
     useEffect(() => {

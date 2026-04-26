@@ -22,7 +22,7 @@ export function LogList() {
 
     useEffect(() => {
         loadLogs();
-    }, [loadLogs]);
+    }, []);
 
     const handleAddLog = () => {
         openNewLogTab();
@@ -41,7 +41,7 @@ export function LogList() {
 
     useEffect(() => {
         loadTracks();
-    }, [loadTracks]);
+    }, []);
 
     const handleAddTrack = () => {
         openNewTrackTab();

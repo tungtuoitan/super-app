@@ -14,7 +14,7 @@ export function useTaskChecklistHeadless() {
             discard: handleChecklistCancelEdit,
         };
         return () => { delete builtinSectionHandlersRef.current.checklist; };
-    }, [handleChecklistSaveEdit, handleChecklistCancelEdit, builtinSectionHandlersRef]);
+    }, [builtinSectionHandlersRef]);
 
     useEffect(() => {
         if (!isExpanded) return;
@@ -30,5 +30,5 @@ export function useTaskChecklistHeadless() {
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
-    }, [isExpanded, barRef, popupRef, setIsExpanded, setIsEditing, setEditErrors]);
+    }, [isExpanded, barRef, popupRef]);
 }

@@ -366,7 +366,7 @@ export default function WikiGraphView() {
         };
         animRef.current = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(animRef.current);
-    }, [draw]);
+    }, []);
 
     // ── Coord helpers ─────────────────────────────────────────────────────────
     const c2w = (cx: number, cy: number) => ({

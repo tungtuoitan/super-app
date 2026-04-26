@@ -66,5 +66,5 @@ export function useTaskTimelineHeadless() {
 
     useEffect(() => {
         checkTodayVisibility();
-    }, [checkTodayVisibility, dayWidth]);
+    }, [dayWidth]);
 }

@@ -96,7 +96,7 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
-    }, [isEditing, showUnsavedPrompt, id, isTempNode, question.question, question.answer, handleRenameCancel]);
+    }, [isEditing, showUnsavedPrompt, id, isTempNode, question.question, question.answer]);
 
     // Context menu outside-click
     useEffect(() => {

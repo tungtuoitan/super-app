@@ -375,7 +375,7 @@ export function RichTextEditor({
         return () => {
             editorElement.removeEventListener("paste", handlePaste);
         };
-    }, [editor, handleImageUpload]);
+    }, [editor]);
 
     // Handle drop event for files
     useEffect(() => {
@@ -398,7 +398,7 @@ export function RichTextEditor({
         return () => {
             editorElement.removeEventListener("drop", handleDrop);
         };
-    }, [editor, handleFileUpload]);
+    }, [editor]);
 
     // Sync content when value changes externally
     // Compare cleaned versions to avoid overwriting blob URLs with empty src
