@@ -65,20 +65,11 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         selectedEdgeIds.forEach((id) => handleEdgeDelete(id));
         return true;
     });
-    useGlobalShortcut("backspace", { id: "kflow-backspace-edge", priority: 65, enabled: selectedEdgeIds.length > 0 }, () => {
-        selectedEdgeIds.forEach((id) => handleEdgeDelete(id));
-        return true;
-    });
-
     // Delete selected nodes (only when no edges are selected)
     const selectedNodeIds = flowNodes
         .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as QuestionFlowNodeData).question.deletedAt)
         .map((n) => parseInt(n.id, 10));
     useGlobalShortcut("delete", { id: "kflow-delete-nodes", priority: 60, enabled: selectedNodeIds.length > 0 && selectedEdgeIds.length === 0 }, () => {
-        selectedNodeIds.forEach((id) => handleDeleteQuestion(id));
-        return true;
-    });
-    useGlobalShortcut("backspace", { id: "kflow-backspace-nodes", priority: 60, enabled: selectedNodeIds.length > 0 && selectedEdgeIds.length === 0 }, () => {
         selectedNodeIds.forEach((id) => handleDeleteQuestion(id));
         return true;
     });
