@@ -1,10 +1,10 @@
-import { wsService, WsDTO } from "@/features/ws/service/ws.service";
-import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
+import { wsService, WsDTO } from "@/features/workspace/service/ws.service";
+import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
 import { useSnackbar } from "notistack";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useWsStore } from "@/features/ws/store/useWs.store";
+import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/shell/types/tab.types";
 import { useAuthStore } from "@/shell/store/Auth.store";

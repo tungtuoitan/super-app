@@ -13,9 +13,9 @@ import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 
 // Feature save actions
 import { useNoteSaveActions } from "@/features/note/hooks/useNoteSaveActions";
-import { useWsSaveActions } from "@/features/ws/hooks/useWsSaveActions";
 import { useProjectSaveActions } from "@/features/project/hooks/useProjectSaveActions";
 import { useLifeLogSaveActions } from "@/features/lifeLog/hooks/useLifeLogSaveActions";
+import {useWsSaveActions} from "@/features/workspace/hooks/ws/useWsSaveActions";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();

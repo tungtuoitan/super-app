@@ -12,8 +12,8 @@ import { kModule } from "@/features/K/shell/k.module";
 import { projectModule } from "@/features/project/shell/project.module";
 import { lifeLogModule } from "@/features/lifeLog/shell/lifeLog.module";
 import { noteModule } from "@/features/note/shell/note.module";
-import { wsModule } from "@/features/ws/shell/ws.module";
 import { wikiModule } from "@/features/Wiki/shell/wiki.module";
+import {wsModule} from "@/features/workspace/shell/ws.module";
 
 // Registration order = ActivityBar display order
 moduleRegistry.register(workspaceModule);

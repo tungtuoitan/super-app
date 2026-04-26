@@ -1,7 +1,7 @@
 
 import { useSnackbar } from "notistack";
-import { useWsStore } from "@/features/ws/store/useWs.store";
-import { wsService } from "@/features/ws/service/ws.service";
+import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
+import { wsService } from "@/features/workspace/service/ws.service";
 import { useWsGridHelper } from "./useWsGrid.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";

@@ -13,8 +13,8 @@ import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
-import { useWsTabHelper } from "@/features/ws/hooks/useWsTab.helper";
 import { constants } from "@/utils/constants";
+import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection

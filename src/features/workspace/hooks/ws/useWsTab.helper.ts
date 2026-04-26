@@ -8,8 +8,8 @@ import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
-import { useWsStore } from "@/features/ws/store/useWs.store";
+import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
+import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
 
 export const useWsTabHelper = () => {

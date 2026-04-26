@@ -5,7 +5,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { WorkspaceProviders } from "@/features/workspace/store/WorkspaceProviders";
 import { KProviders } from "@/features/K/store/KProviders";
 import { NoteProviders } from "@/features/note/store/NoteProviders";
-import { WsProviders } from "@/features/ws/store/WsProviders";
+import { WsProviders } from "@/features/workspace/store/ws/WsProviders";
 import { ProjectProviders } from "@/features/project/store/ProjectProviders";
 import { TaskProvider } from "@/features/task/store/useTask.store";
 import { MultiTimelineProvider } from "@/features/multiProject/store/useMultiTimeline.store";

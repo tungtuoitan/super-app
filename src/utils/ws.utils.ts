@@ -4,7 +4,7 @@
  */
 
 import { Ws } from "@/types/workspace.types";
-import { WsDTO } from "@/features/ws/service/ws.service";
+import { WsDTO } from "@/features/workspace/service/ws.service";
 
 /**
  * Transform WsDTO from API to Ws domain model
