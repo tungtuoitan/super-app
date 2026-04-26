@@ -6,8 +6,6 @@ import { VSCodeLayout } from "@/shell/components";
 import { AuthCallback } from "@/shell/components/AuthCallback";
 import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
-import { NavigationKeyboardShortcuts } from "@/shell/components/NavigationKeyboardShortcuts";
-import { DebugPanel } from "@/shell/components/DebugPanel";
 import {useMobileStore} from "@/store/Mobile.store";
 
 /**

@@ -18,7 +18,7 @@ import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/shell/components/ConfirmationPopoverContainer";
 import MainNav from "./components/main/MainNav";
-import { GeneralProvider, CommandPaletteProvider, ConsoleProvider, ActivityBarProvider, AuthCallbackProvider, NavigationHistoryProvider } from "@/store/index";
+import { GeneralProvider, CommandPaletteProvider, ConsoleProvider, ActivityBarProvider, AuthCallbackProvider } from "@/store/index";
 import { NavProvider } from "@/contexts/NavigationContext";
 import { AuthGuard } from "@/shell/auth/AuthGuard";
 import { OrchestratorContextMenuStoreProvider } from "@/store/ContextMenu.store";
@@ -51,7 +51,6 @@ export function Main() {
                                     <SnackbarProvider autoHideDuration={3000}>
                                         <DndProvider backend={HTML5Backend}>
                                             <AuthStoreProvider>
-                                                <NavigationHistoryProvider>
                                                     <GeneralProvider>
                                                         <CommandPaletteProvider>
                                                             <OrchestratorContextMenuStoreProvider>
@@ -92,7 +91,6 @@ export function Main() {
                                                             </OrchestratorContextMenuStoreProvider>
                                                         </CommandPaletteProvider>
                                                     </GeneralProvider>
-                                                </NavigationHistoryProvider>
                                             </AuthStoreProvider>
                                         </DndProvider>
                                     </SnackbarProvider>

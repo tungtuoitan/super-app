@@ -4,9 +4,7 @@ import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { BaseTab, TabType } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
-import { useNavigationHistoryStore, HistoryEntry } from "@/shell/store/NavigationHistory.store";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
@@ -26,7 +24,6 @@ import type { Task } from "@/features/task/store/useTask.store";
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabsStore();
     const { setNotes } = useNoteGridStore();
-    const { past, present, setPast, setPresent, future, setFuture } = useNavigationHistoryStore();
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useGridControlStore();
     const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
@@ -558,34 +555,6 @@ export const useEditorTabHelper = () => {
         }
     };
 
-    /**
-     * Check if two history entries are duplicates (adjacent items that are "same")
-     */
-    const $areEntriesDuplicate = (entry1: HistoryEntry, entry2: HistoryEntry): boolean => {
-        // Same item and same type
-        return entry1.itemId === entry2.itemId && entry1.type === entry2.type;
-    };
-
-    /**
-     * Remove duplicate adjacent entries from history array
-     */
-    const removeDuplicateAdjacentEntries = (entries: HistoryEntry[]): HistoryEntry[] => {
-        if (entries.length === 0) return entries;
-
-        const result: HistoryEntry[] = [entries[0]];
-
-        for (let i = 1; i < entries.length; i++) {
-            const prev = result[result.length - 1];
-            const current = entries[i];
-
-            // Only add if not duplicate of previous
-            if (!$areEntriesDuplicate(prev, current)) {
-                result.push(current);
-            }
-        }
-
-        return result;
-    };
 
     /**
      * Process tabs and navigation history after deleting notes
@@ -603,40 +572,6 @@ export const useEditorTabHelper = () => {
             return !(tab.type === type && deletedIds.includes((tab.data as { id: number }).id));
         });
         setOpenTabs(newTabs);
-
-        // 2. Clean navigation history - remove entries with deleted noteIds
-        let cleanedPast = past.filter((entry) => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
-        let cleanedFuture = future.filter((entry) => !(entry.type === type && deletedIds.includes(parseInt(entry.itemId))));
-
-        // 3. Remove duplicate adjacent entries and filter out invalid itemIds (id <= 0)
-        cleanedPast = removeDuplicateAdjacentEntries(cleanedPast).filter((entry) => {
-            const itemIdNum = parseInt(entry.itemId);
-            return !isNaN(itemIdNum) && itemIdNum > 0;
-        });
-        cleanedFuture = removeDuplicateAdjacentEntries(cleanedFuture).filter((entry) => {
-            const itemIdNum = parseInt(entry.itemId);
-            return !isNaN(itemIdNum) && itemIdNum > 0;
-        });
-
-        setPast(cleanedPast);
-        setFuture(cleanedFuture);
-
-        // 4. If present was deleted, set present to last item of past
-        if (present && present.type === type && deletedIds.includes(parseInt(present.itemId))) {
-            if (cleanedPast.length > 0) {
-                // Set present to last item of past
-                const newPresent = cleanedPast[cleanedPast.length - 1];
-                setPresent(newPresent);
-                setPast(cleanedPast.slice(0, -1)); // Remove last item from past
-
-                // Set activeTabId to the new present's tab
-                setNewTabAnd(`note-${newPresent.itemId}-${Date.now()}`);
-            } else {
-                // No past entries, clear present and active tab
-                setPresent(null);
-                setNewTabAnd(null);
-            }
-        }
     };
 
     return {

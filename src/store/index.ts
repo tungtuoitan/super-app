@@ -20,9 +20,6 @@ export type { AuthCallbackContextData } from "./AuthCallback.store";
 
 export { GeneralStore, GeneralProvider, useGeneralStore } from "./General.store";
 
-export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "../shell/store/NavigationHistory.store";
-export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "../shell/store/NavigationHistory.store";
-
 export { CommandPaletteStore, CommandPaletteProvider, useCommandPaletteStore } from "./useCommandPalette.store";
 export type { CommandPaletteContextData } from "./useCommandPalette.store";
 

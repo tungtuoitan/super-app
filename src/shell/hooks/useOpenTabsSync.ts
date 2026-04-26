@@ -13,7 +13,6 @@ import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/ws/store/useWs.store";
 import { useProjectStore, Project } from "@/features/project/store/useProject.store";
 import { useTaskStore, Task } from "@/features/task/store/useTask.store";
-import { useNavigationHistoryStore } from "@/shell/store/NavigationHistory.store";
 import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
 import { Note, NoteDTO } from "@/features/note/types/note.types";
@@ -92,7 +91,6 @@ export const useOpenTabSync = () => {
     const { workspaces } = useWsStore();
     const { projects } = useProjectStore();
     const { tasks } = useTaskStore();
-    const { present } = useNavigationHistoryStore();
     const { setNewTabAnd } = useEditorTabHelper();
 
     // Load tabs from localStorage on mount or userId change
@@ -348,37 +346,7 @@ export const useOpenTabSync = () => {
 
                 // Set restored tabs
                 setOpenTabs(restoredTabs);
-
-                // Set active tab based on Present in navigation history
-                if (present) {
-                    // HistoryEntry tracks different types, so match by type and itemId
-                    const matchingTab = restoredTabs.find((tab) => {
-                        if (tab.type === constants.vscode.tab.tabTypes.note && present.type === 'note') {
-                            return (tab.data as Note).id === parseInt(present.itemId);
-                        } else if (tab.type === constants.vscode.tab.tabTypes.workspace && present.type === 'workspace') {
-                            return (tab.data as Ws).id === parseInt(present.itemId);
-                        } else if (tab.type === constants.vscode.tab.tabTypes.project && present.type === 'project') {
-                            return (tab.data as Project).id === parseInt(present.itemId);
-                        } else if (tab.type === constants.vscode.tab.tabTypes.task && present.type === 'task') {
-                            return (tab.data as Task).id === parseInt(present.itemId);
-                        } else if (tab.type === constants.vscode.tab.tabTypes.multiProject && present.type === 'multiProject') {
-                            // For multiProject, compare project IDs
-                            const tabData = tab.data as MultiProjectTabData;
-                            return tabData.projectIds.join(',') === present.itemId;
-                        }
-                        return false;
-                    });
-
-                    if (matchingTab) {
-                        setNewTabAnd(matchingTab.id);
-                    } else if (restoredTabs.length > 0) {
-                        // Fallback to last tab
-                        setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
-                    }
-                } else if (restoredTabs.length > 0) {
-                    // No history, just activate last tab
-                    setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
-                }
+                setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
             } catch (error) {
                 console.error("Failed to restore tabs from localStorage:", error);
                 setOpenTabs([]);

@@ -9,7 +9,7 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useAuthStore } from "@/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useEditorTabsStore, useNavigationHistoryStore, useGeneralStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
 import { useGridControlStore } from "@/store/useGridControl.store";

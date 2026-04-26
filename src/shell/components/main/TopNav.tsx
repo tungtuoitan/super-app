@@ -1,7 +1,6 @@
 import { MouseEvent, useEffect, useState } from "react";
 import { constants } from "@/utils/constants";
 import { envConfig } from "@/utils/config/env.config";
-import { useNavigationHistoryStore } from "@/shell/store/NavigationHistory.store";
 import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
 import { useMobileStore } from "@/store/Mobile.store";
 import { CommandPalette } from "@/shared/components/CommandPalette";
@@ -112,75 +111,5 @@ export function TopNav() {
                 </nav>
             </div>
         </>
-    );
-}
-
-export function DevDetail() {
-    const show = envConfig.REACT_APP_ENVIRONMENT !== constants.environments.production;
-    const { past, present, future } = useNavigationHistoryStore();
-    if (!show) return null;
-
-    return (
-        <div className="flex items-center gap-1 overflow-x-auto">
-            <span className="text-xs text-gray-400 mr-2">History:</span>
-
-            {/* Past entries */}
-            {past.map((entry, index) => (
-                <div
-                    key={`past-${entry.type}-${entry.itemId}-${entry.timestamp}`}
-                    className="px-2 py-0.5 text-xs rounded bg-gray-600 text-gray-400 flex flex-col items-center"
-                    title={`PAST - Type: ${entry.type}, Item: ${entry.itemId}, Time: ${new Date(entry.timestamp).toLocaleTimeString()}
-Scroll: ${entry.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
-Field: ${entry.focusedFieldId || "none"}`}
-                >
-                    <div>
-                        {entry.type}#{entry.itemId}
-                    </div>
-                    <div className="text-[10px] opacity-75">
-                        {entry.scrollPositions && entry.scrollPositions.length > 0 && `S${entry.scrollPositions.length}`}
-                        {entry.focusedFieldId && ` F:${entry.focusedFieldId}`}
-                    </div>
-                </div>
-            ))}
-
-            {/* Present entry */}
-            {present && (
-                <div
-                    className="px-2 py-0.5 text-xs rounded bg-blue-600 text-white font-bold flex flex-col items-center"
-                    title={`PRESENT - Type: ${present.type}, Item: ${present.itemId}, Time: ${new Date(present.timestamp).toLocaleTimeString()}
-Scroll: ${present.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
-Field: ${present.focusedFieldId || "none"}`}
-                >
-                    <div>
-                        {present.type}#{present.itemId} ←
-                    </div>
-                    <div className="text-[10px] opacity-90">
-                        {present.scrollPositions && present.scrollPositions.length > 0 && `S${present.scrollPositions.length}`}
-                        {present.focusedFieldId && ` F:${present.focusedFieldId}`}
-                    </div>
-                </div>
-            )}
-
-            {/* Future entries */}
-            {future.map((entry, index) => (
-                <div
-                    key={`future-${entry.type}-${entry.itemId}-${entry.timestamp}`}
-                    className="px-2 py-0.5 text-xs rounded bg-gray-500 text-gray-500 flex flex-col items-center"
-                    title={`FUTURE - Type: ${entry.type}, Item: ${entry.itemId}, Time: ${new Date(entry.timestamp).toLocaleTimeString()}
-Scroll: ${entry.scrollPositions?.map((s) => `${s.elementId}(${s.scrollTop},${s.scrollLeft})`).join(", ") || "none"}
-Field: ${entry.focusedFieldId || "none"}`}
-                >
-                    <div>
-                        {entry.type}#{entry.itemId}
-                    </div>
-                    <div className="text-[10px] opacity-75">
-                        {entry.scrollPositions && entry.scrollPositions.length > 0 && `S${entry.scrollPositions.length}`}
-                        {entry.focusedFieldId && ` F:${entry.focusedFieldId}`}
-                    </div>
-                </div>
-            ))}
-
-            {!present && past.length === 0 && future.length === 0 && <span className="text-xs text-gray-500 italic">Empty</span>}
-        </div>
     );
 }
