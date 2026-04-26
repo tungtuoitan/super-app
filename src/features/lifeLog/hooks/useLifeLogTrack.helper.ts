@@ -5,7 +5,7 @@
 
 
 import { lifeLogService } from "../service/lifeLog.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";

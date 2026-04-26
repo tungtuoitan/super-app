@@ -13,7 +13,7 @@ import { constants } from "@/utils/constants";
 import type { ItemType } from "../../store/FolderDialog.store";
 import { Folder } from "@/types/folder.types";
 import { workspaceService } from "../../service/workspace.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";

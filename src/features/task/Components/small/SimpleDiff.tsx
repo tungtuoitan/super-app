@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fileService } from "@/services/file.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import type { SimpleDiffProps, ImageInfo, DiffLine, InlineSegment } from "../../types/taskComment.types";
 import { htmlToPlainText, computeImageDiff, computeDiff } from "../../utils/simpleDiff.utils";
 

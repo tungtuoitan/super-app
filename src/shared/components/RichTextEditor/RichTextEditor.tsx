@@ -32,7 +32,7 @@ import {
     Code2,
 } from "lucide-react";
 import { fileService, UploadContext } from "@/services/file.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";

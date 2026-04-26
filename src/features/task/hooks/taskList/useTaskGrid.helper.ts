@@ -7,7 +7,7 @@ import { useGridControlStore } from "@/store/useGridControl.store";
 import { taskService, TaskDTO } from "../../service/task.service";
 import { Task, useTaskStore } from "../../store/useTask.store";
 import { generateTempId } from "@/utils/index";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";

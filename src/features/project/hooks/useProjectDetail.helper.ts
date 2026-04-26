@@ -5,7 +5,7 @@
 
 import { Project, useProjectStore } from "../store/useProject.store";
 import { projectService, ProjectDTO } from "../service/project.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";

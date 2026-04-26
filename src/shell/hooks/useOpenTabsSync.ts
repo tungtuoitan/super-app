@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 import { useEditorTabsStore } from "@/store/index";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/ws/store/useWs.store";
 import { useProjectStore, Project } from "@/features/project/store/useProject.store";

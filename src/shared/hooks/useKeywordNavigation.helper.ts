@@ -3,7 +3,7 @@
  */
 
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
 import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";

@@ -10,7 +10,7 @@ import { useWorkspaceLoader } from "../hooks/useWorkspace.loader";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useWsTabHelper } from "@/features/ws/hooks/useWsTab.helper";

@@ -23,7 +23,7 @@ import { constants } from "@/utils/constants";
 import { ExternalLink, ChevronDown, ChevronRight, Circle, CheckSquare2, Square } from "lucide-react";
 import { useTaskGridStore } from "@/features/task/store/useTaskGrid.store";
 import { taskService } from "@/features/task/service/task.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
 

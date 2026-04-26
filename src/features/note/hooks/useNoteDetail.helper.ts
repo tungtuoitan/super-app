@@ -11,7 +11,7 @@ import { constants } from "@/utils/constants";
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { extractExternalLinks } from "@/utils/markdown.utils";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";

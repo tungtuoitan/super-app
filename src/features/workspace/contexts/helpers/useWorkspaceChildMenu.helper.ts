@@ -8,7 +8,7 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { constants } from "@/utils/constants";
 import { noteService } from "@/features/note/service/note.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";

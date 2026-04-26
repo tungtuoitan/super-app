@@ -4,7 +4,7 @@ import type { Note } from "@/features/note/types/note.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabsStore } from "@/store/index";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";

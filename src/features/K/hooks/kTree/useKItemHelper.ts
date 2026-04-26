@@ -1,7 +1,7 @@
 
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/index";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";

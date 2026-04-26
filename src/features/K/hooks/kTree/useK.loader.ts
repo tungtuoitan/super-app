@@ -12,7 +12,7 @@
  */
 
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
-import {useAuthStore} from "@/store/Auth.store";
+import {useAuthStore} from "@/shell/store/Auth.store";
 import {useKMovingTreeStore} from "../../store/KMovingTree.store";
 import {KService} from "../../service/K.service";
 import {useKStore} from "../../store/K.store";

@@ -5,7 +5,7 @@
  */
 
 import { useRef, useEffect } from "react";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useProjectStore, type Project } from "../store/useProject.store";
 import { useTaskStore, type Task } from "@/features/task/store/useTask.store";

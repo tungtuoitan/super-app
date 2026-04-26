@@ -7,7 +7,7 @@ import { useKStore } from "../../store/K.store";
 import { useKNodeDialogHelper } from "../useKNodeDialog.helper";
 import { KService } from "../../service/K.service";
 import { KItemAction } from "../../types/K.types";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { KItemV2 } from "../../types/K-v2.types";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";

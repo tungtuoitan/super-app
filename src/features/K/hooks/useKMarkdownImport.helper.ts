@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { KService } from "../service/K.service";
 import { KTestService } from "../service/kTest.service";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";

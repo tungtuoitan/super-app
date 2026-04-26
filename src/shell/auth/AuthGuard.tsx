@@ -10,8 +10,8 @@
  */
 
 import { useEffect } from "react";
-import { useAuthStore } from "@/store/Auth.store";
-import { useActivityBarStore } from "@/store/ActivityBar.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
+import { useActivityBarStore } from "@/shell/store/ActivityBar.store";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
 import { configureApiClient } from "@/services/apiClient";

@@ -6,7 +6,7 @@
 import { projectService, ProjectDTO } from "../service/project.service";
 import { Project, useProjectStore } from "../store/useProject.store";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";

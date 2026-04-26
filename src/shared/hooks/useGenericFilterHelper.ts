@@ -4,7 +4,7 @@
  * Pattern: Separate business logic from component
  */
 
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { constants } from "@/utils/constants";

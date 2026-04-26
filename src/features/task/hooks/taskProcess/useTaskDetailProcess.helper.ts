@@ -10,7 +10,7 @@
 import { useEffect, useRef } from "react";
 import { Task, useTaskStore } from "../../store/useTask.store";
 import { taskService } from "../../service/task.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
 import { ChecklistJSON } from "../../types/checklist.types";

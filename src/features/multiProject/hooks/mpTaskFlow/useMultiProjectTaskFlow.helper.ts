@@ -13,7 +13,7 @@ import type { NodeChange, EdgeChange, Connection, Edge } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { flowService } from "@/features/multiProject/service/flow.service";
 import { taskService } from "@/features/task/service/task.service";

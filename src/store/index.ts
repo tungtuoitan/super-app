@@ -3,8 +3,8 @@
  * Central export point for all application stores
  */
 
-export { AuthStore, AuthStoreProvider, useAuthStore } from "./Auth.store";
-export type { AuthStoreData, User } from "./Auth.store";
+export { AuthStore, AuthStoreProvider, useAuthStore } from "../shell/store/Auth.store";
+export type { AuthStoreData, User } from "../shell/store/Auth.store";
 
 
 export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "../shell/store/EditorTab.store";
@@ -12,11 +12,11 @@ export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "../shell/
 export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./HashtagUI.store";
 export type { HashtagUIStoreData } from "./HashtagUI.store";
 
-export { ActivityBarProvider, useActivityBarStore } from "./ActivityBar.store";
-export type { ActivityBarContextData } from "./ActivityBar.store";
+export { ActivityBarProvider, useActivityBarStore } from "../shell/store/ActivityBar.store";
+export type { ActivityBarContextData } from "../shell/store/ActivityBar.store";
 
-export { AuthCallbackProvider, useAuthCallbackStore } from "./AuthCallback.store";
-export type { AuthCallbackContextData } from "./AuthCallback.store";
+export { AuthCallbackProvider, useAuthCallbackStore } from "../shell/store/AuthCallback.store";
+export type { AuthCallbackContextData } from "../shell/store/AuthCallback.store";
 
 export { GeneralStore, GeneralProvider, useGeneralStore } from "./General.store";
 

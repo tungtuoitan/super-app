@@ -6,7 +6,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/Button";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
 import { initiateGoogleLogin } from "@/utils/googleOAuth";
 import { Chrome, LogOut, User } from "lucide-react";

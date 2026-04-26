@@ -7,7 +7,7 @@ import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import { BaseTab } from "@/types/editor/tab.types";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";

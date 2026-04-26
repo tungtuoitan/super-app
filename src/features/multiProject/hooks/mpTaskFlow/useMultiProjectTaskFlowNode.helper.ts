@@ -8,7 +8,7 @@ import type { Node } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
 import { useTaskGridStore } from "@/features/task/store/useTask.store";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/task/service/task.service";
 import type { TaskDTO } from "@/features/task/service/task.service";

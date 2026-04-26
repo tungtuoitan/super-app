@@ -5,7 +5,7 @@
  */
 
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";

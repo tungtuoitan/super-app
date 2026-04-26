@@ -1,5 +1,5 @@
 import { useKStore } from "../store/K.store";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";

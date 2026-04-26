@@ -8,7 +8,7 @@ import React from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { TaskDTO, taskService } from "../service/task.service";
 import { projectService } from "@/features/project/service/project.service";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useGeneralStore } from "@/store/General.store";
 import { BaseTab } from "@/types/editor/tab.types";

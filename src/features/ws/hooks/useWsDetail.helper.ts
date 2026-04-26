@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import { useWsStore } from "@/features/ws/store/useWs.store";
 import { wsService } from "@/features/ws/service/ws.service";
 import { useWsGridHelper } from "./useWsGrid.helper";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";

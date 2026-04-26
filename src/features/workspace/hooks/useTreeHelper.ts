@@ -14,7 +14,7 @@ import type { MoveItemsRequest } from "../types/workspace.types";
 import { WorkspaceItemAction } from "../types/workspace.types";
 import { Folder } from "@/types/index";
 import { useSnackbar } from "notistack";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import {SPECIAL_IDS} from "@/utils/temp-id.utils";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";

@@ -11,7 +11,7 @@ import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector";
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
-import { useAuthStore } from "@/store/Auth.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { taskService } from "../../service/task.service";

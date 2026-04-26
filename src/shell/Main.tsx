@@ -3,7 +3,7 @@ import { SnackbarProvider } from "notistack";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { AuthStoreProvider } from "@/store/Auth.store";
+import { AuthStoreProvider } from "@/shell/store/Auth.store";
 import { WorkspaceProviders } from "@/features/workspace/store/WorkspaceProviders";
 import { KProviders } from "@/features/K/store/KProviders";
 import { NoteProviders } from "@/features/note/store/NoteProviders";
@@ -13,7 +13,7 @@ import { TaskProvider } from "@/features/task/store/useTask.store";
 import { MultiTimelineProvider } from "@/features/multiProject/store/useMultiTimeline.store";
 import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import { WikiProvider } from "@/features/Wiki/store/useWiki.store";
-import { EditorProviders } from "@/shell/store/EditorProviders";
+import { ShellProviders } from "@/shell/store/ShellProviders";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/shell/components/ConfirmationPopoverContainer";
@@ -68,13 +68,13 @@ export function Main() {
                                                                                                     <LifeLogProvider>
                                                                                                         <WikiProvider>
                                                                                                             <NoteProviders>
-                                                                                                                <EditorProviders>
+                                                                                                                <ShellProviders>
                                                                                                                     <CurrentProjectProvider>
                                                                                                                         <OrchestratorContextMenu>
                                                                                                                             <MainNav />
                                                                                                                         </OrchestratorContextMenu>
                                                                                                                     </CurrentProjectProvider>
-                                                                                                                </EditorProviders>
+                                                                                                                </ShellProviders>
                                                                                                             </NoteProviders>
                                                                                                         </WikiProvider>
                                                                                                     </LifeLogProvider>
