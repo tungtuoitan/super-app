@@ -14,16 +14,13 @@ import { KRetentionBadge } from "./small/KRetentionBadge";
 import { KTestStore, useKTestStoreValues } from "../store/useKTest.store";
 import { KTestService } from "../service/kTest.service";
 import { useKStore } from "../store/K.store";
-import type { BaseTab } from "@/types/editor/tab.types";
 import type { KWsResponse } from "../types/K.types";
 import type { KTestDetail as KTestDetailType, KDailySessionQuestion } from "../types/kTest.type";
 import type { KItemV2 } from "../types/K-v2.types";
 import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
 import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
+import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
 
-interface KKnowledgeEditorPanelProps {
-    tab: BaseTab;
-}
 
 type SessionState = {
     knowledgeId: number;
@@ -46,16 +43,18 @@ const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
     { id: "dailyReview", label: "DAILY", icon: <CalendarClock className="h-4 w-4" /> },
 ];
 
-export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
-    const { setOpenTabs } = useEditorTabsStore();
-    const knowledge = tab.data as unknown as KWsResponse;
+export function KKnowledgeEditorPanel() {
+    const { setOpenTabs, activeTabId } = useEditorTabsStore();
+    const { getActiveTab } = useEditorTabHelper()
+    const tab = getActiveTab(activeTabId ?? undefined)
+    const knowledge = tab?.data as unknown as KWsResponse;
     const isNew     = knowledge.id < 0;
     const isMobile  = useIsMobile();
     const kTestStoreValues = useKTestStoreValues();
     const { currentK, pendingImportNodeId, setPendingImportNodeId, pendingQuizTabSwitch, setPendingQuizTabSwitch, allK } = useKStore();
 
     const [activeTab, setActiveTabLocal]           = useState<KTab>(() => {
-        const saved = tab.metadata?.activeKTab as KTab | undefined;
+        const saved = tab?.metadata?.activeKTab as KTab | undefined;
         return saved ?? (isNew ? "general" : "questionFlow");
     });
     const [session, setSession]                   = useState<SessionState>(null);
@@ -77,12 +76,12 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
             .catch(() => {});
     }, [knowledge.id, isNew]);
 
-    // Persist activeTab to tab.metadata so it survives unmount/remount
+    // Persist activeTab to tab?.metadata so it survives unmount/remount
     const setActiveTab = (t: KTab) => {
         setActiveTabLocal(t);
         setOpenTabs((prev) =>
             prev.map((tab2) =>
-                tab2.id === tab.id ? { ...tab2, metadata: { ...tab2.metadata, activeKTab: t } } : tab2
+                tab2.id === tab?.id ? { ...tab2, metadata: { ...tab2.metadata, activeKTab: t } } : tab2
             ),
         );
     };
@@ -95,7 +94,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
         setActiveTabLocal(defaultTab);
         setOpenTabs((prev) =>
             prev.map((t) =>
-                t.id === tab.id ? { ...t, metadata: { ...t.metadata, activeKTab: defaultTab } } : t
+                t.id === tab?.id ? { ...t, metadata: { ...t.metadata, activeKTab: defaultTab } } : t
             ),
         );
     }, [knowledge.id]);
@@ -104,12 +103,12 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
     useEffect(() => {
         setOpenTabs((prev) =>
             prev.map((t) =>
-                t.id === tab.id
+                t.id === tab?.id
                     ? { ...t, hasUnsavedChanges: JSON.stringify(t.data) !== JSON.stringify(t.data0) }
                     : t,
             ),
         );
-    }, [tab.data, tab.id, setOpenTabs]);
+    }, [tab?.data, tab?.id, setOpenTabs]);
 
     // pendingQuizTabSwitch set by tree node click → reload tests filtered by that node
     useEffect(() => {
@@ -134,6 +133,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
         setIsImportOpen(true);
         setPendingImportNodeId(undefined);
     }, [pendingImportNodeId]);
+    console.log('panel rendered');
 
     const handleStartQuickTest = useCallback((testDetail: KTestDetailType) => {
         const questions: KDailySessionQuestion[] = testDetail.questions.map(q => ({
@@ -167,7 +167,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
 
         switch (effectiveTab) {
             case "general":
-                return <KKnowledgeGeneral knowledgeId={knowledge.id} tabId={tab.id} />;
+                return <KKnowledgeGeneral knowledgeId={knowledge.id} tabId={tab?.id ?? ''} />;
             case "testList":
                 if (isNew) return null;
                 return (
@@ -218,7 +218,7 @@ export function KKnowledgeEditorPanel({ tab }: KKnowledgeEditorPanelProps) {
                                 const targetK = allK.find(k => k.id === targetKnowledgeId);
                                 if (targetK) {
                                     setOpenTabs(prev => prev.map(t =>
-                                        t.id === tab.id
+                                        t.id === tab?.id
                                             ? { ...t, data: targetK, data0: targetK, title: targetK.name || "Knowledge", hasUnsavedChanges: false }
                                             : t
                                     ));

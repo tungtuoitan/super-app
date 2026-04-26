@@ -27,9 +27,7 @@ function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: K
     const { tests, isLoadingTests, activeNodeId } = useKTestStore();
     const { loadTests, createEmptyTest } = useKTestLoader();
     const lastLoadKeyRef = useRef<string | null>(null);
-
     const selectedTestIdRef = useRef<number | null>(initialSelectedTestId ?? null);
-
     const [selectedTestId, setSelectedTestId] = useState<number | null>(initialSelectedTestId ?? null);
     const setSelected = (id: number | null) => { selectedTestIdRef.current = id; setSelectedTestId(id); };
     const [questions, setQuestions] = useState<KTestQuestion[]>([]);
@@ -65,6 +63,7 @@ function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: K
     useEffect(() => {
         if (initialSelectedTestId) setSelected(initialSelectedTestId);
     }, [initialSelectedTestId]);
+    console.log('KTestFlowContent rendered');
 
     useEffect(() => {
         if (isLoadingTests) return;
@@ -84,7 +83,7 @@ function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: K
     useEffect(() => {
         if (!selectedTestId) { setQuestions([]); return; }
         loadDetail(selectedTestId);
-    }, [selectedTestId, loadDetail]);
+    }, [selectedTestId]);
 
     useEffect(() => {
         if (!dropdownOpen) return;
@@ -102,16 +101,16 @@ function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: K
         }
     };
 
-    const handleCreateTest = async () => {
-        if (!newTestTitle.trim() || creating) return;
-        setCreating(true);
-        try {
-            const test = await createEmptyTest(knowledgeId, newTestTitle.trim(), activeNodeId ?? undefined);
-            setNewTestTitle("");
-            setCreatingTest(false);
-            if (test) setSelected((test as { id: number }).id);
-        } finally { setCreating(false); }
-    };
+    // const handleCreateTest = async () => {
+    //     if (!newTestTitle.trim() || creating) return;
+    //     setCreating(true);
+    //     try {
+    //         const test = await createEmptyTest(knowledgeId, newTestTitle.trim(), activeNodeId ?? undefined);
+    //         setNewTestTitle("");
+    //         setCreatingTest(false);
+    //         if (test) setSelected((test as { id: number }).id);
+    //     } finally { setCreating(false); }
+    // };
 
     const handleQuestionsChanged = () => {
         if (selectedTestId) loadDetail(selectedTestId);
