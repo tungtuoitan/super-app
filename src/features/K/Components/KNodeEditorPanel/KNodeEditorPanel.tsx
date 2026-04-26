@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { ChevronRight, Trash2, Layers, Trash, LibraryBig, Bookmark } from "lucide-react";
 import { useKStore } from "../../store/K.store";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import type { KItemV2 } from "../../types/K-v2.types";
 import type { BreadcrumbEntry } from "../../hooks/kNodeEditor.miniHelper";
 import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEditor.store";

@@ -9,7 +9,7 @@ import { useLifeLogStore } from "../store/useLifeLog.store";
 import { constants } from "@/utils/constants";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell/moduleRegistry";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
 

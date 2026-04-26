@@ -6,12 +6,12 @@
 
 import { useAuthStore, User } from "@/shell/store/Auth.store";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
-import { authApi } from "@/services/auth.service";
+import { authApi } from "@/shell/services/auth.service";
 import { acquireRefreshToken } from "@/services/apiClient";
 import { userProfileService } from "@/services/userProfile.service";
 import { envConfig } from "@/utils/config/env.config";
 import { constants } from "@/utils/constants";
-import type { LoginRequest } from "@/types/auth.types";
+import type { LoginRequest } from "@/shell/types/auth.types";
 import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
 import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl, GOOGLE_OAUTH_CONFIG } from "@/utils/googleOAuth";

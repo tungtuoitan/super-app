@@ -5,7 +5,7 @@ import { constants } from "@/utils/constants";
 import { ICON_MAP, type IconType } from "@/shared/icons";
 import type { ModuleDefinition } from "@/shell/moduleRegistry";
 import type { Note } from "../types/note.types";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import {NoteBodyInPanel} from "../Components/NoteBodyInPanel";
 
 const NoteDetailTabAdapter = () => <NoteBodyInPanel />;

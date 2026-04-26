@@ -18,7 +18,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import { constants } from "@/utils/constants";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import type { Note } from "@/features/note/types/note.types";
 
 export function useProjectTaskFolderHelper() {

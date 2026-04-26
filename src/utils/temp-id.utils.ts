@@ -6,7 +6,7 @@
  * Names: Unsaved-1, Unsaved-2, Unsaved-3, ...
  */
 
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import type { Note } from "@/features/note/types/note.types";
 import { constants } from "@/utils/constants";
 import type { Ws } from "@/types/workspace.types";

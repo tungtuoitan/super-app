@@ -5,7 +5,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback, RefObject, useRef, MutableRefObject } from "react";
-import type { BaseTab, TabViewState } from "../../types/editor/tab.types";
+import type { BaseTab, TabViewState } from "../types/tab.types";
 
 export interface EditorTabBarContextData {
     openTabs: BaseTab[];

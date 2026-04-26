@@ -5,7 +5,7 @@ import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { useEditorTabBarStore } from "@/store/index";
 import { toLocalISOString } from "@/utils/date.utils";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import {SaveActions} from "@/types/actions.types";
 

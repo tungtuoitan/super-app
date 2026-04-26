@@ -6,7 +6,7 @@
 
 import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import type { KItemV2 } from "../types/K-v2.types";
 
 

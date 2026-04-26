@@ -5,7 +5,7 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  */
 
 import { Task, useTaskStore } from "../store/useTask.store";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";

@@ -17,7 +17,7 @@ import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopo
 import { taskService } from "../../service/task.service";
 import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../../utils/customTab.utils";
 import { isCustomTab, getCustomTabId } from "../../utils/taskDetailSection.utils";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { Task } from "../../store/useTask.store";
 import type { SectionTab } from "../../store/useTaskDetailSection.store";
 

@@ -4,7 +4,7 @@
  * Uses singleton pattern to prevent race conditions
  */
 
-import { authApi } from "@/services/auth.service";
+import { authApi } from "@/shell/services/auth.service";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 

@@ -16,7 +16,7 @@ import { taskService } from "../service/task.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useGeneralStore } from "@/store/General.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";

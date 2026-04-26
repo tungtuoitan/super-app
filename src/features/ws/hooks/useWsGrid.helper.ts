@@ -6,7 +6,7 @@ import { useSnackbar } from "notistack";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWsStore } from "@/features/ws/store/useWs.store";
 import { constants } from "@/utils/constants";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabBarStore } from "@/store/index";

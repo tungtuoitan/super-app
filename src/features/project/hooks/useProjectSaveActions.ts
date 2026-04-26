@@ -3,7 +3,7 @@ import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/task/hooks/useTaskDetail.helper";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
 import { debugLog } from "@/shell/hooks/useDebugLog";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import type { Task } from "@/features/task/store/useTask.store";
 import {SaveActions} from "@/types/actions.types";
 

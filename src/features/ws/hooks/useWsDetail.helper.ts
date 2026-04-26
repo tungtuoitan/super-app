@@ -5,7 +5,7 @@ import { wsService } from "@/features/ws/service/ws.service";
 import { useWsGridHelper } from "./useWsGrid.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { Ws } from "@/types/workspace.types";

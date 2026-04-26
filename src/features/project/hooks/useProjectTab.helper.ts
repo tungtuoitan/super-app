@@ -4,7 +4,7 @@
  */
 
 import { Project } from "../store/useProject.store";
-import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
+import { BaseTab, MultiProjectTabData } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";

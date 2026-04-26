@@ -9,7 +9,7 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 import { constants } from "@/utils/constants";
 import type { Task } from "@/features/task/store/useTask.store";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 
 /** Returns the task group link for a task tab, or null if not a task tab */
 const getTaskGroupLink = (tab: BaseTab): string | null => {

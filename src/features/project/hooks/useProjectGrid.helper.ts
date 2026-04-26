@@ -15,7 +15,7 @@ import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)

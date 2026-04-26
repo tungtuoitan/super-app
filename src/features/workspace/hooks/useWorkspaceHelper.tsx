@@ -8,7 +8,7 @@ import { constants } from "@/utils/constants";
 import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { findNoteByEntityId } from "@/shared/hooks/useKeywordNavigation.helper";
 import type { Note } from "@/features/note/types/note.types";
 import { WorkspaceItemAction } from "../types/workspace.types";

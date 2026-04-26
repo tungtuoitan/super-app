@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from "react";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import { Ws } from "@/types/workspace.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { WsDetailContent } from "./WsDetailContent";

@@ -7,7 +7,7 @@ import { constants } from "@/utils/constants";
 import { useOpenTabSync } from "../../hooks/useOpenTabsSync";
 import { TabBar } from "./TabBar";
 import { moduleRegistry } from "@/shell/moduleRegistry";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 
 /**
  * VSEditorArea — main editor area.

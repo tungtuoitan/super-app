@@ -12,7 +12,7 @@ import { Task, useTaskStore } from "../../store/useTask.store";
 import { taskService } from "../../service/task.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabBarStore } from "@/store/index";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { isChecklistAllDone } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";

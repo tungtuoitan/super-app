@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef, useCallback } from "react";
 import { useEditorTabBarStore } from "@/store/index";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { NoteDetailContent } from "./NoteDetailContent";
 
 interface NoteEditorPanelProps {

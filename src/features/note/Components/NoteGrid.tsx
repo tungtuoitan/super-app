@@ -11,7 +11,7 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useAuthStore, useEditorTabBarStore } from "@/store/index";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { constants } from "@/utils/constants";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table

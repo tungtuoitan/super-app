@@ -17,7 +17,7 @@ import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { taskService } from "../service/task.service";
 import { Task } from "../store/useTask.store";
 import { useEditorTabBarStore } from "@/store/index";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { type CustomTab } from "../types/customTab.types";
 import {
     parseCustomTabs,

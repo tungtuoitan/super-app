@@ -13,7 +13,7 @@ import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { extractExternalLinks } from "@/utils/markdown.utils";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";

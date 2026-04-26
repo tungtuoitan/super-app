@@ -11,4 +11,4 @@
 export * from "./common.types";
 export * from "./folder.types";
 export * from "./workspace-v2.types";
-export * from "./auth.types";
+export * from "../shell/types/auth.types";

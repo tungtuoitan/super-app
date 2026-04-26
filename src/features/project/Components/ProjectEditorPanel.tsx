@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import type { BaseTab } from "@/types/editor/tab.types";
+import type { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { ProjectDetailContent } from "./ProjectDetailContent";

@@ -9,7 +9,7 @@ import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopo
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { useTabKeyboardShortcuts } from "./useTabKeyboardShortcuts";
-import { BaseTab } from "@/types/editor/tab.types";
+import { BaseTab } from "@/shell/types/tab.types";
 import { constants } from "@/utils/constants";
 
 /**
