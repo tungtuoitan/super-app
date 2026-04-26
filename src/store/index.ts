@@ -7,10 +7,7 @@ export { AuthStore, AuthStoreProvider, useAuthStore } from "./Auth.store";
 export type { AuthStoreData, User } from "./Auth.store";
 
 
-export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "./editor/EditorTab.store";
-
-export { EditorStore, EditorProvider, useEditorStore } from "./editor/Editor.store";
-export type { EditorContextData } from "./editor/Editor.store";
+export { EditorTabStore, EditorTabProvider, useEditorTabsStore } from "../shell/store/EditorTab.store";
 
 export { HashtagUIStore, HashtagUIStoreProvider, useHashtagUIStore } from "./HashtagUI.store";
 export type { HashtagUIStoreData } from "./HashtagUI.store";
@@ -23,8 +20,8 @@ export type { AuthCallbackContextData } from "./AuthCallback.store";
 
 export { GeneralStore, GeneralProvider, useGeneralStore } from "./General.store";
 
-export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "./editor/NavigationHistory.store";
-export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "./editor/NavigationHistory.store";
+export { NavigationHistoryStore, NavigationHistoryProvider, useNavigationHistoryStore } from "../shell/store/NavigationHistory.store";
+export type { NavigationHistoryContextData, HistoryEntry, ScrollPosition, CursorPosition } from "../shell/store/NavigationHistory.store";
 
 export { CommandPaletteStore, CommandPaletteProvider, useCommandPaletteStore } from "./useCommandPalette.store";
 export type { CommandPaletteContextData } from "./useCommandPalette.store";

@@ -4,7 +4,7 @@
  * Handles pin/unpin, close all, and close all but pinned operations
  */
 
-import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 import { constants } from "@/utils/constants";

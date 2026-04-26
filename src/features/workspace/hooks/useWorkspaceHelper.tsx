@@ -5,7 +5,7 @@
 
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { constants } from "@/utils/constants";
-import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import { BaseTab } from "@/types/editor/tab.types";

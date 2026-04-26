@@ -12,17 +12,17 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorToolbarHelper } from "@/shell/hooks/useEditorToolbar.helper";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { constants } from "@/utils/constants";
-import { useEditorToolbarStore } from "@/store/editor/EditorToolbar.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { projectService } from "@/features/project/service/project.service";
 import { Breadcrumb } from "../Breadcrumb";
 import { BackButton } from "../BackButton";
 import { moduleRegistry } from "@/shell/moduleRegistry";
+import {useEditorTabsStore} from "@/store/index";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();
-    const { isSaving } = useEditorToolbarStore();
+    const { isSaving } = useEditorTabsStore();
     const { projects } = useProjectStore();
     const { $user } = useAuthStore();
 

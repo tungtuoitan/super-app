@@ -24,6 +24,10 @@ export interface EditorTabContextData {
     dragOverPosition: "left" | "right" | null;
     setDragOverPosition: Dispatch<SetStateAction<"left" | "right" | null>>;
     dragCounterRef: MutableRefObject<number>;
+    isLoadingTab: boolean;
+    setIsLoadingTab: Dispatch<SetStateAction<boolean>>;
+    isSaving: boolean;
+    setIsSaving: Dispatch<SetStateAction<boolean>>;
 }
 
 export const editorTabContextDefaultValue: EditorTabContextData = {
@@ -43,6 +47,10 @@ export const editorTabContextDefaultValue: EditorTabContextData = {
     dragOverPosition: null,
     setDragOverPosition: () => {},
     dragCounterRef: { current: 0 },
+    isLoadingTab: false,
+    setIsLoadingTab: () => {},
+    isSaving: false,
+    setIsSaving: () => {}
 
 };
 
@@ -60,6 +68,8 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
     const [dragOverPosition, setDragOverPosition] = useState<"left" | "right" | null>(null);
     const dragCounterRef = useRef(0);
+    const [isLoadingTab, setIsLoadingTab] = useState<boolean>(false);
+    const [isSaving, setIsSaving] = useState<boolean>(false);
 
     return (
         <EditorTabStore.Provider
@@ -79,7 +89,11 @@ export const EditorTabProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
                 setDragOverTabId,
                 dragOverPosition,
                 setDragOverPosition,
-                dragCounterRef
+                dragCounterRef,
+                isLoadingTab,
+                setIsLoadingTab,
+                isSaving,
+                setIsSaving
 
             }}
         >

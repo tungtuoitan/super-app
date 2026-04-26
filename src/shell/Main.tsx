@@ -13,7 +13,7 @@ import { TaskProvider } from "@/features/task/store/useTask.store";
 import { MultiTimelineProvider } from "@/features/multiProject/store/useMultiTimeline.store";
 import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import { WikiProvider } from "@/features/Wiki/store/useWiki.store";
-import { EditorProviders } from "@/store/editor/EditorProviders";
+import { EditorProviders } from "@/shell/store/EditorProviders";
 import { OrchestratorContextMenu } from "@/shared/contexts";
 import { ConfirmationPopoverProvider } from "@/store/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/shell/components/ConfirmationPopoverContainer";

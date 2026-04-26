@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useLifeLogTabHelper } from "@/features/lifeLog/hooks/useLifeLogTab.helper";
 import { constants } from "@/utils/constants";

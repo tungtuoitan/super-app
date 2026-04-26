@@ -9,8 +9,8 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useNavigationHistoryStore, ScrollPosition, CursorPosition, HistoryEntry, MdPos, MdScrollPos } from "@/store/editor/NavigationHistory.store";
-import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { useNavigationHistoryStore, ScrollPosition, CursorPosition, HistoryEntry, MdPos, MdScrollPos } from "@/shell/store/NavigationHistory.store";
+import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";

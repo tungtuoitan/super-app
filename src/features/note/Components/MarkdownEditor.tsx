@@ -6,7 +6,7 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
-import { useEditorTabsStore, useGeneralStore, useNavigationHistoryStore, useEditorStore } from "@/store/index";
+import { useEditorTabsStore, useGeneralStore } from "@/store/index";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
@@ -26,7 +26,6 @@ import {
 } from "@/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";
 
 export function MarkdownEditor() {
@@ -36,7 +35,7 @@ export function MarkdownEditor() {
     const { getActiveTab } = useEditorTabHelper();
     const { handleNoteFieldChange } = useNoteDetailHelper();
     const { getItemStatus } = useTreeStatusHelper();
-    const { isLoadingTab } = useEditorStore();
+    const { isLoadingTab } = useEditorTabsStore();
 
     // const $mi = useMonaco(); // Monaco instance
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef, isMounted, setIsMounted, editorMountCount, setEditorMountCount } = useNoteDetailStore();

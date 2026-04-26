@@ -13,7 +13,7 @@ import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/ws/store/useWs.store";
 import { useProjectStore, Project } from "@/features/project/store/useProject.store";
 import { useTaskStore, Task } from "@/features/task/store/useTask.store";
-import { useNavigationHistoryStore } from "@/store/editor/NavigationHistory.store";
+import { useNavigationHistoryStore } from "@/shell/store/NavigationHistory.store";
 import { BaseTab, MultiProjectTabData } from "@/types/editor/tab.types";
 import { constants } from "@/utils/constants";
 import { Note, NoteDTO } from "@/features/note/types/note.types";

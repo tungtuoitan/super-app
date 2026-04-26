@@ -6,7 +6,7 @@ import { useEditorTabsStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useWsDetailStore } from "@/features/ws/store/useWsDetail.store";
 import { Ws } from "@/types/workspace.types";
-import { useNavigationHistoryStore, HistoryEntry } from "@/store/editor/NavigationHistory.store";
+import { useNavigationHistoryStore, HistoryEntry } from "@/shell/store/NavigationHistory.store";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";

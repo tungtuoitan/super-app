@@ -24,7 +24,7 @@ import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
-import { useEditorTabsStore } from "@/store/editor/EditorTab.store";
+import { useEditorTabsStore } from "@/shell/store/EditorTab.store";
 import { useGeneralStore } from "@/store/index";
 import { useNoteDetailStore } from "@/features/note";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
