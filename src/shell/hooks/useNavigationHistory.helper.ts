@@ -626,7 +626,7 @@ export const useNavigationHistoryHelper = () => {
                 // Try to find in grid first
                 let noteData = notes.find((n) => n.id === itemIdNum);
 
-                // If not in grid, fetch from API (similar to OpenTabsSync.tsx)
+                // If not in grid, fetch from API (similar to useOpenTabSync.tsx)
                 if (!noteData) {
                     if (!$user.userToken) {
                         console.error("[Navigation] No auth token found");
@@ -661,7 +661,7 @@ export const useNavigationHistoryHelper = () => {
                 // Try to find in grid first
                 let wsData = workspaces.find((w) => w.id === itemIdNum);
 
-                // If not in grid, fetch from API (similar to OpenTabsSync.tsx)
+                // If not in grid, fetch from API (similar to useOpenTabSync.tsx)
                 if (!wsData) {
                     if (!$user.userToken) {
                         console.error("[Navigation] No auth token found");

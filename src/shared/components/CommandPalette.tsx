@@ -8,7 +8,7 @@ import { Search, Link2 } from "lucide-react";
 import { useCommandPaletteStore } from "@/store/useCommandPalette.store";
 import { useCommandPaletteHelper } from "@/shell/hooks/useCommandPalette.helper";
 import { HighlightedText } from "./HighlightedText";
-import { CommandPaletteKeyDown } from "@/shell/HeadlessComponents/CommandPaletteKeyDown";
+import { CommandPaletteKeyDown } from "@/shell/hooks/useCommandPaletteKeyDown";
 import { useGeneralStore } from "@/store/General.store";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";

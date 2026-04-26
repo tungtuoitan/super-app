@@ -10,7 +10,7 @@ import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
  * - Note detail view when a note is selected
  * - Welcome/empty state when no note is selected
  */
-export function TrackTabNavigation() {
+export function useTrackTabNavigation() {
     const { activeTabId } = useEditorTabsStore();
     const { trackNavigation, isNavigating, captureEditorPosition, captureEditorScrollPosition } = useNavigationHistoryHelper();
     const { editorRef } = useNoteDetailStore();

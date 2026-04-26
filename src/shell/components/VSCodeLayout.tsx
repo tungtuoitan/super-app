@@ -9,7 +9,7 @@ import { useActivityBarStore } from "@/store/index";
 import { useGridAutoRegisterHelper } from "@/shell/hooks/useGridAutoRegister.helper";
 import { useLocation } from "react-router-dom";
 import { useMobileStore } from "@/store/Mobile.store";
-import { CheckIsMobile } from "@/shell/HeadlessComponents/CheckIsMobile";
+import { CheckIsMobile } from "@/shell/hooks/useCheckIsMobile";
 import { constants } from "@/utils/constants";
 import { GridControlBar } from "@/shared/components/GridControlBar";
 import { useGridControlStore } from "@/store/useGridControl.store";

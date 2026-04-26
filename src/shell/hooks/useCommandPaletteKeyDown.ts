@@ -2,7 +2,7 @@ import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
 import { useCommandPaletteHelper } from "@/shell/hooks/useCommandPalette.helper";
 
-export function CommandPaletteKeyDown() {
+export function useCommandPaletteKeyDown() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, getKeywordIcon, close } = useCommandPaletteHelper();
 

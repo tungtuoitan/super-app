@@ -85,7 +85,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
     }));
 };
 
-export const OpenTabsSync = () => {
+export const useOpenTabSync = () => {
     const { openTabs, setOpenTabs, setActiveTabId, isLoadingTabs, setIsLoadingTabs } = useEditorTabsStore();
     const { $user } = useAuthStore();
     const { notes } = useNoteGridStore();

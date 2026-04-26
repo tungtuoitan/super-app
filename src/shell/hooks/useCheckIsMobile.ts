@@ -5,7 +5,7 @@ import { useEffect } from "react";
  * Hook to detect if the app is running on a mobile device
  * Uses MobileStore for centralized state management
  */
-export function CheckIsMobile() {
+export function useCheckIsMobile() {
     const { setIsMobile } = useMobileStore();
     useEffect(() => {
         setIsMobile(window.innerWidth < 768);

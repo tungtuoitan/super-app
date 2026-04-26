@@ -299,41 +299,6 @@ export function useAuthHelper() {
         navigate("/", { replace: true });
     };
 
-    /**
-     * Update user filter preferences
-     */
-    const upsertUserFilters = async (): Promise<void> => {
-        try {
-            const token = $user.userToken;
-            if (!token) {
-                throw new Error("User not authenticated");
-            }
-            const newUserFilters: UserFilters = $user.filters || {};
-            newUserFilters[filterViewKey as keyof UserFilters] = uiFilters;
-
-            const payload: UpdateUserProfileRequest = {
-                filters: JSON.stringify(newUserFilters),
-            };
-
-            const result = await userProfileService._upsertUserProfile(token, payload);
-            const newFilters = result.object?.filters;
-            if (!result.success) {
-                throw new Error(result.message || "Failed to update user filters");
-            }
-
-            const updatedUser: typeof $user = {
-                ...$user,
-                filters: newFilters ? JSON.parse(newFilters) : constants.filters.defaults,
-            };
-            set$User(updatedUser);
-
-            storageService.set(STORAGE_KEYS.USER_PROFILE, updatedUser);
-        } catch (err) {
-            const errorMessage = await parseApiError(err);
-            _console.error(`Failed to update filters: ${errorMessage}`);
-            throw err;
-        }
-    };
 
     return {
         login,
@@ -341,7 +306,6 @@ export function useAuthHelper() {
         loginWithGoogleCode,
         handleOAuthCallback,
         navigateToHome,
-        upsertUserFilters,
         initAuthFromStorageToken,
     };
 }

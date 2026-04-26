@@ -4,8 +4,8 @@ import { EditorToolbar } from "@/shell/components/EditorToolbar";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore, useNavigationHistoryStore } from "@/store/index";
 import { constants } from "@/utils/constants";
-import { OpenTabsSync } from "../HeadlessComponents/OpenTabsSync";
-import { TrackTabNavigation } from "../HeadlessComponents/TrackTabNavigation";
+import { useOpenTabSync } from "../hooks/useOpenTabsSync";
+import { useTrackTabNavigation } from "../hooks/useTrackTabNavigation";
 import { TabBar } from "./TabBar";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { BaseTab } from "@/types/editor/tab.types";
@@ -17,6 +17,8 @@ import type { BaseTab } from "@/types/editor/tab.types";
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, editorAreaRef } = useEditorTabsStore();
     const { closeTab, getActiveTab } = useEditorTabHelper();
+    useOpenTabSync()
+    useTrackTabNavigation()
 
     const activeTab = getActiveTab();
     const keepAliveTabTypes = moduleRegistry.getKeepAliveTabTypes();
@@ -35,8 +37,6 @@ export function VSEditorArea() {
 
     return (
         <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
-            <TrackTabNavigation />
-            <OpenTabsSync />
 
             <TabBar />
 
