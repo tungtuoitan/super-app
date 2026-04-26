@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from "react";
-import { useProjectStore } from "@/features/project/store/useProject.store";
+import { useProjectStore } from "@/features/project";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectDetailSelector } from "./useMultiProjectDetail.selector";
 

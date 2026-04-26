@@ -7,7 +7,7 @@
  */
 
 import { useEffect } from "react";
-import { useTaskGridHelper } from "@/features/task/hooks/taskList/useTaskGrid.helper";
+import { useTaskGridHelper } from "@/features/project/task/hooks/taskList/useTaskGrid.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useAuthStore } from "@/store/index";
 

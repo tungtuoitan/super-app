@@ -5,13 +5,14 @@
  */
 
 import { useMemo } from "react";
-import { Task, useTaskStore } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useGeneralStore } from "@/shared/store/General.store";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { constants } from "@/utils/constants";
 
 export const useMultiProjectKanbanSelector = () => {
-    const { tasks } = useTaskStore();
+    const { tasks } = useMpTaskStore();
     const { registriesByType } = useGeneralStore();
     const { projectIds } = useMultiTimelineStore();
 

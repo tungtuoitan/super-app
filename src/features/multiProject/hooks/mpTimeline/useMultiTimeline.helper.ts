@@ -4,20 +4,20 @@
  * Calls stores/selectors directly — no params.
  */
 
-import { useTaskStore } from "@/features/task/store/useTask.store";
-import { useProjectStore } from "@/features/project/store/useProject.store";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
+import { useProjectStore } from "@/features/project";
 import { useAuthStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { taskService } from "@/features/task/service/task.service";
-import { projectService } from "@/features/project/service/project.service";
+import { taskService } from "@/features/taskDetail";
+import { projectService } from "@/features/project";
 import { toLocalISOString } from "@/utils/date.utils";
 import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
-import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/task/utils/TaskGrid.utils";
+import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
 
 export const useMultiTimelineHelper = () => {
     // ── Stores ───────────────────────────────────────────
-    const { setTasks } = useTaskStore();
+    const { setTasks } = useMpTaskStore();
     const { setProjects } = useProjectStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();

@@ -8,14 +8,14 @@ import { useCommandPaletteStore, useGeneralStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
-import { useTaskStore } from "@/features/task/store/useTask.store";
+import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import { Keyword } from "@/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
 import { targetKeywordService } from "@/services/targetKeyword.service";
 import { projectService } from "@/features/project/service/project.service";
-import { taskService } from "@/features/task/service/task.service";
+import { taskService } from "@/features/taskDetail/service/task.service";
 import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";
 
 export const useCommandPaletteHelper = () => {
@@ -24,7 +24,7 @@ export const useCommandPaletteHelper = () => {
     const { navigateLink } = useKeywordNavigationHelper();
     const { $user } = useAuthStore();
     const { projects } = useProjectStore();
-    const { tasks } = useTaskStore();
+    const { tasks } = usePTaskStore();
     const { logs, tracks } = useLifeLogStore();
 
     // Helper: Remove name (last part) from longLink

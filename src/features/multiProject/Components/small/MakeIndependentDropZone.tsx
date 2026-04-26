@@ -6,10 +6,9 @@
 import React, { useRef } from "react";
 import { useDrop, DropTargetMonitor } from "react-dnd";
 import { ArrowUpFromLine } from "lucide-react";
-import { Task } from "@/features/task/store/useTask.store";
+import type { Task, TaskDragItem } from "@/features/taskDetail";
+import { validateMakeIndependent } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
-import { validateMakeIndependent } from "@/features/task/utils/TaskGrid.utils";
-import type { TaskDragItem } from "@/features/task/types/taskGrid.types";
 import { TASK_ROW } from "@/features/multiProject/utils/multiProjectDetail.constants";
 
 interface MakeIndependentDropZoneProps {

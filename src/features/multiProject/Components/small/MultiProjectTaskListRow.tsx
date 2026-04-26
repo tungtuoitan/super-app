@@ -6,11 +6,10 @@
 import React, { useRef } from "react";
 import { Row, flexRender } from "@tanstack/react-table";
 import { useDrag, useDrop, DragSourceMonitor, DropTargetMonitor } from "react-dnd";
-import { Task } from "@/features/task/store/useTask.store";
+import type { Task, TaskDragItem } from "@/features/taskDetail";
+import { validateDropTaskOntoTask } from "@/features/taskDetail";
 import { DateRangePicker } from "@/shared/components";
 import { cn } from "@/lib/utils";
-import { validateDropTaskOntoTask } from "@/features/task/utils/TaskGrid.utils";
-import type { TaskDragItem } from "@/features/task/types/taskGrid.types";
 import { TASK_ROW } from "@/features/multiProject/utils/multiProjectDetail.constants";
 import type { DraggableRowProps } from "@/features/multiProject/types/multiProjectTaskList.type";
 

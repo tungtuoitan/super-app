@@ -15,10 +15,9 @@ import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProject
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { flowService } from "@/features/multiProject/service/flow.service";
-import { taskService } from "@/features/task/service/task.service";
-import type { TaskDTO } from "@/features/task/service/task.service";
-import type { Task } from "@/features/task/types/task.types";
+import { flowService } from "@/shared/services/flow.service";
+import { taskService } from "@/features/taskDetail";
+import type { TaskDTO, Task } from "@/features/taskDetail";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "../../utils/multiProjectTaskFlow.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";

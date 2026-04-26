@@ -1,0 +1,42 @@
+/**
+ * Task Detail Form Selector
+ * Derived / computed values for form autocomplete fields.
+ * No functions, no side effects — only useMemo.
+ */
+
+import { useMemo } from "react";
+import { useTaskDetailStore } from "../store/useTaskDetail.store";
+import { IAutoCompleteOptions } from "@/shared/components";
+import { useTaskDetailSelector } from "./TaskDetailSelector";
+
+export const useTaskDetailFormSelector = () => {
+    const { selectedTask } = useTaskDetailSelector();
+    const { projectOptions, parentTaskOptions } = useTaskDetailStore();
+
+    const currentProjectValue: IAutoCompleteOptions | null = (() => {
+        const projectId = selectedTask?.projectId;
+        if (!projectId) return null;
+        return projectOptions.find((p) => p.id === projectId) ?? {
+            id: projectId,
+            label: `Project #${projectId}`,
+            desc: `Project #${projectId}`,
+            isActive: true,
+        };
+    })()
+
+    const currentParentTaskValue: IAutoCompleteOptions | null = (() => {
+        const parentTaskId = selectedTask?.parentTaskId;
+        if (!parentTaskId) return null;
+        return parentTaskOptions.find((t) => t.id === parentTaskId) ?? {
+            id: parentTaskId,
+            label: `Task #${parentTaskId}`,
+            desc: `Task #${parentTaskId}`,
+            isActive: true,
+        };
+    })()
+
+    return {
+        currentProjectValue,
+        currentParentTaskValue,
+    };
+};

@@ -50,7 +50,16 @@
       "Bash(openclaw agents *)",
       "Bash(curl -s https://claudible.io/v1/models -H \"Authorization: Bearer sk-fdc7951ef714c6bb558b0e23ed98d609365fb8abd89e853e65a0a85dfa13a91e\")",
       "Bash(pkill -f \"openclaw.*gateway\")",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(xargs)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Admin\\\\source\\\\SuperApp\" -Name | Where-Object { $_ -match 'src|client|app|frontend' })",
+      "Bash(find ./src/features/task* -maxdepth 1 -type d)",
+      "Bash(echo \"exit code: $?\")",
+      "Bash(grep -v \"//.*eslint-disable\")",
+      "Bash(echo \"exit:$?\")",
+      "Bash(echo \"mp->project: $?\")",
+      "Bash(echo \"mp->taskDetail: $?\")",
+      "Bash(echo \"others->mp: $?\")"
     ],
     "deny": [],
     "ask": []

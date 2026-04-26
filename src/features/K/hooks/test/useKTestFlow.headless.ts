@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
-import { flowService } from "@/features/multiProject/service/flow.service";
-import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/features/multiProject/service/flow.service";
 import type { KTestQuestion } from "@/features/K/types/kTest.type";
 import type { QuestionFlowNodeData, KFlowEdgeData } from "@/features/K/types/kTestFlow.type";
 import type { Edge, Node } from "@xyflow/react";
+import { flowService } from "@/shared/services/flow.service";
+import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared/services/flow.service";
 
 const QUESTION_NODE_WIDTH = 260;
 const NODE_HEIGHT = 160;

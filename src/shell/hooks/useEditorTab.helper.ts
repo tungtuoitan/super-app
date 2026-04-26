@@ -19,7 +19,7 @@ import {
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import type { Project } from "@/features/project/store/useProject.store";
-import type { Task } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail/types/task.types";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();

@@ -6,8 +6,8 @@
 import React, { useRef } from "react";
 import { useDrag, DragSourceMonitor } from "react-dnd";
 import { CornerDownRight } from "lucide-react";
-import { Task } from "@/features/task/store/useTask.store";
-import { getTaskPriorityColors } from "@/features/task/utils/TaskDetail.utils";
+import type { Task } from "@/features/taskDetail";
+import { getTaskPriorityColors } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
 import { KANBAN_TASK } from "@/features/multiProject/utils/multiProjectDetail.constants";
 import type { DragItem } from "@/features/multiProject/types/multiProjectKanban.type";

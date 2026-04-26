@@ -4,7 +4,7 @@ import { useNoteDetailHelper } from "./useNoteDetail.helper";
 import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
-import { useProjectTaskFolderHelper } from "@/features/project/hooks/useProjectTaskFolderHelper";
+import { useProjectTaskFolderHelper } from "@/features/project";
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { Note } from "../types/note.types";
 import {SaveActions} from "@/types/actions.types";

@@ -6,7 +6,7 @@
 import React, { useRef } from "react";
 import { useDrop, DropTargetMonitor } from "react-dnd";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
-import { getTaskStatusColors } from "@/features/task/utils/TaskDetail.utils";
+import { getTaskStatusColors } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
 import { KANBAN_TASK } from "@/features/multiProject/utils/multiProjectDetail.constants";
 import type { DragItem, KanbanColumnProps } from "@/features/multiProject/types/multiProjectKanban.type";

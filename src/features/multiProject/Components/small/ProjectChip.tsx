@@ -1,7 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getProjectStatusColors } from "@/features/project/Components/ProjectStatusBadge";
+import { getProjectStatusColors } from "@/features/project";
 
 interface ProjectChipProps {
     project: { id: number; name?: string; status?: string };

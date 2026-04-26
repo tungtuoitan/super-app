@@ -12,9 +12,10 @@ import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel,
 import { Loader2, CornerDownRight } from "lucide-react";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { Task, useTaskStore } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useMultiProjectTaskGridHelper } from "../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
-import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
+import { useTaskTabHelper } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
 import { useMultiProjectTaskListSelector } from "../Selectors/useMultiProjectTaskList.selector";
 import { useMultiProjectTaskListHeadless } from "../hooks/mpTaskList/useMultiProjectTaskList.headless";
@@ -38,7 +39,7 @@ export function MultiProjectTaskList() {
         taskGridColumnFilters,
         setTaskGridColumnFilters,
         taskContainerRef,
-    } = useTaskStore();
+    } = useMpTaskStore();
 
     const { openMultiProjectTaskContextMenu } = useMultiProjectTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();

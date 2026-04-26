@@ -5,17 +5,16 @@
  */
 
 import { useMemo } from "react";
-import { useTaskStore } from "@/features/task/store/useTask.store";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useGeneralStore } from "@/shared/store/General.store";
-import { useProjectStore } from "@/features/project/store/useProject.store";
+import { useProjectStore } from "@/features/project";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { IStatusOption } from "@/shared/components";
-import { getTaskStatusColors, getTaskPriorityColors } from "@/features/task/utils/TaskDetail.utils";
-import { sortTasksHierarchically } from "@/features/task/utils/TaskGrid.utils";
+import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
 import { constants } from "@/utils/constants";
 
 export const useMultiProjectTaskListSelector = () => {
-    const { tasks, taskSearchQuery } = useTaskStore();
+    const { tasks, taskSearchQuery } = useMpTaskStore();
     const { registriesByType } = useGeneralStore();
     const { projects } = useProjectStore();
     const { projectIds } = useMultiTimelineStore();

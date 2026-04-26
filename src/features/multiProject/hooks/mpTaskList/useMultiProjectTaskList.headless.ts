@@ -5,10 +5,10 @@
  */
 
 import { useEffect } from "react";
-import { useTaskStore } from "@/features/task/store/useTask.store";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 
 export function useMultiProjectTaskListHeadless() {
-    const { taskContainerRef, setTaskContainerWidth } = useTaskStore();
+    const { taskContainerRef, setTaskContainerWidth } = useMpTaskStore();
 
     // Update container width on resize
     useEffect(() => {

@@ -3,8 +3,9 @@
  * Business logic for task grid operations across multiple projects
  */
 
-import { taskService, TaskDTO } from "@/features/task/service/task.service";
-import { Task, useTaskStore } from "@/features/task/store/useTask.store";
+import { taskService } from "@/features/taskDetail";
+import type { TaskDTO, Task } from "@/features/taskDetail";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { generateTempId } from "@/utils/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -43,7 +44,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
 export const useMultiProjectTaskGridHelper = () => {
     const { $user } = useAuthStore();
     const { tasks, setTasks, setAllTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } =
-        useTaskStore();
+        useMpTaskStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const _console = useConsoleHelper();
 

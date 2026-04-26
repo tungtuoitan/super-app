@@ -16,13 +16,13 @@ import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTas
 import { useMultiProjectTaskFlowNodeHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useMultiProjectTaskFlowSelector } from "@/features/multiProject/Selectors/useMultiProjectTaskFlow.selector";
 import { useGeneralStore } from "@/shared/store/General.store";
-import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
+import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
 import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/utils/checklist.utils";
 import { constants } from "@/utils/constants";
 import { ExternalLink, ChevronDown, ChevronRight, Circle, CheckSquare2, Square } from "lucide-react";
-import { useTaskGridStore } from "@/features/task/store/useTaskGrid.store";
-import { taskService } from "@/features/task/service/task.service";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
+import { taskService } from "@/features/taskDetail";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
@@ -36,7 +36,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const { registriesByType } = useGeneralStore();
     const { openTaskTab } = useTaskTabHelper();
     const zoom = useStore((s) => s.transform[2]);
-    const { setTasks } = useTaskGridStore();
+    const { setTasks } = useMpTaskStore();
     const { $user } = useAuthStore();
     const statusOptions = registriesByType["task_status"] ?? [];
 

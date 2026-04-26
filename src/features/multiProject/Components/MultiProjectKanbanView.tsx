@@ -12,8 +12,8 @@ import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Label } from "@/shared/components/ui/label";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { useTaskStore } from "@/features/task/store/useTask.store";
-import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
+import { useTaskTabHelper } from "@/features/taskDetail";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiProjectKanbanSelector } from "../Selectors/useMultiProjectKanban.selector";
 import { useMultiProjectKanbanHelper } from "../hooks/mpTaskKanban/useMultiProjectKanban.helper";
@@ -21,7 +21,7 @@ import { useMultiProjectKanbanHeadless } from "../hooks/mpTaskKanban/useMultiPro
 import { KanbanColumn } from "./small/KanbanColumn";
 
 export function MultiProjectKanbanView() {
-    const { taskGridIsLoading, taskGridError } = useTaskStore();
+    const { taskGridIsLoading, taskGridError } = useMpTaskStore();
     const { openTaskTab } = useTaskTabHelper();
     const { projects } = useMultiTimelineStore();
 

@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { Task } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail";
 import { StatusAutoComplete, IStatusOption } from "@/shared/components";
 
 /**

@@ -9,11 +9,10 @@ import { ListTodo, Columns, GanttChartSquare, Settings, FolderOpen } from "lucid
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/ui/Button";
 import { ProjectGeneral } from "./ProjectGeneral";
-import { TaskGrid } from "@/features/task/Components/TaskGrid";
-import { TaskKanbanView } from "@/features/task/Components/TaskKanbanView";
-import { TaskTimelineView } from "@/features/task/Components/TaskTimelineView";
-import { TaskFilterPopup } from "@/features/task/Components/TaskFilterPopup";
-import { TaskSearchInput } from "@/features/task/Components/small/TaskSearchInput";
+import { TaskGrid } from "@/features/project/task/Components/TaskGrid";
+import { TaskKanbanView } from "@/features/project/task/Components/TaskKanbanView";
+import { TaskTimelineView } from "@/features/project/task/Components/TaskTimelineView";
+import { TaskFilterPopup, TaskSearchInput } from "@/features/taskDetail";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
 import type { TabConfig } from "../types/projectDetail.type";

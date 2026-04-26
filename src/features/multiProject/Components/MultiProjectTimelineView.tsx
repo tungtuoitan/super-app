@@ -14,19 +14,19 @@ import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Button } from "@/shared/components/ui/Button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { useTaskStore } from "@/features/task/store/useTask.store";
-import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
+import { useTaskTabHelper } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { cn } from "@/lib/utils";
-import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/task/utils/TaskGrid.utils";
+import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "../hooks/mpTimeline/useMultiTimeline.helper";
 import { useMultiTimelineHeadless } from "../hooks/mpTimeline/useMultiTimeline.headless";
-import {TaskBar} from "@/features/task/Components/TaskBar";
+import { TaskBar } from "@/features/multiProject/Components/small/TaskBar";
 
 export function MultiProjectTimelineView() {
-    const { taskGridIsLoading, taskGridError } = useTaskStore();
+    const { taskGridIsLoading, taskGridError } = useMpTaskStore();
     const { openTaskTab } = useTaskTabHelper();
     const _console = useConsoleHelper();
 

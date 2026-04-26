@@ -7,7 +7,11 @@ import { KProviders } from "@/features/K/store/KProviders";
 import { NoteProviders } from "@/features/note/store/NoteProviders";
 import { WsProviders } from "@/features/workspace/store/ws/WsProviders";
 import { ProjectProviders } from "@/features/project/store/ProjectProviders";
-import { TaskProvider } from "@/features/task/store/useTask.store";
+import { PTaskProvider } from "@/features/project/task/store/usePTask.store";
+import { MpTaskProvider } from "@/features/multiProject/store/useMpTask.store";
+import { TaskDetailProvider } from "@/features/taskDetail/store/useTaskDetail.store";
+import { TaskDetailSectionProvider } from "@/features/taskDetail/store/useTaskDetailSection.store";
+import { TaskSectionProvider } from "@/features/taskDetail/store/useTaskSection.store";
 import { MultiTimelineProvider } from "@/features/multiProject/store/useMultiTimeline.store";
 import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import { WikiProvider } from "@/features/Wiki/store/useWiki.store";
@@ -57,21 +61,29 @@ export function Main() {
                                                                 <KProviders>
                                                                     <WsProviders>
                                                                         <ProjectProviders>
-                                                                            <TaskProvider>
-                                                                                <MultiTimelineProvider>
-                                                                                    <LifeLogProvider>
-                                                                                        <WikiProvider>
-                                                                                            <NoteProviders>
-                                                                                                <CurrentProjectProvider>
-                                                                                                    <OrchestratorContextMenu>
-                                                                                                        <MainNav />
-                                                                                                    </OrchestratorContextMenu>
-                                                                                                </CurrentProjectProvider>
-                                                                                            </NoteProviders>
-                                                                                        </WikiProvider>
-                                                                                    </LifeLogProvider>
-                                                                                </MultiTimelineProvider>
-                                                                            </TaskProvider>
+                                                                            <PTaskProvider>
+                                                                                <MpTaskProvider>
+                                                                                    <TaskDetailProvider>
+                                                                                        <TaskDetailSectionProvider>
+                                                                                            <TaskSectionProvider>
+                                                                                                <MultiTimelineProvider>
+                                                                                                    <LifeLogProvider>
+                                                                                                        <WikiProvider>
+                                                                                                            <NoteProviders>
+                                                                                                                <CurrentProjectProvider>
+                                                                                                                    <OrchestratorContextMenu>
+                                                                                                                        <MainNav />
+                                                                                                                    </OrchestratorContextMenu>
+                                                                                                                </CurrentProjectProvider>
+                                                                                                            </NoteProviders>
+                                                                                                        </WikiProvider>
+                                                                                                    </LifeLogProvider>
+                                                                                                </MultiTimelineProvider>
+                                                                                            </TaskSectionProvider>
+                                                                                        </TaskDetailSectionProvider>
+                                                                                    </TaskDetailProvider>
+                                                                                </MpTaskProvider>
+                                                                            </PTaskProvider>
                                                                         </ProjectProviders>
                                                                     </WsProviders>
                                                                 </KProviders>

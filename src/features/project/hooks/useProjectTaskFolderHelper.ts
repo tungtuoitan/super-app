@@ -8,10 +8,11 @@ import { useRef, useEffect } from "react";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabBarStore } from "@/store/index";
 import { useProjectStore, type Project } from "../store/useProject.store";
-import { useTaskStore, type Task } from "@/features/task/store/useTask.store";
+import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
+import type { Task } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { workspaceService } from "@/features/workspace/service/workspace.service";
-import { taskService } from "@/features/task/service/task.service";
+import { taskService } from "@/features/taskDetail";
 import { projectService, type ProjectDTO } from "../service/project.service";
 import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -26,12 +27,12 @@ export function useProjectTaskFolderHelper() {
     const { $user } = useAuthStore();
     const { setOpenTabs } = useEditorTabBarStore();
     const { projects, setProjects } = useProjectStore();
-    const { setTasks } = useTaskStore();
+    const { setTasks } = usePTaskStore();
 
     const projectsRef = useRef(projects);
     useEffect(() => { projectsRef.current = projects; }, [projects]);
 
-    const { tasks } = useTaskStore();
+    const { tasks } = usePTaskStore();
     const tasksRef = useRef(tasks);
     useEffect(() => { tasksRef.current = tasks; }, [tasks]);
 

@@ -4,10 +4,10 @@
  */
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
-import { Project } from "@/features/project/store/useProject.store";
+import type { Project } from "@/features/project";
+import { getProjectStatusColors } from "@/features/project";
+import { TIMELINE_MIN_BAR_WIDTH } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
-import { getProjectStatusColors } from "@/features/project/Components/ProjectStatusBadge";
-import { TIMELINE_MIN_BAR_WIDTH } from "@/features/task/utils/TaskGrid.utils";
 import { PRO_ROW_HEIGHT } from "@/features/multiProject/utils/multiProjectDetail.constants";
 
 const PRO_BAR_HEIGHT = 36;

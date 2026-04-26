@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from "react";
-import { useProjectStore } from "@/features/project/store/useProject.store";
+import { useProjectStore } from "@/features/project";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import { useMultiProjectDetailHelper } from "./useMultiProjectDetail.helper";

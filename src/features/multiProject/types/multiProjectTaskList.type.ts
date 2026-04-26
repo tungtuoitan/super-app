@@ -3,7 +3,7 @@
  */
 
 import { Row } from "@tanstack/react-table";
-import { Task } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail";
 
 export interface DraggableRowProps {
     row: Row<Task>;

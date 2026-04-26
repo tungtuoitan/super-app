@@ -7,24 +7,23 @@
 import type { Node } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
-import { useTaskGridStore } from "@/features/task/store/useTask.store";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { taskService } from "@/features/task/service/task.service";
-import type { TaskDTO } from "@/features/task/service/task.service";
-import { transformTaskData } from "@/features/task/utils/TaskDetail.utils";
-import { flowService } from "@/features/multiProject/service/flow.service";
+import { taskService, transformTaskData } from "@/features/taskDetail";
+import type { TaskDTO } from "@/features/taskDetail";
+import { flowService } from "@/shared/services/flow.service";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
-import type { Task } from "@/features/task/types/task.types";
+import type { Task } from "@/features/taskDetail";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
-import { useProjectTaskFolderHelper } from "@/features/project/hooks/useProjectTaskFolderHelper";
+import { useProjectTaskFolderHelper } from "@/features/project";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();
     const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap } = useMultiProjectTaskFlowSelector();
-    const { tasks, setTasks } = useTaskGridStore();
+    const { tasks, setTasks } = useMpTaskStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { isNodeLocked } = useMultiProjectTaskFlowHelper();

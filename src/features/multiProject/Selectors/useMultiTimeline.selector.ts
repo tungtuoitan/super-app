@@ -5,13 +5,14 @@
  */
 
 import { useMemo } from "react";
-import { Task, useTaskStore } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useMultiTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
-import { generateDateRange, formatMonthHeader } from "@/features/task/utils/TaskGrid.utils";
+import { generateDateRange, formatMonthHeader } from "@/features/taskDetail";
 
 export const useMultiTimelineSelector = () => {
     const { projectIds, projects, mode, timelineRange, dayWidth } = useMultiTimelineStore();
-    const { tasks } = useTaskStore();
+    const { tasks } = useMpTaskStore();
 
     // ── Filtered & sorted tasks (for mode === "task") ────
     const filteredTasks = useMemo(() => {

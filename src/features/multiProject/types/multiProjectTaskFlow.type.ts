@@ -2,7 +2,7 @@
  * MultiProject Task Flow — types
  */
 
-import type { Task } from "@/features/task/types/task.types";
+import type { Task } from "@/features/taskDetail";
 
 /** Data carried by each React Flow node */
 export interface TaskFlowNodeData extends Record<string, unknown> {

@@ -5,17 +5,17 @@
  * Gets projectIds from useMultiTimelineStore — NO params.
  */
 
-import { Task, useTaskStore } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail";
+import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useAuthStore } from "@/store/index";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { taskService } from "@/features/task/service/task.service";
+import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
-import { getSubtasksOutsideRange } from "@/features/task/utils/TaskGrid.utils";
 import {useMultiProjectTaskGridHelper} from "./useMultiProjectTaskGrid.helper";
 
 export const useMultiProjectTaskListHelper = () => {
-    const { tasks, setTasks } = useTaskStore();
+    const { tasks, setTasks } = useMpTaskStore();
     const { loadTasksForProjects } = useMultiProjectTaskGridHelper();
     const { $user } = useAuthStore();
     const { projectIds } = useMultiTimelineStore();

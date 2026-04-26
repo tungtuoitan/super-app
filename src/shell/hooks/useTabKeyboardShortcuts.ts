@@ -12,7 +12,7 @@ import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useLifeLogTabHelper } from "@/features/lifeLog/hooks/useLifeLogTab.helper";
 import { constants } from "@/utils/constants";
-import type { Task } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail/types/task.types";
 import type { BaseTab } from "@/shell/types/tab.types";
 
 export const useTabKeyboardShortcuts = () => {

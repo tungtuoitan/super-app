@@ -22,13 +22,13 @@ import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelpe
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { treeMiniHelper } from "@/features/workspace/hooks/tree.miniHelper";
 import { projectService } from "@/features/project/service/project.service";
-import { taskService } from "@/features/task/service/task.service";
+import { taskService } from "@/features/taskDetail/service/task.service";
 import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";
 import { useProjectStore } from "@/features/project/store/useProject.store";
-import { useTaskStore } from "@/features/task/store/useTask.store";
+import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import type { Project } from "@/features/project/store/useProject.store";
-import type { Task } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail/types/task.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 
 import { targetKeywordService } from "@/services/targetKeyword.service";
@@ -47,7 +47,7 @@ export const useKeywordNavigationHelper = () => {
     const { navigateToView } = useNavigationStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
     const { projects } = useProjectStore();
-    const { tasks } = useTaskStore();
+    const { tasks } = usePTaskStore();
     const { logs, tracks } = useLifeLogStore();
 
     const navigateLink = async (keyword: Keyword, openedBy?: { link: string; label: string }) => {

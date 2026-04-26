@@ -5,7 +5,7 @@
 
 import type { Node, Edge } from "@xyflow/react";
 import { graphlib, layout as dagreLayout } from "@dagrejs/dagre";
-import type { Task } from "@/features/task/types/task.types";
+import type { Task } from "@/features/taskDetail";
 import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
 import { constants } from "@/utils/constants";
 

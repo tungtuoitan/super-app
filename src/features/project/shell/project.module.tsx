@@ -1,11 +1,12 @@
 import { Cuboid, Layers, CheckSquare } from "lucide-react";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
-import { MultiProjectEditorPanel } from "@/features/multiProject/Components/MultiProjectEditorPanel";
-import { TaskEditorPanel } from "@/features/task/Components/TaskEditorPanel";
-import { constants } from "@/utils/constants";
-import type { Task } from "@/features/task/types/task.types";
 import type { ModuleDefinition } from "@/shell/moduleRegistry";
+import {constants} from "@/utils/constants";
+import { TaskEditorPanel } from "@/features/taskDetail";
+import type { Task } from "@/features/taskDetail";
+// eslint-disable-next-line no-restricted-imports
+import { MultiProjectEditorPanel } from "@/features/multiProject";
 
 const ProjectEditorPanelAdapter = () => <ProjectEditorPanel />;
 const MultiProjectEditorPanelAdapter = () => <MultiProjectEditorPanel />;

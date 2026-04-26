@@ -2,7 +2,7 @@
  * MultiProject Kanban Type Definitions
  */
 
-import { Task } from "@/features/task/store/useTask.store";
+import type { Task } from "@/features/taskDetail";
 
 export interface DragItem {
     type: string;
