@@ -32,7 +32,7 @@ export function MultiProjectKanbanView() {
     const { canDropToColumn, handleDropTask } = useMultiProjectKanbanHelper();
 
     // ── Side-effects (headless) ──────────────────────────
-    useMultiProjectKanbanHeadless();
+    // useMultiProjectKanbanHeadless();
 
     // Show subtasks toggle (default: on)
     const [showSubtasks, setShowSubtasks] = useState(true);

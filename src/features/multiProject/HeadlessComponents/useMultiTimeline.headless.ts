@@ -84,10 +84,10 @@ export function useMultiTimelineHeadless() {
     }, [hasScrolledToToday, todayPosition, timelineRange, timelineScrollRef]);
 
     // Effect 4: Load tasks on mount / filter change (task mode only)
-    useEffect(() => {
-        if (mode !== "task") return;
-        if ($user.userId && projectIds.length > 0) loadTasksForProjects(projectIds);
-    }, [mode, $user.userId, projectIds, $user.filters?.taskGrid]);
+    // useEffect(() => {
+    //     if (mode !== "task") return;
+    //     if ($user.userId && projectIds.length > 0) loadTasksForProjects(projectIds);
+    // }, [mode, $user.userId, projectIds, $user.filters?.taskGrid]);
 
     // Effect 5: Recheck today visibility on dayWidth change
     useEffect(() => {

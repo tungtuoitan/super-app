@@ -15,7 +15,7 @@ import { useAuthStore } from "@/store/index";
 
 export function useMultiProjectDetailHeadless() {
     const { projects } = useProjectStore();
-    const { projectIds } = useMultiTimelineStore();
+    const { projectIds, mode} = useMultiTimelineStore();
     const { setProjectIds, setProjects } = useMultiTimelineStore();
     const { currentTab, filteredProjectIds, filteredProjects } = useMultiProjectDetailSelector();
     const { setSelectedProjectIds } = useMultiProjectDetailHelper();
@@ -38,7 +38,7 @@ export function useMultiProjectDetailHeadless() {
 
     // Load tasks once at the parent level — shared by TaskList, Kanban, Timeline tabs
     useEffect(() => {
-        if (!$user.userId || projectIds.length === 0) return;
+        if (!$user.userId || projectIds.length === 0 || mode !== "task") return;
         loadTasksForProjects(projectIds);
-    }, [$user.userId, projectIds, $user.filters?.taskGrid]);
+    }, [$user.userId, projectIds, $user.filters?.taskGrid, mode]);
 }

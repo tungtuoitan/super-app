@@ -15,8 +15,8 @@ export function useMultiProjectKanbanHeadless() {
     const { projectIds } = useMultiTimelineStore();
 
     // Load tasks when user is ready and projectIds change
-    useEffect(() => {
-        if (!$user.userId || projectIds.length === 0) return;
-        loadTasksForProjects(projectIds);
-    }, [$user.userId, projectIds, $user.filters?.taskGrid]);
+    // useEffect(() => {
+    //     if (!$user.userId || projectIds.length === 0) return;
+    //     loadTasksForProjects(projectIds);
+    // }, [$user.userId, projectIds, $user.filters?.taskGrid]);
 }
