@@ -10,13 +10,14 @@ import type { BaseTab } from "@/types/editor/tab.types";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { ProjectDetailContent } from "./ProjectDetailContent";
-import { ProjectEditorPanelHeadless } from "../HeadlessComponents/ProjectEditorPanelHeadless";
 import {useProjectDetailStore} from "../store/useProjectDetail.store";
+import {useProjectEditorPanelHeadless} from "../hooks/ProjectEditorPanel.headless";
 
 export function ProjectEditorPanel() {
     const { setOpenTabs } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
     const { contentRef } = useProjectDetailStore();
+    useProjectEditorPanelHeadless()
 
     const activeTab = getActiveTab();
 
@@ -30,7 +31,6 @@ export function ProjectEditorPanel() {
 
     return (
         <div className="w-full h-full flex flex-col overflow-hidden bg-background">
-            <ProjectEditorPanelHeadless />
             <div ref={contentRef} onScroll={handleScroll} className="flex-1 overflow-hidden bg-background">
                 <ProjectDetailContent />
             </div>

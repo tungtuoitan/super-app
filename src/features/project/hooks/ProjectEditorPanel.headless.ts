@@ -13,7 +13,7 @@ import { Project, useProjectStore } from "../store/useProject.store";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 
-export function ProjectEditorPanelHeadless() {
+export function useProjectEditorPanelHeadless() {
     const { openTabs, setOpenTabs } = useEditorTabsStore();
     const { getActiveTab } = useEditorTabHelper();
     const { setProjectId, setTabId, contentRef } = useProjectDetailStore();

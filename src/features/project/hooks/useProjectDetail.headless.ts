@@ -11,7 +11,7 @@ import { useTaskGridHelper } from "@/features/task/hooks/taskList/useTaskGrid.he
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useAuthStore } from "@/store/index";
 
-export function ProjectDetailHeadless() {
+export function useProjectDetailHeadless() {
     const { loadTasks } = useTaskGridHelper();
     const { $user } = useAuthStore();
     const { projectId } = useProjectDetailStore();

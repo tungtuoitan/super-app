@@ -16,8 +16,8 @@ import { TaskFilterPopup } from "@/features/task/Components/TaskFilterPopup";
 import { TaskSearchInput } from "@/features/task/Components/small/TaskSearchInput";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
-import { ProjectDetailHeadless } from "../HeadlessComponents/ProjectDetailHeadless";
 import type { TabConfig } from "../types/projectDetail.type";
+import {useProjectDetailHeadless} from "../hooks/useProjectDetail.headless";
 
 const TABS: TabConfig[] = [
     { id: "general", label: "GENERAL", icon: <Settings className="h-4 w-4" /> },
@@ -37,6 +37,7 @@ export function ProjectDetailContent() {
 
     // ── Handlers (from helper) ───────────────────────────
     const { setActiveTab, handleOpenWorkspace } = useProjectDetailHelper();
+    useProjectDetailHeadless()
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -55,7 +56,6 @@ export function ProjectDetailContent() {
 
     return (
         <div className="flex flex-col h-full w-full bg-background">
-            <ProjectDetailHeadless />
             {/* TabBar - Project style with uppercase labels */}
                 <div className="flex items-center border-b-2 border-primary/20 bg-muted/20">
                     <div className="flex flex-1">

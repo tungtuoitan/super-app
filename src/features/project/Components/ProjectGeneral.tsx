@@ -13,7 +13,7 @@ import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
-import { useProjectGeneralHeadless } from "../HeadlessComponents/useProjectGeneral.headless";
+import { useProjectGeneralHeadless } from "../hooks/useProjectGeneral.headless";
 import { formatDateTime } from "@/utils/formatters";
 import { ProjectImagePicker } from "./ProjectImagePicker";
 

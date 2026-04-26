@@ -21,7 +21,7 @@ import { Project, useProjectStore } from "../store/useProject.store";
 import { useProjectGridHelper } from "../hooks/useProjectGrid.helper";
 import { useProjectTabHelper } from "../hooks/useProjectTab.helper";
 import { useProjectGridSelector } from "../Selectors/useProjectGrid.selector";
-import { useProjectGridHeadless } from "../HeadlessComponents/useProjectGrid.headless";
+import { useProjectGridHeadless } from "../hooks/useProjectGrid.headless";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
 
 /**
