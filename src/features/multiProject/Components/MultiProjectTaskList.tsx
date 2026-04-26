@@ -18,7 +18,7 @@ import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
 import { cn } from "@/lib/utils";
 import { useMultiProjectTaskListSelector } from "../Selectors/useMultiProjectTaskList.selector";
 import { useMultiProjectTaskListHelper } from "../hooks/useMultiProjectTaskList.helper";
-import { useMultiProjectTaskListHeadless } from "../HeadlessComponents/useMultiProjectTaskList.headless";
+import { useMultiProjectTaskListHeadless } from "../hooks/useMultiProjectTaskList.headless";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { StatusCell, PriorityCell } from "./small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "./small/MultiProjectTaskListRow";

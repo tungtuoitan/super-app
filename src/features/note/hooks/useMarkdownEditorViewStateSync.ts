@@ -13,11 +13,12 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { constants } from "@/utils/constants";
 import type * as _monaco from "monaco-editor";
 
-export function MarkdownEditorViewStateSync() {
-    const { editorRef, editorMountCount } = useNoteDetailStore();
+export function useMarkdownEditorViewStateSync() {
+    const { editorRef, editorMountCount,isMounted } = useNoteDetailStore();
     const { activeTabId, setOpenTabs } = useEditorTabsStore();
     const { isLoadingTab, setIsLoadingTab } = useEditorStore();
     const { getActiveTab } = useEditorTabHelper();
+    
 
     // Track previous active tab to save state when switching
     const prevActiveTabIdRef = useRef<string | null>(null);
@@ -27,6 +28,9 @@ export function MarkdownEditorViewStateSync() {
 
     // Save editor position when switching away from tab
     useEffect(() => {
+        if(!isMounted) {
+            return;
+        }
         const editor = editorRef.current;
         if (!editor || (editor as any)._isDisposed) {
             return;

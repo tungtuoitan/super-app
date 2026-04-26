@@ -10,7 +10,7 @@
 import { useEffect } from "react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
-import { useMultiProjectTaskFlowHelper } from "../hooks/useMultiProjectTaskFlow.helper";
+import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import { buildTaskFlowLayout } from "../utils/multiProjectTaskFlow.utils";
 import { flowService } from "@/features/multiProject/service/flow.service";

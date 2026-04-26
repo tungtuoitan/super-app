@@ -12,7 +12,7 @@ import { Note } from "@/features/note/types/note.types";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 
-export function MarkdownEditorSync() {
+export function useMarkdownEditorSync({$mi}: { $mi: any }) {
     const { getActiveTab, openTab } = useEditorTabHelper();
     const { allKeywords } = useGeneralStore();
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
@@ -38,6 +38,7 @@ export function MarkdownEditorSync() {
 
     // Sync when external activeNote.description changes - convert [id] to [name][nameIndex]
     useEffect(() => {
+        if (!$mi) return;
         const keywordIds = [...(activeNote?.description??"").matchAll(/\[\[(.*?)\]\]/g)].map(m => m[1]);
         if(keywordIds.some(id => !allKeywords.find(kw => kw.id.toString() === id))){
             console.warn("Some keyword IDs not found in allKeywords");
@@ -61,6 +62,7 @@ export function MarkdownEditorSync() {
 
     // Sync external value changes to editor (only when editor doesn't have focus)
     useEffect(() => {
+        if (!$mi) return;
         const editor = editorRef.current;
 
         if (!editor || (editor as any)._isDisposed) {

@@ -22,7 +22,7 @@ import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatD
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "../hooks/useMultiTimeline.helper";
-import { useMultiTimelineHeadless } from "../HeadlessComponents/useMultiTimeline.headless";
+import { useMultiTimelineHeadless } from "../hooks/useMultiTimeline.headless";
 import {TaskBar} from "@/features/task/Components/TaskBar";
 
 export function MultiProjectTimelineView() {

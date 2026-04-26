@@ -5,11 +5,11 @@
  */
 
 import { useEffect } from "react";
-import { useMultiProjectTaskGridHelper } from "../hooks/useMultiProjectTaskGrid.helper";
+import { useMultiProjectTaskGridHelper } from "./useMultiProjectTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
-import { useMultiTimelineHelper } from "../hooks/useMultiTimeline.helper";
+import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
 import { storageService } from "@/services/storage.service";
 
 export function useMultiTimelineHeadless() {

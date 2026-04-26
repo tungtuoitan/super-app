@@ -7,14 +7,12 @@ import { CardContent } from "@/shared/components/ui/card";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
-import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
 import { MarkdownEditor } from "@/features/note/Components/MarkdownEditor";
-import { MarkdownEditorSync } from "../HeadlessComponents/MarkdownEditorSync";
-import { MarkdownEditorTheme } from "../HeadlessComponents/MarkdownEditorTheme";
 import { useMonaco } from "@monaco-editor/react";
 import { Loader2 } from "lucide-react";
+import {useMarkdownEditorTheme} from "../hooks/useMarkdownEditorTheme";
+import {useMarkdownEditorSync} from "../hooks/useMarkdownEditorSync";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -23,7 +21,10 @@ export function NoteDetailContent() {
     const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
+    useMarkdownEditorTheme({$mi: $miRef.current});
+    useMarkdownEditorSync({$mi: $miRef.current});
 
+    
     useEffect(() => {
         if (activeNote) {
             setNameError("");
@@ -46,8 +47,6 @@ export function NoteDetailContent() {
     return (
         <div className="h-full">
             <CardContent className="p-0 h-full">
-                {$miRef.current && <MarkdownEditorSync />}
-                {$miRef.current && <MarkdownEditorTheme $mi={$miRef.current} />}
                 {displayDesc !== null ? (
                     <MarkdownEditor />
                 ) : (

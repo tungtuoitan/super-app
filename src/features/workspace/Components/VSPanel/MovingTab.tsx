@@ -16,7 +16,7 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useDragDropManager, useDrop } from "react-dnd";
 import { useMovingTreeHelper } from "../../hooks/useMovingTree.helper";
 import { MovingTree } from "./MovingTree";
-import {CalculateMovingTreeContainerHeight} from "../../HeadlessComponents/CalculateMovingTreeContainerHeight";
+import {CalculateMovingTreeContainerHeight} from "../../hooks/useCalculateMovingTreeContainerHeight";
 
 export function MovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useMovingTreeStore();

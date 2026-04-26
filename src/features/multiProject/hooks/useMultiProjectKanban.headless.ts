@@ -5,7 +5,7 @@
  */
 
 import { useEffect } from "react";
-import { useMultiProjectTaskGridHelper } from "../hooks/useMultiProjectTaskGrid.helper";
+import { useMultiProjectTaskGridHelper } from "./useMultiProjectTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 

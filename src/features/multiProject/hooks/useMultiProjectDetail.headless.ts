@@ -9,8 +9,8 @@ import { useEffect } from "react";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
-import { useMultiProjectDetailHelper } from "../hooks/useMultiProjectDetail.helper";
-import { useMultiProjectTaskGridHelper } from "../hooks/useMultiProjectTaskGrid.helper";
+import { useMultiProjectDetailHelper } from "./useMultiProjectDetail.helper";
+import { useMultiProjectTaskGridHelper } from "./useMultiProjectTaskGrid.helper";
 import { useAuthStore } from "@/store/index";
 
 export function useMultiProjectDetailHeadless() {

@@ -16,7 +16,7 @@ import { MultiProjectTaskFlowView } from "./MultiProjectTaskFlowView";
 import { TaskFilterPopup } from "@/features/task/Components/TaskFilterPopup";
 import { TaskSearchInput } from "@/features/task/Components/small/TaskSearchInput";
 import { ProjectChip } from "./small/ProjectChip";
-import { useMultiProjectDetailHeadless } from "../HeadlessComponents/useMultiProjectDetail.headless";
+import { useMultiProjectDetailHeadless } from "../hooks/useMultiProjectDetail.headless";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import { useMultiProjectDetailHelper } from "../hooks/useMultiProjectDetail.helper";
 import type { TabType, TabConfig } from "../types/multiProjectDetail.type";
