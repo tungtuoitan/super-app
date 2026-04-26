@@ -7,7 +7,7 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 
 import { useMemo } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
-import { useGeneralStore } from "@/store/General.store";
+import { useGeneralStore } from "@/shared/store/General.store";
 import { constants } from "@/utils/constants";
 
 export const useTaskKanbanSelector = () => {

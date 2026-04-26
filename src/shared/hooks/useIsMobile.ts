@@ -1,4 +1,4 @@
-import { useMobileStore } from "@/store/Mobile.store";
+import { useMobileStore } from "@/shared/store/Mobile.store";
 
 /**
  * Hook to detect if the app is running on a mobile device

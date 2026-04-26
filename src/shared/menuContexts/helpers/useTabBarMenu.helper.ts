@@ -6,7 +6,7 @@
 
 import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 import { constants } from "@/utils/constants";
 import type { Task } from "@/features/task/store/useTask.store";
 import type { BaseTab } from "@/shell/types/tab.types";

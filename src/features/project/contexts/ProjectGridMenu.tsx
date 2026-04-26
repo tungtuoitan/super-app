@@ -2,7 +2,7 @@ import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, Layers as MultiProjectIcon } from "lucide-react";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 
 /**
  * ProjectGridMenu

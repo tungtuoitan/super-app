@@ -8,8 +8,8 @@ import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 import { LogItem } from "./LogItem";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { useGridControlStore } from "@/store/useGridControl.store";
-import { useMobileStore } from "@/store/Mobile.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useMobileStore } from "@/shared/store/Mobile.store";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 

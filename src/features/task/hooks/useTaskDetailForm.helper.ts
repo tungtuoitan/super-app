@@ -10,7 +10,7 @@ import { TaskDTO, taskService } from "../service/task.service";
 import { projectService } from "@/features/project/service/project.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useEditorTabBarStore } from "@/store/index";
-import { useGeneralStore } from "@/store/General.store";
+import { useGeneralStore } from "@/shared/store/General.store";
 import { BaseTab } from "@/shell/types/tab.types";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared/components";
 import { getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextToChecklist } from "@/utils/checklist.utils";

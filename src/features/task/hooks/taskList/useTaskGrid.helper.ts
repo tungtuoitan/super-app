@@ -1,4 +1,4 @@
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 /**
  * Task Grid Helper Hook
  * Business logic for task grid operations

@@ -11,7 +11,7 @@ import { useProjectStore } from "@/features/project/store/useProject.store";
 
 import { useMemo } from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
-import { useGeneralStore } from "@/store/General.store";
+import { useGeneralStore } from "@/shared/store/General.store";
 import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { IStatusOption } from "@/shared/components";

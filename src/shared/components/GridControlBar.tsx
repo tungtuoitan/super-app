@@ -8,8 +8,8 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/Button";
 import { GenericFilterPopup } from "./GenericFilterPopup";
-import { useGridControlStore } from "@/store/useGridControl.store";
-import { useMobileStore } from "@/store/Mobile.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useMobileStore } from "@/shared/store/Mobile.store";
 
 export function GridControlBar({ hideFilter }: { hideFilter?: boolean } = {}) {
     const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useGridControlStore();

@@ -12,7 +12,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 
 export const useNoteGridHelper = () => {

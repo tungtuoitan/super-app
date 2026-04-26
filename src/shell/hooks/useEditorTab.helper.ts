@@ -6,7 +6,7 @@ import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { Ws } from "@/types/workspace.types";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
 import { useGeneralStore } from "@/store/index";
 import {

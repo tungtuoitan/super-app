@@ -12,7 +12,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/
 import { constants } from "@/utils/constants";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { kconstants } from "../../utils/K.Constants";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { containsNormalized } from "../../utils/searchUtils";
 import { useEditorTabBarStore } from "@/store/index";

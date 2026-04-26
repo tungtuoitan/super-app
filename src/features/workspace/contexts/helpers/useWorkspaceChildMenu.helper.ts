@@ -11,7 +11,7 @@ import { noteService } from "@/features/note/service/note.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 import {workspaceService} from "../../service/workspace.service";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader";

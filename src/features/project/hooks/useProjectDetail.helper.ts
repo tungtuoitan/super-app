@@ -11,7 +11,7 @@ import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";

@@ -4,7 +4,7 @@ import { FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ICON_MAP, IconType, ICON_COLORS } from "@/shared/icons";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";

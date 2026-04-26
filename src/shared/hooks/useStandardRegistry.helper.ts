@@ -5,7 +5,7 @@
  */
 
 import { useSnackbar } from "notistack";
-import { useGeneralStore } from "@/store/General.store";
+import { useGeneralStore } from "@/shared/store/General.store";
 import { standardRegistryService } from "@/services/standardRegistry.service";
 import { keywordService } from "@/services/keyword.service";
 import { useAuthStore } from "@/shell/store/Auth.store";

@@ -6,7 +6,7 @@ import { VSCodeLayout } from "@/shell/components";
 import { AuthCallback } from "@/shell/components/AuthCallback";
 import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
-import {useMobileStore} from "@/store/Mobile.store";
+import {useMobileStore} from "@/shared/store/Mobile.store";
 
 /**
  * Main navigation component.

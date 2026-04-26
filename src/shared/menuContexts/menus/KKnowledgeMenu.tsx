@@ -1,6 +1,6 @@
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 
 /**

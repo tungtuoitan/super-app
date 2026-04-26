@@ -8,7 +8,7 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useNavigationStore } from "@/contexts/NavigationContext";
 import { noteService } from "@/features/note/service/note.service";
 import { parseKeywordLink } from "@/utils/keyword-link.utils";

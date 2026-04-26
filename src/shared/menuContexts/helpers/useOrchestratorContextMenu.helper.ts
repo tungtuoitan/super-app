@@ -4,7 +4,7 @@
  */
 
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
-import { OrchestratorContextMenuType, useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { OrchestratorContextMenuType, useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 import { Folder } from "@/types/folder.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 

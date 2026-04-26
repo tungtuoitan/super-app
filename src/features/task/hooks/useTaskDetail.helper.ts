@@ -14,7 +14,7 @@ import React from "react";
 import { Task, useTaskStore } from "../store/useTask.store";
 import { taskService } from "../service/task.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useGeneralStore } from "@/store/General.store";
+import { useGeneralStore } from "@/shared/store/General.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";

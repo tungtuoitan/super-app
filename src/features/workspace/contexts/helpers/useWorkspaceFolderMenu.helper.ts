@@ -16,7 +16,7 @@ import { workspaceService } from "../../service/workspace.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "../../hooks/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "../../types/workspace.types";

@@ -7,7 +7,7 @@
 import React from "react";
 import { ConfirmationPopover } from "@/shared/components/feedback/ConfirmationPopover";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
-import { useConfirmationPopoverStore } from "@/store/ConfirmationPopover.store";
+import { useConfirmationPopoverStore } from "@/shared/store/ConfirmationPopover.store";
 
 /**
  * Container component that manages confirmation popover state

@@ -2,7 +2,7 @@ import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus, Trash2 } from "lucide-react";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 
 export function KTestFlowMenu() {
     const { contextData } = useOrchestratorContextMenuStore();

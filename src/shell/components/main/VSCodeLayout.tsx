@@ -8,10 +8,10 @@ import { VSEditorArea } from "./VSEditorArea";
 import { useActivityBarStore } from "@/store/index";
 import { useGridAutoRegisterHelper } from "@/shell/hooks/useGridAutoRegister.helper";
 import { useLocation } from "react-router-dom";
-import { useMobileStore } from "@/store/Mobile.store";
+import { useMobileStore } from "@/shared/store/Mobile.store";
 import { constants } from "@/utils/constants";
 import { GridControlBar } from "@/shared/components/GridControlBar";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import {useCheckIsMobile} from "../../hooks/useCheckIsMobile";
 

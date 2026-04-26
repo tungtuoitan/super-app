@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { useEditorTabBarStore } from "@/store/index";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { Project } from "../store/useProject.store";
-import { useGeneralStore } from "@/store/General.store";
+import { useGeneralStore } from "@/shared/store/General.store";
 import { constants } from "@/utils/index";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared/components";

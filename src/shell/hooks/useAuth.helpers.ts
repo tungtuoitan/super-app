@@ -19,7 +19,7 @@ import { retrieveAndClearPkceValues, validateState } from "@/utils/pkce.utils";
 import { useAuthCallbackStore } from "@/shell/store/AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
-import {useGridControlStore} from "@/store/useGridControl.store";
+import {useGridControlStore} from "@/shared/store/useGridControl.store";
 import {useGridAutoRegisterHelper} from "@/shell/hooks/useGridAutoRegister.helper";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import { debugLog } from "@/shell/hooks/useDebugLog";

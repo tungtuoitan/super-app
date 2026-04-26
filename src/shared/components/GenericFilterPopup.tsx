@@ -17,7 +17,7 @@ import type { UserFilters, FilterFieldConfig, ViewFilter } from "@/types/common.
 import { constants } from "@/utils/constants";
 import { useGenericFilterHelper } from "@/shared/hooks/useGenericFilterHelper";
 import { useAuthStore, useGeneralStore } from "@/store/index";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/utils/formatters";
 
 export function GenericFilterPopup() {

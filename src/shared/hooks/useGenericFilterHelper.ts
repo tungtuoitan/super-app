@@ -6,7 +6,7 @@
 
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { constants } from "@/utils/constants";
 import type { ViewFilter, UserFilters, FilterFieldConfig, UpdateUserProfileRequest } from "@/types/common.types";
 import { filterUtils } from "@/utils/filter.utils";

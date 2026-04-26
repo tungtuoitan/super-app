@@ -12,17 +12,17 @@ import { MultiTimelineProvider } from "@/features/multiProject/store/useMultiTim
 import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import { WikiProvider } from "@/features/Wiki/store/useWiki.store";
 import { OrchestratorContextMenu } from "@/shared/menuContexts";
-import { ConfirmationPopoverProvider } from "@/store/ConfirmationPopover.store";
+import { ConfirmationPopoverProvider } from "@/shared/store/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/shell/components/ConfirmationPopoverContainer";
 import MainNav from "./components/main/MainNav";
 import { GeneralProvider, CommandPaletteProvider } from "@/store/index";
 import { NavProvider } from "@/contexts/NavigationContext";
 import { AuthGuard } from "@/shell/auth/AuthGuard";
-import { OrchestratorContextMenuStoreProvider } from "@/store/ContextMenu.store";
-import { GridControlProvider } from "@/store/useGridControl.store";
+import { OrchestratorContextMenuStoreProvider } from "@/shared/menuContexts/ContextMenu.store";
+import { GridControlProvider } from "@/shared/store/useGridControl.store";
 import { CurrentProjectProvider } from "@/store/useCurrentProject.store";
-import { MobileProvider } from "@/store/Mobile.store";
-import { DebugLoggerProvider } from "@/store/DebugLogger.store";
+import { MobileProvider } from "@/shared/store/Mobile.store";
+import { DebugLoggerProvider } from "@/shared/store/DebugLogger.store";
 import { ShellProvider } from "./store/ShellProvider";
 
 /**

@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader"; 
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";

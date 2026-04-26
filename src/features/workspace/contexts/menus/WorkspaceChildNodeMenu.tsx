@@ -9,7 +9,7 @@ import {
     RotateCcw as RestoreIcon,
 } from "lucide-react";
 import { useWorkspaceChildMenuHelper } from "../helpers/useWorkspaceChildMenu.helper";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 

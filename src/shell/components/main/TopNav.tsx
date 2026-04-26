@@ -2,7 +2,7 @@ import { MouseEvent, useEffect, useState } from "react";
 import { constants } from "@/utils/constants";
 import { envConfig } from "@/utils/config/env.config";
 import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
-import { useMobileStore } from "@/store/Mobile.store";
+import { useMobileStore } from "@/shared/store/Mobile.store";
 import { CommandPalette } from "@/shared/components/CommandPalette";
 
 /**

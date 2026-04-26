@@ -1,6 +1,6 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { Plus } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 
 /**
  * Blank-space context menu inside KNodeEditorPanel.

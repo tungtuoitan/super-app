@@ -7,7 +7,7 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 
 import { useMemo } from "react";
 import { useTaskStore } from "../store/useTask.store";
-import { useGeneralStore } from "@/store/General.store";
+import { useGeneralStore } from "@/shared/store/General.store";
 import { IStatusOption } from "@/shared/components";
 import { getTaskStatusColors, getTaskPriorityColors } from "../utils/TaskDetail.utils";
 import { sortTasksHierarchically } from "../utils/TaskGrid.utils";

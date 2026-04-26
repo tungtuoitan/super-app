@@ -17,7 +17,7 @@ import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 

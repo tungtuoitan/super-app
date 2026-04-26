@@ -6,7 +6,7 @@
 
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { constants } from "@/utils/index";
 
 /**

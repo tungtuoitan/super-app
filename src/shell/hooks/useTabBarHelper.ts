@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useGridControlStore } from "@/store/useGridControl.store";
+import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
