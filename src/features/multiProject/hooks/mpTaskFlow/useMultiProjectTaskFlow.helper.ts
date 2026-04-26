@@ -11,16 +11,16 @@ import { useCallback, useRef } from "react";
 import { applyNodeChanges, applyEdgeChanges } from "@xyflow/react";
 import type { NodeChange, EdgeChange, Connection, Edge } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
-import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
-import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
+import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
+import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import { useAuthStore } from "@/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { flowService } from "@/features/multiProject/service/flow.service";
 import { taskService } from "@/features/task/service/task.service";
 import type { TaskDTO } from "@/features/task/service/task.service";
 import type { Task } from "@/features/task/types/task.types";
-import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
-import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "../utils/multiProjectTaskFlow.utils";
+import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
+import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "../../utils/multiProjectTaskFlow.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 
@@ -165,7 +165,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                 const otherCenters: { cx: number; cy: number }[] = [];
                 for (const n of prev) {
                     if (draggedIds.has(n.id)) continue;
-                    const h = n.measured?.height ?? estimateNodeHeight((n.data as import("../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+                    const h = n.measured?.height ?? estimateNodeHeight((n.data as import("../../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
                     otherCenters.push({ cx: n.position.x + NODE_WIDTH / 2, cy: n.position.y + h / 2 });
                 }
 
@@ -173,7 +173,7 @@ export const useMultiProjectTaskFlowHelper = () => {
                     if (!draggedIds.has(n.id)) return n;
 
                     const startPos = dragStartRef.current.get(n.id);
-                    const h = n.measured?.height ?? estimateNodeHeight((n.data as import("../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+                    const h = n.measured?.height ?? estimateNodeHeight((n.data as import("../../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
                     let { x, y } = n.position;
 
                     // ── 1. Center-snap (always on) — snap only the closer axis ──
@@ -282,8 +282,8 @@ export const useMultiProjectTaskFlowHelper = () => {
             const srcNode = flowNodes.find((n) => n.id === sourceId);
             const tgtNode = flowNodes.find((n) => n.id === targetId);
             if (!srcNode || !tgtNode) return { sourceHandle: sourceHandle ?? "bottom", targetHandle: targetHandle ?? "top" };
-            const srcH = srcNode.measured?.height ?? estimateNodeHeight((srcNode.data as import("../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
-            const tgtH = tgtNode.measured?.height ?? estimateNodeHeight((tgtNode.data as import("../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+            const srcH = srcNode.measured?.height ?? estimateNodeHeight((srcNode.data as import("../../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
+            const tgtH = tgtNode.measured?.height ?? estimateNodeHeight((tgtNode.data as import("../../types/multiProjectTaskFlow.type").TaskFlowNodeData).task);
             const pair = nearestHandlePair(
                 srcNode.position.x + NODE_WIDTH / 2, srcNode.position.y + srcH / 2,
                 tgtNode.position.x + NODE_WIDTH / 2, tgtNode.position.y + tgtH / 2,

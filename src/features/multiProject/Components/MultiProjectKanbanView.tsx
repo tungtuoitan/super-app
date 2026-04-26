@@ -16,8 +16,8 @@ import { useTaskStore } from "@/features/task/store/useTask.store";
 import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiProjectKanbanSelector } from "../Selectors/useMultiProjectKanban.selector";
-import { useMultiProjectKanbanHelper } from "../hooks/useMultiProjectKanban.helper";
-import { useMultiProjectKanbanHeadless } from "../hooks/useMultiProjectKanban.headless";
+import { useMultiProjectKanbanHelper } from "../hooks/mpTaskKanban/useMultiProjectKanban.helper";
+import { useMultiProjectKanbanHeadless } from "../hooks/mpTaskKanban/useMultiProjectKanban.headless";
 import { KanbanColumn } from "./small/KanbanColumn";
 
 export function MultiProjectKanbanView() {

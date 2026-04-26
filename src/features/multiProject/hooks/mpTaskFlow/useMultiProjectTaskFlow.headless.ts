@@ -9,17 +9,17 @@
 
 import { useEffect } from "react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
-import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
+import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
-import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
-import { buildTaskFlowLayout } from "../utils/multiProjectTaskFlow.utils";
+import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
+import { buildTaskFlowLayout } from "../../utils/multiProjectTaskFlow.utils";
 import { flowService } from "@/features/multiProject/service/flow.service";
 import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/features/multiProject/service/flow.service";
-import type { FlowEdgeData } from "../types/multiProjectTaskFlow.type";
+import type { FlowEdgeData } from "../../types/multiProjectTaskFlow.type";
 import { useAuthStore } from "@/store/Auth.store";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import type { Edge } from "@xyflow/react";
-import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
+import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 
 export function useMultiProjectTaskFlowHeadless() {
     const { setFlowNodes, setFlowEdges, setSavedEdges, savedEdges, setSavedPositions, savedPositions, positionsLoaded, setPositionsLoaded, isTaskFlowLoading, lockOldNodes } = useMultiTaskFlowStore();

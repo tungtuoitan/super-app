@@ -6,7 +6,7 @@
 
 import type { Node } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
-import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
+import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
 import { useTaskGridStore } from "@/features/task/store/useTask.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
@@ -15,7 +15,7 @@ import type { TaskDTO } from "@/features/task/service/task.service";
 import { transformTaskData } from "@/features/task/utils/TaskDetail.utils";
 import { flowService } from "@/features/multiProject/service/flow.service";
 import { toLocalISOString } from "@/utils/date.utils";
-import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
+import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/task/types/task.types";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useProjectTaskFolderHelper } from "@/features/project/hooks/useProjectTaskFolderHelper";

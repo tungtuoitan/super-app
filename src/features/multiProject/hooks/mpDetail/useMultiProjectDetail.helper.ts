@@ -5,8 +5,8 @@
  */
 
 import { useEditorTabsStore } from "@/store/index";
-import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
-import type { TabType } from "../types/multiProjectDetail.type";
+import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
+import type { TabType } from "../../types/multiProjectDetail.type";
 
 export const useMultiProjectDetailHelper = () => {
     const { setOpenTabs, activeTabId } = useEditorTabsStore();

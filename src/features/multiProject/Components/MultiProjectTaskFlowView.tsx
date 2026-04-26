@@ -20,10 +20,10 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Wand2, Scan, Crosshair, RefreshCw, Focus, Lock, Unlock, Map } from "lucide-react";
 import { MultiTaskFlowProvider, useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
-import { useMultiProjectTaskFlowHeadless } from "../hooks/useMultiProjectTaskFlow.headless";
+import { useMultiProjectTaskFlowHeadless } from "../hooks/mpTaskFlow/useMultiProjectTaskFlow.headless";
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
-import { useMultiProjectTaskFlowHelper } from "../hooks/useMultiProjectTaskFlow.helper";
-import { useMultiProjectTaskFlowNodeHelper } from "../hooks/useMultiProjectTaskFlowNode.helper";
+import { useMultiProjectTaskFlowHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
+import { useMultiProjectTaskFlowNodeHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import { cn } from "@/lib/utils";

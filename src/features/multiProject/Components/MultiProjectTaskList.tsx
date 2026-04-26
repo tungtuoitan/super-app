@@ -13,16 +13,16 @@ import { Loader2, CornerDownRight } from "lucide-react";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Task, useTaskStore } from "@/features/task/store/useTask.store";
-import { useMultiProjectTaskGridHelper } from "../hooks/useMultiProjectTaskGrid.helper";
+import { useMultiProjectTaskGridHelper } from "../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
 import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";
 import { cn } from "@/lib/utils";
 import { useMultiProjectTaskListSelector } from "../Selectors/useMultiProjectTaskList.selector";
-import { useMultiProjectTaskListHelper } from "../hooks/useMultiProjectTaskList.helper";
-import { useMultiProjectTaskListHeadless } from "../hooks/useMultiProjectTaskList.headless";
+import { useMultiProjectTaskListHeadless } from "../hooks/mpTaskList/useMultiProjectTaskList.headless";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { StatusCell, PriorityCell } from "./small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "./small/MultiProjectTaskListRow";
 import { MakeIndependentDropZone } from "./small/MakeIndependentDropZone";
+import {useMultiProjectTaskListHelper} from "../hooks/mpTaskList/useMultiProjectTaskList.helper";
 
 /**
  * MultiProjectTaskList - task grid with table display for multiple projects

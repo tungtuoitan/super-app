@@ -14,7 +14,7 @@ import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 
 export function useMarkdownEditorSync({$mi}: { $mi: any }) {
     const { getActiveTab, openTab } = useEditorTabHelper();
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useGeneralStore(); 
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
 
     // Get active tab and note

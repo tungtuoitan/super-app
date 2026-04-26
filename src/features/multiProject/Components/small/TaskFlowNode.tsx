@@ -13,7 +13,7 @@ import { Handle, Position, useStore } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
-import { useMultiProjectTaskFlowNodeHelper } from "@/features/multiProject/hooks/useMultiProjectTaskFlowNode.helper";
+import { useMultiProjectTaskFlowNodeHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useMultiProjectTaskFlowSelector } from "@/features/multiProject/Selectors/useMultiProjectTaskFlow.selector";
 import { useGeneralStore } from "@/store/General.store";
 import { useTaskTabHelper } from "@/features/task/hooks/useTaskTab.helper";

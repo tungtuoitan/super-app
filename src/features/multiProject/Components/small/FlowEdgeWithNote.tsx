@@ -9,7 +9,7 @@ import type { EdgeProps, Edge } from "@xyflow/react";
 import { MessageSquarePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
-import { useMultiProjectTaskFlowHelper } from "@/features/multiProject/hooks/useMultiProjectTaskFlow.helper";
+import { useMultiProjectTaskFlowHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
 
 const ARROW_CYCLE: ArrowDirection[] = ["forward", "backward", "both"];

@@ -19,8 +19,8 @@ import { getProjectStatusColors } from "@/features/project/Components/ProjectSta
 import { TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/task/utils/TaskGrid.utils";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
-import { useMultiTimelineHelper } from "../hooks/useMultiTimeline.helper";
-import { useMultiTimelineHeadless } from "../hooks/useMultiTimeline.headless";
+import { useMultiTimelineHelper } from "../hooks/mpTimeline/useMultiTimeline.helper";
+import { useMultiTimelineHeadless } from "../hooks/mpTimeline/useMultiTimeline.headless";
 import { ProjectBar } from "./small/ProjectBar";
 import { PRO_ROW_HEIGHT } from "../utils/multiProjectDetail.constants";
 
