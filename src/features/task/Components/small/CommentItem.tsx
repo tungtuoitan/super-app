@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { RichTextEditor } from "@/shared/components";
 import { useTaskCommentSelector } from "../../Selectors/TaskCommentSelector";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
-import { useTaskCommentHelper } from "../../hooks/useTaskComment.helper";
+import { useTaskCommentHelper } from "../../hooks/taskComment/useTaskComment.helper";
 import { useTaskSectionStore } from "../../store/useTaskSection.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";

@@ -19,13 +19,13 @@ import {
     migrateToTestcase,
     migrateFromTestcase,
 } from "@/utils/checklist.utils";
-import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
-import { useTaskChecklistSelector } from "../Selectors/TaskChecklistSelector";
-import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklistSelector";
-import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskDetailChecklistHelper } from "../hooks/useTaskDetailChecklist.helper";
-import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
-import { useTaskSectionStore } from "../store/useTaskSection.store";
+import {useTaskDetailChecklistSelector} from "../../Selectors/TaskDetailChecklistSelector";
+import {useTaskChecklistSelector} from "../../Selectors/TaskChecklistSelector";
+import {useTaskDetailSelector} from "../../Selectors/TaskDetailSelector";
+import {useTaskChecklistStore} from "../../store/useTaskChecklist.store";
+import {useTaskSectionStore} from "../../store/useTaskSection.store";
+import {useTaskDetailChecklistHelper} from "./useTaskDetailChecklist.helper";
+import {useTaskCommentHelper} from "../taskComment/useTaskComment.helper";
 
 export const useTaskChecklistHelper = () => {
     // ── Read from selectors ───────────────────────────────────────────────────

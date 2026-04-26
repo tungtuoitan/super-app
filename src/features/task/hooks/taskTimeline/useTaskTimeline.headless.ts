@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useTaskTimelineStore, STORAGE_KEY_ZOOM } from "../store/useTaskTimeline.store";
-import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
-import { useTaskTimelineHelper } from "../hooks/useTaskTimeline.helper";
+import { useTaskTimelineStore, STORAGE_KEY_ZOOM } from "../../store/useTaskTimeline.store";
+import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
+import { useTaskTimelineHelper } from "./useTaskTimeline.helper";
 import { storageService } from "@/services/storage.service";
 
 export function useTaskTimelineHeadless() {

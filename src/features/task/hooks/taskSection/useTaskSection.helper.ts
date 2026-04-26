@@ -5,21 +5,21 @@
  */
 
 
-import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
-import { useTaskSectionStore } from "../store/useTaskSection.store";
-import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskCustomTabSelector } from "../Selectors/TaskCustomTabSelector";
-import { useTaskSectionSelector } from "../Selectors/TaskSectionSelector";
-import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
+import { useTaskDetailSectionStore } from "../../store/useTaskDetailSection.store";
+import { useTaskSectionStore } from "../../store/useTaskSection.store";
+import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
+import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector";
+import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
+import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
 import { useAuthStore } from "@/store/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
-import { taskService } from "../service/task.service";
-import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../utils/customTab.utils";
-import { isCustomTab, getCustomTabId } from "../utils/taskDetailSection.utils";
+import { taskService } from "../../service/task.service";
+import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../../utils/customTab.utils";
+import { isCustomTab, getCustomTabId } from "../../utils/taskDetailSection.utils";
 import { BaseTab } from "@/types/editor/tab.types";
-import { Task } from "../store/useTask.store";
-import type { SectionTab } from "../store/useTaskDetailSection.store";
+import { Task } from "../../store/useTask.store";
+import type { SectionTab } from "../../store/useTaskDetailSection.store";
 
 export const useTaskSectionHelper = () => {
     const { activeSection, setActiveSection } = useTaskDetailSectionStore();

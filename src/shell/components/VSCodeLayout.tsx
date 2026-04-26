@@ -9,11 +9,11 @@ import { useActivityBarStore } from "@/store/index";
 import { useGridAutoRegisterHelper } from "@/shell/hooks/useGridAutoRegister.helper";
 import { useLocation } from "react-router-dom";
 import { useMobileStore } from "@/store/Mobile.store";
-import { CheckIsMobile } from "@/shell/hooks/useCheckIsMobile";
 import { constants } from "@/utils/constants";
 import { GridControlBar } from "@/shared/components/GridControlBar";
 import { useGridControlStore } from "@/store/useGridControl.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";
+import {useCheckIsMobile} from "../hooks/useCheckIsMobile";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -25,6 +25,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const { setIsPanelVisible } = useActivityBarStore();
     const mobileEditorRef = useRef<ImperativePanelHandle>(null);
     const { moduleName } = useGridControlStore();
+    useCheckIsMobile()
 
     const { registerGrid } = useGridAutoRegisterHelper();
 
@@ -50,7 +51,6 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                 className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
                 style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
             >
-                <CheckIsMobile />
                 <ActivityBar horizontal />
 
                 <PanelGroup direction="vertical" autoSaveId="mobile-layout-vertical" className="flex-1">
@@ -81,7 +81,6 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
             className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
             style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
         >
-            <CheckIsMobile />
             <div className="flex-1 flex overflow-hidden">
                 <ActivityBar />
 

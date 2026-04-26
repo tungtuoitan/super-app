@@ -16,13 +16,13 @@ import {
     findItemCursorOffset,
     getFlatItems,
 } from "@/utils/checklist.utils";
-import { useTaskProcessStore } from "../store/useTaskProcess.store";
-import { useTaskProcessSelector } from "../Selectors/TaskProcessSelector";
-import { useTaskDetailProcessSelector } from "../Selectors/TaskDetailProcessSelector";
-import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskDetailProcessHelper } from "../hooks/useTaskDetailProcess.helper";
-import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
-import { useTaskSectionStore } from "../store/useTaskSection.store";
+import { useTaskProcessStore } from "../../store/useTaskProcess.store";
+import { useTaskProcessSelector } from "../../Selectors/TaskProcessSelector";
+import { useTaskDetailProcessSelector } from "../../Selectors/TaskDetailProcessSelector";
+import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
+import { useTaskDetailProcessHelper } from "./useTaskDetailProcess.helper";
+import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
+import { useTaskSectionStore } from "../../store/useTaskSection.store";
 
 export const useTaskProcessHelper = () => {
     // ── Read from selectors ───────────────────────────────────────────────────

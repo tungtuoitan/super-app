@@ -25,7 +25,7 @@ import { useCommandPaletteHelper } from "@/shell/hooks/useCommandPalette.helper"
 import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
+import { useTaskCommentHelper } from "./taskComment/useTaskComment.helper";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 
 // Re-export utils for backward compatibility

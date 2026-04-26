@@ -8,11 +8,11 @@ import { Search, Link2 } from "lucide-react";
 import { useCommandPaletteStore } from "@/store/useCommandPalette.store";
 import { useCommandPaletteHelper } from "@/shell/hooks/useCommandPalette.helper";
 import { HighlightedText } from "./HighlightedText";
-import { CommandPaletteKeyDown } from "@/shell/hooks/useCommandPaletteKeyDown";
 import { useGeneralStore } from "@/store/General.store";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { Keyword, KeywordType } from "@/types/keyword.types";
+import {useCommandPaletteKeyDown} from "@/shell/hooks/useCommandPaletteKeyDown";
 
 const ALL_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];
 
@@ -32,6 +32,7 @@ export function CommandPalette() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword, alreadyLinkedIds, setAlreadyLinkedIds } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, close } = useCommandPaletteHelper();
     const { allKeywords } = useGeneralStore();
+    useCommandPaletteKeyDown()
 
     const [selectedType, setSelectedType] = useState<KeywordType | null>(null);
 
@@ -80,7 +81,6 @@ export function CommandPalette() {
 
     return (
         <>
-            <CommandPaletteKeyDown />
             {/* Backdrop */}
             <div className="fixed inset-0 bg-black/50 z-[100]" onClick={close} />
 

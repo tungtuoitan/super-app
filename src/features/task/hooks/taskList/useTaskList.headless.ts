@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useTaskStore } from "../store/useTask.store";
+import { useTaskStore } from "../../store/useTask.store";
 
 export function useTaskListHeadless() {
     const { taskContainerRef, setTaskContainerWidth } = useTaskStore();

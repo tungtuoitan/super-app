@@ -6,15 +6,15 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  */
 
 
-import { Task, useTaskStore } from "../store/useTask.store";
+import { Task, useTaskStore } from "../../store/useTask.store";
 import { useAuthStore, useEditorTabsStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { taskService } from "../service/task.service";
+import { taskService } from "../../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";
-import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../store/useTaskTimeline.store";
-import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
-import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "../utils/TaskGrid.utils";
+import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/useTaskTimeline.store";
+import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
+import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "../../utils/TaskGrid.utils";
 
 export const useTaskTimelineHelper = () => {
     const { setTasks } = useTaskStore();

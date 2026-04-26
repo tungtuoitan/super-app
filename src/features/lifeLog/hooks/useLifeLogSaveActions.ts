@@ -5,9 +5,9 @@ import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { useEditorTabsStore } from "@/store/index";
 import { toLocalISOString } from "@/utils/date.utils";
-import type { SaveActions } from "@/shell/hooks/useSaveActions.types";
 import type { BaseTab } from "@/types/editor/tab.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
+import {SaveActions} from "@/types/actions.types";
 
 export function useLifeLogSaveActions(): SaveActions {
     const { upsertLog } = useLifeLogLogHelper();

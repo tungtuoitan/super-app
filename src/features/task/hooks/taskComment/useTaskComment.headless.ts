@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskCommentHelper } from "../hooks/useTaskComment.helper";
-import { useTaskCommentStore } from "../store/useTaskComment.store";
-import { useTaskSectionStore } from "../store/useTaskSection.store";
+import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
+import { useTaskCommentStore } from "../../store/useTaskComment.store";
+import { useTaskSectionStore } from "../../store/useTaskSection.store";
+import {useTaskCommentHelper} from "./useTaskComment.helper";
 
 export function useTaskCommentHeadless() {
     const { selectedTask } = useTaskDetailSelector();

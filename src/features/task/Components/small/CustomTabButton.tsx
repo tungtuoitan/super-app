@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useTaskDetailSectionStore } from "../../store/useTaskDetailSection.store";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector";
-import { useTaskSectionHelper } from "../../hooks/useTaskSection.helper";
+import { useTaskSectionHelper } from "../../hooks/taskSection/useTaskSection.helper";
 import { TAB_COLORS } from "../../task.constants";
 import type { SectionTab } from "../../store/useTaskDetailSection.store";
 

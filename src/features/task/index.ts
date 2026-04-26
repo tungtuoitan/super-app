@@ -45,7 +45,7 @@ export { useTaskGridStore } from "./store/useTaskGrid.store";
 
 // Helpers (only expose hooks needed by other features)
 export { useTaskTabHelper } from "./hooks/useTaskTab.helper";
-export { useTaskGridHelper } from "./hooks/useTaskGrid.helper";
+export { useTaskGridHelper } from "./hooks/taskList/useTaskGrid.helper";
 export { useTaskDetailHelper } from "./hooks/useTaskDetail.helper";
 
 // Services (only expose what other features need)

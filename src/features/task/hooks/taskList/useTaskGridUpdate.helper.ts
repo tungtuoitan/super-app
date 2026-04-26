@@ -7,13 +7,13 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  */
 
 
-import { Task, useTaskStore } from "../store/useTask.store";
-import { useTaskGridHelper } from "../hooks/useTaskGrid.helper";
+import { Task, useTaskStore } from "../../store/useTask.store";
 import { useAuthStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { taskService } from "../service/task.service";
+import { taskService } from "../../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
-import { getSubtasksOutsideRange } from "../utils/TaskGrid.utils";
+import { getSubtasksOutsideRange } from "../../utils/TaskGrid.utils";
+import {useTaskGridHelper} from "./useTaskGrid.helper";
 
 export const useTaskGridUpdateHelper = () => {
     const { tasks, setTasks } = useTaskStore();

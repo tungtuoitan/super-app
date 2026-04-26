@@ -11,7 +11,7 @@ import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useTaskStore } from "../store/useTask.store";
 import { TaskDetailContent } from "./TaskDetailContent";
-import { useTaskDetailHeadless } from "../HeadlessComponents/useTaskDetail.headless";
+import { useTaskDetailHeadless } from "../hooks/useTaskDetail.headless";
 
 export function TaskEditorPanel() {
     const { setOpenTabs } = useEditorTabsStore();

@@ -5,7 +5,7 @@ import { BuiltinTab, SectionTab, useTaskDetailSectionStore } from "../store/useT
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskSectionSelector } from "../Selectors/TaskSectionSelector";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
-import { useTaskSectionHelper } from "../hooks/useTaskSection.helper";
+import { useTaskSectionHelper } from "../hooks/taskSection/useTaskSection.helper";
 import { useTaskCustomTabSelector } from "../Selectors/TaskCustomTabSelector";
 import { TaskProcess } from "./TaskProcess";
 import { TaskChecklist } from "./TaskChecklist";
@@ -14,7 +14,7 @@ import { TaskCustomTab } from "./TaskCustomTab";
 import { CommentFilterDropdown } from "./small/CommentFilterDropdown";
 import { CustomTabButton } from "./small/CustomTabButton";
 import { NewTaskPlaceholder } from "./small/NewTaskPlaceholder";
-import { useTaskSectionHeadless } from "../HeadlessComponents/useTaskSection.headless";
+import { useTaskSectionHeadless } from "../hooks/taskSection/useTaskSection.headless";
 import { RichTextEditor } from "@/shared/components";
 import { BUILTIN_TABS, TAB_COLORS } from "../task.constants";
 

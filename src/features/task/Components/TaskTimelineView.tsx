@@ -19,9 +19,9 @@ import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { cn } from "@/lib/utils";
 import { TaskBar } from "./TaskBar";
 import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
-import { useTaskTimelineHelper } from "../hooks/useTaskTimeline.helper";
+import { useTaskTimelineHelper } from "../hooks/taskTimeline/useTaskTimeline.helper";
 import { TaskTimelineProvider, useTaskTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../store/useTaskTimeline.store";
-import { useTaskTimelineHeadless } from "../HeadlessComponents/useTaskTimeline.headless";
+import { useTaskTimelineHeadless } from "../hooks/taskTimeline/useTaskTimeline.headless";
 import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "../utils/TaskGrid.utils";
 
 /**

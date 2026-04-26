@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { SectionTab, useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
-import { useTaskSectionStore } from "../store/useTaskSection.store";
+import { SectionTab, useTaskDetailSectionStore } from "../../store/useTaskDetailSection.store";
+import { useTaskSectionStore } from "../../store/useTaskSection.store";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
-import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskSectionSelector } from "../Selectors/TaskSectionSelector";
-import { useTaskSectionHelper } from "../hooks/useTaskSection.helper";
+import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
+import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
+import { useTaskSectionHelper } from "./useTaskSection.helper";
 import { useEditorTabsStore } from "@/store/index";
 
 export function useTaskSectionHeadless() {

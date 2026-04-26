@@ -25,9 +25,9 @@ import { cn } from "@/lib/utils";
 import { TaskChecklistProvider, useTaskChecklistStore } from "../store/useTaskChecklist.store";
 import { useTaskChecklistSelector } from "../Selectors/TaskChecklistSelector";
 import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklistSelector";
-import { useTaskChecklistHelper } from "../hooks/useTaskChecklist.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskChecklistHeadless } from "../HeadlessComponents/useTaskChecklist.headless";
+import { useTaskChecklistHeadless } from "../hooks/taskChecklist/useTaskChecklist.headless";
+import {useTaskChecklistHelper} from "../hooks/taskChecklist/useTaskChecklist.helper";
 
 export function TaskChecklist() {
     return (

@@ -133,7 +133,6 @@ export function KKnowledgeEditorPanel() {
         setIsImportOpen(true);
         setPendingImportNodeId(undefined);
     }, [pendingImportNodeId]);
-    console.log('panel rendered');
 
     const handleStartQuickTest = useCallback((testDetail: KTestDetailType) => {
         const questions: KDailySessionQuestion[] = testDetail.questions.map(q => ({

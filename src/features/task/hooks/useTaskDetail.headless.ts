@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useTaskStore } from "../store/useTask.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
-import { useTaskLinkedKeywordsHelper } from "../hooks/useTaskLinkedKeywords.helper";
-import { useTaskWorkspaceItemHelper } from "../hooks/useTaskWorkspaceItem.helper";
+import { useTaskDetailFormHelper } from "./useTaskDetailForm.helper";
+import { useTaskLinkedKeywordsHelper } from "./useTaskLinkedKeywords.helper";
+import { useTaskWorkspaceItemHelper } from "./useTaskWorkspaceItem.helper";
 import { useEditorTabsStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import type { BaseTab } from "@/types/editor/tab.types";

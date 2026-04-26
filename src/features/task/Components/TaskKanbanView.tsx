@@ -17,7 +17,7 @@ import { Task, useTaskStore } from "../store/useTask.store";
 import { useTaskTabHelper } from "../hooks/useTaskTab.helper";
 import { cn } from "@/lib/utils";
 import { useTaskKanbanSelector } from "../Selectors/TaskKanbanSelector";
-import { useTaskKanbanHelper } from "../hooks/useTaskKanban.helper";
+import { useTaskKanbanHelper } from "../hooks/taskKanban/useTaskKanban.helper";
 import { getTaskStatusColorsWithBorder, getTaskPriorityDotColor } from "../utils/TaskGrid.utils";
 
 // Drag item type

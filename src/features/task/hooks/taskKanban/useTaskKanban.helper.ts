@@ -7,12 +7,12 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  */
 
 
-import { useTaskStore } from "../store/useTask.store";
+import { useTaskStore } from "../../store/useTask.store";
 import { useAuthStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { taskService } from "../service/task.service";
+import { taskService } from "../../service/task.service";
 import { toLocalISOString } from "@/utils/date.utils";
-import { useTaskKanbanSelector } from "../Selectors/TaskKanbanSelector";
+import { useTaskKanbanSelector } from "../../Selectors/TaskKanbanSelector";
 
 export const useTaskKanbanHelper = () => {
     const { tasks, setTasks } = useTaskStore();

@@ -1,19 +1,19 @@
 import { useEffect } from "react";
-import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
-import { useTaskSectionStore } from "../store/useTaskSection.store";
-import { useTaskChecklistHelper } from "../hooks/useTaskChecklist.helper";
+import { useTaskProcessStore } from "../../store/useTaskProcess.store";
+import { useTaskSectionStore } from "../../store/useTaskSection.store";
+import { useTaskProcessHelper } from "./useTaskProcess.helper";
 
-export function useTaskChecklistHeadless() {
-    const { isExpanded, setIsExpanded, setIsEditing, setEditErrors, barRef, popupRef } = useTaskChecklistStore();
+export function useTaskProcessHeadless() {
+    const { isExpanded, setIsExpanded, setIsEditing, setEditErrors, barRef, popupRef } = useTaskProcessStore();
     const { builtinSectionHandlersRef } = useTaskSectionStore();
-    const { handleChecklistSaveEdit, handleChecklistCancelEdit } = useTaskChecklistHelper();
+    const { handleProcessSaveEdit, handleProcessCancelEdit } = useTaskProcessHelper();
 
     useEffect(() => {
-        builtinSectionHandlersRef.current.checklist = {
-            save: async () => { handleChecklistSaveEdit(); },
-            discard: handleChecklistCancelEdit,
+        builtinSectionHandlersRef.current.process = {
+            save: async () => { handleProcessSaveEdit(); },
+            discard: handleProcessCancelEdit,
         };
-        return () => { delete builtinSectionHandlersRef.current.checklist; };
+        return () => { delete builtinSectionHandlersRef.current.process; };
     }, [builtinSectionHandlersRef]);
 
     useEffect(() => {

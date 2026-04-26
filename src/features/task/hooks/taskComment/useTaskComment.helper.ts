@@ -4,11 +4,11 @@
  */
 
 import { useAuthStore } from "@/store/Auth.store";
-import { useTaskCommentStore } from "../store/useTaskComment.store";
-import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { taskCommentService } from "../service/taskComment.service";
+import { useTaskCommentStore } from "../../store/useTaskComment.store";
+import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
+import { taskCommentService } from "../../service/taskComment.service";
 import { parseAsLocalDate } from "@/utils/date.utils";
-import type { TaskComment, TaskCommentDTO } from "../types/taskComment.types";
+import type { TaskComment, TaskCommentDTO } from "../../types/taskComment.types";
 
 /** Transform DTO (string dates) → domain model (Date objects) */
 const transformComment = (dto: TaskCommentDTO): TaskComment => ({

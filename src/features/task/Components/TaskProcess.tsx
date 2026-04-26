@@ -19,9 +19,9 @@ import { cn } from "@/lib/utils";
 import { TaskProcessProvider, useTaskProcessStore } from "../store/useTaskProcess.store";
 import { useTaskProcessSelector } from "../Selectors/TaskProcessSelector";
 import { useTaskDetailProcessSelector } from "../Selectors/TaskDetailProcessSelector";
-import { useTaskProcessHelper } from "../hooks/useTaskProcess.helper";
+import { useTaskProcessHelper } from "../hooks/taskProcess/useTaskProcess.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskProcessHeadless } from "../HeadlessComponents/useTaskProcess.headless";
+import { useTaskProcessHeadless } from "../hooks/taskProcess/useTaskProcess.headless";
 
 export function TaskProcess() {
     return (

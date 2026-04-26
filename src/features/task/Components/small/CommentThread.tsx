@@ -1,6 +1,6 @@
 import { useTaskCommentSelector } from "../../Selectors/TaskCommentSelector";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
-import { useTaskCommentHelper } from "../../hooks/useTaskComment.helper";
+import { useTaskCommentHelper } from "../../hooks/taskComment/useTaskComment.helper";
 import { CommentItem } from "./CommentItem";
 import { ReplyInput } from "./ReplyInput";
 

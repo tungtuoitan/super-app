@@ -4,8 +4,8 @@ import { useGridControlStore } from "@/store/useGridControl.store";
  * Business logic for task grid operations
  */
 
-import { taskService, TaskDTO } from "../service/task.service";
-import { Task, useTaskStore } from "../store/useTask.store";
+import { taskService, TaskDTO } from "../../service/task.service";
+import { Task, useTaskStore } from "../../store/useTask.store";
 import { generateTempId } from "@/utils/index";
 import { useAuthStore } from "@/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";

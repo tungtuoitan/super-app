@@ -8,14 +8,14 @@
  */
 
 import { useEffect, useRef } from "react";
-import { Task, useTaskStore } from "../store/useTask.store";
-import { taskService } from "../service/task.service";
+import { Task, useTaskStore } from "../../store/useTask.store";
+import { taskService } from "../../service/task.service";
 import { useAuthStore } from "@/store/Auth.store";
 import { useEditorTabsStore } from "@/store/index";
 import { BaseTab } from "@/types/editor/tab.types";
-import { ChecklistJSON } from "../types/checklist.types";
+import { ChecklistJSON } from "../../types/checklist.types";
 import { isChecklistAllDone } from "@/utils/checklist.utils";
-import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
+import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 
 export type ProcessUpdater = ChecklistJSON | ((current: ChecklistJSON) => ChecklistJSON);
 
