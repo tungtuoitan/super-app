@@ -6,7 +6,7 @@
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 import type { KWsResponse } from "../types/K.types";
 import type { KDTO } from "../types/K-dto.types";
-import type { KTreeNode } from "../hooks/Ktree.miniHelper";
+import {KTreeNode} from "../hooks/kTree/Ktree.miniHelper";
 
 export interface KContextData {
     // K list state

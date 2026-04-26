@@ -3,8 +3,8 @@
  * Handles tree status operations: selected items status, deleted status checks
  */
 
-import {useKStore} from "../store/K.store";
-import {KItemV2} from "../types/K-v2.types";
+import {useKStore} from "../../store/K.store";
+import {KItemV2} from "../../types/K-v2.types";
 import { useCallback, useMemo } from "react";
 
 export const useKTreeStatusHelper = () => {

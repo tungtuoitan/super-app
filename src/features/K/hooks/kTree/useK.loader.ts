@@ -11,15 +11,17 @@
  * const { loadAllK, selectWorkspace } = useKLoader();
  */
 
-import { useKStore } from "../store/K.store";
-import { KService } from "../service/K.service";
-import { useAuthStore } from "@/store/Auth.store";
-import {KDTO} from "../types/K-dto.types";
-import { KItemV2 } from "../types/K-v2.types";
-import {useKMovingTreeStore} from "../store/KMovingTree.store";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
-import {ResultOptions} from "../types";
-import { KTestService } from "../service/kTest.service";
+import {useAuthStore} from "@/store/Auth.store";
+import {useKMovingTreeStore} from "../../store/KMovingTree.store";
+import {KService} from "../../service/K.service";
+import {useKStore} from "../../store/K.store";
+import {KTestService} from "../../service/kTest.service";
+import {KItemV2} from "../../types/K-v2.types";
+import {KDTO} from "../../types/K-dto.types";
+import {ResultOptions} from "@/types/common.types";
+import {KWsResponse} from "../../types/K.types";
+
 
 export const useKLoader = () => {
     const { $user } = useAuthStore();
@@ -139,12 +141,12 @@ export const useKLoader = () => {
 
 
 
-    const createKnowledge = async (data: { name: string; description?: string; imageBase64?: string }): Promise<import("../types/K.types").KWsResponse | null> => {
+    const createKnowledge = async (data: { name: string; description?: string; imageBase64?: string }): Promise<KWsResponse | null> => {
         try {
             const token = $user.userToken;
             const result = await KService._createKnowledge(token, data);
             if (result?.success && result.object) {
-                const created = result.object as import("../types/K.types").KWsResponse;
+                const created = result.object as KWsResponse;
                 setAllK((prev) => [...prev, created]);
                 return created;
             }
@@ -160,7 +162,7 @@ export const useKLoader = () => {
             const token = $user.userToken;
             const result = await KService._updateKnowledge(token, id, data);
             if (result?.success && result.object) {
-                const updated = result.object as import("../types/K.types").KWsResponse;
+                const updated = result.object;
                 setAllK((prev) => prev.map((k) => (k.id === id ? { ...k, ...updated } : k)));
                 return true;
             }

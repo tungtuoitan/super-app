@@ -1,6 +1,6 @@
-import { KTestService } from "../service/kTest.service";
-import { useKTestStore } from "../store/useKTest.store";
-import type { KSubmitAnswersRequest, KUpdateTestRequest, KUpdateQuestionsRequest } from "../types/kTest.type";
+import { KTestService } from "../../service/kTest.service";
+import { useKTestStore } from "../../store/useKTest.store";
+import type { KSubmitAnswersRequest, KUpdateTestRequest, KUpdateQuestionsRequest } from "../../types/kTest.type";
 
 export const useKTestLoader = () => {
     const { setTests, setIsLoadingTests } = useKTestStore();

@@ -6,11 +6,11 @@
  * @returns {Object} Selection action functions only (no state)
  */
 
-import {useKStore} from "../store/K.store";
+import {useKStore} from "../../store/K.store";
 
 import type { NodeApi } from "react-arborist";
-import {KTreeNode} from ".";
-import {SPECIAL_IDS} from "../utils/temp-id.utils";
+import {SPECIAL_IDS} from "../../utils/temp-id.utils";
+import {KTreeNode} from "./Ktree.miniHelper";
 
 export const KuseTreeHelper2 = () => {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentK } = useKStore();

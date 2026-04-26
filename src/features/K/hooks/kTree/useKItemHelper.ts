@@ -2,14 +2,14 @@
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useEditorTabsStore } from "@/store/index";
 import { useAuthStore } from "@/store/Auth.store";
-import { useKStore } from "../store/K.store";
-import { KService } from "../service/K.service";
-import { KItemAction, KUpsertWorkspaceItemRequest } from "../types/K.types";
-import { useKLoader } from "./useK.loader";
+import { useKStore } from "../../store/K.store";
+import { KService } from "../../service/K.service";
+import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";
 import { isNumber } from "lodash";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
-import {SPECIAL_IDS} from "../utils/temp-id.utils";
-import {Note} from "../types/note.types";
+import {SPECIAL_IDS} from "../../utils/temp-id.utils";
+import {Note} from "../../types/note.types";
+import {useKLoader} from "./useK.loader";
 
 export const KuseWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
@@ -117,7 +117,7 @@ export const KuseWorkspaceItemHelper = () => {
                                 if (!createdItem) return tab;
 
                                 // Find workspace item from reloaded data by id
-                                const workspaceItemFromDB = newWorkspace?.flatData.find((item) => item.id === createdItem.id);
+                                const workspaceItemFromDB = newWorkspace?.flatData.find((item:any) => item.id === createdItem.id);
 
                                 if (!workspaceItemFromDB) return tab;
 

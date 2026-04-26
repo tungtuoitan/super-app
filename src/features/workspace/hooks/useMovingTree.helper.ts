@@ -6,7 +6,6 @@ import { useAuthStore } from "@/store/Auth.store";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
-import { useKLoader } from "@/features/K/hooks/useK.loader";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";
@@ -14,6 +13,7 @@ import { constants } from "@/utils/constants";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useKLoader} from "@/features/K/hooks/kTree/useK.loader";
 
 export const useMovingTreeHelper = () => {
     const {

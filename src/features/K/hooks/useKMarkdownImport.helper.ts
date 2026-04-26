@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useAuthStore } from "@/store/Auth.store";
 import { KService } from "../service/K.service";
 import { KTestService } from "../service/kTest.service";
-import { useKLoader } from "./useK.loader";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { useKStore } from "../store/K.store";
 import type { KMdParsed, KExistingTestAddition } from "../types/kMarkdownImport.type";
 import type { KTestSummary } from "../types/kTest.type";
+import {useKLoader} from "./kTree/useK.loader";
 
 export interface KMarkdownImportState {
     isLoading: boolean;

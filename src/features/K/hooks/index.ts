@@ -4,11 +4,9 @@
  */
 
 // Sub-hooks (use directly for specific operations)
-export { useKLoader } from "./useK.loader";
 export { useKNodeDialogHelper } from "./useKNodeDialog.helper";
-export { KuseTreeHelper2 } from "./useKTreeHelper2";
-export { KuseTreeHelper } from "./useKTreeHelper";
+export { KuseTreeHelper2 } from "./kTree/useKTreeHelper2";
+export { KuseTreeHelper } from "./kTree/useKTreeHelper";
 
 // Tree helper utilities (pure functions)
-export * from "./Ktree.miniHelper";
- 
+export * from "./kTree/Ktree.miniHelper";

@@ -5,7 +5,7 @@ import type { NodeProps, Node } from "@xyflow/react";
 import { Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { QuestionScoreBar } from "../../small/QuestionScoreBar";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
-import { useKTestFlowHelper } from "@/features/K/hooks/useKTestFlow.helper";
+import { useKTestFlowHelper } from "@/features/K/hooks/test/useKTestFlow.helper";
 import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import type { QuestionFlowNodeData } from "@/features/K/types/kTestFlow.type";
 

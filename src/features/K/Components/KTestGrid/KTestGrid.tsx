@@ -3,7 +3,7 @@ import { BookOpen, Check, Loader2, Pencil, Play, Plus, X } from "lucide-react";
 import { Button } from "@/shared/components/ui/Button";
 import { ScoreSparkline } from "../small/ScoreSparkline";
 import { useKTestStore } from "../../store/useKTest.store";
-import { useKTestLoader } from "../../hooks/useKTest.loader";
+import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import type { KTestDetail, KTestSummary } from "../../types/kTest.type";
 
 interface KTestGridProps {

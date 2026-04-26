@@ -2,8 +2,8 @@ import { ReactFlow, ReactFlowProvider, Background, Controls, MiniMap, Background
 import "@xyflow/react/dist/style.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
-import { useKTestFlowHelper } from "@/features/K/hooks/useKTestFlow.helper";
-import { useKTestFlowHeadless } from "@/features/K/hooks/useKTestFlow.headless";
+import { useKTestFlowHelper } from "@/features/K/hooks/test/useKTestFlow.helper";
+import { useKTestFlowHeadless } from "@/features/K/hooks/test/useKTestFlow.headless";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { QuestionFlowNode } from "./small/QuestionFlowNode";
 import { KQuestionFlowEdge } from "./small/KQuestionFlowEdge";

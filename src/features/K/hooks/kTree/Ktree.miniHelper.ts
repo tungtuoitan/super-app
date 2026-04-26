@@ -1,10 +1,11 @@
-import { KItemV2, isNode, canHaveChildren } from "../types/K-v2.types";
-import { KDTO } from "../types/K-dto.types";
-import { kconstants } from "../utils/K.Constants";
 
 // ============================================
 // TREE NODE TYPE (for react-arborist)
 // ============================================
+
+import {KDTO} from "../../types/K-dto.types";
+import {KItemV2} from "../../types/K-v2.types";
+import {kconstants} from "../../utils/K.Constants";
 
 /** Tree node wrapper for react-arborist */
 export interface KTreeNode {

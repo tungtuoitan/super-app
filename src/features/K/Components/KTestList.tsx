@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BookOpen, BookX, Check, Loader2, Plus, RotateCcw, X } from "lucide-react";
 import { useKTestStore } from "../store/useKTest.store";
-import { useKTestLoader } from "../hooks/useKTest.loader";
+import { useKTestLoader } from "../hooks/test/useKTest.loader";
 import { KTestService } from "../service/kTest.service";
 import { ScoreSparkline } from "./small/ScoreSparkline";
 import type { KTestSummary } from "../types/kTest.type";

@@ -14,9 +14,9 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/compone
 import { useDragDropManager, useDrop } from "react-dnd";
 import {useKStore} from "../../store/K.store";
 import {useKMovingTreeStore} from "../../store/KMovingTree.store";
-import {useKMovingTreeHelper} from "../../hooks/useKMovingTree.helper";
+import {useKMovingTreeHelper} from "../../hooks/kTree/useKMovingTree.helper";
 import {KMovingTree} from "./KMovingTree";
-import {useCalculateKMovingTreeContainerHeight} from "../../hooks/useCalculateMovingKTreeContainerHeight";
+import {useCalculateKMovingTreeContainerHeight} from "../../hooks/kTree/useCalculateMovingKTreeContainerHeight";
 
 export function KMovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useKMovingTreeStore();

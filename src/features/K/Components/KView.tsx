@@ -8,12 +8,12 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/compone
 import { CalendarClock, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/Auth.store";
 import { useKStore } from "../store/K.store";
-import { useKLoader } from "../hooks";
 import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";
 import { KDialog } from "./KExplorer/KDialog/KDialog";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
+import {useKLoader} from "../hooks/kTree/useK.loader";
 
 /**
  * Workspace View - KTree for folder navigation with workspace selection

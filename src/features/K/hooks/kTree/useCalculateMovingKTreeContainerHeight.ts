@@ -4,7 +4,7 @@
  */
 
 import { useEffect } from "react";
-import { useKMovingTreeStore } from "../store/KMovingTree.store";
+import { useKMovingTreeStore } from "../../store/KMovingTree.store";
 
 export function useCalculateKMovingTreeContainerHeight() { 
     const { treeContainerRef, setContainerHeight,containerHeight } = useKMovingTreeStore();

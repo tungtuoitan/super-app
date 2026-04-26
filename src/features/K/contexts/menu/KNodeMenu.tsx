@@ -10,7 +10,7 @@ import {
 import { useOrchestratorContextMenuStore } from "@/store/ContextMenu.store";
 import { useKStore } from "../../store/K.store";
 import { useKMenuHelper } from "../helpers/useKMenu.helper";
-import { useKTreeStatusHelper } from "../../hooks/useKTreeStatusHelper";
+import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
 import { useKTabHelper } from "../../hooks/useKTab.helper";
 import { kconstants } from "../../utils/K.Constants";
 

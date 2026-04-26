@@ -3,7 +3,7 @@ import { Mic, Loader2, CheckCircle2, XCircle, BookOpen, KeyRound, Send, PenLine 
 import { KReviewEditor } from "../small/KReviewEditor";
 import { Button } from "@/shared/components/ui/Button";
 import { KTestService } from "../../service/kTest.service";
-import { useKTestLoader } from "../../hooks/useKTest.loader";
+import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import type { KTestQuestion, KQuestionGrade, KSubmitAnswersResult } from "../../types/kTest.type";
 
 interface KTestRecordSessionProps {

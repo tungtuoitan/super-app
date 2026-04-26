@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import {useKStore} from "../store/K.store";
+import {useKStore} from "../../store/K.store";
 
 export function useScrollToHighlightItem() {
     const { selectedItemIds, _treeRef, scrollToItem, setScrollToItem, currentK, setIsLoadingTree, isLoadingTree } = useKStore();

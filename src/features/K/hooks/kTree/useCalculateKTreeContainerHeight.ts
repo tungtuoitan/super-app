@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from "react";
-import { useKStore } from "../store/K.store";
+import { useKStore } from "../../store/K.store";
  
 export function useCalculateKTreeContainerHeight() { 
     const { treeContainerRef, setContainerHeight } = useKStore();

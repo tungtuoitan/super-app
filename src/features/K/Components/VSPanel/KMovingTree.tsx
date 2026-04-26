@@ -6,11 +6,11 @@
 import React, { useMemo } from "react";
 import { Tree } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
-import { KtreeMiniHelper, KTreeNode as KTreeFolder } from "../../hooks/Ktree.miniHelper";
 import { KNode } from "../KExplorer/KNode";
 import { kconstants } from "../../utils/K.Constants";
 import { useKMovingTreeStore } from "../../store/KMovingTree.store";
-import { useKMovingTreeHelper } from "../../hooks/useKMovingTree.helper";
+import { useKMovingTreeHelper } from "../../hooks/kTree/useKMovingTree.helper";
+import {KTreeFolder, KtreeMiniHelper} from "../../hooks";
 
 export function KMovingTree() {
     const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight, _treeRef } = useKMovingTreeStore();

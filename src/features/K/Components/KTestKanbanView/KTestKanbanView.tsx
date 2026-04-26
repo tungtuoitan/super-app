@@ -4,7 +4,7 @@ import { useDrag, useDrop } from "react-dnd";
 import { Button } from "@/shared/components/ui/Button";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useKTestStore } from "../../store/useKTest.store";
-import { useKTestLoader } from "../../hooks/useKTest.loader";
+import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import { KTestService } from "../../service/kTest.service";
 import { AutoResizeTextarea } from "../KNodeEditorPanel/AutoResizeTextarea";
 import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";

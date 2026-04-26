@@ -1,16 +1,16 @@
 import { useKStore } from "../store/K.store";
 import { useAuthStore } from "@/store/Auth.store";
 import { KService } from "../service/K.service";
-import { useKLoader } from "./useK.loader";
 import { KItemAction } from "../types/K.types";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { isFolder } from "../types/K-v2.types";
-import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../utils/K.Constants";
 import {Folder} from "../types";
 import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/KNodeDialog.store";
 import type { KItemV2 } from "../types/K-v2.types";
+import {KtreeMiniHelper} from "./kTree/Ktree.miniHelper";
+import {useKLoader} from "./kTree/useK.loader";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();
@@ -161,7 +161,7 @@ export const useKNodeDialogHelper = () => {
             // After tree reloads, find and select the new folder (only for create mode)
             if (mode === "create" && loadedWorkspace?.flatData) {
                 // Find the newly created folder by name and parentId
-                const newFolder = loadedWorkspace.flatData.find(item =>
+                const newFolder = loadedWorkspace.flatData.find((item: any) =>
                     isFolder(item) &&
                     item.name === createdFolderName &&
                     item.parentId === parentId

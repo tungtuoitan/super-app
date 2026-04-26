@@ -8,10 +8,10 @@ import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/Button";
 import { useEditorTabsStore } from "@/store/index";
-import { useKLoader } from "../hooks";
 import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
 import { TrackIconPicker } from "@/features/lifeLog/Components/TrackIconPicker";
+import {useKLoader} from "../hooks/kTree/useK.loader";
 
 interface KKnowledgeGeneralProps {
     knowledgeId: number;

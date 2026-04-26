@@ -3,19 +3,18 @@
  * Handles tree operations: drag & drop, refresh, new folder
  */
 
-import type { KTreeNode } from "./Ktree.miniHelper";
-import { KtreeMiniHelper } from "./Ktree.miniHelper";
-import { useKStore } from "../store/K.store";
-import { useKNodeDialogHelper } from "./useKNodeDialog.helper";
-import { useKLoader } from "./useK.loader";
-import { KService } from "../service/K.service";
-import { KItemAction } from "../types/K.types";
+import { useKStore } from "../../store/K.store";
+import { useKNodeDialogHelper } from "../useKNodeDialog.helper";
+import { KService } from "../../service/K.service";
+import { KItemAction } from "../../types/K.types";
 import { useAuthStore } from "@/store/Auth.store";
-import { KItemV2 } from "../types/K-v2.types";
+import { KItemV2 } from "../../types/K-v2.types";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
-import {kconstants} from "../utils/K.Constants";
-import {SPECIAL_IDS} from "../utils/temp-id.utils";
+import {kconstants} from "../../utils/K.Constants";
+import {SPECIAL_IDS} from "../../utils/temp-id.utils";
+import {KtreeMiniHelper, KTreeNode} from "./Ktree.miniHelper";
+import {useKLoader} from "./useK.loader";
 
 export const KuseTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();
@@ -395,7 +394,7 @@ export const KuseTreeHelper = () => {
 
         // Extract nodes from treeData, find parent node by k_items.id
         const allNodes = KtreeMiniHelper.$traverse(treeData).map((t) => t.data);
-        const parentNode = parentId ? allNodes.find((n) => n.id === parentId) as unknown as import("../types").Folder | undefined : undefined;
+        const parentNode = parentId ? allNodes.find((n) => n.id === parentId) as unknown as import("../../types").Folder | undefined : undefined;
 
         openNodeDialog("create", kconstants.workspace.itemTypes.node, null, parentNode ?? null);
     };

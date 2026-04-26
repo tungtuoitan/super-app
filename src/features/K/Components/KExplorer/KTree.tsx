@@ -4,7 +4,7 @@ import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useKStore } from "../../store/K.store";
 import { useGridControlStore } from "@/store/useGridControl.store";
-import { KuseTreeHelper } from "../../hooks/useKTreeHelper";
+import { KuseTreeHelper } from "../../hooks/kTree/useKTreeHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared/contexts/helpers/useOrchestratorContextMenu.helper";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
@@ -12,9 +12,9 @@ import { KNode } from "./KNode";
 import { KTreeNode, KtreeMiniHelper, KuseTreeHelper2 } from "../../hooks";
 import { kconstants } from "../../utils/K.Constants";
 import { storageService, STORAGE_KEYS } from "@/services/storage.service";
-import {useCalculateKTreeContainerHeight} from "../../hooks/useCalculateKTreeContainerHeight";
-import {useCalculateKTreeDropZoneHeight} from "../../hooks/useCalculateKTreeDropZoneHeight";
-import {useScrollToHighlightItem} from "../../hooks/useScrollToHighlightItem";
+import {useCalculateKTreeContainerHeight} from "../../hooks/kTree/useCalculateKTreeContainerHeight";
+import {useCalculateKTreeDropZoneHeight} from "../../hooks/kTree/useCalculateKTreeDropZoneHeight";
+import {useScrollToHighlightItem} from "../../hooks/kTree/useScrollToHighlightItem";
 
 export function KTree() {
     const { isDragging, currentK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, markedNodeId, setMarkedNodeId, treeData: _storeTD, setTreeData } = useKStore();
