@@ -8,9 +8,9 @@
 import { useEffect } from "react";
 import type { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { Project } from "../store/useProject.store";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {Project} from "../types/project.types";
 
 export function useProjectEditorPanelHeadless() {
     const { openTabs, setOpenTabs } = useEditorTabBarStore();

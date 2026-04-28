@@ -9,6 +9,7 @@ import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {Note} from "../../types/note.types";
 import {useKLoader} from "./useK.loader";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export const KuseWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();

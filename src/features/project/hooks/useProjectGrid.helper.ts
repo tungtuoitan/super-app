@@ -4,7 +4,7 @@
  */
 
 import { projectService, ProjectDTO } from "../service/project.service";
-import { Project, useProjectStore } from "../store/useProject.store";
+import {  useProjectStore } from "../store/useProject.store";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -13,6 +13,7 @@ import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/utils/date.utils";
+import {Project} from "../types/project.types";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)

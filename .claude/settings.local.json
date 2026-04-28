@@ -59,7 +59,8 @@
       "Bash(echo \"exit:$?\")",
       "Bash(echo \"mp->project: $?\")",
       "Bash(echo \"mp->taskDetail: $?\")",
-      "Bash(echo \"others->mp: $?\")"
+      "Bash(echo \"others->mp: $?\")",
+      "Bash(cd C:\\\\\\\\Users\\\\\\\\Admin\\\\\\\\source\\\\\\\\SuperApp)"
     ],
     "deny": [],
     "ask": []

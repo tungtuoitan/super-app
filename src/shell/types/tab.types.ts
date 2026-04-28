@@ -5,7 +5,6 @@
 
 import { Note } from "@/features/note/types/note.types";
 import { TrackingGraphTabData } from "@/utils/tracking.types";
-import { Project } from "@/features/project/store/useProject.store";
 import { Task } from "@/features/taskDetail/types/task.types";
 import { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { KWsResponse } from "@/features/K/types/K.types";
@@ -14,6 +13,7 @@ import { constants } from "@/utils/constants";
 import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
 import { WikiTabData } from "@/features/Wiki/types/wiki.type";
 import {Ws} from "@/features/workspace/types/workspace.types";
+import {Project} from "@/features/project";
 
 export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | typeof constants.vscode.tab.tabTypes.trackingGraph | typeof constants.vscode.tab.tabTypes.project | typeof constants.vscode.tab.tabTypes.multiProject | typeof constants.vscode.tab.tabTypes.task | typeof constants.vscode.tab.tabTypes.lifeLog | typeof constants.vscode.tab.tabTypes.lifeLogGraph | typeof constants.vscode.tab.tabTypes.lifeLogTrack | typeof constants.vscode.tab.tabTypes.kKnowledge | typeof constants.vscode.tab.tabTypes.kNode | typeof constants.vscode.tab.tabTypes.kDailyReview | typeof constants.vscode.tab.tabTypes.wikiInfo | "folder" | "settings";
 

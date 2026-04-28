@@ -4,18 +4,23 @@
  * Independent of project feature — makes direct API calls only
  */
 
+import { config } from "@/utils/config/app.config";
+import { apiFetch } from "@/services/apiClient";
 import type { Project } from "../types/task.types";
-import { apiClient } from "@/utils/apiClient";
 
 /**
  * Fetch a single project by ID
  */
-export async function fetchProjectById(token: string, projectId: number): Promise<Project | null> {
+export async function fetchProjectById(_token: string, projectId: number): Promise<Project | null> {
+    const url = `${config.api.baseURL}/api/project/${projectId}`;
+
     try {
-        const response = await apiClient.get(`/projects/${projectId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return response.data?.data ?? null;
+        const res = await apiFetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+        if (res.ok) {
+            const data = await res.json();
+            return data.data ?? null;
+        }
+        return null;
     } catch (error) {
         console.error(`Failed to fetch project ${projectId}:`, error);
         return null;

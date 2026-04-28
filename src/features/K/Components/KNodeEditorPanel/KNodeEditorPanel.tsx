@@ -16,6 +16,7 @@ import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { containsNormalized } from "../../utils/searchUtils";
 import {KtreeMiniHelper} from "../../hooks";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 function KNodeEditorContent() {
     const { rootNode, breadcrumb, setBreadcrumb, setEditingNodeId, setParentPickerNodeId, inlineNewParentId, setInlineNewParentId, showDeleted, setShowDeleted, showAllChild, setShowAllChild, editingNodeId, unsavedPromptNodeId, setPromptFlashTick } = useKNodeEditorStore();

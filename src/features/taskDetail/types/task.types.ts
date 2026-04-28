@@ -79,3 +79,17 @@ export interface TaskDTO {
     /** JSON custom tabs stored as string */
     customTabsJson?: string | null;
 }
+
+/**
+ * Project — minimal project info needed by taskDetail
+ * Used for project cache in taskDetail feature
+ */
+export interface Project {
+    id: number;
+    name: string;
+    status: string;
+    startDate?: Date | string | null;
+    endDate?: Date | string | null;
+    deletedAt?: Date | string | null;
+    workspaceId?: number
+}

@@ -12,12 +12,12 @@ import { useGeneralStore } from "@/shared/store/General.store";
 import { constants } from "@/utils/constants";
 import { IStatusOption } from "@/shared/components";
 import {usePTaskStore} from "../store/usePTask.store";
-import { useTaskDetailProjectStore } from "../store/useTaskDetailProject.store";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useTaskDetailStore} from "../store/useTaskDetail.store";
 
 export const useTaskDetailSelector = () => {
     const { openTabs, activeTabId } = useEditorTabBarStore();
-    const { projectsCache } = useTaskDetailProjectStore();
+    const { allProjects } = useTaskDetailStore();
     const { tasks } = usePTaskStore();
     const { registriesByType } = useGeneralStore();
 
@@ -30,7 +30,7 @@ export const useTaskDetailSelector = () => {
     // ── Project ───────────────────────────────────────────────────────────────
 
     const currentProject = selectedTask?.projectId
-            ? (projectsCache[selectedTask.projectId] ?? null)
+            ? (allProjects.find((p) => p.id === selectedTask.projectId) ?? null)
             : null
     // ── Disabled flags ────────────────────────────────────────────────────────
 

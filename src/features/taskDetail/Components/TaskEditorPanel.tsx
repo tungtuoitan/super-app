@@ -11,7 +11,6 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDetailContent } from "./TaskDetailContent";
 import { useTaskDetailHeadless } from "../hooks/useTaskDetail.headless";
-import { useTaskDetailProjectHeadless } from "../hooks/useTaskDetailProject.headless";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export function TaskEditorPanel() {
@@ -19,7 +18,6 @@ export function TaskEditorPanel() {
     const { getActiveTab } = useEditorTabHelper();
     const { taskDetailContentRef } = useTaskDetailStore();
     useTaskDetailHeadless();
-    useTaskDetailProjectHeadless();
 
     const activeTab = getActiveTab();
 

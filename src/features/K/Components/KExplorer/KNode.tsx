@@ -18,6 +18,7 @@ import type { KWsResponse } from "../../types/K.types";
 import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
 import { useDrop } from "react-dnd";
 import { KTestService } from "../../service/kTest.service";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;

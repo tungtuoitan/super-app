@@ -3,7 +3,6 @@
  * Business logic for project detail operations
  */
 
-import { Project, useProjectStore } from "../store/useProject.store";
 import { projectService, ProjectDTO } from "../service/project.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -18,6 +17,8 @@ import { constants } from "@/utils/index";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import type { TabType } from "../types/projectDetail.type";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {Project} from "../types/project.types";
+import {useProjectStore} from "../store/useProject.store";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)

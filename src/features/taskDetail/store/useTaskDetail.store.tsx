@@ -5,8 +5,8 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import type { LinkedKeyword, TaskFolderItem } from "../types/taskDetail.types";
+import type { Project } from "../types/task.types";
 import { IAutoCompleteOptions } from "@/shared/components";
-import {Project} from "@/features/project";
 
 export type { TaskFolderItem } from "../types/taskDetail.types";
 
@@ -37,8 +37,8 @@ export interface TaskDetailContextData {
     isLoadingParentTasks: boolean;
     setIsLoadingParentTasks: Dispatch<SetStateAction<boolean>>;
 
-    projectsCache: Record<number, Project>;
-    setProjectsCache: Dispatch<SetStateAction<Record<number, Project>>>;
+    allProjects: Project[];
+    setAllProjects: Dispatch<SetStateAction<Project[]>>;
 }
 
 export const taskDetailContextDefaultValue: TaskDetailContextData = {
@@ -59,8 +59,8 @@ export const taskDetailContextDefaultValue: TaskDetailContextData = {
     setParentTaskOptions: () => {},
     isLoadingParentTasks: false, 
     setIsLoadingParentTasks: () => {},
-    projectsCache: {},
-    setProjectsCache: () => {}
+    allProjects: [],
+    setAllProjects: () => {}
 };
 
 export const TaskDetailStore = createContext<TaskDetailContextData>(taskDetailContextDefaultValue);
@@ -86,7 +86,7 @@ export const TaskDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const [parentTaskOptions, setParentTaskOptions] = useState<IAutoCompleteOptions[]>([]);
     const [isLoadingParentTasks, setIsLoadingParentTasks] = useState(false);
 
-    const [projectsCache, setProjectsCache] = useState<Record<number, Project>>({});
+    const [allProjects, setAllProjects] = useState<Project[]>([]);
 
     return (
         <TaskDetailStore.Provider
@@ -100,7 +100,7 @@ export const TaskDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 isLoadingProjects, setIsLoadingProjects,
                 parentTaskOptions, setParentTaskOptions,
                 isLoadingParentTasks, setIsLoadingParentTasks,
-                projectsCache, setProjectsCache
+                allProjects, setAllProjects
             }}
         >
             {children}

@@ -1,7 +1,5 @@
-import { useEffect, useRef, useCallback } from "react";
 import type * as _monaco from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
-import "@/styles/keywords.css";
 import {Keyword} from "@/shared/types/keyword.types";
 
 /**

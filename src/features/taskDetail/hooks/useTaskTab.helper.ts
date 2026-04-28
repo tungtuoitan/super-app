@@ -9,13 +9,19 @@ import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {usePTaskStore} from "../store/usePTask.store";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
-import { useTaskDetailProjectStore } from "../store/useTaskDetailProject.store";
+import {useTaskDetailStore} from "../store/useTaskDetail.store";
 
 export const useTaskTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
     const { updateActiveTab, setNewTabAnd } = useEditorTabHelper();
-    const { projectsCache } = useTaskDetailProjectStore();
+    const { allProjects } = useTaskDetailStore();
     const { tasks } = usePTaskStore();
+
+    // Create a map for faster project lookups
+    const projectsCache: Record<number, any> = {};
+    allProjects.forEach(p => {
+        projectsCache[p.id] = p;
+    });
 
     /**
      * Open task in editor tab (within TabBar of ProjectDetailContent)

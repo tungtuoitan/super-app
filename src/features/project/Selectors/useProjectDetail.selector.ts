@@ -5,13 +5,13 @@
  */
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { Project } from "../store/useProject.store";
 import { useGeneralStore } from "@/shared/store/General.store";
 import { constants } from "@/utils/index";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared/components";
 import type { TabType } from "../types/projectDetail.type";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {Project} from "../types/project.types";
 
 export const useProjectDetailSelector = () => {
     const { openTabs } = useEditorTabBarStore();

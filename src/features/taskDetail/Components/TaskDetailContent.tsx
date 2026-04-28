@@ -9,7 +9,7 @@
  * Comment section scrolls inside its own container.
  */
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
     GenericTextField,
     StatusAutoComplete,
@@ -29,6 +29,8 @@ import { formatDate } from "../utils/TaskDetail.utils";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
 import { useTaskWorkspaceItemHelper } from "../hooks/useTaskWorkspaceItem.helper";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
+import { useAuthStore } from "@/shell/store/Auth.store";
+import { taskService } from "../service/task.service";
 
 /**
  * TaskDetailContent
@@ -65,7 +67,29 @@ export function TaskDetailContent() {
         isLoadingProjects,
         parentTaskOptions,
         isLoadingParentTasks,
+        allProjects,
+        setAllProjects,
     } = useTaskDetailStore();
+
+    const { $user } = useAuthStore();
+
+    // ── Load all projects once ──────────────────────────────────────
+    useEffect(() => {
+        if (allProjects.length > 0 || !$user.userToken) return;
+
+        const loadProjects = async () => {
+            try {
+                const result = await taskService._getProjects($user.userToken);
+                if (result.success && result.data) {
+                    setAllProjects(result.data);
+                }
+            } catch (error) {
+                console.error("Failed to load projects:", error);
+            }
+        };
+
+        loadProjects();
+    }, [$user.userToken, allProjects.length, setAllProjects]);
 
     // ── Handlers (from helpers — each called directly) ─────────────────────
     const {

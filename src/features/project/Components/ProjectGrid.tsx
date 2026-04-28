@@ -17,12 +17,13 @@ import {
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, FolderOpen } from "lucide-react";
 import { Button } from "@/shared/components/ui/Button";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { Project, useProjectStore } from "../store/useProject.store";
+import { useProjectStore } from "../store/useProject.store";
 import { useProjectGridHelper } from "../hooks/useProjectGrid.helper";
 import { useProjectTabHelper } from "../hooks/useProjectTab.helper";
 import { useProjectGridSelector } from "../Selectors/useProjectGrid.selector";
 import { useProjectGridHeadless } from "../hooks/useProjectGrid.headless";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
+import {Project} from "../types/project.types";
 
 /**
  * ProjectGrid - project grid with table display

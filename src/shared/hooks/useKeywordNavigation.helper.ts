@@ -27,12 +27,9 @@ import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
-import type { Project } from "@/features/project/store/useProject.store";
 import type { Task } from "@/features/taskDetail/types/task.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-
-import { targetKeywordService } from "@/services/targetKeyword.service";
-import type { TargetKeywordTargetType } from "@/services/targetKeyword.service";
+import {Project} from "@/features/project";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();

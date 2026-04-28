@@ -23,7 +23,7 @@ export interface PTaskContextData {
     setTaskGridError: Dispatch<SetStateAction<Error | null>>;
     taskGridSorting: SortingState;
     setTaskGridSorting: Dispatch<SetStateAction<SortingState>>;
-    taskGridPagination: TaskPaginationState;
+    taskGridPagination: TaskPaginationState; 
     setTaskGridPagination: Dispatch<SetStateAction<TaskPaginationState>>;
     taskGridRowSelection: RowSelectionState;
     setTaskGridRowSelection: Dispatch<SetStateAction<RowSelectionState>>;
