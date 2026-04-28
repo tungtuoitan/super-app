@@ -2,7 +2,7 @@
  * Breadcrumb utilities for EditorToolbar
  */
 
-import type { Keyword } from "@/types/keyword.types";
+import type { Keyword } from "@/shared/types/keyword.types";
 
 export interface BreadcrumbItem {
     type: "workspace" | "folder" | "note";

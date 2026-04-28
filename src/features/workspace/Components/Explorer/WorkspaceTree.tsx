@@ -13,7 +13,7 @@ import { RootFolderNode } from "./RootFolderNode";
 import { NoteNode } from "./NoteNode";
 import { FileNode } from "./FileNode";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
-import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "@/types/workspace-v2.types";
+import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { CalculateWorkspaceTreeContainerHeight } from "../../hooks/useCalculateWorkspaceTreeContainerHeight";
 import { CalculateWorkspaceTreeDropZoneHeight } from "../../hooks/useCalculateWorkspaceTreeDropZoneHeight";

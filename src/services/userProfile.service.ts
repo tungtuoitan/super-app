@@ -4,7 +4,8 @@
 
 import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { UpdateUserProfileRequest, ResultOptions } from "@/types/common.types";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {UpdateUserProfileRequest} from "@/shared/types/userProfile.types";
 
 const _getUserProfile = async (_token: string): Promise<ResultOptions> => {
     const res = await apiFetch(`${config.api.baseURL}/api/userprofile`, {

@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { constants } from "@/utils/index";
+import {UserFilters} from "@/shared/types/filter.types";
 
 /**
  * Maps URL pathname to grid registration parameters
@@ -25,28 +26,28 @@ export const useGridAutoRegisterHelper = () => {
     //         case "/workspace":
     //             return {
     //                 name: constants.modules.workspace,
-    //                 filterViewKey: constants.filters.views.workspace as keyof import("@/types/common.types").UserFilters,
+    //                 filterViewKey: constants.filters.views.workspace as UserFilters,
     //             };
     //         case "/k":
     //         case "/Kworkspace":
     //             return {
     //                 name: constants.modules.k,
-    //                 filterViewKey: constants.filters.views.k as keyof import("@/types/common.types").UserFilters,
+    //                 filterViewKey: constants.filters.views.k as UserFilters,
     //             };
     //         case "/ws":
     //             return {
     //                 name: constants.modules.ws,
-    //                 filterViewKey: constants.filters.views.wsGrid as keyof import("@/types/common.types").UserFilters,
+    //                 filterViewKey: constants.filters.views.wsGrid as UserFilters,
     //             };
     //         case "/notes":
     //             return {
     //                 name: constants.modules.note,
-    //                 filterViewKey: constants.filters.views.noteGrid as keyof import("@/types/common.types").UserFilters,
+    //                 filterViewKey: constants.filters.views.noteGrid as UserFilters,
     //             };
     //         case "/project":
     //             return {
     //                 name: constants.modules.project,
-    //                 filterViewKey: constants.filters.views.projectGrid as keyof import("@/types/common.types").UserFilters,
+    //                 filterViewKey: constants.filters.views.projectGrid as UserFilters,
     //             };
     //         case "/lifelog":
     //             return {
@@ -64,27 +65,27 @@ export const useGridAutoRegisterHelper = () => {
             case constants.modules.workspace:
                 return {
                     // name: constants.modules.workspace,
-                    filterViewKey: constants.filters.views.workspace as keyof import("@/types/common.types").UserFilters,
+                    filterViewKey: constants.filters.views.workspace as UserFilters,
                 };
             case constants.modules.k:
                 return {
                     // name: constants.modules.k,
-                    filterViewKey: constants.filters.views.k as keyof import("@/types/common.types").UserFilters,
+                    filterViewKey: constants.filters.views.k as UserFilters,
                 };
             case constants.modules.ws:
                 return {
                     // name: constants.modules.ws,
-                    filterViewKey: constants.filters.views.wsGrid as keyof import("@/types/common.types").UserFilters,
+                    filterViewKey: constants.filters.views.wsGrid as UserFilters,
                 };
             case constants.modules.note:
                 return {
                     // name: constants.modules.note,
-                    filterViewKey: constants.filters.views.noteGrid as keyof import("@/types/common.types").UserFilters,
+                    filterViewKey: constants.filters.views.noteGrid as UserFilters,
                 };
             case constants.modules.project:
                 return {
                     // name: constants.modules.project,
-                    filterViewKey: constants.filters.views.projectGrid as keyof import("@/types/common.types").UserFilters,
+                    filterViewKey: constants.filters.views.projectGrid as UserFilters,
                 };
             case constants.modules.lifeLog:
                 return {
@@ -98,7 +99,7 @@ export const useGridAutoRegisterHelper = () => {
 
     const registerGrid = () => {
         const config = getGridConfigFromModuleName(moduleName);
-        setFilterViewKey(config?.filterViewKey ?? constants.filters.views.projectGrid);
+        setFilterViewKey((config?.filterViewKey ?? constants.filters.views.projectGrid) as keyof UserFilters | null)
 
         // if (config) {
         //     // Register grid with proper config

@@ -11,8 +11,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/shared/components/ui/Button";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { GenericTextField, IconPicker } from "@/shared/components";
-import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
-import { isFolder } from "@/types/workspace-v2.types";
+import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
+import { isFolder } from "@/features/workspace/types/workspace-v2.types";
 import { useKeyboardShortcut } from "@/shared/hooks";
 import { useWorkspaceStore } from "../../../store/Workspace.store";
 import { useFolderDialogStore } from "../../../store/FolderDialog.store";

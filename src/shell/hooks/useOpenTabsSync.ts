@@ -17,7 +17,6 @@ import type { Task } from "@/features/taskDetail/types/task.types";
 import { BaseTab, MultiProjectTabData } from "@/shell/types/tab.types";
 import { constants } from "@/utils/constants";
 import { Note, NoteDTO } from "@/features/note/types/note.types";
-import { Ws } from "@/types/workspace.types";
 import { noteService } from "@/features/note/service/note.service";
 import { wsService, WsDTO } from "@/features/workspace/service/ws.service";
 import { projectService, ProjectDTO } from "@/features/project/service/project.service";
@@ -26,6 +25,7 @@ import { transformNotes } from "@/features/note/utils/note.utils";
 import { transformWs } from "@/utils/ws.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
+import {Ws} from "@/features/workspace/types/workspace.types";
 
 // Storage types
 export interface TabStorage {

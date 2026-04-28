@@ -3,8 +3,8 @@
  * Helper functions for workspace data transformation and manipulation
  */
 
-import { Ws } from "@/types/workspace.types";
 import { WsDTO } from "@/features/workspace/service/ws.service";
+import {Ws} from "@/features/workspace/types/workspace.types";
 
 /**
  * Transform WsDTO from API to Ws domain model

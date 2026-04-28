@@ -15,13 +15,11 @@ import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { wsService } from "@/features/workspace/service/ws.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useSnackbar } from "notistack";
-import {ResultOptions} from "@/types/common.types";
 import {WorkspaceDTO} from "../types/workspace-dto.types";
-import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {useMovingTreeStore} from "../store/MovingTree.store";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 export const useWorkspaceLoader = () => {
     const { $user } = useAuthStore();

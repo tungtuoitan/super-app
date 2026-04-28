@@ -9,7 +9,7 @@ import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
-import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { isNumber } from "lodash";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";

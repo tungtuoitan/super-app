@@ -5,7 +5,7 @@
 
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { treeMiniHelper } from "./tree.miniHelper";
-import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { useCallback, useMemo } from "react";
 
 export const useTreeStatusHelper = () => {

@@ -3,7 +3,7 @@
  * Domain models and DTOs for the notes feature
  */
 
-import type { NoteEntity } from "@/types/workspace-v2.types";
+import type { NoteEntity } from "@/features/workspace/types/workspace-v2.types";
 
 /**
  * Workspace link - represents a workspace that references this note

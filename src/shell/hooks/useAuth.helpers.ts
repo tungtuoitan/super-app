@@ -12,7 +12,6 @@ import { userProfileService } from "@/services/userProfile.service";
 import { envConfig } from "@/utils/config/env.config";
 import { constants } from "@/utils/constants";
 import type { LoginRequest } from "@/shell/types/auth.types";
-import type { UserFilters, UpdateUserProfileRequest } from "@/types/common.types";
 import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl, GOOGLE_OAUTH_CONFIG } from "@/utils/googleOAuth";
 import { retrieveAndClearPkceValues, validateState } from "@/utils/pkce.utils";

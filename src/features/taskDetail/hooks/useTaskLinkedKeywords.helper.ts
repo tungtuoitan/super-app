@@ -11,7 +11,7 @@ import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useGeneralStore } from "@/store/index";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
-import { Keyword } from "@/types/keyword.types";
+import { Keyword } from "@/shared/types/keyword.types";
 import type { LinkedKeyword } from "../types/taskDetail.types";
 
 export const useTaskLinkedKeywordsHelper = () => {

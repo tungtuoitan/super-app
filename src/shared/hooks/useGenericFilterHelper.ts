@@ -8,13 +8,13 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { constants } from "@/utils/constants";
-import type { ViewFilter, UserFilters, FilterFieldConfig, UpdateUserProfileRequest } from "@/types/common.types";
 import { filterUtils } from "@/utils/filter.utils";
 import { userProfileService } from "@/services/userProfile.service";
 import { envConfig } from "@/utils/config/env.config";
 import { STORAGE_KEYS, storageService } from "@/services/storage.service";
 import { parseApiError } from "@/utils/api-error.utils";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {FilterFieldConfig, UserFilters, ViewFilter} from "../types/filter.types";
 
 /**
  * Generic filter helper hook for filter operations

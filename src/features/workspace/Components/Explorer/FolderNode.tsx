@@ -6,7 +6,7 @@ import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
-import { WorkspaceFolderItem } from "@/types/workspace-v2.types";
+import { WorkspaceFolderItem } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { HighlightText } from "./HighlightText";

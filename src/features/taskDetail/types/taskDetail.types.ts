@@ -2,9 +2,9 @@
  * Task Detail — domain types for task detail editor features
  */
 
-import type { Keyword } from "@/types/keyword.types";
+import type { Keyword } from "@/shared/types/keyword.types";
 import type { TargetKeywordTargetType } from "@/services/targetKeyword.service";
-import type { NoteEntity } from "@/types/workspace-v2.types";
+import type { NoteEntity } from "@/features/workspace/types/workspace-v2.types";
 
 export interface TaskFolderItem {
     workspaceItemId: number;

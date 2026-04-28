@@ -3,7 +3,8 @@
  * Helper functions for parsing and manipulating filter values
  */
 
-import { FilterValue, ViewFilter } from "@/types/common.types";
+import {FilterValue} from "@/shared/types/filter.types";
+
 
 /**
  * Parse comma-separated string into array

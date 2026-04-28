@@ -1,4 +1,4 @@
-import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 
 /**
  * Unified Workspace DTO

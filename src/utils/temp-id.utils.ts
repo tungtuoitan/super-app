@@ -9,8 +9,8 @@
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { Note } from "@/features/note/types/note.types";
 import { constants } from "@/utils/constants";
-import type { Ws } from "@/types/workspace.types";
-import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
+import {Ws} from "@/features/workspace/types/workspace.types";
 
 /**
  * Collect all IDs from open tabs

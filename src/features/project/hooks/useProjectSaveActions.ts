@@ -5,7 +5,7 @@ import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { Task } from "@/features/taskDetail";
-import {SaveActions} from "@/types/actions.types";
+import {SaveActions} from "@/shared/types/actions.types";
 
 export function useProjectSaveActions(): SaveActions {
     const { upsertProject } = useProjectDetailHelper();

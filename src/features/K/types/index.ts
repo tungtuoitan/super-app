@@ -3,7 +3,6 @@
  * Central export for all type definitions
  */
 
-export * from "./common.types";
 
 // Export folder types
 export * from "./folder.types";

@@ -10,7 +10,7 @@ import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
-import { WorkspaceNoteItem } from "@/types/workspace-v2.types";
+import { WorkspaceNoteItem } from "@/features/workspace/types/workspace-v2.types";
 import { Note } from "@/features/note/types/note.types";
 import { constants } from "@/utils/constants";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";

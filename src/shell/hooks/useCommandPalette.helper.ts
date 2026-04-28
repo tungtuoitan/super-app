@@ -10,7 +10,7 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
-import { Keyword } from "@/types/keyword.types";
+import { Keyword } from "@/shared/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
 import { targetKeywordService } from "@/services/targetKeyword.service";

@@ -4,7 +4,7 @@
 
 import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import { ResultOptions } from "@/types/index";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 export interface ProjectDTO {
     id: number;

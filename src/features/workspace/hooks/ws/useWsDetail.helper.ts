@@ -8,7 +8,7 @@ import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import { Ws } from "@/types/workspace.types";
+import {Ws} from "../../types/workspace.types";
 
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();

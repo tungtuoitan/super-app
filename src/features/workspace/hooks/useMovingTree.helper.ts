@@ -8,7 +8,7 @@ import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { useDragDropManager } from "react-dnd";
-import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";

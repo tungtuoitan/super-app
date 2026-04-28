@@ -4,8 +4,8 @@
 
 import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { ResultOptions } from "@/types/common.types";
 import type { NoteDTO } from "../types/note.types";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 const _getNotes = async (
     _token: string,

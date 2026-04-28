@@ -4,8 +4,8 @@
  * Pattern: Separate store from business logic (similar to TagUIStore, EditorTabBarStore)
  */
 
+import {UserFilters} from "@/shared/types/filter.types";
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
-import { UserFilters } from "@/types/common.types";
 
 /**
  * User interface representing authenticated user data

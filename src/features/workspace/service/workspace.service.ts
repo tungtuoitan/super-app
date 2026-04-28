@@ -7,8 +7,8 @@ import { apiFetch } from "@/services/apiClient";
 import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse, UpsertWorkspaceItemRequest } from "../types/workspace.types";
 import { constants } from "@/utils/constants";
 import _ from "lodash";
-import { ResultOptions } from "@/types/index";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 export interface UpsertFolderRequest {
     id?: number | null;

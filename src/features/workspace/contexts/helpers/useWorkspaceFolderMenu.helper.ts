@@ -11,7 +11,7 @@ import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopo
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
 import type { ItemType } from "../../store/FolderDialog.store";
-import { Folder } from "@/types/folder.types";
+import { Folder } from "@/features/workspace/types/folder.types";
 import { workspaceService } from "../../service/workspace.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -20,7 +20,7 @@ import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMe
 import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "../../hooks/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "../../types/workspace.types";
-import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";

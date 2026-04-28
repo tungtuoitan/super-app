@@ -18,7 +18,7 @@ import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader";
 import { filterTopLevelParents, buildTreeFromV2Items } from "../../hooks/tree.miniHelper";
 import type { UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { WorkspaceItemAction } from "../../types/workspace.types";
-import type { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import type { WorkspaceDTO } from "../../types/workspace-dto.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";

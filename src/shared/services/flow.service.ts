@@ -5,7 +5,7 @@
 
 import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { ResultOptions } from "../../types";
+import {ResultOptions} from "../types/resultOptions.types";
 
 export interface FlowEdgeDTO {
     id: number;

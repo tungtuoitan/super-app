@@ -6,13 +6,9 @@ import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
 import type { LifeLogTrackDTO, LifeLogLogDTO, UpsertLifeLogTrackDTO, UpsertLifeLogLogDTO } from "@/features/lifeLog/types/lifeLog.types";
 import { debugLog } from "@/shell/hooks/useDebugLog";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
-interface ResultOptions<T = unknown> {
-    success: boolean;
-    message?: string;
-    data?: T[];
-    status?: number;
-}
+
 
 const base = () => `${config.api.baseURL}/api/lifelog`;
 

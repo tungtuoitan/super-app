@@ -10,11 +10,11 @@ import { Button } from "@/shared/components/ui/Button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { Ws } from "@/types/workspace.types";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useAuthStore } from "@/store/index";
 import {useWsGridHelper} from "../hooks/ws/useWsGrid.helper";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
+import {Ws} from "../types/workspace.types";
 
 /**
  * WsGrid - ws grid with table display

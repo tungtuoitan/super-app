@@ -4,8 +4,8 @@
 
 import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { ResultOptions } from "@/types/common.types";
-import type { Keyword, UpsertExternalKeywordRequest, KeywordSyncReport } from "@/types/keyword.types";
+import type { Keyword, UpsertExternalKeywordRequest, KeywordSyncReport } from "@/shared/types/keyword.types";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 const _getKeywords = async (
     _token: string,

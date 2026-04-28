@@ -4,8 +4,8 @@
 
 import { config } from "@/utils/config/app.config";
 import { apiFetch } from "@/services/apiClient";
-import type { ResultOptions } from "@/types/common.types";
-import type { StandardRegistryDTO } from "@/types/standardRegistry.types";
+import type { StandardRegistryDTO } from "@/shared/types/standardRegistry.types";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 const _getStandardRegistries = async (
     _token: string,

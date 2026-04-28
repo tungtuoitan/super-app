@@ -4,7 +4,7 @@
  * Will be removed in Phase 3.
  */
 
-import type { FolderEntity } from "@/types/workspace-v2.types";
+import type { FolderEntity } from "@/features/workspace/types/workspace-v2.types";
 
 // API Response DTO (from backend FolderResponse)
 // Backend returns: Id, Name, Description, Color, CreatedAt, IsActive, Depth

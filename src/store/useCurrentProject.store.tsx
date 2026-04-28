@@ -6,7 +6,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
-import type { Project } from "@/types/project.types";
+import type { Project } from "@/features/project/types/project.types";
 
 export interface CurrentProjectContextData {
     projectId: number | null;

@@ -3,7 +3,7 @@
  * Parse and navigate keyword links in markdown editor
  */
 
-import type { Keyword } from "@/types/keyword.types";
+import type { Keyword } from "@/shared/types/keyword.types";
 
 export interface ParsedKeywordLink {
     type: "workspace" | "folder" | "note" | "external" | "project" | "task" | "log" | "track";

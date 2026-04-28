@@ -5,7 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
-import { Ws } from "@/types/workspace.types";
+import {Ws} from "../../types/workspace.types";
 
 export interface PaginationState {
     pageIndex: number;

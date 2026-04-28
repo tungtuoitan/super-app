@@ -1,10 +1,8 @@
 import { WorkspaceItem, FolderItem, NoteItem, FileItem, isFolder, canHaveChildren } from "../types/workspace.types";
-import { WorkspaceItemV2, WorkspaceFolderItem, isFolder as isFolderV2, canHaveChildren as canHaveChildrenV2 } from "@/types/workspace-v2.types";
-import { Folder } from "@/types/index";
-import { transformBackendItems, BackendWorkspaceItem } from "../utils/workspace-mapper";
+import { WorkspaceItemV2, WorkspaceFolderItem, isFolder as isFolderV2, canHaveChildren as canHaveChildrenV2 } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
-import {featureFlags} from "@/utils/config/features.config";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
+import {Folder} from "../types/folder.types";
 
 // ============================================
 // RECURSIVE HELPER FUNCTIONS (prefix with $)

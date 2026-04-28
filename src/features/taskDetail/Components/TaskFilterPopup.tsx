@@ -13,8 +13,8 @@ import { constants } from "@/utils/constants";
 import { filterUtils } from "@/utils/filter.utils";
 import { useAuthStore, useGeneralStore } from "@/store/index";
 import { userProfileService } from "@/services/userProfile.service";
-import type { ViewFilter, UserFilters } from "@/types/common.types";
 import {parseApiError} from "@/utils/api-error.utils";
+import {UserFilters, ViewFilter} from "@/shared/types/filter.types";
 
 const DEFAULT_FILTERS = constants.filters.defaults.taskGrid as ViewFilter;
 const GROUPS = constants.filters.taskGroups;

@@ -5,8 +5,8 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useMemo } from "react";
-import { StandardRegistry } from "@/types/standardRegistry.types";
-import { Keyword } from "@/types/keyword.types";
+import { StandardRegistry } from "@/shared/types/standardRegistry.types";
+import { Keyword } from "@/shared/types/keyword.types";
 
 export interface GeneralContextData {
     // All standard registries loaded from backend (flat array)

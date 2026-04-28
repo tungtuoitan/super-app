@@ -13,12 +13,12 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 import { Slider } from "@/shared/components/ui/slider";
 import { Label } from "@/shared/components/ui/label";
-import type { UserFilters, FilterFieldConfig, ViewFilter } from "@/types/common.types";
 import { constants } from "@/utils/constants";
 import { useGenericFilterHelper } from "@/shared/hooks/useGenericFilterHelper";
 import { useAuthStore, useGeneralStore } from "@/store/index";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/utils/formatters";
+import {FilterFieldConfig, ViewFilter} from "../types/filter.types";
 
 export function GenericFilterPopup() {
     const {

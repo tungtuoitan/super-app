@@ -10,11 +10,10 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
-import { Ws } from "@/types/workspace.types";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import {useWsDetailHelper} from "../hooks/ws/useWsDetail.helper";
+import {Ws} from "../types/workspace.types";
 
 /**
  * Workspace Detail Dialog Content

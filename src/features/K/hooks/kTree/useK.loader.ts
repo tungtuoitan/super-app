@@ -19,8 +19,8 @@ import {useKStore} from "../../store/K.store";
 import {KTestService} from "../../service/kTest.service";
 import {KItemV2} from "../../types/K-v2.types";
 import {KDTO} from "../../types/K-dto.types";
-import {ResultOptions} from "@/types/common.types";
 import {KWsResponse} from "../../types/K.types";
+import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 
 export const useKLoader = () => {

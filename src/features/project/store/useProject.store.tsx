@@ -5,7 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
-import type { Project } from "@/types/project.types";
+import type { Project } from "@/features/project/types/project.types";
 
 export type { Project };
 

@@ -10,15 +10,13 @@ import { useFolderDialogHelper } from "./useFolderDialog.helper";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { constants } from "@/utils/constants";
 import { workspaceService } from "../service/workspace.service";
-import type { MoveItemsRequest } from "../types/workspace.types";
 import { WorkspaceItemAction } from "../types/workspace.types";
-import { Folder } from "@/types/index";
-import { useSnackbar } from "notistack";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { WorkspaceItemV2 } from "@/types/workspace-v2.types";
+import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {SPECIAL_IDS} from "@/utils/temp-id.utils";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
+import {Folder} from "../types/folder.types";
 
 export const useTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace } = useWorkspaceStore();
