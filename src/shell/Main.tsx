@@ -45,17 +45,17 @@ export function Main() {
     return (
         <BrowserRouter>
             <NavProvider>
-                <MobileProvider>
-                    <DebugLoggerProvider>
-                        <SnackbarProvider autoHideDuration={3000}>
-                            <DndProvider backend={HTML5Backend}>
-                                <GeneralProvider>
-                                    <CommandPaletteProvider>
-                                        <OrchestratorContextMenuStoreProvider>
-                                            <ConfirmationPopoverProvider>
-                                                <AuthGuard>
-                                                    <GridControlProvider>
-                                                        <ShellProvider>
+                <ShellProvider>
+                    <MobileProvider>
+                        <DebugLoggerProvider>
+                            <SnackbarProvider autoHideDuration={3000}>
+                                <DndProvider backend={HTML5Backend}>
+                                    <GeneralProvider>
+                                        <CommandPaletteProvider>
+                                            <OrchestratorContextMenuStoreProvider>
+                                                <ConfirmationPopoverProvider>
+                                                    <AuthGuard>
+                                                        <GridControlProvider>
                                                             {/* Main application content */}
                                                             <WorkspaceProviders>
                                                                 <KProviders>
@@ -88,18 +88,18 @@ export function Main() {
                                                                     </WsProviders>
                                                                 </KProviders>
                                                             </WorkspaceProviders>
-                                                        </ShellProvider>
-                                                    </GridControlProvider>
-                                                </AuthGuard>
-                                                <ConfirmationPopoverContainer />
-                                            </ConfirmationPopoverProvider>
-                                        </OrchestratorContextMenuStoreProvider>
-                                    </CommandPaletteProvider>
-                                </GeneralProvider>
-                            </DndProvider>
-                        </SnackbarProvider>
-                    </DebugLoggerProvider>
-                </MobileProvider>
+                                                        </GridControlProvider>
+                                                    </AuthGuard>
+                                                    <ConfirmationPopoverContainer />
+                                                </ConfirmationPopoverProvider>
+                                            </OrchestratorContextMenuStoreProvider>
+                                        </CommandPaletteProvider>
+                                    </GeneralProvider>
+                                </DndProvider>
+                            </SnackbarProvider>
+                        </DebugLoggerProvider>
+                    </MobileProvider>
+                </ShellProvider>
             </NavProvider>
         </BrowserRouter>
     );

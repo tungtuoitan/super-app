@@ -20,9 +20,11 @@ import { useTaskListSelector } from "../Selectors/TaskListSelector";
 import { useTaskGridUpdateHelper } from "../hooks/taskList/useTaskGridUpdate.helper";
 import { useTaskListHeadless } from "../hooks/taskList/useTaskList.headless";
 import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
-import { StatusCell, PriorityCell } from "@/features/multiProject/Components/small/MultiProjectTaskListCells";
-import { DateRangeCell, DraggableRow } from "@/features/multiProject/Components/small/MultiProjectTaskListRow";
-import { MakeIndependentDropZone } from "@/features/multiProject/Components/small/MakeIndependentDropZone";
+import {MakeIndependentDropZone} from "../../Components/MakeIndependentDropZone";
+import {DraggableRow} from "../../Components/DraggableRow";
+import {StatusCell} from "../../Components/StatusCell";
+import {PriorityCell} from "../../Components/PriorityCell";
+import {DateRangeCell} from "../../Components/DateRangeCell";
 
 
 type TaskTableProps = {

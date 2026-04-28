@@ -74,7 +74,7 @@ export function useAuthHelper() {
             return false;
         }
 
-        set$User({ ...cached, userToken: "" });
+        set$User({ ...cached });
 
         try {
             const newToken = await acquireRefreshToken();
@@ -116,7 +116,7 @@ export function useAuthHelper() {
                 authType: "local",
             };
 
-            storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
+            storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile });
             set$User(userProfile);
             setIsAuthenticated(true);
 
