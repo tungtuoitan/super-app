@@ -3,11 +3,9 @@
  * Business logic for command palette operations
  */
 
-import { useMemo } from "react";
 import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
-import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import { Keyword } from "@/shared/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
@@ -18,6 +16,7 @@ import { taskService } from "@/features/taskDetail/service/task.service";
 import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";
 import {useGeneralStore} from "@/shared/store/General.store";
 import {useCommandPaletteStore} from "../store/useCommandPalette.store";
+import {usePTaskStore} from "@/features/project/store/usePTask.store";
 
 export const useCommandPaletteHelper = () => {
     const { allKeywords } = useGeneralStore();

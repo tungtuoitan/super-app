@@ -14,12 +14,12 @@ import { Label } from "@/shared/components/ui/label";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import type { Task } from "@/features/taskDetail";
-import { usePTaskStore } from "../store/usePTask.store";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
 import { useTaskKanbanSelector } from "../Selectors/TaskKanbanSelector";
 import { useTaskKanbanHelper } from "../hooks/taskKanban/useTaskKanban.helper";
 import { getTaskStatusColorsWithBorder, getTaskPriorityDotColor } from "@/features/taskDetail";
+import {usePTaskStore} from "../../store/usePTask.store";
 
 // Drag item type
 const KANBAN_TASK = "KANBAN_TASK";

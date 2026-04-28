@@ -13,6 +13,7 @@ export type { Project } from "./types/project.types";
 
 // Store
 export { useProjectStore } from "./store/useProject.store";
+export { usePTaskStore } from "./store/usePTask.store";
 
 // Hooks
 export { useProjectTabHelper } from "./hooks/useProjectTab.helper";

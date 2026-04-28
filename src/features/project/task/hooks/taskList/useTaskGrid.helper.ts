@@ -6,7 +6,6 @@ import { useGridControlStore } from "@/shared/store/useGridControl.store";
 
 import { taskService } from "@/features/taskDetail";
 import type { TaskDTO, Task } from "@/features/taskDetail";
-import { usePTaskStore } from "../../store/usePTask.store";
 import { generateTempId } from "@/utils/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
@@ -14,6 +13,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";
+import {usePTaskStore} from "@/features/project/store/usePTask.store";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)

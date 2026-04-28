@@ -11,7 +11,7 @@
 
 import { useEffect, useRef } from "react";
 import { Task } from "../../types/task.types";
-import { usePTaskStore } from "../../store/usePTask.store";
+import { usePTaskStore } from "@/features/project";
 import { taskService } from "../../service/task.service";
 import { standardRegistryService } from "@/services/standardRegistry.service";
 import { useAuthStore } from "@/shell/store/Auth.store";

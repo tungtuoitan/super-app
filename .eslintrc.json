@@ -17,7 +17,7 @@
           {
             "patterns": [
               {
-                "group": ["@/features/project/**", "@/features/multiProject/**"],
+                "group": ["@/features/project/**", "@/features/multiProject/**", "../../project/**", "../../../project/**", "../../../../project/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
                 "message": "Import from '@/features/project' or '@/features/multiProject' (index) only, not subdirectories."
               }
             ]
@@ -33,11 +33,11 @@
           {
             "patterns": [
               {
-                "group": ["@/features/multiProject/**"],
+                "group": ["@/features/multiProject/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
                 "message": "Import from '@/features/multiProject' (index) only, not subdirectories."
               },
               {
-                "group": ["@/features/taskDetail/**"],
+                "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
                 "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
               }
             ]
@@ -53,11 +53,11 @@
           {
             "patterns": [
               {
-                "group": ["@/features/project/**"],
+                "group": ["@/features/project/**", "../../project/**", "../../../project/**", "../../../../project/**"],
                 "message": "Import from '@/features/project' (index) only, not subdirectories."
               },
               {
-                "group": ["@/features/taskDetail/**"],
+                "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
                 "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
               }
             ]
@@ -73,7 +73,7 @@
           {
             "patterns": [
               {
-                "group": ["@/features/taskDetail/**", "@/features/project/**", "@/features/multiProject/**"],
+                "group": ["@/features/taskDetail/**", "@/features/project/**", "@/features/multiProject/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**", "../../project/**", "../../../project/**", "../../../../project/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
                 "message": "Import from '@/features/taskDetail', '@/features/project', or '@/features/multiProject' (index) only, not subdirectories."
               }
             ]

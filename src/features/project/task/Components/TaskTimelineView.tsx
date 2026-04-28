@@ -13,7 +13,6 @@ import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Button } from "@/shared/components/ui/Button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { usePTaskStore } from "../store/usePTask.store";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { cn } from "@/lib/utils";
@@ -23,6 +22,7 @@ import { TaskTimelineProvider, useTaskTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_
 import { useTaskTimelineHeadless } from "../hooks/taskTimeline/useTaskTimeline.headless";
 import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
 import {TaskBar} from "./small/TaskBar";
+import {usePTaskStore} from "../../store/usePTask.store";
 
 /**
  * Inner timeline component that consumes the TaskTimelineProvider context

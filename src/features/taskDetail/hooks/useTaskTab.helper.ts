@@ -7,7 +7,7 @@ import { Task } from "../types/task.types";
 import { BaseTab } from "@/shell/types/tab.types";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import {usePTaskStore} from "../store/usePTask.store";
+import { usePTaskStore } from "@/features/project";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 import {useTaskDetailStore} from "../store/useTaskDetail.store";
 

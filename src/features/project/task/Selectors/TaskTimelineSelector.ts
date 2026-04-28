@@ -4,12 +4,11 @@
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-import { useMemo } from "react";
-import { usePTaskStore } from "../store/usePTask.store";
 import { useTaskTimelineStore } from "../store/useTaskTimeline.store";
 import { sortTasksHierarchically, formatMonthHeader, generateDateRange } from "@/features/taskDetail";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
+import {usePTaskStore} from "../../store/usePTask.store";
 
 export const useTaskTimelineSelector = () => {
     const { tasks } = usePTaskStore();

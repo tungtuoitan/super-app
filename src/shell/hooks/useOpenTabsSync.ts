@@ -11,7 +11,6 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
-import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import type { Task } from "@/features/taskDetail/types/task.types";
 import { BaseTab, MultiProjectTabData } from "@/shell/types/tab.types";
 import { constants } from "@/utils/constants";
@@ -27,6 +26,7 @@ import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
 import {Ws} from "@/features/workspace/types/workspace.types";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 import {Project} from "@/features/project";
+import {usePTaskStore} from "@/features/project/store/usePTask.store";
 
 // Storage types
 export interface TabStorage {

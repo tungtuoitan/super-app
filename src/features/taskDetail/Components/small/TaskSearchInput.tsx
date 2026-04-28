@@ -8,7 +8,7 @@ import React, { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/Button";
-import {usePTaskStore} from "../../store/usePTask.store";
+import { usePTaskStore } from "@/features/project";
 
 export function TaskSearchInput() {
     const { taskSearchQuery, setTaskSearchQuery } = usePTaskStore();

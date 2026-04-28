@@ -13,7 +13,6 @@ import { Loader2, CornerDownRight } from "lucide-react";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import type { Task } from "@/features/taskDetail";
-import { usePTaskStore } from "../store/usePTask.store";
 import { useTaskGridHelper } from "../hooks/taskList/useTaskGrid.helper";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { useTaskListSelector } from "../Selectors/TaskListSelector";
@@ -25,6 +24,7 @@ import {DraggableRow} from "../../Components/DraggableRow";
 import {StatusCell} from "../../Components/StatusCell";
 import {PriorityCell} from "../../Components/PriorityCell";
 import {DateRangeCell} from "../../Components/DateRangeCell";
+import {usePTaskStore} from "../../store/usePTask.store";
 
 
 type TaskTableProps = {

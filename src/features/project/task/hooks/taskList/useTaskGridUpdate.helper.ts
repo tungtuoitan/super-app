@@ -6,13 +6,13 @@
  */
 
 import type { Task } from "@/features/taskDetail";
-import { usePTaskStore } from "../../store/usePTask.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
 import { useTaskGridHelper } from "./useTaskGrid.helper";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {useAuthStore} from "@/shell/store/Auth.store";
+import {usePTaskStore} from "@/features/project/store/usePTask.store";
 
 export const useTaskGridUpdateHelper = () => {
     const { tasks, setTasks } = usePTaskStore();

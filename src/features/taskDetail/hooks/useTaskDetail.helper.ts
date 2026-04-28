@@ -27,7 +27,7 @@ import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopo
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskCommentHelper } from "./taskComment/useTaskComment.helper";
 import { debugLog } from "@/shell/hooks/useDebugLog";
-import {usePTaskStore} from "../store/usePTask.store";
+import { usePTaskStore } from "@/features/project";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 // Re-export utils for backward compatibility

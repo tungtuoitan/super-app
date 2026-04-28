@@ -25,23 +25,21 @@ import { projectService } from "@/features/project/service/project.service";
 import { taskService } from "@/features/taskDetail/service/task.service";
 import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";
 import { useProjectStore } from "@/features/project/store/useProject.store";
-import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import type { Task } from "@/features/taskDetail/types/task.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import {Project} from "@/features/project";
+import {usePTaskStore} from "@/features/project/store/usePTask.store";
 
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
     const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { openTab, updateActiveTab } = useEditorTabHelper();
-    const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const { loadTree } = useWorkspaceLoader();
     const { setModuleName } = useGridControlStore();
     const _console = useConsoleHelper();
     const { moduleName } = useGridControlStore();
-    const { navigateToView } = useNavigationStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
     const { projects } = useProjectStore();
     const { tasks } = usePTaskStore();

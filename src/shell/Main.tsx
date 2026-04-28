@@ -7,7 +7,6 @@ import { KProviders } from "@/features/K/store/KProviders";
 import { NoteProviders } from "@/features/note/store/NoteProviders";
 import { WsProviders } from "@/features/workspace/store/ws/WsProviders";
 import { ProjectProviders } from "@/features/project/store/ProjectProviders";
-import { PTaskProvider } from "@/features/project/task/store/usePTask.store";
 import { MpTaskProvider } from "@/features/multiProject/store/useMpTask.store";
 import { TaskDetailProvider } from "@/features/taskDetail/store/useTaskDetail.store";
 import { TaskDetailSectionProvider } from "@/features/taskDetail/store/useTaskDetailSection.store";
@@ -28,6 +27,7 @@ import { DebugLoggerProvider } from "@/shared/store/DebugLogger.store";
 import { ShellProvider } from "./store/ShellProvider";
 import {GeneralProvider} from "@/shared/store/General.store";
 import {CommandPaletteProvider} from "./store/useCommandPalette.store";
+import {PTaskProvider} from "@/features/project/store/usePTask.store";
 
 /**
  * Main application layout component.

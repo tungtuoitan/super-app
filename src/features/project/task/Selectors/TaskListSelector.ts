@@ -4,14 +4,13 @@
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-import { useMemo } from "react";
-import { usePTaskStore } from "../store/usePTask.store";
 import { useGeneralStore } from "@/shared/store/General.store";
 import { IStatusOption } from "@/shared/components";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
 import { constants } from "@/utils/constants";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
+import {usePTaskStore} from "../../store/usePTask.store";
 
 export const useTaskListSelector = () => {
     const { tasks, taskSearchQuery } = usePTaskStore();

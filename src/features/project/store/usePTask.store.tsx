@@ -5,9 +5,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
-import type { Task, TaskPaginationState } from "../types/task.types";
-
-export type { TaskPaginationState } from "../types/task.types";
+import {Task, TaskPaginationState} from "@/features/taskDetail";
 
 export interface PTaskContextData {
     tasks: Task[];
