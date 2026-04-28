@@ -14,7 +14,7 @@ export function useTaskChecklistHeadless() {
             discard: handleChecklistCancelEdit,
         };
         return () => { delete builtinSectionHandlersRef.current.checklist; };
-    }, [builtinSectionHandlersRef]);
+    }, [builtinSectionHandlersRef, handleChecklistSaveEdit, handleChecklistCancelEdit]);
 
     useEffect(() => {
         if (!isExpanded) return;

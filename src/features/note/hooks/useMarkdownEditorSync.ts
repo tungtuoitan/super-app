@@ -54,7 +54,7 @@ export function useMarkdownEditorSync({$mi}: { $mi: any }) {
         // });
         setDisplayDesc(displayValue ?? null);
         
-    }, [activeNote?.description, allKeywords]);
+    }, [activeNote?.description, allKeywords, $mi]);
 
     // useEffect(() => {
     //     // console.log("displayDesc:", displayDesc);
@@ -111,7 +111,7 @@ export function useMarkdownEditorSync({$mi}: { $mi: any }) {
         } catch (error) {
             console.warn("[Monaco] Value sync error (editor may be disposed):", error);
         }
-    }, [displayDesc, activeNote?.id]);
+    }, [displayDesc, activeNote?.id, $mi]);
 
     return null;
 }

@@ -25,9 +25,7 @@ import { useTaskProcessHeadless } from "../hooks/taskProcess/useTaskProcess.head
 
 export function TaskProcess() {
     return (
-        <TaskProcessProvider>
             <TaskProcessInner />
-        </TaskProcessProvider>
     );
 }
 

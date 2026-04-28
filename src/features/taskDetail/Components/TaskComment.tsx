@@ -12,9 +12,7 @@ import { CommentThread } from "./small/CommentThread";
 
 export function TaskComment() {
     return (
-        <TaskCommentProvider>
             <TaskCommentInner />
-        </TaskCommentProvider>
     );
 }
 

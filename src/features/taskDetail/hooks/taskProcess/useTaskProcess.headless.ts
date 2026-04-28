@@ -14,7 +14,7 @@ export function useTaskProcessHeadless() {
             discard: handleProcessCancelEdit,
         };
         return () => { delete builtinSectionHandlersRef.current.process; };
-    }, [builtinSectionHandlersRef]);
+    }, [builtinSectionHandlersRef, handleProcessSaveEdit, handleProcessCancelEdit]);
 
     useEffect(() => {
         if (!isExpanded) return;

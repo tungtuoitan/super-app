@@ -64,8 +64,8 @@ export function Main() {
                                                                             <PTaskProvider>
                                                                                 <MpTaskProvider>
                                                                                     <TaskDetailProvider>
-                                                                                        <TaskDetailSectionProvider>
-                                                                                            <TaskSectionProvider>
+                                                                                        <TaskSectionProvider>
+                                                                                            <TaskDetailSectionProvider>
                                                                                                 <MultiTimelineProvider>
                                                                                                     <LifeLogProvider>
                                                                                                         <WikiProvider>
@@ -79,8 +79,8 @@ export function Main() {
                                                                                                         </WikiProvider>
                                                                                                     </LifeLogProvider>
                                                                                                 </MultiTimelineProvider>
-                                                                                            </TaskSectionProvider>
-                                                                                        </TaskDetailSectionProvider>
+                                                                                            </TaskDetailSectionProvider>
+                                                                                        </TaskSectionProvider>
                                                                                     </TaskDetailProvider>
                                                                                 </MpTaskProvider>
                                                                             </PTaskProvider>

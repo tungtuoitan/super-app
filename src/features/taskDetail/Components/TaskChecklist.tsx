@@ -30,11 +30,7 @@ import { useTaskChecklistHeadless } from "../hooks/taskChecklist/useTaskChecklis
 import {useTaskChecklistHelper} from "../hooks/taskChecklist/useTaskChecklist.helper";
 
 export function TaskChecklist() {
-    return (
-        <TaskChecklistProvider>
-            <TaskChecklistInner />
-        </TaskChecklistProvider>
-    );
+    return <TaskChecklistInner />;
 }
 
 function TaskChecklistInner() {

@@ -10,12 +10,15 @@ import { useTaskCustomTabSelector } from "../Selectors/TaskCustomTabSelector";
 import { TaskProcess } from "./TaskProcess";
 import { TaskChecklist } from "./TaskChecklist";
 import { TaskComment } from "./TaskComment";
+import { TaskChecklistProvider } from "../store/useTaskChecklist.store";
 import { TaskCustomTab } from "./TaskCustomTab";
 import { CommentFilterDropdown } from "./small/CommentFilterDropdown";
 import { CustomTabButton } from "./small/CustomTabButton";
 import { useTaskSectionHeadless } from "../hooks/taskSection/useTaskSection.headless";
 import { RichTextEditor } from "@/shared/components";
 import { BUILTIN_TABS, TAB_COLORS } from "../task.constants";
+import {TaskProcessProvider} from "../store/useTaskProcess.store";
+import {TaskCommentProvider} from "../store/useTaskComment.store";
 
 function  NewTaskPlaceholder() {
   return (
@@ -140,12 +143,16 @@ export function TaskDetailSection() {
 
             {/* ── Section Panels ── */}
             <div className="flex-1 min-h-0">
-                <div className={cn("h-full", activeSection !== "process" && "hidden")}>
-                    {isNewTask ? <NewTaskPlaceholder /> : <TaskProcess />}
-                </div>
-                <div className={cn("h-full", activeSection !== "checklist" && "hidden")}>
-                    {isNewTask ? <NewTaskPlaceholder /> : <TaskChecklist />}
-                </div>
+                <TaskProcessProvider>
+                    <div className={cn("h-full", activeSection !== "process" && "hidden")}>
+                        {isNewTask ? <NewTaskPlaceholder /> : <TaskProcess />}
+                    </div>
+                </TaskProcessProvider>
+                <TaskChecklistProvider>
+                    <div className={cn("h-full", activeSection !== "checklist" && "hidden")}>
+                        {isNewTask ? <NewTaskPlaceholder /> : <TaskChecklist />}
+                    </div>
+                </TaskChecklistProvider>
                 <div className={cn("h-full pt-2.5", activeSection !== "desc" && "hidden")}>
                     <div className="h-full overflow-y-auto border rounded-md">
                         <RichTextEditor
@@ -162,16 +169,18 @@ export function TaskDetailSection() {
                         />
                     </div>
                 </div>
-                <div className={cn("h-full mt-2.5 border-t pt-4", activeSection !== "comment" && "hidden")}>
-                    {isNewTask ? <NewTaskPlaceholder /> : <TaskComment />}
-                </div>
-
-                {customTabs.tabs.map((tab) => (
-                    <div key={tab.id} className={cn("h-full", activeSection !== `custom:${tab.id}` && "hidden")}>
-                        {isNewTask ? <NewTaskPlaceholder /> : <TaskCustomTab tabId={tab.id} />}
+                <TaskCommentProvider>
+                    <div className={cn("h-full mt-2.5 border-t pt-4", activeSection !== "comment" && "hidden")}>
+                        {isNewTask ? <NewTaskPlaceholder /> : <TaskComment />}
                     </div>
-                ))}
-            </div>
+                </TaskCommentProvider>
+
+                    {customTabs.tabs.map((tab) => (
+                        <div key={tab.id} className={cn("h-full", activeSection !== `custom:${tab.id}` && "hidden")}>
+                            {isNewTask ? <NewTaskPlaceholder /> : <TaskCustomTab tabId={tab.id} />}
+                        </div>
+                    ))}
+                </div>
         </div>
     );
 }
