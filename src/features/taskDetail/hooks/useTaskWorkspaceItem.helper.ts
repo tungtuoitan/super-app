@@ -10,14 +10,14 @@ import type { Note } from "@/features/note/types/note.types";
 import { type Task } from "../types/task.types";
 import { type TaskFolderItem } from "../types/taskDetail.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
-import { useGeneralStore } from "@/store/index";
-import { useEditorTabBarStore } from "@/store/index";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { constants } from "@/utils/constants";
 import { workspaceService } from "@/features/workspace/service/workspace.service";
 import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import {useGeneralStore} from "@/shared/store/General.store";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();

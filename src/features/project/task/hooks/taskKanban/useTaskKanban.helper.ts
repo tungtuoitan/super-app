@@ -1,4 +1,3 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Kanban Helper
  * Callbacks only (useCallback). Handles status transition validation and drag-drop API calls.
@@ -6,18 +5,18 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-
 import { usePTaskStore } from "../../store/usePTask.store";
-import { useAuthStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
 import { useTaskKanbanSelector } from "../../Selectors/TaskKanbanSelector";
+import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
+import {useAuthStore} from "@/shell/store/Auth.store";
 
 export const useTaskKanbanHelper = () => {
     const { tasks, setTasks } = usePTaskStore();
     const { $user } = useAuthStore();
-    const { projectId } = useCurrentProjectStore();
+    const { projectId } = useProjectDetailStore();
     const _console = useConsoleHelper();
 
     // Call selector directly

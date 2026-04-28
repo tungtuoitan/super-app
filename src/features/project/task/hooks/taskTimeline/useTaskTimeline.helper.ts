@@ -1,14 +1,11 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Timeline Helper
  * Callbacks only (useCallback). Handles date changes, scroll, zoom, and API calls.
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-
 import type { Task } from "@/features/taskDetail";
 import { usePTaskStore } from "../../store/usePTask.store";
-import { useAuthStore, useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
@@ -16,12 +13,15 @@ import { constants } from "@/utils/constants";
 import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/useTaskTimeline.store";
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
+import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
+import {useAuthStore} from "@/shell/store/Auth.store";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export const useTaskTimelineHelper = () => {
     const { setTasks } = usePTaskStore();
     const { $user } = useAuthStore();
     const { setOpenTabs } = useEditorTabBarStore();
-    const { projectId } = useCurrentProjectStore();
+    const { projectId } = useProjectDetailStore();
     const _console = useConsoleHelper();
 
     // Call stores/selectors directly

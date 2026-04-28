@@ -11,10 +11,11 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Label } from "@/shared/components/ui/label";
 import { constants } from "@/utils/constants";
 import { filterUtils } from "@/utils/filter.utils";
-import { useAuthStore, useGeneralStore } from "@/store/index";
 import { userProfileService } from "@/services/userProfile.service";
 import {parseApiError} from "@/utils/api-error.utils";
 import {UserFilters, ViewFilter} from "@/shared/types/filter.types";
+import {useAuthStore} from "@/shell/store/Auth.store";
+import {useGeneralStore} from "@/shared/store/General.store";
 
 const DEFAULT_FILTERS = constants.filters.defaults.taskGrid as ViewFilter;
 const GROUPS = constants.filters.taskGroups;

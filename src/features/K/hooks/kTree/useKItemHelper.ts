@@ -1,6 +1,5 @@
 
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabBarStore } from "@/store/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";

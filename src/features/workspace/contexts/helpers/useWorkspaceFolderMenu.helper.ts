@@ -25,11 +25,11 @@ import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
-import { useGeneralStore } from "@/store/index";
 import { useNoteDetailStore } from "@/features/note";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/features/note";
 import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useGeneralStore} from "@/shared/store/General.store";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS

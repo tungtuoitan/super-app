@@ -7,11 +7,11 @@
 
 import React from "react";
 import type { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { ProjectDetailContent } from "./ProjectDetailContent";
 import {useProjectDetailStore} from "../store/useProjectDetail.store";
 import {useProjectEditorPanelHeadless} from "../hooks/ProjectEditorPanel.headless";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export function ProjectEditorPanel() {
     const { setOpenTabs } = useEditorTabBarStore();

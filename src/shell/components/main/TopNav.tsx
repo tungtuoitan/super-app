@@ -1,9 +1,10 @@
 import { MouseEvent, useEffect, useState } from "react";
 import { constants } from "@/utils/constants";
 import { envConfig } from "@/utils/config/env.config";
-import { useActivityBarStore, useCommandPaletteStore } from "@/store/index";
 import { useMobileStore } from "@/shared/store/Mobile.store";
 import { CommandPalette } from "@/shared/components/CommandPalette";
+import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
+import {useCommandPaletteStore} from "@/shell/store/useCommandPalette.store";
 
 /**
  * Top navigation component.

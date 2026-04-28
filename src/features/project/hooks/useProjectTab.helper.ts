@@ -5,9 +5,9 @@
 
 import { Project } from "../store/useProject.store";
 import { BaseTab, MultiProjectTabData } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export const useProjectTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();

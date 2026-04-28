@@ -2,12 +2,12 @@ import React from "react";
 import { ConfirmCloseDialog } from "@/shell/components/ConfirmCloseDialog";
 import { EditorToolbar } from "@/shell/components/main/EditorToolbar";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useOpenTabSync } from "../../hooks/useOpenTabsSync";
 import { TabBar } from "./TabBar";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { BaseTab } from "@/shell/types/tab.types";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 /**
  * VSEditorArea — main editor area.

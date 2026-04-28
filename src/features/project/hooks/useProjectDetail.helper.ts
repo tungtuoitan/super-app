@@ -8,7 +8,6 @@ import { projectService, ProjectDTO } from "../service/project.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
@@ -18,6 +17,7 @@ import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/index";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import type { TabType } from "../types/projectDetail.type";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)

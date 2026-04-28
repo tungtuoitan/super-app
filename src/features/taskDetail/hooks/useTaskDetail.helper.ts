@@ -18,7 +18,6 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { useGeneralStore } from "@/shared/store/General.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { useTaskLinkedKeywordsHelper } from "../hooks/useTaskLinkedKeywords.helper";
@@ -29,6 +28,7 @@ import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskCommentHelper } from "./taskComment/useTaskComment.helper";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import {usePTaskStore} from "../store/usePTask.store";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 // Re-export utils for backward compatibility
 export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../utils/TaskDetail.utils";

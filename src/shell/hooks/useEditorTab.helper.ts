@@ -1,13 +1,10 @@
 import { Note } from "@/features/note/types/note.types";
-import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { BaseTab, TabType } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
-import { useGeneralStore } from "@/store/index";
 import {
     findKeywordForNote,
     parseBreadcrumbFromKeyword,
@@ -20,6 +17,8 @@ import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.
 import type { Project } from "@/features/project/store/useProject.store";
 import type { Task } from "@/features/taskDetail/types/task.types";
 import {Ws} from "@/features/workspace/types/workspace.types";
+import {useEditorTabBarStore} from "../store/EditorTab.store";
+import {useGeneralStore} from "@/shared/store/General.store";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();

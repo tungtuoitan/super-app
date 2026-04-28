@@ -6,12 +6,12 @@
  */
 
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useAuthStore } from "@/store/index";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
 import { useMultiProjectKanbanSelector } from "../../Selectors/useMultiProjectKanban.selector";
+import {useAuthStore} from "@/shell/store/Auth.store";
 
 export const useMultiProjectKanbanHelper = () => {
     const { tasks, setTasks } = useMpTaskStore();

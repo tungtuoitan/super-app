@@ -1,25 +1,21 @@
 
-import { useNoteDetailStore } from "../store/useNoteDetail.store";
-import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { noteService } from "../service/note.service";
 import { transformANote } from "../utils/note.utils";
 import { Note, UpsertNoteDTO } from "../types/note.types";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
-import { keywordService } from "@/services/keyword.service";
-import { workspaceService } from "@/features/workspace/service/workspace.service";
 import { constants } from "@/utils/constants";
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { extractExternalLinks } from "@/utils/markdown.utils";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { IAutoCompleteOptions } from "@/shared/components";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useGeneralStore} from "@/shared/store/General.store";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();

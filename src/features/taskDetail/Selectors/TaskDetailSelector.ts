@@ -1,4 +1,3 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Detail Selector
  * Derived / computed values from global store state.
@@ -8,17 +7,17 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
  *           current selected values, date limit bounds.
  */
 
-import { useMemo } from "react";
 import { Task } from "../types/task.types";
 import { useGeneralStore } from "@/shared/store/General.store";
-import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { IStatusOption } from "@/shared/components";
 import {usePTaskStore} from "../store/usePTask.store";
+import { useTaskDetailProjectStore } from "../store/useTaskDetailProject.store";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export const useTaskDetailSelector = () => {
     const { openTabs, activeTabId } = useEditorTabBarStore();
-    const { projects } = useCurrentProjectStore();
+    const { projectsCache } = useTaskDetailProjectStore();
     const { tasks } = usePTaskStore();
     const { registriesByType } = useGeneralStore();
 
@@ -31,7 +30,7 @@ export const useTaskDetailSelector = () => {
     // ── Project ───────────────────────────────────────────────────────────────
 
     const currentProject = selectedTask?.projectId
-            ? (projects.find((p) => p.id === selectedTask.projectId) ?? null)
+            ? (projectsCache[selectedTask.projectId] ?? null)
             : null
     // ── Disabled flags ────────────────────────────────────────────────────────
 

@@ -6,8 +6,8 @@
 
 import React, { useEffect } from "react";
 import type { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { WsDetailContent } from "./WsDetailContent";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 interface WsEditorPanelProps {
     tab: BaseTab;

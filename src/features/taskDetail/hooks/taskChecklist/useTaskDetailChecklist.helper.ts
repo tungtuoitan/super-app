@@ -15,10 +15,10 @@ import { usePTaskStore } from "../../store/usePTask.store";
 import { taskService } from "../../service/task.service";
 import { standardRegistryService } from "@/services/standardRegistry.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabBarStore } from "@/store/index";
 import { BaseTab } from "@/shell/types/tab.types";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export type ChecklistUpdater = ChecklistJSON | ((current: ChecklistJSON) => ChecklistJSON);
 

@@ -3,10 +3,10 @@
  */
 
 import { useEffect } from "react";
-import { useEditorTabBarStore } from "@/store/index";
 import { LogDetailContent } from "./LogDetailContent";
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 interface LogEditorPanelProps {
     tab: BaseTab;

@@ -10,7 +10,7 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
 import { initiateGoogleLogin } from "@/utils/googleOAuth";
 import { Chrome, LogOut, User } from "lucide-react";
-import { useActivityBarStore } from "@/store/index";
+import {useActivityBarStore} from "../store/ActivityBar.store";
 
 export function AccountsDialog() {
     const { isAuthenticated, $user } = useAuthStore();

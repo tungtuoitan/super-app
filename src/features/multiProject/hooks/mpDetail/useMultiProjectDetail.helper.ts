@@ -4,7 +4,7 @@
  * Reads from stores directly — NO params.
  */
 
-import { useEditorTabBarStore } from "@/store/index";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import type { TabType } from "../../types/multiProjectDetail.type";
 

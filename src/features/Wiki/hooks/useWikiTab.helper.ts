@@ -1,8 +1,8 @@
 
-import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { WikiTabData } from "../types/wiki.type";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 const WIKI_TAB_ID = "wiki-singleton-tab";
 

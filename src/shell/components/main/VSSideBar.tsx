@@ -2,10 +2,10 @@ import { Panel, PanelGroup } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { GridControlBar } from "@/shared/components/GridControlBar";
 import { constants } from "@/utils/constants";
-import { useActivityBarStore } from "@/store/index";
 import { useMobileStore } from "@/shared/store/Mobile.store";
 import { Console } from "./Console";
 import { moduleRegistry } from "@/shell/moduleRegistry";
+import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 
 interface VSSideBarProps {
     moduleName: string;

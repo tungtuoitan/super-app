@@ -7,7 +7,6 @@
  */
 
 import { useEffect, useState } from "react";
-import { useEditorTabBarStore } from "@/store/index";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
@@ -26,6 +25,7 @@ import { transformWs } from "@/utils/ws.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
 import {Ws} from "@/features/workspace/types/workspace.types";
+import {useEditorTabBarStore} from "../store/EditorTab.store";
 
 // Storage types
 export interface TabStorage {

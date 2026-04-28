@@ -11,7 +11,7 @@ import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTim
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import { useMultiProjectDetailHelper } from "./useMultiProjectDetail.helper";
 import { useMultiProjectTaskGridHelper } from "../mpTaskList/useMultiProjectTaskGrid.helper";
-import { useAuthStore } from "@/store/index";
+import {useAuthStore} from "@/shell/store/Auth.store";
 
 export function useMultiProjectDetailHeadless() {
     const { projects } = useProjectStore();

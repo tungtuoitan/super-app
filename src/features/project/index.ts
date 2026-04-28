@@ -9,7 +9,7 @@ export { StatusCell } from "./Components/StatusCell";
 export { PriorityCell } from "./Components/PriorityCell";
 export { DateRangeCell } from "./Components/DateRangeCell";
 // Types
-export type { Project } from "./store/useProject.store";
+export type { Project } from "./types/project.types";
 
 // Store
 export { useProjectStore } from "./store/useProject.store";

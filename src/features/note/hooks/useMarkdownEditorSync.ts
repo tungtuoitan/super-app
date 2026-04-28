@@ -5,12 +5,12 @@
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useGeneralStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, updateDecorations } from "@/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";
 import "@/styles/keywords.css";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
+import {useGeneralStore} from "@/shared/store/General.store";
 
 export function useMarkdownEditorSync({$mi}: { $mi: any }) {
     const { getActiveTab, openTab } = useEditorTabHelper();

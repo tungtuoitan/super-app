@@ -3,11 +3,11 @@ import { constants } from "@/utils/constants";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { useEditorTabBarStore } from "@/store/index";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import {SaveActions} from "@/shared/types/actions.types";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export function useLifeLogSaveActions(): SaveActions {
     const { upsertLog } = useLifeLogLogHelper();

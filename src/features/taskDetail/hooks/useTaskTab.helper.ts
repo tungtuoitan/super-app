@@ -1,4 +1,3 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Tab Helper
  * Helper functions for managing task editor tabs
@@ -6,15 +5,16 @@ import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 
 import { Task } from "../types/task.types";
 import { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { constants } from "@/utils/constants";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import {usePTaskStore} from "../store/usePTask.store";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { useTaskDetailProjectStore } from "../store/useTaskDetailProject.store";
 
 export const useTaskTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
     const { updateActiveTab, setNewTabAnd } = useEditorTabHelper();
-    const { projects } = useCurrentProjectStore();
+    const { projectsCache } = useTaskDetailProjectStore();
     const { tasks } = usePTaskStore();
 
     /**
@@ -36,7 +36,7 @@ export const useTaskTabHelper = () => {
                     const parent = tasks.find(t => t.id === task.parentTaskId);
                     return { link: `sa/p${task.projectId}/t${task.parentTaskId}`, label: parent?.title ?? "Parent Task" };
                 }
-                const project = projects.find(p => p.id === task.projectId);
+                const project = projectsCache[task.projectId];
                 return { link: `sa/p${task.projectId}`, label: project?.name ?? "Project" };
             })();
 

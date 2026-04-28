@@ -1,4 +1,3 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Kanban Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
@@ -10,11 +9,12 @@ import type { Task } from "@/features/taskDetail";
 import { usePTaskStore } from "../store/usePTask.store";
 import { useGeneralStore } from "@/shared/store/General.store";
 import { constants } from "@/utils/constants";
+import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 
 export const useTaskKanbanSelector = () => {
     const { tasks } = usePTaskStore();
     const { registriesByType } = useGeneralStore();
-    const { projectId } = useCurrentProjectStore();
+    const { projectId } = useProjectDetailStore();
 
     // Get status options from registriesByType
     const statusOptions = (() => {

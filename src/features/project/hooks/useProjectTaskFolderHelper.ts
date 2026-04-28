@@ -6,7 +6,6 @@
 
 import { useRef, useEffect } from "react";
 import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabBarStore } from "@/store/index";
 import { useProjectStore, type Project } from "../store/useProject.store";
 import { usePTaskStore } from "@/features/project/task/store/usePTask.store";
 import type { Task } from "@/features/taskDetail";
@@ -21,6 +20,7 @@ import { debugLog } from "@/shell/hooks/useDebugLog";
 import { constants } from "@/utils/constants";
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { Note } from "@/features/note/types/note.types";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export function useProjectTaskFolderHelper() {
     const _console = useConsoleHelper();

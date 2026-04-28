@@ -7,7 +7,6 @@
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/Button";
-import { useEditorTabBarStore } from "@/store/index";
 import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
 import { TrackIconPicker } from "@/features/lifeLog/Components/TrackIconPicker";

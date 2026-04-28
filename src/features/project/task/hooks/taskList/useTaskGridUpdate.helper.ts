@@ -1,25 +1,24 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Grid Update Helper
  * Optimistic update callbacks for inline edits and drag & drop.
  * Uses optimistic updates — local state updated immediately, API called in background.
- * Gets projectId from useCurrentProjectStore — NO params.
+ * Gets projectId from useProjectDetailStore — NO params.
  */
-
 
 import type { Task } from "@/features/taskDetail";
 import { usePTaskStore } from "../../store/usePTask.store";
-import { useAuthStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
 import { useTaskGridHelper } from "./useTaskGrid.helper";
+import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
+import {useAuthStore} from "@/shell/store/Auth.store";
 
 export const useTaskGridUpdateHelper = () => {
     const { tasks, setTasks } = usePTaskStore();
     const { loadTasks } = useTaskGridHelper();
     const { $user } = useAuthStore();
-    const { projectId } = useCurrentProjectStore();
+    const { projectId } = useProjectDetailStore();
     const _console = useConsoleHelper();
 
     const handleInlineUpdate =

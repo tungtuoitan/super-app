@@ -7,8 +7,6 @@ import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, 
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
 import type { Project } from "@/features/project/types/project.types";
 
-export type { Project };
-
 export interface PaginationState {
     pageIndex: number;
     pageSize: number;

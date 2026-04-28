@@ -18,7 +18,7 @@ import { projectService } from "@/features/project/service/project.service";
 import { Breadcrumb } from "../Breadcrumb";
 import { BackButton } from "../BackButton";
 import { moduleRegistry } from "@/shell/moduleRegistry";
-import {useEditorTabBarStore} from "@/store/index";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();

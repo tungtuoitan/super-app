@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/shared/hooks/useIsMobile";
 import { CardContent } from "@/shared/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { useEditorTabBarStore } from "@/store/index";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
 import { KTestList } from "./KTestList";
 import { KDailyReviewSession } from "./KDailyReview/KDailyReviewSession";
@@ -20,6 +19,7 @@ import type { KItemV2 } from "../types/K-v2.types";
 import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
 import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
 import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 
 type SessionState = {

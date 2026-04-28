@@ -9,10 +9,10 @@ import { targetKeywordService, TargetKeywordTargetType } from "@/services/target
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useGeneralStore } from "@/store/index";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { Keyword } from "@/shared/types/keyword.types";
 import type { LinkedKeyword } from "../types/taskDetail.types";
+import {useGeneralStore} from "@/shared/store/General.store";
 
 export const useTaskLinkedKeywordsHelper = () => {
     const { $user } = useAuthStore();

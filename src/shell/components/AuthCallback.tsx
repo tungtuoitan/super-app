@@ -4,10 +4,10 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useAuthCallbackStore } from "@/store/index";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
+import {useAuthCallbackStore} from "../store/AuthCallback.store";
 
 export function AuthCallback() {
     const { callbackError, isProcessing } = useAuthCallbackStore();

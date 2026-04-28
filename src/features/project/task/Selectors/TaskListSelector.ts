@@ -1,4 +1,3 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task List Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
@@ -11,11 +10,14 @@ import { useGeneralStore } from "@/shared/store/General.store";
 import { IStatusOption } from "@/shared/components";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
 import { constants } from "@/utils/constants";
+import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
+import { useProjectStore } from "@/features/project/store/useProject.store";
 
 export const useTaskListSelector = () => {
     const { tasks, taskSearchQuery } = usePTaskStore();
     const { registriesByType } = useGeneralStore();
-    const { projects, projectId } = useCurrentProjectStore();
+    const { projectId } = useProjectDetailStore();
+    const { projects } = useProjectStore();
 
     // Get current project for date constraints
     const currentProject = projects.find((p) => p.id === projectId)

@@ -6,9 +6,9 @@ import { useWsGridHelper } from "./useWsGrid.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabBarStore } from "@/store/index";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import {Ws} from "../../types/workspace.types";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();

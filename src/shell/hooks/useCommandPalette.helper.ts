@@ -4,7 +4,6 @@
  */
 
 import { useMemo } from "react";
-import { useCommandPaletteStore, useGeneralStore } from "@/store/index";
 import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
@@ -17,6 +16,8 @@ import { targetKeywordService } from "@/services/targetKeyword.service";
 import { projectService } from "@/features/project/service/project.service";
 import { taskService } from "@/features/taskDetail/service/task.service";
 import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";
+import {useGeneralStore} from "@/shared/store/General.store";
+import {useCommandPaletteStore} from "../store/useCommandPalette.store";
 
 export const useCommandPaletteHelper = () => {
     const { allKeywords } = useGeneralStore();

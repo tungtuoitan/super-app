@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
@@ -11,6 +10,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/
 import { useTabKeyboardShortcuts } from "./useTabKeyboardShortcuts";
 import { BaseTab } from "@/shell/types/tab.types";
 import { constants } from "@/utils/constants";
+import {useEditorTabBarStore} from "../store/EditorTab.store";
 
 /**
  * TabBar - VS Code style tab bar component

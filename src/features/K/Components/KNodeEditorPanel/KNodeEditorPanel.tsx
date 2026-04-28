@@ -15,7 +15,6 @@ import { kconstants } from "../../utils/K.Constants";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { containsNormalized } from "../../utils/searchUtils";
-import { useEditorTabBarStore } from "@/store/index";
 import {KtreeMiniHelper} from "../../hooks";
 
 function KNodeEditorContent() {

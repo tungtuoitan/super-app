@@ -9,11 +9,12 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/shell/types/tab.types";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useGeneralStore} from "@/shared/store/General.store";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();

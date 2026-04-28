@@ -1,7 +1,6 @@
 import { X, Terminal, ArrowRightLeft, FileText } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { useActivityBarStore } from "@/store/index";
 import { useMovingTreeStore } from "@/features/workspace/store/MovingTree.store";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useMobileStore } from "@/shared/store/Mobile.store";
@@ -11,6 +10,7 @@ import { ConsoleTab } from "./MobileConsole/ConsoleTab";
 import { NoteBodyInPanel } from "@/features/note/Components/NoteBodyInPanel";
 import { TabNameList } from "./TabNameList";
 import { constants } from "@/utils/constants";
+import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 
 const NoteBodyInPanelContent = () => <NoteBodyInPanel />;
 

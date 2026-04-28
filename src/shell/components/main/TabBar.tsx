@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
-import { useEditorTabBarStore, useGeneralStore } from "@/store/index";
 import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useTabKeyboardShortcuts } from "@/shell/hooks/useTabKeyboardShortcuts";
@@ -11,6 +10,8 @@ import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { BaseTab } from "@/shell/types/tab.types";
 import type { Note } from "@/features/note/types/note.types";
 import {Ws} from "@/features/workspace/types/workspace.types";
+import {useGeneralStore} from "@/shared/store/General.store";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 
 // ─── Tab Icon ────────────────────────────────────────────────────────────────
 

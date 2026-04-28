@@ -1,4 +1,3 @@
-import { useCurrentProjectStore } from "@/store/useCurrentProject.store";
 /**
  * Task Timeline Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
@@ -9,10 +8,13 @@ import { useMemo } from "react";
 import { usePTaskStore } from "../store/usePTask.store";
 import { useTaskTimelineStore } from "../store/useTaskTimeline.store";
 import { sortTasksHierarchically, formatMonthHeader, generateDateRange } from "@/features/taskDetail";
+import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
+import { useProjectStore } from "@/features/project/store/useProject.store";
 
 export const useTaskTimelineSelector = () => {
     const { tasks } = usePTaskStore();
-    const { projects, projectId } = useCurrentProjectStore();
+    const { projectId } = useProjectDetailStore();
+    const { projects } = useProjectStore();
     const { timelineRange, dayWidth } = useTaskTimelineStore();
 
     // Get current project

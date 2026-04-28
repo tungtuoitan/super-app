@@ -1,0 +1,85 @@
+{
+  "extends": [
+    "react-app",
+    "react-app/jest",
+    "plugin:storybook/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off",
+    "react-hooks/exhaustive-deps": "off"
+  },
+  "overrides": [
+    {
+      "files": ["src/features/taskDetail/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/project/**", "@/features/multiProject/**"],
+                "message": "Import from '@/features/project' or '@/features/multiProject' (index) only, not subdirectories."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/features/project/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/multiProject/**"],
+                "message": "Import from '@/features/multiProject' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/taskDetail/**"],
+                "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/features/multiProject/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/project/**"],
+                "message": "Import from '@/features/project' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/taskDetail/**"],
+                "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/features/K/**", "src/features/Wiki/**", "src/features/lifeLog/**", "src/features/note/**", "src/features/workspace/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/taskDetail/**", "@/features/project/**", "@/features/multiProject/**"],
+                "message": "Import from '@/features/taskDetail', '@/features/project', or '@/features/multiProject' (index) only, not subdirectories."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
