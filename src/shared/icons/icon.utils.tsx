@@ -6,14 +6,14 @@
 import React from "react";
 import type { LucideIcon } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
-import { IconType } from "./icon.types";
+import { IconKey } from "./icon.types";
 import { ICON_MAP, ICON_CONFIG, ICON_COLORS, ICON_GROUPS, IconConfig, IconGroupId } from "./icon.config";
 
 /**
  * Icon option type for dropdowns/pickers
  */
 export interface IconOption {
-    value: IconType;
+    value: IconKey;
     label: string;
     Icon: LucideIcon;
     defaultColor: string;
@@ -33,12 +33,12 @@ export interface IconGroup {
 /**
  * Get all active icons for pickers
  */
-export function getActiveIcons(): Array<{ type: IconType; Icon: LucideIcon; config: IconConfig }> {
+export function getActiveIcons(): Array<{ type: IconKey; Icon: LucideIcon; config: IconConfig }> {
     return Object.entries(ICON_CONFIG)
         .filter(([_, config]) => config.isActive)
         .map(([type, config]) => ({
-            type: type as IconType,
-            Icon: ICON_MAP[type as IconType],
+            type: type as IconKey,
+            Icon: ICON_MAP[type as IconKey],
             config,
         }));
 }
@@ -102,8 +102,8 @@ export function getIconsGrouped(): IconGroup[] {
 /**
  * Get all keywords from active icons for autocomplete suggestions
  */
-export function getAllIconKeywords(): Array<{ id: string; label: string; iconType: IconType }> {
-    const keywords: Array<{ id: string; label: string; iconType: IconType }> = [];
+export function getAllIconKeywords(): Array<{ id: string; label: string; iconType: IconKey }> {
+    const keywords: Array<{ id: string; label: string; iconType: IconKey }> = [];
 
     for (const [iconType, config] of Object.entries(ICON_CONFIG)) {
         if (!config.isActive) continue;
@@ -114,7 +114,7 @@ export function getAllIconKeywords(): Array<{ id: string; label: string; iconTyp
             keywords.push({
                 id: `${iconType}-${keyword}`,
                 label,
-                iconType: iconType as IconType,
+                iconType: iconType as IconKey,
             });
         }
     }
@@ -127,11 +127,11 @@ export function getAllIconKeywords(): Array<{ id: string; label: string; iconTyp
  * Get all active icon labels for autocomplete
  */
 export function getAllIconLabel(): Array<{
-    id: IconType;
+    id: IconKey;
     label: string;
-    iconType: IconType;
+    iconType: IconKey;
 }> {
-    return (Object.entries(ICON_CONFIG) as [IconType, IconConfig][])
+    return (Object.entries(ICON_CONFIG) as [IconKey, IconConfig][])
         .filter(([_, config]) => config.isActive)
         .map(([iconType, config]) => ({
             id: iconType,
@@ -147,11 +147,11 @@ export function getAllIconLabel(): Array<{
  * Only considers active icons
  * Uses fuzzyMatchWithDiacritics for Vietnamese diacritics support
  */
-export function findBestIconMatch(text: string): IconType | null {
+export function findBestIconMatch(text: string): IconKey | null {
     if (!text || text.trim().length < 2) return null;
 
     const query = text.trim();
-    let bestMatch: IconType | null = null;
+    let bestMatch: IconKey | null = null;
     let bestScore = 0;
 
     for (const [iconType, config] of Object.entries(ICON_CONFIG)) {
@@ -163,7 +163,7 @@ export function findBestIconMatch(text: string): IconType | null {
             const result = fuzzyMatchWithDiacritics(keyword, [query]);
             if (result.match && result.score > bestScore) {
                 bestScore = result.score;
-                bestMatch = iconType as IconType;
+                bestMatch = iconType as IconKey;
             }
         }
     }
@@ -175,7 +175,7 @@ export function findBestIconMatch(text: string): IconType | null {
  * Get the default color for an icon type
  * Returns grey color if icon type not found
  */
-export function getIconDefaultColor(iconType: IconType | null): string {
+export function getIconDefaultColor(iconType: IconKey | null): string {
     if (!iconType) return ICON_COLORS.GREY;
     return ICON_CONFIG[iconType]?.defaultColor ?? ICON_COLORS.GREY;
 }
@@ -183,19 +183,19 @@ export function getIconDefaultColor(iconType: IconType | null): string {
 /**
  * Get the icon component for a given type
  */
-export function getIconComponent(iconType: IconType): LucideIcon | null {
+export function getIconComponent(iconType: IconKey): LucideIcon | null {
     return ICON_MAP[iconType] ?? null;
 }
 
 /**
  * Get icon config for a given type
  */
-export function getIconConfig(iconType: IconType): IconConfig | null {
+export function getIconConfig(iconType: IconKey): IconConfig | null {
     return ICON_CONFIG[iconType] ?? null;
 }
 
 type GetIconParams = {
-    type: IconType;
+    type: IconKey;
     color?: string;
     size?: number;
     className?: string;
@@ -218,7 +218,7 @@ export function getIconByType({ type, color, size = 20, className }: GetIconPara
  * Render an icon with its default color
  */
 export function renderIconWithDefaultColor(
-    iconType: IconType | null,
+    iconType: IconKey | null,
     size: number = 18,
     className?: string
 ) {

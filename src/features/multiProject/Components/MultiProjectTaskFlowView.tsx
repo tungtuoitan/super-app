@@ -27,7 +27,7 @@ import { useMultiProjectTaskFlowNodeHelper } from "../hooks/mpTaskFlow/useMultiP
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import { cn } from "@/lib/utils";
-import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
 import { NODE_WIDTH, NODE_HEIGHT } from "../utils/multiProjectTaskFlow.utils";
 import { TASK_FLOW_CSS, MIN_ZOOM, MAX_ZOOM, PAN_SPEED } from "../utils/multiProjectTaskFlow.constants";
 import { TaskFlowNode } from "./small/TaskFlowNode";

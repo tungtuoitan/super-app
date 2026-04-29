@@ -1,6 +1,6 @@
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import { kconstants } from "../utils/K.Constants";
-import { IconType } from "../shared/icons/icon.types";
+import { KIconKey } from "../shared/icons/icon.types";
 import { ICON_COLORS } from "../shared/icons/icon.config";
 
 export interface NodeDialogFormErrors {
@@ -34,8 +34,8 @@ export interface NodeDialogContextData {
     setDescription: Dispatch<SetStateAction<string>>;
     color: string;
     setColor: Dispatch<SetStateAction<string>>;
-    icon: IconType | null;
-    setIcon: Dispatch<SetStateAction<IconType | null>>;
+    icon: KIconKey | null;
+    setIcon: Dispatch<SetStateAction<KIconKey | null>>;
     nodeType: KNodeType | null;
     setNodeType: Dispatch<SetStateAction<KNodeType | null>>;
 
@@ -113,7 +113,7 @@ export const KNodeDialogProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const [newNodeName, setNewNodeName] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [color, setColor] = useState<string>(ICON_COLORS.GREY);
-    const [icon, setIcon] = useState<IconType | null>(null);
+    const [icon, setIcon] = useState<KIconKey | null>(null);
     const [nodeType, setNodeType] = useState<"entity" | "question" | null>(null);
 
     const [errors, setErrors] = useState<NodeDialogFormErrors>({});

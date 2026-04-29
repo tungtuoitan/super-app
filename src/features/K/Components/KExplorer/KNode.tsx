@@ -9,10 +9,10 @@ import { useKStore } from "../../store/K.store";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
 import { KTreeNode } from "../../hooks";
 import { kconstants } from "../../utils/K.Constants";
-import { IconType } from "../../shared/icons/icon.types";
+import { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
-import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
 import { constants } from "@/utils/constants";
 import type { KWsResponse } from "../../types/K.types";
 import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
@@ -59,7 +59,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const nodeId = nodeItem.id; // workspace_items.id (unique)
     const nodeName = nodeItem.name;
     const nodeColor = nodeItem.color;
-    const nodeIcon = nodeItem.icon as IconType | undefined;
+    const nodeIcon = nodeItem.icon as KIconKey | undefined;
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isNodeSelected(nodeId);
     const isWorkspaceRoot = nodeItem.id < 0;

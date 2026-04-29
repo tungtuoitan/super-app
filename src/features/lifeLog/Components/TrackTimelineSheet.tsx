@@ -5,8 +5,8 @@
  */
 
 import { useMemo, useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
+import { Checkbox } from "@/shared";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import {
@@ -324,7 +324,7 @@ function CountChart({ data, selectedTracks, activeTracks }: CountChartProps) {
                 <Tooltip
                     contentStyle={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
                     labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600, marginBottom: 4 }}
-                    formatter={(value: number | undefined, _name: string | undefined, entry: any) => {
+                    formatter={(value, _name, entry: any) => {
                         const trackId = Number(entry?.dataKey);
                         const track = activeTracks.find((t: any) => t.id === trackId);
                         return [value ?? 0, track?.name ?? entry?.dataKey];
@@ -474,7 +474,7 @@ function FrequencyChart({ freqData, xTicks, days, onDotClick, logs }: FrequencyC
                         <Tooltip
                             cursor={false}
                             contentStyle={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
-                            formatter={(value: any, name: string | undefined, props: any) => {
+                            formatter={(value: any, name: any, props: any) => {
                                 if (name === "x") return null;
                                 if (name === "count") return [props?.payload?.count, "times"];
                                 return null;

@@ -13,7 +13,7 @@ import { useEffect, useRef } from "react";
 import { Task } from "../../types/task.types";
 import { usePTaskStore } from "@/features/project";
 import { taskService } from "../../service/task.service";
-import { standardRegistryService } from "@/services/standardRegistry.service";
+import { standardRegistryService } from "@/shared/services/standardRegistry.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { BaseTab } from "@/shell/types/tab.types";
 import { ChecklistJSON } from "../../types/checklist.types";

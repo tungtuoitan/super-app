@@ -3,9 +3,9 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import { apiFetch } from "@/services/apiClient";
 import type { TaskWorkspaceItemDTO } from "../types/taskDetail.types";
 import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {apiFetch} from "@/shared/index";
 
 // Re-export for backward compatibility
 export type { TaskWorkspaceItemDTO } from "../types/taskDetail.types";

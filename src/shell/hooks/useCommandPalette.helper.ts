@@ -10,7 +10,7 @@ import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import { Keyword } from "@/shared/types/keyword.types";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
-import { targetKeywordService } from "@/services/targetKeyword.service";
+import { targetKeywordService } from "@/shared/services/targetKeyword.service";
 import { projectService } from "@/features/project/service/project.service";
 import { taskService } from "@/features/taskDetail/service/task.service";
 import { lifeLogService } from "@/features/lifeLog/service/lifeLog.service";

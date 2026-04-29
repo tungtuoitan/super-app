@@ -7,7 +7,7 @@
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 import {constants} from "@/utils/index";
-import {STORAGE_KEYS, storageService} from "@/services/storage.service";
+import {STORAGE_KEYS, storageService} from "@/shared/services/storage.service";
 import {UserFilters, ViewFilter} from "../types/filter.types";
 
 export interface GridControlContextData {

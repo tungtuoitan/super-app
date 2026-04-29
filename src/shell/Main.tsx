@@ -14,7 +14,7 @@ import { TaskSectionProvider } from "@/features/taskDetail/store/useTaskSection.
 import { MultiTimelineProvider } from "@/features/multiProject/store/useMultiTimeline.store";
 import { LifeLogProvider } from "@/features/lifeLog/store/useLifeLog.store";
 import { WikiProvider } from "@/features/Wiki/store/useWiki.store";
-import { OrchestratorContextMenu } from "@/shared/menuContexts";
+import { OrchestratorContextMenu } from "@/shared/index";
 import { ConfirmationPopoverProvider } from "@/shared/store/ConfirmationPopover.store";
 import { ConfirmationPopoverContainer } from "@/shell/components/ConfirmationPopoverContainer";
 import MainNav from "./components/main/MainNav";

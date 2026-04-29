@@ -7,19 +7,17 @@
 
 import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { Button } from "@/shared/components/ui/Button";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { GenericTextField, IconPicker } from "@/shared/components";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared";
+import { Button } from "@/shared";
+import { GenericTextField, IconPicker } from "@/shared";
 import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { isFolder } from "@/features/workspace/types/workspace-v2.types";
-import { useKeyboardShortcut } from "@/shared/hooks";
 import { useWorkspaceStore } from "../../../store/Workspace.store";
 import { useFolderDialogStore } from "../../../store/FolderDialog.store";
 import { useFolderDialogHelper } from "../../../hooks/useFolderDialog.helper";
 import { constants } from "@/utils/constants";
-import { IconType, findBestIconMatch, getAllIconLabel, getIconDefaultColor } from "@/shared/icons";
-import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components/ui/GenericAutoComplete";
+import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
+import { getAllIconLabel, IconKey, useKeyboardShortcut } from "@/shared";
 
 export function FolderDialog() {
     // Get state from ExplorerStore
@@ -114,7 +112,7 @@ export function FolderDialog() {
 
 
     // Handle icon selection from IconPicker
-    const handleIconChange = (iconType: IconType | null, defaultColor: string) => {
+    const handleIconChange = (iconType: IconKey | null, defaultColor: string) => {
         hasManuallySelectedIcon.current = true;
         setIcon(iconType);
         setColor(defaultColor);

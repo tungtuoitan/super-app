@@ -6,13 +6,13 @@ import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKStore } from "../../store/K.store";
 import { DND_TYPE, CARD_HEIGHT, isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
-import type { IconType } from "../../shared/icons/icon.types";
+import type { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { IconPicker } from "@/shared/components/ui/IconPicker";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
-import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
 import { KHighlightText } from "../KExplorer/KHighlightText";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import {useGlobalShortcut} from "@/shared/hooks/useGlobalShortcut";
@@ -110,7 +110,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
     const level = isRoot ? 0 : (node.pathDepth ?? 1);
     const parentNode = !isRoot && node.parentId != null ? allNodes.find((n) => n.id === node.parentId) : null;
 
-    const nodeIcon = node.icon as IconType | undefined;
+    const nodeIcon = node.icon as KIconKey | undefined;
     const IconComponent = nodeIcon && ICON_MAP[nodeIcon] ? ICON_MAP[nodeIcon] : null;
 
     // Resolved icon rendering helpers
@@ -292,7 +292,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
                 {showIconPicker && (
                     <div className="absolute top-6 left-0 z-50 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl" style={{ width: 280 }}>
                         <IconPicker
-                            value={(isEditing ? editDraft.icon : node.icon) as IconType | null}
+                            value={(isEditing ? editDraft.icon : node.icon) as KIconKey | null}
                             onChange={(iconType, defaultColor) => {
                                 if (isEditing) {
                                     // In edit mode: update draft (saved on submit)

@@ -6,11 +6,11 @@
 import React from "react";
 import { Layers, FileText } from "lucide-react";
 import { BreadcrumbItem } from "@/utils/breadcrumb.utils";
-import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
+import { useKeywordNavigationHelper } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { ICON_MAP, IconType } from "@/shared/icons";
-import { FolderIconWithBadge } from "@/shared/components";
-import {useGeneralStore} from "@/shared/store/General.store";
+import { ICON_MAP, IconKey } from "@/shared";
+import { FolderIconWithBadge } from "@/shared";
+import { useGeneralStore } from "@/shared";
 
 interface BreadcrumbProps {
     items: BreadcrumbItem[];
@@ -67,7 +67,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                             )}
                             {item.type === "folder" && (
                                 <FolderIconWithBadge
-                                    iconType={item.icon as IconType}
+                                    iconType={item.icon as IconKey}
                                     color={item.color || "#75beff"}
                                     size="sm"
                                 />
@@ -75,8 +75,8 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                             {item.type === "note" && (
                                 (() => {
                                     // Use custom icon if available, otherwise default to FileText
-                                    const IconComponent = item.icon && ICON_MAP[item.icon as IconType]
-                                        ? ICON_MAP[item.icon as IconType]
+                                    const IconComponent = item.icon && ICON_MAP[item.icon as IconKey]
+                                        ? ICON_MAP[item.icon as IconKey]
                                         : FileText;
                                     return (
                                         <IconComponent

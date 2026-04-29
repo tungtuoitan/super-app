@@ -6,7 +6,7 @@
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { Project } from "@/features/project";
-import { storageService } from "@/services/storage.service";
+import { storageService } from "@/shared/services/storage.service";
 
 // Constants
 export const DEFAULT_DAY_WIDTH = 40;

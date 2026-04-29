@@ -3,7 +3,7 @@
  */
 
 import type { Keyword } from "@/shared/types/keyword.types";
-import type { TargetKeywordTargetType } from "@/services/targetKeyword.service";
+import type { TargetKeywordTargetType } from "@/shared/services/targetKeyword.service";
 import type { NoteEntity } from "@/features/workspace/types/workspace-v2.types";
 
 export interface TaskFolderItem {

@@ -6,8 +6,7 @@
  */
 
 import React from "react";
-import { GenericTextField, StatusAutoComplete, RichTextEditor } from "@/shared/components";
-import { DateRangePicker } from "@/shared/components/DateTimePicker";
+import { GenericTextField, StatusAutoComplete, RichTextEditor, DateRangePicker } from "@/shared/components";
 import { CardContent } from "@/shared/components/ui/card";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";

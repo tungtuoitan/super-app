@@ -5,7 +5,7 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import { apiFetch } from "@/services/apiClient";
+import {apiFetch} from "./apiClient";
 
 export interface UploadImageResponse {
     url: string;

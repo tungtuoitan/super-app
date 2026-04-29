@@ -3,10 +3,10 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import { apiFetch } from "@/services/apiClient";
 import type { LifeLogTrackDTO, LifeLogLogDTO, UpsertLifeLogTrackDTO, UpsertLifeLogLogDTO } from "@/features/lifeLog/types/lifeLog.types";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {apiFetch} from "@/shared/index";
 
 
 

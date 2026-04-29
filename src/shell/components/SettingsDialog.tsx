@@ -4,7 +4,7 @@ import { Label } from "@/shared/components/ui/label";
 import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
-import { keywordService } from "@/services/keyword.service";
+import { keywordService } from "@/shared/services/keyword.service";
 import type { KeywordSyncReport } from "@/shared/types/keyword.types";
 import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
 import {useAuthStore} from "../store/Auth.store";

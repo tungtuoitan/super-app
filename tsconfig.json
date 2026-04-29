@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "ignoreDeprecations": "6.0",
+        // "ignoreDeprecations": "6.0",
         "target": "es2015",
         "lib": ["dom", "dom.iterable", "esnext"],
         "allowJs": true,
@@ -23,15 +23,17 @@
             "@/contexts/*": ["contexts/*"],
             "@/types/*": ["types/*"],
             "@/utils/*": ["utils/*"],
+            "@/shared": ["shared/index"],
             "@/shared/*": ["shared/*"],
+            "@/shell": ["shell/index"],
+            "@/shell/*": ["shell/*"],
             "@/lib/*": ["lib/*"],
             "@/features/*": ["features/*"],
             "@/pages/*": ["pages/*"],
             "@/store/*": ["store/*"],
             "@/styles/*": ["styles/*"],
             "@/HeadlessComponents/*": ["HeadlessComponents/*"],
-            "@/Selectors/*": ["Selectors/*"],
-            "@/shell/*": ["shell/*"]
+            "@/Selectors/*": ["Selectors/*"]
         }
     },
     "include": ["src"]

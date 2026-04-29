@@ -78,7 +78,7 @@ import {
     CopyCheck,
     Atom,
 } from "lucide-react";
-import { IconType } from "./icon.types";
+import { KIconKey } from "./icon.types";
 
 /**
  * Material Design Icons color palette
@@ -111,7 +111,7 @@ export type IconColorValue = typeof ICON_COLORS[IconColorKey];
 /**
  * Icon map with Lucide components
  */
-export const ICON_MAP: Record<IconType, LucideIcon> = {
+export const ICON_MAP: Record<KIconKey, LucideIcon> = {
     BIN: Trash2,
     FOLDER: Folder,
     TASK: CheckSquare,
@@ -222,7 +222,7 @@ export interface IconConfig {
     group: IconGroupId;
 }
 
-export const ICON_CONFIG: Record<IconType, IconConfig> = {
+export const ICON_CONFIG: Record<KIconKey, IconConfig> = {
   // ===== SYSTEM (inactive) =====
   BIN: { keywords: ["trash", "delete", "remove", "garbage", "recycle", "bin", "waste", "thùng rác", "xóa"], isActive: false, label: "Bin", defaultColor: ICON_COLORS.GREY, group: "other" },
   FOLDER: { keywords: ["folder", "directory", "collection", "group", "thư mục", "nhóm"], isActive: false, label: "Folder", defaultColor: ICON_COLORS.GREY, group: "other" },

@@ -5,7 +5,7 @@
  */
 
 
-import { targetKeywordService, TargetKeywordTargetType } from "@/services/targetKeyword.service";
+import { targetKeywordService, TargetKeywordTargetType } from "@/shared/services/targetKeyword.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";

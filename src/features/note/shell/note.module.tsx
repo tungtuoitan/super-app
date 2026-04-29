@@ -2,17 +2,14 @@ import { FileText } from "lucide-react";
 import { NoteGrid } from "../Components/NoteGrid";
 import { NoteEditorPanel } from "../Components/NoteEditorPanel";
 import { constants } from "@/utils/constants";
-import { ICON_MAP, type IconType } from "@/shared/icons";
 import type { ModuleDefinition } from "@/shell/moduleRegistry";
 import type { Note } from "../types/note.types";
-import type { BaseTab } from "@/shell/types/tab.types";
-import {NoteBodyInPanel} from "../Components/NoteBodyInPanel";
-
-const NoteDetailTabAdapter = () => <NoteBodyInPanel />;
+import type { BaseTab } from "@/shell";
+import { ICON_MAP, IconKey } from "@/shared";
 
 function getNoteTabIcon(tab: BaseTab) {
     const note = tab.data0 as Note | undefined;
-    const IconComponent = note?.icon && ICON_MAP[note.icon as IconType] ? ICON_MAP[note.icon as IconType] : FileText;
+    const IconComponent = note?.icon && ICON_MAP[note.icon as IconKey] ? ICON_MAP[note.icon as IconKey] : FileText;
     return <IconComponent className="w-4 h-4" />;
 }
 

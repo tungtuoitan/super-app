@@ -3,10 +3,10 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import { apiFetch } from "@/services/apiClient";
 import type { TaskDTO } from "../types/task.types";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {apiFetch} from "@/shared/index";
 
 export interface ProjectOptionDTO {
     id: number;

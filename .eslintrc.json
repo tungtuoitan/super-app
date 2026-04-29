@@ -6,9 +6,30 @@
   ],
   "rules": {
     "@typescript-eslint/no-unused-vars": "off",
-    "react-hooks/exhaustive-deps": "off"
+    "react-hooks/exhaustive-deps": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@/shell/**"],
+            "message": "Import from '@/shell' (index) only, not subdirectories."
+          },
+          {
+            "group": ["@/shared/**"],
+            "message": "Import from '@/shared' (index) only, not subdirectories."
+          }
+        ]
+      }
+    ]
   },
   "overrides": [
+    {
+      "files": ["src/shell/index.ts", "src/shared/index.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
     {
       "files": ["src/features/taskDetail/**"],
       "rules": {
@@ -19,6 +40,14 @@
               {
                 "group": ["@/features/project/**", "@/features/multiProject/**", "../../project/**", "../../../project/**", "../../../../project/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
                 "message": "Import from '@/features/project' or '@/features/multiProject' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shell/**"],
+                "message": "Import from '@/shell' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shared/**"],
+                "message": "Import from '@/shared' (index) only, not subdirectories."
               }
             ]
           }
@@ -39,6 +68,14 @@
               {
                 "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
                 "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shell/**"],
+                "message": "Import from '@/shell' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shared/**"],
+                "message": "Import from '@/shared' (index) only, not subdirectories."
               }
             ]
           }
@@ -59,6 +96,88 @@
               {
                 "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
                 "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shell/**"],
+                "message": "Import from '@/shell' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shared/**"],
+                "message": "Import from '@/shared' (index) only, not subdirectories."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/shell/**"],
+      "excludedFiles": ["src/shell/index.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/project/**", "../../project/**", "../../../project/**", "../../../../project/**"],
+                "message": "Import from '@/features/project' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
+                "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/K/**", "../../K/**", "../../../K/**", "../../../../K/**"],
+                "message": "Import from '@/features/K' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/Wiki/**", "../../Wiki/**", "../../../Wiki/**", "../../../../Wiki/**"],
+                "message": "Import from '@/features/Wiki' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/lifeLog/**", "../../lifeLog/**", "../../../lifeLog/**", "../../../../lifeLog/**"],
+                "message": "Import from '@/features/lifeLog' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/note/**", "../../note/**", "../../../note/**", "../../../../note/**"],
+                "message": "Import from '@/features/note' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/workspace/**", "../../workspace/**", "../../../workspace/**", "../../../../workspace/**"],
+                "message": "Import from '@/features/workspace' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shared/**"],
+                "message": "Import from '@/shared' (index) only, not subdirectories."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/shared/**"],
+      "excludedFiles": ["src/shared/index.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/project/**", "../../project/**", "../../../project/**", "../../../../project/**"],
+                "message": "Import from '@/features/project' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
+                "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/multiProject/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
+                "message": "Import from '@/features/multiProject' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shell/**"],
+                "message": "Import from '@/shell' (index) only, not subdirectories."
               }
             ]
           }
@@ -75,11 +194,20 @@
               {
                 "group": ["@/features/taskDetail/**", "@/features/project/**", "@/features/multiProject/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**", "../../project/**", "../../../project/**", "../../../../project/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
                 "message": "Import from '@/features/taskDetail', '@/features/project', or '@/features/multiProject' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shell/**"],
+                "message": "Import from '@/shell' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/shared/**"],
+                "message": "Import from '@/shared' (index) only, not subdirectories."
               }
             ]
           }
         ]
       }
-    }
+    },
+    
   ]
 }

@@ -1,6 +1,5 @@
 import { config } from "@/utils/config/app.config";
 import { envConfig } from "@/utils/config/env.config";
-import { apiFetch } from "@/services/apiClient";
 import type {
     KTestSummary,
     KTestDetail,
@@ -16,6 +15,7 @@ import type {
     KRetentionGraph,
     KQuestionGrade,
 } from "../types/kTest.type";
+import {apiFetch} from "@/shared/index";
 import {ResultOptions} from "@/shared/types/resultOptions.types";
 
 const base = (knowledgeId: number) => `${config.api.baseURL}/api/k/${knowledgeId}`;

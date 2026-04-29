@@ -31,15 +31,15 @@ import {
     ChevronDown,
     Code2,
 } from "lucide-react";
-import { fileService, UploadContext } from "@/services/file.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { fileService, UploadContext } from "@/shared/services/file.service";
+import { useAuthStore } from "@/shell";
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { constants } from "@/utils/constants";
 import "./RichTextEditor.css";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 
 interface RichTextEditorProps {
     value: string;
@@ -187,6 +187,7 @@ export function RichTextEditor({
             TextStyle,
             Color,
             ProxyImage.configure({
+                // @ts-ignore - HTMLAttributes is valid Tiptap config but not typed in tiptap-extension-resize-image
                 HTMLAttributes: {
                     class: "rich-text-image",
                 },
@@ -280,9 +281,9 @@ export function RichTextEditor({
 
                     // Insert image into editor with fileId for future loading
                     // The fileId is stored in data-file-id attribute for re-loading when content is loaded
+                    // @ts-ignore - setImage and data-file-id are added by the ProxyImage/ImageResize extension
                     editor.chain().focus().setImage({
                         src: imageUrl,
-                        // @ts-expect-error - custom attribute for ProxyImage extension
                         "data-file-id": fileId?.toString() || null,
                     }).run();
                 }

@@ -2,11 +2,11 @@ import { Route, Routes, Navigate } from "react-router-dom";
 
 import { useNavigationStore } from "../../../contexts/NavigationContext";
 import { TopNav } from "./TopNav";
-import { VSCodeLayout } from "@/shell/components";
 import { AuthCallback } from "@/shell/components/AuthCallback";
 import { constants } from "@/utils/index";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import {useMobileStore} from "@/shared/store/Mobile.store";
+import {VSCodeLayout} from "./VSCodeLayout";
 
 /**
  * Main navigation component.

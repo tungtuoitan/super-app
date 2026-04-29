@@ -5,14 +5,14 @@ import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
 import { IconPicker } from "@/shared/components/ui/IconPicker";
-import type { IconType } from "../../shared/icons/icon.types";
+import type { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 
 export function InlineNewNodeCard() {
     const { inlineNewParentId } = useKNodeEditorStore();
     const { handleInlineCreate, handleCancelInline } = useKNodeEditorLoader();
 
-    const [draft, setDraft] = useState({ name: "", description: "", icon: 'LIBRARIES' as IconType | null, color: 'GREY' as string | null });
+    const [draft, setDraft] = useState({ name: "", description: "", icon: 'LIBRARIES' as KIconKey | null, color: 'GREY' as string | null });
     const [showIconPicker, setShowIconPicker] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -33,12 +33,12 @@ export function InlineNewNodeCard() {
         return () => document.removeEventListener("mousedown", handler);
     }, [showIconPicker]);
 
-    const handleIconChange = (iconType: IconType | null, defaultColor: string) => {
+    const handleIconChange = (iconType: KIconKey | null, defaultColor: string) => {
         setDraft(prev => ({ ...prev, icon: iconType, color: defaultColor }));
         setShowIconPicker(false);
     };
 
-    const IconComponent = draft.icon && ICON_MAP[draft.icon as IconType] ? ICON_MAP[draft.icon as IconType] : null;
+    const IconComponent = draft.icon && ICON_MAP[draft.icon as KIconKey] ? ICON_MAP[draft.icon as KIconKey] : null;
 
     return (
         <div
@@ -66,7 +66,7 @@ export function InlineNewNodeCard() {
                 {!isQuestion && showIconPicker && (
                     <div className="absolute top-6 left-0 z-50 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl" style={{ width: 280 }}>
                         <IconPicker
-                            value={draft.icon as IconType | null}
+                            value={draft.icon as KIconKey | null}
                             onChange={handleIconChange}
                             columns={4}
                             maxHeight="240px"

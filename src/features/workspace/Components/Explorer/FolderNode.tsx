@@ -2,15 +2,15 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers, Dot, Circle, ChevronUp } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFolderItem } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { HighlightText } from "./HighlightText";
-import {ICON_MAP, IconType} from "@/shared/icons";
+import { ICON_MAP, IconKey } from "@/shared";
 
 interface FolderNodeProps {
     node: NodeApi<TreeFolder>;
@@ -51,7 +51,7 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
     const entityId = folderItem.entityId; // folders.id (for API calls, context menu)
     const folderName = folderItem.data.name;
     const folderColor = folderItem.data.color;
-    const folderIcon = folderItem.data.icon as IconType | undefined; // Icon type from database
+    const folderIcon = folderItem.data.icon as IconKey | undefined; // Icon type from database
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isFolderSelected(workspaceItemId); // Use workspace_items.id for selection
     const isWorkspaceRoot = entityId < 0; // Workspace root node has negative ID

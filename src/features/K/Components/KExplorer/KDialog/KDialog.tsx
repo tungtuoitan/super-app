@@ -10,17 +10,15 @@ import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/Button";
 import { GenericTextField, IconPicker } from "@/shared/components";
-import { useKeyboardShortcut } from "@/shared/hooks";
 import { useKNodeDialogHelper as useKFolderDialogHelper } from "../../../hooks/useKNodeDialog.helper";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components/ui/GenericAutoComplete";
 import {useKStore} from "../../../store/K.store";
 import {isFolder, KItemV2} from "../../../types/K-v2.types";
 import {kconstants} from "../../../utils/K.Constants";
 import {getAllIconLabel} from "../../../shared/icons/icon.utils";
-import {IconType} from "../../../shared/icons/icon.types";
+import {KIconKey} from "../../../shared/icons/icon.types";
 import {useNodeDialogStore} from "../../../store/KNodeDialog.store";
-import { getIconDefaultColor } from "@/shared/icons";
-import type { KNodeType } from "../../../store/KNodeDialog.store";
+import {getIconDefaultColor, useKeyboardShortcut} from "@/shared/index";
 
 export function KDialog() {
     // Get state from ExplorerStore
@@ -40,8 +38,8 @@ export function KDialog() {
     useEffect(() => {
         if (isNodeDialogOpen && mode === "create") {
             hasManuallySelectedIcon.current = false;
-            setIcon(IconType.LIBRARIES);
-            setColor(getIconDefaultColor(IconType.LIBRARIES));
+            setIcon(KIconKey.LIBRARIES);
+            setColor(getIconDefaultColor(KIconKey.LIBRARIES));
             setNodeType("entity");
         }
     }, [isNodeDialogOpen, mode]);
@@ -118,7 +116,7 @@ export function KDialog() {
 
 
     // Handle icon selection from IconPicker
-    const handleIconChange = (iconType: IconType | null, defaultColor: string) => {
+    const handleIconChange = (iconType: KIconKey | null, defaultColor: string) => {
         hasManuallySelectedIcon.current = true;
         setIcon(iconType);
         setColor(defaultColor);

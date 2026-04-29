@@ -14,10 +14,10 @@ import { useAuthStore } from "@/shell/store/Auth.store";
 import { useActivityBarStore } from "@/shell/store/ActivityBar.store";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
 import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
-import { configureApiClient } from "@/services/apiClient";
 import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { debugLog } from "@/shell/hooks/useDebugLog";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
+import {configureApiClient} from "@/shared/index";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, $user, set$User } = useAuthStore();

@@ -3,7 +3,7 @@
  * Used across the application for folder icons, note icons, etc.
  */
 
-export enum IconType {
+export enum IconKey {
     BIN = "BIN",
     FOLDER = "FOLDER",
     TASK = "TASK",

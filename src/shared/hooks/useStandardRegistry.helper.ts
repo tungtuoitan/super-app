@@ -6,8 +6,8 @@
 
 import { useSnackbar } from "notistack";
 import { useGeneralStore } from "@/shared/store/General.store";
-import { standardRegistryService } from "@/services/standardRegistry.service";
-import { keywordService } from "@/services/keyword.service";
+import { standardRegistryService } from "@/shared/services/standardRegistry.service";
+import { keywordService } from "@/shared/services/keyword.service";
 import { useAuthStore } from "@/shell/store/Auth.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { StandardRegistry } from "@/shared/types/standardRegistry.types";

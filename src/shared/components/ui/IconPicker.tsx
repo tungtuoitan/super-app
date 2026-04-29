@@ -10,21 +10,20 @@ import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
-    IconType,
     ICON_MAP,
     ICON_COLORS,
     ICON_CONFIG,
     getIconsGrouped,
-    getIconDefaultColor,
-    type IconOption,
-    type IconGroup,
-} from "@/shared/icons";
+    getIconDefaultColor
+} from "@/shared/index";
+import { IconKey } from "../../icons/icon.types";
+import {IconOption} from "@/shared/icons/icon.utils";
 
 export interface IconPickerProps {
     /** Currently selected icon type */
-    value: IconType | null;
+    value: IconKey | null;
     /** Callback when icon is selected */
-    onChange: (iconType: IconType | null, defaultColor: string) => void;
+    onChange: (iconType: IconKey | null, defaultColor: string) => void;
     /** Label for the picker */
     label?: string;
     /** Whether the picker is disabled */
@@ -41,7 +40,7 @@ export interface IconPickerProps {
     /** Label for the default option */
     defaultOptionLabel?: string;
     /** Icon type to use for the default option (defaults to FOLDER) */
-    defaultIconType?: IconType;
+    defaultIconKey?: IconKey;
     /** Whether to show group labels */
     showGroupLabels?: boolean;
     /** Whether to show search input */
@@ -61,7 +60,7 @@ export function IconPicker({
     columns = 4,
     showDefaultOption = true,
     defaultOptionLabel = "Default",
-    defaultIconType = IconType.FOLDER,
+    defaultIconKey = IconKey.FOLDER,
     showGroupLabels = true,
     showSearch = true,
     searchPlaceholder = "Search icons...",
@@ -107,9 +106,9 @@ export function IconPicker({
         6: "grid-cols-6",
     };
 
-    const handleIconSelect = (iconType: IconType | null, defaultIconType: IconType) => {
+    const handleIconSelect = (iconType: IconKey | null, defaultIconKey: IconKey) => {
         if (disabled) return;
-        const color = !iconType && defaultIconType === IconType.NOTE ? ICON_COLORS.LIGHT_BLUE : getIconDefaultColor(iconType);
+        const color = !iconType && defaultIconKey === IconKey.NOTE ? ICON_COLORS.LIGHT_BLUE : getIconDefaultColor(iconType);
         onChange(iconType, color);
     };
 
@@ -117,7 +116,7 @@ export function IconPicker({
         <button
             key={option.value}
             type="button"
-            onClick={() => handleIconSelect(option.value, defaultIconType)}
+            onClick={() => handleIconSelect(option.value, defaultIconKey)}
             disabled={disabled}
             className={cn(
                 "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
@@ -176,7 +175,7 @@ export function IconPicker({
                     <div className={cn("grid gap-1 mb-2", gridCols[columns])}>
                         <button
                             type="button"
-                            onClick={() => handleIconSelect(null, defaultIconType)}
+                            onClick={() => handleIconSelect(null, defaultIconKey)}
                             disabled={disabled}
                             className={cn(
                                 "flex items-center gap-2 p-2 rounded-md border-2 transition-all",
@@ -188,10 +187,10 @@ export function IconPicker({
                         >
                             <div
                                 className="w-5 h-5 flex items-center justify-center flex-shrink-0"
-                                style={{ color: defaultIconType === IconType.FOLDER ? ICON_COLORS.GREY : ICON_COLORS.BLUE }}
+                                style={{ color: defaultIconKey === IconKey.FOLDER ? ICON_COLORS.GREY : ICON_COLORS.BLUE }}
                             >
-                                {ICON_MAP[defaultIconType] && (() => {
-                                    const DefaultIcon = ICON_MAP[defaultIconType];
+                                {ICON_MAP[defaultIconKey] && (() => {
+                                    const DefaultIcon = ICON_MAP[defaultIconKey];
                                     return <DefaultIcon size={18} />;
                                 })()}
                             </div>
@@ -232,13 +231,13 @@ export function IconPicker({
  * For showing a single icon with its color
  */
 export interface IconDisplayProps {
-    iconType: IconType | null;
+    iconType: IconKey | null;
     size?: number;
     className?: string;
     /** Override the default color */
     color?: string;
     /** Fallback icon type when iconType is null (defaults to FOLDER) */
-    fallbackIconType?: IconType;
+    fallbackIconKey?: IconKey;
 }
 
 export function IconDisplay({
@@ -246,9 +245,9 @@ export function IconDisplay({
     size = 18,
     className,
     color,
-    fallbackIconType = IconType.FOLDER,
+    fallbackIconKey = IconKey.FOLDER,
 }: IconDisplayProps) {
-    const Icon = iconType ? ICON_MAP[iconType] : ICON_MAP[fallbackIconType];
+    const Icon = iconType ? ICON_MAP[iconType] : ICON_MAP[fallbackIconKey];
     const iconColor = color ?? getIconDefaultColor(iconType);
 
     return (
@@ -276,11 +275,11 @@ export function IconWithLabel({
     color,
     label,
     labelClassName,
-    fallbackIconType = IconType.FOLDER,
+    fallbackIconKey = IconKey.FOLDER,
 }: IconWithLabelProps) {
     return (
         <div className={cn("flex items-center gap-2", className)}>
-            <IconDisplay iconType={iconType} size={size} color={color} fallbackIconType={fallbackIconType} />
+            <IconDisplay iconType={iconType} size={size} color={color} fallbackIconKey={fallbackIconKey} />
             {label && (
                 <span className={cn("text-sm", labelClassName)}>{label}</span>
             )}

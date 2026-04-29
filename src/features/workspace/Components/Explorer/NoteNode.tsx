@@ -2,12 +2,12 @@ import React, { useCallback } from "react";
 import { NodeApi } from "react-arborist";
 import { FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ICON_MAP, IconType, ICON_COLORS } from "@/shared/icons";
+import { ICON_MAP, IconKey, ICON_COLORS } from "@/shared";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceNoteItem } from "@/features/workspace/types/workspace-v2.types";
@@ -65,7 +65,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     const workspaceLinks = noteItem.data.workspaceLinks || [];
 
     // Extract icon and color from note data
-    const noteIcon = noteItem.data.icon as IconType | undefined;
+    const noteIcon = noteItem.data.icon as IconKey | undefined;
     const noteColor = noteItem.data.color;
 
     // Handle workspace navigation with highlight

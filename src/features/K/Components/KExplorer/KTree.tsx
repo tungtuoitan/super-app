@@ -11,7 +11,7 @@ import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
 import { KTreeNode, KtreeMiniHelper, KuseTreeHelper2 } from "../../hooks";
 import { kconstants } from "../../utils/K.Constants";
-import { storageService, STORAGE_KEYS } from "@/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
 import {useCalculateKTreeContainerHeight} from "../../hooks/kTree/useCalculateKTreeContainerHeight";
 import {useCalculateKTreeDropZoneHeight} from "../../hooks/kTree/useCalculateKTreeDropZoneHeight";
 import {useScrollToHighlightItem} from "../../hooks/kTree/useScrollToHighlightItem";

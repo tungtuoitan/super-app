@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
-import { storageService } from "@/services/storage.service";
+import { storageService } from "@/shared/services/storage.service";
 
 // Constants
 export const STORAGE_KEY_ZOOM = "timeline_day_width";

@@ -117,7 +117,7 @@ export const useWorkspaceItemHelper = () => {
                                 if (!tabInfo) return tab;
 
                                 // Find corresponding created item in response
-                                const createdItem = result.data?.find((item) => item.entityType === 3);
+                                const createdItem = result.data?.find((item: any) => item.entityType === 3);
 
                                 if (!createdItem) return tab;
 

@@ -14,9 +14,9 @@ import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
 import { useMonaco } from "@monaco-editor/react";
-import { IconType } from "@/shared/icons";
 import {useGeneralStore} from "@/shared/store/General.store";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { IconKey } from "@/shared";
 
 export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -114,7 +114,7 @@ export function NoteBodyInPanel() {
                         <GenericTextField label="Created by" value={activeNote?.createdBy || "-"} disabled size="small" />
 
                         <IconPicker
-                            value={(activeNote?.icon as IconType) || null}
+                            value={(activeNote?.icon as IconKey) || null}
                             onChange={(iconType, defaultColor) => {
                                 handleNoteFieldChange("icon", {iconType, defaultColor});
                             }}
@@ -124,7 +124,7 @@ export function NoteBodyInPanel() {
                             height="150px"
                             showDefaultOption={true}
                             defaultOptionLabel="Default (Note)"
-                            defaultIconType={IconType.NOTE}
+                            defaultIconKey={IconKey.NOTE}
                             showGroupLabels={true}
                             disabled={isDisabled}
                         />

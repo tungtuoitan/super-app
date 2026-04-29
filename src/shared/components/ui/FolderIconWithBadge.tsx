@@ -4,7 +4,8 @@
  */
 
 import React from "react";
-import { ICON_MAP, IconType } from "@/shared/icons";
+import { ICON_MAP } from "../../icons/icon.config";
+import { IconKey } from "../../icons/icon.types";
 
 interface FolderIconProps {
     className?: string;
@@ -43,7 +44,7 @@ export const FolderOpenFilled: React.FC<FolderIconProps> = ({ className, color }
 
 export interface FolderIconWithBadgeProps {
     /** Icon type for the badge (e.g., "TASK", "IMAGE") */
-    iconType?: IconType | string | null;
+    iconType?: IconKey | string | null;
     /** Folder color */
     color?: string;
     /** Whether the folder is open */
@@ -94,8 +95,8 @@ export function FolderIconWithBadge({
     const badgeColor = isDeleted ? "#9ca3af" : "#ffffff";
 
     // Check if we have a valid custom icon
-    const hasCustomIcon = iconType && ICON_MAP[iconType as IconType];
-    const CustomIcon = hasCustomIcon ? ICON_MAP[iconType as IconType] : null;
+    const hasCustomIcon = iconType && ICON_MAP[iconType as IconKey];
+    const CustomIcon = hasCustomIcon ? ICON_MAP[iconType as IconKey] : null;
 
     // If no custom icon, just render the folder
     if (!CustomIcon) {

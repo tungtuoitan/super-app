@@ -1,9 +1,25 @@
 /**
- * Shared Components Index
- * Exports all shared components
+ * Shared Components Public API
+ * Internal imports within components should use relative paths.
  */
 
+// ── UI primitives ─────────────────────────────────────────────────────────
 export * from "./ui";
-export * from "./feedback";
-export * from "./RichTextEditor";
-export * from "./DateTimePicker";
+
+// ── Feedback ──────────────────────────────────────────────────────────────
+export * from "./feedback/ConfirmationPopover";
+export * from "./feedback/ErrorBoundary";
+
+// ── Rich Text Editor ──────────────────────────────────────────────────────
+export * from "./RichTextEditor/RichTextEditor";
+
+// ── Date / Time ───────────────────────────────────────────────────────────
+export * from "./DateTimePicker/DateTimePicker";
+export * from "./DateTimePicker/DateRangePicker";
+
+// ── Misc Components ───────────────────────────────────────────────────────
+export * from "./CommandPalette";
+export * from "./GenericFilterPopup";
+export * from "./GridControlBar";
+export * from "./HighlightedText";
+export * from "./KeywordIconRenderer";

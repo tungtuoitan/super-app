@@ -14,7 +14,7 @@ interface OpenConfirmDialogParams {
     count: number;
     allAreTempItems: boolean;
     onConfirm: () => void;
-    event: any;
+    event: any; 
 }
 
 interface ExecuteDirectlyParams {

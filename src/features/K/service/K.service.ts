@@ -9,11 +9,11 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import { apiFetch } from "@/services/apiClient";
 import type { KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
 import type { KDTO } from "../types/K-dto.types";
 import type { KImportTestMarkdownRequest } from "../types/kMarkdownImport.type";
 import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {apiFetch} from "@/shared/index";
 
 // ── Get all knowledge bases ──────────────────────────────────────────────────
 
