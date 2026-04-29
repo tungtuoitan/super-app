@@ -6,10 +6,10 @@
 import { projectService, ProjectDTO } from "../service/project.service";
 import {  useProjectStore } from "../store/useProject.store";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/utils/date.utils";

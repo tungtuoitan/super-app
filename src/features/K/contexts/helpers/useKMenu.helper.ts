@@ -4,11 +4,6 @@
  * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
  */
 
-import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {buildTreeFromV2Items, filterTopLevelParents, useKNodeDialogHelper} from "../../hooks";
 import {useKStore} from "../../store/K.store";
 import {KService} from "../../service/K.service";
@@ -20,6 +15,8 @@ import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
 import {getConfirmMessage} from "../../utils/confirmation-message.utils";
 import {Folder} from "../../types";
 import {NodeItemType} from "../../store/KNodeDialog.store";
+import {useAuthStore, useConsoleHelper, useEditorTabHelper} from "@/shell";
+import {useConfirmationPopoverHelper, useOrchestratorContextMenuStore} from "@/shared";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS

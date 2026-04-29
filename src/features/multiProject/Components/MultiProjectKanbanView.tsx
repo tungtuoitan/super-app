@@ -9,7 +9,7 @@
 
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Checkbox } from "@/shared";
 import { Label } from "@/shared/components/ui/label";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";

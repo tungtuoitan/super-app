@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, updateDecorations } from "@/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";

@@ -3,15 +3,15 @@ import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useKStore } from "../../store/K.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { KuseTreeHelper } from "../../hooks/kTree/useKTreeHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
 import { KTreeNode, KtreeMiniHelper, KuseTreeHelper2 } from "../../hooks";
 import { kconstants } from "../../utils/K.Constants";
-import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared";
 import {useCalculateKTreeContainerHeight} from "../../hooks/kTree/useCalculateKTreeContainerHeight";
 import {useCalculateKTreeDropZoneHeight} from "../../hooks/kTree/useCalculateKTreeDropZoneHeight";
 import {useScrollToHighlightItem} from "../../hooks/kTree/useScrollToHighlightItem";

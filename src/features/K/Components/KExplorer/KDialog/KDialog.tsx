@@ -7,18 +7,18 @@
 
 import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { Button } from "@/shared/components/ui/Button";
-import { GenericTextField, IconPicker } from "@/shared/components";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared";
+import { Button } from "@/shared";
+import { GenericTextField, IconPicker } from "@/shared";
 import { useKNodeDialogHelper as useKFolderDialogHelper } from "../../../hooks/useKNodeDialog.helper";
-import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components/ui/GenericAutoComplete";
+import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import {useKStore} from "../../../store/K.store";
 import {isFolder, KItemV2} from "../../../types/K-v2.types";
 import {kconstants} from "../../../utils/K.Constants";
 import {getAllIconLabel} from "../../../shared/icons/icon.utils";
 import {KIconKey} from "../../../shared/icons/icon.types";
 import {useNodeDialogStore} from "../../../store/KNodeDialog.store";
-import {getIconDefaultColor, useKeyboardShortcut} from "@/shared/index";
+import {getIconDefaultColor, useKeyboardShortcut} from "@/shared";
 
 export function KDialog() {
     // Get state from ExplorerStore

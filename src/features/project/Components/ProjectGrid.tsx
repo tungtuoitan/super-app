@@ -15,7 +15,7 @@ import {
     flexRender,
 } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, FolderOpen } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useProjectStore } from "../store/useProject.store";
 import { useProjectGridHelper } from "../hooks/useProjectGrid.helper";

@@ -1,16 +1,16 @@
 
 import { useSnackbar } from "notistack";
 import type { Note } from "@/features/note/types/note.types";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useEditorTabHelper } from "@/shell";
+import { useAuthStore } from "@/shell";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { isNumber } from "lodash";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useConsoleHelper} from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 
 export const useWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();

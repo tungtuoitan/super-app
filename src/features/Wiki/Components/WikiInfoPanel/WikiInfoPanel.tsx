@@ -4,7 +4,7 @@ import { useWikiStore } from "../../store/useWiki.store";
 import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
 import { wikiService } from "../../service/wiki.service";
 import type { WikiInfo, WikiKeyword, WikiTabData } from "../../types/wiki.type";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 import { MONO_ACCENT } from "../../utils/wiki.graph.utils";
 import { WikiInfoCard } from "../small/WikiInfoCard";
 import WikiInsertModal from "./WikiInsertModal";

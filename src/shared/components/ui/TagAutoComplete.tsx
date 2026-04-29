@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shared/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { Label } from "@/shared/components/ui/label";

@@ -5,9 +5,9 @@
 
 
 import { constants } from "@/utils/constants";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 import type { KItemV2 } from "../types/K-v2.types";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 
 export function useKNodeTabHelper() {

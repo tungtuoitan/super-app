@@ -13,15 +13,15 @@ import type { NodeChange, EdgeChange, Connection, Edge } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useAuthStore } from "@/shell";
+import { useConsoleHelper } from "@/shell";
 import { flowService } from "@/shared/services/flow.service";
 import { taskService } from "@/features/taskDetail";
 import type { TaskDTO, Task } from "@/features/taskDetail";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "../../utils/multiProjectTaskFlow.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
-import { debugLog } from "@/shell/hooks/useDebugLog";
+import { debugLog } from "@/shell";
 
 const transformTaskData = (dtos: TaskDTO[]): Task[] =>
     dtos.map((dto) => ({

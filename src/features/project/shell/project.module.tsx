@@ -1,7 +1,7 @@
 import { Cuboid, Layers, CheckSquare } from "lucide-react";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
-import type { ModuleDefinition } from "@/shell/moduleRegistry";
+import type { ModuleDefinition } from "@/shell";
 import {constants} from "@/utils/constants";
 import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";

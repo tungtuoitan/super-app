@@ -8,7 +8,7 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { constants } from "@/utils/constants";
 import { noteService } from "@/features/note/service/note.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
@@ -20,8 +20,8 @@ import type { UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { WorkspaceItemAction } from "../../types/workspace.types";
 import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import type { WorkspaceDTO } from "../../types/workspace-dto.types";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import { useEditorTabHelper } from "@/shell";
+import {useConsoleHelper} from "@/shell";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();

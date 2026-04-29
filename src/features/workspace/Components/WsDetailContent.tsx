@@ -6,12 +6,12 @@
 import React, { useEffect } from "react";
 import { GenericTextField, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Textarea } from "@/shared/components/ui/textarea";
+import { Textarea } from "@/shared";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import {useWsDetailHelper} from "../hooks/ws/useWsDetail.helper";
 import {Ws} from "../types/workspace.types";
 

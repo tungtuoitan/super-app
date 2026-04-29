@@ -1,6 +1,6 @@
 import { config } from "@/utils/config/app.config";
 import type { WikiExtractResult, WikiInfo, WikiKeyword } from "../types/wiki.type";
-import {apiFetch} from "@/shared/index";
+import {apiFetch} from "@/shared";
 
 const BASE = () => `${config.api.baseURL}/api/wiki`;
 

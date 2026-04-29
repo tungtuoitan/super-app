@@ -6,7 +6,7 @@
 
 import { config } from "@/utils/config/app.config";
 import type { Project } from "../types/task.types";
-import {apiFetch} from "@/shared/index";
+import {apiFetch} from "@/shared";
 
 /**
  * Fetch a single project by ID

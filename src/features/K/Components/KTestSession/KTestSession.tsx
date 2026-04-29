@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Mic, MicOff, ChevronLeft, ChevronRight, BookOpen, KeyRound, Loader2, CheckCircle2, XCircle } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { KTestService } from "../../service/kTest.service";
 import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import type { KTestQuestion, KQuestionGrade, KSubmitAnswersResult } from "../../types/kTest.type";

@@ -6,19 +6,19 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Save, RotateCcw, Undo2 } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorToolbarHelper } from "@/shell/hooks/useEditorToolbar.helper";
-import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
+import { Button } from "@/shared";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
+import { useEditorTabHelper } from "@/shell";
+import { useEditorToolbarHelper } from "@/shell";
+import { useGlobalShortcut } from "@/shared";
 import { constants } from "@/utils/constants";
-import { useProjectStore } from "@/features/project/store/useProject.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { projectService } from "@/features/project/service/project.service";
+import { useProjectStore } from "@/features/project";
+import { useAuthStore } from "@/shell";
+import { projectService } from "@/features/project";
 import { Breadcrumb } from "../Breadcrumb";
 import { BackButton } from "../BackButton";
-import { moduleRegistry } from "@/shell/moduleRegistry";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { moduleRegistry } from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();

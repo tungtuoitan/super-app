@@ -3,10 +3,10 @@
  * Helper functions for managing project editor tabs
  */
 
-import { BaseTab, MultiProjectTabData } from "@/shell/types/tab.types";
+import { BaseTab, MultiProjectTabData } from "@/shell";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { useEditorTabHelper } from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";
 
 export const useProjectTabHelper = () => {

@@ -15,8 +15,8 @@ import type {
     KRetentionGraph,
     KQuestionGrade,
 } from "../types/kTest.type";
-import {apiFetch} from "@/shared/index";
-import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {apiFetch} from "@/shared";
+import {ResultOptions} from "@/shared";
 
 const base = (knowledgeId: number) => `${config.api.baseURL}/api/k/${knowledgeId}`;
 

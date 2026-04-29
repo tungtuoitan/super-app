@@ -1,6 +1,6 @@
 import { Note } from "@/features/note/types/note.types";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
-import { BaseTab, TabType } from "@/shell/types/tab.types";
+import { BaseTab, TabType } from "@/shell";
 import { constants } from "@/utils/constants";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";

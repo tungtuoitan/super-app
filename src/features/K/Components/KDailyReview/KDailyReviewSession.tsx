@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { KTestService } from "../../service/kTest.service";
 import { cn } from "@/lib/utils";
 import type { KDailySessionQuestion, KDailyAnswerItem } from "../../types/kTest.type";

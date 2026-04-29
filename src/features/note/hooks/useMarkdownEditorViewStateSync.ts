@@ -7,8 +7,8 @@
 
 import { useEffect, useRef } from "react";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabBarStore } from "@/shell";
+import { useEditorTabHelper } from "@/shell";
 import { constants } from "@/utils/constants";
 import type * as _monaco from "monaco-editor";
 

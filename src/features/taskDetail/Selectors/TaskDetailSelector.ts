@@ -12,7 +12,7 @@ import { useGeneralStore } from "@/shared/store/General.store";
 import { constants } from "@/utils/constants";
 import { IStatusOption } from "@/shared/components";
 import { usePTaskStore } from "@/features/project";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 import {useTaskDetailStore} from "../store/useTaskDetail.store";
 
 export const useTaskDetailSelector = () => {

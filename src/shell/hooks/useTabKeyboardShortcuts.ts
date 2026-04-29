@@ -8,12 +8,12 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabBarStore } from "@/shell";
+import { useEditorTabHelper } from "@/shell";
 import { useLifeLogTabHelper } from "@/features/lifeLog/hooks/useLifeLogTab.helper";
 import { constants } from "@/utils/constants";
 import type { Task } from "@/features/taskDetail/types/task.types";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 
 export const useTabKeyboardShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabBarStore();

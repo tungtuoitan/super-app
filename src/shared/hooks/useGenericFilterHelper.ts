@@ -4,8 +4,8 @@
  * Pattern: Separate business logic from component
  */
 
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
+import { useAuthStore } from "@/shell";
+import { useAuthHelper } from "@/shell";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { constants } from "@/utils/constants";
 import { filterUtils } from "@/utils/filter.utils";
@@ -13,7 +13,7 @@ import { userProfileService } from "@/shared/services/userProfile.service";
 import { envConfig } from "@/utils/config/env.config";
 import { STORAGE_KEYS, storageService } from "@/shared/services/storage.service";
 import { parseApiError } from "@/utils/api-error.utils";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useConsoleHelper} from "@/shell";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "../types/filter.types";
 
 /**

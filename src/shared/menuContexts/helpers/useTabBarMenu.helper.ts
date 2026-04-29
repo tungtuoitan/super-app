@@ -4,12 +4,12 @@
  * Handles pin/unpin, close all, and close all but pinned operations
  */
 
-import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabBarStore } from "@/shell";
+import { useEditorTabHelper } from "@/shell";
 import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
 import { constants } from "@/utils/constants";
 import type { Task } from "@/features/taskDetail/types/task.types";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 
 /** Returns the task group link for a task tab, or null if not a task tab */
 const getTaskGroupLink = (tab: BaseTab): string | null => {

@@ -6,14 +6,14 @@
 
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useProjectStore } from "@/features/project";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { taskService } from "@/features/taskDetail";
 import { projectService } from "@/features/project";
 import { toLocalISOString } from "@/utils/date.utils";
 import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
-import {useAuthStore} from "@/shell/store/Auth.store";
+import {useAuthStore} from "@/shell";
 
 export const useMultiTimelineHelper = () => {
     // ── Stores ───────────────────────────────────────────

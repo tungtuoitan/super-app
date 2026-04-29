@@ -5,12 +5,12 @@
 
 
 import { lifeLogService } from "../service/lifeLog.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
-import { debugLog } from "@/shell/hooks/useDebugLog";
+import { debugLog } from "@/shell";
 
 export function transformLog(dto: LifeLogLogDTO): LifeLogLog {
     const result = {

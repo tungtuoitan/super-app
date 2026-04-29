@@ -11,8 +11,8 @@
  * const { loadAllK, selectWorkspace } = useKLoader();
  */
 
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
-import {useAuthStore} from "@/shell/store/Auth.store";
+import {useConsoleHelper} from "@/shell";
+import {useAuthStore} from "@/shell";
 import {useKMovingTreeStore} from "../../store/KMovingTree.store";
 import {KService} from "../../service/K.service";
 import {useKStore} from "../../store/K.store";
@@ -20,7 +20,7 @@ import {KTestService} from "../../service/kTest.service";
 import {KItemV2} from "../../types/K-v2.types";
 import {KDTO} from "../../types/K-dto.types";
 import {KWsResponse} from "../../types/K.types";
-import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {ResultOptions} from "@/shared";
 
 
 export const useKLoader = () => {

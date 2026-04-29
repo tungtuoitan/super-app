@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Check, Loader2, Pencil, Play, Plus, X, HelpCircle, Mic, Trash2, RotateCcw, Eye, EyeOff, BookX, GripVertical, PenLine } from "lucide-react";
 import { useDrag, useDrop } from "react-dnd";
-import { Button } from "@/shared/components/ui/Button";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Button } from "@/shared";
+import { ScrollArea } from "@/shared";
 import { useKTestStore } from "../../store/useKTest.store";
 import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import { KTestService } from "../../service/kTest.service";
 import { AutoResizeTextarea } from "../KNodeEditorPanel/AutoResizeTextarea";
 import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";
-import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
+import { useGlobalShortcut } from "@/shared";
 import { NodeCard } from "../KNodeEditorPanel/NodeCard";
 import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { ScoreSparkline } from "../small/ScoreSparkline";

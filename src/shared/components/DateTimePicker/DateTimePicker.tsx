@@ -8,7 +8,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, Clock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Calendar } from "@/shared/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { Label } from "@/shared/components/ui/label";

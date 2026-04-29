@@ -4,9 +4,9 @@
 
 import { config } from "@/utils/config/app.config";
 import type { TaskDTO } from "../types/task.types";
-import { debugLog } from "@/shell/hooks/useDebugLog";
-import {ResultOptions} from "@/shared/types/resultOptions.types";
-import {apiFetch} from "@/shared/index";
+import { debugLog } from "@/shell";
+import {ResultOptions} from "@/shared";
+import {apiFetch} from "@/shared";
 
 export interface ProjectOptionDTO {
     id: number;

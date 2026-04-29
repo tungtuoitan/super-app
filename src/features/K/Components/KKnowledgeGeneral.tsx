@@ -4,14 +4,14 @@
  */
 
 
-import { Label } from "@/shared/components/ui/label";
-import { Input } from "@/shared/components/ui/input";
-import { Button } from "@/shared/components/ui/Button";
+import { Label } from "@/shared";
+import { Input } from "@/shared";
+import { Button } from "@/shared";
 import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
 import { TrackIconPicker } from "@/features/lifeLog/Components/TrackIconPicker";
 import {useKLoader} from "../hooks/kTree/useK.loader";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 interface KKnowledgeGeneralProps {
     knowledgeId: number;

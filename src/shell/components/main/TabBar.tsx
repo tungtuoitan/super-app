@@ -1,17 +1,17 @@
 import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants } from "@/utils/constants";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useTabKeyboardShortcuts } from "@/shell/hooks/useTabKeyboardShortcuts";
-import { useTabBarHelper } from "@/shell/hooks/useTabBarHelper";
-import { useMobileStore } from "@/shared/store/Mobile.store";
-import { moduleRegistry } from "@/shell/moduleRegistry";
-import type { BaseTab } from "@/shell/types/tab.types";
-import type { Note } from "@/features/note/types/note.types";
-import {Ws} from "@/features/workspace/types/workspace.types";
-import {useGeneralStore} from "@/shared/store/General.store";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { useEditorTabHelper } from "@/shell";
+import { useWorkspaceStore } from "@/features/workspace";
+import { useTabKeyboardShortcuts } from "@/shell";
+import { useTabBarHelper } from "@/shell";
+import { useMobileStore } from "@/shared";
+import { moduleRegistry } from "@/shell";
+import type { BaseTab } from "@/shell";
+import type { Note } from "@/features/note";
+import {Ws} from "@/features/workspace";
+import {useGeneralStore} from "@/shared";
+import {useEditorTabBarStore} from "@/shell";
 
 // ─── Tab Icon ────────────────────────────────────────────────────────────────
 

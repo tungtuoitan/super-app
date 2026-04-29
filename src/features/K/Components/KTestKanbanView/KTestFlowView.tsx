@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, BookX, Check, ChevronDown, Eye, EyeOff, Loader2, Play, Plus, X } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
 import { useKTestStore } from "../../store/useKTest.store";
 import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import { KTestService } from "../../service/kTest.service";

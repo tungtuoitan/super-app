@@ -3,8 +3,8 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import {ResultOptions} from "@/shared/types/resultOptions.types";
-import {apiFetch} from "@/shared/index";
+import {ResultOptions} from "@/shared";
+import {apiFetch} from "@/shared";
 
 export interface ProjectDTO {
     id: number;

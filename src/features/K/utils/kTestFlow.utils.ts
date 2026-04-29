@@ -1,5 +1,5 @@
-import { flowService } from "@/shared/services/flow.service";
-import type { FlowEdgeDTO } from "@/shared/services/flow.service";
+import { flowService } from "@/shared";
+import type { FlowEdgeDTO } from "@/shared";
 
 /**
  * Topological sort (Kahn's BFS) of questions by their canvas flow edges.

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useKStore } from "../store/K.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";
 import { useKNodeEditorStore } from "../store/KNodeEditor.store";

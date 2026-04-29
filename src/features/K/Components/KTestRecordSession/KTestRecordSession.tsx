@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Mic, Loader2, CheckCircle2, XCircle, BookOpen, KeyRound, Send, PenLine } from "lucide-react";
 import { KReviewEditor } from "../small/KReviewEditor";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { KTestService } from "../../service/kTest.service";
 import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import type { KTestQuestion, KQuestionGrade, KSubmitAnswersResult } from "../../types/kTest.type";

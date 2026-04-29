@@ -7,12 +7,12 @@
  */
 
 import { useEffect, useState } from "react";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import type { Task } from "@/features/taskDetail/types/task.types";
-import { BaseTab, MultiProjectTabData } from "@/shell/types/tab.types";
+import { BaseTab, MultiProjectTabData } from "@/shell";
 import { constants } from "@/utils/constants";
 import { Note, NoteDTO } from "@/features/note/types/note.types";
 import { noteService } from "@/features/note/service/note.service";
@@ -22,7 +22,7 @@ import { taskService, TaskDTO } from "@/features/taskDetail/service/task.service
 import { transformNotes } from "@/features/note/utils/note.utils";
 import { transformWs } from "@/utils/ws.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
-import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
+import {useEditorTabHelper} from "@/shell";
 import {Ws} from "@/features/workspace/types/workspace.types";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 import {Project} from "@/features/project";

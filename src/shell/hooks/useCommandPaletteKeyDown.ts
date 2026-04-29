@@ -1,5 +1,5 @@
 import { MouseEvent, useEffect, useMemo, useState } from "react";
-import { useCommandPaletteHelper } from "@/shell/hooks/useCommandPalette.helper";
+import { useCommandPaletteHelper } from "@/shell";
 import {useCommandPaletteStore} from "../store/useCommandPalette.store";
 
 export function useCommandPaletteKeyDown() {

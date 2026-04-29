@@ -6,8 +6,8 @@
 
 
 import { targetKeywordService, TargetKeywordTargetType } from "@/shared/services/targetKeyword.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useAuthStore } from "@/shell";
+import { useConsoleHelper } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { Keyword } from "@/shared/types/keyword.types";

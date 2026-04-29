@@ -14,21 +14,21 @@ import React from "react";
 import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { taskService } from "../service/task.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useGeneralStore } from "@/shared/store/General.store";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { BaseTab } from "@/shell/types/tab.types";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { BaseTab } from "@/shell";
+import { useConsoleHelper } from "@/shell";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { useTaskLinkedKeywordsHelper } from "../hooks/useTaskLinkedKeywords.helper";
-import { useCommandPaletteHelper } from "@/shell/hooks/useCommandPalette.helper";
+import { useCommandPaletteHelper } from "@/shell";
 import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskCommentHelper } from "./taskComment/useTaskComment.helper";
-import { debugLog } from "@/shell/hooks/useDebugLog";
+import { debugLog } from "@/shell";
 import { usePTaskStore } from "@/features/project";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 // Re-export utils for backward compatibility
 export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../utils/TaskDetail.utils";

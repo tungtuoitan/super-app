@@ -9,7 +9,7 @@
 import { useEffect } from "react";
 import { useTaskGridHelper } from "@/features/project/task/hooks/taskList/useTaskGrid.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import {useAuthStore} from "@/shell/store/Auth.store";
+import {useAuthStore} from "@/shell";
 
 export function useProjectDetailHeadless() {
     const { loadTasks } = useTaskGridHelper();

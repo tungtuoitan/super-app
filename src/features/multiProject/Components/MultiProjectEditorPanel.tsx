@@ -6,10 +6,10 @@
  */
 
 import React from "react";
-import type { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import type { BaseTab } from "@/shell";
+import { useEditorTabHelper } from "@/shell";
 import { MultiProjectDetailContent } from "./MultiProjectDetailContent";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export function MultiProjectEditorPanel() {
     const { setOpenTabs } = useEditorTabBarStore();

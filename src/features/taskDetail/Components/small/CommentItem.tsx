@@ -6,7 +6,7 @@ import { useTaskCommentSelector } from "../../Selectors/TaskCommentSelector";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
 import { useTaskCommentHelper } from "../../hooks/taskComment/useTaskComment.helper";
 import { useTaskSectionStore } from "../../store/useTaskSection.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { parseVersionComment, formatTimeAgo, formatFullDate } from "../../utils/versionComment.utils";
 import { CollapsibleContent } from "./CollapsibleContent";

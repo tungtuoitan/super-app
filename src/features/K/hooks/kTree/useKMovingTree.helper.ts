@@ -1,19 +1,17 @@
 import React from "react";
-import { useSnackbar } from "notistack";
 import { useKMovingTreeStore } from "../../store/KMovingTree.store";
 import { useKStore } from "../../store/K.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
 import { KService } from "../../service/K.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";
-import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, KItemV2 } from "../../types/K-v2.types";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
 import {KDTO} from "../../types/K-dto.types";
 import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../../utils/K.Constants";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {useKLoader} from "./useK.loader";
+import {useAuthStore, useConsoleHelper} from "@/shell";
+import {IAutoCompleteOptions} from "@/shared";
 
 export const useKMovingTreeHelper = () => {
     const {

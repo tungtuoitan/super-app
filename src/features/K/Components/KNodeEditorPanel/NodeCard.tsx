@@ -8,14 +8,13 @@ import { DND_TYPE, CARD_HEIGHT, isAncestorNode } from "../../hooks/kNodeEditor.m
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
 import type { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
-import { IconPicker } from "@/shared/components/ui/IconPicker";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
-import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared";
 import { KHighlightText } from "../KExplorer/KHighlightText";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
-import {useGlobalShortcut} from "@/shared/hooks/useGlobalShortcut";
+import { useGridControlStore } from "@/shared";
+import {useGlobalShortcut} from "@/shared";
 
 export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV2; isRoot?: boolean; compact?: boolean; onSubmitEdit?: (draft: { name: string; description: string; icon: string | null; color: string | null }) => Promise<void> }) {
     const {

@@ -5,16 +5,16 @@
 
 import React from "react";
 import { Filter, RotateCcw } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Checkbox } from "@/shared";
 import { Label } from "@/shared/components/ui/label";
 import { constants } from "@/utils/constants";
 import { filterUtils } from "@/utils/filter.utils";
 import { userProfileService } from "@/shared/services/userProfile.service";
 import {parseApiError} from "@/utils/api-error.utils";
 import {UserFilters, ViewFilter} from "@/shared/types/filter.types";
-import {useAuthStore} from "@/shell/store/Auth.store";
+import {useAuthStore} from "@/shell";
 import {useGeneralStore} from "@/shared/store/General.store";
 
 const DEFAULT_FILTERS = constants.filters.defaults.taskGrid as ViewFilter;

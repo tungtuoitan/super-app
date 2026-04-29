@@ -15,7 +15,7 @@ export { useIsMobile } from "./hooks/useIsMobile";
 export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from "./hooks/useKeyboardShortcut";
 export { useKeywordNavigationHelper, findFolderInWorkspace, findNoteByEntityId } from "./hooks/useKeywordNavigation.helper";
 export { useStandardRegistryHelper } from "./hooks/useStandardRegistry.helper";
-
+    
 // ── Stores ────────────────────────────────────────────────────────────────
 export { debugLogStore } from "./store/debugLog.store";
 export { useConfirmationPopoverStore, ConfirmationPopoverProvider } from "./store/ConfirmationPopover.store";
@@ -43,7 +43,7 @@ export type { KeywordType, Keyword, UpsertExternalKeywordRequest, KeywordSyncIte
 export type { ResultOptions } from "./types/resultOptions.types";
 export type { RegistryType, StandardRegistry, StandardRegistryDTO, StandardRegistryResponse, GetStandardRegistryParams } from "./types/standardRegistry.types";
 export type { UpdateUserProfileRequest } from "./types/userProfile.types";
-
+export type { FlowEdgeDTO, FlowNodePositionDTO } from "./types/flow.types";
 // ── Icons ─────────────────────────────────────────────────────────────────
 export { IconKey } from "./icons/icon.types";
 export { ICON_COLORS, ICON_MAP, ICON_GROUPS, ICON_CONFIG } from "./icons/icon.config";

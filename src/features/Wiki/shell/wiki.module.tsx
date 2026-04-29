@@ -1,7 +1,7 @@
 import { BookOpen } from "lucide-react";
 import { constants } from "@/utils/constants";
-import type { ModuleDefinition } from "@/shell/moduleRegistry";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { ModuleDefinition } from "@/shell";
+import type { BaseTab } from "@/shell";
 import WikiGraphView from "../Components/WikiGraphView/WikiGraphView";
 import WikiInfoPanel from "../Components/WikiInfoPanel/WikiInfoPanel";
 

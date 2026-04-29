@@ -13,11 +13,11 @@ import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProject
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import { buildTaskFlowLayout } from "../../utils/multiProjectTaskFlow.utils";
-import { flowService } from "@/shared/services/flow.service";
-import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared/services/flow.service";
+import { flowService } from "@/shared";
+import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
 import type { FlowEdgeData } from "../../types/multiProjectTaskFlow.type";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { debugLog } from "@/shell/hooks/useDebugLog";
+import { useAuthStore } from "@/shell";
+import { debugLog } from "@/shell";
 import type { Edge } from "@xyflow/react";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 

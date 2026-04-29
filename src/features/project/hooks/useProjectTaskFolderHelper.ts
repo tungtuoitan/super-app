@@ -5,21 +5,21 @@
  */
 
 import { useRef, useEffect } from "react";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useProjectStore } from "../store/useProject.store";
 import type { Task } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { workspaceService } from "@/features/workspace/service/workspace.service";
 import { taskService } from "@/features/taskDetail";
 import { projectService, type ProjectDTO } from "../service/project.service";
 import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
-import { debugLog } from "@/shell/hooks/useDebugLog";
+import { debugLog } from "@/shell";
 import { constants } from "@/utils/constants";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note/types/note.types";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";
 import {usePTaskStore} from "@/features/project/store/usePTask.store";
 

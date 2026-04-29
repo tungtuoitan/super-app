@@ -1,6 +1,6 @@
 import React, { MouseEventHandler, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";

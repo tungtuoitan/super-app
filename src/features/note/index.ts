@@ -8,6 +8,7 @@
 export { NoteGrid } from "./Components/NoteGrid";
 export { NoteDetailContent } from "./Components/NoteDetailContent";
 export { NoteEditorPanel } from "./Components/NoteEditorPanel";
+export { NoteBodyInPanel } from "./Components/NoteBodyInPanel";
 
 // Stores/Providers (used by Main.tsx)
 export { NoteDetailProvider, useNoteDetailStore } from "./store/useNoteDetail.store";

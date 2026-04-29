@@ -11,7 +11,7 @@
 
 import type { ComponentType, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 
 // ─── Contract ────────────────────────────────────────────────────────────────
 

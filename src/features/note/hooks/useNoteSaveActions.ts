@@ -5,7 +5,7 @@ import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceI
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
 import { useProjectTaskFolderHelper } from "@/features/project";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 import type { Note } from "../types/note.types";
 import {SaveActions} from "@/shared/types/actions.types";
 

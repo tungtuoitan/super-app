@@ -1,4 +1,4 @@
-import { useConsoleStore, ConsoleMessageType } from "@/shell/store/useConsole.store";
+import { useConsoleStore, ConsoleMessageType } from "@/shell";
 
 export const useConsoleHelper = () => {
     const { messages, setMessages, maxMessages } = useConsoleStore();

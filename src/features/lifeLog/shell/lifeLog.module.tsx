@@ -8,8 +8,8 @@ import { TrackIconDisplay } from "../Components/TrackIconDisplay";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { constants } from "@/utils/constants";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
-import type { ModuleDefinition, TabMeta } from "@/shell/moduleRegistry";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { ModuleDefinition, TabMeta } from "@/shell";
+import type { BaseTab } from "@/shell";
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
 

@@ -3,6 +3,8 @@
  * Used by auth.service.ts and shell auth hooks.
  */
 
+import {UserFilters} from "@/shared";
+
 export interface ApiRequestConfig {
     method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     headers?: Record<string, string>;
@@ -71,4 +73,21 @@ export interface NoteCreateUpdateResponse {
     };
     success: boolean;
     message?: string;
+}
+
+/**
+ * User interface representing authenticated user data
+ * Contains user profile info and authentication token
+ */
+export interface User {
+    userId: number | null;
+    userName: string;
+    email: string;
+    password?: string;
+    firstName?: string;
+    lastName?: string;
+    picture?: string;
+    authType?: "google" | "local";
+    userToken: string;
+    filters?: UserFilters; // User-level filter preferences for different views
 }

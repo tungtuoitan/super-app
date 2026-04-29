@@ -9,7 +9,7 @@
 import React, { useRef, useState } from "react";
 import { useDrag, useDrop, DragSourceMonitor, DropTargetMonitor } from "react-dnd";
 import { Loader2, CornerDownRight } from "lucide-react";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Checkbox } from "@/shared";
 import { Label } from "@/shared/components/ui/label";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";

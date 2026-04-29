@@ -4,9 +4,9 @@ import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "./useTaskDetailForm.helper";
 import { useTaskLinkedKeywordsHelper } from "./useTaskLinkedKeywords.helper";
 import { useTaskWorkspaceItemHelper } from "./useTaskWorkspaceItem.helper";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import type { BaseTab } from "@/shell/types/tab.types";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { useEditorTabHelper } from "@/shell";
+import type { BaseTab } from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 
 export function useTaskDetailHeadless() {
     const { selectedTask, currentProject } = useTaskDetailSelector();

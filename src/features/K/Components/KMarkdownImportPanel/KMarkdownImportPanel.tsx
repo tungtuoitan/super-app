@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Loader2, CheckCircle2, AlertCircle, FileText, XCircle, TriangleAlert, FlaskConical, HelpCircle } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
-import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components/ui/GenericAutoComplete";
+import { Button } from "@/shared";
+import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useKMarkdownImportHelper } from "../../hooks/useKMarkdownImport.helper";
 import { useKStore } from "../../store/K.store";
 import type { KItemV2 } from "../../types/K-v2.types";

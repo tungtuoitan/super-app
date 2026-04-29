@@ -6,7 +6,7 @@ import { Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { QuestionScoreBar } from "../../small/QuestionScoreBar";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
 import { useKTestFlowHelper } from "@/features/K/hooks/test/useKTestFlow.helper";
-import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
+import { useGlobalShortcut } from "@/shared";
 import type { QuestionFlowNodeData } from "@/features/K/types/kTestFlow.type";
 
 const HANDLES = [Position.Top, Position.Right, Position.Bottom, Position.Left];

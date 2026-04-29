@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useRef } from "react";
 import { ChevronRight, Trash2, Layers, Trash, LibraryBig, Bookmark } from "lucide-react";
 import { useKStore } from "../../store/K.store";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 import type { KItemV2 } from "../../types/K-v2.types";
 import type { BreadcrumbEntry } from "../../hooks/kNodeEditor.miniHelper";
 import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { NodeCard } from "./NodeCard";
 import { InlineNewNodeCard } from "./InlineNewNodeCard";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { constants } from "@/utils/constants";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { kconstants } from "../../utils/K.Constants";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { containsNormalized } from "../../utils/searchUtils";
 import {KtreeMiniHelper} from "../../hooks";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 function KNodeEditorContent() {
     const { rootNode, breadcrumb, setBreadcrumb, setEditingNodeId, setParentPickerNodeId, inlineNewParentId, setInlineNewParentId, showDeleted, setShowDeleted, showAllChild, setShowAllChild, editingNodeId, unsavedPromptNodeId, setPromptFlashTick } = useKNodeEditorStore();

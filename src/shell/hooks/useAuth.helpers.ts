@@ -4,25 +4,22 @@
  * Pattern: Separate business logic from store (similar to useTagUIHelper)
  */
 
-import { useAuthStore, User } from "@/shell/store/Auth.store";
-import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
-import { authApi } from "@/shell/services/auth.service";
-import { userProfileService } from "@/shared/services/userProfile.service";
+import { useAuthStore, User } from "@/shell";
+import { storageService, STORAGE_KEYS } from "@/shared";
+import { authApi } from "@/shell";
 import { envConfig } from "@/utils/config/env.config";
 import { constants } from "@/utils/constants";
-import type { LoginRequest } from "@/shell/types/auth.types";
+import type { LoginRequest } from "@/shell";
 import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl, GOOGLE_OAUTH_CONFIG } from "@/utils/googleOAuth";
 import { retrieveAndClearPkceValues, validateState } from "@/utils/pkce.utils";
-import { useAuthCallbackStore } from "@/shell/store/AuthCallback.store";
+import { useAuthCallbackStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useSnackbar } from "notistack";
-import {useGridControlStore} from "@/shared/store/useGridControl.store";
-import {useGridAutoRegisterHelper} from "@/shell/hooks/useGridAutoRegister.helper";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
-import { debugLog } from "@/shell/hooks/useDebugLog";
+import {useGridControlStore} from "@/shared";
+import {useConsoleHelper} from "@/shell";
+import { debugLog } from "@/shell";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
-import {acquireRefreshToken} from "@/shared/index";
+import {acquireRefreshToken} from "@/shared";
 
 const DEFAULT_USER: User = {
     userId: null,

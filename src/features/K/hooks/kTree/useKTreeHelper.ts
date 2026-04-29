@@ -7,14 +7,13 @@ import { useKStore } from "../../store/K.store";
 import { useKNodeDialogHelper } from "../useKNodeDialog.helper";
 import { KService } from "../../service/K.service";
 import { KItemAction } from "../../types/K.types";
-import { useAuthStore } from "@/shell/store/Auth.store";
 import { KItemV2 } from "../../types/K-v2.types";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
-import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
 import {kconstants} from "../../utils/K.Constants";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {KtreeMiniHelper, KTreeNode} from "./Ktree.miniHelper";
 import {useKLoader} from "./useK.loader";
+import {useAuthStore, useConsoleHelper} from "@/shell";
+import {useStandardRegistryHelper} from "@/shared";
 
 export const KuseTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();

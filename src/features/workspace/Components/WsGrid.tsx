@@ -6,15 +6,15 @@
 import React, { useEffect, useMemo } from "react";
 import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Button } from "@/shared";
+import { Checkbox } from "@/shared";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import {useWsGridHelper} from "../hooks/ws/useWsGrid.helper";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 import {Ws} from "../types/workspace.types";
-import {useAuthStore} from "@/shell/store/Auth.store";
+import {useAuthStore} from "@/shell";
 
 /**
  * WsGrid - ws grid with table display

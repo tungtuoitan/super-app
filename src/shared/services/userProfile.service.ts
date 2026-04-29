@@ -3,7 +3,7 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {ResultOptions} from "@/shared";
 import {UpdateUserProfileRequest} from "@/shared/types/userProfile.types";
 import {apiFetch} from "./apiClient";
 

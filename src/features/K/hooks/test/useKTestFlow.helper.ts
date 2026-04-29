@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { applyNodeChanges, applyEdgeChanges, addEdge } from "@xyflow/react";
 import type { NodeChange, EdgeChange, Connection, Edge, Node } from "@xyflow/react";
-import { flowService } from "@/shared/services/flow.service";
+import { flowService } from "@/shared";
 import { KTestService } from "@/features/K/service/kTest.service";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
 import type { KFlowEdgeData, QuestionFlowNodeData, ArrowDirection } from "@/features/K/types/kTestFlow.type";

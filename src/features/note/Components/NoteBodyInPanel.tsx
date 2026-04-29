@@ -9,13 +9,13 @@ import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
 import { formatNoteDate } from "../utils/note.utils";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
 import { useMonaco } from "@monaco-editor/react";
 import {useGeneralStore} from "@/shared/store/General.store";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 import { IconKey } from "@/shared";
 
 export function NoteBodyInPanel() {

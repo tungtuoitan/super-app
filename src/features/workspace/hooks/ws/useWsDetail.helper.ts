@@ -3,12 +3,12 @@ import { useSnackbar } from "notistack";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { wsService } from "@/features/workspace/service/ws.service";
 import { useWsGridHelper } from "./useWsGrid.helper";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { BaseTab } from "@/shell/types/tab.types";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { BaseTab } from "@/shell";
+import { useConsoleHelper } from "@/shell";
 import {Ws} from "../../types/workspace.types";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();

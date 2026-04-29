@@ -11,15 +11,15 @@ import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector";
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
 import { taskService } from "../../service/task.service";
 import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../../utils/customTab.utils";
 import { isCustomTab, getCustomTabId } from "../../utils/taskDetailSection.utils";
-import { BaseTab } from "@/shell/types/tab.types";
+import { BaseTab } from "@/shell";
 import { Task } from "../../types/task.types";
 import type { SectionTab } from "../../store/useTaskDetailSection.store";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export const useTaskSectionHelper = () => {
     const { activeSection, setActiveSection } = useTaskDetailSectionStore();

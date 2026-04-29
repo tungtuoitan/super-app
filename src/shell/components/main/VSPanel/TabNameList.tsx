@@ -1,5 +1,5 @@
 import { X, Terminal } from "lucide-react";
-import { moduleRegistry, type PanelTabDefinition } from "@/shell/moduleRegistry";
+import { moduleRegistry, type PanelTabDefinition } from "@/shell";
 
 interface VSPanelHeaderProps {
     moduleName: string;

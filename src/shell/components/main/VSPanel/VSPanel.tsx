@@ -1,16 +1,16 @@
 import { X, Terminal, ArrowRightLeft, FileText } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { useMovingTreeStore } from "@/features/workspace/store/MovingTree.store";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useMobileStore } from "@/shared/store/Mobile.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
-import { moduleRegistry, type PanelTabDefinition } from "@/shell/moduleRegistry";
+import { useMovingTreeStore } from "@/features/workspace";
+import { useEditorTabHelper } from "@/shell";
+import { useMobileStore } from "@/shared";
+import { useGridControlStore } from "@/shared";
+import { moduleRegistry, type PanelTabDefinition } from "@/shell";
 import { ConsoleTab } from "./MobileConsole/ConsoleTab";
-import { NoteBodyInPanel } from "@/features/note/Components/NoteBodyInPanel";
+import { NoteBodyInPanel } from "@/features/note";
 import { TabNameList } from "./TabNameList";
 import { constants } from "@/utils/constants";
-import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
+import {useActivityBarStore} from "@/shell";
 
 const NoteBodyInPanelContent = () => <NoteBodyInPanel />;
 

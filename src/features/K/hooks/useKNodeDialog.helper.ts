@@ -1,9 +1,6 @@
 import { useKStore } from "../store/K.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
 import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";
-import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
 import { isFolder } from "../types/K-v2.types";
 import {kconstants} from "../utils/K.Constants";
 import {Folder} from "../types";
@@ -11,6 +8,8 @@ import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/K
 import type { KItemV2 } from "../types/K-v2.types";
 import {KtreeMiniHelper} from "./kTree/Ktree.miniHelper";
 import {useKLoader} from "./kTree/useK.loader";
+import {useAuthStore, useConsoleHelper} from "@/shell";
+import {useStandardRegistryHelper} from "@/shared";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();

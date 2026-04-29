@@ -6,10 +6,10 @@
  */
 
 import { useEffect } from "react";
-import type { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import type { BaseTab } from "@/shell";
+import { useEditorTabHelper } from "@/shell";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";
 
 export function useProjectEditorPanelHeadless() {

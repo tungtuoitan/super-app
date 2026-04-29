@@ -4,15 +4,8 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import {ConsoleMessage} from "../types/console.types";
 
-export type ConsoleMessageType = "error" | "warning" | "info" | "success" | "special-success";
-
-export interface ConsoleMessage {
-    id: string;
-    type: ConsoleMessageType;
-    message: string;
-    timestamp: Date;
-}
 
 export interface ConsoleContextData {
     messages: ConsoleMessage[];

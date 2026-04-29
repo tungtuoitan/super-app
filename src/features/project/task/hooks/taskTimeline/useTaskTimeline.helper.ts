@@ -5,7 +5,7 @@
  */
 
 import type { Task } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/constants";
@@ -13,8 +13,8 @@ import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
-import {useAuthStore} from "@/shell/store/Auth.store";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useAuthStore} from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 import {usePTaskStore} from "@/features/project/store/usePTask.store";
 
 export const useTaskTimelineHelper = () => {

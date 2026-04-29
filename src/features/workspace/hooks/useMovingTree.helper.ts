@@ -2,7 +2,7 @@ import React from "react";
 import { useSnackbar } from "notistack";
 import { useMovingTreeStore } from "../store/MovingTree.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
@@ -12,7 +12,7 @@ import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/ty
 import { constants } from "@/utils/constants";
 import { SPECIAL_IDS } from "@/utils/temp-id.utils";
 import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useConsoleHelper} from "@/shell";
 import {useKLoader} from "@/features/K/hooks/kTree/useK.loader";
 
 export const useMovingTreeHelper = () => {

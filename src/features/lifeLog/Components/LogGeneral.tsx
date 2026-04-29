@@ -3,18 +3,14 @@
  */
 
 
-import { Label } from "@/shared/components/ui/label";
-import { Input } from "@/shared/components/ui/input";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { Checkbox } from "@/shared/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { Checkbox, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from "@/shared";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { LOG_TYPES, LOG_TYPE_CONFIG, type LifeLogLog, type LogType } from "@/features/lifeLog/types/lifeLog.types";
 import { format } from "date-fns";
 import { LogTypeIcon } from "./LogTypeIcon";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { SingleDatePicker } from "./SingleDatePicker";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 interface LogGeneralProps {
     logId: number;

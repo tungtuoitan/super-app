@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
+import { useAuthHelper } from "@/shell";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import {useAuthCallbackStore} from "../store/AuthCallback.store";

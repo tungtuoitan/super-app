@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, Loader2, Pencil, Play, Plus, X } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { useKTestLoader } from "../../hooks/test/useKTest.loader";
 import type { KTestDetail as KTestDetailType, KTestQuestion } from "../../types/kTest.type";
 

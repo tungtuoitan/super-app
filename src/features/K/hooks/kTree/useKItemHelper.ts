@@ -1,15 +1,15 @@
 
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useEditorTabHelper } from "@/shell";
+import { useAuthStore } from "@/shell";
 import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";
 import { isNumber } from "lodash";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useConsoleHelper} from "@/shell";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {Note} from "../../types/note.types";
 import {useKLoader} from "./useK.loader";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export const KuseWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();

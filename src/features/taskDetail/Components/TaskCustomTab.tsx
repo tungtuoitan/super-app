@@ -11,12 +11,12 @@ import { RichTextEditor } from "@/shared/components";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
 import { useTaskCommentHelper } from "../hooks/taskComment/useTaskComment.helper";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { taskService } from "../service/task.service";
 import { Task } from "../types/task.types";
-import { BaseTab } from "@/shell/types/tab.types";
+import { BaseTab } from "@/shell";
 import { type CustomTab } from "../types/customTab.types";
 import {
     parseCustomTabs,
@@ -24,7 +24,7 @@ import {
     extractNameVersion,
     validateCustomTabFormat,
 } from "../utils/customTab.utils";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 /** Loop-rendered: accepts only the tabId identifier. */
 export function TaskCustomTab({ tabId }: { tabId: string }) {

@@ -15,7 +15,7 @@ import {
     ICON_CONFIG,
     getIconsGrouped,
     getIconDefaultColor
-} from "@/shared/index";
+} from "@/shared";
 import { IconKey } from "../../icons/icon.types";
 import {IconOption} from "@/shared/icons/icon.utils";
 

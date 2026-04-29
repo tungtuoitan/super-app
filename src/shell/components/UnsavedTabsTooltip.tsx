@@ -5,7 +5,7 @@
 
 import { useMemo, ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarStore } from "@/shell";
 
 interface UnsavedTabsTooltipProps {
     children: ReactNode;

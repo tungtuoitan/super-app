@@ -47,3 +47,5 @@ export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbP
 export { ShadcnButton, buttonVariants } from "./Button";
 export { GenericDrawingDate, type GenericDrawingDateProps } from "./GenericDrawingDate";
 export { AutoCompleteOption, type AutoCompleteOptionProps } from "./AutoCompleteOption";
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
+export { resolveVariant } from "./Button";

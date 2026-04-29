@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/kTree/useKTreeHelper2";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { KHighlightText } from "./KHighlightText";
 import { useKStore } from "../../store/K.store";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
@@ -12,13 +12,13 @@ import { kconstants } from "../../utils/K.Constants";
 import { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
-import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared";
 import { constants } from "@/utils/constants";
 import type { KWsResponse } from "../../types/K.types";
 import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
 import { useDrop } from "react-dnd";
 import { KTestService } from "../../service/kTest.service";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;

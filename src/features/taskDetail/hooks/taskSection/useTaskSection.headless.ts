@@ -5,7 +5,7 @@ import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskSectionHelper } from "./useTaskSection.helper";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export function useTaskSectionHeadless() {
     const { setActiveSection } = useTaskDetailSectionStore();

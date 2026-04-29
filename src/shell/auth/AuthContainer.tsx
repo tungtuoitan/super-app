@@ -1,9 +1,9 @@
-import { useAuthHelper } from "@/shell/hooks/useAuth.helpers";
-import { Button } from "@/shared/components/ui/Button";
+import { useAuthHelper } from "@/shell";
+import { Button } from "@/shared";
 import { Input } from "@/shared/components/ui/input";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 
 /**
  * Authentication container component.

@@ -3,16 +3,16 @@
  */
 
 import { useRef, useEffect } from "react";
-import { Label } from "@/shared/components/ui/label";
-import { Input } from "@/shared/components/ui/input";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Label } from "@/shared";
+import { Input } from "@/shared";
+import { Checkbox } from "@/shared";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { TrackIconPicker } from "./TrackIconPicker";
 import { TRACK_COLORS } from "./trackColors";
 import { Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 interface TrackGeneralProps {
     trackId: number;

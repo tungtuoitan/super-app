@@ -4,9 +4,9 @@
 
 import { useEffect } from "react";
 import { TrackGeneral } from "./TrackGeneral";
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 interface TrackEditorPanelProps {
     tab: BaseTab;

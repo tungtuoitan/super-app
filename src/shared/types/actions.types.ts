@@ -1,4 +1,4 @@
-import type { BaseTab } from "@/shell/types/tab.types";
+import type { BaseTab } from "@/shell";
 
 /**
  * Contract for per-feature save handlers.

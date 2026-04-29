@@ -4,16 +4,16 @@ import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { transformNotes } from "../utils/note.utils";
 import { Note } from "../types/note.types";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import { constants } from "@/utils/constants";
-import { BaseTab } from "@/shell/types/tab.types";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { BaseTab } from "@/shell";
+import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
 import { filterUtils } from "@/utils/filter.utils";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { useConsoleHelper } from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 import {useGeneralStore} from "@/shared/store/General.store";
 
 export const useNoteGridHelper = () => {

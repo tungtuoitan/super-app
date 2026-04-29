@@ -6,7 +6,7 @@ import React, { useEffect } from "react";
 import { CardContent } from "@/shared/components/ui/card";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import { constants } from "@/utils/constants";
 import { MarkdownEditor } from "@/features/note/Components/MarkdownEditor";
 import { useMonaco } from "@monaco-editor/react";

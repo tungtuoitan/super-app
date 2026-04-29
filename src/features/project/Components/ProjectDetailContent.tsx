@@ -7,7 +7,7 @@
 import React from "react";
 import { ListTodo, Columns, GanttChartSquare, Settings, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { ProjectGeneral } from "./ProjectGeneral";
 import { TaskGrid } from "@/features/project/task/Components/TaskGrid";
 import { TaskKanbanView } from "@/features/project/task/Components/TaskKanbanView";

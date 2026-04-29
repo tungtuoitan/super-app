@@ -2,8 +2,8 @@ import { constants } from "@/utils/constants";
 import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/taskDetail";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
-import { debugLog } from "@/shell/hooks/useDebugLog";
-import type { BaseTab } from "@/shell/types/tab.types";
+import { debugLog } from "@/shell";
+import type { BaseTab } from "@/shell";
 import type { Task } from "@/features/taskDetail";
 import {SaveActions} from "@/shared/types/actions.types";
 

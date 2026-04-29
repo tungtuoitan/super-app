@@ -7,9 +7,9 @@
 
 import React, { useEffect } from "react";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Checkbox } from "@/shared";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 import { Slider } from "@/shared/components/ui/slider";
 import { Label } from "@/shared/components/ui/label";
@@ -19,7 +19,7 @@ import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/utils/formatters";
 import {FilterFieldConfig, ViewFilter} from "../types/filter.types";
 import {useGeneralStore} from "../store/General.store";
-import {useAuthStore} from "@/shell/store/Auth.store";
+import {useAuthStore} from "@/shell";
 
 export function GenericFilterPopup() {
     const {

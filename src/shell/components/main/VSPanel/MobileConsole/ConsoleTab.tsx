@@ -1,5 +1,5 @@
-import { useConsoleStore } from "@/shell/store/useConsole.store";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleStore } from "@/shell";
+import { useConsoleHelper } from "@/shell";
 import {ConsoleMessage} from "./ConsoleMessage";
 
 

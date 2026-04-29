@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Check, Loader2, Pencil, Play, Plus, X } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { ScoreSparkline } from "../small/ScoreSparkline";
 import { useKTestStore } from "../../store/useKTest.store";
 import { useKTestLoader } from "../../hooks/test/useKTest.loader";

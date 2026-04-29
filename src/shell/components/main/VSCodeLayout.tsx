@@ -5,15 +5,15 @@ import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { VSSideBar } from "./VSSideBar";
 import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
-import { useGridAutoRegisterHelper } from "@/shell/hooks/useGridAutoRegister.helper";
+import { useGridAutoRegisterHelper } from "@/shell";
 import { useLocation } from "react-router-dom";
-import { useMobileStore } from "@/shared/store/Mobile.store";
+import { useMobileStore } from "@/shared";
 import { constants } from "@/utils/constants";
-import { GridControlBar } from "@/shared/components/GridControlBar";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
-import { moduleRegistry } from "@/shell/moduleRegistry";
+import { GridControlBar } from "@/shared";
+import { useGridControlStore } from "@/shared";
+import { moduleRegistry } from "@/shell";
 import {useCheckIsMobile} from "../../hooks/useCheckIsMobile";
-import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
+import {useActivityBarStore} from "@/shell";
 
 interface VSCodeLayoutProps {
     className?: string;

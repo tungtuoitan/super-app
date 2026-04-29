@@ -4,7 +4,7 @@ import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
-import { IconPicker } from "@/shared/components/ui/IconPicker";
+import { IconPicker } from "@/shared";
 import type { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 

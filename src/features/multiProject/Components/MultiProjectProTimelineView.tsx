@@ -11,7 +11,7 @@
 import React, { useEffect } from "react";
 import { ZoomIn, ZoomOut, Calendar } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { useProjectTabHelper, getProjectStatusColors } from "@/features/project";
 import { cn } from "@/lib/utils";

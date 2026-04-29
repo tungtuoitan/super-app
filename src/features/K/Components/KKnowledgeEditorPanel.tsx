@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { Settings, GitBranch, CalendarClock, LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/shared/hooks/useIsMobile";
-import { CardContent } from "@/shared/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { useIsMobile } from "@/shared";
+import { CardContent } from "@/shared";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
 import { KTestList } from "./KTestList";
 import { KDailyReviewSession } from "./KDailyReview/KDailyReviewSession";
@@ -18,8 +18,8 @@ import type { KTestDetail as KTestDetailType, KDailySessionQuestion } from "../t
 import type { KItemV2 } from "../types/K-v2.types";
 import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
 import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
-import {useEditorTabHelper} from "@/shell/hooks/useEditorTab.helper";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabHelper} from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 
 
 type SessionState = {

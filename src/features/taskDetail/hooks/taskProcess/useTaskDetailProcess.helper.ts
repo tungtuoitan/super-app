@@ -11,12 +11,12 @@ import { useEffect, useRef } from "react";
 import { Task } from "../../types/task.types";
 import { usePTaskStore } from "@/features/project";
 import { taskService } from "../../service/task.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { BaseTab } from "@/shell/types/tab.types";
+import { useAuthStore } from "@/shell";
+import { BaseTab } from "@/shell";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { isChecklistAllDone } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export type ProcessUpdater = ChecklistJSON | ((current: ChecklistJSON) => ChecklistJSON);
 

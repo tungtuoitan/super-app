@@ -3,9 +3,9 @@
  */
 
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
-import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
+import { useAuthStore } from "@/shell";
+import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarStore } from "@/shell";
 import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
@@ -19,7 +19,7 @@ import { WorkspaceDTO } from "@/features/workspace/types/workspace-dto.types";
 import { Keyword } from "@/shared/types/keyword.types";
 import { isValidUrl } from "@/utils/url.utils";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { treeMiniHelper } from "@/features/workspace/hooks/tree.miniHelper";
 import { projectService } from "@/features/project/service/project.service";
 import { taskService } from "@/features/taskDetail/service/task.service";

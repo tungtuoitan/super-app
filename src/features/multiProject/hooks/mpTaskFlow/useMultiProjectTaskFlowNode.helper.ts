@@ -8,8 +8,8 @@ import type { Node } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useAuthStore } from "@/shell";
+import { useConsoleHelper } from "@/shell";
 import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
 import { flowService } from "@/shared/services/flow.service";
@@ -18,7 +18,7 @@ import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useProjectTaskFolderHelper } from "@/features/project";
-import { debugLog } from "@/shell/hooks/useDebugLog";
+import { debugLog } from "@/shell";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();

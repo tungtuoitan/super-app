@@ -4,7 +4,7 @@
  */
 
 import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
 import { Keyword } from "@/shared/types/keyword.types";

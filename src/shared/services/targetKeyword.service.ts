@@ -3,7 +3,7 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import {ResultOptions} from "@/shared/types/resultOptions.types";
+import {ResultOptions} from "@/shared";
 import {apiFetch} from "./apiClient";
 
 export interface TargetKeywordDTO {

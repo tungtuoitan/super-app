@@ -4,19 +4,19 @@
  */
 
 import { projectService, ProjectDTO } from "../service/project.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { BaseTab } from "@/shell/types/tab.types";
+import { BaseTab } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
 import { constants } from "@/utils/index";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import type { TabType } from "../types/projectDetail.type";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";
 import {useProjectStore} from "../store/useProject.store";
 

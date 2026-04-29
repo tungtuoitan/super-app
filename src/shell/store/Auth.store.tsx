@@ -4,25 +4,11 @@
  * Pattern: Separate store from business logic (similar to TagUIStore, EditorTabBarStore)
  */
 
-import {UserFilters} from "@/shared/types/filter.types";
+import {UserFilters} from "@/shared";
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import {User} from "../types/auth.types";
 
-/**
- * User interface representing authenticated user data
- * Contains user profile info and authentication token
- */
-export interface User {
-    userId: number | null;
-    userName: string;
-    email: string;
-    password?: string;
-    firstName?: string;
-    lastName?: string;
-    picture?: string;
-    authType?: "google" | "local";
-    userToken: string;
-    filters?: UserFilters; // User-level filter preferences for different views
-}
+
 
 export interface AuthStoreData {
     // Core auth data

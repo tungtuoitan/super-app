@@ -1,18 +1,18 @@
 import React, { useEffect } from "react";
 import { flexRender } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "@/shared/components/ui/Button";
+import { Button } from "@/shared";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { useNoteGridHelper } from "../hooks/useNoteGrid.helper";
 import { useNoteGridTableHelper } from "../hooks/useNoteGrid.table.helper";
 import { Note } from "../types/note.types";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { constants } from "@/utils/constants";
-import { BaseTab } from "@/shell/types/tab.types";
-import {useAuthStore} from "@/shell/store/Auth.store";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { BaseTab } from "@/shell";
+import {useAuthStore} from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table

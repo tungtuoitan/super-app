@@ -8,13 +8,13 @@ import React from "react";
 import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDTO, taskService } from "../service/task.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { useGeneralStore } from "@/shared/store/General.store";
-import { BaseTab } from "@/shell/types/tab.types";
+import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared/components";
 import { getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextToChecklist } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();

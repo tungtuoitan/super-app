@@ -8,11 +8,11 @@
 import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
+import { useConsoleHelper } from "@/shell";
 import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
 import { toLocalISOString } from "@/utils/date.utils";
 import {useMultiProjectTaskGridHelper} from "./useMultiProjectTaskGrid.helper";
-import {useAuthStore} from "@/shell/store/Auth.store";
+import {useAuthStore} from "@/shell";
 
 export const useMultiProjectTaskListHelper = () => {
     const { tasks, setTasks } = useMpTaskStore();

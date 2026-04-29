@@ -8,11 +8,11 @@ import { useSnackbar } from "notistack";
 import { useGeneralStore } from "@/shared/store/General.store";
 import { standardRegistryService } from "@/shared/services/standardRegistry.service";
 import { keywordService } from "@/shared/services/keyword.service";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { StandardRegistry } from "@/shared/types/standardRegistry.types";
 import { IAutoCompleteOptions } from "@/shared/components";
-import {useConsoleHelper} from "@/shell/hooks/useConsole.helper";
+import {useConsoleHelper} from "@/shell";
 
 /**
  * Transform DTO date strings to Date objects

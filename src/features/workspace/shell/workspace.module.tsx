@@ -3,7 +3,7 @@ import { WorkspaceView } from "../Components/WorkspaceView";
 import { WsEditorPanel } from "../Components/WsEditorPanel";
 import { MovingTab } from "../Components/VSPanel/MovingTab";
 import { constants } from "@/utils/constants";
-import type { ModuleDefinition } from "@/shell/moduleRegistry";
+import type { ModuleDefinition } from "@/shell";
 
 const MovingTabAdapter = () => <MovingTab />;
 

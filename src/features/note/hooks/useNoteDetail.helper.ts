@@ -6,15 +6,15 @@ import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { constants } from "@/utils/constants";
 import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useAuthStore } from "@/shell/store/Auth.store";
+import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { BaseTab } from "@/shell/types/tab.types";
+import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions } from "@/shared/components";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import { useEditorTabHelper } from "@/shell";
 import { useGridControlStore } from "@/shared/store/useGridControl.store";
 import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
-import { useConsoleHelper } from "@/shell/hooks/useConsole.helper";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import { useConsoleHelper } from "@/shell";
+import {useEditorTabBarStore} from "@/shell";
 import {useGeneralStore} from "@/shared/store/General.store";
 
 export const useNoteDetailHelper = () => {

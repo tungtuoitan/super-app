@@ -6,12 +6,12 @@
  */
 
 import React from "react";
-import type { BaseTab } from "@/shell/types/tab.types";
-import { useEditorTabHelper } from "@/shell/hooks/useEditorTab.helper";
+import type { BaseTab } from "@/shell";
+import { useEditorTabHelper } from "@/shell";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDetailContent } from "./TaskDetailContent";
 import { useTaskDetailHeadless } from "../hooks/useTaskDetail.headless";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarStore} from "@/shell";
 
 export function TaskEditorPanel() {
     const { setOpenTabs } = useEditorTabBarStore();
