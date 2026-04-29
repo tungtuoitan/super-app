@@ -7,11 +7,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Search, Link2 } from "lucide-react";
 import { useCommandPaletteStore } from "@/shell";
 import { useCommandPaletteHelper } from "@/shell";
-import { HighlightedText } from "./HighlightedText";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { HighlightedText } from "../../shared/components/HighlightedText";
+import { useGeneralStore } from "@/shared";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import type { Keyword, KeywordType } from "@/shared/types/keyword.types";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
+import type { Keyword, KeywordType } from "@/shell";
 import {useCommandPaletteKeyDown} from "@/shell";
 
 const ALL_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];

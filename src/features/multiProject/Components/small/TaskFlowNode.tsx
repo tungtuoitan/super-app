@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowNodeHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useMultiProjectTaskFlowSelector } from "@/features/multiProject/Selectors/useMultiProjectTaskFlow.selector";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGeneralStore } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
 import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/utils/checklist.utils";

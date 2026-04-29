@@ -15,7 +15,7 @@ import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProject
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import { useAuthStore } from "@/shell";
 import { useConsoleHelper } from "@/shell";
-import { flowService } from "@/shared/services/flow.service";
+import { flowService } from "@/shared";
 import { taskService } from "@/features/taskDetail";
 import type { TaskDTO, Task } from "@/features/taskDetail";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";

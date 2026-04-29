@@ -6,7 +6,7 @@ import { useAuthStore } from "@/shell";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
-import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
+import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/utils/constants";

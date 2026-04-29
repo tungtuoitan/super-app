@@ -4,10 +4,10 @@
  */
 
 import React, { useEffect } from "react";
-import { GenericTextField, GenericAutoComplete, IAutoCompleteOptions } from "@/shared/components";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { GenericTextField, GenericAutoComplete, IAutoCompleteOptions } from "@/shared";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared";
 import { Textarea } from "@/shared";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { ScrollArea } from "@/shared";
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { constants } from "@/utils/constants";

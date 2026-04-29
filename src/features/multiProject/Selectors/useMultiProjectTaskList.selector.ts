@@ -6,10 +6,10 @@
 
 import { useMemo } from "react";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGeneralStore } from "@/shared";
 import { useProjectStore } from "@/features/project";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
-import { IStatusOption } from "@/shared/components";
+import { IStatusOption } from "@/shared";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
 import { constants } from "@/utils/constants";
 

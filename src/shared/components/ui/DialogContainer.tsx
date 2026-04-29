@@ -1,7 +1,7 @@
 import React, { MouseEventHandler, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
 import { Button } from "@/shared";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CSSProperties } from "react";

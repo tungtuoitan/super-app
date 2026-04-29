@@ -5,7 +5,7 @@
 
 import React from "react";
 import type { Task } from "@/features/taskDetail";
-import { StatusAutoComplete, IStatusOption } from "@/shared/components";
+import { StatusAutoComplete, IStatusOption } from "@/shared";
 
 /**
  * Memoized Status Cell

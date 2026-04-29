@@ -1,5 +1,5 @@
 import { PanelResizeHandle } from "react-resizable-panels";
-import { useMobileStore } from "@/shared/store/Mobile.store";
+import { useMobileStore } from "@/shared";
 
 interface VSCodeResizeHandleProps {
     direction: "horizontal" | "vertical";

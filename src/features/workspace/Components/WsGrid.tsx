@@ -8,9 +8,9 @@ import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowMode
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/shared";
 import { Checkbox } from "@/shared";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Alert, AlertDescription } from "@/shared";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import {useWsGridHelper} from "../hooks/ws/useWsGrid.helper";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 import {Ws} from "../types/workspace.types";

@@ -6,8 +6,8 @@
 
 import React, { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
-import { Label } from "@/shared/components/ui/label";
-import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared";
+import { Input } from "@/shared";
 import { cn } from "@/lib/utils";
 import {
     ICON_MAP,
@@ -17,7 +17,7 @@ import {
     getIconDefaultColor
 } from "@/shared";
 import { IconKey } from "../../icons/icon.types";
-import {IconOption} from "@/shared/icons/icon.utils";
+import {IconOption} from "@/shared";
 
 export interface IconPickerProps {
     /** Currently selected icon type */

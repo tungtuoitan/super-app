@@ -9,7 +9,7 @@ import { useMultiProjectTaskGridHelper } from "../mpTaskList/useMultiProjectTask
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
-import { storageService } from "@/shared/services/storage.service";
+import { storageService } from "@/shared";
 import {useAuthStore} from "@/shell";
 
 export function useMultiTimelineHeadless() {

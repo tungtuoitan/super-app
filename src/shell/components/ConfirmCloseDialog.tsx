@@ -5,7 +5,7 @@
 
 import React from "react";
 import { AlertTriangle } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/shared";
 import { Button } from "@/shared";
 
 interface ConfirmCloseDialogProps {

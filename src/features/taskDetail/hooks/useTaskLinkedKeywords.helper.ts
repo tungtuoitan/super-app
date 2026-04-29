@@ -5,14 +5,14 @@
  */
 
 
-import { targetKeywordService, TargetKeywordTargetType } from "@/shared/services/targetKeyword.service";
+import { targetKeywordService, TargetKeywordTargetType } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { useConsoleHelper } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
-import { Keyword } from "@/shared/types/keyword.types";
+import { Keyword } from "@/shell";
 import type { LinkedKeyword } from "../types/taskDetail.types";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 
 export const useTaskLinkedKeywordsHelper = () => {
     const { $user } = useAuthStore();

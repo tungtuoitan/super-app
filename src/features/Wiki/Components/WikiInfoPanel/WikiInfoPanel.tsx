@@ -9,7 +9,7 @@ import { MONO_ACCENT } from "../../utils/wiki.graph.utils";
 import { WikiInfoCard } from "../small/WikiInfoCard";
 import WikiInsertModal from "./WikiInsertModal";
 import WikiInsertKeywordModal from "./WikiInsertKeywordModal";
-import { useKeyboardShortcut } from "@/shared/hooks/useKeyboardShortcut";
+import { useKeyboardShortcut } from "@/shell";
 
 interface Props {
     tab: BaseTab;

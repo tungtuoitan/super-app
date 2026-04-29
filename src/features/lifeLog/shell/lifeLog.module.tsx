@@ -6,17 +6,16 @@ import { TrackEditorPanel } from "../Components/TrackEditorPanel";
 import { LogTypeIcon } from "../Components/LogTypeIcon";
 import { TrackIconDisplay } from "../Components/TrackIconDisplay";
 import { useLifeLogStore } from "../store/useLifeLog.store";
+import { lifeLogService } from "../service/lifeLog.service";
 import { constants } from "@/utils/constants";
-import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
+import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell";
 import type { BaseTab } from "@/shell";
+import { keywordNavigatorRegistry } from "@/shell";
+import { parseKeywordLink } from "@/utils/keyword-link.utils";
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
 
-/**
- * LifeLogTabIcon — hook-based component so it can read useLifeLogStore.
- * Called as a JSX element inside getTabMeta, so hooks rules are satisfied.
- */
 function LifeLogTabIcon({ tab }: { tab: BaseTab }) {
     const { tracks } = useLifeLogStore();
     const className = "w-4 h-4";
@@ -63,3 +62,103 @@ export const lifeLogModule: ModuleDefinition = {
 
     getTabMeta: getLifeLogTabMeta,
 };
+
+// ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
+
+keywordNavigatorRegistry.register({
+    handles: ["log", "track"],
+    resolveTargetTypes: ["LOG", "TRACK"],
+
+    navigate: async (keyword, openedBy, ctx) => {
+        const parsed = parseKeywordLink(keyword);
+        if (!parsed) return false;
+
+        if (parsed.type === "log" && parsed.logId) {
+            try {
+                const existingTab = ctx.openTabs.find(
+                    (t) => t.type === constants.vscode.tab.tabTypes.lifeLog && (t.data as LifeLogLog).id === parsed.logId
+                );
+                if (existingTab) {
+                    if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
+                    ctx.updateActiveTab(existingTab.id);
+                    return true;
+                }
+
+                const res = await lifeLogService._getLogById(ctx.userToken, parsed.logId);
+                if (res.success && res.data?.[0]) {
+                    const dto = res.data[0];
+                    const log: LifeLogLog = {
+                        id: dto.id,
+                        userId: dto.userId,
+                        type: dto.type as LifeLogLog["type"],
+                        trackId: dto.trackId ?? undefined,
+                        title: dto.title ?? undefined,
+                        description: dto.description ?? undefined,
+                        isSensitive: dto.isSensitive,
+                        location: dto.location ?? undefined,
+                        occurAt: dto.occurAt ? new Date(dto.occurAt) : undefined,
+                        createdAt: new Date(dto.createdAt),
+                        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
+                        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                    };
+                    ctx.openTab(log, constants.vscode.tab.tabTypes.lifeLog, openedBy);
+                } else {
+                    ctx.log.error("Log not found");
+                }
+            } catch {
+                ctx.log.error("Failed to load log");
+            }
+            return true;
+        }
+
+        if (parsed.type === "track" && parsed.trackId) {
+            try {
+                const existingTab = ctx.openTabs.find(
+                    (t) => t.type === constants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === parsed.trackId
+                );
+                if (existingTab) {
+                    if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
+                    ctx.updateActiveTab(existingTab.id);
+                    return true;
+                }
+
+                const res = await lifeLogService._getTrackById(ctx.userToken, parsed.trackId);
+                if (res.success && res.data?.[0]) {
+                    const dto = res.data[0];
+                    const track: LifeLogTrack = {
+                        id: dto.id,
+                        userId: dto.userId,
+                        name: dto.name,
+                        emoji: dto.emoji,
+                        description: dto.description,
+                        isSensitive: dto.isSensitive,
+                        color: dto.color,
+                        createdAt: new Date(dto.createdAt),
+                        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
+                        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                    };
+                    ctx.openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack, openedBy);
+                } else {
+                    ctx.log.error("Track not found");
+                }
+            } catch {
+                ctx.log.error("Failed to load track");
+            }
+            return true;
+        }
+
+        return false;
+    },
+
+    resolveTarget: async (targetType, targetId, userToken) => {
+        if (targetType === "LOG") {
+            const res = await lifeLogService._getLogById(userToken, targetId);
+            if (res.success && res.data?.[0]) return { link: `sa/l${targetId}`, label: res.data[0].title ?? `Log ${targetId}` };
+        }
+        if (targetType === "TRACK") {
+            const res = await lifeLogService._getTrackById(userToken, targetId);
+            if (res.success && res.data?.[0]) return { link: `sa/tr${targetId}`, label: res.data[0].name };
+        }
+        return undefined;
+    },
+});

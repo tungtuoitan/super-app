@@ -1,4 +1,4 @@
-import { useMobileStore } from "@/shared/store/Mobile.store";
+import { useMobileStore } from "@/shared";
 import { useEffect } from "react";
 
 /**

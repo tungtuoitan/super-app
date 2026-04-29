@@ -5,10 +5,10 @@
  */
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGeneralStore } from "@/shared";
 import { constants } from "@/utils/index";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
-import type { IStatusOption } from "@/shared/components";
+import type { IStatusOption } from "@/shared";
 import type { TabType } from "../types/projectDetail.type";
 import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";

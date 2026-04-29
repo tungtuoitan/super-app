@@ -8,7 +8,7 @@ import {  useProjectStore } from "../store/useProject.store";
 import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { useConsoleHelper } from "@/shell";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";

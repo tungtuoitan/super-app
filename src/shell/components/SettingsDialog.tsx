@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/components/ui/dialog";
-import { Label } from "@/shared/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared";
+import { Label } from "@/shared";
 import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
-import { keywordService } from "@/shared/services/keyword.service";
-import type { KeywordSyncReport } from "@/shared/types/keyword.types";
-import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
-import {useAuthStore} from "../store/Auth.store";
+import { ScrollArea } from "@/shared";
+import { keywordService } from "@/shell";
+import type { KeywordSyncReport } from "@/shell";
+import {useStandardRegistryHelper} from "@/shared";
+import {useAuthStore} from "../auth/Auth.store";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];

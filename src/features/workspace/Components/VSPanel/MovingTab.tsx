@@ -10,7 +10,7 @@
 
 import React, { useEffect, useMemo } from "react";
 import { Loader2, ArrowRightLeft, CheckCircle2 } from "lucide-react";
-import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
+import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useDragDropManager, useDrop } from "react-dnd";

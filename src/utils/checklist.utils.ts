@@ -18,7 +18,7 @@
  *   { "checklistTemplate": "# Group\n- item\n- optional-o" }
  */
 
-import type { StandardRegistry } from "@/shared/types/standardRegistry.types";
+import type { StandardRegistry } from "@/shared";
 import type { ChecklistItem, ChecklistGroup, ChecklistJSON, ChecklistType, EnvCheckState, ValidationResult } from "@/features/taskDetail/types/checklist.types";
 import { TESTCASE_ENVIRONMENTS } from "@/features/taskDetail/task.constants";
 

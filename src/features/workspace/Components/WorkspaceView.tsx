@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useCallback } from "react";
-import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared/components";
+import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { WorkspaceTree } from "./Explorer/WorkspaceTree";
 import { useWorkspaceLoader } from "../hooks/useWorkspace.loader";
 import { useWorkspaceStore } from "../store/Workspace.store";
@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
 import { useAuthStore } from "@/shell";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { constants } from "@/utils/constants";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 

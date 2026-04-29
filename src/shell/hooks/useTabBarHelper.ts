@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { useConfirmationPopoverHelper } from "@/shared";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { useTabKeyboardShortcuts } from "./useTabKeyboardShortcuts";
 import { BaseTab } from "@/shell";
 import { constants } from "@/utils/constants";

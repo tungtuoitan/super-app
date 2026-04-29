@@ -1,7 +1,7 @@
 import { useAuthHelper } from "@/shell";
 import { Button } from "@/shared";
-import { Input } from "@/shared/components/ui/input";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Input } from "@/shared";
+import { Alert, AlertDescription } from "@/shared";
 import { AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/shell";
 

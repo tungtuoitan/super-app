@@ -2,11 +2,16 @@ import { Cuboid, Layers, CheckSquare } from "lucide-react";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
 import type { ModuleDefinition } from "@/shell";
-import {constants} from "@/utils/constants";
+import { constants } from "@/utils/constants";
 import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
 // eslint-disable-next-line no-restricted-imports
 import { MultiProjectEditorPanel } from "@/features/multiProject";
+import { keywordNavigatorRegistry } from "@/shell";
+import { parseKeywordLink } from "@/utils/keyword-link.utils";
+import { projectService } from "../service/project.service";
+import { taskService } from "@/features/taskDetail";
+import type { Project } from "..";
 
 const ProjectEditorPanelAdapter = () => <ProjectEditorPanel />;
 const MultiProjectEditorPanelAdapter = () => <MultiProjectEditorPanel />;
@@ -39,14 +44,12 @@ export const projectModule: ModuleDefinition = {
         return { icon: <Icon className="w-4 h-4" style={{ color }} />, color };
     },
 
-    /** Task tab groups its child tabs (notes/files opened from within a task) */
     getTabGroupKey: (tab) => {
         if (tab.type !== constants.vscode.tab.tabTypes.task) return null;
         const task = tab.data as Task;
         return `sa/p${task.projectId}/t${task.id}`;
     },
 
-    /** For task tabs without openedBy, derive back button pointing to their project */
     getBackButton: (tab, { projects }) => {
         if (tab.type !== constants.vscode.tab.tabTypes.task || tab.openedBy) return null;
         const task = tab.data as Task;
@@ -55,3 +58,113 @@ export const projectModule: ModuleDefinition = {
         return { link: `sa/p${task.projectId}`, label: project.name };
     },
 };
+
+// ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
+
+keywordNavigatorRegistry.register({
+    handles: ["project", "task"],
+    resolveTargetTypes: ["PROJECT", "TASK"],
+
+    navigate: async (keyword, openedBy, ctx) => {
+        const parsed = parseKeywordLink(keyword);
+        if (!parsed) return false;
+
+        if (parsed.type === "project" && parsed.projectId) {
+            try {
+                const existingTab = ctx.openTabs.find(
+                    (t) => t.type === constants.vscode.tab.tabTypes.project && (t.data as Project).id === parsed.projectId
+                );
+                if (existingTab) {
+                    if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
+                    ctx.updateActiveTab(existingTab.id);
+                    return true;
+                }
+
+                const res = await projectService._getProjectById(ctx.userToken, parsed.projectId);
+                if (res.success && res.data?.[0]) {
+                    const dto = res.data[0];
+                    const project: Project = {
+                        id: dto.id,
+                        name: dto.name,
+                        description: dto.description,
+                        status: dto.status,
+                        startDate: dto.startDate ? new Date(dto.startDate) : null,
+                        endDate: dto.endDate ? new Date(dto.endDate) : null,
+                        createdAt: new Date(dto.createdAt),
+                        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
+                        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                        workspaceId: dto.workspaceId,
+                    };
+                    ctx.openTab(project, constants.vscode.tab.tabTypes.project, openedBy);
+                } else {
+                    ctx.log.error("Project not found");
+                }
+            } catch {
+                ctx.log.error("Failed to load project");
+            }
+            return true;
+        }
+
+        if (parsed.type === "task" && parsed.taskId) {
+            try {
+                const existingTab = ctx.openTabs.find(
+                    (t) => t.type === constants.vscode.tab.tabTypes.task && (t.data as Task).id === parsed.taskId
+                );
+                if (existingTab) {
+                    if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
+                    ctx.updateActiveTab(existingTab.id);
+                    return true;
+                }
+
+                const res = await taskService._getTaskById(ctx.userToken, parsed.taskId);
+                if (res.success && res.data?.[0]) {
+                    const dto = res.data[0];
+                    const task: Task = {
+                        id: dto.id,
+                        projectId: dto.projectId,
+                        parentTaskId: dto.parentTaskId,
+                        type: dto.type,
+                        taskType: dto.taskType || "personal",
+                        title: dto.title,
+                        note: dto.note,
+                        status: dto.status,
+                        priority: dto.priority,
+                        startDate: dto.startDate ? new Date(dto.startDate) : null,
+                        endDate: dto.endDate ? new Date(dto.endDate) : null,
+                        orderIndex: dto.orderIndex,
+                        createdAt: new Date(dto.createdAt),
+                        updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
+                        deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+                        folderWorkspaceItemId: dto.folderWorkspaceItemId,
+                        checklistJson: dto.checklistJson ?? null,
+                        processJson: dto.processJson ?? null,
+                        customTabsJson: dto.customTabsJson ?? null,
+                    };
+                    ctx.openTab(task, constants.vscode.tab.tabTypes.task, openedBy);
+                } else {
+                    ctx.log.error("Task not found");
+                }
+            } catch {
+                ctx.log.error("Failed to load task");
+            }
+            return true;
+        }
+
+        return false;
+    },
+
+    resolveTarget: async (targetType, targetId, userToken) => {
+        if (targetType === "PROJECT") {
+            const res = await projectService._getProjectById(userToken, targetId);
+            if (res.success && res.data?.[0]) return { link: `sa/p${targetId}`, label: res.data[0].name };
+        }
+        if (targetType === "TASK") {
+            const res = await taskService._getTaskById(userToken, targetId);
+            if (res.success && res.data?.[0]) {
+                const dto = res.data[0];
+                return { link: `sa/p${dto.projectId}/t${targetId}`, label: dto.title };
+            }
+        }
+        return undefined;
+    },
+});

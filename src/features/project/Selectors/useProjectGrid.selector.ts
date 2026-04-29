@@ -6,8 +6,8 @@
 
 import { useMemo } from "react";
 import { useProjectStore } from "../store/useProject.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGridControlStore } from "@/shared";
+import { useGeneralStore } from "@/shared";
 
 export const useProjectGridSelector = () => {
     const { projects } = useProjectStore();

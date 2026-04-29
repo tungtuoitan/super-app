@@ -6,7 +6,7 @@
 
 import { useMemo } from "react";
 import type { Task } from "@/features/taskDetail";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGeneralStore } from "@/shared";
 import { constants } from "@/utils/constants";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {usePTaskStore} from "../../store/usePTask.store";

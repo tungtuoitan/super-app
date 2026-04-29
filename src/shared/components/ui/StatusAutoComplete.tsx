@@ -8,9 +8,9 @@ import { CSSProperties, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shared/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
-import { Label } from "@/shared/components/ui/label";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shared";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
+import { Label } from "@/shared";
 
 /**
  * Interface for status option items with color support

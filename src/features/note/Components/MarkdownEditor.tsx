@@ -7,7 +7,7 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
+import { useKeywordNavigationHelper } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
 import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
@@ -26,7 +26,7 @@ import {
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 export function MarkdownEditor() {

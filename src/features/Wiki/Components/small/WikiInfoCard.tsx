@@ -7,7 +7,7 @@ import type { WikiInfo, WikiKeyword } from "../../types/wiki.type";
 import { WIKI_MENTION } from "../../utils/wiki.constants";
 import MentionText from "./MentionText";
 import { WikiSelectionTooltip, WikiKeywordTooltip } from "./WikiSelectionKeywordButton";
-import { useKeyboardShortcut } from "@/shared/hooks/useKeyboardShortcut";
+import { useKeyboardShortcut } from "@/shell";
 
 interface CardProps {
     info: WikiInfo;

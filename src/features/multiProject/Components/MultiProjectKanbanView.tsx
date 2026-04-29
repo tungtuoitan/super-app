@@ -10,8 +10,8 @@
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/shared";
-import { Label } from "@/shared/components/ui/label";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Label } from "@/shared";
+import { Alert, AlertDescription } from "@/shared";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";

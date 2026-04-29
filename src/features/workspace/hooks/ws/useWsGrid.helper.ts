@@ -8,7 +8,7 @@ import { constants } from "@/utils/constants";
 import { BaseTab } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import {filterUtils} from "@/utils/filter.utils";
 import {useConsoleHelper} from "@/shell";
 import {Ws} from "../../types/workspace.types";

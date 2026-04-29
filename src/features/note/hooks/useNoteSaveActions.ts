@@ -7,7 +7,7 @@ import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types"
 import { useProjectTaskFolderHelper } from "@/features/project";
 import type { BaseTab } from "@/shell";
 import type { Note } from "../types/note.types";
-import {SaveActions} from "@/shared/types/actions.types";
+import {SaveActions} from "@/shared";
 
 export function useNoteSaveActions(): SaveActions {
     const { upsertNote } = useNoteDetailHelper();

@@ -5,13 +5,13 @@
  */
 
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { useConfirmationPopoverHelper } from "@/shared";
 import { constants } from "@/utils/constants";
 import { noteService } from "@/features/note/service/note.service";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
-import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared";
 import {workspaceService} from "../../service/workspace.service";
 import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader";

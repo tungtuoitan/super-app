@@ -6,9 +6,9 @@
 
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { constants } from "@/utils/index";
-import {UserFilters} from "@/shared/types/filter.types";
+import {UserFilters} from "@/shared";
 
 /**
  * Maps URL pathname to grid registration parameters

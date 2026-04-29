@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { SectionTab, useTaskDetailSectionStore } from "../../store/useTaskDetailSection.store";
 import { useTaskSectionStore } from "../../store/useTaskSection.store";
-import { useGlobalShortcut } from "@/shared/hooks/useGlobalShortcut";
+import { useGlobalShortcut } from "@/shared";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskSectionHelper } from "./useTaskSection.helper";

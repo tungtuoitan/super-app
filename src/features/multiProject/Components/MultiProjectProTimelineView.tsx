@@ -10,9 +10,9 @@
 
 import React, { useEffect } from "react";
 import { ZoomIn, ZoomOut, Calendar } from "lucide-react";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { ScrollArea } from "@/shared";
 import { Button } from "@/shared";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useProjectTabHelper, getProjectStatusColors } from "@/features/project";
 import { cn } from "@/lib/utils";
 import { TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";

@@ -7,7 +7,7 @@
  */
 
 import { useMemo } from "react";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGeneralStore } from "@/shared";
 import { parseChecklistJson, getChecklistTemplate } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "./TaskDetailSelector";
 

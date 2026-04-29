@@ -17,7 +17,7 @@ import { WorkspaceSelectorMenu } from "@/features/workspace/contexts/menus/Works
 import { constants } from "@/utils/constants";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
-import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared";
 import {KNodeMenu} from "@/features/K/contexts/menu/KNodeMenu";
 import { KNodePanelBlankMenu } from "./menus/KNodePanelBlankMenu";
 import { KNodePanelCardMenu } from "@/features/K/contexts/menu/KNodePanelCardMenu";

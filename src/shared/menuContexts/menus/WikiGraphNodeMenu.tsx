@@ -1,7 +1,7 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { Trash2 } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
-import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { useOrchestratorContextMenuStore } from "@/shared";
+import { useConfirmationPopoverHelper } from "@/shared";
 
 /**
  * WikiGraphNodeMenu

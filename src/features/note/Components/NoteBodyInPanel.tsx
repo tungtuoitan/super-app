@@ -3,8 +3,8 @@
  */
 
 import React, { useEffect } from "react";
-import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker } from "@/shared/components";
-import { CardContent } from "@/shared/components/ui/card";
+import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker } from "@/shared";
+import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
@@ -14,7 +14,7 @@ import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
 import { useMonaco } from "@monaco-editor/react";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 import { IconKey } from "@/shared";
 

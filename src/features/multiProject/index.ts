@@ -7,7 +7,8 @@
 export { MultiProjectEditorPanel } from "./Components/MultiProjectEditorPanel";
 export { MultiProjectDetailContent } from "./Components/MultiProjectDetailContent";
 
-// Stores
+// Stores / Providers
 export { MultiTimelineProvider } from "./store/useMultiTimeline.store";
 export { MultiTaskFlowProvider } from "./store/useMultiTaskFlow.store";
+export { MpTaskProvider } from "./store/useMpTask.store";
 

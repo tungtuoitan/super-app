@@ -3,7 +3,7 @@ import { Search, RefreshCw, Plus, ScanLine, Bookmark, BookmarkCheck } from "luci
 import { useWikiStore } from "../../store/useWiki.store";
 import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
 import { useWikiTabHelper } from "../../hooks/useWikiTab.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { constants } from "@/utils/constants";
 import { wikiService } from "../../service/wiki.service";
 import {

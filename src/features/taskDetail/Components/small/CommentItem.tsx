@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 import { Send, Reply, Edit2, Trash2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RichTextEditor } from "@/shared/components";
+import { RichTextEditor } from "@/shared";
 import { useTaskCommentSelector } from "../../Selectors/TaskCommentSelector";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
 import { useTaskCommentHelper } from "../../hooks/taskComment/useTaskComment.helper";
 import { useTaskSectionStore } from "../../store/useTaskSection.store";
 import { useAuthStore } from "@/shell";
-import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { useConfirmationPopoverHelper } from "@/shared";
 import { parseVersionComment, formatTimeAgo, formatFullDate } from "../../utils/versionComment.utils";
 import { CollapsibleContent } from "./CollapsibleContent";
 import { VersionCommentCard } from "./VersionCommentCard";

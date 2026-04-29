@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Send, Loader2 } from "lucide-react";
-import { RichTextEditor } from "@/shared/components";
+import { RichTextEditor } from "@/shared";
 import { useTaskCommentSelector } from "../Selectors/TaskCommentSelector";
 import { TaskCommentProvider, useTaskCommentStore } from "../store/useTaskComment.store";
 import { useTaskCommentHelper } from "../hooks/taskComment/useTaskComment.helper";

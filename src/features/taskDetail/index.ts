@@ -41,8 +41,10 @@ export {
     isFirstDayOfMonth,
 } from "./utils/TaskGrid.utils";
 
-// Stores (only expose hooks needed by other features)
-export { useTaskDetailStore } from "./store/useTaskDetail.store";
+// Stores / Providers (only expose what other features/shell need)
+export { useTaskDetailStore, TaskDetailProvider } from "./store/useTaskDetail.store";
+export { TaskDetailSectionProvider } from "./store/useTaskDetailSection.store";
+export { TaskSectionProvider } from "./store/useTaskSection.store";
 
 // Helpers (only expose hooks needed by other features)
 export { useTaskTabHelper } from "./hooks/useTaskTab.helper";

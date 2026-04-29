@@ -18,8 +18,8 @@ export * from "./DateTimePicker/DateTimePicker";
 export * from "./DateTimePicker/DateRangePicker";
 
 // ── Misc Components ───────────────────────────────────────────────────────
-export * from "./CommandPalette";
+export * from "../../shell/commandPallete/CommandPalette";
 export * from "./GenericFilterPopup";
 export * from "./GridControlBar";
 export * from "./HighlightedText";
-export * from "./KeywordIconRenderer";
+export * from "../../shell/commandPallete/KeywordIconRenderer";

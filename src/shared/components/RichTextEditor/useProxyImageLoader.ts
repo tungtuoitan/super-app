@@ -5,7 +5,7 @@
 
 import { useEffect, useRef } from "react";
 import { Editor } from "@tiptap/react";
-import { fileService } from "@/shared/services/file.service";
+import { fileService } from "@/shared";
 
 interface UseProxyImageLoaderOptions {
     editor: Editor | null;

@@ -6,7 +6,7 @@
 
 import {UserFilters} from "@/shared";
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
-import {User} from "../types/auth.types";
+import {User} from "./auth.types";
 
 
 

@@ -7,12 +7,12 @@
  * useTaskTimelineStore (context), useTaskTimelineHeadless, TaskBar
  */
 
-import React from "react";
+
 import { Loader2, ZoomIn, ZoomOut, Calendar, CornerDownRight } from "lucide-react";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/shared";
+import { ScrollArea } from "@/shared";
 import { Button } from "@/shared";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shell";
 import { cn } from "@/lib/utils";

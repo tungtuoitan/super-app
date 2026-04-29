@@ -13,7 +13,7 @@ import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceNoteItem } from "@/features/workspace/types/workspace-v2.types";
 import { Note } from "@/features/note/types/note.types";
 import { constants } from "@/utils/constants";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { StatusDot } from "./StatusDot";
 import { HighlightText } from "./HighlightText";
 // import { useLogger } from "store/debug/DebugLogger.store";

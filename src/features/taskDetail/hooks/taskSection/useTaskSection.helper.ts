@@ -12,7 +12,7 @@ import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector"
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
 import { useAuthStore } from "@/shell";
-import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { useConfirmationPopoverHelper } from "@/shared";
 import { taskService } from "../../service/task.service";
 import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../../utils/customTab.utils";
 import { isCustomTab, getCustomTabId } from "../../utils/taskDetailSection.utils";

@@ -2,14 +2,14 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFileItem } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/utils/constants";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { StatusDot } from "./StatusDot";
 import { HighlightText } from "./HighlightText";
 

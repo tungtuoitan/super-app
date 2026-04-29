@@ -15,11 +15,11 @@ import {
     StatusAutoComplete,
     DateRangePicker,
     GenericAutoComplete,
-} from "@/shared/components";
-import { CardContent } from "@/shared/components/ui/card";
+} from "@/shared";
+import { CardContent } from "@/shared";
 import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon } from "lucide-react";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { KeywordIconRenderer } from "@/shared/components/KeywordIconRenderer";
+import { Alert, AlertDescription } from "@/shared";
+import { KeywordIconRenderer } from "@/shell";
 import { TaskDetailSection } from "./TaskDetailSection";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailKeywordSelector } from "../Selectors/TaskDetailKeywordSelector";

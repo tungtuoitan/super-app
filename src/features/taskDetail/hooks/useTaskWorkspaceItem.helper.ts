@@ -16,7 +16,7 @@ import { constants } from "@/utils/constants";
 import { workspaceService } from "@/features/workspace/service/workspace.service";
 import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 export const useTaskWorkspaceItemHelper = () => {

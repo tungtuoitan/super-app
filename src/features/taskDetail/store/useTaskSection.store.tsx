@@ -6,7 +6,7 @@
 
 import React, { useContext, createContext, useState, useRef, useCallback, Dispatch, SetStateAction } from "react";
 import type { CommentFilterType } from "../types/taskComment.types";
-import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared";
 
 export interface CustomTabHandler {
     save: () => Promise<void>;

@@ -6,12 +6,12 @@
 
 import { useAuthStore } from "@/shell";
 import { useAuthHelper } from "@/shell";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { constants } from "@/utils/constants";
 import { filterUtils } from "@/utils/filter.utils";
-import { userProfileService } from "@/shared/services/userProfile.service";
+import { userProfileService } from "@/shared";
 import { envConfig } from "@/utils/config/env.config";
-import { STORAGE_KEYS, storageService } from "@/shared/services/storage.service";
+import { STORAGE_KEYS, storageService } from "@/shared";
 import { parseApiError } from "@/utils/api-error.utils";
 import {useConsoleHelper} from "@/shell";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "../types/filter.types";

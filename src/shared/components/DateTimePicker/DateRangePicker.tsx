@@ -10,10 +10,10 @@ import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfW
 import { Calendar as CalendarIcon, Clock, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared";
-import { Calendar } from "@/shared/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
-import { Label } from "@/shared/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { Calendar } from "@/shared";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
+import { Label } from "@/shared";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import type { Matcher, DateRange } from "react-day-picker";
 
 /**

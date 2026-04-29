@@ -6,7 +6,7 @@
 
 import { useMemo } from "react";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
-import { IAutoCompleteOptions } from "@/shared/components";
+import { IAutoCompleteOptions } from "@/shared";
 import { useTaskDetailSelector } from "./TaskDetailSelector";
 
 export const useTaskDetailFormSelector = () => {

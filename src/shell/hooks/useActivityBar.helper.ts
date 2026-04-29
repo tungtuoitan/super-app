@@ -1,7 +1,7 @@
 import { constants, type ActivityBarView } from "@/utils/constants";
-import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
-import {useGridControlStore} from "@/shared/store/useGridControl.store";
-import {STORAGE_KEYS, storageService} from "@/shared/services/storage.service";
+import { useWorkspaceHelper } from "@/features/workspace";
+import {useGridControlStore} from "@/shared";
+import {STORAGE_KEYS, storageService} from "@/shared";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 
 export interface UseActivityBarHelperReturn {

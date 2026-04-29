@@ -31,12 +31,12 @@ import {
     ChevronDown,
     Code2,
 } from "lucide-react";
-import { fileService, UploadContext } from "@/shared/services/file.service";
+import { fileService, UploadContext } from "@/shared";
 import { useAuthStore } from "@/shell";
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { constants } from "@/utils/constants";
 import "./RichTextEditor.css";
 import { useConsoleHelper } from "@/shell";

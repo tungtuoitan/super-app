@@ -13,7 +13,7 @@ import {
 import { constants } from "@/utils/constants";
 import { useWorkspaceFolderMenuHelper } from "../helpers/useWorkspaceFolderMenu.helper";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 
 /**

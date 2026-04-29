@@ -6,7 +6,7 @@ import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { BaseTab } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-import {SaveActions} from "@/shared/types/actions.types";
+import {SaveActions} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 export function useLifeLogSaveActions(): SaveActions {

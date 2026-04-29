@@ -9,7 +9,7 @@ import { constants } from "@/utils/constants";
 import { convertToDisplayVersion, updateDecorations } from "@/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 
 export function useMarkdownEditorSync({$mi}: { $mi: any }) {
     const { getActiveTab, openTab } = useEditorTabHelper();

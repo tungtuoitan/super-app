@@ -3,7 +3,7 @@
  * Helper functions for parsing and manipulating filter values
  */
 
-import {FilterValue} from "@/shared/types/filter.types";
+import {FilterValue} from "@/shared";
 
 
 /**

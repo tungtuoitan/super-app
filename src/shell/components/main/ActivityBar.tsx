@@ -1,7 +1,7 @@
 import { Settings, UserCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { SettingsDialog } from "../SettingsDialog";
-import { AccountsDialog } from "../AccountsDialog";
+import { AccountsDialog } from "../../auth/AccountsDialog";
 import { useActivityBarHelper } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { useGridControlStore } from "@/shared";

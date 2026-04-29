@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { RichTextEditor } from "@/shared/components";
+import { RichTextEditor } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
 import { useTaskCommentHelper } from "../hooks/taskComment/useTaskComment.helper";

@@ -1,8 +1,8 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus as AddIcon, Trash2 as DeleteIcon, AlertTriangle as HardDeleteIcon, RotateCcw as RestoreIcon } from "lucide-react";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
-import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
+import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useOrchestratorContextMenuStore } from "@/shared";
 
 /**
  * NoteGridMenu

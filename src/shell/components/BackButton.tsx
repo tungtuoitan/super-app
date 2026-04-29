@@ -5,8 +5,8 @@
 
 import React from "react";
 import { Cuboid, CheckSquare, FileText, Box, Layers, Activity } from "lucide-react";
-import { useKeywordNavigationHelper } from "@/shared/hooks/useKeywordNavigation.helper";
-import {useGeneralStore} from "@/shared/store/General.store";
+import { useKeywordNavigationHelper } from "@/shell";
+import {useGeneralStore} from "@/shared";
 
 interface BackButtonProps {
     openedBy: { link: string; label: string };

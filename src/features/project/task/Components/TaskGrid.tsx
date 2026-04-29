@@ -11,7 +11,7 @@ import React from "react";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { Loader2, CornerDownRight } from "lucide-react";
 import { Checkbox } from "@/shared";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Alert, AlertDescription } from "@/shared";
 import type { Task } from "@/features/taskDetail";
 import { useTaskGridHelper } from "../hooks/taskList/useTaskGrid.helper";
 import { useTaskTabHelper } from "@/features/taskDetail";

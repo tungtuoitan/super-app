@@ -1,6 +1,6 @@
 import type * as _monaco from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
-import {Keyword} from "@/shared/types/keyword.types";
+import {Keyword} from "@/shell";
 
 /**
  * Update decorations (highlight _allKeywords and URLs)

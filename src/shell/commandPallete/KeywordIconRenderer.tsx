@@ -8,7 +8,7 @@
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText } from "lucide-react";
 import { LogTypeIcon } from "@/features/lifeLog/Components/LogTypeIcon";
 import { TrackIconDisplay } from "@/features/lifeLog/Components/TrackIconDisplay";
-import type { KeywordType } from "@/shared/types/keyword.types";
+import type { KeywordType } from "@/shell";
 import type { LogType } from "@/features/lifeLog/types/lifeLog.types";
 
 interface KeywordIconRendererProps {

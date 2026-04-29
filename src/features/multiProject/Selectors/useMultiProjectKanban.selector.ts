@@ -7,7 +7,7 @@
 import { useMemo } from "react";
 import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGeneralStore } from "@/shared";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { constants } from "@/utils/constants";
 

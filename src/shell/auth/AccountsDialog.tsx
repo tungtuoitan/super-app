@@ -4,7 +4,7 @@
  * Similar to VSCode account management UI
  */
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared";
 import { Button } from "@/shared";
 import { useAuthStore } from "@/shell";
 import { useAuthHelper } from "@/shell";

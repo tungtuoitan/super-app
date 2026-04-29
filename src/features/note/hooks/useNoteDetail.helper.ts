@@ -9,13 +9,13 @@ import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { BaseTab } from "@/shell";
-import { IAutoCompleteOptions } from "@/shared/components";
+import { IAutoCompleteOptions } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
-import { useStandardRegistryHelper } from "@/shared/hooks/useStandardRegistry.helper";
+import { useGridControlStore } from "@/shared";
+import { useStandardRegistryHelper } from "@/shared";
 import { useConsoleHelper } from "@/shell";
 import {useEditorTabBarStore} from "@/shell";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();

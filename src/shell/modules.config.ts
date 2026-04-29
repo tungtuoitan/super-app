@@ -7,13 +7,11 @@
  */
 
 import { moduleRegistry } from "./moduleRegistry";
-import { workspaceModule } from "@/features/workspace/shell/workspace.module";
-import { kModule } from "@/features/K/shell/k.module";
-import { projectModule } from "@/features/project/shell/project.module";
-import { lifeLogModule } from "@/features/lifeLog/shell/lifeLog.module";
-import { noteModule } from "@/features/note/shell/note.module";
-import { wikiModule } from "@/features/Wiki/shell/wiki.module";
-import {wsModule} from "@/features/workspace/shell/ws.module";
+import { workspaceModule } from "@/features/workspace";
+import { kModule } from "@/features/K";
+import { projectModule } from "@/features/project";
+import { lifeLogModule } from "@/features/lifeLog";
+import { noteModule } from "@/features/note";
 
 // Registration order = ActivityBar display order
 moduleRegistry.register(workspaceModule);
@@ -21,7 +19,7 @@ moduleRegistry.register(projectModule);
 moduleRegistry.register(kModule);
 moduleRegistry.register(lifeLogModule);
 // moduleRegistry.register(wikiModule);
-// noteModule and wsModule are available but not shown in ActivityBar by default
+// noteModule and workspaceModule are available but not shown in ActivityBar by default
 // (they can still have editor panels registered for tab rendering)
 moduleRegistry.register(noteModule);
-moduleRegistry.register(wsModule);
+moduleRegistry.register(workspaceModule);

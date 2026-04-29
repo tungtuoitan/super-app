@@ -4,7 +4,7 @@
 
 import { config } from "@/utils/config/app.config";
 import {ResultOptions} from "@/shared";
-import {UpdateUserProfileRequest} from "@/shared/types/userProfile.types";
+import {UpdateUserProfileRequest} from "@/shared";
 import {apiFetch} from "./apiClient";
 
 const _getUserProfile = async (_token: string): Promise<ResultOptions> => {

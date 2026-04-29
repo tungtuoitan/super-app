@@ -3,7 +3,7 @@ import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
 import { BaseTab, TabType } from "@/shell";
 import { constants } from "@/utils/constants";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useGridControlStore } from "@/shared/store/useGridControl.store";
+import { useGridControlStore } from "@/shared";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {
     findKeywordForNote,
@@ -17,7 +17,7 @@ import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.
 import type { Task } from "@/features/taskDetail/types/task.types";
 import {Ws} from "@/features/workspace/types/workspace.types";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 import {Project} from "@/features/project";
 
 export const useEditorTabHelper = () => {

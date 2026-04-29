@@ -8,7 +8,6 @@ import { Row, flexRender } from "@tanstack/react-table";
 import { useDrag, useDrop, DragSourceMonitor, DropTargetMonitor } from "react-dnd";
 import type { Task, TaskDragItem } from "@/features/taskDetail";
 import { validateDropTaskOntoTask } from "@/features/taskDetail";
-import { DateRangePicker } from "@/shared/components";
 import { cn } from "@/lib/utils";
 import { TASK_ROW } from "../task/Components/small/taskRow.constants";
 

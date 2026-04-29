@@ -3,7 +3,7 @@ import { constants } from "@/utils/constants";
 import { useWsDetailHelper } from "./useWsDetail.helper";
 import { useWsGridHelper } from "./useWsGrid.helper";
 import type { BaseTab } from "@/shell";
-import {SaveActions} from "@/shared/types/actions.types";
+import {SaveActions} from "@/shared";
 
 export function useWsSaveActions(): SaveActions {
     const { upsertWorkspace } = useWsDetailHelper();

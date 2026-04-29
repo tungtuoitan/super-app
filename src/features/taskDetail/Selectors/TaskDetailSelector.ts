@@ -8,9 +8,9 @@
  */
 
 import { Task } from "../types/task.types";
-import { useGeneralStore } from "@/shared/store/General.store";
+import { useGeneralStore } from "@/shared";
 import { constants } from "@/utils/constants";
-import { IStatusOption } from "@/shared/components";
+import { IStatusOption } from "@/shared";
 import { usePTaskStore } from "@/features/project";
 import {useEditorTabBarStore} from "@/shell";
 import {useTaskDetailStore} from "../store/useTaskDetail.store";

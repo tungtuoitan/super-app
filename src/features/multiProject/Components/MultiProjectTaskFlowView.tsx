@@ -24,10 +24,10 @@ import { useMultiProjectTaskFlowHeadless } from "../hooks/mpTaskFlow/useMultiPro
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
 import { useMultiProjectTaskFlowNodeHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared/menuContexts/helpers/useOrchestratorContextMenu.helper";
+import { useOrchestratorContextMenuHelper } from "@/shared";
 import { constants } from "@/utils/constants";
 import { cn } from "@/lib/utils";
-import { storageService, STORAGE_KEYS } from "@/shared/services/storage.service";
+import { storageService, STORAGE_KEYS } from "@/shared";
 import { NODE_WIDTH, NODE_HEIGHT } from "../utils/multiProjectTaskFlow.utils";
 import { TASK_FLOW_CSS, MIN_ZOOM, MAX_ZOOM, PAN_SPEED } from "../utils/multiProjectTaskFlow.constants";
 import { TaskFlowNode } from "./small/TaskFlowNode";

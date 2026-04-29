@@ -25,7 +25,7 @@
   },
   "overrides": [
     {
-      "files": ["src/shell/index.ts", "src/shared/index.ts"],
+      "files": ["src/shell/index.ts", "src/shared/index.ts", "src/features/*/index.ts"],
       "rules": {
         "no-restricted-imports": "off"
       }
@@ -40,6 +40,10 @@
               {
                 "group": ["@/features/project/**", "@/features/multiProject/**", "../../project/**", "../../../project/**", "../../../../project/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
                 "message": "Import from '@/features/project' or '@/features/multiProject' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/K/**", "@/features/Wiki/**", "@/features/lifeLog/**", "@/features/note/**", "@/features/workspace/**"],
+                "message": "Import from feature index only, not subdirectories."
               },
               {
                 "group": ["@/shell/**"],
@@ -70,6 +74,10 @@
                 "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
               },
               {
+                "group": ["@/features/K/**", "@/features/Wiki/**", "@/features/lifeLog/**", "@/features/note/**", "@/features/workspace/**"],
+                "message": "Import from feature index only, not subdirectories."
+              },
+              {
                 "group": ["@/shell/**"],
                 "message": "Import from '@/shell' (index) only, not subdirectories."
               },
@@ -96,6 +104,10 @@
               {
                 "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
                 "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/K/**", "@/features/Wiki/**", "@/features/lifeLog/**", "@/features/note/**", "@/features/workspace/**"],
+                "message": "Import from feature index only, not subdirectories."
               },
               {
                 "group": ["@/shell/**"],
@@ -125,6 +137,10 @@
               {
                 "group": ["@/features/taskDetail/**", "../../taskDetail/**", "../../../taskDetail/**", "../../../../taskDetail/**"],
                 "message": "Import from '@/features/taskDetail' (index) only, not subdirectories."
+              },
+              {
+                "group": ["@/features/multiProject/**", "../../multiProject/**", "../../../multiProject/**", "../../../../multiProject/**"],
+                "message": "Import from '@/features/multiProject' (index) only, not subdirectories."
               },
               {
                 "group": ["@/features/K/**", "../../K/**", "../../../K/**", "../../../../K/**"],

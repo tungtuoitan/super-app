@@ -5,13 +5,13 @@
  */
 
 import { useSnackbar } from "notistack";
-import { useGeneralStore } from "@/shared/store/General.store";
-import { standardRegistryService } from "@/shared/services/standardRegistry.service";
-import { keywordService } from "@/shared/services/keyword.service";
+import { useGeneralStore } from "@/shared";
+import { standardRegistryService } from "@/shared";
+import { keywordService } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { StandardRegistry } from "@/shared/types/standardRegistry.types";
-import { IAutoCompleteOptions } from "@/shared/components";
+import { StandardRegistry } from "@/shared";
+import { IAutoCompleteOptions } from "@/shared";
 import {useConsoleHelper} from "@/shell";
 
 /**

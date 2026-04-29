@@ -6,7 +6,7 @@
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import type { LinkedKeyword, TaskFolderItem } from "../types/taskDetail.types";
 import type { Project } from "../types/task.types";
-import { IAutoCompleteOptions } from "@/shared/components";
+import { IAutoCompleteOptions } from "@/shared";
 
 export type { TaskFolderItem } from "../types/taskDetail.types";
 

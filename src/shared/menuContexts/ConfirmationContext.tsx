@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext, useState } from "react";
-import { ConfirmationPopover } from "@/shared/components/feedback/ConfirmationPopover";
+import { ConfirmationPopover } from "@/shared";
 
 interface ConfirmationOptions {
     title: string;

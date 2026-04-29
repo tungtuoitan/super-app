@@ -9,7 +9,7 @@ import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 import { TrackItem } from "./TrackItem";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { useMobileStore } from "@/shared/store/Mobile.store";
+import { useMobileStore } from "@/shared";
 
 export function TrackPanel() {
     const { tracks, logs } = useLifeLogStore();

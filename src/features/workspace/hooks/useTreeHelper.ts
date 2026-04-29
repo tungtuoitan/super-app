@@ -15,7 +15,7 @@ import { useAuthStore } from "@/shell";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {SPECIAL_IDS} from "@/utils/temp-id.utils";
 import {useConsoleHelper} from "@/shell";
-import {useStandardRegistryHelper} from "@/shared/hooks/useStandardRegistry.helper";
+import {useStandardRegistryHelper} from "@/shared";
 import {Folder} from "../types/folder.types";
 
 export const useTreeHelper = () => {

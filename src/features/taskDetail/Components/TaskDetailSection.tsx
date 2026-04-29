@@ -15,7 +15,7 @@ import { TaskCustomTab } from "./TaskCustomTab";
 import { CommentFilterDropdown } from "./small/CommentFilterDropdown";
 import { CustomTabButton } from "./small/CustomTabButton";
 import { useTaskSectionHeadless } from "../hooks/taskSection/useTaskSection.headless";
-import { RichTextEditor } from "@/shared/components";
+import { RichTextEditor } from "@/shared";
 import { BUILTIN_TABS, TAB_COLORS } from "../task.constants";
 import {TaskProcessProvider} from "../store/useTaskProcess.store";
 import {TaskCommentProvider} from "../store/useTaskComment.store";

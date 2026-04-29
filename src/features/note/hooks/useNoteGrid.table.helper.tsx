@@ -6,7 +6,7 @@ import { WorkspaceLinksCell } from "../Components/WorkspaceLinksCell";
 import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
 import { constants } from "@/utils/constants";
 import { useNavigate, useLocation } from "react-router-dom";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 
 export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<number>) {
     const {

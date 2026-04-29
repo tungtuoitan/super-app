@@ -7,7 +7,7 @@
 import React from "react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useFolderDialogHelper } from "../../hooks/useFolderDialog.helper";
-import { useConfirmationPopoverHelper } from "@/shared/hooks/useConfirmationPopover.helper";
+import { useConfirmationPopoverHelper } from "@/shared";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { constants } from "@/utils/constants";
 import type { ItemType } from "../../store/FolderDialog.store";
@@ -16,7 +16,7 @@ import { workspaceService } from "../../service/workspace.service";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
 import { useSnackbar } from "notistack";
-import { useOrchestratorContextMenuStore } from "@/shared/menuContexts/ContextMenu.store";
+import { useOrchestratorContextMenuStore } from "@/shared";
 import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "../../hooks/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "../../types/workspace.types";
@@ -29,7 +29,7 @@ import { useNoteDetailStore } from "@/features/note";
 import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
 import { Note } from "@/features/note";
 import {useConsoleHelper} from "@/shell";
-import {useGeneralStore} from "@/shared/store/General.store";
+import {useGeneralStore} from "@/shared";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS

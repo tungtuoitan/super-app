@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { RichTextEditor } from "@/shared/components";
+import { RichTextEditor } from "@/shared";
 
 export function ReplyInput({ onSubmit, onCancel }: { onSubmit: (c: string) => void; onCancel: () => void }) {
     const [text, setText] = useState("");

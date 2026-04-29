@@ -5,10 +5,10 @@
  * Pure UI — reads from selector, helper, headless. NO props.
  */
 
-import React from "react";
-import { GenericTextField, StatusAutoComplete, RichTextEditor, DateRangePicker } from "@/shared/components";
-import { CardContent } from "@/shared/components/ui/card";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
+
+import { GenericTextField, StatusAutoComplete, RichTextEditor, DateRangePicker } from "@/shared";
+import { CardContent } from "@/shared";
+import { ScrollArea } from "@/shared";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";

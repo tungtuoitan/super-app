@@ -26,3 +26,10 @@ export { noteService } from "./service/note.service";
 
 // Utils (used by workspace feature for transformations)
 export { transformANote, transformNotes, formatNoteDate } from "./utils/note.utils";
+
+
+// Providers
+export { NoteProviders } from "./store/NoteProviders";
+
+// shell module
+export { noteModule } from "./shell/note.module";

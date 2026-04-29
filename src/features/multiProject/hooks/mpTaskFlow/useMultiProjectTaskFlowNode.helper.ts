@@ -12,7 +12,7 @@ import { useAuthStore } from "@/shell";
 import { useConsoleHelper } from "@/shell";
 import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
-import { flowService } from "@/shared/services/flow.service";
+import { flowService } from "@/shared";
 import { toLocalISOString } from "@/utils/date.utils";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";

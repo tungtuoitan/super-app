@@ -3,9 +3,9 @@
  */
 
 import { config } from "@/utils/config/app.config";
-import type { Keyword, UpsertExternalKeywordRequest, KeywordSyncReport } from "@/shared/types/keyword.types";
+import type { Keyword, UpsertExternalKeywordRequest, KeywordSyncReport } from "@/shell";
 import {ResultOptions} from "@/shared";
-import {apiFetch} from "./apiClient";
+import {apiFetch} from "../../shared/services/apiClient";
 
 const _getKeywords = async (
     _token: string,
