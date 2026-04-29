@@ -3,16 +3,16 @@
  * Supports multiple tab types: Note, Folder, etc.
  */
 
-import { Note } from "@/features/note/types/note.types";
+import { Note } from "@/features/note";
 import { TrackingGraphTabData } from "@/utils/tracking.types";
-import { Task } from "@/features/taskDetail/types/task.types";
-import { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-import { KWsResponse } from "@/features/K/types/K.types";
-import { KItemV2 } from "@/features/K/types/K-v2.types";
+import { Task } from "@/features/taskDetail";
+import { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
+import { KWsResponse } from "@/features/K";
+import { KItemV2 } from "@/features/K";
 import { constants } from "@/utils/constants";
 import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
-import { WikiTabData } from "@/features/Wiki/types/wiki.type";
-import {Ws} from "@/features/workspace/types/workspace.types";
+import { WikiTabData } from "@/features/Wiki";
+import {Ws} from "@/features/workspace";
 import {Project} from "@/features/project";
 
 export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | typeof constants.vscode.tab.tabTypes.trackingGraph | typeof constants.vscode.tab.tabTypes.project | typeof constants.vscode.tab.tabTypes.multiProject | typeof constants.vscode.tab.tabTypes.task | typeof constants.vscode.tab.tabTypes.lifeLog | typeof constants.vscode.tab.tabTypes.lifeLogGraph | typeof constants.vscode.tab.tabTypes.lifeLogTrack | typeof constants.vscode.tab.tabTypes.kKnowledge | typeof constants.vscode.tab.tabTypes.kNode | typeof constants.vscode.tab.tabTypes.kDailyReview | typeof constants.vscode.tab.tabTypes.wikiInfo | "folder" | "settings";

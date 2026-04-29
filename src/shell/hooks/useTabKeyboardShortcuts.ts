@@ -10,9 +10,9 @@
 import { useEffect, useRef } from "react";
 import { useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
-import { useLifeLogTabHelper } from "@/features/lifeLog/hooks/useLifeLogTab.helper";
+import { useLifeLogTabHelper } from "@/features/lifeLog";
 import { constants } from "@/utils/constants";
-import type { Task } from "@/features/taskDetail/types/task.types";
+import type { Task } from "@/features/taskDetail";
 import type { BaseTab } from "@/shell";
 
 export const useTabKeyboardShortcuts = () => {

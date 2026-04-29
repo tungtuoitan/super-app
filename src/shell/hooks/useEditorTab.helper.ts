@@ -1,10 +1,10 @@
-import { Note } from "@/features/note/types/note.types";
-import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
+import { Note } from "@/features/note";
+import { useNoteGridStore } from "@/features/note";
 import { BaseTab, TabType } from "@/shell";
 import { constants } from "@/utils/constants";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace";
 import { useGridControlStore } from "@/shared";
-import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
+import { WorkspaceItemV2 } from "@/features/workspace";
 import {
     findKeywordForNote,
     parseBreadcrumbFromKeyword,
@@ -12,10 +12,10 @@ import {
     buildBreadcrumbFromTree,
     BreadcrumbItem,
 } from "@/utils/breadcrumb.utils";
-import { useLifeLogStore } from "@/features/lifeLog/store/useLifeLog.store";
-import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-import type { Task } from "@/features/taskDetail/types/task.types";
-import {Ws} from "@/features/workspace/types/workspace.types";
+import { useLifeLogStore } from "@/features/lifeLog";
+import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
+import type { Task } from "@/features/taskDetail";
+import {Ws} from "@/features/workspace";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 import {useGeneralStore} from "@/shared";
 import {Project} from "@/features/project";

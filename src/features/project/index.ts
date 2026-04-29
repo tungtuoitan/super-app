@@ -26,10 +26,14 @@ export { useProjectTaskFolderHelper } from "./hooks/useProjectTaskFolderHelper";
 
 // Service
 export { projectService } from "./service/project.service";
+export type { ProjectDTO } from "./service/project.service";
+
+// Hooks
+export { useProjectSaveActions } from "./hooks/useProjectSaveActions";
 
 // Providers
 export { ProjectProviders } from "./store/ProjectProviders";
 export { PTaskProvider } from "./store/usePTask.store";
 
 // shell module
-export { projectModule } from "./shell/project.module";
+export { projectModule, projectKeywordPlugin } from "./shell/project.module";

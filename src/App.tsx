@@ -2,6 +2,8 @@ import { Main } from "./shell/Main";
 
 // Register all feature modules into the VSCode shell (side-effect import)
 import "./shell/modules.config";
+// Register all keyword navigator plugins
+import "./shell/commandPallete/keywordNavigator.config";
 
 import "./App.css";
 

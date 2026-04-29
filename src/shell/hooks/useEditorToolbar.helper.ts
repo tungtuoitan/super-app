@@ -11,10 +11,10 @@ import { useStandardRegistryHelper } from "@/shared";
 import { useConsoleHelper } from "@/shell";
 
 // Feature save actions
-import { useNoteSaveActions } from "@/features/note/hooks/useNoteSaveActions";
-import { useProjectSaveActions } from "@/features/project/hooks/useProjectSaveActions";
-import { useLifeLogSaveActions } from "@/features/lifeLog/hooks/useLifeLogSaveActions";
-import {useWsSaveActions} from "@/features/workspace/hooks/ws/useWsSaveActions";
+import { useNoteSaveActions } from "@/features/note";
+import { useProjectSaveActions } from "@/features/project";
+import { useLifeLogSaveActions } from "@/features/lifeLog";
+import {useWsSaveActions} from "@/features/workspace";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 
 export const useEditorToolbarHelper = () => {

@@ -31,5 +31,8 @@ export { transformANote, transformNotes, formatNoteDate } from "./utils/note.uti
 // Providers
 export { NoteProviders } from "./store/NoteProviders";
 
+// Hooks
+export { useNoteSaveActions } from "./hooks/useNoteSaveActions";
+
 // shell module
 export { noteModule } from "./shell/note.module";

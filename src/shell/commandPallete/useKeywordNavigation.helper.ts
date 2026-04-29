@@ -2,25 +2,23 @@
  * Hook for handling keyword navigation in markdown editor
  */
 
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace";
 import { useAuthStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useEditorTabBarStore } from "@/shell";
-import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
-import { useWorkspaceLoader } from "@/features/workspace/hooks/useWorkspace.loader";
 import { useGridControlStore } from "@/shared";
-import { useNavigationStore } from "@/contexts/NavigationContext";
-import { noteService } from "@/features/note/service/note.service";
+import { noteService } from "@/features/note";
 import { parseKeywordLink } from "@/utils/keyword-link.utils";
 import { constants } from "@/utils/constants";
-import { Note } from "@/features/note/types/note.types";
-import { WorkspaceNoteItem, WorkspaceFolderItem } from "@/features/workspace/types/workspace-v2.types";
-import { WorkspaceDTO } from "@/features/workspace/types/workspace-dto.types";
+import { Note } from "@/features/note";
+import { useWorkspaceLoader } from "@/features/workspace";
+import { WorkspaceNoteItem, WorkspaceFolderItem } from "@/features/workspace";
+import { WorkspaceDTO } from "@/features/workspace";
+import { treeMiniHelper } from "@/features/workspace";
 import { Keyword } from "@/shell";
 import { isValidUrl } from "@/utils/url.utils";
-import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
+import { useWorkspaceHelper } from "@/features/workspace";
 import { useConsoleHelper } from "@/shell";
-import { treeMiniHelper } from "@/features/workspace/hooks/tree.miniHelper";
 import { keywordNavigatorRegistry } from "./keywordNavigator.registry";
 
 export const useKeywordNavigationHelper = () => {

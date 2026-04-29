@@ -7,7 +7,7 @@ import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
 // eslint-disable-next-line no-restricted-imports
 import { MultiProjectEditorPanel } from "@/features/multiProject";
-import { keywordNavigatorRegistry } from "@/shell";
+import type { KeywordPlugin } from "@/shell";
 import { parseKeywordLink } from "@/utils/keyword-link.utils";
 import { projectService } from "../service/project.service";
 import { taskService } from "@/features/taskDetail";
@@ -61,7 +61,7 @@ export const projectModule: ModuleDefinition = {
 
 // ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
 
-keywordNavigatorRegistry.register({
+export const projectKeywordPlugin: KeywordPlugin = {
     handles: ["project", "task"],
     resolveTargetTypes: ["PROJECT", "TASK"],
 
@@ -167,4 +167,4 @@ keywordNavigatorRegistry.register({
         }
         return undefined;
     },
-});
+};

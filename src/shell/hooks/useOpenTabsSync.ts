@@ -8,25 +8,25 @@
 
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/shell";
-import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
-import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { useProjectStore } from "@/features/project/store/useProject.store";
-import type { Task } from "@/features/taskDetail/types/task.types";
+import { useNoteGridStore } from "@/features/note";
+import { useWsStore } from "@/features/workspace";
+import { useProjectStore } from "@/features/project";
+import type { Task } from "@/features/taskDetail";
 import { BaseTab, MultiProjectTabData } from "@/shell";
 import { constants } from "@/utils/constants";
-import { Note, NoteDTO } from "@/features/note/types/note.types";
-import { noteService } from "@/features/note/service/note.service";
-import { wsService, WsDTO } from "@/features/workspace/service/ws.service";
-import { projectService, ProjectDTO } from "@/features/project/service/project.service";
-import { taskService, TaskDTO } from "@/features/taskDetail/service/task.service";
-import { transformNotes } from "@/features/note/utils/note.utils";
+import { Note, NoteDTO } from "@/features/note";
+import { noteService } from "@/features/note";
+import { wsService, WsDTO } from "@/features/workspace";
+import { projectService, ProjectDTO } from "@/features/project";
+import { taskService, TaskDTO } from "@/features/taskDetail";
+import { transformNotes } from "@/features/note";
 import { transformWs } from "@/utils/ws.utils";
 import { parseAsLocalDate } from "@/utils/date.utils";
 import {useEditorTabHelper} from "@/shell";
-import {Ws} from "@/features/workspace/types/workspace.types";
+import type {Ws} from "@/features/workspace";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 import {Project} from "@/features/project";
-import {usePTaskStore} from "@/features/project/store/usePTask.store";
+import {usePTaskStore} from "@/features/project";
 
 // Storage types
 export interface TabStorage {

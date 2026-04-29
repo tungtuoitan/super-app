@@ -8,10 +8,10 @@ import { TrackIconDisplay } from "../Components/TrackIconDisplay";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { lifeLogService } from "../service/lifeLog.service";
 import { constants } from "@/utils/constants";
-import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
+import type { LifeLogLog, LifeLogTrack } from "../types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell";
 import type { BaseTab } from "@/shell";
-import { keywordNavigatorRegistry } from "@/shell";
+import type { KeywordPlugin } from "@/shell";
 import { parseKeywordLink } from "@/utils/keyword-link.utils";
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
@@ -65,7 +65,7 @@ export const lifeLogModule: ModuleDefinition = {
 
 // ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
 
-keywordNavigatorRegistry.register({
+export const lifeLogKeywordPlugin: KeywordPlugin = {
     handles: ["log", "track"],
     resolveTargetTypes: ["LOG", "TRACK"],
 
@@ -161,4 +161,4 @@ keywordNavigatorRegistry.register({
         }
         return undefined;
     },
-});
+};

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useEditorTabHelper } from "./useEditorTab.helper";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace";
 import { useGridControlStore } from "@/shared";
-import { useNoteGridStore } from "@/features/note/store/useNoteGrid.store";
-import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
+import { useNoteGridStore } from "@/features/note";
+import { useWsStore } from "@/features/workspace";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared";

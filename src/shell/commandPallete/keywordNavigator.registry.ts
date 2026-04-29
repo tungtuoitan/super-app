@@ -9,7 +9,7 @@
  *                                                                     ←  useCommandPaletteHelper
  */
 
-import type { BaseTab } from "@/shell";
+import type { BaseTab } from "../types/tab.types";
 import type { Keyword } from "./keyword.types";
 
 // ─── Contracts ───────────────────────────────────────────────────────────────
