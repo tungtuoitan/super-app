@@ -6,29 +6,7 @@
 
 import { config } from "config/app.config";
 import {apiFetch} from "../fetch/apiClient";
-
-export interface UploadImageResponse {
-    url: string;
-    fileName: string;
-    fileId?: number;
-}
-
-export interface UploadAttachmentResponse {
-    url: string;
-    fileName: string;
-    originalName: string;
-    size: number;
-    contentType: string;
-    fileId?: number;
-}
-
-export interface FileUploadResult<T> {
-    success: boolean;
-    message?: string;
-    data?: T;
-}
-
-export type UploadContext = "project" | "workspace" | "conversation" | "general";
+import {FileUploadResult, UploadAttachmentResponse, UploadContext, UploadImageResponse} from "./file.types";
 
 const _uploadImage = async (
     _token: string,
@@ -79,18 +57,7 @@ const _blobToBase64 = (blob: Blob): Promise<string> => {
     });
 };
 
-const _isImageFile = (file: File): boolean => {
-    const imageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
-    return imageTypes.includes(file.type);
-};
 
-const _formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-};
 
 const _fetchFileAsBlob = async (_token: string, fileId: number): Promise<string | null> => {
     try {
@@ -109,14 +76,7 @@ const _fetchFileAsBlob = async (_token: string, fileId: number): Promise<string 
     }
 };
 
-const _revokeBlobUrl = (blobUrl: string): void => {
-    if (blobUrl && blobUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(blobUrl);
-    }
-};
-
 const blobUrlCache = new Map<number, string>();
-
 const _getFileBlobUrl = async (_token: string, fileId: number): Promise<string | null> => {
     if (blobUrlCache.has(fileId)) return blobUrlCache.get(fileId)!;
 
@@ -125,19 +85,10 @@ const _getFileBlobUrl = async (_token: string, fileId: number): Promise<string |
     return blobUrl;
 };
 
-const _clearBlobUrlCache = (): void => {
-    blobUrlCache.forEach((url) => URL.revokeObjectURL(url));
-    blobUrlCache.clear();
-};
 
 export const fileService = {
     _uploadImage,
     _uploadAttachment,
-    _blobToBase64,
-    _isImageFile,
-    _formatFileSize,
     _fetchFileAsBlob,
-    _revokeBlobUrl,
-    _getFileBlobUrl,
-    _clearBlobUrlCache,
+    _getFileBlobUrl
 };

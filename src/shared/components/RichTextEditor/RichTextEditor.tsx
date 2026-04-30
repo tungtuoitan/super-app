@@ -31,7 +31,7 @@ import {
     ChevronDown,
     Code2,
 } from "lucide-react";
-import { fileService, UploadContext, useAuthStore, useConsoleHelper } from "@/shared";
+import { _isImageFile, fileService, UploadContext, useAuthStore, useConsoleHelper } from "@/shared";
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";
@@ -306,7 +306,7 @@ export function RichTextEditor({
                 setIsUploading(true);
 
                 // Check if it's an image
-                if (fileService._isImageFile(file)) {
+                if (_isImageFile(file)) {
                     await handleImageUpload(file);
                     return;
                 }

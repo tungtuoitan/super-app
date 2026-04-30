@@ -81,11 +81,12 @@ export { DebugLoggerProvider } from "./debug/DebugLogger.store";
 export { useDebugLog } from "./debug/useDebugLog";
 
 // ── fetch ─────────────────────────────────────────────────────────────────
-export { apiFetch, acquireRefreshToken, configureApiClient } from "./fetch/apiClient";
+export { apiFetch } from "./fetch/apiClient";
 
 // ── file ──────────────────────────────────────────────────────────────────
 export { fileService } from "./file/file.service";
-export type { UploadContext } from "./file/file.service";
+export { _isImageFile, _blobToBase64} from "./file/file.utils";
+export type { UploadContext } from "./file/file.types";
 
 // ── flow ──────────────────────────────────────────────────────────────────
 export { flowService } from "./flow/flow.service";
