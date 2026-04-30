@@ -1,12 +1,12 @@
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { useEffect } from "react";
 
 /**
  * Hook to detect if the app is running on a mobile device
  * Uses MobileStore for centralized state management
  */
-export function useCheckIsMobile() {
-    const { setIsMobile } = useMobileStore();
+export function useDetectDevice() {
+    const { setIsMobile } = useDeviceStore();
     useEffect(() => {
         setIsMobile(window.innerWidth < 768);
         const checkMobile = () => {

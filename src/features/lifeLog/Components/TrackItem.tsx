@@ -11,7 +11,7 @@ import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { TrackIconDisplay } from "./TrackIconDisplay";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
@@ -30,7 +30,7 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
     const { deleteTrack } = useLifeLogTrackHelper();
     const { openTrackTab } = useLifeLogTabHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
     const { logs } = useLifeLogStore();
     const [flashing, setFlashing] = useState(false);
     const { loadKeywords } = useKeywordHelper();

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Panel } from "react-resizable-panels";
 import { useMovingTreeStore } from "@/features/workspace";
 import { useEditorTabHelper } from "@/shell";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { useGridControlStore } from "@/shared";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell";
 import { ConsoleTab } from "../../../../shared/console/ConsoleTab";
@@ -26,7 +26,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const { moduleName } = useGridControlStore();
     const { setTargetWorkspace } = useMovingTreeStore();
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
     const isNoteTab = activeTab?.type === constants.vscode.tab.tabTypes.note;

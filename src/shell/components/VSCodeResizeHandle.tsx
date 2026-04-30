@@ -1,5 +1,5 @@
 import { PanelResizeHandle } from "react-resizable-panels";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 
 interface VSCodeResizeHandleProps {
     direction: "horizontal" | "vertical";
@@ -8,7 +8,7 @@ interface VSCodeResizeHandleProps {
 
 export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
     const isHorizontal = direction === "horizontal";
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
 
     if (!isHorizontal && isMobile) {
         // Mobile vertical handle: tall touch-friendly bar with grip dots

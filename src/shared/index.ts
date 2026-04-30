@@ -20,8 +20,7 @@ export { initiateGoogleLogin } from "./auth/googleOAuth.utils";
 export type { User, UserData } from "./auth/auth.types";
 
 // ── checkDevice ───────────────────────────────────────────────────────────
-export { useIsMobile } from "./checkDevice/useIsMobile";
-export { useMobileStore, MobileProvider } from "./checkDevice/Mobile.store";
+export { useDeviceStore, DeviceProvider } from "./device/Device.store";
 
 // ── components ────────────────────────────────────────────────────────────
 export { Button } from "./components/ui/Button";

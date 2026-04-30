@@ -2,7 +2,7 @@ import { Panel, PanelGroup } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { GridControlBar } from "@/shared";
 import { constants } from "@/shared";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { Console } from "../../../shared/console/Console";
 import { moduleRegistry } from "@/shell";
 import {useActivityBarStore} from "@/shell";
@@ -17,7 +17,7 @@ interface VSSideBarProps {
  */
 export function VSSideBar({ moduleName }: VSSideBarProps) {
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
 
     const defaultSize = isMobile ? 70 : 20;
     const maxSize = isMobile ? 70 : 40;

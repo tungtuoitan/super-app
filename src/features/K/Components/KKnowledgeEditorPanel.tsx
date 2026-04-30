@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Settings, GitBranch, CalendarClock, LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { CardContent } from "@/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
@@ -49,7 +49,7 @@ export function KKnowledgeEditorPanel() {
     const tab = getActiveTab(activeTabId ?? undefined)
     const knowledge = tab?.data as unknown as KWsResponse;
     const isNew     = knowledge.id < 0;
-    const isMobile  = useIsMobile();
+    const { isMobile } = useDeviceStore();
     const kTestStoreValues = useKTestStoreValues();
     const { currentK, pendingImportNodeId, setPendingImportNodeId, pendingQuizTabSwitch, setPendingQuizTabSwitch, allK } = useKStore();
 

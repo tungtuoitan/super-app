@@ -5,7 +5,7 @@ import { useEditorTabHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useTabKeyboardShortcuts } from "@/shell";
 import { useTabBarHelper } from "@/shell";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { moduleRegistry } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
@@ -56,7 +56,7 @@ export function TabBar() {
     const { allKeywords } = useKeywordStore();
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
 
     useTabKeyboardShortcuts();
 

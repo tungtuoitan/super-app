@@ -22,7 +22,7 @@ import { NavProvider } from "@/contexts/NavigationContext";
 
 import { OrchestratorContextMenuStoreProvider } from "@/shared";
 import { GridControlProvider } from "@/shared";
-import { MobileProvider } from "@/shared";
+import { DeviceProvider } from "@/shared";
 import { DebugLoggerProvider } from "@/shared";
 import { ShellProvider } from "./store/ShellProvider";
 import { StandardRegistryProvider } from "@/shared";
@@ -51,7 +51,7 @@ export function Main() {
             <NavProvider>
                 <ConsoleProvider>
                     <ShellProvider>
-                        <MobileProvider>
+                        <DeviceProvider>
                             <DebugLoggerProvider>
                                 <SnackbarProvider autoHideDuration={3000}>
                                     <DndProvider backend={HTML5Backend}>
@@ -105,7 +105,7 @@ export function Main() {
                                     </DndProvider>
                                 </SnackbarProvider>
                             </DebugLoggerProvider>
-                        </MobileProvider>
+                        </DeviceProvider>
                     </ShellProvider>
                 </ConsoleProvider>
             </NavProvider>

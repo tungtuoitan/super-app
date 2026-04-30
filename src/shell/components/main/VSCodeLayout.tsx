@@ -7,12 +7,12 @@ import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
 import { useGridAutoRegisterHelper } from "@/shell";
 import { useLocation } from "react-router-dom";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { constants } from "@/shared";
 import { GridControlBar } from "@/shared";
 import { useGridControlStore } from "@/shared";
 import { moduleRegistry } from "@/shell";
-import {useCheckIsMobile} from "../../hooks/useCheckIsMobile";
+import {useDetectDevice} from "../../../shared/device/useDetectDevice";
 import {useActivityBarStore} from "@/shell";
 
 interface VSCodeLayoutProps {
@@ -21,11 +21,11 @@ interface VSCodeLayoutProps {
 
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const location = useLocation();
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
     const { setIsPanelVisible } = useActivityBarStore();
     const mobileEditorRef = useRef<ImperativePanelHandle>(null);
     const { moduleName } = useGridControlStore();
-    useCheckIsMobile()
+    useDetectDevice()
 
     const { registerGrid } = useGridAutoRegisterHelper();
 

@@ -17,7 +17,6 @@ export { useCommandPaletteHelper } from "./commandPallete/useCommandPalette.help
 export { useCommandPaletteKeyDown } from "./commandPallete/useCommandPaletteKeyDown";
 export { useTabBarHelper } from "./hooks/useTabBarHelper";
 export { useTabBarMenuHelper } from "./hooks/useTabBarMenu.helper";
-export { useCheckIsMobile } from "./hooks/useCheckIsMobile";
 export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
 export { useTabKeyboardShortcuts } from "./hooks/useTabKeyboardShortcuts";

@@ -5,28 +5,28 @@
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useEffect } from "react";
 
-export interface MobileContextData {
+export interface DeviceContextData {
     // Mobile detection
     isMobile: boolean;
     setIsMobile: Dispatch<SetStateAction<boolean>>;
 }
 
-export const mobileContextDefaultValue: MobileContextData = {
+export const deviceContextDefaultValue: DeviceContextData = {
     isMobile: false,
     setIsMobile: () => {},
 };
 
-const MobileContext = createContext<MobileContextData>(mobileContextDefaultValue);
+const DeviceContext = createContext<DeviceContextData>(deviceContextDefaultValue);
 
-export const useMobileStore = () => {
-    const ctx = useContext(MobileContext);
+export const useDeviceStore = () => {
+    const ctx = useContext(DeviceContext);
     if (!ctx) {
-        throw new Error("useMobileStore must be used within MobileProvider");
+        throw new Error("useDeviceStore must be used within DeviceProvider");
     }
     return ctx;
 };
 
-export const MobileProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const DeviceProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     // Mobile detection state - breakpoint 768px (tailwind md)
     const [isMobile, setIsMobile] = useState<boolean>(() => {
         if (typeof window === "undefined") return false;
@@ -34,13 +34,13 @@ export const MobileProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     });
 
     return (
-        <MobileContext.Provider
+        <DeviceContext.Provider
             value={{
                 isMobile,
                 setIsMobile,
             }}
         >
             {children}
-        </MobileContext.Provider>
+        </DeviceContext.Provider>
     );
 };

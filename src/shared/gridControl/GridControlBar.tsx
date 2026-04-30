@@ -9,11 +9,11 @@ import { Input } from "@/shared";
 import { Button } from "@/shared";
 import { GenericFilterPopup } from "../genericFilter/GenericFilterPopup";
 import { useGridControlStore } from "@/shared";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 
 export function GridControlBar({ hideFilter }: { hideFilter?: boolean } = {}) {
     const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useGridControlStore();
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
     const [inputValue, setInputValue] = useState(searchQuery);
 
     // Sync inputValue with searchQuery from store

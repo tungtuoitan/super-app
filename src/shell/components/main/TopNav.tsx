@@ -1,7 +1,7 @@
 import { MouseEvent, useEffect, useState } from "react";
 import { constants } from "@/shared";
 import { envConfig } from "config/env.config";
-import { useMobileStore } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { CommandPalette } from "@/shell";
 import {useActivityBarStore} from "@/shell";
 import {useCommandPaletteStore} from "@/shell";
@@ -22,7 +22,7 @@ import {useCommandPaletteStore} from "@/shell";
 export function TopNav() {
     const showDevBadge = envConfig.REACT_APP_ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
-    const { isMobile } = useMobileStore();
+    const { isMobile } = useDeviceStore();
     const { setIsOpen } = useCommandPaletteStore();
 
     // Handle Ctrl+P to open command palette
