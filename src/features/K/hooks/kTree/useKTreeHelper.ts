@@ -14,6 +14,7 @@ import {KtreeMiniHelper, KTreeNode} from "./Ktree.miniHelper";
 import {useKLoader} from "./useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
 import {useKeywordHelper} from "@/shared";
+import {Folder} from "../../types/folder.types";
 
 export const KuseTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();
@@ -393,7 +394,7 @@ export const KuseTreeHelper = () => {
 
         // Extract nodes from treeData, find parent node by k_items.id
         const allNodes = KtreeMiniHelper.$traverse(treeData).map((t) => t.data);
-        const parentNode = parentId ? allNodes.find((n) => n.id === parentId) as unknown as import("../../types").Folder | undefined : undefined;
+        const parentNode = parentId ? allNodes.find((n) => n.id === parentId) as unknown as Folder | undefined : undefined;
 
         openNodeDialog("create", kconstants.workspace.itemTypes.node, null, parentNode ?? null);
     };

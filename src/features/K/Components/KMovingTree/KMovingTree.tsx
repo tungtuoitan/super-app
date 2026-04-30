@@ -10,7 +10,7 @@ import { KNode } from "../KExplorer/KNode";
 import { kconstants } from "../../utils/K.Constants";
 import { useKMovingTreeStore } from "../../store/KMovingTree.store";
 import { useKMovingTreeHelper } from "../../hooks/kTree/useKMovingTree.helper";
-import {KTreeFolder, KtreeMiniHelper} from "../../hooks";
+import {KTreeFolder, KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
 
 export function KMovingTree() {
     const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight, _treeRef } = useKMovingTreeStore();

@@ -12,7 +12,7 @@ import { Button } from "@/shared";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 
-export interface ConfirmationPopoverProps {
+ interface ConfirmationPopoverProps {
     /** Whether the popover is open */
     open: boolean;
     /** Element to anchor the popover to */

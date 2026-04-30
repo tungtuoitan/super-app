@@ -2,8 +2,38 @@
  * Folder Types and Interfaces
  * Domain models and DTOs for the folder feature (workspace navigation)
  */
+interface FolderEntity {
+  /** Folder ID (folders.id) */
+  id: number;
 
-import type { FolderEntity } from "@/features/workspace/types/workspace-v2.types";
+  /** User ID who owns the folder (folders.user_id) */
+  userId: number;
+
+  /** Folder name (folders.name) */
+  name: string;
+
+  /** Folder description (folders.description) */
+  description?: string;
+
+  /** URL slug (folders.slug) */
+  slug?: string;
+
+  /** Hex color code (folders.color) */
+  color?: string;
+
+  /** Icon emoji or class (folders.icon) */
+  icon?: string;
+
+  /** Created timestamp (folders.created_at) - ISO string from API */
+  createdAt: string;
+
+  /** Updated timestamp (folders.updated_at) - ISO string from API */
+  updatedAt?: string;
+
+  /** Soft delete timestamp (folders.deleted_at) - ISO string from API */
+  deletedAt?: string | null;
+
+}
 
 // API Response DTO (from backend FolderResponse)
 // Backend returns: Id, Name, Description, Color, CreatedAt, IsActive, Depth

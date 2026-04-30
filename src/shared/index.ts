@@ -58,12 +58,11 @@ export { GenericDrawingDate, type GenericDrawingDateProps } from "./components/u
 export { AutoCompleteOption, type AutoCompleteOptionProps } from "./components/ui/AutoCompleteOption";
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./components/ui/card";
 export { resolveVariant } from "./components/ui/Button";
-export * from "./components/feedback/ConfirmationPopover";
-export * from "./components/feedback/ErrorBoundary";
-export * from "./components/RichTextEditor/RichTextEditor";
-export * from "./components/DateTimePicker/DateTimePicker";
-export * from "./components/DateTimePicker/DateRangePicker";
-export * from "./components/HighlightedText";
+export { ConfirmationPopover } from "./components/feedback/ConfirmationPopover";
+export { RichTextEditor } from "./components/RichTextEditor/RichTextEditor";
+export { DateTimePicker } from "./components/DateTimePicker/DateTimePicker";
+export { DateRangePicker, type DateRangePickerProps } from "./components/DateTimePicker/DateRangePicker";
+export { HighlightedText } from "./components/HighlightedText";
 
 // ── confirmPopover ────────────────────────────────────────────────────────
 export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";

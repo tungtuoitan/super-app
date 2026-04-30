@@ -7,7 +7,6 @@ import { useOrchestratorContextMenuHelper } from "@/shared";
 import { KHighlightText } from "./KHighlightText";
 import { useKStore } from "../../store/K.store";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
-import { KTreeNode } from "../../hooks";
 import { kconstants } from "../../utils/K.Constants";
 import { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
@@ -19,6 +18,7 @@ import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KT
 import { useDrop } from "react-dnd";
 import { KTestService } from "../../service/kTest.service";
 import {useEditorTabBarStore} from "@/shell";
+import {KTreeNode} from "../../hooks/kTree/Ktree.miniHelper";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;

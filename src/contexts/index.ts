@@ -2,6 +2,6 @@
  * Contexts Index
  */
 
-export * from "./NavigationContext";
+export { useNavigationStore, NavProvider } from "./NavigationContext";
 // TagUIContext moved to store - import from '@/store/tagUI/TagUIStore'
-export * from "./ThemeContext";
+export { ThemeProvider, useTheme } from "./ThemeContext";

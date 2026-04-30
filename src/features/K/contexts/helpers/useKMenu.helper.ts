@@ -4,7 +4,6 @@
  * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
  */
 
-import {buildTreeFromV2Items, filterTopLevelParents, useKNodeDialogHelper} from "../../hooks";
 import {useKStore} from "../../store/K.store";
 import {KService} from "../../service/K.service";
 import {KItemV2} from "../../types/K-v2.types";
@@ -12,10 +11,12 @@ import {KUpsertWorkspaceItemRequest, KItemAction} from "../../types/K.types";
 import {KDTO} from "../../types/K-dto.types";
 import {kconstants} from "../../utils/K.Constants";
 import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
-import {Folder} from "../../types";
 import {NodeItemType} from "../../store/KNodeDialog.store";
 import { useEditorTabHelper} from "@/shell";
 import {getConfirmMessage, useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useOrchestratorContextMenuStore} from "@/shared";
+import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
+import {useKNodeDialogHelper} from "../../hooks/useKNodeDialog.helper";
+import {Folder} from "../../types/folder.types";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -478,8 +479,8 @@ export const useKMenuHelper = () => {
             const token = $user.userToken;
 
             // ===== STEP 3: Filter to top-level parents only =====
-            const treeData = buildTreeFromV2Items(currentK.flatData);
-            const topLevelIds = filterTopLevelParents(selectedIds, treeData);
+            const treeData = KtreeMiniHelper.buildTreeFromV2Items(currentK.flatData);
+            const topLevelIds = KtreeMiniHelper.filterTopLevelParents(selectedIds, treeData);
 
             if (topLevelIds.length === 0) {
                 console.warn("⚠️ No valid items after filtering");

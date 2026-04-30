@@ -41,15 +41,14 @@ export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
 export { resolveVariant } from "./ui/Button";
 
 // ── Feedback ──────────────────────────────────────────────────────────────
-export * from "./feedback/ConfirmationPopover";
-export * from "./feedback/ErrorBoundary";
+export { ConfirmationPopover } from "./feedback/ConfirmationPopover";
 
 // ── Rich Text Editor ──────────────────────────────────────────────────────
-export * from "./RichTextEditor/RichTextEditor";
+export { RichTextEditor } from "./RichTextEditor/RichTextEditor";
 
 // ── Date / Time ───────────────────────────────────────────────────────────
-export * from "./DateTimePicker/DateTimePicker";
-export * from "./DateTimePicker/DateRangePicker";
+export { DateTimePicker } from "./DateTimePicker/DateTimePicker";
+export { DateRangePicker, type DateRangePickerProps } from "./DateTimePicker/DateRangePicker";
 
 // ── Misc Components ───────────────────────────────────────────────────────
-export * from "./HighlightedText";
+export { HighlightedText } from "./HighlightedText";

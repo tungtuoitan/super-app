@@ -3,13 +3,13 @@ import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";
 import { isFolder } from "../types/K-v2.types";
 import {kconstants} from "../utils/K.Constants";
-import {Folder} from "../types";
 import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/KNodeDialog.store";
 import type { KItemV2 } from "../types/K-v2.types";
 import {KtreeMiniHelper} from "./kTree/Ktree.miniHelper";
 import {useKLoader} from "./kTree/useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
 import {useKeywordHelper} from "@/shared";
+import {Folder} from "../types/folder.types";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();

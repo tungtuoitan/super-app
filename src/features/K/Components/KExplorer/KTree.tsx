@@ -9,12 +9,13 @@ import { useOrchestratorContextMenuHelper } from "@/shared";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
-import { KTreeNode, KtreeMiniHelper, KuseTreeHelper2 } from "../../hooks";
 import { kconstants } from "../../utils/K.Constants";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import {useCalculateKTreeContainerHeight} from "../../hooks/kTree/useCalculateKTreeContainerHeight";
 import {useCalculateKTreeDropZoneHeight} from "../../hooks/kTree/useCalculateKTreeDropZoneHeight";
 import {useScrollToHighlightItem} from "../../hooks/kTree/useScrollToHighlightItem";
+import {KtreeMiniHelper, KTreeNode} from "../../hooks/kTree/Ktree.miniHelper";
+import {KuseTreeHelper2} from "../../hooks/kTree/useKTreeHelper2";
 
 export function KTree() {
     const { isDragging, currentK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, markedNodeId, setMarkedNodeId, treeData: _storeTD, setTreeData } = useKStore();
