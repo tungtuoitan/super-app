@@ -68,8 +68,7 @@ export { HighlightedText } from "./components/HighlightedText";
 export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";
 export { useConfirmationPopoverStore, ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopover.store";
 export type { ConfirmationPopoverOptions } from "./confirmPopover/ConfirmationPopover.store";
-export { getConfirmMessage } from "./confirmPopover/confirmation-message.utils";
-export type { GetConfirmMessageParams, ConfirmMessage } from "./confirmPopover/confirmation-message.utils";
+export type { ConfirmMessage, DeleteType } from "./confirmPopover/types";
 
 // ── console ───────────────────────────────────────────────────────────────
 export { useConsoleStore, ConsoleProvider } from "./console/useConsole.store";

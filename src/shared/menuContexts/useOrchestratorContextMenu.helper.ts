@@ -1,6 +1,6 @@
 import { useConfirmationPopoverHelper } from "@/shared";
 import { OrchestratorContextMenuType, useOrchestratorContextMenuStore } from "@/shared";
-import { getConfirmMessage } from "../confirmPopover/confirmation-message.utils";
+import { getGenericConfirmMessage } from "../confirmPopover/confirmMessage.utils";
 
 interface OpenConfirmDialogParams {
     type: "soft-delete" | "hard-delete";
@@ -30,7 +30,7 @@ export const useOrchestratorContextMenuHelper = () => {
         const nativeEvent = event.syntheticEvent || event;
         const anchorElement = nativeEvent?.target as HTMLElement;
         const isMultiple = count > 1;
-        const confirmMsg = getConfirmMessage({ type, entityType, count, isMultiple });
+        const confirmMsg = getGenericConfirmMessage({ type, entityType, count, isMultiple });
         const confirmText = type === "hard-delete" ? "Delete Permanently" : "Delete";
 
         showConfirmation({

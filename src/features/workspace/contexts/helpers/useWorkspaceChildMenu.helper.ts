@@ -5,8 +5,9 @@
  */
 
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { getConfirmMessage, useConfirmationPopoverHelper } from "@/shared";
+import { useConfirmationPopoverHelper } from "@/shared";
 import { constants } from "@/shared";
+import { getWorkspaceConfirmMessage } from "../../utils/confirmMessage";
 import { noteService } from "@/features/note";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
@@ -299,7 +300,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ----------------
         const entityName = isMultipleSelected ? undefined : (contextData.data?.name || contextData.name || "this item");
 
-        const confirmMsg = getConfirmMessage({
+        const confirmMsg = getWorkspaceConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
             entityType: isFile ? "file" : "note",
             count: selectedCount,

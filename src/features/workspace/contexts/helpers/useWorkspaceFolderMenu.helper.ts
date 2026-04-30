@@ -7,7 +7,8 @@
 import React from "react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useFolderDialogHelper } from "../../hooks/useFolderDialog.helper";
-import { getConfirmMessage, useConfirmationPopoverHelper } from "@/shared";
+import { useConfirmationPopoverHelper } from "@/shared";
+import { getWorkspaceConfirmMessage } from "../../utils/confirmMessage";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { constants } from "@/shared";
 import type { ItemType } from "../../store/FolderDialog.store";
@@ -551,7 +552,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         const childCount = isMultipleSelected ? 0 : $countChildren(contextData);
         const entityName = isMultipleSelected ? undefined : contextData.name;
         
-        const confirmMsg = getConfirmMessage({
+        const confirmMsg = getWorkspaceConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
             entityType: "folder",
             count: selectedCount,

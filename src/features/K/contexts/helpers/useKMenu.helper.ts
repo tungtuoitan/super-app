@@ -13,7 +13,8 @@ import {kconstants} from "../../utils/K.Constants";
 import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
 import {NodeItemType} from "../../store/KNodeDialog.store";
 import { useEditorTabHelper} from "@/shell";
-import {getConfirmMessage, useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useOrchestratorContextMenuStore} from "@/shared";
+import {useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useOrchestratorContextMenuStore} from "@/shared";
+import { getKConfirmMessage } from "../../utils/confirmMessage";
 import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
 import {useKNodeDialogHelper} from "../../hooks/useKNodeDialog.helper";
 import {Folder} from "../../types/folder.types";
@@ -408,7 +409,7 @@ export const useKMenuHelper = () => {
             confirmText = "Restore";
             confirmColor = "default";
         } else {
-            const confirmMsg = getConfirmMessage({
+            const confirmMsg = getKConfirmMessage({
                 type: isHardDelete ? "hard-delete" : "soft-delete",
                 entityType: "folder",
                 count: selectedCount,

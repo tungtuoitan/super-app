@@ -1,29 +1,25 @@
-type EntityType = "note" | "workspace" | "folder" | "file" | "task";
-type DeleteType = "soft-delete" | "hard-delete";
+/**
+ * Workspace Confirmation Messages
+ * Delete confirmation dialogs for workspace items (folders, notes, files)
+ */
 
-export interface GetConfirmMessageParams {
+import { type ConfirmMessage, type DeleteType } from "@/shared";
+
+export type WorkspaceEntityType = "folder" | "note" | "file" | "workspace";
+
+export interface WorkspaceConfirmMessageParams {
     type: DeleteType;
-    entityType: EntityType;
+    entityType: WorkspaceEntityType;
     count: number;
     isMultiple: boolean;
     entityName?: string;
     childCount?: number;
 }
 
-export interface ConfirmMessage {
-    title: string;
-    subtitle?: string;
-}
-
-export const getConfirmMessage = (params: GetConfirmMessageParams): ConfirmMessage => {
+export const getWorkspaceConfirmMessage = (params: WorkspaceConfirmMessageParams): ConfirmMessage => {
     const { type, entityType, count, isMultiple, entityName, childCount = 0 } = params;
 
     if (type === "soft-delete") {
-        if (entityType === "task") {
-            return isMultiple
-                ? { title: `Delete ${count} tasks?`, subtitle: `Are you sure you want to delete ${count} selected tasks?` }
-                : { title: "Delete this task?", subtitle: "This task will be moved to trash." };
-        }
         if (entityType === "note" || entityType === "file") {
             if (isMultiple) {
                 const label = entityType === "file" ? "files" : "notes";
