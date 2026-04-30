@@ -5,7 +5,7 @@
  */
 
 
-import { useConfirmationPopoverStore, ConfirmationPopoverOptions } from "@/shared";
+import {ConfirmationPopoverOptions, useConfirmationPopoverStore} from "./ConfirmationPopover.store";
 
 export const useConfirmationPopoverHelper = () => {
     const { isOpen, setIsOpen, options, setOptions } = useConfirmationPopoverStore();

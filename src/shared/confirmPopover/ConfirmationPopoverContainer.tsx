@@ -4,10 +4,9 @@
  * Following SuperApp architecture patterns
  */
 
-import React from "react";
 import { ConfirmationPopover } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
-import { useConfirmationPopoverStore } from "@/shared";
+import {useConfirmationPopoverStore} from "./ConfirmationPopover.store";
 
 /**
  * Container component that manages confirmation popover state

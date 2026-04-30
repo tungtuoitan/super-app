@@ -66,12 +66,12 @@ export { HighlightedText } from "./components/HighlightedText";
 
 // ── confirmPopover ────────────────────────────────────────────────────────
 export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";
-export { useConfirmationPopoverStore, ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopover.store";
-export type { ConfirmationPopoverOptions } from "./confirmPopover/ConfirmationPopover.store";
+export { ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopover.store";
+// export type { ConfirmationPopoverOptions } from "./confirmPopover/ConfirmationPopover.store";
 export type { ConfirmMessage, DeleteType } from "./confirmPopover/types";
 
 // ── console ───────────────────────────────────────────────────────────────
-export { useConsoleStore, ConsoleProvider } from "./console/useConsole.store";
+export { ConsoleProvider } from "./console/useConsole.store";
 export { useConsoleHelper } from "./console/useConsole.helper";
 
 // ── debug ─────────────────────────────────────────────────────────────────

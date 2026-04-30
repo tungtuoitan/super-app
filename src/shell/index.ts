@@ -47,4 +47,4 @@ export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
 export { CommandPalette } from "./commandPallete/CommandPalette";
 export { ConfirmCloseDialog } from "./components/ConfirmCloseDialog";
 export { EditorToolbar } from "./components/main/EditorToolbar";
-export { ConfirmationPopoverContainer } from "./components/ConfirmationPopoverContainer";
+export { ConfirmationPopoverContainer } from "../shared/confirmPopover/ConfirmationPopoverContainer";
