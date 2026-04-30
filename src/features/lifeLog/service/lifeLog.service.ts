@@ -4,7 +4,7 @@
 
 import { config } from "config/app.config";
 import type { LifeLogTrackDTO, LifeLogLogDTO, UpsertLifeLogTrackDTO, UpsertLifeLogLogDTO } from "@/features/lifeLog/types/lifeLog.types";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";
 
@@ -30,6 +30,7 @@ const _getTracks = async (
 };
 
 const _upsertTracks = async (_token: string, requests: UpsertLifeLogTrackDTO[]) => {
+    const debugLog = useDebugLog();
     debugLog.log("lifelog", "upsertTracks:request", {
         count: requests.length,
         tracks: requests.map(r => ({ id: r.id, name: r.name, emoji: r.emoji, color: r.color, isSensitive: r.isSensitive, deletedAt: r.deletedAt ?? null })),
@@ -89,6 +90,7 @@ const _getLogs = async (
 };
 
 const _upsertLogs = async (_token: string, requests: UpsertLifeLogLogDTO[]) => {
+    const debugLog = useDebugLog();
     debugLog.log("lifelog", "upsertLogs:request", {
         count: requests.length,
         logs: requests.map(r => ({ id: r.id, type: r.type, trackId: r.trackId ?? null, title: r.title ?? null, isSensitive: r.isSensitive, occurAt: r.occurAt ?? null, deletedAt: r.deletedAt ?? null })),

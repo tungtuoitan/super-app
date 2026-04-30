@@ -21,7 +21,7 @@ import type { TaskDTO, Task } from "@/features/taskDetail";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import { buildTaskFlowLayout, smartWand, computeOptimalHandles, nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "../../utils/multiProjectTaskFlow.utils";
 import { parseAsLocalDate } from "@/shared";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 
 const transformTaskData = (dtos: TaskDTO[]): Task[] =>
     dtos.map((dto) => ({
@@ -59,7 +59,7 @@ export const useMultiProjectTaskFlowHelper = () => {
     const dragAxisRef = useRef<Map<string, "x" | "y" | null>>(new Map());
     // last snapped positions applied by handleNodeDrag — restored at drop to avoid RF overwrite
     const lastSnappedRef = useRef<Map<string, { x: number; y: number }>>(new Map());
-
+    const debugLog = useDebugLog();
     // ── Lock guards ────────────────────────────────────────────────────────
     const isNodeLocked = (nodeId: string): boolean => {
         if (!lockOldNodes) return false;

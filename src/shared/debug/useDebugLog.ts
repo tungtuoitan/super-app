@@ -8,13 +8,13 @@
  *   await flush();   // optional — fires-and-forgets by default
  *
  * Outside React (services, utils):
- *   import { debugLog } from "@/shared";
+ *   import { useDebugLog } from "@/shared";
  *   debugLog.log("auth", "google-redirect", { redirectUri });
  *   debugLog.flush();
  */
 
-import { debugLogStore, type DebugLogEntry } from "@/shared";
 import { config } from "config/app.config";
+import {DebugLogEntry, debugLogStore} from "./debugLog.store";
 
 const FLUSH_URL = `${config.api.baseURL}/api/diagnostic/logs`;
 

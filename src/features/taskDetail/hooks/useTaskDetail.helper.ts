@@ -24,7 +24,7 @@ import { useCommandPaletteHelper } from "@/shell";
 import { useKeywordNavigationHelper } from "@/shell";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 import { usePTaskStore } from "@/features/project";
 import {useEditorTabBarStore} from "@/shell";
 
@@ -42,7 +42,7 @@ export const useTaskDetailHelper = () => {
     const { setTasks } = usePTaskStore();
     const { linkedKeywords, folderItems } = useTaskDetailStore();
     const { allKeywords } = useKeywordStore();
-
+    const debugLog = useDebugLog();
     const { selectedTask } = useTaskDetailSelector();
 
     // ── Linked keywords & workspace items ─────────────────────────────────────

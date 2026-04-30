@@ -2,7 +2,7 @@ import { constants } from "@/shared";
 import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/taskDetail";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { Task } from "@/features/taskDetail";
 import {SaveActions} from "@/shell";
@@ -11,7 +11,7 @@ export function useProjectSaveActions(): SaveActions {
     const { upsertProject } = useProjectDetailHelper();
     const { upsertTask } = useTaskDetailHelper();
     const { createTaskFolder } = useProjectTaskFolderHelper();
-
+    const debugLog = useDebugLog();
     const handles = (tabType: string) =>
         tabType === constants.vscode.tab.tabTypes.project ||
         tabType === constants.vscode.tab.tabTypes.task;

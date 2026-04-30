@@ -4,7 +4,7 @@
 
 import { config } from "config/app.config";
 import type { TaskDTO } from "../types/task.types";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";
 
@@ -67,6 +67,7 @@ const _upsertTaskBatch = async (
     }>
 ): Promise<ResultOptions<TaskDTO>> => {
     // ── Debug: log every upsert request with folderWorkspaceItemId ──
+    const debugLog = useDebugLog();
     for (const req of requests) {
         debugLog.log("task-upsert", "service-upsertTaskBatch", {
             id: req.id,

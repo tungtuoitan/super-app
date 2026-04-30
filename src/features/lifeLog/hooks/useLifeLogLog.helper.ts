@@ -10,7 +10,7 @@ import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 
 export function transformLog(dto: LifeLogLogDTO): LifeLogLog {
     const result = {
@@ -36,6 +36,7 @@ export function useLifeLogLogHelper() {
     const { $user } = useAuthStore();
     const token = $user.userToken;
     const { enqueueSnackbar } = useSnackbar();
+    const debugLog = useDebugLog();
 
     const loadLogs = async (params?: {
         type?: string;

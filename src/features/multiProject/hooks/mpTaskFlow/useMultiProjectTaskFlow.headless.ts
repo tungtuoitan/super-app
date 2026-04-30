@@ -13,11 +13,11 @@ import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProject
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import { buildTaskFlowLayout } from "../../utils/multiProjectTaskFlow.utils";
-import { flowService } from "@/shared";
+import { flowService, useDebugLog } from "@/shared";
 import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
 import type { FlowEdgeData } from "../../types/multiProjectTaskFlow.type";
 import { useAuthStore } from "@/shared";
-import { debugLog } from "@/shared";
+
 import type { Edge } from "@xyflow/react";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 
@@ -27,6 +27,7 @@ export function useMultiProjectTaskFlowHeadless() {
     const { loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
     const { $user } = useAuthStore();
+    const debugLog = useDebugLog();
 
     // ── Load all tasks (no filter) — only once per token ───────────────────
     useEffect(() => {

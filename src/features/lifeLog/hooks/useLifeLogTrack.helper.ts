@@ -10,7 +10,7 @@ import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/fea
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/shared";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 
 function transformTrack(dto: LifeLogTrackDTO): LifeLogTrack {
     return {
@@ -32,7 +32,7 @@ export function useLifeLogTrackHelper() {
     const { $user } = useAuthStore();
     const { enqueueSnackbar } = useSnackbar();
     const token = $user.userToken;
-
+    const debugLog = useDebugLog();
     const loadTracks = async () => {
         if (!token) return;
         setIsLoading(true);

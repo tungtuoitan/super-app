@@ -75,10 +75,10 @@ export { ConsoleProvider } from "./console/useConsole.store";
 export { useConsoleHelper } from "./console/useConsole.helper";
 
 // ── debug ─────────────────────────────────────────────────────────────────
-export { debugLogStore } from "./debug/debugLog.store";
-export type { DebugLogEntry } from "./debug/debugLog.store";
-export { useDebugLogger, DebugLoggerProvider, useLogger } from "./debug/DebugLogger.store";
-export { useDebugLog, debugLog } from "./debug/useDebugLog";
+// export { debugLogStore } from "./debug/debugLog.store";
+// export type { DebugLogEntry } from "./debug/debugLog.store";
+export { DebugLoggerProvider } from "./debug/DebugLogger.store";
+export { useDebugLog } from "./debug/useDebugLog";
 
 // ── fetch ─────────────────────────────────────────────────────────────────
 export { apiFetch, acquireRefreshToken, configureApiClient } from "./fetch/apiClient";

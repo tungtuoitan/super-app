@@ -18,7 +18,7 @@ import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useProjectTaskFolderHelper } from "@/features/project";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();
@@ -28,7 +28,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
     const _console = useConsoleHelper();
     const { isNodeLocked } = useMultiProjectTaskFlowHelper();
     const { createTaskFolder } = useProjectTaskFolderHelper();
-
+    const debugLog = useDebugLog();
     // ── Rename ──────────────────────────────────────────────────────────────
 
     const handleRenameStart = (nodeId: string) => setEditingNodeId(nodeId)

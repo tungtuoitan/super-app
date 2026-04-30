@@ -15,7 +15,7 @@ import { projectService, type ProjectDTO } from "../service/project.service";
 import { WorkspaceItemAction } from "@/features/workspace";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { parseAsLocalDate } from "@/shared";
-import { debugLog } from "@/shared";
+import { useDebugLog } from "@/shared";
 import { constants } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
@@ -29,6 +29,7 @@ export function useProjectTaskFolderHelper() {
     const { setOpenTabs } = useEditorTabBarStore();
     const { projects, setProjects } = useProjectStore();
     const { setTasks } = usePTaskStore();
+    const debugLog = useDebugLog();
 
     const projectsRef = useRef(projects);
     useEffect(() => { projectsRef.current = projects; }, [projects]);
