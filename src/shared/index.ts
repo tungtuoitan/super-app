@@ -15,12 +15,9 @@ export { AuthCallbackProvider, useAuthCallbackStore } from "./auth/AuthCallback.
 export { AuthStoreProvider, useAuthStore } from "./auth/Auth.store";
 export { AuthGuard } from "./auth/AuthGuard";
 export { AuthCallback } from "./auth/AuthCallback";
-export { AuthContainer } from "./auth/AuthContainer";
 export { useAuthHelper } from "./auth/useAuth.helpers";
-export { authApi } from "./auth/auth.service";
-export { initiateGoogleLogin, GOOGLE_OAUTH_CONFIG, extractAuthCodeFromUrl, extractStateFromUrl, extractOAuthError } from "./auth/googleOAuth.utils";
-export { retrieveAndClearPkceValues, validateState, generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "./auth/pkce.utils";
-export type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest, User, UserData, ExchangeTokenResponse } from "./auth/auth.types";
+export { initiateGoogleLogin } from "./auth/googleOAuth.utils";
+export type { User, UserData } from "./auth/auth.types";
 
 // ── checkDevice ───────────────────────────────────────────────────────────
 export { useIsMobile } from "./checkDevice/useIsMobile";
