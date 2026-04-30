@@ -15,7 +15,7 @@ import { useProjectSaveActions } from "@/features/project";
 import { useLifeLogSaveActions } from "@/features/lifeLog";
 import {useWsSaveActions} from "@/features/workspace";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
-import {useKeywordHelper} from "../commandPallete/useKeyword.helper";
+import {useKeywordHelper} from "../../shared/keyword/useKeyword.helper";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();

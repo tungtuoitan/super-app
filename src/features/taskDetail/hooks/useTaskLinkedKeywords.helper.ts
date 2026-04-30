@@ -5,12 +5,12 @@
  */
 
 
-import { targetKeywordService, TargetKeywordTargetType, useKeywordStore } from "@/shell";
+import { targetKeywordService, TargetKeywordTargetType, useKeywordStore } from "@/shared";
 import { useAuthStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
-import { Keyword } from "@/shell";
+import { Keyword } from "@/shared";
 import type { LinkedKeyword } from "../types/taskDetail.types";
 
 export const useTaskLinkedKeywordsHelper = () => {

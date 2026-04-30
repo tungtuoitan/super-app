@@ -15,7 +15,7 @@ import { useGridControlStore } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 import {useStandardRegistryStore} from "@/shared";
-import {useKeywordHelper} from "@/shell";
+import {useKeywordHelper} from "@/shared";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();

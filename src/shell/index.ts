@@ -9,11 +9,6 @@
 export { useEditorTabBarStore, EditorTabBarProvider } from "./store/EditorTab.store";
 export { useActivityBarStore } from "./store/ActivityBar.store";
 export { useCommandPaletteStore } from "./commandPallete/useCommandPalette.store";
-export { useKeywordStore } from "./commandPallete/Keyword.store";
-
-// ── Services ──────────────────────────────────────────────────────────────
-export { keywordService } from "./commandPallete/keyword.service";
-export { targetKeywordService } from "./commandPallete/targetKeyword.service";
 
 // ── Hooks ─────────────────────────────────────────────────────────────────
 export { useEditorTabHelper } from "./hooks/useEditorTab.helper";
@@ -27,29 +22,24 @@ export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
 export { useDebugLog, debugLog } from "../shared/debug/useDebugLog";
 export { useTabKeyboardShortcuts } from "./hooks/useTabKeyboardShortcuts";
-export { useKeyboardShortcut } from "./commandPallete/useKeyboardShortcut";
-export { findNoteByEntityId } from "./commandPallete/useKeywordNavigation.helper";
-export { useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
-export { parseKeywordLink } from "./commandPallete/keyword-link.utils";
-export { isValidUrl } from "./commandPallete/url.utils";
-export { findKeywordForNote,parseBreadcrumbFromKeyword,enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils"
-export { transformWs } from "./utils/ws.utils"
-export { useKeywordHelper } from "./commandPallete/useKeyword.helper"
+export { findNoteByEntityId, useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
+export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
+export { transformWs } from "./utils/ws.utils";
+
+// ── Keyword (re-exported from shared for backward compat) ──────────────────
+// export { keywordService, targetKeywordService, useKeywordStore, useKeyboardShortcut, parseKeywordLink, isValidUrl, useKeywordHelper } from "@/shared";
+// export type { Keyword, KeywordType, KeywordSyncItem, KeywordSyncReport, UpsertExternalKeywordRequest, TargetKeywordTargetType } from "@/shared";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 export type { BaseTab, TabViewState, TabType, MultiProjectTabData } from "./types/tab.types";
 export type { ModuleDefinition, TabMeta, PanelTabDefinition } from "./moduleRegistry";
-export type { KeywordType, KeywordSyncItem } from "./commandPallete/keyword.types";
 export type { BreadcrumbItem } from "./utils/breadcrumb.utils";
+export type { SaveActions } from "./types/actions.types";
+
 // ── Module Registry ───────────────────────────────────────────────────────
 export { moduleRegistry } from "./moduleRegistry";
 export { keywordNavigatorRegistry } from "./commandPallete/keywordNavigator.registry";
 export type { KeywordPlugin, NavigationContext } from "./commandPallete/keywordNavigator.registry";
-export type { Keyword } from "./commandPallete/keyword.types";
-export type { TargetKeywordTargetType } from "./commandPallete/targetKeyword.service";
-export type { KeywordSyncReport } from "./commandPallete/keyword.types";
-export type { UpsertExternalKeywordRequest } from "./commandPallete/keyword.types";
-export type { SaveActions } from "./types/actions.types";
 // ── Auth (re-exported from shared for backward compat) ────────────────────
 export { AuthCallbackProvider, useAuthCallbackStore, AuthStoreProvider, useAuthStore, AuthGuard, AuthCallback, AuthContainer, useAuthHelper, authApi, initiateGoogleLogin, GOOGLE_OAUTH_CONFIG, extractAuthCodeFromUrl, extractStateFromUrl, extractOAuthError, retrieveAndClearPkceValues, validateState, generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "@/shared";
 export type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest, User, UserData, ExchangeTokenResponse } from "@/shared";

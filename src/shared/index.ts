@@ -59,6 +59,22 @@ export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./
 // ── globalShortcut ────────────────────────────────────────────────────────
 export { useGlobalShortcut } from "./globalShortcut/useGlobalShortcut";
 
+// ── keyword ───────────────────────────────────────────────────────────────
+// Services
+export { keywordService } from "./keyword/keyword.service";
+export { targetKeywordService } from "./keyword/targetKeyword.service";
+// Store
+export { useKeywordStore } from "./keyword/Keyword.store";
+// Hooks
+export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from "./hooks/useKeyboardShortcut";
+export { useKeywordHelper } from "./keyword/useKeyword.helper";
+// Utils
+export { parseKeywordLink } from "./keyword/keyword-link.utils";
+export { isValidUrl } from "./keyword/url.utils";
+// Types
+export type { Keyword, KeywordType, UpsertExternalKeywordRequest, KeywordSyncItem, KeywordSyncReport } from "./keyword/keyword.types";
+export type { TargetKeywordTargetType } from "./keyword/targetKeyword.service";
+
 // ── gridControl ───────────────────────────────────────────────────────────
 export { useGridControlStore, GridControlProvider } from "./gridControl/useGridControl.store";
 

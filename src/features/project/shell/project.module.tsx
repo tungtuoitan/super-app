@@ -8,7 +8,7 @@ import type { Task } from "@/features/taskDetail";
 // eslint-disable-next-line no-restricted-imports
 import { MultiProjectEditorPanel } from "@/features/multiProject";
 import type { KeywordPlugin } from "@/shell";
-import { parseKeywordLink } from "@/shell";
+import { parseKeywordLink } from "@/shared";
 import { projectService } from "../service/project.service";
 import { taskService } from "@/features/taskDetail";
 import type { Project } from "..";

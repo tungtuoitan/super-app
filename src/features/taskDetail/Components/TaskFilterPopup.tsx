@@ -140,7 +140,7 @@ export function TaskFilterPopup() {
                                     <div className="space-y-1.5">
                                         {options
                                             .sort((a:any, b:any) => {
-                                            const order = ORDER[group.key] || [];
+                                            const order = ORDER[group.key as keyof typeof ORDER] || [];
                                             return order.indexOf(a.code) - order.indexOf(b.code);
                                         })
                                         

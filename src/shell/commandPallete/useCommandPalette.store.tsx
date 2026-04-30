@@ -4,7 +4,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
-import { Keyword } from "@/shell";
+import type { Keyword } from "@/shared";
 
 export interface CommandPaletteContextData {
     // Visibility state

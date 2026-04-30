@@ -5,9 +5,9 @@
  */
 
 import { useAuthStore } from "@/shared";
-import { parseApiError, isUnauthorizedError } from "../../shared/utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "../utils/api-error.utils";
 import {useConsoleHelper} from "@/shared";
-import {keywordService, useKeywordStore} from "@/shell";
+import {keywordService, useKeywordStore} from "@/shared";
 
 
 export const useKeywordHelper = () => {

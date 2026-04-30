@@ -20,7 +20,6 @@ export { useNoteDetailHelper } from "./hooks/useNoteDetail.helper";
 
 // Types (used by workspace feature for isNote checks, etc.)
 export type { Note, NoteDTO, UpsertNoteDTO, WorkspaceLink, NoteType } from "./types/note.types";
-
 // Service (used by workspace feature to link notes)
 export { noteService } from "./service/note.service";
 

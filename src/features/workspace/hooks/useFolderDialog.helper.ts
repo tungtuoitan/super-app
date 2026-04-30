@@ -1,11 +1,11 @@
 import { useFolderDialogStore } from "../store/FolderDialog.store";
 import type { ItemType } from "../store/FolderDialog.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
-import { useAuthStore, useKeywordHelper } from "@/shell";
+import { useAuthStore } from "@/shell";
 import { workspaceService } from "../service/workspace.service"; 
 import type { FolderDialogFormErrors } from "../store/FolderDialog.store";
 import type { Folder } from "@/features/workspace/types/folder.types";
-import { constants } from "@/shared";
+import { constants, useKeywordHelper } from "@/shared";
 import { WorkspaceItemAction } from "../types/workspace.types";
 import { useConsoleHelper } from "@/shared";
 import { treeMiniHelper } from "./tree.miniHelper";

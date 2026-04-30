@@ -4,7 +4,7 @@
 
 import { config } from "config/app.config";
 import {ResultOptions} from "@/shared";
-import {apiFetch} from "../../shared/fetch/apiClient";
+import {apiFetch} from "../fetch/apiClient";
 
 export interface TargetKeywordDTO {
     id: number;

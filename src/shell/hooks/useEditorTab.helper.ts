@@ -1,7 +1,7 @@
 import { Note } from "@/features/note";
 import { useNoteGridStore } from "@/features/note";
-import { BaseTab, TabType, useKeywordStore } from "@/shell";
-import { constants } from "@/shared";
+import { BaseTab, TabType } from "@/shell";
+import { constants, useKeywordStore } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useGridControlStore } from "@/shared";
 import { WorkspaceItemV2 } from "@/features/workspace";

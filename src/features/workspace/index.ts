@@ -24,7 +24,7 @@ export { useWsStore } from "./store/ws/useWs.store";
 // Types
 export type { WorkspaceItemV2 } from "./types/workspace-v2.types";
 export type { WorkspaceFileItem } from "./types/workspace-v2.types";
-
+export type { NoteEntity } from "./types/workspace-v2.types";
 // Services
 export { wsService } from "./service/ws.service";
 export { workspaceService } from "./service/workspace.service";

@@ -10,8 +10,8 @@ import { useKeywordNavigationHelper } from "../commandPallete/useKeywordNavigati
 import { useWorkspaceStore } from "@/features/workspace";
 import { ICON_MAP, IconKey } from "@/shared";
 import { FolderIconWithBadge } from "@/shared";
-import {Keyword} from "../commandPallete/keyword.types";
-import {useKeywordStore} from "../commandPallete/Keyword.store";
+import {Keyword} from "../../shared/keyword/keyword.types";
+import {useKeywordStore} from "../../shared/keyword/Keyword.store";
 
 interface BreadcrumbProps {
     items: BreadcrumbItem[];

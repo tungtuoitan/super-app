@@ -1,16 +1,17 @@
 /**
  * Command Palette Helper
- * Business logic for command palette operations
+ * Business logic for command palette operations.
+ * Single entry point for all keyword data and navigation within commandPallete.
  */
 
-import { useKeywordNavigationHelper, useKeywordStore } from "@/shell";
-import { useAuthStore } from "@/shell";
-import { Keyword } from "@/shell";
+import { useAuthStore, fuzzyMatchWithDiacritics, targetKeywordService, useKeywordStore } from "@/shared";
+import type { Keyword, KeywordType } from "@/shared";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
-import { fuzzyMatchWithDiacritics } from "@/shared";
-import { targetKeywordService } from "@/shell";
 import { useCommandPaletteStore } from "./useCommandPalette.store";
 import { keywordNavigatorRegistry } from "./keywordNavigator.registry";
+import { useKeywordNavigationHelper } from "./useKeywordNavigation.helper";
+
+const ALL_KEYWORD_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];
 
 export const useCommandPaletteHelper = () => {
     const { allKeywords } = useKeywordStore();
@@ -26,6 +27,13 @@ export const useCommandPaletteHelper = () => {
             return parts.join("/");
         }
         return "";
+    };
+
+    /** Types that have at least one active keyword — used by UI for the filter bar */
+    const getActiveTypes = (): KeywordType[] => {
+        return ALL_KEYWORD_TYPES.filter((t) =>
+            allKeywords.some((k) => k.type === t && k.hardDeletedAt === null)
+        );
     };
 
     const getFilteredKeywords = (searchQuery: string) => {
@@ -146,6 +154,7 @@ export const useCommandPaletteHelper = () => {
     };
 
     return {
+        getActiveTypes,
         getFilteredKeywords,
         getKeywordIcon,
         handleSelectKeyword,

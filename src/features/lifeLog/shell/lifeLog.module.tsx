@@ -12,7 +12,7 @@ import type { LifeLogLog, LifeLogTrack } from "../types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { KeywordPlugin } from "@/shell";
-import { parseKeywordLink } from "@/shell";
+import { parseKeywordLink } from "@/shared";
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
 

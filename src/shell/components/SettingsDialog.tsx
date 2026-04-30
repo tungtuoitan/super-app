@@ -4,9 +4,8 @@ import { Label } from "@/shared";
 import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollArea } from "@/shared";
-import { keywordService, useKeywordHelper } from "@/shell";
-import type { KeywordSyncReport } from "@/shell";
-import {useStandardRegistryHelper} from "@/shared";
+import { keywordService, useKeywordHelper } from "@/shared";
+import type { KeywordSyncReport } from "@/shared";
 import {useAuthStore} from "@/shell";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 

@@ -3,17 +3,14 @@
  * VS Code-style Ctrl+P quick search for keywords
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, Link2 } from "lucide-react";
-import { useCommandPaletteStore, useKeywordStore } from "@/shell";
-import { useCommandPaletteHelper } from "@/shell";
-import { HighlightedText } from "../../shared/components/HighlightedText";
+import { useCommandPaletteStore } from "./useCommandPalette.store";
+import { useCommandPaletteHelper } from "./useCommandPalette.helper";
+import { useCommandPaletteKeyDown } from "./useCommandPaletteKeyDown";
+import { HighlightedText, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
+import type { Keyword, KeywordType } from "@/shared";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
-import type { Keyword, KeywordType } from "@/shell";
-import {useCommandPaletteKeyDown} from "@/shell";
-
-const ALL_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];
 
 const TYPE_LABELS: Record<KeywordType, string> = {
     workspace: "Workspace",
@@ -29,9 +26,8 @@ const TYPE_LABELS: Record<KeywordType, string> = {
 
 export function CommandPalette() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword, alreadyLinkedIds, setAlreadyLinkedIds } = useCommandPaletteStore();
-    const { getFilteredKeywords, handleSelectKeyword, close } = useCommandPaletteHelper();
-    const { allKeywords } = useKeywordStore();
-    useCommandPaletteKeyDown()
+    const { getFilteredKeywords, handleSelectKeyword, close, getActiveTypes } = useCommandPaletteHelper();
+    useCommandPaletteKeyDown();
 
     const [selectedType, setSelectedType] = useState<KeywordType | null>(null);
 
@@ -74,9 +70,7 @@ export function CommandPalette() {
     const isLinkMode = onLinkKeyword !== null;
 
     // Only show types that have at least 1 active keyword
-    const activeTypes = ALL_TYPES.filter((t) =>
-        allKeywords.some((k) => k.type === t && k.hardDeletedAt === null)
-    );
+    const activeTypes = getActiveTypes();
 
     return (
         <>

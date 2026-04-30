@@ -8,13 +8,12 @@ import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { useFolderDialogHelper } from "./useFolderDialog.helper";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
-import { constants } from "@/shared";
+import { constants, useKeywordHelper } from "@/shared";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction } from "../types/workspace.types";
-import { useAuthStore, useKeywordHelper } from "@/shell";
+import { useAuthStore } from "@/shell";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {useConsoleHelper} from "@/shared";
-import {useStandardRegistryHelper} from "@/shared";
 import {Folder} from "../types/folder.types";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 

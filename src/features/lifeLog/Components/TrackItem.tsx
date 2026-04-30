@@ -16,7 +16,7 @@ import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-import {useKeywordHelper} from "@/shell";
+import {useKeywordHelper} from "@/shared";
 
 const LONG_PRESS_MS = 500;
 

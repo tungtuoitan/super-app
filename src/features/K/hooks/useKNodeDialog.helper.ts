@@ -9,7 +9,7 @@ import type { KItemV2 } from "../types/K-v2.types";
 import {KtreeMiniHelper} from "./kTree/Ktree.miniHelper";
 import {useKLoader} from "./kTree/useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
-import {useKeywordHelper} from "@/shell";
+import {useKeywordHelper} from "@/shared";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();

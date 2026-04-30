@@ -10,7 +10,7 @@
  */
 
 import type { BaseTab } from "../types/tab.types";
-import type { Keyword } from "./keyword.types";
+import type { Keyword } from "../../shared/keyword/keyword.types";
 
 // ─── Contracts ───────────────────────────────────────────────────────────────
 

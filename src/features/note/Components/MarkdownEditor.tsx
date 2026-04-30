@@ -27,7 +27,7 @@ import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";
 import {useEditorTabBarStore} from "@/shell";
-import {useKeywordStore} from "@/shell";
+import {useKeywordStore} from "@/shared";
 
 export function MarkdownEditor() {
     const { allKeywords } = useKeywordStore();

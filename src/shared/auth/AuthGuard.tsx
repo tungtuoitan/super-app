@@ -16,7 +16,7 @@ import { configureApiClient } from "../fetch/apiClient";
 import {useAuthHelper} from "./useAuth.helpers";
 import {useAuthStore} from "./Auth.store";
 import { debugLog } from "../debug/useDebugLog"
-import {useKeywordHelper} from "@/shell";
+import {useKeywordHelper} from "../keyword/useKeyword.helper";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, $user, set$User } = useAuthStore();

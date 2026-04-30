@@ -3,9 +3,9 @@
  * Shows the icon + label of the entity that opened the current tab.
  */
 
-import React from "react";
 import { Cuboid, CheckSquare, FileText, Box, Layers, Activity } from "lucide-react";
-import { Keyword, useKeywordNavigationHelper, useKeywordStore } from "@/shell";
+import { Keyword, useKeywordStore } from "@/shared";
+import { useKeywordNavigationHelper } from "@/shell";
 
 interface BackButtonProps {
     openedBy: { link: string; label: string };
