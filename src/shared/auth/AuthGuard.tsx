@@ -16,10 +16,12 @@ import { configureApiClient } from "../fetch/apiClient";
 import {useAuthHelper} from "./useAuth.helpers";
 import {useAuthStore} from "./Auth.store";
 import { debugLog } from "../debug/useDebugLog"
+import {useKeywordHelper} from "@/shell";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, $user, set$User } = useAuthStore();
-    const { loadStandardRegistries, loadKeywords } = useStandardRegistryHelper();
+    const { loadStandardRegistries } = useStandardRegistryHelper();
+    const { loadKeywords } = useKeywordHelper();
     const { initAuthFromStorageToken, logout } = useAuthHelper();
 
     // Configure apiFetch singleton with token callbacks from AuthStore

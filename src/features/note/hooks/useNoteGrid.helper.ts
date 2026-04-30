@@ -3,7 +3,6 @@ import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { transformNotes } from "../utils/note.utils";
 import { Note } from "../types/note.types";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import { constants } from "@/shared";
 import { useAuthStore } from "@/shell";
@@ -13,7 +12,8 @@ import { filterUtils } from "@/shared";
 import { useGridControlStore } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
+import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "@/features/workspace";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
@@ -26,7 +26,7 @@ export const useNoteGridHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const _console = useConsoleHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
-    const { registries } = useGeneralStore();
+    const { registries } = useStandardRegistryStore();
 
     // Create new note (temporary with negative ID)
     const __createNewNote = () => {

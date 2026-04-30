@@ -5,10 +5,9 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Search, Link2 } from "lucide-react";
-import { useCommandPaletteStore } from "@/shell";
+import { useCommandPaletteStore, useKeywordStore } from "@/shell";
 import { useCommandPaletteHelper } from "@/shell";
 import { HighlightedText } from "../../shared/components/HighlightedText";
-import { useGeneralStore } from "@/shared";
 import { KeywordIconRenderer } from "./KeywordIconRenderer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import type { Keyword, KeywordType } from "@/shell";
@@ -31,7 +30,7 @@ const TYPE_LABELS: Record<KeywordType, string> = {
 export function CommandPalette() {
     const { isOpen, setIsOpen, searchQuery, setSearchQuery, selectedIndex, setSelectedIndex, inputRef, listRef, onLinkKeyword, alreadyLinkedIds, setAlreadyLinkedIds } = useCommandPaletteStore();
     const { getFilteredKeywords, handleSelectKeyword, close } = useCommandPaletteHelper();
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
     useCommandPaletteKeyDown()
 
     const [selectedType, setSelectedType] = useState<KeywordType | null>(null);

@@ -6,10 +6,10 @@ import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
-import { SPECIAL_IDS } from "@/shared";
 import { isNumber } from "lodash";
 import {useConsoleHelper} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
+import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();

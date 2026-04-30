@@ -12,22 +12,21 @@ import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import { useGridControlStore } from "@/shared";
-import { useStandardRegistryHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
+import {useKeywordHelper} from "@/shell";
 
 export const useNoteDetailHelper = () => {
     const { $user } = useAuthStore();
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceLoader();
-    const { currentWorkspace } = useWorkspaceStore();
     const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { registries, registriesLoading, allKeywords } = useGeneralStore();
+    const { registries } = useStandardRegistryStore();
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useGridControlStore();
-    const { loadKeywords } = useStandardRegistryHelper();
+    const { loadKeywords } = useKeywordHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
         const activeTab = getActiveTab();
@@ -151,8 +150,8 @@ export const useNoteDetailHelper = () => {
         }
 
     const hashtagOptions = registries
-        .filter((r) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
-        .map((item) => ({
+        .filter((r:any) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
+        .map((item:any) => ({
             id: item.code,
             label: item.code,
             desc: item.description || item.code,

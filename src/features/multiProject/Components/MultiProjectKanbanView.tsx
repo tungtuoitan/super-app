@@ -55,7 +55,7 @@ export function MultiProjectKanbanView() {
 
             <div className="flex-1 overflow-x-auto p-4">
                 <div className="flex gap-4 h-full">
-                    {statusOptions.map((status) => (
+                    {statusOptions.map((status:any) => (
                         <KanbanColumn
                             key={status.code}
                             status={status}

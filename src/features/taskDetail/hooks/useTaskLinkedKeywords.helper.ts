@@ -5,19 +5,18 @@
  */
 
 
-import { targetKeywordService, TargetKeywordTargetType } from "@/shell";
+import { targetKeywordService, TargetKeywordTargetType, useKeywordStore } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { Keyword } from "@/shell";
 import type { LinkedKeyword } from "../types/taskDetail.types";
-import {useGeneralStore} from "@/shared";
 
 export const useTaskLinkedKeywordsHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
     const { setLinkedKeywords, setIsLoadingLinkedKeywords } = useTaskDetailStore();
 
     /**

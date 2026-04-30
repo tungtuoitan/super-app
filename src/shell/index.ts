@@ -9,6 +9,7 @@
 export { useEditorTabBarStore, EditorTabBarProvider } from "./store/EditorTab.store";
 export { useActivityBarStore } from "./store/ActivityBar.store";
 export { useCommandPaletteStore } from "./commandPallete/useCommandPalette.store";
+export { useKeywordStore } from "./commandPallete/Keyword.store";
 
 // ── Services ──────────────────────────────────────────────────────────────
 export { keywordService } from "./commandPallete/keyword.service";
@@ -20,6 +21,7 @@ export { useActivityBarHelper } from "./hooks/useActivityBar.helper";
 export { useCommandPaletteHelper } from "./commandPallete/useCommandPalette.helper";
 export { useCommandPaletteKeyDown } from "./commandPallete/useCommandPaletteKeyDown";
 export { useTabBarHelper } from "./hooks/useTabBarHelper";
+export { useTabBarMenuHelper } from "./hooks/useTabBarMenu.helper";
 export { useCheckIsMobile } from "./hooks/useCheckIsMobile";
 export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
@@ -32,12 +34,13 @@ export { parseKeywordLink } from "./commandPallete/keyword-link.utils";
 export { isValidUrl } from "./commandPallete/url.utils";
 export { findKeywordForNote,parseBreadcrumbFromKeyword,enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils"
 export { transformWs } from "./utils/ws.utils"
+export { useKeywordHelper } from "./commandPallete/useKeyword.helper"
+
 // ── Types ─────────────────────────────────────────────────────────────────
 export type { BaseTab, TabViewState, TabType, MultiProjectTabData } from "./types/tab.types";
 export type { ModuleDefinition, TabMeta, PanelTabDefinition } from "./moduleRegistry";
-export type { KeywordType } from "./commandPallete/keyword.types";
+export type { KeywordType, KeywordSyncItem } from "./commandPallete/keyword.types";
 export type { BreadcrumbItem } from "./utils/breadcrumb.utils";
-// export type { transformWs } from "./utils/ws.utils";
 // ── Module Registry ───────────────────────────────────────────────────────
 export { moduleRegistry } from "./moduleRegistry";
 export { keywordNavigatorRegistry } from "./commandPallete/keywordNavigator.registry";

@@ -4,14 +4,11 @@
  * Pattern: Similar to useNoteGridHelper - uses store and service
  */
 
-import { useSnackbar } from "notistack";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { standardRegistryService } from "@/shared";
-import { keywordService } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "../utils/api-error.utils";
 import { StandardRegistry } from "@/shared";
-import { IAutoCompleteOptions } from "@/shared";
 import {useConsoleHelper} from "@/shared";
 
 /**
@@ -32,10 +29,7 @@ export const useStandardRegistryHelper = () => {
         setRegistries,
         setRegistriesLoading,
         setRegistriesError,
-        setAllKeywords,
-        setKeywordsLoading,
-        setKeywordsError
-    } = useGeneralStore();
+    } = useStandardRegistryStore();
     const _console = useConsoleHelper();
 
     /**
@@ -76,37 +70,7 @@ export const useStandardRegistryHelper = () => {
         }
     };
 
-    /**
-     * Load all keywords from backend (workspaces, folders, notes, headings, external links)
-     * Stores in global state for markdown editor autocomplete
-     */
-    const loadKeywords = async () => {
-        try {
-            setKeywordsLoading(true);
-            const token = $user.userToken;
-
-            // Call API to get all keywords
-            const keywords = await keywordService._getKeywords(token);
-
-            setAllKeywords(keywords);
-            setKeywordsError(null);
-        } catch (err) {
-            const errorMessage = await parseApiError(err);
-            setKeywordsError(new Error(errorMessage));
-
-            // Show snackbar for unauthorized errors
-            if (isUnauthorizedError(err)) {
-                _console.error("Unauthorized. Please login again.");
-            } else {
-                console.error("Failed to load keywords:", errorMessage);
-            }
-        } finally {
-            setKeywordsLoading(false);
-        }
-    };
-
     return {
         loadStandardRegistries,
-        loadKeywords,
     };
 };

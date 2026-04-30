@@ -6,7 +6,6 @@
 
 import { taskService } from "@/features/taskDetail";
 import type { TaskDTO, Task } from "@/features/taskDetail";
-import { generateTempId } from "@/shared";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
@@ -14,6 +13,7 @@ import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
 import {usePTaskStore} from "@/features/project/store/usePTask.store";
+import {generateTempId} from "@/features/workspace";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)

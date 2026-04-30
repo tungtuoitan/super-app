@@ -6,7 +6,7 @@ import {
     X as CloseIcon,
     XCircle as CloseAllIcon,
 } from "lucide-react";
-import { useTabBarMenuHelper } from "@/shared";
+import {useTabBarMenuHelper} from "@/shell/hooks/useTabBarMenu.helper";
 
 export function TabBarMenu() {
     const { contextTabId, isPinned, isChild, pinTab, unpinTab, closeAllSavedTabs, closeSavedTabsButPinned } = useTabBarMenuHelper();

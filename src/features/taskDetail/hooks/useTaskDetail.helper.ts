@@ -14,8 +14,8 @@ import React from "react";
 import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { taskService } from "../service/task.service";
-import { useAuthStore } from "@/shell";
-import { useGeneralStore } from "@/shared";
+import { useAuthStore, useKeywordStore } from "@/shell";
+import { useStandardRegistryStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
 import { useConsoleHelper } from "@/shared";
@@ -43,10 +43,9 @@ export const useTaskDetailHelper = () => {
     const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
     const { setTasks } = usePTaskStore();
     const { linkedKeywords, folderItems } = useTaskDetailStore();
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
 
     const { selectedTask } = useTaskDetailSelector();
-    const { submitVersionComment } = useTaskCommentHelper();
 
     // ── Linked keywords & workspace items ─────────────────────────────────────
     const { linkKeyword, unlinkKeyword } = useTaskLinkedKeywordsHelper();

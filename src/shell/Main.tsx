@@ -25,7 +25,7 @@ import { GridControlProvider } from "@/shared";
 import { MobileProvider } from "@/shared";
 import { DebugLoggerProvider } from "@/shared";
 import { ShellProvider } from "./store/ShellProvider";
-import { GeneralProvider } from "@/shared";
+import { StandardRegistryProvider } from "@/shared";
 import { CommandPaletteProvider } from "./commandPallete/useCommandPalette.store";
 import { PTaskProvider } from "@/features/project";
 import { AuthCallbackProvider } from "@/shared";
@@ -55,7 +55,7 @@ export function Main() {
                             <DebugLoggerProvider>
                                 <SnackbarProvider autoHideDuration={3000}>
                                     <DndProvider backend={HTML5Backend}>
-                                        <GeneralProvider>
+                                        <StandardRegistryProvider>
                                             <CommandPaletteProvider>
                                                 <OrchestratorContextMenuStoreProvider>
                                                     <ConfirmationPopoverProvider>
@@ -101,7 +101,7 @@ export function Main() {
                                                     </ConfirmationPopoverProvider>
                                                 </OrchestratorContextMenuStoreProvider>
                                             </CommandPaletteProvider>
-                                        </GeneralProvider>
+                                        </StandardRegistryProvider>
                                     </DndProvider>
                                 </SnackbarProvider>
                             </DebugLoggerProvider>

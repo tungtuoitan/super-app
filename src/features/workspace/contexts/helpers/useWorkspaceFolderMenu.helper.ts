@@ -25,10 +25,10 @@ import { useEditorTabHelper } from "@/shell";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
 import { useEditorTabBarStore } from "@/shell";
 import { useNoteDetailStore } from "@/features/note";
-import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/shared";
 import { Note } from "@/features/note";
 import {useConsoleHelper} from "@/shared";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
+import {collectIdsFromTree, generateTempId, generateUnsavedName} from "../../utils/temp-id.utils";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS
@@ -118,7 +118,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { openFolderDialog } = useFolderDialogHelper();
     const { processTabAfterDelete, openTab } = useEditorTabHelper();
     const { openTabs } = useEditorTabBarStore();
-    const { registries } = useGeneralStore();
+    const { registries } = useStandardRegistryStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 
     const selectedCount = selectedItemIds.length;
@@ -165,7 +165,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            statusCode: registries.find((reg:any) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
             type: "idea",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -196,7 +196,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 userId: $user.userId ?? 0,
                 name: name,
                 description: "",
-                statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+                statusCode: registries.find((reg:any) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 deletedAt: null,

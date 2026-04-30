@@ -6,41 +6,41 @@
 
 import { useMemo } from "react";
 import type { Task } from "@/features/taskDetail";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { constants } from "@/shared";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {usePTaskStore} from "../../store/usePTask.store";
 
 export const useTaskKanbanSelector = () => {
     const { tasks } = usePTaskStore();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
     const { projectId } = useProjectDetailStore();
 
     // Get status options from registriesByType
     const statusOptions = (() => {
         const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
-            .map((reg) => ({
+            .map((reg:any) => ({
                 code: reg.code,
                 label: reg.description || reg.code,
             }))
             .sort(
-                (a, b) =>
+                (a:any, b:any) =>
                     (constants.optionOrder.taskStatuses[a.label] ?? 999) -
                     (constants.optionOrder.taskStatuses[b.label] ?? 999),
             );
     })();
 
     // Filter tasks by projectId, exclude deleted
-    const filteredTasks = tasks.filter((task) => task.projectId === projectId && !task.deletedAt);
+    const filteredTasks = tasks.filter((task:any) => task.projectId === projectId && !task.deletedAt);
 
     // Group tasks by status
     const tasksByStatus = (() => {
         const grouped: Record<string, Task[]> = {};
-        statusOptions.forEach((status) => {
+        statusOptions.forEach((status:any) => {
             grouped[status.code] = [];
         });
-        filteredTasks.forEach((task) => {
+        filteredTasks.forEach((task:any) => {
             if (grouped[task.status]) {
                 grouped[task.status].push(task);
             } else {

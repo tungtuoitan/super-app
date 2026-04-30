@@ -7,13 +7,13 @@
  */
 
 import { useMemo } from "react";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { useTaskDetailSelector } from "./TaskDetailSelector";
 import {getChecklistTemplate, parseChecklistJson} from "../utils/checklist.utils";
 
 export const useTaskDetailChecklistSelector = () => {
     const { selectedTask } = useTaskDetailSelector();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
 
     const parsedChecklist = parseChecklistJson(selectedTask?.checklistJson ?? null)
 

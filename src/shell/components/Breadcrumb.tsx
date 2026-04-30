@@ -10,7 +10,8 @@ import { useKeywordNavigationHelper } from "../commandPallete/useKeywordNavigati
 import { useWorkspaceStore } from "@/features/workspace";
 import { ICON_MAP, IconKey } from "@/shared";
 import { FolderIconWithBadge } from "@/shared";
-import { useGeneralStore } from "@/shared";
+import {Keyword} from "../commandPallete/keyword.types";
+import {useKeywordStore} from "../commandPallete/Keyword.store";
 
 interface BreadcrumbProps {
     items: BreadcrumbItem[];
@@ -18,7 +19,7 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
     const { navigateLink } = useKeywordNavigationHelper();
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
     const { currentWorkspace } = useWorkspaceStore();
 
     if (!items || items.length === 0) {
@@ -32,7 +33,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         }
 
         // Find keyword by link
-        const keyword = allKeywords.find(k => k.link === item.link);
+        const keyword = allKeywords.find((k: Keyword) => k.link === item.link);
         if (keyword) {
             navigateLink(keyword);
         }

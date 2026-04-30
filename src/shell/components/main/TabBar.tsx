@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabHelper, useKeywordStore } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useTabKeyboardShortcuts } from "@/shell";
 import { useTabBarHelper } from "@/shell";
@@ -10,7 +10,7 @@ import { moduleRegistry } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
 import {Ws} from "@/features/workspace";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 // ─── Tab Icon ────────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ export function TabBar() {
     } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, generateBreadcrumbForTab } = useEditorTabHelper();
     const { currentWorkspace } = useWorkspaceStore();
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();
     const { isMobile } = useMobileStore();

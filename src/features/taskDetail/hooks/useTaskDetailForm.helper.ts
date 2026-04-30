@@ -9,7 +9,7 @@ import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDTO, taskService } from "../service/task.service";
 import { useAuthStore } from "@/shell";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
@@ -19,7 +19,7 @@ import {getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextT
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
     const { setProjectOptions, setIsLoadingProjects, setParentTaskOptions, setIsLoadingParentTasks } = useTaskDetailStore();
 
     const { taskTab, selectedTask } = useTaskDetailSelector();

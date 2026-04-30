@@ -11,7 +11,8 @@ import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
-import { constants, generateTempId } from "@/shared";
+import { constants } from "@/shared";
+import {generateTempId} from "@/features/workspace";
 
 /**
  * Transform task DTOs to domain models

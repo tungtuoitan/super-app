@@ -9,9 +9,8 @@
 
 import type { NodeApi } from "react-arborist";
 import type { TreeFolder } from "./tree.miniHelper";
-import { treeMiniHelper } from "./tree.miniHelper";
 import { useWorkspaceStore } from "../store/Workspace.store";
-import { SPECIAL_IDS } from "@/shared";
+import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useTreeHelper2 = () => {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentWorkspace } = useWorkspaceStore();

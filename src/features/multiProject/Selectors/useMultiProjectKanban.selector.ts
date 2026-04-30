@@ -7,25 +7,25 @@
 import { useMemo } from "react";
 import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { constants } from "@/shared";
 
 export const useMultiProjectKanbanSelector = () => {
     const { tasks } = useMpTaskStore();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
     const { projectIds } = useMultiTimelineStore();
 
     // Get status options from registriesByType
     const statusOptions = useMemo(() => {
         const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
-            .map((reg) => ({
+            .map((reg:any) => ({
                 code: reg.code,
                 label: reg.description || reg.code,
             }))
             .sort(
-                (a, b) =>
+                (a:any, b:any) =>
                     (constants.optionOrder.taskStatuses[a.label] ?? 999) -
                     (constants.optionOrder.taskStatuses[b.label] ?? 999),
             );
@@ -39,7 +39,7 @@ export const useMultiProjectKanbanSelector = () => {
     // Group tasks by status
     const tasksByStatus = useMemo(() => {
         const grouped: Record<string, Task[]> = {};
-        statusOptions.forEach((status) => {
+        statusOptions.forEach((status:any) => {
             grouped[status.code] = [];
         });
         filteredTasks.forEach((task) => {

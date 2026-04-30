@@ -13,7 +13,7 @@ import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {KtreeMiniHelper, KTreeNode} from "./Ktree.miniHelper";
 import {useKLoader} from "./useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
-import {useStandardRegistryHelper} from "@/shared";
+import {useKeywordHelper} from "@/shell";
 
 export const KuseTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();
@@ -22,7 +22,7 @@ export const KuseTreeHelper = () => {
     const { loadTree } = useKLoader(); 
     const _console = useConsoleHelper();
     const { $user } = useAuthStore();
-    const { loadKeywords } = useStandardRegistryHelper();
+    const { loadKeywords } = useKeywordHelper();
 
     /**
      * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)

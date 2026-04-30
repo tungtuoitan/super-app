@@ -6,7 +6,7 @@ import { WorkspaceLinksCell } from "../Components/WorkspaceLinksCell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { constants } from "@/shared";
 import { useNavigate, useLocation } from "react-router-dom";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
 
 export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<number>) {
     const {
@@ -22,7 +22,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         containerWidth,
     } = useNoteGridStore();
 
-    const { registries } = useGeneralStore();
+    const { registries } = useStandardRegistryStore();
     const navigate = useNavigate();
     const location = useLocation();
     const { setSelectedWorkspaceId, setScrollToItem, setSelectedItemIds } = useWorkspaceStore();
@@ -49,7 +49,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
     const columns = useMemo<ColumnDef<Note>[]>(() => {
         const getStatusDescription = (statusCode: string | undefined): string => {
             if (!statusCode) return "-";
-            const status = registries.find((r) => r.code === statusCode && r.type === constants.standardRegistryFE.types.noteStatus);
+            const status = registries.find((r:any) => r.code === statusCode && r.type === constants.standardRegistryFE.types.noteStatus);
             return status?.description || statusCode;
         };
 

@@ -4,7 +4,7 @@ import { Label } from "@/shared";
 import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollArea } from "@/shared";
-import { keywordService } from "@/shell";
+import { keywordService, useKeywordHelper } from "@/shell";
 import type { KeywordSyncReport } from "@/shell";
 import {useStandardRegistryHelper} from "@/shared";
 import {useAuthStore} from "@/shell";
@@ -20,7 +20,7 @@ export function SettingsDialog() {
     const [isSyncing, setIsSyncing] = useState(false);
     const [syncReport, setSyncReport] = useState<KeywordSyncReport | null>(null);
     const [syncError, setSyncError] = useState<string | null>(null);
-    const { loadStandardRegistries, loadKeywords } = useStandardRegistryHelper();
+    const { loadKeywords } = useKeywordHelper();
 
     useEffect(() => {
         if (!settingsOpen) {

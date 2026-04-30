@@ -26,11 +26,11 @@ import {
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";
-import {useGeneralStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
+import {useKeywordStore} from "@/shell";
 
 export function MarkdownEditor() {
-    const { registries, allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
     const { navigateLink } = useKeywordNavigationHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const { getActiveTab } = useEditorTabHelper();

@@ -14,7 +14,7 @@ import { useWorkspaceStore } from "@/features/workspace";
 import { constants } from "@/shared";
 import { useTreeStatusHelper } from "@/features/workspace";
 import { useMonaco } from "@monaco-editor/react";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 import { IconKey } from "@/shared";
 
@@ -31,15 +31,15 @@ export function NoteBodyInPanel() {
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
 
-    const { registries, registriesLoading, allKeywords } = useGeneralStore();
+    const { registries, registriesLoading } = useStandardRegistryStore();
 
     let isDeleted = activeNote?.deletedAt !== null;
     let isHardDeleted = activeNote?.isHardDeleted;
     const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
 
     const noteStatusOptions = registries
-        .filter((r) => r.type === constants.standardRegistryFE.types.noteStatus && r.isActive)
-        .map((item) => ({
+        .filter((r:any) => r.type === constants.standardRegistryFE.types.noteStatus && r.isActive)
+        .map((item:any) => ({
             id: item.code,
             label: item.description || item.code,
             desc: item.description || item.code,

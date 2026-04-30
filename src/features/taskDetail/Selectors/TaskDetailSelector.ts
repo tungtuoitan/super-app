@@ -8,7 +8,7 @@
  */
 
 import { Task } from "../types/task.types";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { constants } from "@/shared";
 import { IStatusOption } from "@/shared";
 import { usePTaskStore } from "@/features/project";
@@ -19,7 +19,7 @@ export const useTaskDetailSelector = () => {
     const { openTabs, activeTabId } = useEditorTabBarStore();
     const { allProjects } = useTaskDetailStore();
     const { tasks } = usePTaskStore();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
 
     // ── Tab & task ────────────────────────────────────────────────────────────
 
@@ -53,7 +53,7 @@ export const useTaskDetailSelector = () => {
 
     // ── Dropdown options ──────────────────────────────────────────────────────
 
-    const taskTypeOptions: IStatusOption[] = (registriesByType["taskType"] ?? []).map((reg) => ({
+    const taskTypeOptions: IStatusOption[] = (registriesByType["taskType"] ?? []).map((reg:any) => ({
                 id: reg.code,
                 code: reg.code,
                 label: reg.description || reg.code,
@@ -64,7 +64,7 @@ export const useTaskDetailSelector = () => {
     const colors = (code: string) => constants.optionColor.taskStatus.colors[code] ?? constants.optionColor.taskStatus.default;
     const statusOptions: IStatusOption[] = (() => {
         return (registriesByType["task_status"] ?? [])
-            .map((reg) => ({
+            .map((reg:any) => ({
                 id: reg.code,
                 code: reg.code,
                 label: reg.description || reg.code,
@@ -72,7 +72,7 @@ export const useTaskDetailSelector = () => {
                 textColor: colors(reg.code).text,
             }))
             .sort(
-                (a, b) =>
+                (a:any, b:any) =>
                     (constants.optionOrder.taskStatuses[a.label] ?? 999) -
                     (constants.optionOrder.taskStatuses[b.label] ?? 999),
             );
@@ -80,7 +80,7 @@ export const useTaskDetailSelector = () => {
 
     const priorityOptions: IStatusOption[] = (() => {
         return (registriesByType["task_priority"] ?? [])
-            .map((reg) => ({
+            .map((reg:any) => ({
                 id: reg.code,
                 code: reg.code,
                 label: reg.description || reg.code,
@@ -88,7 +88,7 @@ export const useTaskDetailSelector = () => {
                 textColor: colors(reg.code).text,
             }))
             .sort(
-                (a, b) =>
+                (a:any, b:any) =>
                     (constants.optionOrder.taskPriorities[a.label] ?? 999) -
                     (constants.optionOrder.taskPriorities[b.label] ?? 999),
             );
@@ -97,13 +97,13 @@ export const useTaskDetailSelector = () => {
     // ── Current selected option values ────────────────────────────────────────
 
     const currentStatusValue: IStatusOption | null =
-        statusOptions.find((o) => o.code === selectedTask?.status) ?? null;
+        statusOptions.find((o:any) => o.code === selectedTask?.status) ?? null;
 
     const currentPriorityValue: IStatusOption | null =
-        priorityOptions.find((o) => o.code === selectedTask?.priority) ?? null;
+        priorityOptions.find((o:any) => o.code === selectedTask?.priority) ?? null;
 
     const currentTaskTypeValue: IStatusOption | null =
-        taskTypeOptions.find((o) => o.code === selectedTask?.taskType) ?? null;
+        taskTypeOptions.find((o:any) => o.code === selectedTask?.taskType) ?? null;
 
     // ── Date limit bounds (for DateRangePicker warnings) ──────────────────────
 

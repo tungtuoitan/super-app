@@ -3,18 +3,17 @@
  * Business logic for command palette operations
  */
 
-import { useKeywordNavigationHelper } from "@/shell";
+import { useKeywordNavigationHelper, useKeywordStore } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { Keyword } from "@/shell";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "@/shared";
 import { targetKeywordService } from "@/shell";
-import { useGeneralStore } from "@/shared";
 import { useCommandPaletteStore } from "./useCommandPalette.store";
 import { keywordNavigatorRegistry } from "./keywordNavigator.registry";
 
 export const useCommandPaletteHelper = () => {
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
     const { setIsOpen, setSearchQuery, setSelectedIndex, setOnLinkKeyword, setAlreadyLinkedIds } = useCommandPaletteStore();
     const { navigateLink } = useKeywordNavigationHelper();
     const { $user } = useAuthStore();
@@ -40,7 +39,7 @@ export const useCommandPaletteHelper = () => {
         };
 
         if (!searchQuery.trim()) {
-            return activeKeywords.map((keyword) => ({
+            return activeKeywords.map((keyword: Keyword) => ({
                 keyword,
                 matchedIndices: { name: [], link: [] },
                 displayLink: resolveDisplayLink(keyword),
@@ -102,7 +101,7 @@ export const useCommandPaletteHelper = () => {
         setAlreadyLinkedIds(new Set());
     };
 
-    const handleSelectKeyword = async (keyword: any) => {
+    const handleSelectKeyword = async (keyword: Keyword) => {
         if (keyword.hardDeletedAt !== null) return;
         const openedBy = await _resolveOpenedBy(keyword.id);
         navigateLink(keyword, openedBy);

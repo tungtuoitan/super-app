@@ -5,8 +5,7 @@
 
 import React from "react";
 import { Cuboid, CheckSquare, FileText, Box, Layers, Activity } from "lucide-react";
-import { useKeywordNavigationHelper } from "@/shell";
-import {useGeneralStore} from "@/shared";
+import { Keyword, useKeywordNavigationHelper, useKeywordStore } from "@/shell";
 
 interface BackButtonProps {
     openedBy: { link: string; label: string };
@@ -50,13 +49,13 @@ function BackIcon({ type, className }: { type: string; className: string }) {
 }
 
 export function BackButton({ openedBy }: BackButtonProps) {
-    const { allKeywords } = useGeneralStore();
+    const { allKeywords } = useKeywordStore();
     const { navigateLink } = useKeywordNavigationHelper();
 
     const type = getTypeFromLink(openedBy.link);
 
     const handleBack = () => {
-        const keyword = allKeywords.find(k => k.link === openedBy.link);
+        const keyword = allKeywords.find((k: Keyword) => k.link === openedBy.link);
         if (keyword) {
             navigateLink(keyword);
         }

@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowNodeHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useMultiProjectTaskFlowSelector } from "@/features/multiProject/Selectors/useMultiProjectTaskFlow.selector";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
 import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/features/taskDetail";
@@ -33,7 +33,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const { editingNodeId, draggingNodeId, flowNodes, flowEdges, connectingSourceId, setFlowNodes } = useMultiTaskFlowStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleChangeProject, handleChangeStatus, isNodeLocked } = useMultiProjectTaskFlowNodeHelper();
     const { allProjects } = useMultiProjectTaskFlowSelector();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
     const { openTaskTab } = useTaskTabHelper();
     const zoom = useStore((s) => s.transform[2]);
     const { setTasks } = useMpTaskStore();
@@ -436,7 +436,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                     style={{ top: "100%", marginTop: 6, transform: `translateX(-50%) scale(${1 / zoom})` }}
                 >
                     {/* Status pills from registry */}
-                    {statusOptions.map((opt) => {
+                    {statusOptions.map((opt:any) => {
                         const isActive = data.task.status === opt.code;
                         const color = (constants.optionColor.taskStatus.colors[opt.code] ?? constants.optionColor.taskStatus.default).bg;
                         return (

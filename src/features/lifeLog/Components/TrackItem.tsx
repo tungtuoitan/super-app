@@ -16,7 +16,7 @@ import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-import {useStandardRegistryHelper} from "@/shared";
+import {useKeywordHelper} from "@/shell";
 
 const LONG_PRESS_MS = 500;
 
@@ -33,7 +33,7 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
     const { isMobile } = useMobileStore();
     const { logs } = useLifeLogStore();
     const [flashing, setFlashing] = useState(false);
-    const { loadKeywords } = useStandardRegistryHelper();
+    const { loadKeywords } = useKeywordHelper();
 
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const didLongPressRef = useRef(false);

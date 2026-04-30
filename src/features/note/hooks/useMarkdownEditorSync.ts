@@ -4,16 +4,15 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabHelper, useKeywordStore } from "@/shell";
 import { constants } from "@/shared";
 import { convertToDisplayVersion, updateDecorations } from "@/features/note/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import {useGeneralStore} from "@/shared";
 
 export function useMarkdownEditorSync({$mi}: { $mi: any }) {
     const { getActiveTab, openTab } = useEditorTabHelper();
-    const { allKeywords } = useGeneralStore(); 
+    const { allKeywords } = useKeywordStore(); 
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
 
     // Get active tab and note

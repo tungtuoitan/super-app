@@ -15,14 +15,14 @@ import { userProfileService } from "@/shared";
 import {parseApiError} from "@/shared";
 import {UserFilters, ViewFilter} from "@/shared";
 import {useAuthStore} from "@/shell";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
 
 const DEFAULT_FILTERS = constants.filters.defaults.taskGrid as ViewFilter;
 const GROUPS = constants.filters.taskGroups;
 
 export function TaskFilterPopup() {
     const { $user, set$User } = useAuthStore();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
     const [open, setOpen] = React.useState(false);
     const [pending, setPending] = React.useState<ViewFilter>(DEFAULT_FILTERS);
 
@@ -122,7 +122,7 @@ export function TaskFilterPopup() {
 
                     {/* Filter Fields */}
                     <div className="space-y-4">
-                        {GROUPS.map((group) => {
+                        {GROUPS.map((group:any) => {
                             const options = registriesByType[group.standardRegistryType] || [];
                             const isEmpty = !(pending as any)[group.key]?.trim();
                             const ORDER = {
@@ -139,12 +139,12 @@ export function TaskFilterPopup() {
                                     </div>
                                     <div className="space-y-1.5">
                                         {options
-                                            .sort((a, b) => {
+                                            .sort((a:any, b:any) => {
                                             const order = ORDER[group.key] || [];
                                             return order.indexOf(a.code) - order.indexOf(b.code);
                                         })
                                         
-                                        .map((option) => {
+                                        .map((option:any) => {
                                             const checked = isChecked(group.key, option.code);
                                             return (
                                                 <div key={option.code} className="flex items-center space-x-2">

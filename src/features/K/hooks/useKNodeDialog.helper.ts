@@ -8,12 +8,13 @@ import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/K
 import type { KItemV2 } from "../types/K-v2.types";
 import {KtreeMiniHelper} from "./kTree/Ktree.miniHelper";
 import {useKLoader} from "./kTree/useK.loader";
-import {useAuthStore, useConsoleHelper, useStandardRegistryHelper} from "@/shared";
+import {useAuthStore, useConsoleHelper} from "@/shared";
+import {useKeywordHelper} from "@/shell";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();
     const { loadTree } = useKLoader();
-    const { loadKeywords } = useStandardRegistryHelper();
+    const { loadKeywords } = useKeywordHelper();
 
     // Form state from NodeDialogStore
     const {

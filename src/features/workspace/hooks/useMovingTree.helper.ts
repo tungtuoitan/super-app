@@ -10,10 +10,10 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/shared";
-import { SPECIAL_IDS } from "@/shared";
 import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";
 import {useConsoleHelper} from "@/shared";
 import {useKLoader} from "@/features/K";
+import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useMovingTreeHelper = () => {
     const {

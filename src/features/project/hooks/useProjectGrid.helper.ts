@@ -5,7 +5,6 @@
 
 import { projectService, ProjectDTO } from "../service/project.service";
 import {  useProjectStore } from "../store/useProject.store";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/shared";
 import { useAuthStore } from "@/shell";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
@@ -14,6 +13,7 @@ import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/shared";
 import {Project} from "../types/project.types";
+import {generateTempId, generateUnsavedName} from "@/features/workspace";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)

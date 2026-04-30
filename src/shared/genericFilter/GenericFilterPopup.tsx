@@ -7,7 +7,7 @@
 
 import React, { useEffect } from "react";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
-import { Button } from "@/shared";
+import { Button, useStandardRegistryStore } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
 import { Checkbox } from "@/shared";
 import { RadioGroup, RadioGroupItem } from "@/shared";
@@ -18,7 +18,6 @@ import { useGenericFilterHelper } from "@/shared";
 import { useGridControlStore } from "@/shared";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "../utils/formatters";
 import {FilterFieldConfig, ViewFilter} from "./filter.types";
-import {useGeneralStore} from "../standardRegistry/General.store";
 import {useAuthStore} from "@/shared";
 
 export function GenericFilterPopup() {
@@ -31,7 +30,7 @@ export function GenericFilterPopup() {
         getFieldErrors,
         isApplyDisabled,
     } = useGenericFilterHelper();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
     const { moduleName, filterViewKey, uiFilters, setUIFilters } = useGridControlStore();
     const { $user } = useAuthStore();
     const [open, setOpen] = React.useState(false);

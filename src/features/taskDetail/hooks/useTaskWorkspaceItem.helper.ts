@@ -11,17 +11,16 @@ import { type Task } from "../types/task.types";
 import { type TaskFolderItem } from "../types/taskDetail.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { useNoteDetailStore } from "@/features/note";
-import { generateTempId, generateUnsavedName } from "@/shared";
 import { constants } from "@/shared";
-import { workspaceService } from "@/features/workspace";
+import { generateTempId, generateUnsavedName, workspaceService } from "@/features/workspace";
 import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace";
 import { useEditorTabHelper } from "@/shell";
-import {useGeneralStore} from "@/shared";
+import {useStandardRegistryStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();
-    const { registries } = useGeneralStore();
+    const { registries } = useStandardRegistryStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { openTab } = useEditorTabHelper();
@@ -105,7 +104,7 @@ export const useTaskWorkspaceItemHelper = () => {
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: registries.find((reg) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            statusCode: registries.find((reg:any) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
             createdAt: new Date(),
             updatedAt: new Date(),
             createdBy: $user.userName || "Unknown",

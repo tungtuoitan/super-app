@@ -5,7 +5,7 @@
  */
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { useGeneralStore } from "@/shared";
+import { useStandardRegistryStore } from "@/shared";
 import { constants } from "@/shared";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared";
@@ -16,7 +16,7 @@ import {Project} from "../types/project.types";
 export const useProjectDetailSelector = () => {
     const { openTabs } = useEditorTabBarStore();
     const { projectId, tabId } = useProjectDetailStore();
-    const { registriesByType } = useGeneralStore();
+    const { registriesByType } = useStandardRegistryStore();
 
     // Current editor tab
     const currentTab = openTabs.find((t) => t.id === tabId) || null;
@@ -40,7 +40,7 @@ export const useProjectDetailSelector = () => {
     const statusOptions: IStatusOption[] = (() => {
         const projectStatuses = registriesByType["project_status"] || [];
         return projectStatuses
-            .map((reg) => {
+            .map((reg:any) => {
                 const colors = getProjectStatusColors(reg.code);
                 return {
                     id: reg.code,
@@ -50,7 +50,7 @@ export const useProjectDetailSelector = () => {
                     textColor: colors.text,
                 };
             })
-            .sort((a, b) =>
+            .sort((a:any, b:any) =>
                 (constants.optionOrder.projectStatuses[a.label] ?? 999) - (constants.optionOrder.projectStatuses[b.label] ?? 999),
             );
     })()

@@ -7,7 +7,7 @@
 import { useAuthStore } from "@/shared";
 import { useGridControlStore } from "@/shared";
 import { constants } from "@/shared";
-import { filterUtils } from "../utils/filter.utils";
+import { filterUtils } from "./filter.utils";
 import { userProfileService } from "@/shared";
 import { envConfig } from "../../config/env.config";
 import { STORAGE_KEYS, storageService } from "@/shared";

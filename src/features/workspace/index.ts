@@ -49,3 +49,6 @@ export { WorkspaceChildNodeMenu } from "./contexts/menus/WorkspaceChildNodeMenu"
 export { WorkspaceSelectorMenu } from "./contexts/menus/WorkspaceSelectorMenu";
 export { WsGridMenu } from "./contexts/menus/WsGridMenu";
 
+// Utils
+export { generateTempId, collectIdsFromTabs, generateUnsavedName, collectIdsFromTree, SPECIAL_IDS } from "./utils/temp-id.utils";
+

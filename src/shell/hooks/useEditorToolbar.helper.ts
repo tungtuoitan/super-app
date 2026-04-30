@@ -7,7 +7,6 @@
 
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useStandardRegistryHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 
 // Feature save actions
@@ -16,13 +15,14 @@ import { useProjectSaveActions } from "@/features/project";
 import { useLifeLogSaveActions } from "@/features/lifeLog";
 import {useWsSaveActions} from "@/features/workspace";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
+import {useKeywordHelper} from "../commandPallete/useKeyword.helper";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabHelper();
     const { isSaving, setIsSaving } = useEditorTabBarStore();
     const { setOpenTabs } = useEditorTabBarStore();
-    const { loadKeywords } = useStandardRegistryHelper();
+    const { loadKeywords } = useKeywordHelper();
 
     const activeTab = getActiveTab();
 
