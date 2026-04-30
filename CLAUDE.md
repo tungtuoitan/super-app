@@ -60,3 +60,14 @@ Validate all new/modified code against these rules before committing.
 
 ## UI file rule
 - each UI file contain max 1 big component
+
+## Import Architecture (enforced by ESLint)
+
+Dependency direction: `features → shell`, `features → shared`, `shell → shared`
+
+- **features**: can import from `@/features/X` (index only), `@/shell` (index only), `@/shared` (index only)
+- **shell**: same as a feature — can import from feature indexes and `@/shared` index; no subdirectory imports
+- **shared**: fully independent — CANNOT import from any feature or shell at all
+- **Cross-boundary imports MUST go through the index barrel file** — never import from subdirectories (`@/features/X/store/foo`, `@/shell/hooks/bar`, etc.)
+- **Exception**: `index.ts` barrel files themselves may import freely for re-exporting
+- **To add a new feature**: add its name to `FEATURES` array in `.eslintrc.js`

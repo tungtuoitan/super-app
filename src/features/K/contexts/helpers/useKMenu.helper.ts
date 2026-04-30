@@ -12,11 +12,10 @@ import {KUpsertWorkspaceItemRequest, KItemAction} from "../../types/K.types";
 import {KDTO} from "../../types/K-dto.types";
 import {kconstants} from "../../utils/K.Constants";
 import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
-import {getConfirmMessage} from "../../utils/confirmation-message.utils";
 import {Folder} from "../../types";
 import {NodeItemType} from "../../store/KNodeDialog.store";
-import {useAuthStore, useConsoleHelper, useEditorTabHelper} from "@/shell";
-import {useConfirmationPopoverHelper, useOrchestratorContextMenuStore} from "@/shared";
+import {useAuthStore, useEditorTabHelper} from "@/shell";
+import {getConfirmMessage, useConfirmationPopoverHelper, useConsoleHelper, useOrchestratorContextMenuStore} from "@/shared";
 
 // --------------------------------
 // RECURSIVE HELPER FUNCTIONS

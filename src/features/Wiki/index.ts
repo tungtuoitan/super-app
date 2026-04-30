@@ -8,3 +8,6 @@ export { WikiProvider } from "./store/useWiki.store";
 
 // shell module
 export { wikiModule } from "./shell/wiki.module";
+
+// Context menus
+export { WikiGraphNodeMenu } from "./contexts/menus/WikiGraphNodeMenu";

@@ -5,7 +5,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 export interface ContextMenuPosition {
     x: number;

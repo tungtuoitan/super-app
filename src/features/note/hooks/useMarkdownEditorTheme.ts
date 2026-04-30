@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 export function useMarkdownEditorTheme({ $mi }: { $mi: any }) {
     useEffect(() => {

@@ -12,7 +12,7 @@ import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";
 import { KDialog } from "./KExplorer/KDialog/KDialog";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import {useKLoader} from "../hooks/kTree/useK.loader";
 
 /**

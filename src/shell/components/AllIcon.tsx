@@ -30,7 +30,7 @@ import {
     Armchair,
 } from "lucide-react";
 
-import { SAModule } from "../../shared/types/SAModule";
+import { SAModule } from "../types/SAModule";
 
 /**
  * Application icon management and navigation configuration.

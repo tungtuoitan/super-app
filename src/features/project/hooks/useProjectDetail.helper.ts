@@ -5,15 +5,15 @@
 
 import { projectService, ProjectDTO } from "../service/project.service";
 import { useAuthStore } from "@/shell";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { useWorkspaceHelper } from "@/features/workspace/hooks/useWorkspaceHelper";
+import { useWorkspaceStore } from "@/features/workspace";
+import { useWorkspaceHelper } from "@/features/workspace";
 import { useGridControlStore } from "@/shared";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { useConsoleHelper } from "@/shell";
-import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
-import { constants } from "@/utils/index";
+import { useConsoleHelper } from "@/shared";
+import { parseAsLocalDate, toLocalISOString } from "@/shared";
+import { constants } from "@/shared";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import type { TabType } from "../types/projectDetail.type";
 import {useEditorTabBarStore} from "@/shell";

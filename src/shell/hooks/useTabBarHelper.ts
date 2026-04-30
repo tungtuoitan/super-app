@@ -9,7 +9,7 @@ import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { useTabKeyboardShortcuts } from "./useTabKeyboardShortcuts";
 import { BaseTab } from "@/shell";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 
 /**

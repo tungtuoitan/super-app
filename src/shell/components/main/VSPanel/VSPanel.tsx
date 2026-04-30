@@ -6,10 +6,10 @@ import { useEditorTabHelper } from "@/shell";
 import { useMobileStore } from "@/shared";
 import { useGridControlStore } from "@/shared";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell";
-import { ConsoleTab } from "./MobileConsole/ConsoleTab";
+import { ConsoleTab } from "../../../../shared/console/ConsoleTab";
 import { NoteBodyInPanel } from "@/features/note";
 import { TabNameList } from "./TabNameList";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import {useActivityBarStore} from "@/shell";
 
 const NoteBodyInPanelContent = () => <NoteBodyInPanel />;

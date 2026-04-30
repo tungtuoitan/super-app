@@ -9,11 +9,11 @@ import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/worksp
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
-import { constants } from "@/utils/constants";
-import { SPECIAL_IDS } from "@/utils/temp-id.utils";
+import { constants } from "@/shared";
+import { SPECIAL_IDS } from "@/shared";
 import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";
-import {useConsoleHelper} from "@/shell";
-import {useKLoader} from "@/features/K/hooks/kTree/useK.loader";
+import {useConsoleHelper} from "@/shared";
+import {useKLoader} from "@/features/K";
 
 export const useMovingTreeHelper = () => {
     const {

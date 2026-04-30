@@ -6,12 +6,12 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
+import { useWorkspaceStore } from "@/features/workspace";
 import { useKeywordNavigationHelper } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
-import { useTreeStatusHelper } from "@/features/workspace/hooks/useTreeStatusHelper";
-import { constants } from "@/utils/constants";
+import { useTreeStatusHelper } from "@/features/workspace";
+import { constants } from "@/shared";
 import { Loader2 } from "lucide-react";
 import {
     convertToDisplayVersion,
@@ -22,7 +22,7 @@ import {
     setupLinkProvider,
     setupMarkdownFolding,
     updateDecorations,
-} from "@/utils/markdown.utils";
+} from "@/features/note/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";

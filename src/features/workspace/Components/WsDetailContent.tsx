@@ -10,7 +10,7 @@ import { Textarea } from "@/shared";
 import { ScrollArea } from "@/shared";
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import {useWsDetailHelper} from "../hooks/ws/useWsDetail.helper";
 import {Ws} from "../types/workspace.types";

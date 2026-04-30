@@ -5,8 +5,8 @@
 
 import React, { useState } from "react";
 import type { WorkspaceLink } from "../types/note.types";
-import { constants } from "@/utils/constants";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
+import { constants } from "@/shared";
+import { useWorkspaceStore } from "@/features/workspace";
 
 interface WorkspaceLinksCellProps {
     source?: string;

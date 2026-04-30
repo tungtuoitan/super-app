@@ -1,5 +1,5 @@
 
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { WikiTabData } from "../types/wiki.type";
 import {useEditorTabBarStore} from "@/shell";

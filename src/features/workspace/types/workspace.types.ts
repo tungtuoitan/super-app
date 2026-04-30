@@ -3,7 +3,7 @@
  * Aligns with backend AddItemToWorkspaceRequest and WorkspaceItem
  */
 
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 /**
  * Type aliases for backend API compatibility

@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import { useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useLifeLogTabHelper } from "@/features/lifeLog";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { Task } from "@/features/taskDetail";
 import type { BaseTab } from "@/shell";
 

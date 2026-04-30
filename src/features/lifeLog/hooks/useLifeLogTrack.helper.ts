@@ -9,7 +9,7 @@ import { useAuthStore } from "@/shell";
 import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/shared";
 import { debugLog } from "@/shell";
 
 function transformTrack(dto: LifeLogTrackDTO): LifeLogTrack {

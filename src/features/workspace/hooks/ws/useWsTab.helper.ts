@@ -4,11 +4,11 @@
  */
 
 import { BaseTab } from "@/shell";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
+import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/shared";
 import {Ws, WsResponse} from "../../types/workspace.types";
 import {useEditorTabBarStore} from "@/shell";
 

@@ -1,0 +1,55 @@
+/**
+ * OAuth Callback Page
+ * Handles Google OAuth redirect with authorization code
+ */
+
+import { useEffect, useRef } from "react";
+import { useAuthHelper } from "./useAuth.helpers";
+import { Alert, AlertDescription } from "../components";
+import { AlertCircle, Loader2 } from "lucide-react";
+import {useAuthCallbackStore} from "./AuthCallback.store";
+
+export function AuthCallback() {
+    const { callbackError, isProcessing } = useAuthCallbackStore();
+    const { handleOAuthCallback, navigateToHome } = useAuthHelper();
+
+    // Prevent double execution in React StrictMode
+    const hasProcessed = useRef(false);
+
+    useEffect(() => {
+        if (hasProcessed.current) {
+            return;
+        }
+        hasProcessed.current = true;
+
+        handleOAuthCallback();
+    }, []);
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+            <div className="w-full max-w-md space-y-4">
+                {isProcessing ? (
+                    <div className="flex flex-col items-center gap-4 text-center">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                        <div className="space-y-2">
+                            <h2 className="text-xl font-semibold text-foreground">Completing sign in...</h2>
+                            <p className="text-sm text-muted-foreground">Please wait while we authenticate your account</p>
+                        </div>
+                    </div>
+                ) : callbackError ? (
+                    <div className="space-y-4">
+                        <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>{callbackError}</AlertDescription>
+                        </Alert>
+                        <div className="text-center">
+                            <button onClick={navigateToHome} className="text-sm text-primary hover:underline">
+                                Return to home
+                            </button>
+                        </div>
+                    </div>
+                ) : null}
+            </div>
+        </div>
+    );
+}

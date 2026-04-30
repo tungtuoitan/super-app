@@ -2,7 +2,7 @@ import React from "react";
 import { ConfirmCloseDialog } from "@/shell";
 import { EditorToolbar } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useOpenTabSync } from "../../hooks/useOpenTabsSync";
 import { TabBar } from "./TabBar";
 import { moduleRegistry } from "@/shell";

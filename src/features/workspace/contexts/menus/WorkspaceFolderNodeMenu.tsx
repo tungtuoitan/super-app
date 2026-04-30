@@ -10,7 +10,7 @@ import {
     RotateCcw as RestoreIcon,
     BarChart3 as TrackingIcon,
 } from "lucide-react";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useWorkspaceFolderMenuHelper } from "../helpers/useWorkspaceFolderMenu.helper";
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useOrchestratorContextMenuStore } from "@/shared";

@@ -7,7 +7,7 @@ import { useKeywordNavigationHelper } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { Keyword } from "@/shell";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
-import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
+import { fuzzyMatchWithDiacritics } from "@/shared";
 import { targetKeywordService } from "@/shell";
 import { useGeneralStore } from "@/shared";
 import { useCommandPaletteStore } from "./useCommandPalette.store";

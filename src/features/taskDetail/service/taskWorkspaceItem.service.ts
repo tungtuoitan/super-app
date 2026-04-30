@@ -2,7 +2,7 @@
  * TaskWorkspaceItem Service - API communication for task-workspace item links
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import type { TaskWorkspaceItemDTO } from "../types/taskDetail.types";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";

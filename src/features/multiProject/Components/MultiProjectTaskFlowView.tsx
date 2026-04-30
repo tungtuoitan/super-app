@@ -25,7 +25,7 @@ import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTas
 import { useMultiProjectTaskFlowHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
 import { useMultiProjectTaskFlowNodeHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { cn } from "@/lib/utils";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import { NODE_WIDTH, NODE_HEIGHT } from "../utils/multiProjectTaskFlow.utils";

@@ -7,7 +7,7 @@ import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFolderItem } from "@/features/workspace/types/workspace-v2.types";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { HighlightText } from "./HighlightText";
 import { ICON_MAP, IconKey } from "@/shared";

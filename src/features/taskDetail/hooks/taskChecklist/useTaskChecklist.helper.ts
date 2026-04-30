@@ -7,18 +7,7 @@
  *             TaskDetailChecklistHelper — no params from outside.
  */
 
-import {
-    validateChecklistText,
-    parseTextToChecklist,
-    checklistToText,
-    toggleChecklistItem,
-    flatItemIndex,
-    findItemCursorOffset,
-    getItemCheckState,
-    getFlatItems,
-    migrateToTestcase,
-    migrateFromTestcase,
-} from "@/utils/checklist.utils";
+
 import {useTaskDetailChecklistSelector} from "../../Selectors/TaskDetailChecklistSelector";
 import {useTaskChecklistSelector} from "../../Selectors/TaskChecklistSelector";
 import {useTaskDetailSelector} from "../../Selectors/TaskDetailSelector";
@@ -26,6 +15,7 @@ import {useTaskChecklistStore} from "../../store/useTaskChecklist.store";
 import {useTaskSectionStore} from "../../store/useTaskSection.store";
 import {useTaskDetailChecklistHelper} from "./useTaskDetailChecklist.helper";
 import {useTaskCommentHelper} from "../taskComment/useTaskComment.helper";
+import {checklistToText, findItemCursorOffset, flatItemIndex, getFlatItems, getItemCheckState, migrateFromTestcase, migrateToTestcase, parseTextToChecklist, toggleChecklistItem, validateChecklistText} from "../../utils/checklist.utils";
 
 export const useTaskChecklistHelper = () => {
     // ── Read from selectors ───────────────────────────────────────────────────

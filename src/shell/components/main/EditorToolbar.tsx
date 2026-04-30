@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shar
 import { useEditorTabHelper } from "@/shell";
 import { useEditorToolbarHelper } from "@/shell";
 import { useGlobalShortcut } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useProjectStore } from "@/features/project";
 import { useAuthStore } from "@/shell";
 import { projectService } from "@/features/project";

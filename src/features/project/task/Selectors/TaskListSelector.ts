@@ -7,7 +7,7 @@
 import { useGeneralStore } from "@/shared";
 import { IStatusOption } from "@/shared";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import {usePTaskStore} from "../../store/usePTask.store";

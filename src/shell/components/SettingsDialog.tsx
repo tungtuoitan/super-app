@@ -7,7 +7,7 @@ import { ScrollArea } from "@/shared";
 import { keywordService } from "@/shell";
 import type { KeywordSyncReport } from "@/shell";
 import {useStandardRegistryHelper} from "@/shared";
-import {useAuthStore} from "../auth/Auth.store";
+import {useAuthStore} from "@/shell";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];

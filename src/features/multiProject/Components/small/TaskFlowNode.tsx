@@ -18,13 +18,13 @@ import { useMultiProjectTaskFlowSelector } from "@/features/multiProject/Selecto
 import { useGeneralStore } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
-import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/utils/checklist.utils";
-import { constants } from "@/utils/constants";
+import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/features/taskDetail";
+import { constants } from "@/shared";
 import { ExternalLink, ChevronDown, ChevronRight, Circle, CheckSquare2, Square } from "lucide-react";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { taskService } from "@/features/taskDetail";
 import { useAuthStore } from "@/shell";
-import { toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/shared";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
 
 const HANDLE_BASE = "!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150";

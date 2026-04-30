@@ -4,10 +4,9 @@
  * Colors, date formatting, DTO → domain transform.
  */
 
-import { Task } from "@/features/taskDetail/types/task.types";
-import { TaskDTO } from "@/features/taskDetail/service/task.service";
-import { constants } from "@/utils/constants";
-import { parseAsLocalDate } from "@/utils/date.utils";
+import { constants } from "@/shared";
+import { parseAsLocalDate } from "@/shared";
+import {Task, TaskDTO} from "../types/task.types";
 
 /** Task status bg/text colors from constants */
 export const getTaskStatusColors = (status: string) => {

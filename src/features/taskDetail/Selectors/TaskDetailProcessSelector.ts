@@ -6,8 +6,7 @@
  * Depends on: useTaskDetailSelector (for selectedTask).
  */
 
-import { useMemo } from "react";
-import { parseChecklistJson } from "@/utils/checklist.utils";
+import {parseChecklistJson} from "../utils/checklist.utils";
 import { useTaskDetailSelector } from "./TaskDetailSelector";
 
 export const useTaskDetailProcessSelector = () => {

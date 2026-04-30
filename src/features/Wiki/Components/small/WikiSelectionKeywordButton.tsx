@@ -5,7 +5,7 @@ import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
 import { wikiService } from "../../service/wiki.service";
 import type { WikiKeyword } from "../../types/wiki.type";
 import { MONO_ACCENT } from "../../utils/wiki.graph.utils";
-import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
+import { fuzzyMatchWithDiacritics } from "@/shared";
 
 function findMatchedKeyword(text: string, keywords: WikiKeyword[]): WikiKeyword | null {
     const normalized = text.trim().toLowerCase();

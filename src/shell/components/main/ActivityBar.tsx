@@ -1,12 +1,12 @@
 import { Settings, UserCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { SettingsDialog } from "../SettingsDialog";
-import { AccountsDialog } from "../../auth/AccountsDialog";
+import { AccountsDialog } from "../AccountsDialog";
 import { useActivityBarHelper } from "@/shell";
 import { useAuthStore } from "@/shell";
 import { useGridControlStore } from "@/shared";
 import { moduleRegistry, type ModuleDefinition } from "@/shell";
-import type { ActivityBarView } from "@/utils/constants";
+import type { ActivityBarView } from "@/shared";
 import {useActivityBarStore} from "@/shell";
 
 // ─── Per-module button (own component so hooks inside useBadge work) ─────────

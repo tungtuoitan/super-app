@@ -5,14 +5,14 @@
 
 import { projectService, ProjectDTO } from "../service/project.service";
 import {  useProjectStore } from "../store/useProject.store";
-import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/utils/index";
+import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "@/shared";
 import { useAuthStore } from "@/shell";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { parseAsLocalDate } from "@/utils/date.utils";
+import { parseAsLocalDate } from "@/shared";
 import {Project} from "../types/project.types";
 
 /**

@@ -18,7 +18,8 @@ import {kconstants} from "../../../utils/K.Constants";
 import {getAllIconLabel} from "../../../shared/icons/icon.utils";
 import {KIconKey} from "../../../shared/icons/icon.types";
 import {useNodeDialogStore} from "../../../store/KNodeDialog.store";
-import {getIconDefaultColor, useKeyboardShortcut} from "@/shared";
+import { getIconDefaultColor } from "@/shared";
+import { useKeyboardShortcut } from "@/shell";
 
 export function KDialog() {
     // Get state from ExplorerStore

@@ -9,7 +9,7 @@ import { useEffect, useRef } from "react";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type * as _monaco from "monaco-editor";
 
 export function useMarkdownEditorViewStateSync() {

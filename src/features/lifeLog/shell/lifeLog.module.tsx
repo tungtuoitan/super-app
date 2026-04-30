@@ -7,12 +7,12 @@ import { LogTypeIcon } from "../Components/LogTypeIcon";
 import { TrackIconDisplay } from "../Components/TrackIconDisplay";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { lifeLogService } from "../service/lifeLog.service";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { LifeLogLog, LifeLogTrack } from "../types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { KeywordPlugin } from "@/shell";
-import { parseKeywordLink } from "@/utils/keyword-link.utils";
+import { parseKeywordLink } from "@/shell";
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
 

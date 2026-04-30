@@ -1,4 +1,4 @@
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import type { WikiExtractResult, WikiInfo, WikiKeyword } from "../types/wiki.type";
 import {apiFetch} from "@/shared";
 

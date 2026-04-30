@@ -4,7 +4,7 @@ import { useWikiStore } from "../../store/useWiki.store";
 import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
 import { useWikiTabHelper } from "../../hooks/useWikiTab.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { wikiService } from "../../service/wiki.service";
 import {
     buildGraphNodes, simulateStep,

@@ -36,3 +36,7 @@ export { useNoteSaveActions } from "./hooks/useNoteSaveActions";
 
 // shell module
 export { noteModule } from "./shell/note.module";
+
+// Context menus
+export { NoteGridMenu } from "./contexts/menus/NoteGridMenu";
+export { RichTextEditorMenu } from "./contexts/menus/RichTextEditorMenu";

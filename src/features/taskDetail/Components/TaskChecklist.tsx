@@ -9,7 +9,6 @@
  * Skip button is shown inline next to check (not hover-only on the right).
  */
 
-import { flatItemIndex, getChecklistTypeLabel, getItemCheckState, checklistProgress } from "@/utils/checklist.utils";
 import type { ChecklistType } from "../types/checklist.types";
 import { REQUIRED_ENVIRONMENTS, OPTIONAL_ENVIRONMENTS } from "../task.constants";
 import type { TestcaseEnvironment } from "../task.constants";
@@ -28,6 +27,7 @@ import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklist
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskChecklistHeadless } from "../hooks/taskChecklist/useTaskChecklist.headless";
 import {useTaskChecklistHelper} from "../hooks/taskChecklist/useTaskChecklist.helper";
+import {checklistProgress, flatItemIndex, getChecklistTypeLabel, getItemCheckState} from "../utils/checklist.utils";
 
 export function TaskChecklist() {
     return <TaskChecklistInner />;

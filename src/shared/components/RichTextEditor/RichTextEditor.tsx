@@ -31,15 +31,13 @@ import {
     ChevronDown,
     Code2,
 } from "lucide-react";
-import { fileService, UploadContext } from "@/shared";
-import { useAuthStore } from "@/shell";
+import { fileService, UploadContext, useAuthStore, useConsoleHelper } from "@/shared";
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import "./RichTextEditor.css";
-import { useConsoleHelper } from "@/shell";
 
 interface RichTextEditorProps {
     value: string;
@@ -281,8 +279,7 @@ export function RichTextEditor({
 
                     // Insert image into editor with fileId for future loading
                     // The fileId is stored in data-file-id attribute for re-loading when content is loaded
-                    // @ts-ignore - setImage and data-file-id are added by the ProxyImage/ImageResize extension
-                    editor.chain().focus().setImage({
+                    (editor.chain().focus() as any).setImage({
                         src: imageUrl,
                         "data-file-id": fileId?.toString() || null,
                     }).run();

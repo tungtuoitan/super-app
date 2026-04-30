@@ -4,6 +4,8 @@ import { Main } from "./shell/Main";
 import "./shell/modules.config";
 // Register all keyword navigator plugins
 import "./shell/commandPallete/keywordNavigator.config";
+// Register all context menu plugins
+import "./shell/contextMenu.config";
 
 import "./App.css";
 

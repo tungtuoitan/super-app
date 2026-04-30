@@ -6,7 +6,7 @@
  */
 
 import { WorkspaceItem, FolderItem, NoteItem, FileItem, FolderMetadata, NoteMetadata, FileMetadata } from "../types/workspace.types";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 /**
  * Type aliases for backend API types

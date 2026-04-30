@@ -3,7 +3,7 @@
  * Displays project status with color coding (GitHub-style)
  */
 
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 interface ProjectStatusBadgeProps {
     status: string;

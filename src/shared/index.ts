@@ -4,49 +4,55 @@
  * Internal imports within shared should use relative paths.
  */
 
+// ── Constants (must be FIRST — other shared files import constants via @/shared barrel) ──
+export { constants } from "./constants";
+export type { ActivityBarView } from "./constants";
+
+// ── Auth (must be SECOND — no internal @/shared deps; consumed early by shell/features) ──
+export { AuthCallbackProvider, useAuthCallbackStore, AuthStoreProvider, useAuthStore, AuthGuard, AuthCallback, AuthContainer, useAuthHelper, authApi, initiateGoogleLogin, GOOGLE_OAUTH_CONFIG, extractAuthCodeFromUrl, extractStateFromUrl, extractOAuthError, retrieveAndClearPkceValues, validateState, generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "./auth";
+export type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest, User, UserData, ExchangeTokenResponse } from "./auth";
+
 // ── Components ────────────────────────────────────────────────────────────
 export * from "./components";
 
 // ── Hooks ─────────────────────────────────────────────────────────────────
-export { useConfirmationPopoverHelper } from "./hooks/useConfirmationPopover.helper";
-export { useGenericFilterHelper } from "./hooks/useGenericFilterHelper";
-export { useGlobalShortcut } from "./hooks/useGlobalShortcut";
-export { useIsMobile } from "./hooks/useIsMobile";
-export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from "../shell/commandPallete/useKeyboardShortcut";
-export { useKeywordNavigationHelper, findFolderInWorkspace, findNoteByEntityId } from "../shell/commandPallete/useKeywordNavigation.helper";
-export { useStandardRegistryHelper } from "./hooks/useStandardRegistry.helper";
+export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";
+export { useGenericFilterHelper } from "./genericFilter/useGenericFilterHelper";
+export { useGlobalShortcut } from "./globalShortcut/useGlobalShortcut";
+export { useIsMobile } from "./checkDevice/useIsMobile";
+export { useStandardRegistryHelper } from "./standardRegistry/useStandardRegistry.helper";
     
 // ── Stores ────────────────────────────────────────────────────────────────
-export { debugLogStore } from "./store/debugLog.store";
-export type { DebugLogEntry } from "./store/debugLog.store";
-export { useConfirmationPopoverStore, ConfirmationPopoverProvider } from "./store/ConfirmationPopover.store";
-export type { ConfirmationPopoverOptions } from "./store/ConfirmationPopover.store";
-export { useDebugLogger, DebugLoggerProvider, useLogger } from "./store/DebugLogger.store";
-export { useGeneralStore, GeneralProvider } from "./store/General.store";
-export { useMobileStore, MobileProvider } from "./store/Mobile.store";
-export { useGridControlStore, GridControlProvider } from "./store/useGridControl.store";
+export { debugLogStore } from "./debug/debugLog.store";
+export type { DebugLogEntry } from "./debug/debugLog.store";
+export { useConfirmationPopoverStore, ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopover.store";
+export type { ConfirmationPopoverOptions } from "./confirmPopover/ConfirmationPopover.store";
+export { useDebugLogger, DebugLoggerProvider, useLogger } from "./debug/DebugLogger.store";
+export { useGeneralStore, GeneralProvider } from "./standardRegistry/General.store";
+export { useMobileStore, MobileProvider } from "./checkDevice/Mobile.store";
+export { useGridControlStore, GridControlProvider } from "./gridControl/useGridControl.store";
+export { useConsoleStore, ConsoleProvider } from "./console/useConsole.store";
+export { useConsoleHelper } from "./console/useConsole.helper";
 
 // ── Services ──────────────────────────────────────────────────────────────
-export { apiFetch, acquireRefreshToken, configureApiClient } from "./services/apiClient";
-export { fileService } from "./services/file.service";
-export type { UploadContext } from "./services/file.service";
-export { flowService } from "./services/flow.service";
+export { apiFetch, acquireRefreshToken, configureApiClient } from "./fetch/apiClient";
+export { fileService } from "./file/file.service";
+export type { UploadContext } from "./file/file.service";
+export { flowService } from "./flow/flow.service";
 export { keywordService } from "../shell/commandPallete/keyword.service";
-export { standardRegistryService } from "./services/standardRegistry.service";
-export { storageService, STORAGE_KEYS } from "./services/storage.service";
+export { standardRegistryService } from "./standardRegistry/standardRegistry.service";
+export { storageService, STORAGE_KEYS } from "./localStorage/storage.service";
 export { targetKeywordService } from "../shell/commandPallete/targetKeyword.service";
-export { userProfileService } from "./services/userProfile.service";
+export { userProfileService } from "./userProfile/userProfile.service";
 
 // ── Types ─────────────────────────────────────────────────────────────────
-export type { SAModule } from "./types/SAModule";
-export type { SaveActions } from "./types/actions.types";
-export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./types/filter.types";
-export type { IconCategory, IconProps } from "./types/icon.types";
+export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./genericFilter/filter.types";
+export type { IconCategory, IconProps } from "./icons/icon.types";
 export type { KeywordType, Keyword, UpsertExternalKeywordRequest, KeywordSyncItem, KeywordSyncReport } from "../shell/commandPallete/keyword.types";
 export type { ResultOptions } from "./types/resultOptions.types";
-export type { RegistryType, StandardRegistry, StandardRegistryDTO, StandardRegistryResponse, GetStandardRegistryParams } from "./types/standardRegistry.types";
-export type { UpdateUserProfileRequest } from "./types/userProfile.types";
-export type { FlowEdgeDTO, FlowNodePositionDTO } from "./types/flow.types";
+export type { RegistryType, StandardRegistry, StandardRegistryDTO, StandardRegistryResponse, GetStandardRegistryParams } from "./standardRegistry/standardRegistry.types";
+export type { UpdateUserProfileRequest } from "./userProfile/userProfile.types";
+export type { FlowEdgeDTO, FlowNodePositionDTO } from "./flow/flow.types";
 // ── Icons ─────────────────────────────────────────────────────────────────
 export { IconKey } from "./icons/icon.types";
 export { ICON_COLORS, ICON_MAP, ICON_GROUPS, ICON_CONFIG } from "./icons/icon.config";
@@ -59,8 +65,22 @@ export { useConfirmation, ConfirmationProvider } from "./menuContexts/Confirmati
 export { useOrchestratorContextMenuStore, OrchestratorContextMenuStoreProvider } from "./menuContexts/ContextMenu.store";
 export type { OrchestratorContextMenuType } from "./menuContexts/ContextMenu.store";
 export { OrchestratorContextMenu } from "./menuContexts/OrchestratorMenuContext";
-export { useOrchestratorContextMenuHelper } from "./menuContexts/helpers/useOrchestratorContextMenu.helper";
-export { useTabBarMenuHelper } from "./menuContexts/helpers/useTabBarMenu.helper";
+export { useOrchestratorContextMenuHelper } from "./menuContexts/useOrchestratorContextMenu.helper";
+export { useMenuContext } from "./menuContexts/useMenuContext";
+export { useTabBarMenuHelper } from "../shell/hooks/useTabBarMenu.helper";
+export { contextMenuRegistry } from "./menuContexts/contextMenu.registry";
+export type { ContextMenuPlugin } from "./menuContexts/contextMenu.registry";
+
+// ── Constants & Utils ─────────────────────────────────────────────────────
+export { generateTempId, collectIdsFromTabs, generateUnsavedName, collectIdsFromTree, SPECIAL_IDS } from "../features/workspace/utils/temp-id.utils";
+export { parseApiError, isUnauthorizedError } from "./utils/api-error.utils";
+export { parseAsLocalDate, toLocalISOString } from "./utils/date.utils";
+export { fuzzyMatchWithDiacritics, removeDiacritics, findMatchIndices } from "./utils/fuzzy-search.utils";
+export { getDeviceFingerprint } from "./utils/deviceFingerprint";
+export { filterUtils } from "./utils/filter.utils";
+export { formatDate, formatDateTime, isEmpty, truncateText, getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "./utils/formatters";
+export { getConfirmMessage } from "./confirmPopover/confirmation-message.utils";
+export type { GetConfirmMessageParams, ConfirmMessage } from "./confirmPopover/confirmation-message.utils";
 
 // ── Styles ────────────────────────────────────────────────────────────────
 export { Grow, GroupIconContainer, StyledAppBar } from "./styles/commonStyles";

@@ -14,9 +14,9 @@ import { taskService } from "../../service/task.service";
 import { useAuthStore } from "@/shell";
 import { BaseTab } from "@/shell";
 import { ChecklistJSON } from "../../types/checklist.types";
-import { isChecklistAllDone } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import {useEditorTabBarStore} from "@/shell";
+import {isChecklistAllDone} from "../../utils/checklist.utils";
 
 export type ProcessUpdater = ChecklistJSON | ((current: ChecklistJSON) => ChecklistJSON);
 

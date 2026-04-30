@@ -1,7 +1,7 @@
 import { FileText } from "lucide-react";
 import { NoteGrid } from "../Components/NoteGrid";
 import { NoteEditorPanel } from "../Components/NoteEditorPanel";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
 import type { Note } from "../types/note.types";
 import type { BaseTab } from "@/shell";

@@ -16,7 +16,7 @@ import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useTaskTabHelper } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { cn } from "@/lib/utils";
 import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";

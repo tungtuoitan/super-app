@@ -8,9 +8,9 @@
 import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
-import { toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/shared";
 import {useMultiProjectTaskGridHelper} from "./useMultiProjectTaskGrid.helper";
 import {useAuthStore} from "@/shell";
 

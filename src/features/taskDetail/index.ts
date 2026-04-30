@@ -17,6 +17,14 @@ export type { TaskDTO } from "./service/task.service";
 // Utils
 export { getTaskStatusColors, getTaskPriorityColors, transformTaskData } from "./utils/TaskDetail.utils";
 export {
+    parseChecklistJson,
+    checklistProgress,
+    toggleChecklistItem,
+    getItemCheckState,
+    flatItemIndex,
+    getFlatItems,
+} from "./utils/checklist.utils";
+export {
     generateDateRange,
     formatMonthHeader,
     sortTasksHierarchically,

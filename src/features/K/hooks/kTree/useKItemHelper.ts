@@ -5,7 +5,7 @@ import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";
 import { isNumber } from "lodash";
-import {useConsoleHelper} from "@/shell";
+import {useConsoleHelper} from "@/shared";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {Note} from "../../types/note.types";
 import {useKLoader} from "./useK.loader";

@@ -38,7 +38,7 @@ export function useKTestFlowHeadless(selectedTestId: number | null, questions: K
         setSavedEdges([]);
         setSavedPositions({});
         setPositionsLoaded(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps 
     }, [selectedTestId]);
 
     // Load positions + edges only after questions for this test are available

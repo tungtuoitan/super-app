@@ -4,7 +4,7 @@ import { KKnowledgeEditorPanel } from "../Components/KKnowledgeEditorPanel";
 import { KNodeEditorPanel } from "../Components/KNodeEditorPanel/KNodeEditorPanel";
 import { KMovingTab } from "../Components/KMovingTree/KMovingTab";
 import { useKStore } from "../store/K.store";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
 
 const KMovingTabAdapter = () => <KMovingTab />;

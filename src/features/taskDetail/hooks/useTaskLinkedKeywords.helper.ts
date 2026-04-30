@@ -7,8 +7,8 @@
 
 import { targetKeywordService, TargetKeywordTargetType } from "@/shell";
 import { useAuthStore } from "@/shell";
-import { useConsoleHelper } from "@/shell";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { useConsoleHelper } from "@/shared";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { Keyword } from "@/shell";
 import type { LinkedKeyword } from "../types/taskDetail.types";

@@ -6,9 +6,9 @@
  */
 
 import { useEditorTabHelper } from "./useEditorTab.helper";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useStandardRegistryHelper } from "@/shared";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 
 // Feature save actions
 import { useNoteSaveActions } from "@/features/note";

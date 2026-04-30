@@ -2,10 +2,10 @@
  * Keyword Service - API communication for keyword operations
  */
 
-import { config } from "@/utils/config/app.config";
-import type { Keyword, UpsertExternalKeywordRequest, KeywordSyncReport } from "@/shell";
+import { config } from "config/app.config";
+import type { Keyword, UpsertExternalKeywordRequest, KeywordSyncReport } from "./keyword.types";
 import {ResultOptions} from "@/shared";
-import {apiFetch} from "../../shared/services/apiClient";
+import {apiFetch} from "../../shared/fetch/apiClient";
 
 const _getKeywords = async (
     _token: string,

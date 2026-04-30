@@ -1,4 +1,4 @@
-import type { CustomTabsJSON } from "@/features/taskDetail/types/customTab.types";
+import {CustomTabsJSON} from "../types/customTab.types";
 
 /** Generate a simple unique ID */
 export function generateTabId(): string {

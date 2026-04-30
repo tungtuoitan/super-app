@@ -1,7 +1,7 @@
 import { Note } from "@/features/note";
 import { useNoteGridStore } from "@/features/note";
 import { BaseTab, TabType } from "@/shell";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useGridControlStore } from "@/shared";
 import { WorkspaceItemV2 } from "@/features/workspace";
@@ -11,7 +11,7 @@ import {
     enrichBreadcrumbWithColors,
     buildBreadcrumbFromTree,
     BreadcrumbItem,
-} from "@/utils/breadcrumb.utils";
+} from "@/shell";
 import { useLifeLogStore } from "@/features/lifeLog";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
 import type { Task } from "@/features/taskDetail";

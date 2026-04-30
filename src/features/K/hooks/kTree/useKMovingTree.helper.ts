@@ -10,7 +10,7 @@ import {KtreeMiniHelper} from "./Ktree.miniHelper";
 import {kconstants} from "../../utils/K.Constants";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {useKLoader} from "./useK.loader";
-import {useAuthStore, useConsoleHelper} from "@/shell";
+import {useAuthStore, useConsoleHelper} from "@/shared";
 import {IAutoCompleteOptions} from "@/shared";
 
 export const useKMovingTreeHelper = () => {

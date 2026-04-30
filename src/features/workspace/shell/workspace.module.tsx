@@ -2,7 +2,7 @@ import { Boxes, Box, BarChart3, ArrowRightLeft } from "lucide-react";
 import { WorkspaceView } from "../Components/WorkspaceView";
 import { WsEditorPanel } from "../Components/WsEditorPanel";
 import { MovingTab } from "../Components/VSPanel/MovingTab";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
 
 const MovingTabAdapter = () => <MovingTab />;

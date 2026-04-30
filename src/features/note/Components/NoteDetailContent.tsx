@@ -7,7 +7,7 @@ import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useEditorTabHelper } from "@/shell";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { MarkdownEditor } from "@/features/note/Components/MarkdownEditor";
 import { useMonaco } from "@monaco-editor/react";
 import { Loader2 } from "lucide-react";

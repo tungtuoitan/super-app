@@ -1,5 +1,5 @@
 import { BookOpen } from "lucide-react";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
 import type { BaseTab } from "@/shell";
 import WikiGraphView from "../Components/WikiGraphView/WikiGraphView";

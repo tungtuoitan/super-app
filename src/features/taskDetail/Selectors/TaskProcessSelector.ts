@@ -6,12 +6,8 @@
  * Reads process data from useTaskDetailProcessSelector.
  */
 
-import { useMemo } from "react";
-import {
-    isChecklistAllDone,
-    checklistProgress,
-    getFlatItems,
-} from "@/utils/checklist.utils";
+
+import {checklistProgress, getFlatItems, isChecklistAllDone} from "../utils/checklist.utils";
 import { useTaskDetailProcessSelector } from "./TaskDetailProcessSelector";
 
 export const useTaskProcessSelector = () => {

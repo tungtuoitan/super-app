@@ -7,7 +7,7 @@ import { useKTestFlowHeadless } from "@/features/K/hooks/test/useKTestFlow.headl
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { QuestionFlowNode } from "./small/QuestionFlowNode";
 import { KQuestionFlowEdge } from "./small/KQuestionFlowEdge";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useGlobalShortcut } from "@/shared";
 import type { KTestQuestion } from "@/features/K/types/kTest.type";
 import type { QuestionFlowNodeData } from "@/features/K/types/kTestFlow.type";

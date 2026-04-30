@@ -18,7 +18,7 @@ import { useAuthStore } from "@/shell";
 import {WorkspaceDTO} from "../types/workspace-dto.types";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {useMovingTreeStore} from "../store/MovingTree.store";
-import {useConsoleHelper} from "@/shell";
+import {useConsoleHelper} from "@/shared";
 import {ResultOptions} from "@/shared";
 
 export const useWorkspaceLoader = () => {

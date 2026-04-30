@@ -12,9 +12,9 @@ import { useAuthStore } from "@/shell";
 import { useGeneralStore } from "@/shared";
 import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared";
-import { getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextToChecklist } from "@/utils/checklist.utils";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import {useEditorTabBarStore} from "@/shell";
+import {getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextToChecklist} from "../utils/checklist.utils";
 
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();

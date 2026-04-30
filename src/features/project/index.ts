@@ -5,6 +5,7 @@
  */
 // Components
 export { DraggableRow } from "./Components/DraggableRow";
+export { ProjectGridMenu } from "./contexts/ProjectGridMenu";
 export { StatusCell } from "./Components/StatusCell";
 export { PriorityCell } from "./Components/PriorityCell";
 export { DateRangeCell } from "./Components/DateRangeCell";
@@ -37,3 +38,7 @@ export { PTaskProvider } from "./store/usePTask.store";
 
 // shell module
 export { projectModule, projectKeywordPlugin } from "./shell/project.module";
+
+// Context menus
+export { TaskGridMenu } from "./task/contexts/menus/TaskGridMenu";
+export { TaskFlowMenu } from "./task/contexts/menus/TaskFlowMenu";

@@ -6,7 +6,6 @@
  * Process steps are always sequential (locked until previous is done).
  */
 
-import { flatItemIndex } from "@/utils/checklist.utils";
 import {
     CheckCircle2,
     Circle,
@@ -22,6 +21,7 @@ import { useTaskDetailProcessSelector } from "../Selectors/TaskDetailProcessSele
 import { useTaskProcessHelper } from "../hooks/taskProcess/useTaskProcess.helper";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskProcessHeadless } from "../hooks/taskProcess/useTaskProcess.headless";
+import {flatItemIndex} from "../utils/checklist.utils";
 
 export function TaskProcess() {
     return (

@@ -11,7 +11,7 @@ import { useProjectStore } from "@/features/project";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { IStatusOption } from "@/shared";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 export const useMultiProjectTaskListSelector = () => {
     const { tasks, taskSearchQuery } = useMpTaskStore();

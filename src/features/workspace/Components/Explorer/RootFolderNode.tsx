@@ -8,7 +8,7 @@ import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { FolderItem } from "../../types/workspace.types";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { HighlightText } from "./HighlightText";
 
 interface RootNodeProps {

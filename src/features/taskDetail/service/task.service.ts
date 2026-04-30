@@ -2,7 +2,7 @@
  * Task Service - API communication for task operations
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import type { TaskDTO } from "../types/task.types";
 import { debugLog } from "@/shell";
 import {ResultOptions} from "@/shared";

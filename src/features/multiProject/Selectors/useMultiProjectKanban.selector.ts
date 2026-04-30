@@ -9,7 +9,7 @@ import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useGeneralStore } from "@/shared";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 export const useMultiProjectKanbanSelector = () => {
     const { tasks } = useMpTaskStore();

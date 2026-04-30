@@ -7,7 +7,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useGridControlStore } from "@/shared";
-import { constants } from "@/utils/index";
+import { constants } from "@/shared";
 import {UserFilters} from "@/shared";
 
 /**

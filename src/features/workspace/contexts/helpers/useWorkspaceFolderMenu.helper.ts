@@ -7,14 +7,14 @@
 import React from "react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useFolderDialogHelper } from "../../hooks/useFolderDialog.helper";
-import { useConfirmationPopoverHelper } from "@/shared";
+import { getConfirmMessage, useConfirmationPopoverHelper } from "@/shared";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { ItemType } from "../../store/FolderDialog.store";
 import { Folder } from "@/features/workspace/types/folder.types";
 import { workspaceService } from "../../service/workspace.service";
 import { useAuthStore } from "@/shell";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/shared";
 import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "../../hooks/tree.miniHelper";
@@ -23,12 +23,11 @@ import { isFolder, WorkspaceItemAction } from "../../types/workspace.types";
 import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
-import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useEditorTabBarStore } from "@/shell";
 import { useNoteDetailStore } from "@/features/note";
-import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
+import { collectIdsFromTree, generateTempId, generateUnsavedName } from "@/shared";
 import { Note } from "@/features/note";
-import {useConsoleHelper} from "@/shell";
+import {useConsoleHelper} from "@/shared";
 import {useGeneralStore} from "@/shared";
 
 // --------------------------------

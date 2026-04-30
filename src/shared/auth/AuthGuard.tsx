@@ -1,0 +1,83 @@
+/**
+ * AuthGuard Component
+ * Handles authentication requirements and auto-shows login dialog
+ *
+ * Responsibilities:
+ * - On mount: attempt to restore session from cached profile + HttpOnly cookie
+ * - Auto show AccountsDialog if user is not authenticated
+ * - Listen for 401 unauthorized events from apiClient interceptor
+ * - Prevent unauthorized access to the app
+ */
+
+import { useEffect } from "react";
+import { getDeviceFingerprint } from "../utils/deviceFingerprint";
+import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
+import { configureApiClient } from "../fetch/apiClient";
+import {useAuthHelper} from "./useAuth.helpers";
+import {useAuthStore} from "./Auth.store";
+import { debugLog } from "../debug/useDebugLog"
+
+export function AuthGuard({ children }: { children: React.ReactNode }) {
+    const { isAuthenticated, $user, set$User } = useAuthStore();
+    const { loadStandardRegistries, loadKeywords } = useStandardRegistryHelper();
+    const { initAuthFromStorageToken, logout } = useAuthHelper();
+
+    // Configure apiFetch singleton with token callbacks from AuthStore
+    useEffect(() => {
+        configureApiClient({
+            getToken: () => $user.userToken,
+            setToken: (token) => set$User((prev) => ({ ...prev, userToken: token })),
+            onAuthFailed: logout,
+        });
+    }, [$user.userToken]);
+
+    // On mount: try to restore session from HttpOnly cookie + cached profile
+    useEffect(() => {
+        const device = getDeviceFingerprint();
+        debugLog.log("auth", "authguard-mount", { device, isAuthenticated });
+        initAuthFromStorageToken().then((restored) => {
+            debugLog.log("auth", "authguard-init-done", { restored, device });
+            debugLog.flush();
+        });
+    }, []);
+
+    // Listen for 401 events dispatched by apiClient interceptor
+    useEffect(() => {
+        const handleUnauthorized = () => {
+            const device = getDeviceFingerprint();
+            debugLog.log("auth", "authguard-unauthorized-event", { device });
+            debugLog.flush();
+            logout();
+        };
+        const handleRefreshSuccess = () => {
+            const device = getDeviceFingerprint();
+            debugLog.log("auth", "authguard-refresh-success-event", { device });
+            // _console.specialSuccess("Token refreshed successfully.");
+        };
+        window.addEventListener("auth:unauthorized", handleUnauthorized);
+        window.addEventListener("auth:special-success", handleRefreshSuccess);
+        return () => {
+            window.removeEventListener("auth:unauthorized", handleUnauthorized);
+            window.removeEventListener("auth:special-success", handleRefreshSuccess);
+        };
+    }, []);
+
+    // Auto show login dialog when not authenticated
+    // useEffect(() => {
+    //     if (!isAuthenticated) {
+    //         setAccountsOpen(true);
+    //     } else {
+    //         setAccountsOpen(false);
+    //     }
+    // }, [isAuthenticated]);
+
+    // Load standard registries and keywords when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            loadStandardRegistries();
+            loadKeywords();
+        }
+    }, [isAuthenticated]);
+
+    return <>{children}</>;
+}

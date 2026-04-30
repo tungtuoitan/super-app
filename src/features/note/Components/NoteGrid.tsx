@@ -9,7 +9,7 @@ import { useNoteGridTableHelper } from "../hooks/useNoteGrid.table.helper";
 import { Note } from "../types/note.types";
 import { useEditorTabHelper } from "@/shell";
 import { useGridControlStore } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { BaseTab } from "@/shell";
 import {useAuthStore} from "@/shell";
 import {useEditorTabBarStore} from "@/shell";

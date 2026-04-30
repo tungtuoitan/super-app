@@ -5,8 +5,8 @@
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useEditorTabHelper } from "@/shell";
-import { constants } from "@/utils/constants";
-import { convertToDisplayVersion, updateDecorations } from "@/utils/markdown.utils";
+import { constants } from "@/shared";
+import { convertToDisplayVersion, updateDecorations } from "@/features/note/utils/markdown.utils";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useGeneralStore} from "@/shared";

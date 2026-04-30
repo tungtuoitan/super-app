@@ -4,9 +4,9 @@
  * Shared validation, sorting, color helpers, and timeline utilities for task grid views.
  */
 
-import { Task } from "@/features/taskDetail/types/task.types";
-import type { DropValidation } from "@/features/taskDetail/types/taskGrid.types";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
+import {DropValidation} from "../types/taskGrid.types";
+import {Task} from "../types/task.types";
 
 // ──────────────────────────────────────────────────────────
 // Timeline Constants

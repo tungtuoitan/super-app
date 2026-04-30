@@ -7,15 +7,6 @@
  */
 
 
-import {
-    validateChecklistText,
-    parseTextToChecklist,
-    checklistToText,
-    toggleChecklistItem,
-    flatItemIndex,
-    findItemCursorOffset,
-    getFlatItems,
-} from "@/utils/checklist.utils";
 import { useTaskProcessStore } from "../../store/useTaskProcess.store";
 import { useTaskProcessSelector } from "../../Selectors/TaskProcessSelector";
 import { useTaskDetailProcessSelector } from "../../Selectors/TaskDetailProcessSelector";
@@ -23,6 +14,7 @@ import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskDetailProcessHelper } from "./useTaskDetailProcess.helper";
 import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
 import { useTaskSectionStore } from "../../store/useTaskSection.store";
+import {checklistToText, findItemCursorOffset, flatItemIndex, getFlatItems, parseTextToChecklist, toggleChecklistItem, validateChecklistText} from "../../utils/checklist.utils";
 
 export const useTaskProcessHelper = () => {
     // ── Read from selectors ───────────────────────────────────────────────────

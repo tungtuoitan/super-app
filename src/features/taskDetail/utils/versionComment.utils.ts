@@ -1,5 +1,5 @@
-import type { VersionPayload } from "@/features/taskDetail/types/taskComment.types";
 import { SECTION_META, FALLBACK_CUSTOM_ICON } from "../task.constants";
+import {VersionPayload} from "../types/taskComment.types";
 
 /** Try to parse comment content as a version payload */
 export function parseVersionComment(content: string): VersionPayload | null {

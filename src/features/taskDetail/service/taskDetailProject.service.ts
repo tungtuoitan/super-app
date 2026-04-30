@@ -4,7 +4,7 @@
  * Independent of project feature — makes direct API calls only
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import type { Project } from "../types/task.types";
 import {apiFetch} from "@/shared";
 

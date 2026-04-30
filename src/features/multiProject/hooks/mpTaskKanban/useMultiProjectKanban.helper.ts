@@ -7,9 +7,9 @@
 
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
-import { toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/shared";
 import { useMultiProjectKanbanSelector } from "../../Selectors/useMultiProjectKanban.selector";
 import {useAuthStore} from "@/shell";
 

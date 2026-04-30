@@ -6,13 +6,12 @@
 import { taskService } from "@/features/taskDetail";
 import type { TaskDTO, Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { generateTempId } from "@/utils/index";
 import { useAuthStore } from "@/shell";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { useConsoleHelper } from "@/shell";
-import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
-import { constants } from "@/utils/constants";
+import { useConsoleHelper } from "@/shared";
+import { parseAsLocalDate, toLocalISOString } from "@/shared";
+import { constants, generateTempId } from "@/shared";
 
 /**
  * Transform task DTOs to domain models

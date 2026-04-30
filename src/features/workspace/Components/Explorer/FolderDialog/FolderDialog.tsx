@@ -15,9 +15,10 @@ import { isFolder } from "@/features/workspace/types/workspace-v2.types";
 import { useWorkspaceStore } from "../../../store/Workspace.store";
 import { useFolderDialogStore } from "../../../store/FolderDialog.store";
 import { useFolderDialogHelper } from "../../../hooks/useFolderDialog.helper";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
-import { getAllIconLabel, IconKey, useKeyboardShortcut } from "@/shared";
+import { getAllIconLabel, IconKey } from "@/shared";
+import { useKeyboardShortcut } from "@/shell";
 
 export function FolderDialog() {
     // Get state from ExplorerStore

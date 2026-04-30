@@ -3,7 +3,7 @@
  * Uses native fetch API without TanStack Query
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";
 

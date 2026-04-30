@@ -5,15 +5,13 @@
  */
 
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useConfirmationPopoverHelper } from "@/shared";
-import { constants } from "@/utils/constants";
-import { noteService } from "@/features/note/service/note.service";
+import { getConfirmMessage, useConfirmationPopoverHelper } from "@/shared";
+import { constants } from "@/shared";
+import { noteService } from "@/features/note";
 import { useAuthStore } from "@/shell";
-import { parseApiError, isUnauthorizedError } from "@/utils/api-error.utils";
-import { useSnackbar } from "notistack";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuStore } from "@/shared";
 import {workspaceService} from "../../service/workspace.service";
-import { getConfirmMessage } from "@/utils/confirmation-message.utils";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader";
 import { filterTopLevelParents, buildTreeFromV2Items } from "../../hooks/tree.miniHelper";
 import type { UpsertWorkspaceItemRequest } from "../../types/workspace.types";
@@ -21,7 +19,7 @@ import { WorkspaceItemAction } from "../../types/workspace.types";
 import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import type { WorkspaceDTO } from "../../types/workspace-dto.types";
 import { useEditorTabHelper } from "@/shell";
-import {useConsoleHelper} from "@/shell";
+import {useConsoleHelper} from "@/shared";
 
 export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();

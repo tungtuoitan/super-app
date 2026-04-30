@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuthStore } from "@/shell";
 import { KService } from "../service/K.service";
 import { KTestService } from "../service/kTest.service";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { useKStore } from "../store/K.store";
 import type { KMdParsed, KExistingTestAddition } from "../types/kMarkdownImport.type";
 import type { KTestSummary } from "../types/kTest.type";

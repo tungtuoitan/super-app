@@ -5,9 +5,9 @@
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
-import { toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/shared";
 import { useTaskKanbanSelector } from "../../Selectors/TaskKanbanSelector";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {useAuthStore} from "@/shell";

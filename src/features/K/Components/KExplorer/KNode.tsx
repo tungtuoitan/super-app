@@ -13,7 +13,7 @@ import { KIconKey } from "../../shared/icons/icon.types";
 import { ICON_MAP } from "../../shared/icons/icon.config";
 import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
 import { storageService, STORAGE_KEYS } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { KWsResponse } from "../../types/K.types";
 import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
 import { useDrop } from "react-dnd";

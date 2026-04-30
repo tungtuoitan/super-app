@@ -5,7 +5,7 @@ import { TrackIconDisplay } from "./TrackIconDisplay";
 import { SensitiveOverlay } from "./SensitiveOverlay";
 import { cn } from "@/lib/utils";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
 const LONG_PRESS_MS = 500;

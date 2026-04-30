@@ -13,8 +13,8 @@ import { useOrchestratorContextMenuHelper } from "@/shared";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { useMobileStore } from "@/shared";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { toLocalISOString } from "@/utils/date.utils";
-import { constants } from "@/utils/constants";
+import { toLocalISOString } from "@/shared";
+import { constants } from "@/shared";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import {useStandardRegistryHelper} from "@/shared";
 

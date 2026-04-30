@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useTabKeyboardShortcuts } from "@/shell";

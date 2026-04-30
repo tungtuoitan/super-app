@@ -6,9 +6,9 @@
  */
 
 import type { Task } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
-import { toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/shared";
 import { useTaskGridHelper } from "./useTaskGrid.helper";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {useAuthStore} from "@/shell";

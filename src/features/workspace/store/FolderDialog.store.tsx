@@ -1,5 +1,5 @@
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { IconKey, ICON_COLORS } from "@/shared";
 
 export interface FolderDialogFormErrors {

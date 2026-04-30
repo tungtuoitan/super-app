@@ -2,7 +2,7 @@
  * Note Service - API communication for note operations
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import type { NoteDTO } from "../types/note.types";
 import type { ResultOptions } from "@/shared";
 import { apiFetch } from "@/shared";

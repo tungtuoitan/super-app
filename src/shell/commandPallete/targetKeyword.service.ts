@@ -2,9 +2,9 @@
  * TargetKeyword Service - API communication for linking keywords to target entities
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import {ResultOptions} from "@/shared";
-import {apiFetch} from "../../shared/services/apiClient";
+import {apiFetch} from "../../shared/fetch/apiClient";
 
 export interface TargetKeywordDTO {
     id: number;

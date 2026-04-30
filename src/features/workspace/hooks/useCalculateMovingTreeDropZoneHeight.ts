@@ -6,7 +6,7 @@
 import { useEffect } from "react";
 import type { TreeApi } from "react-arborist";
 import { TreeFolder } from "./tree.miniHelper";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 interface CalculateMovingTreeDropZoneHeightProps {
     treeData: TreeFolder[];

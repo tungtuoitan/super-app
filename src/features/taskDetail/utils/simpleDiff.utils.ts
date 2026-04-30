@@ -1,4 +1,4 @@
-import type { DiffLine, ImageInfo, InlineSegment } from "@/features/taskDetail/types/taskComment.types";
+import {DiffLine, ImageInfo, InlineSegment} from "../types/taskComment.types";
 
 /** Strip HTML tags → plain text, collapse whitespace, keep line breaks */
 export function htmlToPlainText(html: string): string {

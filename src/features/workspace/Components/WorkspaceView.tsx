@@ -13,7 +13,7 @@ import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
 import { useAuthStore } from "@/shell";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 
 /**

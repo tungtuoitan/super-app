@@ -19,15 +19,19 @@ import { ConfirmationPopoverProvider } from "@/shared";
 import { ConfirmationPopoverContainer } from "@/shell";
 import MainNav from "./components/main/MainNav";
 import { NavProvider } from "@/contexts/NavigationContext";
-import { AuthGuard } from "@/shell";
+
 import { OrchestratorContextMenuStoreProvider } from "@/shared";
 import { GridControlProvider } from "@/shared";
 import { MobileProvider } from "@/shared";
 import { DebugLoggerProvider } from "@/shared";
 import { ShellProvider } from "./store/ShellProvider";
-import {GeneralProvider} from "@/shared";
-import {CommandPaletteProvider} from "./commandPallete/useCommandPalette.store";
-import {PTaskProvider} from "@/features/project";
+import { GeneralProvider } from "@/shared";
+import { CommandPaletteProvider } from "./commandPallete/useCommandPalette.store";
+import { PTaskProvider } from "@/features/project";
+import { AuthCallbackProvider } from "@/shared";
+import { AuthStoreProvider } from "@/shared";
+import { AuthGuard } from "@/shared";
+import {ConsoleProvider} from "@/shared";
 
 /**
  * Main application layout component.
@@ -45,59 +49,65 @@ export function Main() {
     return (
         <BrowserRouter>
             <NavProvider>
-                <ShellProvider>
-                    <MobileProvider>
-                        <DebugLoggerProvider>
-                            <SnackbarProvider autoHideDuration={3000}>
-                                <DndProvider backend={HTML5Backend}>
-                                    <GeneralProvider>
-                                        <CommandPaletteProvider>
-                                            <OrchestratorContextMenuStoreProvider>
-                                                <ConfirmationPopoverProvider>
-                                                    <AuthGuard>
-                                                        <GridControlProvider>
-                                                            {/* Main application content */}
-                                                            <WorkspaceProviders>
-                                                                <KProviders>
-                                                                    <WsProviders>
-                                                                        <ProjectProviders>
-                                                                            <PTaskProvider>
-                                                                                <MpTaskProvider>
-                                                                                    <TaskDetailProvider>
-                                                                                            <TaskSectionProvider>
-                                                                                                <TaskDetailSectionProvider>
-                                                                                                <MultiTimelineProvider>
-                                                                                                    <LifeLogProvider>
-                                                                                                        <WikiProvider>
-                                                                                                            <NoteProviders>
-                                                                                                                    <OrchestratorContextMenu>
-                                                                                                                        <MainNav />
-                                                                                                                    </OrchestratorContextMenu>
-                                                                                                            </NoteProviders>
-                                                                                                        </WikiProvider>
-                                                                                                    </LifeLogProvider>
-                                                                                                </MultiTimelineProvider>
-                                                                                                </TaskDetailSectionProvider>
-                                                                                            </TaskSectionProvider>
-                                                                                    </TaskDetailProvider>
-                                                                                </MpTaskProvider>
-                                                                            </PTaskProvider>
-                                                                        </ProjectProviders>
-                                                                    </WsProviders>
-                                                                </KProviders>
-                                                            </WorkspaceProviders>
-                                                        </GridControlProvider>
-                                                    </AuthGuard>
-                                                    <ConfirmationPopoverContainer />
-                                                </ConfirmationPopoverProvider>
-                                            </OrchestratorContextMenuStoreProvider>
-                                        </CommandPaletteProvider>
-                                    </GeneralProvider>
-                                </DndProvider>
-                            </SnackbarProvider>
-                        </DebugLoggerProvider>
-                    </MobileProvider>
-                </ShellProvider>
+                <ConsoleProvider>
+                    <ShellProvider>
+                        <MobileProvider>
+                            <DebugLoggerProvider>
+                                <SnackbarProvider autoHideDuration={3000}>
+                                    <DndProvider backend={HTML5Backend}>
+                                        <GeneralProvider>
+                                            <CommandPaletteProvider>
+                                                <OrchestratorContextMenuStoreProvider>
+                                                    <ConfirmationPopoverProvider>
+                                                        <AuthCallbackProvider>
+                                                            <AuthStoreProvider>
+                                                                <AuthGuard>
+                                                                    <GridControlProvider>
+                                                                        {/* Main application content */}
+                                                                        <WorkspaceProviders>
+                                                                            <KProviders>
+                                                                                <WsProviders>
+                                                                                    <ProjectProviders>
+                                                                                        <PTaskProvider>
+                                                                                            <MpTaskProvider>
+                                                                                                <TaskDetailProvider>
+                                                                                                    <TaskSectionProvider>
+                                                                                                        <TaskDetailSectionProvider>
+                                                                                                            <MultiTimelineProvider>
+                                                                                                                <LifeLogProvider>
+                                                                                                                    <WikiProvider>
+                                                                                                                        <NoteProviders>
+                                                                                                                            <OrchestratorContextMenu>
+                                                                                                                                <MainNav />
+                                                                                                                            </OrchestratorContextMenu>
+                                                                                                                        </NoteProviders>
+                                                                                                                    </WikiProvider>
+                                                                                                                </LifeLogProvider>
+                                                                                                            </MultiTimelineProvider>
+                                                                                                        </TaskDetailSectionProvider>
+                                                                                                    </TaskSectionProvider>
+                                                                                                </TaskDetailProvider>
+                                                                                            </MpTaskProvider>
+                                                                                        </PTaskProvider>
+                                                                                    </ProjectProviders>
+                                                                                </WsProviders>
+                                                                            </KProviders>
+                                                                        </WorkspaceProviders>
+                                                                    </GridControlProvider>
+                                                                </AuthGuard>
+                                                            </AuthStoreProvider>
+                                                        </AuthCallbackProvider>
+                                                        <ConfirmationPopoverContainer />
+                                                    </ConfirmationPopoverProvider>
+                                                </OrchestratorContextMenuStoreProvider>
+                                            </CommandPaletteProvider>
+                                        </GeneralProvider>
+                                    </DndProvider>
+                                </SnackbarProvider>
+                            </DebugLoggerProvider>
+                        </MobileProvider>
+                    </ShellProvider>
+                </ConsoleProvider>
             </NavProvider>
         </BrowserRouter>
     );

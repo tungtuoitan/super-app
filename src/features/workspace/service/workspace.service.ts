@@ -2,9 +2,9 @@
  * Workspace Service - API communication for workspace operations
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse, UpsertWorkspaceItemRequest } from "../types/workspace.types";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import _ from "lodash";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import type { ResultOptions } from "@/shared";

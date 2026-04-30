@@ -5,10 +5,10 @@
  */
 
 import type { Task } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
-import { toLocalISOString } from "@/utils/date.utils";
-import { constants } from "@/utils/constants";
+import { toLocalISOString } from "@/shared";
+import { constants } from "@/shared";
 import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/useTaskTimeline.store";
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";

@@ -11,7 +11,7 @@
  * const { loadAllK, selectWorkspace } = useKLoader();
  */
 
-import {useConsoleHelper} from "@/shell";
+import {useConsoleHelper} from "@/shared";
 import {useAuthStore} from "@/shell";
 import {useKMovingTreeStore} from "../../store/KMovingTree.store";
 import {KService} from "../../service/K.service";

@@ -4,13 +4,13 @@
  */
 
 import { Note } from "@/features/note";
-import { TrackingGraphTabData } from "@/utils/tracking.types";
+
 import { Task } from "@/features/taskDetail";
 import { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
 import { KWsResponse } from "@/features/K";
 import { KItemV2 } from "@/features/K";
-import { constants } from "@/utils/constants";
-import {BreadcrumbItem} from "@/utils/breadcrumb.utils";
+import { constants } from "@/shared";
+import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { WikiTabData } from "@/features/Wiki";
 import {Ws} from "@/features/workspace";
 import {Project} from "@/features/project";
@@ -21,6 +21,10 @@ export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constan
  * Data type for multi-project tab
  * Contains array of project IDs and their names for display
  */
+export interface TrackingGraphTabData {
+    type?: string;
+}
+
 export interface MultiProjectTabData {
     projectIds: number[];
     projects: Project[];

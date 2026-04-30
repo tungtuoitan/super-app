@@ -5,7 +5,7 @@
 
 import React from "react";
 import type { LucideIcon } from "lucide-react";
-import { fuzzyMatchWithDiacritics } from "@/utils/fuzzy-search.utils";
+import { fuzzyMatchWithDiacritics } from "../utils/fuzzy-search.utils";
 import { IconKey } from "./icon.types";
 import { ICON_MAP, ICON_CONFIG, ICON_COLORS, ICON_GROUPS, IconConfig, IconGroupId } from "./icon.config";
 

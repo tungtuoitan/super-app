@@ -68,15 +68,6 @@ export interface ExchangeTokenResponse {
     scope?: string;
 }
 
-/**
- * Note Types
- * Re-export from notes feature with aliases for API compatibility
- */
-export type { Note, NoteType, NoteDTO, GetNotesParams, NotesResponse } from "@/features/note/types/note.types";
-
-// API compatibility aliases
-export type { CreateNoteDTO as CreateNoteRequest, UpdateNoteDTO as UpdateNoteRequest, NoteDTO as NoteResponse } from "@/features/note/types/note.types";
-
 // Response wrapper type for create/update operations
 export interface NoteCreateUpdateResponse {
     data: {

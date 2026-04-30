@@ -1,4 +1,4 @@
-import type { SectionTab } from "@/features/taskDetail/store/useTaskDetailSection.store";
+import {SectionTab} from "../store/useTaskDetailSection.store";
 
 /** Check if a tab is a custom tab (prefix "custom:") */
 export function isCustomTab(tab: SectionTab): tab is `custom:${string}` {

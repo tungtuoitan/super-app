@@ -9,7 +9,7 @@ import { Input } from "@/shared";
 import { Button } from "@/shared";
 import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
-import { TrackIconPicker } from "@/features/lifeLog/Components/TrackIconPicker";
+import { TrackIconPicker } from "@/features/lifeLog";
 import {useKLoader} from "../hooks/kTree/useK.loader";
 import {useEditorTabBarStore} from "@/shell";
 

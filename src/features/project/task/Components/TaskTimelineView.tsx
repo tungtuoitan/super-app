@@ -14,7 +14,7 @@ import { ScrollArea } from "@/shared";
 import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { cn } from "@/lib/utils";
 import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
 import { useTaskTimelineHelper } from "../hooks/taskTimeline/useTaskTimeline.helper";

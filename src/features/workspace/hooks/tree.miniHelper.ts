@@ -1,6 +1,6 @@
 import { WorkspaceItem, FolderItem, NoteItem, FileItem, isFolder, canHaveChildren } from "../types/workspace.types";
 import { WorkspaceItemV2, WorkspaceFolderItem, isFolder as isFolderV2, canHaveChildren as canHaveChildrenV2 } from "@/features/workspace/types/workspace-v2.types";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import {Folder} from "../types/folder.types";
 

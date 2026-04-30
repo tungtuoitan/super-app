@@ -1,5 +1,4 @@
-import type { TaskComment } from "@/features/taskDetail/types/taskComment.types";
-import type { CommentFilterType } from "@/features/taskDetail/types/taskComment.types";
+import {CommentFilterType, TaskComment} from "../types/taskComment.types";
 import { parseVersionComment } from "../utils/versionComment.utils";
 
 export function matchesFilter(comment: TaskComment, filter: CommentFilterType): boolean {

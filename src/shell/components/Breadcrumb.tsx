@@ -5,8 +5,8 @@
 
 import React from "react";
 import { Layers, FileText } from "lucide-react";
-import { BreadcrumbItem } from "@/utils/breadcrumb.utils";
-import { useKeywordNavigationHelper } from "@/shared";
+import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
+import { useKeywordNavigationHelper } from "../commandPallete/useKeywordNavigation.helper";
 import { useWorkspaceStore } from "@/features/workspace";
 import { ICON_MAP, IconKey } from "@/shared";
 import { FolderIconWithBadge } from "@/shared";

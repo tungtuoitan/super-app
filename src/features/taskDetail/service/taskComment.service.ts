@@ -2,7 +2,7 @@
  * Task Comment Service — API communication for task comment operations
  */
 
-import { config } from "@/utils/config/app.config";
+import { config } from "config/app.config";
 import type { TaskCommentDTO } from "../types/taskComment.types";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";

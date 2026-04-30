@@ -4,7 +4,7 @@
  */
 
 
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { KItemV2 } from "../types/K-v2.types";
 import {useEditorTabBarStore} from "@/shell";

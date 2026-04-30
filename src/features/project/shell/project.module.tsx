@@ -2,13 +2,13 @@ import { Cuboid, Layers, CheckSquare } from "lucide-react";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
 import type { ModuleDefinition } from "@/shell";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
 // eslint-disable-next-line no-restricted-imports
 import { MultiProjectEditorPanel } from "@/features/multiProject";
 import type { KeywordPlugin } from "@/shell";
-import { parseKeywordLink } from "@/utils/keyword-link.utils";
+import { parseKeywordLink } from "@/shell";
 import { projectService } from "../service/project.service";
 import { taskService } from "@/features/taskDetail";
 import type { Project } from "..";

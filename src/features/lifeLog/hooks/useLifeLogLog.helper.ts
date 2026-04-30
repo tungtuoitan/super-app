@@ -9,7 +9,7 @@ import { useAuthStore } from "@/shell";
 import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { parseAsLocalDate, toLocalISOString } from "@/utils/date.utils";
+import { parseAsLocalDate, toLocalISOString } from "@/shared";
 import { debugLog } from "@/shell";
 
 export function transformLog(dto: LifeLogLogDTO): LifeLogLog {

@@ -1,9 +1,9 @@
 import { Panel, PanelGroup } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { GridControlBar } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useMobileStore } from "@/shared";
-import { Console } from "./Console";
+import { Console } from "../../../shared/console/Console";
 import { moduleRegistry } from "@/shell";
 import {useActivityBarStore} from "@/shell";
 

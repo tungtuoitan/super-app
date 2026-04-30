@@ -7,7 +7,7 @@ import type { Node, Edge } from "@xyflow/react";
 import { graphlib, layout as dagreLayout } from "@dagrejs/dagre";
 import type { Task } from "@/features/taskDetail";
 import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 
 export const NODE_WIDTH = 230;
 export const NODE_HEIGHT = 76;

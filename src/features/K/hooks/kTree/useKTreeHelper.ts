@@ -12,7 +12,7 @@ import {kconstants} from "../../utils/K.Constants";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {KtreeMiniHelper, KTreeNode} from "./Ktree.miniHelper";
 import {useKLoader} from "./useK.loader";
-import {useAuthStore, useConsoleHelper} from "@/shell";
+import {useAuthStore, useConsoleHelper} from "@/shared";
 import {useStandardRegistryHelper} from "@/shared";
 
 export const KuseTreeHelper = () => {

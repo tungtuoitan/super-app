@@ -3,8 +3,8 @@ import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowMode
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { Note } from "../types/note.types";
 import { WorkspaceLinksCell } from "../Components/WorkspaceLinksCell";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { constants } from "@/utils/constants";
+import { useWorkspaceStore } from "@/features/workspace";
+import { constants } from "@/shared";
 import { useNavigate, useLocation } from "react-router-dom";
 import {useGeneralStore} from "@/shared";
 

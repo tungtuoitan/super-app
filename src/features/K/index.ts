@@ -1,3 +1,4 @@
+import {useKLoader} from "./hooks/kTree/useK.loader";
 
 
 // Types
@@ -9,3 +10,12 @@ export { KProviders } from "./store/KProviders";
 
 // shell module
 export { kModule } from "./shell/k.module";
+
+// Context menus
+export { KNodeMenu } from "./contexts/menu/KNodeMenu";
+export { KNodePanelCardMenu } from "./contexts/menu/KNodePanelCardMenu";
+export { KKnowledgeMenu } from "./contexts/menu/KKnowledgeMenu";
+export { KTestFlowMenu } from "./contexts/menu/KTestFlowMenu";
+export { KNodePanelBlankMenu } from "./contexts/menu/KNodePanelBlankMenu";
+
+export { useKLoader } from "./hooks/kTree/useK.loader";

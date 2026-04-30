@@ -6,10 +6,10 @@
 
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useProjectStore } from "@/features/project";
-import { useConsoleHelper } from "@/shell";
+import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
 import { projectService } from "@/features/project";
-import { toLocalISOString } from "@/utils/date.utils";
+import { toLocalISOString } from "@/shared";
 import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";

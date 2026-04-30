@@ -8,7 +8,7 @@ import { VSEditorArea } from "./VSEditorArea";
 import { useGridAutoRegisterHelper } from "@/shell";
 import { useLocation } from "react-router-dom";
 import { useMobileStore } from "@/shared";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { GridControlBar } from "@/shared";
 import { useGridControlStore } from "@/shared";
 import { moduleRegistry } from "@/shell";

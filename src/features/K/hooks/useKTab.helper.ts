@@ -4,7 +4,7 @@
  */
 
 
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { KWsResponse } from "../types/K.types";
 import { useKStore } from "../store/K.store";

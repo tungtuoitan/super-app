@@ -7,7 +7,7 @@ import { useAuthStore } from "@/shell";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { taskCommentService } from "../../service/taskComment.service";
-import { parseAsLocalDate } from "@/utils/date.utils";
+import { parseAsLocalDate } from "@/shared";
 import type { TaskComment, TaskCommentDTO } from "../../types/taskComment.types";
 
 /** Transform DTO (string dates) → domain model (Date objects) */

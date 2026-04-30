@@ -1,4 +1,4 @@
-import { constants, type ActivityBarView } from "@/utils/constants";
+import { constants, type ActivityBarView } from "@/shared";
 import { useWorkspaceHelper } from "@/features/workspace";
 import {useGridControlStore} from "@/shared";
 import {STORAGE_KEYS, storageService} from "@/shared";

@@ -7,15 +7,9 @@
  * Environment-aware: uses activeEnv from store when checklistType === "testcase".
  */
 
-import { useMemo } from "react";
-import {
-    isChecklistAllDone,
-    checklistProgress,
-    getFlatItems,
-    getItemCheckState,
-} from "@/utils/checklist.utils";
 import { useTaskDetailChecklistSelector } from "./TaskDetailChecklistSelector";
 import { useTaskChecklistStore } from "../store/useTaskChecklist.store";
+import {checklistProgress, getFlatItems, getItemCheckState, isChecklistAllDone} from "../utils/checklist.utils";
 
 export const useTaskChecklistSelector = () => {
     const { parsedChecklist } = useTaskDetailChecklistSelector();

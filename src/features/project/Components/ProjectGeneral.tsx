@@ -13,7 +13,7 @@ import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import { useProjectGeneralHeadless } from "../hooks/useProjectGeneral.headless";
-import { formatDateTime } from "@/utils/formatters";
+import { formatDateTime } from "@/shared";
 import { ProjectImagePicker } from "./ProjectImagePicker";
 
 /**

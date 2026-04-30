@@ -4,15 +4,15 @@
  */
 
 import { useWorkspaceStore } from "../store/Workspace.store";
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useEditorTabBarStore } from "@/shell";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import { BaseTab } from "@/shell";
 import { findNoteByEntityId } from "@/shell";
-import type { Note } from "@/features/note/types/note.types";
+import type { Note } from "@/features/note";
 import { WorkspaceItemAction } from "../types/workspace.types";
-import {useConsoleHelper} from "@/shell";
+import {useConsoleHelper} from "@/shared";
 
 /**
  * Workspace View - WorkspaceTree for folder navigation with workspace selection

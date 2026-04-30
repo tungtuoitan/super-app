@@ -7,7 +7,7 @@
 import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { PropsWithChildren } from "react";
-import { constants, ActivityBarView } from "@/utils/constants";
+import { constants, ActivityBarView } from "@/shared";
 
 /**
  * Helper function to get view from route path

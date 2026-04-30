@@ -6,15 +6,15 @@
 
 
 import { useAuthStore } from "@/shell";
-import type { Note } from "@/features/note/types/note.types";
+import type { Note } from "@/features/note";
 import { type Task } from "../types/task.types";
 import { type TaskFolderItem } from "../types/taskDetail.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
-import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { generateTempId, generateUnsavedName } from "@/utils/temp-id.utils";
-import { constants } from "@/utils/constants";
-import { workspaceService } from "@/features/workspace/service/workspace.service";
-import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace/types/workspace-v2.types";
+import { useNoteDetailStore } from "@/features/note";
+import { generateTempId, generateUnsavedName } from "@/shared";
+import { constants } from "@/shared";
+import { workspaceService } from "@/features/workspace";
+import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace";
 import { useEditorTabHelper } from "@/shell";
 import {useGeneralStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";

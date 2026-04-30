@@ -6,7 +6,7 @@
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useGeneralStore } from "@/shared";
-import { constants } from "@/utils/index";
+import { constants } from "@/shared";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared";
 import type { TabType } from "../types/projectDetail.type";

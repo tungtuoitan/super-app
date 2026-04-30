@@ -1,13 +1,13 @@
 
-import { constants } from "@/utils/constants";
+import { constants } from "@/shared";
 import { useNoteDetailHelper } from "./useNoteDetail.helper";
-import { useWorkspaceItemHelper } from "@/features/workspace/hooks/useWorkspaceItemHelper";
-import { useWorkspaceStore } from "@/features/workspace/store/Workspace.store";
-import { WorkspaceItemAction } from "@/features/workspace/types/workspace.types";
+import { useWorkspaceItemHelper } from "@/features/workspace";
+import { useWorkspaceStore } from "@/features/workspace";
+import { WorkspaceItemAction } from "@/features/workspace";
 import { useProjectTaskFolderHelper } from "@/features/project";
 import type { BaseTab } from "@/shell";
 import type { Note } from "../types/note.types";
-import {SaveActions} from "@/shared";
+import {SaveActions} from "@/shell";
 
 export function useNoteSaveActions(): SaveActions {
     const { upsertNote } = useNoteDetailHelper();
