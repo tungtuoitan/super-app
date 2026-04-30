@@ -3,7 +3,7 @@ import { useNoteGridStore } from "@/features/note";
 import { BaseTab, TabType } from "@/shell";
 import { constants, useKeywordStore } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { WorkspaceItemV2 } from "@/features/workspace";
 import {
     findKeywordForNote,
@@ -23,7 +23,7 @@ export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
     const { setNotes } = useNoteGridStore();
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
-    const { moduleName } = useGridControlStore();
+    const { moduleName } = useSideBarStore();
     const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
     const { allKeywords } = useKeywordStore();
     const { setLogs, setTracks } = useLifeLogStore();

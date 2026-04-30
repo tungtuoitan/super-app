@@ -92,8 +92,9 @@ const _registry: ModuleDefinition[] = [];
 
 export const moduleRegistry = {
     register(def: ModuleDefinition): void {
-        if (_registry.find((m) => m.id === def.id)) {
-            console.warn(`[moduleRegistry] Module "${def.id}" is already registered. Skipping.`);
+        const existingIndex = _registry.findIndex((m) => m.id === def.id);
+        if (existingIndex >= 0) {
+            _registry[existingIndex] = def;
             return;
         }
         _registry.push(def);

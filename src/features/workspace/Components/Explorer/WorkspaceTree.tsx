@@ -3,7 +3,7 @@ import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
@@ -22,7 +22,7 @@ import { ScrollToHighlightItem } from "../../hooks/useScrollToHighlightItem";
 export function WorkspaceTree() {
     const { isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } =
         useWorkspaceStore();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery } = useSideBarStore();
     const { handleSelectionChange, handleKeyDown } = useTreeHelper2();
     const { handleMove } = useTreeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();

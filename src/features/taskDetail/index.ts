@@ -60,3 +60,4 @@ export { useTaskDetailHelper } from "./hooks/useTaskDetail.helper";
 
 // Services (only expose what other features need)
 export { taskService } from "./service/task.service";
+export { registerTaskFilters } from "./shell/task.filterConfig";

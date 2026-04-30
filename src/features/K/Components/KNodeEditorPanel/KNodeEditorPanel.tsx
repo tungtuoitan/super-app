@@ -12,7 +12,7 @@ import { useOrchestratorContextMenuHelper } from "@/shared";
 import { constants } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { kconstants } from "../../utils/K.Constants";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { containsNormalized } from "../../utils/searchUtils";
 import {useEditorTabBarStore} from "@/shell";
@@ -24,7 +24,7 @@ function KNodeEditorContent() {
     const { scopedNodes, allNodes } = useKNodeEditorLoader();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { warning } = useConsoleHelper();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery } = useSideBarStore();
 
     const kName = allK.find(k => k.id === rootNode.knowledgeId)?.name ?? "";
 

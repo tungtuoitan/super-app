@@ -6,11 +6,11 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
-import { constants } from "../constants";
+import { constants } from "../../shared/constants";
 import {STORAGE_KEYS, storageService} from "@/shared";
 import {UserFilters, ViewFilter} from "../genericFilter/filter.types";
 
-export interface GridControlContextData {
+export interface SideBarContextData {
     // Search query
     searchQuery: string;
     setSearchQuery: Dispatch<SetStateAction<string>>;
@@ -28,7 +28,7 @@ export interface GridControlContextData {
     setUIFilters: Dispatch<SetStateAction<ViewFilter>>;
 }
 
-export const gridControlContextDefaultValue: GridControlContextData = {
+export const sideBarContextDefaultValue: SideBarContextData = {
     searchQuery: "",
     setSearchQuery: () => {},
     moduleName: "",
@@ -39,11 +39,11 @@ export const gridControlContextDefaultValue: GridControlContextData = {
     setUIFilters: () => {},
 };
 
-export const GridControlStore = createContext<GridControlContextData>(gridControlContextDefaultValue);
+export const SideBarStore = createContext<SideBarContextData>(sideBarContextDefaultValue);
 
-export const useGridControlStore = () => useContext(GridControlStore);
+export const useSideBarStore = () => useContext(SideBarStore);
 
-export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const SideBarProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [moduleName, setModuleName] = useState<string>(storageService.get<string>(`${STORAGE_KEYS.MODULE_NAME}`) ?? constants.modules.project);
 
@@ -51,7 +51,7 @@ export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const [uiFilters, setUIFilters] = useState<ViewFilter>({});
 
     return (
-        <GridControlStore.Provider
+        <SideBarStore.Provider
             value={{
                 searchQuery,
                 setSearchQuery,
@@ -64,6 +64,6 @@ export const GridControlProvider: React.FC<React.PropsWithChildren<unknown>> = (
             }}
         >
             {children}
-        </GridControlStore.Provider>
+        </SideBarStore.Provider>
     );
 };

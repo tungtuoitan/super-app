@@ -13,6 +13,12 @@ import { projectModule } from "@/features/project";
 import { lifeLogModule } from "@/features/lifeLog";
 import { noteModule } from "@/features/note";
 
+// Filter registrations — features register their filter configs
+import { registerWorkspaceFilters } from "@/features/workspace";
+import { registerKFilters } from "@/features/K";
+import { registerNoteFilters } from "@/features/note";
+import { registerTaskFilters } from "@/features/taskDetail";
+
 // Registration order = ActivityBar display order
 moduleRegistry.register(workspaceModule);
 moduleRegistry.register(projectModule);
@@ -22,4 +28,10 @@ moduleRegistry.register(lifeLogModule);
 // noteModule and workspaceModule are available but not shown in ActivityBar by default
 // (they can still have editor panels registered for tab rendering)
 moduleRegistry.register(noteModule);
-moduleRegistry.register(workspaceModule);
+
+// ── Filter Configuration Registration ────────────────────────────────────────
+// Register feature-specific filter configurations for genericFilter
+registerWorkspaceFilters();
+registerKFilters();
+registerNoteFilters();
+registerTaskFilters();

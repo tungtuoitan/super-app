@@ -108,7 +108,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
     // const [activeView, setActiveView] = useState<ActivityBarView>(constants.modules.lifeLog);
-    // const { moduleName } = useGridControlStore();
+    // const { moduleName } = useSideBarStore();
 
     const location = useLocation();
     const navigate = useNavigate();

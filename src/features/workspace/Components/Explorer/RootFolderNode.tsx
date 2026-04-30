@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader"; 
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
@@ -25,7 +25,7 @@ interface RootNodeProps {
  */
 export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: RootNodeProps) {
     const { currentWorkspace } = useWorkspaceStore();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery } = useSideBarStore();
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();

@@ -10,10 +10,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
 import { Checkbox } from "@/shared";
 import { Label } from "@/shared";
 import { constants } from "@/shared";
-import { filterUtils } from "@/shared";
+import { filterUtils } from "@/shell";
 import { userProfileService } from "@/shared";
 import {parseApiError} from "@/shared";
-import {UserFilters, ViewFilter} from "@/shared";
+import {UserFilters, ViewFilter} from "@/shell";
 import {useAuthStore} from "@/shared";
 import {useStandardRegistryStore} from "@/shared";
 

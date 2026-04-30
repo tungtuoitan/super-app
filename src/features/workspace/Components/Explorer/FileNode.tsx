@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
@@ -51,7 +51,7 @@ interface FileNodeProps {
 
 export function FileNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FileNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef,setScrollToItem } = useWorkspaceStore();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery } = useSideBarStore();
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();

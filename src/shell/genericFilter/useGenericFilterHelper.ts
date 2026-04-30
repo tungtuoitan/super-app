@@ -5,15 +5,16 @@
  */
 
 import { useAuthStore } from "@/shared";
-import { useGridControlStore } from "@/shared";
 import { constants } from "@/shared";
 import { filterUtils } from "./filter.utils";
 import { userProfileService } from "@/shared";
 import { envConfig } from "../../config/env.config";
 import { STORAGE_KEYS, storageService } from "@/shared";
-import { parseApiError } from "../utils/api-error.utils";
+import { parseApiError } from "../../shared/utils/api-error.utils";
 import {useConsoleHelper} from "@/shared";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "./filter.types";
+import { filterRegistry } from "./filterRegistry";
+import {useSideBarStore} from "@/shell";
 
 /**
  * Generic filter helper hook for filter operations
@@ -23,7 +24,7 @@ import {FilterFieldConfig, UserFilters, ViewFilter} from "./filter.types";
  * @returns Object containing filter helper functions
  */
 export function useGenericFilterHelper() {
-    const { filterViewKey, uiFilters, setUIFilters } = useGridControlStore();
+    const { filterViewKey, uiFilters, setUIFilters } = useSideBarStore();
     const _console = useConsoleHelper();
     const { $user, set$User } = useAuthStore();
 
@@ -140,33 +141,39 @@ export function useGenericFilterHelper() {
 
     /**
      * Validate pending filters and get field errors
-     * A field is invalid if it exists in pending filters but has no values selected
+     * Uses filter registry validators for feature-specific validation
      * @returns Record of fieldKey -> error message
      */
     const getFieldErrors = (): Record<string, string> => {
         if (!filterViewKey) return {};
 
         const errors: Record<string, string> = {};
-        const fieldConfigs = (constants.filters.groups as any)[filterViewKey] as readonly FilterFieldConfig[];
+        const registryConfigs = filterRegistry.getFieldConfigs(filterViewKey);
+        const fieldConfigs: readonly FilterFieldConfig[] = registryConfigs.length > 0
+            ? registryConfigs
+            : (constants.filters.groups as any)[filterViewKey] ?? [];
 
         fieldConfigs.forEach((fieldConfig) => {
             const filterValue = (uiFilters as any)[fieldConfig.key];
 
-            // Check if field exists in pending filters but is empty
-            if (filterValue !== undefined && (!filterValue || filterValue.trim() === "")) {
-                errors[fieldConfig.key] = "Required";
-            }
-
-            // Special validation for workspace deletedAt (checkbox type)
-            // Must always include "null" (Existing)
-            if (filterViewKey === "workspace" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
-                if (!filterUtils._hasValue(filterValue, "null")) {
-                    errors[fieldConfig.key] = "Must include Existing";
+            if (registryConfigs.length > 0) {
+                // Use registry validator
+                const error = filterRegistry.validateField(filterViewKey, fieldConfig.key, filterValue);
+                if (error) errors[fieldConfig.key] = error;
+            } else {
+                // Fallback: original validation logic
+                if (filterValue !== undefined && (!filterValue || filterValue.trim() === "")) {
+                    errors[fieldConfig.key] = "Required";
                 }
-            }
-            if (filterViewKey === "k" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
-                if (!filterUtils._hasValue(filterValue, "null")) {
-                    errors[fieldConfig.key] = "Must include Existing";
+                if (filterViewKey === "workspace" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
+                    if (!filterUtils._hasValue(filterValue, "null")) {
+                        errors[fieldConfig.key] = "Must include Existing";
+                    }
+                }
+                if (filterViewKey === "k" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
+                    if (!filterUtils._hasValue(filterValue, "null")) {
+                        errors[fieldConfig.key] = "Must include Existing";
+                    }
                 }
             }
         });
@@ -185,9 +192,11 @@ export function useGenericFilterHelper() {
 
     return {
         isPendingValueActive,
+
         handleCheckboxToggle,
         handleRadioChange,
         handleDateRangeChange,
+
         applyFilter,
         getFieldErrors,
         isApplyDisabled,

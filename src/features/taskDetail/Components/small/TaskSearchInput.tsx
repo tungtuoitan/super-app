@@ -1,7 +1,7 @@
 /**
  * TaskSearchInput - Search input for task grids
  * Reads/writes taskSearchQuery from TaskGridStore.
- * Pattern matches GridControlBar search (local state + Enter to search).
+ * Pattern matches RightSideBar search (local state + Enter to search).
  */
 
 import React, { useState, useEffect } from "react";

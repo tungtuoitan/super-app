@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { useNoteGridStore } from "@/features/note";
 import { useWsStore } from "@/features/workspace";
 import { useConfirmationPopoverHelper } from "@/shared";
@@ -31,7 +31,7 @@ export function useTabBarHelper() {
     } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, getActiveTab } = useEditorTabHelper();
     const { currentWorkspace } = useWorkspaceStore();
-    const { moduleName } = useGridControlStore();
+    const { moduleName } = useSideBarStore();
     const { notes } = useNoteGridStore();
     const { workspaces } = useWsStore();
     const { showConfirmation } = useConfirmationPopoverHelper();

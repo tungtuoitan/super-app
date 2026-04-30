@@ -5,7 +5,7 @@ import { ProjectGridMenu, TaskGridMenu, TaskFlowMenu } from "@/features/project"
 import { LogListMenu, TrackPanelMenu } from "@/features/lifeLog";
 import { KNodeMenu, KNodePanelCardMenu, KKnowledgeMenu, KTestFlowMenu, KNodePanelBlankMenu } from "@/features/K";
 import { WikiGraphNodeMenu } from "@/features/Wiki";
-import { TabBarMenu } from "./components/menus/TabBarMenu";
+import { TabBarMenu } from "./components/TabBarMenu";
 
 const t = constants.contextMenu.contextMenuTypes;
 

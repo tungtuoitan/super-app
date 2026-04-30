@@ -1,6 +1,6 @@
 import { constants, type ActivityBarView } from "@/shared";
 import { useWorkspaceHelper } from "@/features/workspace";
-import {useGridControlStore} from "@/shared";
+import {useSideBarStore} from "@/shell";
 import {STORAGE_KEYS, storageService} from "@/shared";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 
@@ -12,7 +12,7 @@ export interface UseActivityBarHelperReturn {
 export const useActivityBarHelper = (): UseActivityBarHelperReturn => {
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
-    const { setModuleName, moduleName } = useGridControlStore();
+    const { setModuleName, moduleName } = useSideBarStore();
 
     const toggleSideBar = () => {
         setIsSideBarVisible(!isSideBarVisible);

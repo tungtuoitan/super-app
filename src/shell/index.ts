@@ -5,18 +5,21 @@
  * Internal imports within shell should use relative paths.
  */
 
+
 // ── Stores ────────────────────────────────────────────────────────────────
-export { useEditorTabBarStore, EditorTabBarProvider } from "./store/EditorTab.store";
+export { useEditorTabBarStore } from "./store/EditorTab.store";
 export { useActivityBarStore } from "./store/ActivityBar.store";
 export { useCommandPaletteStore } from "./commandPallete/useCommandPalette.store";
+export { useSideBarStore } from "./store/SideBar.store";
+
 
 // ── Hooks ─────────────────────────────────────────────────────────────────
 export { useEditorTabHelper } from "./hooks/useEditorTab.helper";
 export { useActivityBarHelper } from "./hooks/useActivityBar.helper";
 export { useCommandPaletteHelper } from "./commandPallete/useCommandPalette.helper";
-export { useCommandPaletteKeyDown } from "./commandPallete/useCommandPaletteKeyDown";
+// export { useCommandPaletteKeyDown } from "./commandPallete/useCommandPaletteKeyDown";
 export { useTabBarHelper } from "./hooks/useTabBarHelper";
-export { useTabBarMenuHelper } from "./hooks/useTabBarMenu.helper";
+// export { useTabBarMenuHelper } from "./hooks/useTabBarMenu.helper";
 export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
 export { useTabKeyboardShortcuts } from "./hooks/useTabKeyboardShortcuts";
@@ -24,9 +27,11 @@ export { findNoteByEntityId, useKeywordNavigationHelper } from "./commandPallete
 export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
 export { transformWs } from "./utils/ws.utils";
 
+
 // ── Keyword (re-exported from shared for backward compat) ──────────────────
 // export { keywordService, targetKeywordService, useKeywordStore, useKeyboardShortcut, parseKeywordLink, isValidUrl, useKeywordHelper } from "@/shared";
 // export type { Keyword, KeywordType, KeywordSyncItem, KeywordSyncReport, UpsertExternalKeywordRequest, TargetKeywordTargetType } from "@/shared";
+
 
 // ── Types ─────────────────────────────────────────────────────────────────
 export type { BaseTab, TabViewState, TabType, MultiProjectTabData } from "./types/tab.types";
@@ -34,17 +39,30 @@ export type { ModuleDefinition, TabMeta, PanelTabDefinition } from "./moduleRegi
 export type { BreadcrumbItem } from "./utils/breadcrumb.utils";
 export type { SaveActions } from "./types/actions.types";
 
+
 // ── Module Registry ───────────────────────────────────────────────────────
 export { moduleRegistry } from "./moduleRegistry";
-export { keywordNavigatorRegistry } from "./commandPallete/keywordNavigator.registry";
+// export { keywordNavigatorRegistry } from "./commandPallete/keywordNavigator.registry";
 export type { KeywordPlugin, NavigationContext } from "./commandPallete/keywordNavigator.registry";
-export { AccountsDialog } from "./components/AccountsDialog";
-export { TabBarMenu } from "./components/menus/TabBarMenu";
+// export { AccountsDialog } from "./components/AccountsDialog";
+// export { TabBarMenu } from "./components/TabBarMenu";
+
+
+// ── Generic Filter ────────────────────────────────────────────────────────
+export { filterRegistry } from "./genericFilter/filterRegistry";
+export type { FilterDefinition } from "./genericFilter/filterRegistry";
+
+// export { useGenericFilterHelper } from "./genericFilter/useGenericFilterHelper";
+// export { GenericFilterPopup } from "./genericFilter/GenericFilterPopup";
+export { filterUtils } from "./genericFilter/filter.utils";
+export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./genericFilter/filter.types";
+
+
 
 // ── Components ────────────────────────────────────────────────────────────
 export { Main } from "./Main";
 export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
-export { CommandPalette } from "./commandPallete/CommandPalette";
-export { ConfirmCloseDialog } from "./components/ConfirmCloseDialog";
-export { EditorToolbar } from "./components/main/EditorToolbar";
-export { ConfirmationPopoverContainer } from "../shared/confirmPopover/ConfirmationPopoverContainer";
+// export { CommandPalette } from "./commandPallete/CommandPalette";
+// export { ConfirmCloseDialog } from "./components/ConfirmCloseDialog";
+// export { EditorToolbar } from "./components/main/EditorToolbar";
+// export { ConfirmationPopoverContainer } from "../shared/confirmPopover/ConfirmationPopoverContainer";

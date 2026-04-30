@@ -13,7 +13,7 @@ import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import { KHighlightText } from "../KExplorer/KHighlightText";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import {useGlobalShortcut} from "@/shared";
 
 export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV2; isRoot?: boolean; compact?: boolean; onSubmitEdit?: (draft: { name: string; description: string; icon: string | null; color: string | null }) => Promise<void> }) {
@@ -37,7 +37,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { openKNodeTab } = useKNodeTabHelper();
     const { hoveredNodeId, setHoveredNodeId, markedNodeId, setMarkedNodeId, currentK } = useKStore();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery } = useSideBarStore();
 
     const isMarked = markedNodeId === node.id;
     const handleToggleMark = (e: React.MouseEvent) => {

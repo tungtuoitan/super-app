@@ -8,8 +8,8 @@ import { constants } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { filterUtils } from "@/shared";
-import { useGridControlStore } from "@/shared";
+import { filterUtils } from "@/shell";
+import { useSideBarStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 import {useStandardRegistryStore} from "@/shared";
@@ -17,7 +17,7 @@ import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "@/feature
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery } = useSideBarStore();
 
     const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection, noteGridPagination, setNoteGridPagination, setTotalCount } = useNoteGridStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();

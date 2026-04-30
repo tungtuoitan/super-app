@@ -6,9 +6,9 @@
 
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { constants } from "@/shared";
-import {UserFilters} from "@/shared";
+import {UserFilters} from "@/shell";
 
 /**
  * Maps URL pathname to grid registration parameters
@@ -20,7 +20,7 @@ import {UserFilters} from "@/shared";
 */
 export const useGridAutoRegisterHelper = () => {
     const location = useLocation();
-    const { setModuleName, moduleName, setFilterViewKey, setSearchQuery } = useGridControlStore();
+    const { setModuleName, moduleName, setFilterViewKey, setSearchQuery } = useSideBarStore();
     // const getGridConfigFromPath = (pathname: string) => {
     //     switch (pathname) {
     //         case "/workspace":
@@ -60,8 +60,7 @@ export const useGridAutoRegisterHelper = () => {
     // };
 
     const getGridConfigFromModuleName = (moduleName: string) => {
-        const _moduleName = moduleName.toLowerCase();
-        switch (_moduleName) {
+        switch (moduleName) {
             case constants.modules.workspace:
                 return {
                     // name: constants.modules.workspace,
@@ -99,7 +98,7 @@ export const useGridAutoRegisterHelper = () => {
 
     const registerGrid = () => {
         const config = getGridConfigFromModuleName(moduleName);
-        setFilterViewKey((config?.filterViewKey ?? constants.filters.views.projectGrid) as keyof UserFilters | null)
+        setFilterViewKey(config ? (config.filterViewKey as keyof UserFilters | null) : null)
 
         // if (config) {
         //     // Register grid with proper config

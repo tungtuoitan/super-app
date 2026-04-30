@@ -16,12 +16,10 @@ import { LifeLogProvider } from "@/features/lifeLog";
 import { WikiProvider } from "@/features/Wiki/";
 import { OrchestratorContextMenu } from "@/shared";
 import { ConfirmationPopoverProvider } from "@/shared";
-import { ConfirmationPopoverContainer } from "@/shell";
 import MainNav from "./components/main/MainNav";
 import { NavProvider } from "@/contexts/NavigationContext";
 
 import { OrchestratorContextMenuStoreProvider } from "@/shared";
-import { GridControlProvider } from "@/shared";
 import { DeviceProvider } from "@/shared";
 import { DebugLoggerProvider } from "@/shared";
 import { ShellProvider } from "./store/ShellProvider";
@@ -32,6 +30,7 @@ import { AuthCallbackProvider } from "@/shared";
 import { AuthStoreProvider } from "@/shared";
 import { AuthGuard } from "@/shared";
 import {ConsoleProvider} from "@/shared";
+import {ConfirmationPopoverContainer} from "@/shared";
 
 /**
  * Main application layout component.
@@ -62,7 +61,6 @@ export function Main() {
                                                         <AuthCallbackProvider>
                                                             <AuthStoreProvider>
                                                                 <AuthGuard>
-                                                                    <GridControlProvider>
                                                                         {/* Main application content */}
                                                                         <WorkspaceProviders>
                                                                             <KProviders>
@@ -93,7 +91,6 @@ export function Main() {
                                                                                 </WsProviders>
                                                                             </KProviders>
                                                                         </WorkspaceProviders>
-                                                                    </GridControlProvider>
                                                                 </AuthGuard>
                                                             </AuthStoreProvider>
                                                         </AuthCallbackProvider>

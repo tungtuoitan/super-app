@@ -7,7 +7,7 @@ import { BaseTab } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { filterUtils } from "@/shared";
+import { filterUtils } from "@/shell";
 import {useConsoleHelper} from "@/shared";
 import {Ws} from "../../types/workspace.types";
 import {useEditorTabBarStore} from "@/shell";

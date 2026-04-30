@@ -6,7 +6,7 @@ import { useWorkspaceStore } from "@/features/workspace";
 import { useAuthStore } from "@/shared";
 import { useEditorTabHelper } from "../hooks/useEditorTab.helper";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { noteService } from "@/features/note";
 import { parseKeywordLink, constants, isValidUrl } from "@/shared";
 import type { Keyword } from "@/shared";
@@ -25,9 +25,9 @@ export const useKeywordNavigationHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { openTab, updateActiveTab } = useEditorTabHelper();
     const { loadTree } = useWorkspaceLoader();
-    const { setModuleName } = useGridControlStore();
+    const { setModuleName } = useSideBarStore();
     const _console = useConsoleHelper();
-    const { moduleName } = useGridControlStore();
+    const { moduleName } = useSideBarStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
 
     const navigateLink = async (keyword: Keyword, openedBy?: { link: string; label: string }) => {

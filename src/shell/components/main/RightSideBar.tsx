@@ -1,5 +1,5 @@
 /**
- * GridControlBar - Search and filter controls for grid
+ * RightSideBar - Search and filter controls for grid
  * Used in VSSideBar header to control active grid
  */
 
@@ -7,12 +7,12 @@ import React, { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/shared";
 import { Button } from "@/shared";
-import { GenericFilterPopup } from "../genericFilter/GenericFilterPopup";
-import { useGridControlStore } from "@/shared";
+import { GenericFilterPopup } from "../../genericFilter/GenericFilterPopup";
 import { useDeviceStore } from "@/shared";
+import {useSideBarStore} from "../../store/SideBar.store";
 
-export function GridControlBar({ hideFilter }: { hideFilter?: boolean } = {}) {
-    const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useGridControlStore();
+export function RightSideBar({ hideFilter }: { hideFilter?: boolean } = {}) {
+    const { searchQuery, moduleName, filterViewKey, setSearchQuery } = useSideBarStore();
     const { isMobile } = useDeviceStore();
     const [inputValue, setInputValue] = useState(searchQuery);
 

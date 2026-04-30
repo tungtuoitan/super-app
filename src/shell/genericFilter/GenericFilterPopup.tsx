@@ -7,18 +7,12 @@
 
 import React, { useEffect } from "react";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
-import { Button, useStandardRegistryStore } from "@/shared";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
-import { Checkbox } from "@/shared";
-import { RadioGroup, RadioGroupItem } from "@/shared";
-import { Slider } from "@/shared";
-import { Label } from "@/shared";
-import { constants } from "@/shared";
-import { useGenericFilterHelper } from "@/shared";
-import { useGridControlStore } from "@/shared";
-import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "../utils/formatters";
-import {FilterFieldConfig, ViewFilter} from "./filter.types";
-import {useAuthStore} from "@/shared";
+import { Button, useStandardRegistryStore, Popover, PopoverContent, PopoverTrigger, Checkbox, RadioGroup, RadioGroupItem, Slider, Label, constants, useAuthStore } from "@/shared";
+import { useGenericFilterHelper } from "./useGenericFilterHelper";
+import { useSideBarStore } from "@/shell";
+import { filterRegistry } from "./filterRegistry";
+import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/shared";
+import { FilterFieldConfig, ViewFilter } from "./filter.types";
 
 export function GenericFilterPopup() {
     const {
@@ -31,7 +25,7 @@ export function GenericFilterPopup() {
         isApplyDisabled,
     } = useGenericFilterHelper();
     const { registriesByType } = useStandardRegistryStore();
-    const { moduleName, filterViewKey, uiFilters, setUIFilters } = useGridControlStore();
+    const { moduleName, filterViewKey, uiFilters, setUIFilters } = useSideBarStore();
     const { $user } = useAuthStore();
     const [open, setOpen] = React.useState(false);
 
@@ -225,37 +219,30 @@ export function GenericFilterPopup() {
     };
 
     /**
-     * Render fields for a specific filterViewKey using switch
+     * Render a single field based on its type/key — no hard-coded view names
+     */
+    const renderField = (group: FilterFieldConfig) => {
+        if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
+        if (group.type === "radio" && group.key === "deletedAt") return renderDeletedAtRadio(group);
+        if (group.type === "checkbox" && group.key === "deletedAt") return renderDeletedAtCheckbox(group);
+        if (group.type === "dateRange") return renderDateRange(group);
+        return null;
+    };
+
+    /**
+     * Render fields for a specific filterViewKey using registry.
+     * Falls back to constants.filters.groups when view is not registered
+     * (handles projectGrid and any view not yet migrated to registry).
      */
     const renderFieldsByView = () => {
-        const groups = filterViewKey ? (constants.filters.groups as any)[filterViewKey] as readonly FilterFieldConfig[] : [];
+        if (!filterViewKey) return null;
 
-        switch (filterViewKey) {
-            case "noteGrid":
-            case "wsGrid":
-                return groups.map((group) => {
-                    if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
-                    if (group.type === "radio" && group.key === "deletedAt") return renderDeletedAtRadio(group);
-                    if (group.type === "dateRange") return renderDateRange(group);
-                    return null;
-                });
+        const registryGroups = filterRegistry.getFieldConfigs(filterViewKey);
+        const groups: readonly FilterFieldConfig[] = registryGroups.length > 0
+            ? registryGroups
+            : (constants.filters.groups as any)[filterViewKey] ?? [];
 
-            case "workspace":
-                return groups.map((group) => {
-                    if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
-                    if (group.type === "checkbox" && group.key === "deletedAt") return renderDeletedAtCheckbox(group);
-                    return null;
-                });
-
-            case "projectGrid":
-                return groups.map((group) => {
-                    if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
-                    return null;
-                });
-
-            default:
-                return null;
-        }
+        return groups.map(renderField);
     };
 
     // Check if UI filters differ from default filters

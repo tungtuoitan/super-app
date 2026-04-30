@@ -1,11 +1,11 @@
 import { Panel, PanelGroup } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
-import { GridControlBar } from "@/shared";
 import { constants } from "@/shared";
 import { useDeviceStore } from "@/shared";
 import { Console } from "../../../shared/console/Console";
 import { moduleRegistry } from "@/shell";
 import {useActivityBarStore} from "@/shell";
+import {RightSideBar} from "./RightSideBar";
 
 interface VSSideBarProps {
     moduleName: string;
@@ -44,7 +44,7 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
                             {/* Header */}
                             <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                 <span>{viewTitle}</span>
-                                <GridControlBar hideFilter={moduleName === constants.modules.lifeLog} />
+                                <RightSideBar hideFilter={moduleName === constants.modules.lifeLog} />
                             </div>
 
                             {/* Content — delegated to feature module */}

@@ -15,4 +15,4 @@ export { KKnowledgeMenu } from "./contexts/menu/KKnowledgeMenu";
 export { KTestFlowMenu } from "./contexts/menu/KTestFlowMenu";
 export { KNodePanelBlankMenu } from "./contexts/menu/KNodePanelBlankMenu";
 
-export { useKLoader } from "./hooks/kTree/useK.loader";
+export { useKLoader } from "./hooks/kTree/useK.loader";export { registerKFilters } from "./shell/k.filterConfig";

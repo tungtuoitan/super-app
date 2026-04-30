@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
-import { useGridControlStore } from "@/shared";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/kTree/useKTreeHelper2";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { KHighlightText } from "./KHighlightText";
@@ -19,6 +18,7 @@ import { useDrop } from "react-dnd";
 import { KTestService } from "../../service/kTest.service";
 import {useEditorTabBarStore} from "@/shell";
 import {KTreeNode} from "../../hooks/kTree/Ktree.miniHelper";
+import {useSideBarStore} from "@/shell";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
@@ -45,7 +45,8 @@ const Folder2: React.FC<IconProps> = ({ className, color }) => (
 export default Folder2;
 
 export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds, markedNodeId, setMarkedNodeId, currentKId }: NodeProps) {
-    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, setPendingQuizTabSwitch } = useKStore();    const { searchQuery } = useGridControlStore();
+    const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, setPendingQuizTabSwitch } = useKStore();    
+    const { searchQuery } = useSideBarStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();

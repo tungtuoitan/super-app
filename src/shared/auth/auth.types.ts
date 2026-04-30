@@ -3,7 +3,7 @@
  * Used by auth.service.ts and shell auth hooks.
  */
 
-import type {UserFilters} from "../genericFilter/filter.types";
+import type {UserFilters} from "../../shell/genericFilter/filter.types";
 
 export interface ApiRequestConfig {
     method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";

@@ -68,6 +68,7 @@ export { HighlightedText } from "./components/HighlightedText";
 export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";
 export { ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopover.store";
 // export type { ConfirmationPopoverOptions } from "./confirmPopover/ConfirmationPopover.store";
+export { ConfirmationPopoverContainer } from "./confirmPopover/ConfirmationPopoverContainer";
 export type { ConfirmMessage, DeleteType } from "./confirmPopover/types";
 
 // ── console ───────────────────────────────────────────────────────────────
@@ -92,12 +93,6 @@ export type { UploadContext } from "./file/file.types";
 export { flowService } from "./flow/flow.service";
 export type { FlowEdgeDTO, FlowNodePositionDTO } from "./flow/flow.types";
 
-// ── genericFilter ─────────────────────────────────────────────────────────
-export { useGenericFilterHelper } from "./genericFilter/useGenericFilterHelper";
-export { filterUtils } from "./genericFilter/filter.utils";
-export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./genericFilter/filter.types";
-export { GenericFilterPopup } from "./genericFilter/GenericFilterPopup";
-
 // ── globalShortcut ────────────────────────────────────────────────────────
 export { useGlobalShortcut } from "./globalShortcut/useGlobalShortcut";
 
@@ -118,8 +113,8 @@ export type { Keyword, KeywordType, UpsertExternalKeywordRequest, KeywordSyncIte
 export type { TargetKeywordTargetType } from "./keyword/targetKeyword.service";
 
 // ── gridControl ───────────────────────────────────────────────────────────
-export { useGridControlStore, GridControlProvider } from "./gridControl/useGridControl.store";
-export { GridControlBar } from "./gridControl/GridControlBar";
+// export { useSideBarStore, GridControlProvider } from "./gridControl/useSideBar.store";
+// export { RightSideBar } from "./gridControl/RightSideBar";
 
 // ── icons ─────────────────────────────────────────────────────────────────
 export { IconKey } from "./icons/icon.types";

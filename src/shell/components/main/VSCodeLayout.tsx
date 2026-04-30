@@ -9,11 +9,11 @@ import { useGridAutoRegisterHelper } from "@/shell";
 import { useLocation } from "react-router-dom";
 import { useDeviceStore } from "@/shared";
 import { constants } from "@/shared";
-import { GridControlBar } from "@/shared";
-import { useGridControlStore } from "@/shared";
 import { moduleRegistry } from "@/shell";
 import {useDetectDevice} from "../../../shared/device/useDetectDevice";
 import {useActivityBarStore} from "@/shell";
+import {useSideBarStore} from "@/shell/store/SideBar.store";
+import {RightSideBar} from "./RightSideBar";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -24,14 +24,14 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const { isMobile } = useDeviceStore();
     const { setIsPanelVisible } = useActivityBarStore();
     const mobileEditorRef = useRef<ImperativePanelHandle>(null);
-    const { moduleName } = useGridControlStore();
+    const { moduleName } = useSideBarStore();
     useDetectDevice()
 
     const { registerGrid } = useGridAutoRegisterHelper();
 
     useEffect(() => {
         registerGrid();
-    }, [location.pathname]);
+    }, [moduleName]);
 
     // Expand editor panel when any lifelog tab opens (mobile)
     useEffect(() => {
@@ -59,7 +59,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                             <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                 <span>{moduleName}</span>
                                 {moduleName === constants.modules.lifeLog && (
-                                    <GridControlBar hideFilter />
+                                    <RightSideBar hideFilter />
                                 )}
                             </div>
                             <div className="flex-1 overflow-hidden">

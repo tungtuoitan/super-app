@@ -9,7 +9,7 @@ import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useWorkspaceHelper } from "@/features/workspace";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
@@ -47,7 +47,7 @@ export const useProjectDetailHelper = () => {
     const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
     const { setSelectedWorkspaceId } = useWorkspaceStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
-    const { setModuleName } = useGridControlStore();
+    const { setModuleName } = useSideBarStore();
     const { tabId } = useProjectDetailStore();
     const { selectedProject } = useProjectDetailSelector();
 

@@ -4,7 +4,7 @@ import { Panel } from "react-resizable-panels";
 import { useMovingTreeStore } from "@/features/workspace";
 import { useEditorTabHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell";
 import { ConsoleTab } from "../../../../shared/console/ConsoleTab";
 import { NoteBodyInPanel } from "@/features/note";
@@ -24,7 +24,7 @@ interface VSPanelProps {
  */
 export function VSPanel({ onClose }: VSPanelProps) {
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
-    const { moduleName } = useGridControlStore();
+    const { moduleName } = useSideBarStore();
     const { setTargetWorkspace } = useMovingTreeStore();
     const { isMobile } = useDeviceStore();
     const { getActiveTab } = useEditorTabHelper();

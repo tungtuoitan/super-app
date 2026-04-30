@@ -6,12 +6,12 @@
 
 import { useMemo } from "react";
 import { useProjectStore } from "../store/useProject.store";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { useStandardRegistryStore } from "@/shared";
 
 export const useProjectGridSelector = () => {
     const { projects } = useProjectStore();
-    const { searchQuery } = useGridControlStore();
+    const { searchQuery } = useSideBarStore();
     const { registriesByType } = useStandardRegistryStore();
 
     // Get status label from registry

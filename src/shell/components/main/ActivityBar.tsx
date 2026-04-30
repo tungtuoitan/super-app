@@ -4,7 +4,7 @@ import { SettingsDialog } from "../SettingsDialog";
 import { AccountsDialog } from "../AccountsDialog";
 import { useActivityBarHelper } from "@/shell";
 import { useAuthStore } from "@/shared";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { moduleRegistry, type ModuleDefinition } from "@/shell";
 import type { ActivityBarView } from "@/shared";
 import {useActivityBarStore} from "@/shell";
@@ -58,7 +58,7 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { setAccountsOpen, setSettingsOpen } = useActivityBarStore();
     const { handleActivityClick } = useActivityBarHelper();
     const { isAuthenticated } = useAuthStore();
-    const { moduleName } = useGridControlStore();
+    const { moduleName } = useSideBarStore();
 
     // Only show modules that have a defined sidebar view (i.e. intended for ActivityBar)
     // note and ws are registered but hidden by default (no activityBar flag)

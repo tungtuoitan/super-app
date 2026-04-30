@@ -11,7 +11,7 @@ import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
-import { useGridControlStore } from "@/shared";
+import { useSideBarStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 import {useStandardRegistryStore} from "@/shared";
@@ -25,7 +25,7 @@ export const useNoteDetailHelper = () => {
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { registries } = useStandardRegistryStore();
     const { getActiveTab } = useEditorTabHelper();
-    const { moduleName } = useGridControlStore();
+    const { moduleName } = useSideBarStore();
     const { loadKeywords } = useKeywordHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
