@@ -7,13 +7,12 @@
  */
 
 import { useEffect, useState } from "react";
-import { useAuthStore } from "@/shell";
 import { useNoteGridStore } from "@/features/note";
 import { useWsStore } from "@/features/workspace";
 import { useProjectStore } from "@/features/project";
 import type { Task } from "@/features/taskDetail";
 import { BaseTab, MultiProjectTabData } from "@/shell";
-import { constants } from "@/shared";
+import { constants, useAuthStore } from "@/shared";
 import { Note, NoteDTO } from "@/features/note";
 import { noteService } from "@/features/note";
 import { wsService, WsDTO } from "@/features/workspace";

@@ -2,7 +2,7 @@ import React from "react";
 import { useSnackbar } from "notistack";
 import { useMovingTreeStore } from "../store/MovingTree.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";

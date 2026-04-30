@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import { Task } from "../../types/task.types";
 import { usePTaskStore } from "@/features/project";
 import { taskService } from "../../service/task.service";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { BaseTab } from "@/shell";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";

@@ -4,7 +4,7 @@
  */
 
 import { projectService, ProjectDTO } from "../service/project.service";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";

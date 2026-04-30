@@ -10,7 +10,7 @@ import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTim
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
 import { storageService } from "@/shared";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 
 export function useMultiTimelineHeadless() {
     const { loadTasksForProjects } = useMultiProjectTaskGridHelper();

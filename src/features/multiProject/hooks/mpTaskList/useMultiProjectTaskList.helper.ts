@@ -12,7 +12,7 @@ import { useConsoleHelper } from "@/shared";
 import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
 import { toLocalISOString } from "@/shared";
 import {useMultiProjectTaskGridHelper} from "./useMultiProjectTaskGrid.helper";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 
 export const useMultiProjectTaskListHelper = () => {
     const { tasks, setTasks } = useMpTaskStore();

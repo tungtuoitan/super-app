@@ -2,7 +2,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 
 import { useNavigationStore } from "../../../contexts/NavigationContext";
 import { TopNav } from "./TopNav";
-import { AuthCallback } from "@/shell";
+import { AuthCallback } from "@/shared";
 import { constants } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import {useMobileStore} from "@/shared";

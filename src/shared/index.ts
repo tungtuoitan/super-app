@@ -11,18 +11,63 @@ export type { ActivityBarView } from "./constants";
 
 // ── auth ──────────────────────────────────────────────────────────────────
 // NOTE: must remain SECOND — no internal @/shared deps; consumed early by shell/features
-export { AuthCallbackProvider, useAuthCallbackStore, AuthStoreProvider, useAuthStore, AuthGuard, AuthCallback, 
-    AuthContainer, useAuthHelper, authApi, initiateGoogleLogin, GOOGLE_OAUTH_CONFIG, extractAuthCodeFromUrl, 
-    extractStateFromUrl, extractOAuthError, retrieveAndClearPkceValues, validateState, generateCodeVerifier, 
-    generateCodeChallenge, generateState, storePkceValues } from "./auth";
-export type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest, User, UserData, ExchangeTokenResponse } from "./auth";
+export { AuthCallbackProvider, useAuthCallbackStore } from "./auth/AuthCallback.store";
+export { AuthStoreProvider, useAuthStore } from "./auth/Auth.store";
+export { AuthGuard } from "./auth/AuthGuard";
+export { AuthCallback } from "./auth/AuthCallback";
+export { AuthContainer } from "./auth/AuthContainer";
+export { useAuthHelper } from "./auth/useAuth.helpers";
+export { authApi } from "./auth/auth.service";
+export { initiateGoogleLogin, GOOGLE_OAUTH_CONFIG, extractAuthCodeFromUrl, extractStateFromUrl, extractOAuthError } from "./auth/googleOAuth.utils";
+export { retrieveAndClearPkceValues, validateState, generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "./auth/pkce.utils";
+export type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest, User, UserData, ExchangeTokenResponse } from "./auth/auth.types";
 
 // ── checkDevice ───────────────────────────────────────────────────────────
 export { useIsMobile } from "./checkDevice/useIsMobile";
 export { useMobileStore, MobileProvider } from "./checkDevice/Mobile.store";
 
 // ── components ────────────────────────────────────────────────────────────
-export * from "./components";
+export { Button } from "./components/ui/Button";
+export { Spinner } from "./components/ui/Spinner";
+export { GenericTagAutoComplete, type GenericTagAutoCompleteProps } from "./components/ui/TagAutoComplete";
+export { GenericAutoComplete, type GenericAutoCompleteProps, type IAutoCompleteOptions } from "./components/ui/GenericAutoComplete";
+export { GenericTextField, type GenericTextFieldProps } from "./components/ui/GenericTextField";
+export { DialogContainer, type IDialogContainerProps, type IDialogContentProps } from "./components/ui/DialogContainer";
+export { GridContainer, type GridContainerProps } from "./components/ui/GridContainer";
+export { Tooltip2 } from "./components/ui/Tooltip2";
+export { CloseNotiBtn } from "./components/ui/CloseNotiBtn";
+export { IconPicker, IconDisplay, IconWithLabel, type IconPickerProps, type IconDisplayProps, type IconWithLabelProps } from "./components/ui/IconPicker";
+export { FolderIconWithBadge, FolderFilled, FolderOpenFilled, type FolderIconWithBadgeProps } from "./components/ui/FolderIconWithBadge";
+export { StatusAutoComplete, type StatusAutoCompleteProps, type IStatusOption } from "./components/ui/StatusAutoComplete";
+export { Dialog, DialogPortal, DialogOverlay, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./components/ui/dialog";
+export { Checkbox } from "./components/ui/checkbox";
+export { Popover, PopoverTrigger, PopoverContent } from "./components/ui/popover";
+export { Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton } from "./components/ui/select";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
+export { Badge, badgeVariants } from "./components/ui/badge";
+export { Input } from "./components/ui/input";
+export { Textarea } from "./components/ui/textarea";
+export { Label } from "./components/ui/label";
+export { Separator } from "./components/ui/separator";
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./components/ui/tooltip";
+export { ScrollArea, ScrollBar } from "./components/ui/scroll-area";
+export { Alert, AlertTitle, AlertDescription } from "./components/ui/alert";
+export { Calendar, CalendarDayButton } from "./components/ui/calendar";
+export { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
+export { Slider } from "./components/ui/slider";
+export { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from "./components/ui/command";
+export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from "./components/ui/breadcrumb";
+export { ShadcnButton, buttonVariants } from "./components/ui/Button";
+export { GenericDrawingDate, type GenericDrawingDateProps } from "./components/ui/GenericDrawingDate";
+export { AutoCompleteOption, type AutoCompleteOptionProps } from "./components/ui/AutoCompleteOption";
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./components/ui/card";
+export { resolveVariant } from "./components/ui/Button";
+export * from "./components/feedback/ConfirmationPopover";
+export * from "./components/feedback/ErrorBoundary";
+export * from "./components/RichTextEditor/RichTextEditor";
+export * from "./components/DateTimePicker/DateTimePicker";
+export * from "./components/DateTimePicker/DateRangePicker";
+export * from "./components/HighlightedText";
 
 // ── confirmPopover ────────────────────────────────────────────────────────
 export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";
@@ -39,6 +84,7 @@ export { useConsoleHelper } from "./console/useConsole.helper";
 export { debugLogStore } from "./debug/debugLog.store";
 export type { DebugLogEntry } from "./debug/debugLog.store";
 export { useDebugLogger, DebugLoggerProvider, useLogger } from "./debug/DebugLogger.store";
+export { useDebugLog, debugLog } from "./debug/useDebugLog";
 
 // ── fetch ─────────────────────────────────────────────────────────────────
 export { apiFetch, acquireRefreshToken, configureApiClient } from "./fetch/apiClient";
@@ -55,6 +101,7 @@ export type { FlowEdgeDTO, FlowNodePositionDTO } from "./flow/flow.types";
 export { useGenericFilterHelper } from "./genericFilter/useGenericFilterHelper";
 export { filterUtils } from "./genericFilter/filter.utils";
 export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./genericFilter/filter.types";
+export { GenericFilterPopup } from "./genericFilter/GenericFilterPopup";
 
 // ── globalShortcut ────────────────────────────────────────────────────────
 export { useGlobalShortcut } from "./globalShortcut/useGlobalShortcut";
@@ -77,6 +124,7 @@ export type { TargetKeywordTargetType } from "./keyword/targetKeyword.service";
 
 // ── gridControl ───────────────────────────────────────────────────────────
 export { useGridControlStore, GridControlProvider } from "./gridControl/useGridControl.store";
+export { GridControlBar } from "./gridControl/GridControlBar";
 
 // ── icons ─────────────────────────────────────────────────────────────────
 export { IconKey } from "./icons/icon.types";
@@ -122,11 +170,3 @@ export { parseAsLocalDate, toLocalISOString } from "./utils/date.utils";
 export { fuzzyMatchWithDiacritics, removeDiacritics, findMatchIndices } from "./utils/fuzzy-search.utils";
 export { getDeviceFingerprint } from "./utils/deviceFingerprint";
 export { formatDate, formatDateTime, isEmpty, truncateText, getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "./utils/formatters";
-
-// ── Cross-boundary re-exports ──────────────────────────────────────────────
-// NOTE: these originate outside shared/ — kept here for backward compatibility
-// export { keywordService } from "../shell/commandPallete/keyword.service";
-// export { targetKeywordService } from "../shell/commandPallete/targetKeyword.service";
-// export type { KeywordType, Keyword, UpsertExternalKeywordRequest, KeywordSyncItem, KeywordSyncReport } from "../shell/commandPallete/keyword.types";
-// export { useTabBarMenuHelper } from "../shell/hooks/useTabBarMenu.helper";
-// export { generateTempId, collectIdsFromTabs, generateUnsavedName, collectIdsFromTree, SPECIAL_IDS } from "../features/workspace/utils/temp-id.utils";

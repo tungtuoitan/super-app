@@ -13,7 +13,7 @@ import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 import {usePTaskStore} from "@/features/project/store/usePTask.store";
 

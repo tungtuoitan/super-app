@@ -1,6 +1,6 @@
 
 import { useEditorTabHelper } from "@/shell";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";

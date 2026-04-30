@@ -14,7 +14,7 @@ import { filterUtils } from "@/shared";
 import { userProfileService } from "@/shared";
 import {parseApiError} from "@/shared";
 import {UserFilters, ViewFilter} from "@/shared";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 import {useStandardRegistryStore} from "@/shared";
 
 const DEFAULT_FILTERS = constants.filters.defaults.taskGrid as ViewFilter;

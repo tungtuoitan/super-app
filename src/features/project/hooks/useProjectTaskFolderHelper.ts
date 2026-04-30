@@ -5,7 +5,7 @@
  */
 
 import { useRef, useEffect } from "react";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useProjectStore } from "../store/useProject.store";
 import type { Task } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shared";
@@ -15,7 +15,7 @@ import { projectService, type ProjectDTO } from "../service/project.service";
 import { WorkspaceItemAction } from "@/features/workspace";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { parseAsLocalDate } from "@/shared";
-import { debugLog } from "@/shell";
+import { debugLog } from "@/shared";
 import { constants } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";

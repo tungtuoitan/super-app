@@ -3,7 +3,7 @@
  * Handles comment CRUD operations, reply, edit mode.
  */
 
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { taskCommentService } from "../../service/taskComment.service";

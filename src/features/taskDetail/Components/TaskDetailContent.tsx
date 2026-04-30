@@ -29,7 +29,7 @@ import { formatDate } from "../utils/TaskDetail.utils";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
 import { useTaskWorkspaceItemHelper } from "../hooks/useTaskWorkspaceItem.helper";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { taskService } from "../service/task.service";
 
 /**

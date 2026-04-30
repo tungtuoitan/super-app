@@ -6,7 +6,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollArea } from "@/shared";
 import { keywordService, useKeywordHelper } from "@/shared";
 import type { KeywordSyncReport } from "@/shared";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];

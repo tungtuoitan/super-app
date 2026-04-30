@@ -5,7 +5,7 @@
 
 import { projectService, ProjectDTO } from "../service/project.service";
 import {  useProjectStore } from "../store/useProject.store";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";

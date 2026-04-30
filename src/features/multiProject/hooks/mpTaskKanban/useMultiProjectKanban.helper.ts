@@ -11,7 +11,7 @@ import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/shared";
 import { useMultiProjectKanbanSelector } from "../../Selectors/useMultiProjectKanban.selector";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 
 export const useMultiProjectKanbanHelper = () => {
     const { tasks, setTasks } = useMpTaskStore();

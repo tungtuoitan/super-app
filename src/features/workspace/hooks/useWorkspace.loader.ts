@@ -14,7 +14,7 @@
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { wsService } from "@/features/workspace/service/ws.service";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import {WorkspaceDTO} from "../types/workspace-dto.types";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {useMovingTreeStore} from "../store/MovingTree.store";

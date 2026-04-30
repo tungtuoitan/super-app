@@ -10,7 +10,7 @@ import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/shared";
 import { useTaskKanbanSelector } from "../../Selectors/TaskKanbanSelector";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 import {usePTaskStore} from "@/features/project/store/usePTask.store";
 
 export const useTaskKanbanHelper = () => {

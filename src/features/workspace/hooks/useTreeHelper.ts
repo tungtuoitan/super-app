@@ -11,7 +11,7 @@ import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { constants, useKeywordHelper } from "@/shared";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction } from "../types/workspace.types";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {useConsoleHelper} from "@/shared";
 import {Folder} from "../types/folder.types";

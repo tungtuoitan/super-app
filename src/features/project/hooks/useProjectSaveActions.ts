@@ -2,7 +2,7 @@ import { constants } from "@/shared";
 import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/taskDetail";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
-import { debugLog } from "@/shell";
+import { debugLog } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { Task } from "@/features/taskDetail";
 import {SaveActions} from "@/shell";

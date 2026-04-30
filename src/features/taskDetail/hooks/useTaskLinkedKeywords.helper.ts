@@ -6,7 +6,7 @@
 
 
 import { targetKeywordService, TargetKeywordTargetType, useKeywordStore } from "@/shared";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";

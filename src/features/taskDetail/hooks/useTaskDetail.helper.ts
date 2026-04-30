@@ -14,7 +14,7 @@ import React from "react";
 import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { taskService } from "../service/task.service";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError, useKeywordStore } from "@/shared";
 import { BaseTab } from "@/shell";
 import { useConsoleHelper } from "@/shared";
@@ -24,8 +24,7 @@ import { useCommandPaletteHelper } from "@/shell";
 import { useKeywordNavigationHelper } from "@/shell";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskCommentHelper } from "./taskComment/useTaskComment.helper";
-import { debugLog } from "@/shell";
+import { debugLog } from "@/shared";
 import { usePTaskStore } from "@/features/project";
 import {useEditorTabBarStore} from "@/shell";
 

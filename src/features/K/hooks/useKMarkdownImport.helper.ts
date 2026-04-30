@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { KService } from "../service/K.service";
 import { KTestService } from "../service/kTest.service";
 import { useConsoleHelper } from "@/shared";

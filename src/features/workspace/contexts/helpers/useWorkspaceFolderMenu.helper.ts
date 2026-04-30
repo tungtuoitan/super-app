@@ -13,7 +13,7 @@ import { constants } from "@/shared";
 import type { ItemType } from "../../store/FolderDialog.store";
 import { Folder } from "@/features/workspace/types/folder.types";
 import { workspaceService } from "../../service/workspace.service";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/shared";

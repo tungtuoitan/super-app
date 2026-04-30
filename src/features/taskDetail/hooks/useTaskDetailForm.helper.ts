@@ -8,7 +8,7 @@ import React from "react";
 import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDTO, taskService } from "../service/task.service";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useStandardRegistryStore } from "@/shared";
 import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared";

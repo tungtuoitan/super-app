@@ -4,7 +4,7 @@ import { useEditorTabHelper } from "@/shell";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { constants } from "@/shared";
 import { BaseTab } from "@/shell";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { filterUtils } from "@/shared";

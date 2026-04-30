@@ -8,7 +8,7 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { getConfirmMessage, useConfirmationPopoverHelper } from "@/shared";
 import { constants } from "@/shared";
 import { noteService } from "@/features/note";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useOrchestratorContextMenuStore } from "@/shared";
 import {workspaceService} from "../../service/workspace.service";

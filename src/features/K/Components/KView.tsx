@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useCallback } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { CalendarClock, Loader2 } from "lucide-react";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useKStore } from "../store/K.store";
 import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";

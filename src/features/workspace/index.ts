@@ -4,9 +4,6 @@
  * Internal implementation details stay private.
  */
 
-import {useWorkspaceLoader} from "./hooks";
-import {WorkspaceFileItem} from "./types/workspace-v2.types";
-
 // Stores
 export { useWorkspaceStore } from "./store/Workspace.store";
 export { useMovingTreeStore } from "./store/MovingTree.store";

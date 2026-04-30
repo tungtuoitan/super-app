@@ -4,7 +4,7 @@
 
 import { config } from "config/app.config";
 import type { TaskDTO } from "../types/task.types";
-import { debugLog } from "@/shell";
+import { debugLog } from "@/shared";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";
 

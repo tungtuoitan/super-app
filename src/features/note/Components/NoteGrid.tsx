@@ -11,7 +11,7 @@ import { useEditorTabHelper } from "@/shell";
 import { useGridControlStore } from "@/shared";
 import { constants } from "@/shared";
 import { BaseTab } from "@/shell";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 /**

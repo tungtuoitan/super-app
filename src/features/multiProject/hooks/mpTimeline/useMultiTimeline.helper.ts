@@ -13,7 +13,7 @@ import { toLocalISOString } from "@/shared";
 import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 
 export const useMultiTimelineHelper = () => {
     // ── Stores ───────────────────────────────────────────

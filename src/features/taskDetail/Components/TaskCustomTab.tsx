@@ -11,7 +11,7 @@ import { RichTextEditor } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
 import { useTaskCommentHelper } from "../hooks/taskComment/useTaskComment.helper";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { taskService } from "../service/task.service";

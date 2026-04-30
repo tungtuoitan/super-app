@@ -4,7 +4,7 @@
 
 import { config } from "config/app.config";
 import type { LifeLogTrackDTO, LifeLogLogDTO, UpsertLifeLogTrackDTO, UpsertLifeLogLogDTO } from "@/features/lifeLog/types/lifeLog.types";
-import { debugLog } from "@/shell";
+import { debugLog } from "@/shared";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";
 

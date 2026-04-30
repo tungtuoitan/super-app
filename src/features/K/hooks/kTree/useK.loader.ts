@@ -12,7 +12,7 @@
  */
 
 import {useConsoleHelper} from "@/shared";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 import {useKMovingTreeStore} from "../../store/KMovingTree.store";
 import {KService} from "../../service/K.service";
 import {useKStore} from "../../store/K.store";

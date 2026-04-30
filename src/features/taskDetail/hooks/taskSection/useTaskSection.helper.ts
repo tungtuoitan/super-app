@@ -11,7 +11,7 @@ import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskCustomTabSelector } from "../../Selectors/TaskCustomTabSelector";
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskCommentHelper } from "../taskComment/useTaskComment.helper";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { taskService } from "../../service/task.service";
 import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../../utils/customTab.utils";

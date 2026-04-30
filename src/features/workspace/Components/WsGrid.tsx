@@ -14,7 +14,7 @@ import { useGridControlStore } from "@/shared";
 import {useWsGridHelper} from "../hooks/ws/useWsGrid.helper";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 import {Ws} from "../types/workspace.types";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 
 /**
  * WsGrid - ws grid with table display

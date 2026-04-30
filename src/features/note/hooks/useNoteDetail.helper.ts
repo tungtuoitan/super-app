@@ -6,7 +6,7 @@ import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { constants } from "@/shared";
 import { useWorkspaceLoader } from "@/features/workspace";
 import { useWorkspaceStore } from "@/features/workspace";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions } from "@/shared";

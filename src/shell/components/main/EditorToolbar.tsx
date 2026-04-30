@@ -13,7 +13,7 @@ import { useEditorToolbarHelper } from "@/shell";
 import { useGlobalShortcut } from "@/shared";
 import { constants } from "@/shared";
 import { useProjectStore } from "@/features/project";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { projectService } from "@/features/project";
 import { Breadcrumb } from "../Breadcrumb";
 import { BackButton } from "../BackButton";

@@ -1,7 +1,7 @@
 import { useFolderDialogStore } from "../store/FolderDialog.store";
 import type { ItemType } from "../store/FolderDialog.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { workspaceService } from "../service/workspace.service"; 
 import type { FolderDialogFormErrors } from "../store/FolderDialog.store";
 import type { Folder } from "@/features/workspace/types/folder.types";

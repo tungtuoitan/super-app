@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { useProjectStore } from "../store/useProject.store";
 import { useProjectGridHelper } from "./useProjectGrid.helper";
 import { useProjectTabHelper } from "./useProjectTab.helper";
-import {useAuthStore} from "@/shell";
+import {useAuthStore} from "@/shared";
 
 export const useProjectGridHeadless = () => {
     const { containerRef, setContainerWidth, projectGridPagination } = useProjectStore();

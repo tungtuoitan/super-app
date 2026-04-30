@@ -20,7 +20,6 @@ export { useTabBarMenuHelper } from "./hooks/useTabBarMenu.helper";
 export { useCheckIsMobile } from "./hooks/useCheckIsMobile";
 export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
-export { useDebugLog, debugLog } from "../shared/debug/useDebugLog";
 export { useTabKeyboardShortcuts } from "./hooks/useTabKeyboardShortcuts";
 export { findNoteByEntityId, useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
 export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
@@ -40,9 +39,6 @@ export type { SaveActions } from "./types/actions.types";
 export { moduleRegistry } from "./moduleRegistry";
 export { keywordNavigatorRegistry } from "./commandPallete/keywordNavigator.registry";
 export type { KeywordPlugin, NavigationContext } from "./commandPallete/keywordNavigator.registry";
-// ── Auth (re-exported from shared for backward compat) ────────────────────
-export { AuthCallbackProvider, useAuthCallbackStore, AuthStoreProvider, useAuthStore, AuthGuard, AuthCallback, AuthContainer, useAuthHelper, authApi, initiateGoogleLogin, GOOGLE_OAUTH_CONFIG, extractAuthCodeFromUrl, extractStateFromUrl, extractOAuthError, retrieveAndClearPkceValues, validateState, generateCodeVerifier, generateCodeChallenge, generateState, storePkceValues } from "@/shared";
-export type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest, User, UserData, ExchangeTokenResponse } from "@/shared";
 export { AccountsDialog } from "./components/AccountsDialog";
 export { TabBarMenu } from "./components/menus/TabBarMenu";
 

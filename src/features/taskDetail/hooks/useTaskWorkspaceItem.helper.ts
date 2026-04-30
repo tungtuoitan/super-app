@@ -5,7 +5,7 @@
  */
 
 
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import type { Note } from "@/features/note";
 import { type Task } from "../types/task.types";
 import { type TaskFolderItem } from "../types/taskDetail.types";

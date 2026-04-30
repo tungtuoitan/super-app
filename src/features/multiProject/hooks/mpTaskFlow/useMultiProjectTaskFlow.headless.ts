@@ -16,8 +16,8 @@ import { buildTaskFlowLayout } from "../../utils/multiProjectTaskFlow.utils";
 import { flowService } from "@/shared";
 import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
 import type { FlowEdgeData } from "../../types/multiProjectTaskFlow.type";
-import { useAuthStore } from "@/shell";
-import { debugLog } from "@/shell";
+import { useAuthStore } from "@/shared";
+import { debugLog } from "@/shared";
 import type { Edge } from "@xyflow/react";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 

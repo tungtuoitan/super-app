@@ -1,7 +1,7 @@
 
 import type { Note } from "@/features/note";
 import { useEditorTabHelper } from "@/shell";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";

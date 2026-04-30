@@ -5,12 +5,12 @@
 
 
 import { lifeLogService } from "../service/lifeLog.service";
-import { useAuthStore } from "@/shell";
+import { useAuthStore } from "@/shared";
 import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { toLocalISOString } from "@/shared";
-import { debugLog } from "@/shell";
+import { debugLog } from "@/shared";
 
 function transformTrack(dto: LifeLogTrackDTO): LifeLogTrack {
     return {
