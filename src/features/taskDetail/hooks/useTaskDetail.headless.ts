@@ -4,7 +4,7 @@ import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "./useTaskDetailForm.helper";
 import { useTaskLinkedKeywordsHelper } from "./useTaskLinkedKeywords.helper";
 import { useTaskWorkspaceItemHelper } from "./useTaskWorkspaceItem.helper";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import type { BaseTab } from "@/shell";
 import {useEditorTabBarStore} from "@/shell";
 
@@ -17,7 +17,7 @@ export function useTaskDetailHeadless() {
     const { setOpenTabs, openTabs } = useEditorTabBarStore();
     const openTabsRef = useRef(openTabs);
     openTabsRef.current = openTabs;
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
 
     const tab = getActiveTab();
 

@@ -5,7 +5,7 @@
  * Each feature owns its own save logic; this coordinator just dispatches.
  */
 
-import { useEditorTabHelper } from "./useEditorTab.helper";
+import { useEditorTabBarHelper } from "./useEditorTabBar.helper";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { moduleRegistry } from "@/shell/moduleRegistry";
@@ -14,7 +14,7 @@ import { useKeywordHelper } from "../../shared/keyword/useKeyword.helper";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { isSaving, setIsSaving } = useEditorTabBarStore();
     const { setOpenTabs } = useEditorTabBarStore();
     const { loadKeywords } = useKeywordHelper();

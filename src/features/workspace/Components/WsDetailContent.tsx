@@ -11,7 +11,7 @@ import { ScrollArea } from "@/shared";
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { constants } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {useWsDetailHelper} from "../hooks/ws/useWsDetail.helper";
 import {Ws} from "../types/workspace.types";
 
@@ -22,7 +22,7 @@ import {Ws} from "../types/workspace.types";
 export function WsDetailContent() {
     const { wsNameRef, shouldFocusWsName, setShouldFocusWsName, nameError, setNameError } = useWsDetailStore();
     const { handleWsFieldChange } = useWsDetailHelper();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
 
     // Get active tab
     const activeTab = getActiveTab();

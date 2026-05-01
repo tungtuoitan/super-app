@@ -9,7 +9,7 @@ import type { Project } from "@/features/project";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 
-export const useEditorTabHelper = () => {
+export const useEditorTabBarHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
 
     // ── Registry hook collections ─────────────────────────────────────────────

@@ -1,5 +1,5 @@
 
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";
@@ -13,7 +13,7 @@ import {useEditorTabBarStore} from "@/shell";
 
 export const KuseWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { $user } = useAuthStore();
     const { currentK } = useKStore();

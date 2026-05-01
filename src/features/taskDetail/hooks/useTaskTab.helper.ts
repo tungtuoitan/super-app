@@ -7,14 +7,14 @@ import { Task } from "../types/task.types";
 import { shellConstants } from "@/shell/shell.constants";
 import { BaseTab } from "@/shell";
 import { constants } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { usePTaskStore } from "@/features/project";
 import {useEditorTabBarStore} from "@/shell";
 import {useTaskDetailStore} from "../store/useTaskDetail.store";
 
 export const useTaskTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
-    const { updateActiveTab, setNewTabAnd } = useEditorTabHelper();
+    const { updateActiveTab, setNewTabAnd } = useEditorTabBarHelper();
     const { allProjects } = useTaskDetailStore();
     const { tasks } = usePTaskStore();
 

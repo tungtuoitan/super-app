@@ -1,6 +1,6 @@
 ﻿import { wsService, WsDTO } from "@/features/workspace/service/ws.service";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
-import { shellConstants, useEditorTabHelper } from "@/shell";
+import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { constants, standardRegistryConstants } from "@/shared";
 import { BaseTab } from "@/shell";
@@ -34,7 +34,7 @@ export const useWsGridHelper = () => {
     const { workspaces, setWorkspaces, setWsGridIsLoading, setWsGridError, wsGridRowSelection, setWsGridRowSelection, wsGridPagination, setTotalCount } = useWsStore();
     const { showContextMenu } = useMenuContextHelper();
 
-    const { openTab } = useEditorTabHelper();
+    const { openTab } = useEditorTabBarHelper();
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const _console = useConsoleHelper();
     const { setShouldFocusWsName } = useWsDetailStore();

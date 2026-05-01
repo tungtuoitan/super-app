@@ -60,7 +60,7 @@ export const lifeLogModule: ModuleDefinition = {
     useShortcuts: () => {
         const { openNewLogTab } = useLifeLogTabHelper();
         return [
-            { key: "l", ctrl: true, handler: openNewLogTab },
+            { key: "l", ctrl: true, handler: openNewLogTab }, 
         ];
     },
 

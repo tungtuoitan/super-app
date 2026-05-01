@@ -5,7 +5,7 @@
  */
 
 import { shellConstants, useEditorTabBarStore } from "@/shell";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import type { Task } from "@/features/taskDetail";
@@ -28,7 +28,7 @@ const isGroupChild = (tab: BaseTab, allTabs: BaseTab[]): boolean => {
 
 export const useTabBarMenuHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
-    const { closeTabs } = useEditorTabHelper();
+    const { closeTabs } = useEditorTabBarHelper();
     const { contextData } = useMenuContext();
     const { setIsMenuContextOpen } = useMenuContextHelper();
 

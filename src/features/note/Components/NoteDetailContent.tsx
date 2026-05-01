@@ -7,7 +7,7 @@ import { shellConstants } from "@/shell/shell.constants";
 import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { constants } from "@/shared";
 import { MarkdownEditor } from "@/features/note/Components/MarkdownEditor";
 import { useMonaco } from "@monaco-editor/react";
@@ -17,7 +17,7 @@ import {useMarkdownEditorSync} from "../hooks/useMarkdownEditorSync";
 
 export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const activeTab = getActiveTab();
     const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();

@@ -4,7 +4,7 @@ import { useSideBarStore } from "@/shell";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { UserFilters } from "@/shell";
 
-export const useGridAutoRegisterHelper = () => {
+export const useModuleRegisterHelper = () => {
     const location = useLocation();
     const { setModuleName, moduleName, setFilterViewKey, setSearchQuery } = useSideBarStore();
 

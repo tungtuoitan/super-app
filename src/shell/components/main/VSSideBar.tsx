@@ -1,11 +1,10 @@
 ﻿import { Panel, PanelGroup } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
-import { shellConstants } from "@/shell/shell.constants";
 import { useDeviceStore } from "@/shared";
 import { Console } from "../../../shared/console/Console";
 import { moduleRegistry } from "@/shell";
-import {useActivityBarStore} from "@/shell";
 import {RightSideBar} from "./RightSideBar";
+import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 
 interface VSSideBarProps {
     moduleName: string;

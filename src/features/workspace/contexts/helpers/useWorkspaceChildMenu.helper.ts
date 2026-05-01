@@ -20,7 +20,7 @@ import type { UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { WorkspaceItemAction } from "../../types/workspace.types";
 import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import type { WorkspaceDTO } from "../../types/workspace-dto.types";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {useConsoleHelper} from "@/shared";
 
 export const useWorkspaceChildMenuHelper = () => {
@@ -31,7 +31,7 @@ export const useWorkspaceChildMenuHelper = () => {
     const { setIsMenuContextOpen } = useMenuContextHelper();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
-    const { processTabAfterDelete } = useEditorTabHelper();
+    const { processTabAfterDelete } = useEditorTabBarHelper();
 
     const isNote = contextType === workspaceConstants.itemTypes.note;
     const isFile = contextType === workspaceConstants.itemTypes.file;

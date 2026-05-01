@@ -1,7 +1,7 @@
 ﻿import React from "react";
-import { shellConstants, useEditorTabHelper } from "@/shell";
+import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { constants } from "@/shared";
-import { useOpenTabSync } from "../../hooks/useOpenTabsSync";
+import { useTabBarSync } from "../../hooks/useTabBarSync";
 import { TabBar } from "./TabBar";
 import { moduleRegistry } from "@/shell";
 import type { BaseTab } from "@/shell";
@@ -15,8 +15,8 @@ import {ConfirmCloseDialog} from "../ConfirmCloseDialog";
  */
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, editorAreaRef } = useEditorTabBarStore();
-    const { closeTab, getActiveTab } = useEditorTabHelper();
-    useOpenTabSync()
+    const { closeTab, getActiveTab } = useEditorTabBarHelper();
+    useTabBarSync()
 
     const activeTab = getActiveTab();
     const keepAliveTabTypes = moduleRegistry.getKeepAliveTabTypes();

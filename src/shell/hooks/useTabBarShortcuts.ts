@@ -12,13 +12,13 @@
 
 import { useEffect, useRef } from "react";
 import { shellConstants, useEditorTabBarStore } from "@/shell";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import type { Task } from "@/features/taskDetail";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 
 export const useTabBarShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { closeTabs } = useEditorTabHelper();
+    const { closeTabs } = useEditorTabBarHelper();
     const ctrlKPressedRef = useRef(false);
 
     // Collect feature shortcuts from all registered modules

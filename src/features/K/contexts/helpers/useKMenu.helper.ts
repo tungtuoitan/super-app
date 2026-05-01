@@ -12,7 +12,7 @@ import {KUpsertWorkspaceItemRequest, KItemAction} from "../../types/K.types";
 import {KDTO} from "../../types/K-dto.types";
 import {kconstants} from "../../utils/K.Constants";
 import {NodeItemType} from "../../store/KNodeDialog.store";
-import { useEditorTabHelper} from "@/shell";
+import { useEditorTabBarHelper} from "@/shell";
 import {isUnauthorizedError, parseApiError, useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useMenuContext, useMenuContextHelper} from "@/shared";
 import { getKConfirmMessage } from "../../utils/confirmMessage";
 import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
@@ -106,7 +106,7 @@ export const useKMenuHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentK, setCurrentK } = useKStore();
     const { openNodeDialog } = useKNodeDialogHelper();
-    const { processTabAfterDelete, openTab } = useEditorTabHelper();
+    const { processTabAfterDelete, openTab } = useEditorTabBarHelper();
 
     const selectedCount = selectedItemIds.length;
     const isMultipleSelected = selectedCount > 1;

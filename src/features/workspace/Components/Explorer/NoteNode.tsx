@@ -9,7 +9,7 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useSideBarStore } from "@/shell";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceNoteItem } from "@/features/workspace/types/workspace-v2.types";
@@ -35,7 +35,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
     const { showContextMenu } = useMenuContextHelper();
     const { isFolderSelected, getVisibleNodeIds, selectItem } = useTreeHelper2();
-    const { openTab } = useEditorTabHelper();
+    const { openTab } = useEditorTabBarHelper();
     const _TREESTATUS = useTreeStatusHelper();
     const navigate = useNavigate();
     const location = useLocation();

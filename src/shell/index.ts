@@ -8,30 +8,29 @@
 
 // ── Stores ────────────────────────────────────────────────────────────────
 export { useEditorTabBarStore } from "./store/EditorTab.store";
-export { useActivityBarStore } from "./store/ActivityBar.store";
-export { useCommandPaletteStore } from "./commandPallete/useCommandPalette.store";
+// export { useActivityBarStore } from "./store/ActivityBar.store";
+// export { useCommandPaletteStore } from "./commandPallete/useCommandPalette.store";
 export { useSideBarStore } from "./store/SideBar.store";
 
 
 // ── Hooks ─────────────────────────────────────────────────────────────────
-export { useEditorTabHelper } from "./hooks/useEditorTab.helper";
-export { useActivityBarHelper } from "./hooks/useActivityBar.helper";
+export { useEditorTabBarHelper } from "./hooks/useEditorTabBar.helper";
+// export { useActivityBarHelper } from "./hooks/useActivityBar.helper";
 export { useCommandPaletteHelper } from "./commandPallete/useCommandPalette.helper";
 // export { useCommandPaletteKeyDown } from "./commandPallete/useCommandPaletteKeyDown";
-export { useTabBarHelper } from "./hooks/useTabBarHelper";
+// export { useTabBarHelper } from "./hooks/useTabBarHelper";
 // export { useTabBarMenuHelper } from "./hooks/useTabBarMenu.helper";
-export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
-export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
-export { useTabBarShortcuts } from "./hooks/useTabBarShortcuts";
+// export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
+// export { useModuleRegisterHelper } from "./hooks/useGridAutoRegister.helper";
+// export { useTabBarShortcuts } from "./hooks/useTabBarShortcuts";
 export { useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
 export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
 
 
 
-
 // ── Types ─────────────────────────────────────────────────────────────────
 export type { BaseTab, TabViewState, TabType, MultiProjectTabData } from "./types/tab.types";
-export type { ModuleDefinition, TabMeta, PanelTabDefinition, TabStorage, OpenTabsStorage, TabPersistence, ShortcutDefinition } from "./moduleRegistry";
+export type { ModuleDefinition, TabMeta, PanelTabDefinition, TabStorage, OpenTabsStorage, TabPersistence, ShortcutDefinition } from "./types/moduleRegistry.type";
 export type { BreadcrumbItem } from "./utils/breadcrumb.utils";
 export type { SaveActions } from "./types/actions.types";
 
@@ -55,7 +54,7 @@ export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./
 
 
 // ── Components ────────────────────────────────────────────────────────────
-export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
+// export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
 // export { CommandPalette } from "./commandPallete/CommandPalette";
 // export { ConfirmCloseDialog } from "./components/ConfirmCloseDialog";
 // export { EditorToolbar } from "./components/main/EditorToolbar";

@@ -9,15 +9,11 @@
  */
 
 import { useEffect } from "react";
-import type { BaseTab } from "@/shell";
+import type { BaseTab, OpenTabsStorage, TabStorage } from "@/shell";
 import { moduleRegistry } from "@/shell/moduleRegistry";
-import type { TabStorage, OpenTabsStorage } from "@/shell/moduleRegistry";
 import { useAuthStore } from "@/shared";
-import { useEditorTabHelper } from "./useEditorTab.helper";
+import { useEditorTabBarHelper } from "./useEditorTabBar.helper";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
-
-// Re-export for consumers that imported from here previously
-export type { TabStorage, OpenTabsStorage };
 
 // ── Storage key ───────────────────────────────────────────────────────────────
 
@@ -28,10 +24,10 @@ export const getStorageKey = (userId: number | null | undefined): string | null 
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
-export const useOpenTabSync = () => {
+export const useTabBarSync = () => {
     const { openTabs, setOpenTabs, isLoadingTabs, setIsLoadingTabs } = useEditorTabBarStore();
     const { $user } = useAuthStore();
-    const { setNewTabAnd } = useEditorTabHelper();
+    const { setNewTabAnd } = useEditorTabBarHelper();
 
     // ── Restore tabs from localStorage on mount / userId change ───────────────
 

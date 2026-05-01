@@ -1,13 +1,13 @@
 /**
  * Task Editor Panel
  * Editor panel for task tabs in VSCodeLayout
- * NO props — reads active tab from useEditorTabHelper.
+ * NO props — reads active tab from useEditorTabBarHelper.
  * All useEffect logic lives in useTaskDetailHeadless.
  */
 
 import React from "react";
 import type { BaseTab } from "@/shell";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDetailContent } from "./TaskDetailContent";
 import { useTaskDetailHeadless } from "../hooks/useTaskDetail.headless";
@@ -15,7 +15,7 @@ import {useEditorTabBarStore} from "@/shell";
 
 export function TaskEditorPanel() {
     const { setOpenTabs } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { taskDetailContentRef } = useTaskDetailStore();
     useTaskDetailHeadless();
 

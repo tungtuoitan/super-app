@@ -5,7 +5,7 @@
 
 import { BaseTab, shellConstants } from "@/shell";
 import { constants, standardRegistryConstants } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import {Ws, WsResponse} from "../../types/workspace.types";
@@ -14,9 +14,9 @@ import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "../../uti
 
 export const useWsTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
-    const { updateActiveTab } = useEditorTabHelper();
-    const { setNewTabAnd } = useEditorTabHelper();
-    const { openTab } = useEditorTabHelper();
+    const { updateActiveTab } = useEditorTabBarHelper();
+    const { setNewTabAnd } = useEditorTabBarHelper();
+    const { openTab } = useEditorTabBarHelper();
     const { setShouldFocusWsName } = useWsDetailStore();
     const { workspaces, setWorkspaces } = useWsStore();
 

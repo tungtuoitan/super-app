@@ -9,7 +9,7 @@ import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
 import { formatNoteDate } from "../utils/note.utils";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useTreeStatusHelper } from "@/features/workspace";
 import { useMonaco } from "@monaco-editor/react";
@@ -22,7 +22,7 @@ export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
     const { activeTabId } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const activeTab = getActiveTab();
     const { getItemStatus } = useTreeStatusHelper();
     const { currentWorkspace } = useWorkspaceStore();

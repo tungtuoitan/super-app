@@ -4,7 +4,7 @@ import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { transformNotes } from "../utils/note.utils";
 import { Note } from "../types/note.types";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { constants, standardRegistryConstants } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
@@ -22,7 +22,7 @@ export const useNoteGridHelper = () => {
     const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection, noteGridPagination, setNoteGridPagination, setTotalCount } = useNoteGridStore();
     const { showContextMenu } = useMenuContextHelper();
 
-    const { openTab, processTabAfterDelete } = useEditorTabHelper();
+    const { openTab, processTabAfterDelete } = useEditorTabBarHelper();
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const _console = useConsoleHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();

@@ -6,14 +6,14 @@
 import { BaseTab, MultiProjectTabData } from "@/shell";
 import { shellConstants } from "@/shell/shell.constants";
 import { constants } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";
 
 export const useProjectTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
-    const { updateActiveTab } = useEditorTabHelper();
-    const { setNewTabAnd } = useEditorTabHelper();
+    const { updateActiveTab } = useEditorTabBarHelper();
+    const { setNewTabAnd } = useEditorTabBarHelper();
 
     /**
      * Open project in editor tab

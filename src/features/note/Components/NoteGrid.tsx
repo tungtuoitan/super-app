@@ -8,7 +8,7 @@ import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { useNoteGridHelper } from "../hooks/useNoteGrid.helper";
 import { useNoteGridTableHelper } from "../hooks/useNoteGrid.table.helper";
 import { Note } from "../types/note.types";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useSideBarStore } from "@/shell";
 import { constants } from "@/shared";
 import { BaseTab } from "@/shell";
@@ -20,7 +20,7 @@ import {useEditorTabBarStore} from "@/shell";
  */
 export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string; disabledRowIds?: Set<number> } = {}) {
     const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef, noteGridPagination, totalCount } = useNoteGridStore();
-    const { openTab } = useEditorTabHelper();
+    const { openTab } = useEditorTabBarHelper();
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { $user } = useAuthStore();
     const { table } = useNoteGridTableHelper(source, disabledRowIds);

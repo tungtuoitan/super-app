@@ -1,13 +1,13 @@
 /**
  * Project Editor Panel
  * Editor panel for project tabs in VSCodeLayout
- * NO props — reads active tab from useEditorTabHelper.
+ * NO props — reads active tab from useEditorTabBarHelper.
  * All useEffect logic lives in ProjectEditorPanelHeadless.
  */
 
 import React from "react";
 import type { BaseTab } from "@/shell";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { ProjectDetailContent } from "./ProjectDetailContent";
 import {useProjectDetailStore} from "../store/useProjectDetail.store";
 import {useProjectEditorPanelHeadless} from "../hooks/ProjectEditorPanel.headless";
@@ -15,7 +15,7 @@ import {useEditorTabBarStore} from "@/shell";
 
 export function ProjectEditorPanel() {
     const { setOpenTabs } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { contentRef } = useProjectDetailStore();
     useProjectEditorPanelHeadless()
 

@@ -1,4 +1,4 @@
-import { useEditorTabHelper } from "../hooks/useEditorTab.helper";
+import { useEditorTabBarHelper } from "../hooks/useEditorTabBar.helper";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { useAuthStore } from "@/shared";
 import { parseKeywordLink, isValidUrl } from "@/shared";
@@ -9,7 +9,7 @@ import { keywordNavigatorRegistry } from "./keywordNavigator.registry";
 export const useKeywordNavigationHelper = () => {
     const { $user } = useAuthStore();
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
-    const { openTab, updateActiveTab } = useEditorTabHelper();
+    const { openTab, updateActiveTab } = useEditorTabBarHelper();
     const _console = useConsoleHelper();
 
     const navigateLink = async (keyword: Keyword, openedBy?: { link: string; label: string }) => {

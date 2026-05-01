@@ -18,7 +18,7 @@ import type { KTestDetail as KTestDetailType, KDailySessionQuestion } from "../t
 import type { KItemV2 } from "../types/K-v2.types";
 import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
 import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
-import {useEditorTabHelper} from "@/shell";
+import {useEditorTabBarHelper} from "@/shell";
 import {useEditorTabBarStore} from "@/shell";
 
 
@@ -45,7 +45,7 @@ const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
 
 export function KKnowledgeEditorPanel() {
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabHelper()
+    const { getActiveTab } = useEditorTabBarHelper()
     const tab = getActiveTab(activeTabId ?? undefined)
     const knowledge = tab?.data as unknown as KWsResponse;
     const isNew     = knowledge.id < 0;

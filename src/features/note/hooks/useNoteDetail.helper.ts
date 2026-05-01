@@ -10,7 +10,7 @@ import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useSideBarStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
@@ -22,7 +22,7 @@ export const useNoteDetailHelper = () => {
     const { loadTree } = useWorkspaceLoader();
     const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { moduleName } = useSideBarStore();
     const { loadKeywords } = useKeywordHelper();
 

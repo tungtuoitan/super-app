@@ -1,6 +1,6 @@
 
 import type { Note } from "@/features/note";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { workspaceService } from "../service/workspace.service";
@@ -13,7 +13,7 @@ import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { $user } = useAuthStore();
     const { currentWorkspace } = useWorkspaceStore();

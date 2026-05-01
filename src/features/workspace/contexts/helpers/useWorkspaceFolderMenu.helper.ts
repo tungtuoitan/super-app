@@ -22,7 +22,7 @@ import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, 
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "../../types/workspace.types";
 import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
 import { useNoteDetailStore } from "@/features/note";
 import { Note } from "@/features/note";
@@ -116,7 +116,7 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
-    const { processTabAfterDelete, openTab } = useEditorTabHelper();
+    const { processTabAfterDelete, openTab } = useEditorTabBarHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 
     const selectedCount = selectedItemIds.length;

@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState, useRef } from "react";
-import { useEditorTabHelper } from "./useEditorTab.helper";
+import { useEditorTabBarHelper } from "./useEditorTabBar.helper";
 import { moduleRegistry } from "@/shell";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
@@ -26,7 +26,7 @@ export function useTabBarHelper() {
         setDragOverPosition,
         dragCounterRef,
     } = useEditorTabBarStore();
-    const { closeTab, updateActiveTab, getActiveTab } = useEditorTabHelper();
+    const { closeTab, updateActiveTab, getActiveTab } = useEditorTabBarHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { upsertOrchestraitor } = useEditorToolbarHelper();
     const { showContextMenu } = useMenuContextHelper();

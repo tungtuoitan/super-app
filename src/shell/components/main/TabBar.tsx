@@ -1,15 +1,15 @@
 ﻿import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordSelector } from "@/shared";
-import { shellConstants, useEditorTabHelper } from "@/shell";
-import { useTabBarShortcuts } from "@/shell";
-import { useTabBarHelper } from "@/shell";
+import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
 import { moduleRegistry } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
 import type { Ws } from "@/features/workspace";
 import {useEditorTabBarStore} from "@/shell";
+import {useTabBarHelper} from "@/shell/hooks/useTabBarHelper";
+import {useTabBarShortcuts} from "@/shell/hooks/useTabBarShortcuts";
 
 // â”€â”€â”€ Tab Icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -49,7 +49,7 @@ export function TabBar() {
         setDragOverPosition,
         dragCounterRef,
     } = useEditorTabBarStore();
-    const { closeTab, updateActiveTab, generateBreadcrumbForTab, breadcrumbTriggerKey } = useEditorTabHelper();
+    const { closeTab, updateActiveTab, generateBreadcrumbForTab, breadcrumbTriggerKey } = useEditorTabBarHelper();
     const { allKeywords } = useKeywordSelector();
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();

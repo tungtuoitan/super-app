@@ -1,19 +1,19 @@
 /**
  * Multi-Project Editor Panel
  * Editor panel for multi-project tabs in VSCodeLayout.
- * NO props — reads active tab from useEditorTabHelper.
+ * NO props — reads active tab from useEditorTabBarHelper.
  * Provider is in Main.tsx.
  */
 
 import React from "react";
 import type { BaseTab } from "@/shell";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { MultiProjectDetailContent } from "./MultiProjectDetailContent";
 import {useEditorTabBarStore} from "@/shell";
 
 export function MultiProjectEditorPanel() {
     const { setOpenTabs } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const contentRef = React.useRef<HTMLDivElement>(null);
 
     const activeTab = getActiveTab();

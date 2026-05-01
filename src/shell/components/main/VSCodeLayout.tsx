@@ -5,15 +5,14 @@ import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { VSSideBar } from "./VSSideBar";
 import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
-import { shellConstants, useGridAutoRegisterHelper } from "@/shell";
 import { useLocation } from "react-router-dom";
 import { useDeviceStore } from "@/shared";
-import { constants } from "@/shared";
 import { moduleRegistry } from "@/shell";
 import {useDetectDevice} from "../../../shared/device/useDetectDevice";
-import {useActivityBarStore} from "@/shell";
 import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {RightSideBar} from "./RightSideBar";
+import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
+import {useModuleRegisterHelper} from "@/shell/hooks/useModuleRegister.helper";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -27,7 +26,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const { moduleName } = useSideBarStore();
     useDetectDevice()
 
-    const { registerGrid } = useGridAutoRegisterHelper();
+    const { registerGrid } = useModuleRegisterHelper();
 
     useEffect(() => {
         registerGrid();

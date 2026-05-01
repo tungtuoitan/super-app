@@ -1,14 +1,13 @@
 import { X, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { shellConstants, useEditorTabHelper } from "@/shell";
+import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
 import { useSideBarStore } from "@/shell";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell";
 import { ConsoleTab } from "../../../../shared/console/ConsoleTab";
 import { TabNameList } from "./TabNameList";
-import { constants } from "@/shared";
-import {useActivityBarStore} from "@/shell";
+import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 
 interface VSPanelProps {
     onClose: () => void;
@@ -23,7 +22,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const { moduleName } = useSideBarStore();
     const { isMobile } = useDeviceStore();
-    const { getActiveTab } = useEditorTabHelper();
+    const { getActiveTab } = useEditorTabBarHelper();
     const activeTab = getActiveTab();
 
     // Collect hook-based panel tabs from all modules (registry is stable — hook count is stable)

@@ -15,14 +15,14 @@ import { useNoteDetailStore } from "@/features/note";
 import { constants } from "@/shared";
 import { generateTempId, generateUnsavedName, workspaceService } from "@/features/workspace";
 import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace";
-import { useEditorTabHelper } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {useEditorTabBarStore} from "@/shell";
 
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
-    const { openTab } = useEditorTabHelper();
+    const { openTab } = useEditorTabBarHelper();
     const { setFolderItems, setIsLoadingFolderItems } = useTaskDetailStore();
 
     /**
