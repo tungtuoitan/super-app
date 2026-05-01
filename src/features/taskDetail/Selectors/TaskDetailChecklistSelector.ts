@@ -6,18 +6,17 @@
  * Depends on: useTaskDetailSelector (for selectedTask + registriesByType).
  */
 
-import { useMemo } from "react";
-import { useStandardRegistryStore } from "@/shared";
+import { useGetStandardRegistry } from "@/shared";
 import { useTaskDetailSelector } from "./TaskDetailSelector";
 import {getChecklistTemplate, parseChecklistJson} from "../utils/checklist.utils";
 
 export const useTaskDetailChecklistSelector = () => {
     const { selectedTask } = useTaskDetailSelector();
-    const { registriesByType } = useStandardRegistryStore();
+    const taskTypes = useGetStandardRegistry("task_type");
 
     const parsedChecklist = parseChecklistJson(selectedTask?.checklistJson ?? null)
 
-    const checklistTemplate = getChecklistTemplate(selectedTask?.taskType ?? "personal", registriesByType)
+    const checklistTemplate = getChecklistTemplate(selectedTask?.taskType ?? "personal", taskTypes)
 
     return {
         parsedChecklist,

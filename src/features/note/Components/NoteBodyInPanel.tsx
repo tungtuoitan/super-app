@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect } from "react";
-import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker } from "@/shared";
+import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker, useGetStandardRegistry } from "@/shared";
 import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
@@ -14,9 +14,9 @@ import { useWorkspaceStore } from "@/features/workspace";
 import { constants } from "@/shared";
 import { useTreeStatusHelper } from "@/features/workspace";
 import { useMonaco } from "@monaco-editor/react";
-import {useStandardRegistryStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 import { IconKey } from "@/shared";
+import {useStandardRegistrySelector} from "@/shared";
 
 export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -31,14 +31,15 @@ export function NoteBodyInPanel() {
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
 
-    const { registries, registriesLoading } = useStandardRegistryStore();
+    const noteStatus = useGetStandardRegistry(constants.standardRegistryFE.types.noteStatus);
+    const { registriesLoading } = useStandardRegistrySelector();
 
     let isDeleted = activeNote?.deletedAt !== null;
     let isHardDeleted = activeNote?.isHardDeleted;
     const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
 
-    const noteStatusOptions = registries
-        .filter((r:any) => r.type === constants.standardRegistryFE.types.noteStatus && r.isActive)
+    const noteStatusOptions = noteStatus
+        .filter((r:any) => r.isActive)
         .map((item:any) => ({
             id: item.code,
             label: item.description || item.code,

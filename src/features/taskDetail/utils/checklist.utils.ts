@@ -18,9 +18,9 @@
  *   { "checklistTemplate": "# Group\n- item\n- optional-o" }
  */
 
-import type { StandardRegistry } from "@/shared";
 import {ChecklistGroup, ChecklistItem, ChecklistJSON, ChecklistType, EnvCheckState, ValidationResult} from "../types/checklist.types";
 import {TESTCASE_ENVIRONMENTS} from "../task.constants";
+import {StandardRegistry} from "@/shared";
 
 // ─── Suffix parsing helper ───────────────────────────────────────────────────
 
@@ -401,10 +401,9 @@ export function getFlatItems(json: ChecklistJSON): ChecklistItem[] {
  */
 export function getChecklistTemplate(
     taskTypeCode: string,
-    registriesByType: Record<string, StandardRegistry[]>
+    taskTypes: StandardRegistry[]
 ): string {
-    const regs = registriesByType["taskType"] ?? [];
-    const reg = regs.find((r) => r.code === taskTypeCode);
+    const reg = taskTypes.find((r) => r.code === taskTypeCode);
 
     if (reg?.json_detail) {
         try {

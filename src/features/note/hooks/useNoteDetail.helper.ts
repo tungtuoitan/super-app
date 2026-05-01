@@ -3,9 +3,8 @@ import { noteService } from "../service/note.service";
 import { transformANote } from "../utils/note.utils";
 import { Note, UpsertNoteDTO } from "../types/note.types";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
-import { constants } from "@/shared";
+import { constants, useGetStandardRegistry } from "@/shared";
 import { useWorkspaceLoader } from "@/features/workspace";
-import { useWorkspaceStore } from "@/features/workspace";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
@@ -14,7 +13,6 @@ import { useEditorTabHelper } from "@/shell";
 import { useSideBarStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
-import {useStandardRegistryStore} from "@/shared";
 import {useKeywordHelper} from "@/shared";
 
 export const useNoteDetailHelper = () => {
@@ -23,7 +21,6 @@ export const useNoteDetailHelper = () => {
     const { loadTree } = useWorkspaceLoader();
     const _console = useConsoleHelper();
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { registries } = useStandardRegistryStore();
     const { getActiveTab } = useEditorTabHelper();
     const { moduleName } = useSideBarStore();
     const { loadKeywords } = useKeywordHelper();
@@ -149,8 +146,9 @@ export const useNoteDetailHelper = () => {
             }
         }
 
-    const hashtagOptions = registries
-        .filter((r:any) => r.type === constants.standardRegistryFE.types.hashtag && r.isActive)
+    const hastags = useGetStandardRegistry("hashtag");
+    const hashtagOptions = hastags
+        .filter((r:any) => r.isActive)
         .map((item:any) => ({
             id: item.code,
             label: item.code,

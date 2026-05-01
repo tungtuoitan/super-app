@@ -9,14 +9,12 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useFolderDialogHelper } from "../../hooks/useFolderDialog.helper";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { getWorkspaceConfirmMessage } from "../../utils/confirmMessage";
-import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { constants } from "@/shared";
 import type { ItemType } from "../../store/FolderDialog.store";
 import { Folder } from "@/features/workspace/types/folder.types";
 import { workspaceService } from "../../service/workspace.service";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useSnackbar } from "notistack";
 import { useOrchestratorContextMenuStore } from "@/shared";
 import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "../../hooks/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "../../types/workspace.types";
@@ -24,11 +22,9 @@ import { isFolder, WorkspaceItemAction } from "../../types/workspace.types";
 import type { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { useEditorTabHelper } from "@/shell";
 import {WorkspaceDTO} from "../../types/workspace-dto.types";
-import { useEditorTabBarStore } from "@/shell";
 import { useNoteDetailStore } from "@/features/note";
 import { Note } from "@/features/note";
 import {useConsoleHelper} from "@/shared";
-import {useStandardRegistryStore} from "@/shared";
 import {collectIdsFromTree, generateTempId, generateUnsavedName} from "../../utils/temp-id.utils";
 
 // --------------------------------
@@ -118,8 +114,6 @@ export const useWorkspaceFolderMenuHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
     const { processTabAfterDelete, openTab } = useEditorTabHelper();
-    const { openTabs } = useEditorTabBarStore();
-    const { registries } = useStandardRegistryStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 
     const selectedCount = selectedItemIds.length;
@@ -166,7 +160,7 @@ export const useWorkspaceFolderMenuHelper = () => {
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: registries.find((reg:any) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            statusCode: constants.standardRegistryFE.activeStatus.active,
             type: "idea",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -197,7 +191,7 @@ export const useWorkspaceFolderMenuHelper = () => {
                 userId: $user.userId ?? 0,
                 name: name,
                 description: "",
-                statusCode: registries.find((reg:any) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+                statusCode: constants.standardRegistryFE.activeStatus.active,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 deletedAt: null,

@@ -3,8 +3,8 @@
  */
 
 import { config } from "config/app.config";
-import type { StandardRegistryDTO } from "@/shared";
 import {apiFetch, ResultOptions} from "@/shared";
+import {StandardRegistryDTO} from "./standardRegistry.types";
 
 const _getStandardRegistries = async (
     _token: string,

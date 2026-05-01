@@ -4,9 +4,8 @@ import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { Note } from "../types/note.types";
 import { WorkspaceLinksCell } from "../Components/WorkspaceLinksCell";
 import { useWorkspaceStore } from "@/features/workspace";
-import { constants } from "@/shared";
+import { constants, useGetStandardRegistry } from "@/shared";
 import { useNavigate, useLocation } from "react-router-dom";
-import {useStandardRegistryStore} from "@/shared";
 
 export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<number>) {
     const {
@@ -22,7 +21,6 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         containerWidth,
     } = useNoteGridStore();
 
-    const { registries } = useStandardRegistryStore();
     const navigate = useNavigate();
     const location = useLocation();
     const { setSelectedWorkspaceId, setScrollToItem, setSelectedItemIds } = useWorkspaceStore();
@@ -46,10 +44,11 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
     const showCreatedDateColumn = containerWidth >= 682;
     const showDeletedColumn = containerWidth >= 742;
 
+    const noteStatus = useGetStandardRegistry("noteStatus");
     const columns = useMemo<ColumnDef<Note>[]>(() => {
         const getStatusDescription = (statusCode: string | undefined): string => {
             if (!statusCode) return "-";
-            const status = registries.find((r:any) => r.code === statusCode && r.type === constants.standardRegistryFE.types.noteStatus);
+            const status = noteStatus.find((r:any) => r.code === statusCode);
             return status?.description || statusCode;
         };
 
@@ -212,7 +211,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         }
 
         return [...baseColumns, ...optionalColumns];
-    }, [containerWidth, showStatusColumn, showWorkspaceLinksColumn, showCreatedDateColumn, showDeletedColumn, registries, handleWorkspaceNavigation]);
+    }, [containerWidth, showStatusColumn, showWorkspaceLinksColumn, showCreatedDateColumn, showDeletedColumn, noteStatus, handleWorkspaceNavigation]);
 
     const table = useReactTable({
         data: notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),

@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowNodeHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useMultiProjectTaskFlowSelector } from "@/features/multiProject/Selectors/useMultiProjectTaskFlow.selector";
-import { useStandardRegistryStore } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
 import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/features/taskDetail";
@@ -26,6 +25,7 @@ import { taskService } from "@/features/taskDetail";
 import { useAuthStore } from "@/shared";
 import { toLocalISOString } from "@/shared";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
+import {useGetStandardRegistry} from "@/shared";
 
 const HANDLE_BASE = "!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150";
 
@@ -33,12 +33,11 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const { editingNodeId, draggingNodeId, flowNodes, flowEdges, connectingSourceId, setFlowNodes } = useMultiTaskFlowStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleChangeProject, handleChangeStatus, isNodeLocked } = useMultiProjectTaskFlowNodeHelper();
     const { allProjects } = useMultiProjectTaskFlowSelector();
-    const { registriesByType } = useStandardRegistryStore();
     const { openTaskTab } = useTaskTabHelper();
     const zoom = useStore((s) => s.transform[2]);
     const { setTasks } = useMpTaskStore();
     const { $user } = useAuthStore();
-    const statusOptions = registriesByType["task_status"] ?? [];
+    const statusOptions = useGetStandardRegistry("task_status");
 
     const isEditing = editingNodeId === id;
     const isTempNode = id.startsWith("temp-node-");

@@ -8,8 +8,7 @@ import React from "react";
 import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDTO, taskService } from "../service/task.service";
-import { useAuthStore } from "@/shared";
-import { useStandardRegistryStore } from "@/shared";
+import { useAuthStore, useGetStandardRegistry } from "@/shared";
 import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
@@ -19,7 +18,6 @@ import {getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextT
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();
     const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { registriesByType } = useStandardRegistryStore();
     const { setProjectOptions, setIsLoadingProjects, setParentTaskOptions, setIsLoadingParentTasks } = useTaskDetailStore();
 
     const { taskTab, selectedTask } = useTaskDetailSelector();
@@ -112,13 +110,14 @@ export const useTaskDetailFormHelper = () => {
     const handlePriorityChange = (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
             if (newValue) handleFieldChange("priority", newValue.code);
         };
-
+    
+    const taskTypes = useGetStandardRegistry("task_type");
     const handleTaskTypeChange = (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
             if (!newValue || !taskTab || !selectedTask) return;
             const newType = newValue.code;
             let newChecklistJson = selectedTask.checklistJson ?? null;
             if (!newChecklistJson) {
-                const template = getChecklistTemplate(newType, registriesByType);
+                const template = getChecklistTemplate(newType, taskTypes);
                 if (template) newChecklistJson = JSON.stringify(parseTextToChecklist(template));
             }
             setOpenTabs((prev: BaseTab[]) =>

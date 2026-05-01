@@ -7,16 +7,15 @@
 import { useMemo } from "react";
 import { useProjectStore } from "../store/useProject.store";
 import { useSideBarStore } from "@/shell";
-import { useStandardRegistryStore } from "@/shared";
+import { useGetStandardRegistry } from "@/shared";
 
 export const useProjectGridSelector = () => {
     const { projects } = useProjectStore();
     const { searchQuery } = useSideBarStore();
-    const { registriesByType } = useStandardRegistryStore();
+    const projectStatuses = useGetStandardRegistry("project_status");
 
     // Get status label from registry
     const getStatusLabel = (() => {
-        const projectStatuses = registriesByType["project_status"] || [];
         return (statusCode: string) => {
             const status = projectStatuses.find((s:any) => s.code === statusCode);
             return status?.description || statusCode;

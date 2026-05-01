@@ -4,8 +4,7 @@
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-import { useStandardRegistryStore } from "@/shared";
-import { IStatusOption } from "@/shared";
+import { IStatusOption, useGetStandardRegistry } from "@/shared";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
 import { constants } from "@/shared";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
@@ -14,7 +13,6 @@ import {usePTaskStore} from "../../store/usePTask.store";
 
 export const useTaskListSelector = () => {
     const { tasks, taskSearchQuery } = usePTaskStore();
-    const { registriesByType } = useStandardRegistryStore();
     const { projectId } = useProjectDetailStore();
     const { projects } = useProjectStore();
 
@@ -22,8 +20,8 @@ export const useTaskListSelector = () => {
     const currentProject = projects.find((p) => p.id === projectId)
 
     // Get status options from registriesByType with colors
+    const taskStatuses = useGetStandardRegistry("task_status") || [];
     const statusOptions: IStatusOption[] = (() => {
-        const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg:any) => {
                 const colors = getTaskStatusColors(reg.code);
@@ -39,8 +37,8 @@ export const useTaskListSelector = () => {
     })()
 
     // Get priority options from registriesByType with colors
+    const taskPriorities = useGetStandardRegistry("task_priority") || [];
     const priorityOptions: IStatusOption[] = (() => {
-        const taskPriorities = registriesByType["task_priority"] || [];
         return taskPriorities
             .map((reg:any) => {
                 const colors = getTaskPriorityColors(reg.code);

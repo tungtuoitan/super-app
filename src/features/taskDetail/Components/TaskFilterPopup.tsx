@@ -5,7 +5,7 @@
 
 import React from "react";
 import { Filter, RotateCcw } from "lucide-react";
-import { Button } from "@/shared";
+import { Button, useGetStandardRegistry } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
 import { Checkbox } from "@/shared";
 import { Label } from "@/shared";
@@ -15,14 +15,13 @@ import { userProfileService } from "@/shared";
 import {parseApiError} from "@/shared";
 import {UserFilters, ViewFilter} from "@/shell";
 import {useAuthStore} from "@/shared";
-import {useStandardRegistryStore} from "@/shared";
+import {TaskFilterGroup} from "./TaskFilterGroup";
 
 const DEFAULT_FILTERS = constants.filters.defaults.taskGrid as ViewFilter;
 const GROUPS = constants.filters.taskGroups;
 
 export function TaskFilterPopup() {
     const { $user, set$User } = useAuthStore();
-    const { registriesByType } = useStandardRegistryStore();
     const [open, setOpen] = React.useState(false);
     const [pending, setPending] = React.useState<ViewFilter>(DEFAULT_FILTERS);
 
@@ -123,48 +122,7 @@ export function TaskFilterPopup() {
                     {/* Filter Fields */}
                     <div className="space-y-4">
                         {GROUPS.map((group:any) => {
-                            const options = registriesByType[group.standardRegistryType] || [];
-                            const isEmpty = !(pending as any)[group.key]?.trim();
-                            const ORDER = {
-                                status: ["open", "in_progress","background_progress","paused", "completed", "on_hold", "cancelled", "failed"],
-                                priority: ["low", "medium", "high"]
-                            };
-
-
-                            return (
-                                <div key={group.key} className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                                        {isEmpty && <span className="text-xs text-red-500 font-medium">Required</span>}
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        {options
-                                            .sort((a:any, b:any) => {
-                                            const order = ORDER[group.key as keyof typeof ORDER] || [];
-                                            return order.indexOf(a.code) - order.indexOf(b.code);
-                                        })
-                                        
-                                        .map((option:any) => {
-                                            const checked = isChecked(group.key, option.code);
-                                            return (
-                                                <div key={option.code} className="flex items-center space-x-2">
-                                                    <Checkbox
-                                                        id={`${group.key}-${option.code}`}
-                                                        checked={checked}
-                                                        onCheckedChange={() => toggle(group.key, option.code)}
-                                                    />
-                                                    <label
-                                                        htmlFor={`${group.key}-${option.code}`}
-                                                        className={`text-sm font-normal cursor-pointer ${checked ? "text-foreground" : "text-gray-400"}`}
-                                                    >
-                                                        {option.description || option.code}
-                                                    </label>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            );
+                            return <TaskFilterGroup group={group} pending={pending} isChecked={isChecked} toggle={toggle} />
                         })}
                     </div>
                 </div>

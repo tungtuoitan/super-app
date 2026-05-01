@@ -4,12 +4,12 @@
  * Pattern: Similar to useNoteGridHelper - uses store and service
  */
 
-import { useStandardRegistryStore } from "@/shared";
 import { standardRegistryService } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "../utils/api-error.utils";
-import { StandardRegistry } from "@/shared";
 import {useConsoleHelper} from "@/shared";
+import {useStandardRegistryStore} from "./StandardRegistry.store";
+import {StandardRegistry} from "./standardRegistry.types";
 
 /**
  * Transform DTO date strings to Date objects
@@ -69,6 +69,8 @@ export const useStandardRegistryHelper = () => {
             setRegistriesLoading(false);
         }
     };
+
+
 
     return {
         loadStandardRegistries,

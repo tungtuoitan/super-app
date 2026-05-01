@@ -8,8 +8,7 @@
  */
 
 import { Task } from "../types/task.types";
-import { useStandardRegistryStore } from "@/shared";
-import { constants } from "@/shared";
+import { constants, useStandardRegistrySelector } from "@/shared";
 import { IStatusOption } from "@/shared";
 import { usePTaskStore } from "@/features/project";
 import {useEditorTabBarStore} from "@/shell";
@@ -19,7 +18,7 @@ export const useTaskDetailSelector = () => {
     const { openTabs, activeTabId } = useEditorTabBarStore();
     const { allProjects } = useTaskDetailStore();
     const { tasks } = usePTaskStore();
-    const { registriesByType } = useStandardRegistryStore();
+    const { registriesByType } = useStandardRegistrySelector();
 
     // ── Tab & task ────────────────────────────────────────────────────────────
 

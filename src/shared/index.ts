@@ -138,10 +138,13 @@ export { contextMenuRegistry } from "./menuContexts/contextMenu.registry";
 export type { ContextMenuPlugin } from "./menuContexts/contextMenu.registry";
 
 // ── standardRegistry ──────────────────────────────────────────────────────
+export { StandardRegistryProvider } from "./standardRegistry/StandardRegistry.store";
 export { useStandardRegistryHelper } from "./standardRegistry/useStandardRegistry.helper";
-export { useStandardRegistryStore, StandardRegistryProvider } from "./standardRegistry/StandardRegistry.store";
+export { useStandardRegistrySelector } from "./standardRegistry/useStandardRegistrySelector";
+export { useGetStandardRegistry } from "./standardRegistry/useGetStandardRegistry";
 export { standardRegistryService } from "./standardRegistry/standardRegistry.service";
-export type { RegistryType, StandardRegistry, StandardRegistryDTO, StandardRegistryResponse, GetStandardRegistryParams } from "./standardRegistry/standardRegistry.types";
+// export type { RegistryType, StandardRegistry, StandardRegistryDTO, StandardRegistryResponse, GetStandardRegistryParams } from "./standardRegistry/standardRegistry.types";
+export type { StandardRegistry} from "./standardRegistry/standardRegistry.types";
 
 // ── styles ────────────────────────────────────────────────────────────────
 export { Grow, GroupIconContainer, StyledAppBar } from "./styles/commonStyles";

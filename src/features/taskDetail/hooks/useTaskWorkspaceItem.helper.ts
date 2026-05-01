@@ -15,12 +15,10 @@ import { constants } from "@/shared";
 import { generateTempId, generateUnsavedName, workspaceService } from "@/features/workspace";
 import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace";
 import { useEditorTabHelper } from "@/shell";
-import {useStandardRegistryStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();
-    const { registries } = useStandardRegistryStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { openTab } = useEditorTabHelper();
@@ -104,7 +102,7 @@ export const useTaskWorkspaceItemHelper = () => {
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: registries.find((reg:any) => reg.type === constants.standardRegistryFE.types.noteStatus)?.code,
+            statusCode: constants.standardRegistryFE.activeStatus.active,
             createdAt: new Date(),
             updatedAt: new Date(),
             createdBy: $user.userName || "Unknown",

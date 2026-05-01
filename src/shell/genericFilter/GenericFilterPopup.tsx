@@ -7,7 +7,7 @@
 
 import React, { useEffect } from "react";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
-import { Button, useStandardRegistryStore, Popover, PopoverContent, PopoverTrigger, Checkbox, RadioGroup, RadioGroupItem, Slider, Label, constants, useAuthStore } from "@/shared";
+import { Button, Popover, PopoverContent, PopoverTrigger, Checkbox, RadioGroup, RadioGroupItem, Slider, Label, constants, useAuthStore, useStandardRegistrySelector } from "@/shared";
 import { useGenericFilterHelper } from "./useGenericFilterHelper";
 import { useSideBarStore } from "@/shell";
 import { filterRegistry } from "./filterRegistry";
@@ -24,13 +24,13 @@ export function GenericFilterPopup() {
         getFieldErrors,
         isApplyDisabled,
     } = useGenericFilterHelper();
-    const { registriesByType } = useStandardRegistryStore();
     const { moduleName, filterViewKey, uiFilters, setUIFilters } = useSideBarStore();
     const { $user } = useAuthStore();
     const [open, setOpen] = React.useState(false);
 
     const fieldErrors = getFieldErrors();
     const applyDisabled = isApplyDisabled();
+    const { registriesByType } = useStandardRegistrySelector();
 
     // ============================================================
     // RENDER HELPERS - Extracted for clarity

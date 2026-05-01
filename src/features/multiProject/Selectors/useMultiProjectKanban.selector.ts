@@ -7,18 +7,17 @@
 import { useMemo } from "react";
 import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useStandardRegistryStore } from "@/shared";
+import { useGetStandardRegistry,  } from "@/shared";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { constants } from "@/shared";
 
 export const useMultiProjectKanbanSelector = () => {
     const { tasks } = useMpTaskStore();
-    const { registriesByType } = useStandardRegistryStore();
     const { projectIds } = useMultiTimelineStore();
 
+    const taskStatuses = useGetStandardRegistry("task_status")
     // Get status options from registriesByType
     const statusOptions = useMemo(() => {
-        const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg:any) => ({
                 code: reg.code,
@@ -29,7 +28,7 @@ export const useMultiProjectKanbanSelector = () => {
                     (constants.optionOrder.taskStatuses[a.label] ?? 999) -
                     (constants.optionOrder.taskStatuses[b.label] ?? 999),
             );
-    }, [registriesByType]);
+    }, [taskStatuses]);
 
     // Filter tasks by projectIds, exclude deleted
     const filteredTasks = useMemo(() => {

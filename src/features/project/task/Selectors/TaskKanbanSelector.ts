@@ -4,21 +4,18 @@
  * Gets projectId from useProjectDetailStore — NO params.
  */
 
-import { useMemo } from "react";
 import type { Task } from "@/features/taskDetail";
-import { useStandardRegistryStore } from "@/shared";
-import { constants } from "@/shared";
+import { constants, useGetStandardRegistry } from "@/shared";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {usePTaskStore} from "../../store/usePTask.store";
 
 export const useTaskKanbanSelector = () => {
     const { tasks } = usePTaskStore();
-    const { registriesByType } = useStandardRegistryStore();
     const { projectId } = useProjectDetailStore();
 
+    const taskStatuses = useGetStandardRegistry("task_status");
     // Get status options from registriesByType
     const statusOptions = (() => {
-        const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg:any) => ({
                 code: reg.code,

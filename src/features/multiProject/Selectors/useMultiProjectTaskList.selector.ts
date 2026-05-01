@@ -6,16 +6,14 @@
 
 import { useMemo } from "react";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useStandardRegistryStore } from "@/shared";
 import { useProjectStore } from "@/features/project";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
-import { IStatusOption } from "@/shared";
+import { IStatusOption, useGetStandardRegistry } from "@/shared";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
 import { constants } from "@/shared";
 
 export const useMultiProjectTaskListSelector = () => {
     const { tasks, taskSearchQuery } = useMpTaskStore();
-    const { registriesByType } = useStandardRegistryStore();
     const { projects } = useProjectStore();
     const { projectIds } = useMultiTimelineStore();
 
@@ -30,9 +28,9 @@ export const useMultiProjectTaskListSelector = () => {
         return map;
     }, [projects, projectIds]);
 
+    const taskStatuses = useGetStandardRegistry("task_status")
     // Get status options from registriesByType with colors
     const statusOptions: IStatusOption[] = useMemo(() => {
-        const taskStatuses = registriesByType["task_status"] || [];
         return taskStatuses
             .map((reg:any) => {
                 const colors = getTaskStatusColors(reg.code);
@@ -45,11 +43,11 @@ export const useMultiProjectTaskListSelector = () => {
                 };
             })
             .sort((a:any, b:any) => (constants.optionOrder.taskStatuses[a.label] ?? 999) - (constants.optionOrder.taskStatuses[b.label] ?? 999));
-    }, [registriesByType]);
+    }, [taskStatuses]);
 
+    const taskPriorities = useGetStandardRegistry("task_priority") || [];
     // Get priority options from registriesByType with colors
     const priorityOptions: IStatusOption[] = useMemo(() => {
-        const taskPriorities = registriesByType["task_priority"] || [];
         return taskPriorities
             .map((reg:any) => {
                 const colors = getTaskPriorityColors(reg.code);
@@ -62,7 +60,7 @@ export const useMultiProjectTaskListSelector = () => {
                 };
             })
             .sort((a:any, b:any) => (constants.optionOrder.taskPriorities[a.label] ?? 999) - (constants.optionOrder.taskPriorities[b.label] ?? 999));
-    }, [registriesByType]);
+    }, [taskPriorities]);
 
     // Filter tasks by projectIds and search query
     const filteredTasks = useMemo(() => {

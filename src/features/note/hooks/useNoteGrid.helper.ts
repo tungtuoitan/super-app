@@ -12,7 +12,6 @@ import { filterUtils } from "@/shell";
 import { useSideBarStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
-import {useStandardRegistryStore} from "@/shared";
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "@/features/workspace";
 
 export const useNoteGridHelper = () => {
@@ -26,7 +25,6 @@ export const useNoteGridHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const _console = useConsoleHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
-    const { registries } = useStandardRegistryStore();
 
     // Create new note (temporary with negative ID)
     const __createNewNote = () => {

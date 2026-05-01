@@ -10,7 +10,6 @@ import { moduleRegistry } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
 import {Ws} from "@/features/workspace";
-import {useStandardRegistryStore} from "@/shared";
 import {useEditorTabBarStore} from "@/shell";
 
 // ─── Tab Icon ────────────────────────────────────────────────────────────────

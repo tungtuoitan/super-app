@@ -5,8 +5,7 @@
  */
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { useStandardRegistryStore } from "@/shared";
-import { constants } from "@/shared";
+import { constants, useGetStandardRegistry } from "@/shared";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared";
 import type { TabType } from "../types/projectDetail.type";
@@ -16,7 +15,6 @@ import {Project} from "../types/project.types";
 export const useProjectDetailSelector = () => {
     const { openTabs } = useEditorTabBarStore();
     const { projectId, tabId } = useProjectDetailStore();
-    const { registriesByType } = useStandardRegistryStore();
 
     // Current editor tab
     const currentTab = openTabs.find((t) => t.id === tabId) || null;
@@ -37,8 +35,8 @@ export const useProjectDetailSelector = () => {
     
 
     // Project status options for autocomplete
+    const projectStatuses = useGetStandardRegistry("project_status");
     const statusOptions: IStatusOption[] = (() => {
-        const projectStatuses = registriesByType["project_status"] || [];
         return projectStatuses
             .map((reg:any) => {
                 const colors = getProjectStatusColors(reg.code);
