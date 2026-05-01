@@ -1,6 +1,5 @@
-import { constants, type ActivityBarView } from "@/shared";
 import { useWorkspaceHelper } from "@/features/workspace";
-import {useSideBarStore} from "@/shell";
+import {ActivityBarView, useSideBarStore} from "@/shell";
 import {STORAGE_KEYS, storageService} from "@/shared";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 

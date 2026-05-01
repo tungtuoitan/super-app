@@ -7,7 +7,7 @@
 import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { PropsWithChildren } from "react";
-import { ActivityBarView } from "@/shared";
+import { ActivityBarView } from "@/shell";
 import { shellConstants } from "@/shell/shell.constants";
 
 /**

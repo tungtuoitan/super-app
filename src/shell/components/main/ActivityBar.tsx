@@ -6,7 +6,7 @@ import { useActivityBarHelper } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { useSideBarStore } from "@/shell";
 import { moduleRegistry, type ModuleDefinition } from "@/shell";
-import type { ActivityBarView } from "@/shared";
+import type { ActivityBarView } from "@/shell";
 import {useActivityBarStore} from "@/shell";
 
 // ─── Per-module button (own component so hooks inside useBadge work) ─────────

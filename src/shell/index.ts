@@ -66,3 +66,4 @@ export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
 
 
 export {shellConstants} from "./shell.constants";
+export type { ActivityBarView } from "./types/activeBarView";

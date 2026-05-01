@@ -7,7 +7,6 @@
 // ── constants ─────────────────────────────────────────────────────────────
 // NOTE: must remain FIRST — other shared files import constants via @/shared barrel
 export { constants } from "./constants";
-export type { ActivityBarView } from "./constants";
 
 // ── auth ──────────────────────────────────────────────────────────────────
 // NOTE: must remain SECOND — no internal @/shared deps; consumed early by shell/features
