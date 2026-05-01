@@ -10,12 +10,16 @@ function feat(name) {
             `../../../${name}/**`,
             `../../../../${name}/**`,
         ],
-        message: `Import from '@/features/${name}' (index) only, not subdirectories.`,
+        // `import type` is always allowed from subdirectories — types are erased at runtime and never cause circular deps.
+        // For *.constants.ts direct imports (needed to break mutual-dependency cycles), use:
+        //   // eslint-disable-next-line no-restricted-imports -- direct import to break circular dep
+        allowTypeImports: true,
+        message: `Import from '@/features/${name}' (index) only. Exception: 'import type' and *.constants.ts may be imported directly to avoid circular deps.`,
     };
 }
 
-const SHELL  = { group: ["@/shell/**"],  message: "Import from '@/shell' (index) only, not subdirectories." };
-const SHARED = { group: ["@/shared/**"], message: "Import from '@/shared' (index) only, not subdirectories." };
+const SHELL  = { group: ["@/shell/**"],  allowTypeImports: true, message: "Import from '@/shell' (index) only. Exception: 'import type' allowed from subdirectories." };
+const SHARED = { group: ["@/shared/**"], allowTypeImports: true, message: "Import from '@/shared' (index) only. Exception: 'import type' allowed from subdirectories." };
 
 // ─── Feature list ─────────────────────────────────────────────────────────────
 // To add a new feature: append its name here. Done.

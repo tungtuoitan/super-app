@@ -6,11 +6,10 @@
 
 import {DropValidation} from "../types/taskGrid.types";
 import {Task} from "../types/task.types";
+// eslint-disable-next-line no-restricted-imports -- direct import to break project ↔ taskDetail circular dep
 import {projectConstants} from "@/features/project/project.constants";
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Timeline Constants
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const TIMELINE_ROW_HEIGHT = 36;
 export const TIMELINE_HEADER_HEIGHT = 60;
 export const TIMELINE_TASK_BAR_HEIGHT = 28;
