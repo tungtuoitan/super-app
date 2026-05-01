@@ -10,7 +10,7 @@ import { filterUtils } from "./filter.utils";
 import { userProfileService } from "@/shared";
 import { envConfig } from "../../config/env.config";
 import { STORAGE_KEYS, storageService } from "@/shared";
-import { parseApiError } from "../../shared/utils/api-error.utils";
+import { parseApiError } from "../../shared/fetch/api-error.utils";
 import {useConsoleHelper} from "@/shared";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "./filter.types";
 import { filterRegistry } from "./filterRegistry";

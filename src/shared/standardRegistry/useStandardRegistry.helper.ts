@@ -6,7 +6,7 @@
 
 import { standardRegistryService } from "@/shared";
 import { useAuthStore } from "@/shared";
-import { parseApiError, isUnauthorizedError } from "../utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "../fetch/api-error.utils";
 import {useConsoleHelper} from "@/shared";
 import {useStandardRegistryStore} from "./StandardRegistry.store";
 import {StandardRegistry} from "./standardRegistry.types";

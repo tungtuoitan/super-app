@@ -4,7 +4,7 @@
  */
 
 import { config } from "config/app.config";
-import {ResultOptions} from "../types/resultOptions.types";
+import {ResultOptions} from "../fetch/resultOptions.types";
 import {apiFetch} from "../fetch/apiClient";
 import {FlowEdgeDTO, FlowNodePositionDTO, UpsertFlowEdgePayload, UpsertFlowNodePositionPayload} from "./flow.types";
 

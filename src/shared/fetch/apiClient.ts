@@ -4,7 +4,7 @@
  * Uses singleton pattern to prevent race conditions
  */
 
-import { getDeviceFingerprint } from "../utils/deviceFingerprint";
+import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { authApi } from "../auth/auth.service";
 import { debugLog } from "../debug/useDebugLog";
 

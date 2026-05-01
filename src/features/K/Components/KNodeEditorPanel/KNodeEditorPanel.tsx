@@ -8,13 +8,12 @@ import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEdito
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { NodeCard } from "./NodeCard";
 import { InlineNewNodeCard } from "./InlineNewNodeCard";
-import { useMenuContextHelper } from "@/shared";
+import { containsNormalized, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { kconstants } from "../../utils/K.Constants";
 import { useSideBarStore } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
-import { containsNormalized } from "../../utils/searchUtils";
 import {useEditorTabBarStore} from "@/shell";
 import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
 

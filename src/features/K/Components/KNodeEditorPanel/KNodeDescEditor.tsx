@@ -7,7 +7,7 @@ import TaskGrid from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { Bold, Italic, Underline as UnderlineIcon, List, ListChecks } from "lucide-react";
 import "./KNodeDescEditor.css";
-import { removeDiacritics } from "../../utils/searchUtils";
+import {removeDiacritics} from "@/shared";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 

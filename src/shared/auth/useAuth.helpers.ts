@@ -15,9 +15,9 @@ import { useNavigate } from "react-router-dom";
 import { extractAuthCodeFromUrl, extractOAuthError, extractStateFromUrl, GOOGLE_OAUTH_CONFIG } from "./googleOAuth.utils";
 import { retrieveAndClearPkceValues, validateState } from "./pkce.utils";
 import { useAuthCallbackStore } from "./AuthCallback.store";
-import { parseApiError, isUnauthorizedError } from "../utils/api-error.utils";
+import { parseApiError, isUnauthorizedError } from "../fetch/api-error.utils";
 import { debugLog } from "../debug/useDebugLog";
-import { getDeviceFingerprint } from "../utils/deviceFingerprint";
+import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { acquireRefreshToken } from "../fetch/apiClient";
 import {STORAGE_KEYS} from "../localStorage/storage.config";
 

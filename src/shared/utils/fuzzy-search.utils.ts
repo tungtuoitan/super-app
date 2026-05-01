@@ -63,7 +63,7 @@ export function fuzzyMatchWithDiacritics(text: string, searchWords: string[]): {
         const wordNormalized = removeDiacritics(word.toLowerCase());
         const foundIndex = textNormalized.indexOf(wordNormalized);
 
-        if (foundIndex !== -1) {
+        if (foundIndex !== -1) { 
             matchedCount++;
             totalPosition += foundIndex;
 
@@ -118,4 +118,17 @@ function fuzzyMatchCharacters(text: string, query: string): { match: boolean; sc
     }
     
     return { match: false, score: 0, matchedIndices: [] };
+}
+
+
+
+/**
+ * Check whether `text` contains `query` with diacritic-insensitive,
+ * case-insensitive matching.
+ */
+export function containsNormalized(text: string, query: string): boolean {
+    if (!query.trim()) return true;
+    return removeDiacritics(text).toLowerCase().includes(
+        removeDiacritics(query.trim()).toLowerCase(),
+    );
 }

@@ -3,8 +3,8 @@
  * "bat" matches "Bát", "khoan" matches "khoăn", "duong" matches "đường", etc.
  */
 
+import {removeDiacritics} from "@/shared";
 import React from "react";
-import { removeDiacritics } from "../../utils/searchUtils";
 
 interface HighlightTextProps {
     text: string;

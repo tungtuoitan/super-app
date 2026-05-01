@@ -10,7 +10,7 @@
  */
 
 import { useEffect } from "react";
-import { getDeviceFingerprint } from "../utils/deviceFingerprint";
+import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
 import { configureApiClient } from "../fetch/apiClient";
 import {useAuthHelper} from "./useAuth.helpers";

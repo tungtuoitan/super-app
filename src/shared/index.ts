@@ -94,6 +94,8 @@ export { useDebugLog } from "./debug/useDebugLog";
 
 // ── fetch ─────────────────────────────────────────────────────────────────
 export { apiFetch } from "./fetch/apiClient";
+export { parseApiError, isUnauthorizedError } from "./fetch/api-error.utils";
+export type { ResultOptions } from "./fetch/resultOptions.types";
 
 // ── file ──────────────────────────────────────────────────────────────────
 export { fileService } from "./file/file.service";
@@ -156,18 +158,16 @@ export { standardRegistryService } from "./standardRegistry/standardRegistry.ser
 export type { StandardRegistry } from "./standardRegistry/standardRegistry.types";
 
 // ── styles ────────────────────────────────────────────────────────────────
-export { Grow } from "./styles/commonStyles";
+// export { Grow } from "./styles/commonStyles";
 
 // ── types ─────────────────────────────────────────────────────────────────
-export type { ResultOptions } from "./types/resultOptions.types";
 
 // ── userProfile ───────────────────────────────────────────────────────────
 export { userProfileService } from "./userProfile/userProfile.service";
 export type { UpdateUserProfileRequest } from "./userProfile/userProfile.types";
 
 // ── utils ─────────────────────────────────────────────────────────────────
-export { parseApiError, isUnauthorizedError } from "./utils/api-error.utils";
 export { parseAsLocalDate, toLocalISOString } from "./utils/date.utils";
-export { fuzzyMatchWithDiacritics, removeDiacritics, findMatchIndices } from "./utils/fuzzy-search.utils";
-export { getDeviceFingerprint } from "./utils/deviceFingerprint";
+export { fuzzyMatchWithDiacritics, removeDiacritics, containsNormalized } from "./utils/fuzzy-search.utils";
+export { getDeviceFingerprint } from "./device/deviceFingerprint";
 export { formatDate, formatDateTime, isEmpty, truncateText, getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "./utils/formatters";
