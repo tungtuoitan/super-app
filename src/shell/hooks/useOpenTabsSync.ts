@@ -19,13 +19,13 @@ import { wsService, WsDTO } from "@/features/workspace";
 import { projectService, ProjectDTO } from "@/features/project";
 import { taskService, TaskDTO } from "@/features/taskDetail";
 import { transformNotes } from "@/features/note";
-import { transformWs } from "@/shell";
 import { parseAsLocalDate } from "@/shared";
 import {useEditorTabHelper} from "@/shell";
 import type {Ws} from "@/features/workspace";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 import {Project} from "@/features/project";
 import {usePTaskStore} from "@/features/project";
+import {transformWs} from "../utils/ws.utils";
 
 // Storage types
 export interface TabStorage {

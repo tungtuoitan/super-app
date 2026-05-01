@@ -7,11 +7,7 @@ import { useWorkspaceStore } from "@/features/workspace";
 import { useSideBarStore } from "@/shell";
 import { WorkspaceItemV2 } from "@/features/workspace";
 import {
-    findKeywordForNote,
-    parseBreadcrumbFromKeyword,
-    enrichBreadcrumbWithColors,
-    buildBreadcrumbFromTree,
-    BreadcrumbItem,
+    BreadcrumbItem
 } from "@/shell";
 import { useLifeLogStore } from "@/features/lifeLog";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
@@ -19,6 +15,7 @@ import type { Task } from "@/features/taskDetail";
 import {Ws} from "@/features/workspace";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
 import {Project} from "@/features/project";
+import {buildBreadcrumbFromTree, enrichBreadcrumbWithColors, findKeywordForNote, parseBreadcrumbFromKeyword} from "../utils/breadcrumb.utils";
 
 export const useEditorTabHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();

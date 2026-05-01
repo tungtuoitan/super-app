@@ -1,8 +1,8 @@
-import { BrowserRouter } from "react-router-dom";
+﻿import { BrowserRouter } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { WorkspaceProviders } from "@/features/workspace";
+import { WorkspaceProviders, WorkspaceKeywordPluginInit } from "@/features/workspace";
 import { KProviders } from "@/features/K";
 import { NoteProviders } from "@/features/note";
 import { WsProviders } from "@/features/workspace";
@@ -41,7 +41,7 @@ import {ConfirmationPopoverContainer} from "@/shared";
  * - Feature stores: Workspace, K, Ws, Project, Task, Note, Editor
  * - UI layer: Dialog, MenuContext, ConfirmationPopover, AuthGuard
  *
- * IMPORTANT: DndProvider MUST stay here — both react-arborist and
+ * IMPORTANT: DndProvider MUST stay here â€” both react-arborist and
  * react-mosaic-component require a shared DnD context.
  */
 export function Main() {
@@ -76,6 +76,7 @@ export function Main() {
                                                                                                                     <WikiProvider>
                                                                                                                         <NoteProviders>
                                                                                                                             <MenuContext>
+                                                                                                                                <WorkspaceKeywordPluginInit />
                                                                                                                                 <MainNav />
                                                                                                                             </MenuContext>
                                                                                                                         </NoteProviders>

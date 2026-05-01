@@ -23,9 +23,9 @@ export { useTabBarHelper } from "./hooks/useTabBarHelper";
 export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
 export { useTabBarShortcuts } from "./hooks/useTabBarShortcuts";
-export { findNoteByEntityId, useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
-export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
-export { transformWs } from "./utils/ws.utils";
+export { useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
+// export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
+// export { transformWs } from "./utils/ws.utils";
 
 
 
@@ -39,25 +39,23 @@ export type { SaveActions } from "./types/actions.types";
 
 // ── Module Registry ───────────────────────────────────────────────────────
 export { moduleRegistry } from "./moduleRegistry";
-// export { keywordNavigatorRegistry } from "./commandPallete/keywordNavigator.registry";
 export type { KeywordPlugin, NavigationContext } from "./commandPallete/keywordNavigator.registry";
+// export { keywordNavigatorRegistry } from "./commandPallete/keywordNavigator.registry";
 // export { AccountsDialog } from "./components/AccountsDialog";
 // export { TabBarMenu } from "./components/TabBarMenu";
 
 
 // ── Generic Filter ────────────────────────────────────────────────────────
 export { filterRegistry } from "./genericFilter/filterRegistry";
+export { filterUtils } from "./genericFilter/filter.utils";
 export type { FilterDefinition } from "./genericFilter/filterRegistry";
-
+export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./genericFilter/filter.types";
 // export { useGenericFilterHelper } from "./genericFilter/useGenericFilterHelper";
 // export { GenericFilterPopup } from "./genericFilter/GenericFilterPopup";
-export { filterUtils } from "./genericFilter/filter.utils";
-export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./genericFilter/filter.types";
 
 
 
 // ── Components ────────────────────────────────────────────────────────────
-export { Main } from "../Main";
 export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
 // export { CommandPalette } from "./commandPallete/CommandPalette";
 // export { ConfirmCloseDialog } from "./components/ConfirmCloseDialog";

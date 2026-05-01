@@ -49,4 +49,5 @@ export { WsGridMenu } from "./contexts/menus/WsGridMenu";
 export { generateTempId, collectIdsFromTabs, generateUnsavedName, collectIdsFromTree, SPECIAL_IDS } from "./utils/temp-id.utils";
 
 export { registerWorkspaceFilters } from "./shell/workspace.filterConfig";
+export { WorkspaceKeywordPluginInit } from "./shell/workspace.keywordPlugin";
 

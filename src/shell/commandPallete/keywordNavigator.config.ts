@@ -12,6 +12,8 @@
 import { keywordNavigatorRegistry } from "./keywordNavigator.registry";
 import { projectKeywordPlugin } from "@/features/project/shell/project.module";
 import { lifeLogKeywordPlugin } from "@/features/lifeLog/shell/lifeLog.module";
+import { workspaceKeywordPlugin } from "@/features/workspace/shell/workspace.keywordPlugin";
 
 keywordNavigatorRegistry.register(projectKeywordPlugin);
 keywordNavigatorRegistry.register(lifeLogKeywordPlugin);
+keywordNavigatorRegistry.register(workspaceKeywordPlugin);

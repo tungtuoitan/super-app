@@ -9,7 +9,7 @@ import { shellConstants, useEditorTabBarStore } from "@/shell";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import { BaseTab } from "@/shell";
-import { findNoteByEntityId } from "@/shell";
+import { findNoteByEntityId } from "../utils/workspace.find.utils";
 import type { Note } from "@/features/note";
 import { WorkspaceItemAction } from "../types/workspace.types";
 import {useConsoleHelper} from "@/shared";

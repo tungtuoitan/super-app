@@ -11,7 +11,6 @@ import { useWorkspaceStore } from "@/features/workspace";
 import { ICON_MAP, IconKey, useKeywordSelector } from "@/shared";
 import { FolderIconWithBadge } from "@/shared";
 import {Keyword} from "../../shared/keyword/keyword.types";
-import {useKeywordStore} from "../../shared/keyword/Keyword.store";
 
 interface BreadcrumbProps {
     items: BreadcrumbItem[];
