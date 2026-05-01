@@ -9,7 +9,7 @@
  *   features/xxx/shell/xxx.filterConfig.ts  →  filterRegistry  ←  shell/components
  */
 
-import type { FilterFieldConfig } from "./filter.types";
+import type { FilterFieldConfig, ViewFilter } from "./filter.types";
 
 export interface FilterDefinition {
     /** View key (e.g., "workspace", "noteGrid", "k", "taskGrid") */
@@ -20,6 +20,9 @@ export interface FilterDefinition {
 
     /** Field configurations for this view */
     fieldConfigs: readonly FilterFieldConfig[];
+
+    /** Default filter values for this view — used on reset and first load */
+    defaultFilters?: ViewFilter;
 
     /** Custom validator for specific fields - called from useGenericFilterHelper */
     validateField?: (fieldKey: string, fieldValue: string | undefined, fieldConfig: FilterFieldConfig) => string | null;
@@ -56,6 +59,10 @@ export const filterRegistry = {
 
     getFieldConfigs(viewKey: string): readonly FilterFieldConfig[] {
         return this.getByViewKey(viewKey)?.fieldConfigs ?? [];
+    },
+
+    getDefaultFilters(viewKey: string): ViewFilter {
+        return this.getByViewKey(viewKey)?.defaultFilters ?? {};
     },
 
     /**

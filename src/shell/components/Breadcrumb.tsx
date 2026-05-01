@@ -7,7 +7,6 @@ import React from "react";
 import { Layers, FileText } from "lucide-react";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { useKeywordNavigationHelper } from "../commandPallete/useKeywordNavigation.helper";
-import { useWorkspaceStore } from "@/features/workspace";
 import { ICON_MAP, IconKey, useKeywordSelector } from "@/shared";
 import { FolderIconWithBadge } from "@/shared";
 import {Keyword} from "../../shared/keyword/keyword.types";
@@ -19,17 +18,13 @@ interface BreadcrumbProps {
 export function Breadcrumb({ items }: BreadcrumbProps) {
     const { navigateLink } = useKeywordNavigationHelper();
     const { allKeywords } = useKeywordSelector();
-    const { currentWorkspace } = useWorkspaceStore();
 
     if (!items || items.length === 0) {
         return null;
     }
 
     const handleClick = (item: BreadcrumbItem, index: number) => {
-        // Don't navigate if its same as current workspace
-        if (item.type === 'workspace' && item.name === currentWorkspace?.name) {
-            return;
-        }
+        if (item.disabled) return;
 
         // Find keyword by link
         const keyword = allKeywords.find((k: Keyword) => k.link === item.link);
@@ -41,7 +36,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
     return (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
             {items.map((item, index) => {
-                const disable = item.type === 'workspace' && item.name === currentWorkspace?.name
+                const disable = !!item.disabled
                 const isLast = index === items.length - 1;
                 return (
                     <React.Fragment key={item.link}>

@@ -7,6 +7,10 @@
  */
 
 import { moduleRegistry } from "./moduleRegistry";
+import { FileText } from "lucide-react";
+import React from "react";
+import { NoteBodyInPanel } from "@/features/note";
+import { shellConstants } from "@/shell/shell.constants";
 // Module files are imported directly (not via barrel) to avoid circular deps.
 // Each *.module file may import from other feature barrels; keeping them out
 // of their own barrel breaks the init cycle during HMR and initial load.
@@ -31,6 +35,17 @@ import { registerWorkspaceFilters } from "@/features/workspace";
 import { registerKFilters } from "@/features/K";
 import { registerNoteFilters } from "@/features/note";
 import { registerTaskFilters } from "@/features/taskDetail";
+import { registerProjectFilters } from "@/features/project";
+
+// ── Global panel tabs ─────────────────────────────────────────────────────────
+const NoteBodyInPanelContent = () => React.createElement(NoteBodyInPanel);
+moduleRegistry.registerGlobalPanelTab({
+    id: "noteDetail",
+    label: "Note Detail",
+    icon: FileText,
+    Content: NoteBodyInPanelContent,
+    showWhenTabType: shellConstants.vscode.tab.tabTypes.note,
+});
 
 // ── Module registration (ActivityBar display order) ───────────────────────────
 moduleRegistry.register(workspaceModule);
@@ -44,6 +59,7 @@ registerWorkspaceFilters();
 registerKFilters();
 registerNoteFilters();
 registerTaskFilters();
+registerProjectFilters();
 
 // ── Context menu registration ─────────────────────────────────────────────────
 menuContextRegistry.register({ handles: ["folder"],                component: WorkspaceFolderNodeMenu });

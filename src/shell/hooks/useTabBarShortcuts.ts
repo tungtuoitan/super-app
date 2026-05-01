@@ -1,25 +1,32 @@
-﻿/**
+/**
  * Tab Keyboard Shortcuts Hook
- * Handles VSCode-style keyboard shortcuts for tab operations
+ * Handles VSCode-style keyboard shortcuts for tab operations.
  *
- * Shortcuts:
+ * Built-in shortcuts (shell-generic):
  * - Ctrl+K Shift+Enter: Pin/Unpin active tab
- * - Ctrl+K W: Close all tabs
+ * - Ctrl+K W: Close all saved tabs
+ *
+ * Feature shortcuts are registered via moduleRegistry.useShortcuts
+ * (e.g. Ctrl+L for new LifeLog entry — contributed by lifeLog module).
  */
 
 import { useEffect, useRef } from "react";
 import { shellConstants, useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
-import { useLifeLogTabHelper } from "@/features/lifeLog";
-import { constants } from "@/shared";
 import type { Task } from "@/features/taskDetail";
-import type { BaseTab } from "@/shell";
+import { moduleRegistry } from "@/shell/moduleRegistry";
 
 export const useTabBarShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { closeTabs } = useEditorTabHelper();
-    const { openNewLogTab } = useLifeLogTabHelper();
     const ctrlKPressedRef = useRef(false);
+
+    // Collect feature shortcuts from all registered modules
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
+    const moduleShortcuts = moduleRegistry.getAll()
+        .filter((m) => m.useShortcuts != null)
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .flatMap((m) => m.useShortcuts!());
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -29,15 +36,11 @@ export const useTabBarShortcuts = () => {
             if (isCtrlOrCmd && event.key.toLowerCase() === "k") {
                 event.preventDefault();
                 ctrlKPressedRef.current = true;
-
-                // Reset Ctrl+K state after 1 second if no follow-up key
-                setTimeout(() => {
-                    ctrlKPressedRef.current = false;
-                }, 1000);
+                setTimeout(() => { ctrlKPressedRef.current = false; }, 1000);
                 return;
             }
 
-            // Ctrl+K Shift+Enter - Pin/Unpin active tab
+            // Ctrl+K Shift+Enter — Pin/Unpin active tab
             if (ctrlKPressedRef.current && event.shiftKey && event.key === "Enter") {
                 event.preventDefault();
                 ctrlKPressedRef.current = false;
@@ -46,7 +49,6 @@ export const useTabBarShortcuts = () => {
                     const activeTab = openTabs.find((t) => t.id === activeTabId);
                     if (!activeTab) return;
 
-                    // Block pin/unpin for group children
                     const isChild = activeTab.openedBy?.link
                         ? openTabs.some((t) => {
                               if (t.type !== shellConstants.vscode.tab.tabTypes.task) return false;
@@ -57,7 +59,6 @@ export const useTabBarShortcuts = () => {
                     if (isChild) return;
 
                     const newPinned = !activeTab.isPinned;
-                    // If task tab, also toggle children
                     const groupLink =
                         activeTab.type === shellConstants.vscode.tab.tabTypes.task
                             ? `sa/p${(activeTab.data as Task).projectId}/t${(activeTab.data as Task).id}`
@@ -69,50 +70,42 @@ export const useTabBarShortcuts = () => {
                         return tab;
                     });
 
-                    // Sort: pinned tabs first
-                    newTabs.sort((a, b) => {
-                        if (a.isPinned && !b.isPinned) return -1;
-                        if (!a.isPinned && b.isPinned) return 1;
-                        return 0;
-                    });
-
+                    newTabs.sort((a, b) => (a.isPinned && !b.isPinned ? -1 : !a.isPinned && b.isPinned ? 1 : 0));
                     setOpenTabs(newTabs);
 
-                    // Save pinned state to localStorage
                     const pinnedState: Record<string, boolean> = {};
-                    newTabs.forEach(tab => {
-                        pinnedState[tab.id] = !!tab.isPinned;
-                    });
+                    newTabs.forEach((tab) => { pinnedState[tab.id] = !!tab.isPinned; });
                     localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
                 }
                 return;
             }
 
-            // Ctrl+K W - Close all saved tabs
+            // Ctrl+K W — Close all saved tabs
             if (ctrlKPressedRef.current && event.key === "w") {
                 event.preventDefault();
                 ctrlKPressedRef.current = false;
-
-                // Close all saved tabs
                 const savedTabs = openTabs.filter((tab) => !tab.hasUnsavedChanges);
-                const tabIds = savedTabs.map((tab) => tab.id);
-                closeTabs(tabIds);
+                closeTabs(savedTabs.map((tab) => tab.id));
                 return;
             }
 
-            // Ctrl+L - Create new log
-            if (isCtrlOrCmd && event.key.toLowerCase() === "l") {
-                event.preventDefault();
-                openNewLogTab();
-                return;
+            // Feature shortcuts (e.g. Ctrl+L for new log, registered via moduleRegistry)
+            if (!ctrlKPressedRef.current) {
+                const matched = moduleShortcuts.find((s) => {
+                    if (s.ctrl && !isCtrlOrCmd) return false;
+                    if (s.shift && !event.shiftKey) return false;
+                    if (s.alt && !event.altKey) return false;
+                    return event.key.toLowerCase() === s.key.toLowerCase();
+                });
+                if (matched) {
+                    event.preventDefault();
+                    matched.handler();
+                    return;
+                }
             }
         };
 
         window.addEventListener("keydown", handleKeyDown);
-
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [openTabs, activeTabId]);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [openTabs, activeTabId, moduleShortcuts]);
 };
-

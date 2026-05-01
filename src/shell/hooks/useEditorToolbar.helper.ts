@@ -1,21 +1,16 @@
 /**
  * Editor Toolbar Helper — Thin Coordinator
  *
- * Routes save/cancel actions to per-feature save hooks.
+ * Routes save/cancel actions to per-feature save hooks via moduleRegistry.
  * Each feature owns its own save logic; this coordinator just dispatches.
  */
 
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useConsoleHelper } from "@/shared";
-
-// Feature save actions
-import { useNoteSaveActions } from "@/features/note";
-import { useProjectSaveActions } from "@/features/project";
-import { useLifeLogSaveActions } from "@/features/lifeLog";
-import {useWsSaveActions} from "@/features/workspace";
-import {useEditorTabBarStore} from "../store/EditorTab.store";
-import {useKeywordHelper} from "../../shared/keyword/useKeyword.helper";
+import { moduleRegistry } from "@/shell/moduleRegistry";
+import { useEditorTabBarStore } from "../store/EditorTab.store";
+import { useKeywordHelper } from "../../shared/keyword/useKeyword.helper";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
@@ -26,12 +21,12 @@ export const useEditorToolbarHelper = () => {
 
     const activeTab = getActiveTab();
 
-    // Collect all feature save handlers
-    const noteActions = useNoteSaveActions();
-    const wsActions = useWsSaveActions();
-    const projectActions = useProjectSaveActions();
-    const lifeLogActions = useLifeLogSaveActions();
-    const handlers = [noteActions, wsActions, projectActions, lifeLogActions];
+    // Collect save handlers from all registered modules
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
+    const handlers = moduleRegistry.getAll()
+        .filter((m) => m.useSaveActions != null)
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map((m) => m.useSaveActions!());
 
     // ── Status derivations (simple, stays in coordinator) ────────────────────
 
@@ -72,7 +67,7 @@ export const useEditorToolbarHelper = () => {
             loadKeywords();
             setIsSaving(false);
         }
-    }
+    };
 
     // ── Cancel / discard changes ─────────────────────────────────────────────
 
@@ -89,7 +84,7 @@ export const useEditorToolbarHelper = () => {
             );
             _console.info("Changes discarded");
         }
-    }
+    };
 
     return {
         upsertOrchestraitor,

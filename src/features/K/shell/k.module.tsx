@@ -30,6 +30,10 @@ export const kModule: ModuleDefinition = {
 
     keepAliveTabTypes: [shellConstants.vscode.tab.tabTypes.kKnowledge],
 
+    tabFlags: {
+        noDeletedStyle: true,
+    },
+
     getTabMeta: (tab) => {
         if (tab.type === shellConstants.vscode.tab.tabTypes.kDailyReview) {
             return { icon: <CalendarClock className="w-4 h-4" style={{ color: K_COLOR }} />, color: K_COLOR };
@@ -45,6 +49,8 @@ export const kModule: ModuleDefinition = {
             Content: KMovingTabAdapter,
         },
     ],
+
+    filterViewKey: "k",
 };
 
 

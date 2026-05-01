@@ -24,15 +24,14 @@ export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
 export { useTabBarShortcuts } from "./hooks/useTabBarShortcuts";
 export { useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
-// export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
-// export { transformWs } from "./utils/ws.utils";
+export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
 
 
 
 
 // ── Types ─────────────────────────────────────────────────────────────────
 export type { BaseTab, TabViewState, TabType, MultiProjectTabData } from "./types/tab.types";
-export type { ModuleDefinition, TabMeta, PanelTabDefinition } from "./moduleRegistry";
+export type { ModuleDefinition, TabMeta, PanelTabDefinition, TabStorage, OpenTabsStorage, TabPersistence, ShortcutDefinition } from "./moduleRegistry";
 export type { BreadcrumbItem } from "./utils/breadcrumb.utils";
 export type { SaveActions } from "./types/actions.types";
 

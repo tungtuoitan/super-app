@@ -7,12 +7,14 @@ import { TrackEditorPanel } from "../Components/TrackEditorPanel";
 import { LogTypeIcon } from "../Components/LogTypeIcon";
 import { TrackIconDisplay } from "../Components/TrackIconDisplay";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { lifeLogService } from "../service/lifeLog.service"; 
-import type { LifeLogLog, LifeLogTrack } from "../types/lifeLog.types";
-import type { ModuleDefinition, TabMeta } from "@/shell"; 
+import { lifeLogService } from "../service/lifeLog.service";
+import type { LifeLogLog, LifeLogTrack, LogType } from "../types/lifeLog.types";
+import type { ModuleDefinition, TabMeta } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { KeywordPlugin } from "@/shell";
 import { parseKeywordLink } from "@/shared";
+import { useLifeLogSaveActions } from "../hooks/useLifeLogSaveActions";
+import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
@@ -53,6 +55,28 @@ export const lifeLogModule: ModuleDefinition = {
     icon: Shell,
     label: "LifeLog",
 
+    useSaveActions: useLifeLogSaveActions,
+
+    useShortcuts: () => {
+        const { openNewLogTab } = useLifeLogTabHelper();
+        return [
+            { key: "l", ctrl: true, handler: openNewLogTab },
+        ];
+    },
+
+    useOnTabClose: () => {
+        const { setLogs, setTracks } = useLifeLogStore();
+        return (tab: BaseTab) => {
+            if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLog) {
+                const log = tab.data as LifeLogLog;
+                if (log.id < 0) setLogs((prev) => prev.filter((l) => l.id !== log.id));
+            } else if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
+                const track = tab.data as LifeLogTrack;
+                if (track.id < 0) setTracks((prev) => prev.filter((t) => t.id !== track.id));
+            }
+        };
+    },
+
     SidebarView: LifeLogView,
 
     editorPanels: {
@@ -62,6 +86,8 @@ export const lifeLogModule: ModuleDefinition = {
     },
 
     getTabMeta: getLifeLogTabMeta,
+
+    filterViewKey: null,
 };
 
 // â”€â”€â”€ Keyword Navigator Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -69,6 +95,12 @@ export const lifeLogModule: ModuleDefinition = {
 export const lifeLogKeywordPlugin: KeywordPlugin = {
     handles: ["log", "track"],
     resolveTargetTypes: ["LOG", "TRACK"],
+
+    renderIcon: (icon?: string, color?: string, className?: string) => {
+        if (color) return <TrackIconDisplay value={icon} trackColor={color} size="sm" />;
+        if (icon) return <LogTypeIcon type={icon as LogType} className={className} />;
+        return null;
+    },
 
     navigate: async (keyword, openedBy, ctx) => {
         const parsed = parseKeywordLink(keyword);

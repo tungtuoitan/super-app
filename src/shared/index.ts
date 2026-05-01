@@ -122,6 +122,7 @@ export { isValidUrl } from "./keyword/url.utils";
 // Types
 export type { Keyword, KeywordType, KeywordSyncReport } from "./keyword/keyword.types";
 export type { TargetKeywordTargetType } from "./keyword/targetKeyword.service";
+export { KeywordStaticIcon } from "./keyword/KeywordStaticIcon";
 
 // ── gridControl ───────────────────────────────────────────────────────────
 // export { useSideBarStore, GridControlProvider } from "./gridControl/useSideBar.store";

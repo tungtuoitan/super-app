@@ -18,8 +18,7 @@ import {
 } from "@/shared";
 import { CardContent } from "@/shared";
 import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon } from "lucide-react";
-import { Alert, AlertDescription } from "@/shared";
-import { KeywordIconRenderer } from "@/shell";
+import { Alert, AlertDescription, KeywordStaticIcon } from "@/shared";
 import { TaskDetailSection } from "./TaskDetailSection";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailKeywordSelector } from "../Selectors/TaskDetailKeywordSelector";
@@ -312,10 +311,8 @@ export function TaskDetailContent() {
                                                     key={lk.linkId}
                                                     className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted group"
                                                 >
-                                                    <KeywordIconRenderer
+                                                    <KeywordStaticIcon
                                                         type={lk.type}
-                                                        icon={lk.icon}
-                                                        color={lk.color}
                                                         className="h-3.5 w-3.5 text-muted-foreground shrink-0"
                                                     />
                                                     <span

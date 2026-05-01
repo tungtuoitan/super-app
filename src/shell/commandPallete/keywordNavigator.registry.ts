@@ -47,6 +47,9 @@ export interface KeywordPlugin {
         targetId: number,
         userToken: string,
     ) => Promise<{ link: string; label: string } | undefined>;
+
+    /** Render the icon for this keyword type. Return null to use default static icon. */
+    renderIcon?: (icon?: string, color?: string, className?: string) => React.ReactNode | null;
 }
 
 // ─── Registry ────────────────────────────────────────────────────────────────
@@ -83,5 +86,19 @@ export const keywordNavigatorRegistry = {
             }
         }
         return undefined;
+    },
+
+    renderIcon(
+        type: string,
+        icon?: string,
+        color?: string,
+        className?: string,
+    ): React.ReactNode | null {
+        for (const plugin of _plugins) {
+            if (plugin.handles.includes(type) && plugin.renderIcon) {
+                return plugin.renderIcon(icon, color, className);
+            }
+        }
+        return null;
     },
 };

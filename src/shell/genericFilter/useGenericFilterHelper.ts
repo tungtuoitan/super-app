@@ -15,7 +15,6 @@ import {useConsoleHelper} from "@/shared";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "./filter.types";
 import { filterRegistry } from "./filterRegistry";
 import {useSideBarStore} from "@/shell";
-import {projectConstants} from "@/features/project/project.constants";
 
 /**
  * Generic filter helper hook for filter operations
@@ -48,9 +47,9 @@ export function useGenericFilterHelper() {
             if (!token) {
                 throw new Error("User not authenticated");
             }
-            const newUserFilters: UserFilters = $user.filters || (projectConstants.filters.defaults as UserFilters);
+            const newUserFilters: UserFilters = $user.filters || ({} as UserFilters);
             newUserFilters[filterViewKey as keyof UserFilters] = usingDefaultFilter
-                ? (projectConstants.filters.defaults[filterViewKey] as ViewFilter) || (projectConstants.filters.defaults as ViewFilter)
+                ? filterRegistry.getDefaultFilters(filterViewKey) as ViewFilter
                 : uiFilters;
 
             // Update backend - will upsert profile if not exists
@@ -68,7 +67,7 @@ export function useGenericFilterHelper() {
                 filters: newFilters ? JSON.parse(newFilters) : undefined,
             };
             set$User(updatedUser);
-            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || (projectConstants.filters.defaults[filterViewKey] as ViewFilter));
+            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || filterRegistry.getDefaultFilters(filterViewKey) as ViewFilter);
 
             // In dev environment, update localStorage with new filters
             // if (envConfig.NODE_ENV === constants.environments.development) {
@@ -149,34 +148,12 @@ export function useGenericFilterHelper() {
         if (!filterViewKey) return {};
 
         const errors: Record<string, string> = {};
-        const registryConfigs = filterRegistry.getFieldConfigs(filterViewKey);
-        const fieldConfigs: readonly FilterFieldConfig[] = registryConfigs.length > 0
-            ? registryConfigs
-            : (projectConstants.filters.groups as any)[filterViewKey] ?? [];
+        const fieldConfigs: readonly FilterFieldConfig[] = filterRegistry.getFieldConfigs(filterViewKey);
 
         fieldConfigs.forEach((fieldConfig) => {
             const filterValue = (uiFilters as any)[fieldConfig.key];
-
-            if (registryConfigs.length > 0) {
-                // Use registry validator
-                const error = filterRegistry.validateField(filterViewKey, fieldConfig.key, filterValue);
-                if (error) errors[fieldConfig.key] = error;
-            } else {
-                // Fallback: original validation logic
-                if (filterValue !== undefined && (!filterValue || filterValue.trim() === "")) {
-                    errors[fieldConfig.key] = "Required";
-                }
-                if (filterViewKey === "workspace" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
-                    if (!filterUtils._hasValue(filterValue, "null")) {
-                        errors[fieldConfig.key] = "Must include Existing";
-                    }
-                }
-                if (filterViewKey === "k" && fieldConfig.key === "deletedAt" && fieldConfig.type === "checkbox") {
-                    if (!filterUtils._hasValue(filterValue, "null")) {
-                        errors[fieldConfig.key] = "Must include Existing";
-                    }
-                }
-            }
+            const error = filterRegistry.validateField(filterViewKey, fieldConfig.key, filterValue);
+            if (error) errors[fieldConfig.key] = error;
         });
 
         return errors;

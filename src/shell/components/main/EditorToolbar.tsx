@@ -11,10 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shar
 import { shellConstants, useEditorTabHelper } from "@/shell";
 import { useEditorToolbarHelper } from "@/shell";
 import { useGlobalShortcut } from "@/shared";
-import { constants } from "@/shared";
-import { useProjectStore } from "@/features/project";
 import { useAuthStore } from "@/shared";
-import { projectService } from "@/features/project";
 import { Breadcrumb } from "../Breadcrumb";
 import { BackButton } from "../BackButton";
 import { moduleRegistry } from "@/shell";
@@ -23,35 +20,43 @@ import {useEditorTabBarStore} from "@/shell";
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabHelper();
     const { isSaving } = useEditorTabBarStore();
-    const { projects } = useProjectStore();
     const { $user } = useAuthStore();
 
     const activeTab = getActiveTab();
 
-    // â”€â”€ Back button via registry (sync) + async fallback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // â”€â”€ Back button via registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Sync: hook-based resolvers read from store (e.g. projects already loaded)
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
+    const backButtonGetters = moduleRegistry.getAll()
+        .filter((m) => m.useGetBackButton != null)
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map((m) => m.useGetBackButton!());
+
     const registryBackButton = activeTab && !activeTab.openedBy
-        ? moduleRegistry.getBackButton(activeTab, { projects })
+        ? backButtonGetters.reduce<{ link: string; label: string } | null>(
+            (found, getter) => found ?? getter(activeTab),
+            null
+          )
         : null;
 
-    // Async fallback: if registry can't resolve (project not in store), fetch from API
+    // Async fallback: if sync resolver returned null (data not in store yet), fetch from API
     const [asyncBackButton, setAsyncBackButton] = useState<{ link: string; label: string } | undefined>(undefined);
     useEffect(() => {
         if (registryBackButton || activeTab?.openedBy) {
             setAsyncBackButton(undefined);
             return;
         }
-        // Only project module uses getBackButton â€” if it returned null, project might not be loaded yet
-        if (!activeTab || activeTab.type !== shellConstants.vscode.tab.tabTypes.task) {
-            setAsyncBackButton(undefined);
-            return;
-        }
-        const task = activeTab.data as { projectId: number };
+        if (!activeTab) { setAsyncBackButton(undefined); return; }
+
+        const asyncModules = moduleRegistry.getAll().filter((m) => m.getBackButtonAsync != null);
+        if (asyncModules.length === 0) { setAsyncBackButton(undefined); return; }
+
         let cancelled = false;
-        projectService._getProjectById($user.userToken, task.projectId).then(res => {
-            if (!cancelled && res.success && res.data?.[0]) {
-                setAsyncBackButton({ link: `sa/p${task.projectId}`, label: res.data[0].name });
-            }
-        }).catch(() => {});
+        Promise.all(asyncModules.map((m) => m.getBackButtonAsync!(activeTab, $user.userToken)))
+            .then((results) => {
+                if (!cancelled) setAsyncBackButton(results.find((r) => r !== null) ?? undefined);
+            })
+            .catch(() => {});
         return () => { cancelled = true; };
     }, [activeTab?.id, registryBackButton]);
 

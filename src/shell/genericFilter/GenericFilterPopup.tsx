@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect } from "react";
-import { projectConstants } from "@/features/project/project.constants";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Checkbox, RadioGroup, RadioGroupItem, Slider, Label, constants, useAuthStore, useStandardRegistrySelector } from "@/shared";
 import { useGenericFilterHelper } from "./useGenericFilterHelper";
@@ -238,16 +237,11 @@ export function GenericFilterPopup() {
     const renderFieldsByView = () => {
         if (!filterViewKey) return null;
 
-        const registryGroups = filterRegistry.getFieldConfigs(filterViewKey);
-        const groups: readonly FilterFieldConfig[] = registryGroups.length > 0
-            ? registryGroups
-            : (projectConstants.filters.groups as any)[filterViewKey] ?? [];
-
-        return groups.map(renderField);
+        return filterRegistry.getFieldConfigs(filterViewKey).map(renderField);
     };
 
     // Check if UI filters differ from default filters
-    const defaultFilters = filterViewKey ? (projectConstants.filters.defaults[filterViewKey] as ViewFilter) : {};
+    const defaultFilters = filterViewKey ? filterRegistry.getDefaultFilters(filterViewKey) : {};
 
     const hasDiff = (() => {
         if (!filterViewKey) return false;
@@ -264,7 +258,7 @@ export function GenericFilterPopup() {
         // When popup opens, load current user filters into UI
         //* báº¯t buá»™c pháº£i update ngay má»—i khi userFilters thay Ä‘á»•i, thÃ¬ khi vÃ o web ta má»›i tháº¥y cháº¥m tráº¯ng bÃªn cáº¡nh FilterIcon náº¿u cÃ³ filter Ã¡p dá»¥ng
         if (filterViewKey) {
-            setUIFilters($user.filters?.[filterViewKey] || projectConstants.filters.defaults[filterViewKey] as ViewFilter);
+            setUIFilters($user.filters?.[filterViewKey] || filterRegistry.getDefaultFilters(filterViewKey) as ViewFilter);
         }
     }, [filterViewKey, $user.filters]);
 
@@ -274,7 +268,7 @@ export function GenericFilterPopup() {
 
         // When opening, load current user filters into UI
         if (newOpen && filterViewKey) {
-            setUIFilters($user.filters?.[filterViewKey] || projectConstants.filters.defaults[filterViewKey] as ViewFilter);
+            setUIFilters($user.filters?.[filterViewKey] || filterRegistry.getDefaultFilters(filterViewKey) as ViewFilter);
         }
     };
 

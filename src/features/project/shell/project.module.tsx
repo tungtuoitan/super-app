@@ -2,17 +2,37 @@
 import { shellConstants } from "@/shell/shell.constants";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
-import type { ModuleDefinition } from "@/shell";
+import type { ModuleDefinition, BaseTab } from "@/shell";
+import type { TabStorage } from "@/shell";
+import type { MultiProjectTabData } from "@/shell/types/tab.types";
 import { constants } from "@/shared";
 import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
+import { taskService, transformTaskData } from "@/features/taskDetail";
+import type { TaskDTO } from "@/features/taskDetail";
 // eslint-disable-next-line no-restricted-imports
 import { MultiProjectEditorPanel } from "@/features/multiProject";
 import type { KeywordPlugin } from "@/shell";
 import { parseKeywordLink } from "@/shared";
 import { projectService } from "../service/project.service";
-import { taskService } from "@/features/taskDetail";
+import type { ProjectDTO } from "../service/project.service";
 import type { Project } from "..";
+import { useProjectSaveActions } from "../hooks/useProjectSaveActions";
+import { useProjectStore } from "../store/useProject.store";
+
+/** Transform a single ProjectDTO to domain model */
+const _transformProject = (dto: ProjectDTO): Project => ({
+    id: dto.id,
+    name: dto.name,
+    description: dto.description,
+    status: dto.status,
+    startDate: dto.startDate ? new Date(dto.startDate) : null,
+    endDate: dto.endDate ? new Date(dto.endDate) : null,
+    createdAt: new Date(dto.createdAt),
+    updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
+    deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+    workspaceId: dto.workspaceId,
+});
 
 
 const ProjectEditorPanelAdapter = () => <ProjectEditorPanel />;
@@ -29,6 +49,67 @@ export const projectModule: ModuleDefinition = {
     id: "Project",
     icon: Cuboid,
     label: "Projects",
+
+    useSaveActions: useProjectSaveActions,
+
+    tabPersistence: {
+        getDataId: (tab) => {
+            if (tab.type === shellConstants.vscode.tab.tabTypes.project) {
+                const p = tab.data as Project;
+                return p.id > 0 ? p.id : null;
+            }
+            if (tab.type === shellConstants.vscode.tab.tabTypes.task) {
+                const t = tab.data as Task;
+                return t.id > 0 ? t.id : null;
+            }
+            if (tab.type === shellConstants.vscode.tab.tabTypes.multiProject) {
+                const mp = tab.data as MultiProjectTabData;
+                return mp.projectIds.join(",");
+            }
+            return null;
+        },
+        restoreTab: async (persisted: TabStorage, userToken: string) => {
+            if (persisted.type === shellConstants.vscode.tab.tabTypes.project) {
+                const res = await projectService._getProjectById(userToken, persisted.dataId as number);
+                if (!res.success || !res.data?.[0]) return null;
+                const project = _transformProject(res.data[0]);
+                return {
+                    id: persisted.tabId,
+                    type: shellConstants.vscode.tab.tabTypes.project,
+                    data: project, data0: project,
+                    title: project.name || shellConstants.vscode.tabTitles.unsavedProject,
+                    hasUnsavedChanges: false,
+                };
+            }
+            if (persisted.type === shellConstants.vscode.tab.tabTypes.task) {
+                const res = await taskService._getTaskById(userToken, persisted.dataId as number);
+                if (!res.success || !res.data?.[0]) return null;
+                const [task] = transformTaskData(res.data as TaskDTO[]);
+                return {
+                    id: persisted.tabId,
+                    type: shellConstants.vscode.tab.tabTypes.task,
+                    data: task, data0: task,
+                    title: task.title || shellConstants.vscode.tabTitles.unsavedTask,
+                    hasUnsavedChanges: false,
+                };
+            }
+            if (persisted.type === shellConstants.vscode.tab.tabTypes.multiProject) {
+                const res = await projectService._getProjects(userToken, { ids: persisted.dataId as string });
+                if (!res.success || !res.data?.length) return null;
+                const projectIds = (persisted.dataId as string).split(",").map(Number).filter(n => n > 0);
+                const projects = (res.data as ProjectDTO[]).map(_transformProject);
+                const tabData: MultiProjectTabData = { projectIds, projects };
+                return {
+                    id: persisted.tabId,
+                    type: shellConstants.vscode.tab.tabTypes.multiProject,
+                    data: tabData, data0: tabData,
+                    title: "Multiple-Projects",
+                    hasUnsavedChanges: false,
+                };
+            }
+            return null;
+        },
+    },
 
     SidebarView: ProjectView,
 
@@ -59,6 +140,29 @@ export const projectModule: ModuleDefinition = {
         if (!project) return null;
         return { link: `sa/p${task.projectId}`, label: project.name };
     },
+
+    useGetBackButton: () => {
+        const { projects } = useProjectStore();
+        return (tab: BaseTab) => {
+            if (tab.type !== shellConstants.vscode.tab.tabTypes.task || tab.openedBy) return null;
+            const task = tab.data as Task;
+            const project = projects.find((p) => p.id === task.projectId);
+            if (!project) return null;
+            return { link: `sa/p${task.projectId}`, label: project.name };
+        };
+    },
+
+    getBackButtonAsync: async (tab, userToken) => {
+        if (tab.type !== shellConstants.vscode.tab.tabTypes.task || tab.openedBy) return null;
+        const task = tab.data as Task;
+        const res = await projectService._getProjectById(userToken, task.projectId);
+        if (res.success && res.data?.[0]) {
+            return { link: `sa/p${task.projectId}`, label: res.data[0].name };
+        }
+        return null;
+    },
+
+    filterViewKey: "projectGrid",
 };
 
 // â”€â”€â”€ Keyword Navigator Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

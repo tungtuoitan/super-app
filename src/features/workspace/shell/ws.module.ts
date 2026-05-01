@@ -11,6 +11,8 @@ export const wsModule: ModuleDefinition = {
     SidebarView: WsView, 
 
     editorPanels: {},
+
+    filterViewKey: "wsGrid",
 };
 
 

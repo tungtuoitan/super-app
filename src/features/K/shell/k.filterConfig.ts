@@ -31,6 +31,7 @@ export const kFilterDefinition: FilterDefinition = {
     viewKey: "k",
     featureName: "K",
     fieldConfigs: K_FILTER_FIELDS,
+    defaultFilters: { statusCode: "active", deletedAt: "null" },
     validateField: (fieldKey: string, fieldValue: string | undefined): string | null => {
         // Default required validation (field exists but is empty string)
         if (fieldValue !== undefined && (!fieldValue || fieldValue.trim() === "")) {

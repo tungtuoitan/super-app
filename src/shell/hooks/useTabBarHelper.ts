@@ -1,9 +1,6 @@
 ﻿import React, { useEffect, useState, useRef } from "react";
 import { useEditorTabHelper } from "./useEditorTab.helper";
-import { useWorkspaceStore } from "@/features/workspace";
-import { shellConstants, useSideBarStore } from "@/shell";
-import { useNoteGridStore } from "@/features/note";
-import { useWsStore } from "@/features/workspace";
+import { moduleRegistry } from "@/shell";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
 import { useMenuContextHelper } from "@/shared";
@@ -30,10 +27,6 @@ export function useTabBarHelper() {
         dragCounterRef,
     } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, getActiveTab } = useEditorTabHelper();
-    const { currentWorkspace } = useWorkspaceStore();
-    const { moduleName } = useSideBarStore();
-    const { notes } = useNoteGridStore();
-    const { workspaces } = useWsStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { upsertOrchestraitor } = useEditorToolbarHelper();
     const { showContextMenu } = useMenuContextHelper();
@@ -41,39 +34,14 @@ export function useTabBarHelper() {
     // Enable keyboard shortcuts
     useTabBarShortcuts();
 
-    /**
-     * Check if tab exists in current module's data source
-     * Based on moduleName (Note/Workspace/Ws) and corresponding data
-     */
-    const isInCurrentModule = (tab: any) => {
-        // Check based on moduleName from GridControl
-        if (moduleName === "Note") {
-            // NoteGrid view - check if note exists in notes array
-            if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
-                const note = tab.data;
-                return notes.some((n) => n.id === note.id);
-            }
-        } else if (moduleName === "Ws") {
-            // WsGrid view - check if workspace exists in workspaces array
-            if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {
-                const ws = tab.data;
-                return workspaces.some((w) => w.id === ws.id);
-            }
-        } else if (moduleName === "Workspace") {
-            // Workspace tree view - check if note/workspace exists in currentWorkspace.flatData
-            if (!currentWorkspace?.flatData) return false;
+    // Collect per-module "is this tab in the active sidebar module?" predicates
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
+    const moduleIsInPreds = moduleRegistry.getAll()
+        .filter((m) => m.useIsInModule != null)
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map((m) => m.useIsInModule!());
 
-            if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
-                const note = tab.data;
-                return currentWorkspace.flatData.some((item: any) => item.entityType === 3 && item.entityId === note.id);
-            } else if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {
-                const ws = tab.data;
-                return ws.id === currentWorkspace.id;
-            }
-        }
-
-        return false;
-    };
+    const isInCurrentModule = (tab: BaseTab) => moduleIsInPreds.some((pred) => pred(tab));
 
     const handleCloseTab = async (event: React.MouseEvent, tabId: string) => {
         event.stopPropagation();

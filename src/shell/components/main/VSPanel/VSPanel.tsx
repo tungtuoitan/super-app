@@ -1,58 +1,58 @@
-﻿import { X, Terminal, ArrowRightLeft, FileText } from "lucide-react";
+import { X, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { useMovingTreeStore } from "@/features/workspace";
 import { shellConstants, useEditorTabHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
 import { useSideBarStore } from "@/shell";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell";
 import { ConsoleTab } from "../../../../shared/console/ConsoleTab";
-import { NoteBodyInPanel } from "@/features/note";
 import { TabNameList } from "./TabNameList";
 import { constants } from "@/shared";
 import {useActivityBarStore} from "@/shell";
-
-const NoteBodyInPanelContent = () => <NoteBodyInPanel />;
 
 interface VSPanelProps {
     onClose: () => void;
 }
 
 /**
- * VSPanel â€” bottom panel.
+ * VSPanel — bottom panel.
  * Panel tabs are contributed by the active module via the registry.
+ * Global tabs (e.g. noteDetail) declare showWhenTabType and are included when the active editor tab matches.
  */
 export function VSPanel({ onClose }: VSPanelProps) {
     const { isPanelVisible, setIsPanelVisible } = useActivityBarStore();
     const { moduleName } = useSideBarStore();
-    const { setTargetWorkspace } = useMovingTreeStore();
     const { isMobile } = useDeviceStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
-    const isNoteTab = activeTab?.type === shellConstants.vscode.tab.tabTypes.note;
 
-    const changeTab = (id: string) => {
-        if (id !== "moving") setTargetWorkspace(null);
-        setActiveTabId(id);
-    };
+    // Collect hook-based panel tabs from all modules (registry is stable — hook count is stable)
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
+    const allModuleHookTabs = moduleRegistry.getAll().map((m) => ({
+        moduleId: m.id,
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        tabs: m.usePanelTabs != null ? m.usePanelTabs() : (m.panelTabs ?? []),
+    }));
+    const modulePanelTabs = allModuleHookTabs.find((m) => m.moduleId === moduleName)?.tabs ?? [];
 
-    const modulePanelTabs = moduleRegistry.getPanelTabs(moduleName);
+    // Include global tabs (showWhenTabType) when the active editor tab matches
+    const globalTabs = moduleRegistry.getGlobalPanelTabs()
+        .filter((t) => t.showWhenTabType === activeTab?.type);
 
-    // Build full tab list: module tabs + noteDetail (only when active tab is note) + console (mobile only)
     const allTabs: Array<PanelTabDefinition | { id: "console"; label: "Console"; icon: typeof Terminal }> = [
         ...modulePanelTabs,
-        ...(isNoteTab ? [{
-            id: "noteDetail",
-            label: "Note Detail",
-            icon: FileText,
-            Content: NoteBodyInPanelContent,
-        }] : []),
+        ...globalTabs,
         ...(isMobile ? [{ id: "console" as const, label: "Console" as const, icon: Terminal }] : [])
     ];
 
     const [activeTabId, setActiveTabId] = useState<string>(allTabs[0]?.id ?? "");
 
-    // If module changed and current tab doesn't exist in new module, reset to first
+    const changeTab = (id: string) => {
+        const prevTab = allTabs.find((t) => t.id === resolvedTabId);
+        if ("onLeave" in prevTab! && prevTab?.onLeave) prevTab.onLeave();
+        setActiveTabId(id);
+    };
+
     const currentTabExists = allTabs.some((t) => t.id === activeTabId);
     const resolvedTabId = currentTabExists ? activeTabId : (allTabs[0]?.id ?? "");
 
@@ -69,7 +69,6 @@ export function VSPanel({ onClose }: VSPanelProps) {
         >
             {isPanelVisible && (
                 <div className="h-full border-t border-editor-border bg-editor-bg flex flex-col overflow-hidden">
-                    {/* Tab header */}
                     <div className="flex items-center justify-between border-b border-editor-border h-[35px]">
                         <div className="flex h-full">
                             <TabNameList allTabs={allTabs} moduleName={moduleName} activeTabId={activeTabId} onTabChange={changeTab} />
@@ -83,7 +82,6 @@ export function VSPanel({ onClose }: VSPanelProps) {
                         </button>
                     </div>
 
-                    {/* Tab content */}
                     <div className={`flex-1 overflow-auto ${resolvedTabId === "moving" || resolvedTabId === "console" ? "" : "p-3"}`}>
                         {resolvedTabId === "console" && isMobile
                             ? <ConsoleTab />
@@ -96,4 +94,3 @@ export function VSPanel({ onClose }: VSPanelProps) {
         </Panel>
     );
 }
-

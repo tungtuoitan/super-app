@@ -42,6 +42,7 @@ export const workspaceFilterDefinition: FilterDefinition = {
     viewKey: "workspace",
     featureName: "workspace",
     fieldConfigs: WORKSPACE_FILTER_FIELDS,
+    defaultFilters: { statusCode: "active", deletedAt: "null" },
     validateField: (fieldKey: string, fieldValue: string | undefined): string | null => {
         // Default required validation (field exists but is empty string)
         if (fieldValue !== undefined && (!fieldValue || fieldValue.trim() === "")) {
@@ -91,6 +92,7 @@ export const workspaceFolderGridFilterDefinition: FilterDefinition = {
     viewKey: "wsGrid",
     featureName: "workspace",
     fieldConfigs: WORKSPACE_FOLDER_GRID_FILTER_FIELDS,
+    defaultFilters: { statusCode: "active", deletedAt: "null" },
 };
 
 /**

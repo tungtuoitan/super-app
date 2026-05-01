@@ -35,6 +35,7 @@ export const noteGridFilterDefinition: FilterDefinition = {
     viewKey: "noteGrid",
     featureName: "note",
     fieldConfigs: NOTE_GRID_FILTER_FIELDS,
+    defaultFilters: { statusCode: "active", deletedAt: "null" },
 };
 
 /**

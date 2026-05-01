@@ -11,6 +11,8 @@ export interface BreadcrumbItem {
     color?: string;
     icon?: string;
     isNew?: boolean;
+    /** When true, the breadcrumb item is not clickable (e.g. already the active workspace) */
+    disabled?: boolean;
 }
 
 /**

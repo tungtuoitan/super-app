@@ -2,14 +2,13 @@
 import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordSelector } from "@/shared";
 import { shellConstants, useEditorTabHelper } from "@/shell";
-import { useWorkspaceStore } from "@/features/workspace";
 import { useTabBarShortcuts } from "@/shell";
 import { useTabBarHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
 import { moduleRegistry } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
-import {Ws} from "@/features/workspace";
+import type { Ws } from "@/features/workspace";
 import {useEditorTabBarStore} from "@/shell";
 
 // â”€â”€â”€ Tab Icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -50,8 +49,7 @@ export function TabBar() {
         setDragOverPosition,
         dragCounterRef,
     } = useEditorTabBarStore();
-    const { closeTab, updateActiveTab, generateBreadcrumbForTab } = useEditorTabHelper();
-    const { currentWorkspace } = useWorkspaceStore();
+    const { closeTab, updateActiveTab, generateBreadcrumbForTab, breadcrumbTriggerKey } = useEditorTabHelper();
     const { allKeywords } = useKeywordSelector();
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();
@@ -103,7 +101,7 @@ export function TabBar() {
 
     // â”€â”€ Breadcrumb update (note tabs only â€” via registry could be generalised later) â”€â”€
     useEffect(() => {
-        if (currentWorkspace && openTabs.length > 0 && allKeywords.length > 0) {
+        if (openTabs.length > 0 && allKeywords.length > 0) {
             const newTabs = openTabs.map((tab) => {
                 if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
                     return { ...tab, breadcrumb: generateBreadcrumbForTab(tab.data as Note | Ws, tab.type) };
@@ -112,7 +110,7 @@ export function TabBar() {
             });
             setOpenTabs(newTabs);
         }
-    }, [allKeywords, openTabs.length, currentWorkspace?.id]);
+    }, [allKeywords, openTabs.length, breadcrumbTriggerKey]);
 
     // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -123,8 +121,8 @@ export function TabBar() {
         const isDropTarget = dragOverTabId === tab.id && !isDragging;
         const isActive = activeTabId === tab.id;
 
-        // kNode tabs: never show deleted strikethrough
-        const showDeletedStyle = isDeleted && tab.type !== shellConstants.vscode.tab.tabTypes.kNode;
+        const { noDeletedStyle } = moduleRegistry.getTabFlags(tab.type);
+        const showDeletedStyle = isDeleted && !noDeletedStyle;
 
         return (
             <button
@@ -159,7 +157,7 @@ export function TabBar() {
 
                 <span className={`text-[13px] whitespace-nowrap ${showDeletedStyle ? "text-muted-foreground/40 line-through" : ""}`}>
                     {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
-                    {tab.type !== shellConstants.vscode.tab.tabTypes.kNode
+                    {!noDeletedStyle
                         ? isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""
                         : ""}
                 </span>
