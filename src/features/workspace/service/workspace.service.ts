@@ -4,7 +4,7 @@
 
 import { config } from "config/app.config";
 import type { MoveItemsRequest, DeleteItemsRequest, WorkspaceOperationResult, WorkspaceWithTreeResponse, WsResponse, UpsertWorkspaceItemRequest } from "../types/workspace.types";
-import { constants } from "@/shared";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import _ from "lodash";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import type { ResultOptions } from "@/shared";
@@ -77,7 +77,7 @@ const _upsertWorkspaceItem = async (
     workspaceId: number,
     data: {
         parentTagId?: number | null;
-        childType?: typeof constants.workspace.itemTypes.note | typeof constants.workspace.itemTypes.folder;
+        childType?: typeof workspaceConstants.itemTypes.note | typeof workspaceConstants.itemTypes.folder;
         childId?: number;
         label?: string;
         notes?: string;

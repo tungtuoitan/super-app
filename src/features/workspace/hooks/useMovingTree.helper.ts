@@ -1,4 +1,5 @@
-import React from "react";
+﻿import React from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { useSnackbar } from "notistack";
 import { useMovingTreeStore } from "../store/MovingTree.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
@@ -156,7 +157,7 @@ export const useMovingTreeHelper = () => {
             const dragItem = monitor.getItem();
 
             if (!dragItem) {
-                console.warn("⚠️ No drag item found in monitor");
+                console.warn("âš ï¸ No drag item found in monitor");
                 return;
             }
 
@@ -166,20 +167,20 @@ export const useMovingTreeHelper = () => {
             if (args.parentNode) {
                 const parentNodeData = args.parentNode.data.data as any;
 
-                // Check if dropped on drop zone → treat as root
+                // Check if dropped on drop zone â†’ treat as root
                 if (SPECIAL_IDS.includes(parentNodeData.entityId)) {
                     targetId = null;
                 }
                 // Check if parent node is a folder
                 else if (isFolderV2(parentNodeData as unknown as WorkspaceItemV2)) {
-                    // Drop into folder → use folder's entityId
+                    // Drop into folder â†’ use folder's entityId
                     targetId = parentNodeData.id;
                 } else {
-                    // Drop into note/file → use their parent folder entityId
+                    // Drop into note/file â†’ use their parent folder entityId
                     targetId = parentNodeData.parentId ?? null;
                 }
             } else {
-                // No parent node → drop to root
+                // No parent node â†’ drop to root
                 targetId = null;
             }
 
@@ -238,7 +239,7 @@ export const useMovingTreeHelper = () => {
                     // Fallback: Try to get from dragItem (for backward compatibility)
                     const draggedNodeIds = dragItem.dragIds || [dragItem.id];
                     itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
-                    console.warn("⚠️ Fallback to dragItem.dragIds:", itemIds);
+                    console.warn("âš ï¸ Fallback to dragItem.dragIds:", itemIds);
                 }
 
                 if (itemIds.length === 0) {
@@ -261,7 +262,7 @@ export const useMovingTreeHelper = () => {
                 }
 
                 // STEP 5.1: Prevent dragging root node
-                const hasRootNode = itemIds.includes(constants.workspace.root.workspaceItemId);
+                const hasRootNode = itemIds.includes(workspaceConstants.root.workspaceItemId);
                 if (hasRootNode) {
                     _console.error("Cannot move workspace root node");
                     return;
@@ -375,3 +376,4 @@ export const useMovingTreeHelper = () => {
         checkAndHighlightDuplicates,
     };
 };
+

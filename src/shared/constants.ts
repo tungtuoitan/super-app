@@ -1,106 +1,18 @@
 /**
  * Static Constants
  * Non-configuration constants used throughout the app
+ *
+ * NOTE: Feature-specific and shell-specific constants have been moved to their respective files:
+ * - shell/shell.constants.ts: navigation, vscode, modules
+ * - features/workspace/workspace.constants.ts: workspace
+ * - features/project/project.constants.ts: optionColor, optionOrder, filters
+ * - shared/components/RichTextEditor/richTextEditor.constants.ts: markdown
  */
-
-import type * as _monaco from "monaco-editor";
 
 export const constants = {
     environments: {
         development: "development",
         production: "production",
-    },
-    navigation: {
-        path: {
-            home: "/",
-            workspace: "/workspace",
-            k: "/k",
-            ws: "/ws",
-            notes: "/notes",
-            project: "/project",
-            lifeLog: "/lifelog",
-        } as const,
-        views: {
-            workspace: "workspace",
-            k: "k",
-            ws: "ws",
-            note: "note",
-            project: "project",
-            lifeLog: "lifeLog",
-        } as const,
-    },
-    vscode: {
-        tab: {
-            tabTypes: {
-                note: "note",
-                workspace: "workspace",
-                trackingGraph: "trackingGraph",
-                project: "project",
-                multiProject: "multiProject",
-                task: "task",
-                lifeLog: "lifeLog",
-                lifeLogGraph: "lifeLogGraph",
-                lifeLogTrack: "lifeLogTrack",
-                kKnowledge: "k-knowledge",
-                kNode: "k-node",
-                kDailyReview: "k-daily-review",
-                wikiInfo: "wiki-info",
-            } as const,
-        },
-        viewTypes: {
-            workspace: "workspace",
-            k: "k",
-            ws: "ws",
-            note: "note",
-            notes: "notes",
-            project: "project",
-            lifeLog: "lifeLog",
-            wiki: "wiki",
-        } as const,
-        displayNames: {
-            note: "Note",
-            workspace: "Workspace",
-            k: "K",
-            node: "Node",
-            folder: "Node",
-            file: "File",
-            ws: "All Workspaces",
-            notes: "Notes",
-            project: "Projects",
-            lifeLog: "LifeLog",
-            wiki: "Wiki",
-        } as const,
-        tabTitles: {
-            unsavedNote: "Unsaved Note",
-            unsavedWorkspace: "Unsaved Workspace",
-            unsavedProject: "Unsaved Project",
-            unsavedTask: "Unsaved Task",
-            unknownTab: "Unknown Tab",
-        } as const,
-    },
-    workspace: {
-        itemTypes: {
-            node: "node",
-            k: "k",
-            note: "note",
-            file: "file",
-            workspace: "workspace",
-            // @deprecated — use node
-            folder: "node",
-        } as const,
-
-        // Virtual node IDs
-        root: {
-            workspaceItemId: -12345,
-            entityId: -12345,
-        },
-        dropZone: {
-            workspaceItemId: -23456,
-            entityId: -23456,
-        },
-        search: {
-            mode: "showAllDescendants" as "showAllDescendants" | "exactMatchOnly",
-        },
     },
 
     pagination: {
@@ -115,227 +27,22 @@ export const constants = {
         rowBuffer: 250,
     } as const,
 
-    standardRegistryFE: {
-        types: {
-            hashtag: "hashtag",
-            entity: "entity",
-            workspaceStatus: "workspaceStatus",
-            noteStatus: "noteStatus",
-        } as const,
-        activeStatus: {
-            active: "active",
-            inactive: "inactive",
-        } as const,
-        activeStatusOptions: [
-            { id: "active", code: "active", desc: "Active", label: "Active" },
-            { id: "inactive", code: "inactive", desc: "Inactive", label: "Inactive" },
-        ] as const,
-    },
-
-    modules: {
-        note: "Note",
-        workspace: "Workspace",
-        k: "K",
-        ws: "Ws",
-        task: "Task",
-        project: "Project",
-        lifeLog: "LifeLog",
-        wiki: "Wiki",
-    } as const,
-
-    // Status and Priority colors (GitHub-style)
-    optionColor: {
-        projectStatus: {
-            colors: {
-                paused: { bg: "#805f52", text: "#ffffff" },
-                active: { bg: "#0969da", text: "#ffffff" },
-                completed: { bg: "#1a7f64", text: "#ffffff" },
-                dropped: { bg: "#57606a", text: "#ffffff" },
-            } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#57606a", text: "#ffffff" },
-        } as const,
-        timelinePro: {
-            colors: {
-                paused:    { bg: "#805f52", text: "#E5E7EB" },
-                active:    { bg: "#1E3A8A", text: "#E5E7EB" },
-                completed: { bg: "#1F5E4B", text: "#E5E7EB" },
-                dropped:   { bg: "#374151", text: "#E5E7EB" },
-            } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#374151", text: "#E5E7EB" },
-        } as const,
-        taskStatus: {
-            colors: {
-                open: { bg: "#1f6f43", text: "#ffffff" },
-                in_progress: { bg: "#FCCC3E", text: "#1a1a1a" },
-                background_progress: { bg: "#534514", text: "#ffffff" },
-                paused: { bg: "#575757", text: "#ffffff" },
-                completed: { bg: "#6f42c1", text: "#ffffff" },
-                on_hold: { bg: "#475363", text: "#ffffff" },
-                cancelled: { bg: "#78716c", text: "#ffffff" },
-                failed: { bg: "#a63636", text: "#ffffff" },
-            } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#4b5563", text: "#ffffff" },
-        } as const,
-        timelineTask: {
-            colors: {
-                open: { bg: "#09331c", text: "#E5E7EB" },
-                in_progress: { bg: "#6e560b", text: "#E5E7EB" },
-                background_progress: { bg: "#251f0c", text: "#ffffff" },
-                paused: { bg: "#464646", text: "#ffffff" },
-                completed: { bg: "#311a5e", text: "#E5E7EB" },
-                on_hold: { bg: "#2B2F45", text: "#E5E7EB" },
-                cancelled: { bg: "#3d3730", text: "#E5E7EB" },
-                failed: { bg: "#4A2E3A", text: "#E5E7EB" },
-            } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#2b3038", text: "#E5E7EB" },
-        } as const,
-        taskPriority: {
-            colors: {
-                low: { bg: "#6e7681", text: "#ffffff" },
-                medium: { bg: "#d29922", text: "#ffffff" },
-                high: { bg: "#da3633", text: "#ffffff" },
-                urgent: { bg: "rgb(255, 0, 0)", text: "#ffffff" },
-            } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#6e7681", text: "#ffffff" },
-        } as const,
-    },
-    optionOrder: {
-        projectStatuses: {
-            Paused: 1,
-            Active: 2,
-            Completed: 3,
-            Dropped: 4,
-        } as Record<string, number>,
-        taskStatuses: {
-            Open: 1,
-            "In Progress": 2,
-            "Bg Progress": 3,
-            "Paused": 4,
-            Completed: 5,
-            "On Hold": 6,
-            Cancelled: 7,
-            Failed: 8,
-        } as Record<string, number>,
-        taskPriorities: {
-            Low: 1,
-            Medium: 2,
-            High: 3,
-            Urgent: 4,
-        } as Record<string, number>,
-    },
-    filters: {
-        views: {
-            noteGrid: "noteGrid",
-            wsGrid: "wsGrid",
-            workspace: "workspace",
-            k: "k",
-            projectGrid: "projectGrid",
-        } as const,
-        defaults: {
-            noteGrid: { statusCode: "active", deletedAt: "null" },
-            wsGrid: { statusCode: "active", deletedAt: "null" },
-            workspace: { statusCode: "active", deletedAt: "null" },
-            k: { statusCode: "active", deletedAt: "null" },
-            projectGrid: { statusCode: "active" },
-            taskGrid: { status: "open,in_progress,background_progress,paused", priority: "low,medium,high" },
-        } as const,
-        taskDefaults: {
-            status: "open,in_progress,background_progress,paused",
-            priority: "low,medium,high",
-        } as const,
-        taskGroups: [
-            { key: "status", label: "Status", standardRegistryType: "task_status" },
-            { key: "priority", label: "Priority", standardRegistryType: "task_priority" },
-        ] as const,
-        groups: {
-            noteGrid: [
-                { key: "statusCode", label: "Status", type: "checkbox", standardRegistryType: "noteStatus", defaultValue: "active" },
-                { key: "deletedAt", label: "Deleted Status", type: "radio", defaultValue: "null" },
-                { key: "createdAt", label: "Created Date", type: "dateRange", defaultValue: "" },
-            ],
-            wsGrid: [
-                { key: "statusCode", label: "Status", type: "checkbox", standardRegistryType: "workspaceStatus", defaultValue: "active" },
-                { key: "deletedAt", label: "Deleted Status", type: "radio", defaultValue: "null" },
-                { key: "createdAt", label: "Created Date", type: "dateRange", defaultValue: "" },
-            ],
-            workspace: [
-                { key: "statusCode", label: "Status", type: "checkbox", standardRegistryType: "noteStatus", defaultValue: "active" },
-                { key: "deletedAt", label: "Deleted Status", type: "checkbox", defaultValue: "null" },
-            ],
-            k: [
-                { key: "statusCode", label: "Status", type: "checkbox", standardRegistryType: "noteStatus", defaultValue: "active" },
-                { key: "deletedAt", label: "Deleted Status", type: "checkbox", defaultValue: "null" },
-            ],
-            projectGrid: [
-                { key: "statusCode", label: "Status", type: "checkbox", standardRegistryType: "project_status", defaultValue: "active" },
-            ],
-            taskGrid: [
-                { key: "status", label: "Status", type: "checkbox", standardRegistryType: "task_status", defaultValue: "open,in_progress" },
-                { key: "priority", label: "Priority", type: "checkbox", standardRegistryType: "task_priority", defaultValue: "low,medium,high" },
-            ],
-        } as const,
-    },
-
-    markdown: {
-        theme: {
-            name: "custom-dark",
-            config: {
-                base: "vs-dark",
-                inherit: true,
-                rules: [
-                    { token: "string.link.markdown", foreground: "D4D4D4" },
-                    { token: "string", foreground: "D4D4D4" },
-                    { token: "meta.link.inline.markdown", foreground: "D4D4D4" },
-                ],
-                colors: {
-                    "editor.background": "#09090B",
-                    "editor.foreground": "#D4D4D4",
-                    "editorLineNumber.foreground": "#858585",
-                    "editorCursor.foreground": "#AEAFAD",
-                    "editor.selectionBackground": "#264F78",
-                    "editor.inactiveSelectionBackground": "#3A3D41",
-                },
-            } as _monaco.editor.IStandaloneThemeData,
-        },
-        editor: {
-            fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
-            options: (disabled: boolean, value: string) =>
-                ({
-                    value,
-                    language: "markdown",
-                    theme: "custom-dark",
-                    minimap: { enabled: false },
-                    wordWrap: "on",
-                    fontSize: 14,
-                    fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
-                    lineNumbers: "on",
-                    lineNumbersMinChars: 3,
-                    lineDecorationsWidth: 16,
-                    folding: true,
-                    foldingStrategy: "auto",
-                    showFoldingControls: "mouseover",
-                    glyphMargin: true,
-                    readOnly: disabled,
-                    scrollBeyondLastLine: true,
-                    padding: { top: 20, bottom: 200 },
-                    automaticLayout: true,
-                    rulers: [],
-                    renderLineHighlight: "none",
-                    quickSuggestions: { other: true, comments: true, strings: true },
-                    acceptSuggestionOnCommitCharacter: true,
-                    acceptSuggestionOnEnter: "on",
-                    wordBasedSuggestions: "off",
-                    suggest: {
-                        showWords: false,
-                        showKeywords: true,
-                        snippetsPreventQuickSuggestions: false,
-                        localityBonus: true,
-                        shareSuggestSelections: false,
-                    },
-                    parameterHints: { enabled: true },
-                }) as _monaco.editor.IStandaloneEditorConstructionOptions,
-        },
-    } as const,
+    // standardRegistryFE: {
+    //     types: {
+    //         hashtag: "hashtag",
+    //         entity: "entity",
+    //         workspaceStatus: "workspaceStatus",
+    //         noteStatus: "noteStatus",
+    //     } as const,
+    //     activeStatus: {
+    //         active: "active",
+    //         inactive: "inactive",
+    //     } as const,
+    //     activeStatusOptions: [
+    //         { id: "active", code: "active", desc: "Active", label: "Active" },
+    //         { id: "inactive", code: "inactive", desc: "Inactive", label: "Inactive" },
+    //     ] as const,
+    // },
 
     keywordIcons: {
         workspace: "folder",
@@ -381,9 +88,9 @@ export const constants = {
 
 // Type exports
 export type ActivityBarView =
-    | typeof constants.modules.workspace
-    | typeof constants.modules.k
-    | typeof constants.modules.ws
-    | typeof constants.modules.note
-    | typeof constants.modules.project
-    | typeof constants.modules.lifeLog;
+    | "Workspace"
+    | "K"
+    | "Ws"
+    | "Note"
+    | "Project"
+    | "LifeLog";

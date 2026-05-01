@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Static Constants
  * Non-configuration kconstants used throughout the app
  */
@@ -84,7 +84,7 @@ export const kconstants = {
         itemTypes: {
             node: "node",
             k: "k",
-            // @deprecated — kept for backward compat, remove after Phase 3
+            // @deprecated â€” kept for backward compat, remove after Phase 3
             folder: "node",
             note: "note",
             file: "file",
@@ -95,9 +95,6 @@ export const kconstants = {
         root: {
             workspaceItemId: -12345,
             entityId: -12345,
-            // @deprecated aliases
-            KworkspaceItemId: -12345,
-            KentityId: -12345,
         },
         dropZone: {
             workspaceItemId: -23456,
@@ -115,14 +112,6 @@ export const kconstants = {
             kNodePanelCard: "k-node-panel-card",
             kKnowledgeSelector: "k-knowledge-selector",
             kTestFlow: "k-test-flow",
-        } as const,
-    },
-    standardRegistryFE: {
-        types: {
-            hashtag: "hashtag",
-            entity: "entity",
-            workspaceStatus: "workspaceStatus",
-            noteStatus: "noteStatus",
         } as const,
     },
 
@@ -159,3 +148,4 @@ export const kconstants = {
         { value: "#8D6E63", label: "Brown" },
     ],
 } as const;
+

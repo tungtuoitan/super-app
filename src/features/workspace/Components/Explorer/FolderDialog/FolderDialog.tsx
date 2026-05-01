@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FolderDialog - Dialog for creating new folders in workspace
  * Migrated from MUI to shadcn/ui
  *
@@ -6,6 +6,8 @@
  */
 
 import React, { useEffect } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
+import { shellConstants } from "@/shell/shell.constants";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared";
 import { Button } from "@/shared";
@@ -43,7 +45,7 @@ export function FolderDialog() {
 
     // Auto-select icon based on folder name (only in create mode and only for folders)
     // useEffect(() => {
-    //     if (mode === "create" && itemType === constants.workspace.itemTypes.folder && !hasManuallySelectedIcon.current) {
+    //     if (mode === "create" && itemType === workspaceConstants.itemTypes.folder && !hasManuallySelectedIcon.current) {
     //         const matchedIcon = findBestIconMatch(newFolderName);
     //         setIcon(matchedIcon);
     //         // Also set the color based on the matched icon's default color
@@ -72,7 +74,7 @@ export function FolderDialog() {
         // For creating at root, parentId would be null or the workspace root id
         return currentWorkspace.flatData.filter(
             (item: WorkspaceItemV2) =>
-                // ✅ Use type guard and entityId field
+                // âœ… Use type guard and entityId field
                 isFolder(item) &&
                 // Same parent (siblings)
                 item.parentId === parentFolderId &&
@@ -130,12 +132,12 @@ export function FolderDialog() {
     // Dynamic labels based on itemType
     const getItemLabel = () => {
         switch (itemType) {
-            case constants.workspace.itemTypes.folder:
-                return constants.vscode.displayNames.folder;
-            case constants.workspace.itemTypes.note:
-                return constants.vscode.displayNames.note;
-            case constants.workspace.itemTypes.file:
-                return constants.vscode.displayNames.file;
+            case workspaceConstants.itemTypes.folder:
+                return "Node";
+            case workspaceConstants.itemTypes.note:
+                return "Note";
+            case workspaceConstants.itemTypes.file:
+                return "File";
             default:
                 return "Item";
         }
@@ -152,7 +154,7 @@ export function FolderDialog() {
 
                 <div className="space-y-6">
                     {/* Folder name with suggestions dropdown for folders */}
-                    {itemType === constants.workspace.itemTypes.folder && mode === "create" ? (
+                    {itemType === workspaceConstants.itemTypes.folder && mode === "create" ? (
                         <div className="space-y-2">
                             <div className="flex gap-2">
                                 <div className="flex-1">
@@ -236,7 +238,7 @@ export function FolderDialog() {
                     </div> */}
 
                     {/* Only show color and icon pickers for folders */}
-                    {itemType === constants.workspace.itemTypes.folder && (
+                    {itemType === workspaceConstants.itemTypes.folder && (
                         <>
                             {/* Compact Color Picker - Disabled, using default gray color from icon config */}
                             {/* <div className="space-y-2">
@@ -285,3 +287,7 @@ export function FolderDialog() {
         </Dialog>
     );
 }
+
+
+
+

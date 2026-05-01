@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { Panel, PanelGroup, type ImperativePanelHandle } from "react-resizable-panels";
 import { ActivityBar } from "./ActivityBar";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { VSSideBar } from "./VSSideBar";
 import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
-import { useGridAutoRegisterHelper } from "@/shell";
+import { shellConstants, useGridAutoRegisterHelper } from "@/shell";
 import { useLocation } from "react-router-dom";
 import { useDeviceStore } from "@/shared";
 import { constants } from "@/shared";
@@ -58,7 +58,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                         <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col">
                             <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                 <span>{moduleName}</span>
-                                {moduleName === constants.modules.lifeLog && (
+                                {moduleName === "LifeLog" && (
                                     <RightSideBar hideFilter />
                                 )}
                             </div>
@@ -105,7 +105,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     );
 }
 
-/** Mobile sidebar reads SidebarView from registry — same as VSSideBar desktop */
+/** Mobile sidebar reads SidebarView from registry â€” same as VSSideBar desktop */
 function MobileSidebarContent({ moduleName }: { moduleName: string }) {
     const module = moduleRegistry.getById(moduleName);
     const SidebarView = module?.SidebarView;
@@ -115,3 +115,6 @@ function MobileSidebarContent({ moduleName }: { moduleName: string }) {
         </div>
     );
 }
+
+
+

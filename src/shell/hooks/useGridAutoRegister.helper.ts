@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Grid Auto Register Helper
  * Automatically registers grid controls based on URL route
  * Eliminates need for individual grid components to register themselves
@@ -7,7 +7,8 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useSideBarStore } from "@/shell";
-import { constants } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
+import { projectConstants } from "@/features/project/project.constants";
 import {UserFilters} from "@/shell";
 
 /**
@@ -25,29 +26,29 @@ export const useGridAutoRegisterHelper = () => {
     //     switch (pathname) {
     //         case "/workspace":
     //             return {
-    //                 name: constants.modules.workspace,
-    //                 filterViewKey: constants.filters.views.workspace as UserFilters,
+    //                 name: "Workspace",
+    //                 filterViewKey: projectConstants.filters.views.workspace as UserFilters,
     //             };
     //         case "/k":
     //         case "/Kworkspace":
     //             return {
-    //                 name: constants.modules.k,
-    //                 filterViewKey: constants.filters.views.k as UserFilters,
+    //                 name: "K",
+    //                 filterViewKey: projectConstants.filters.views.k as UserFilters,
     //             };
     //         case "/ws":
     //             return {
-    //                 name: constants.modules.ws,
-    //                 filterViewKey: constants.filters.views.wsGrid as UserFilters,
+    //                 name: "Ws",
+    //                 filterViewKey: projectConstants.filters.views.wsGrid as UserFilters,
     //             };
     //         case "/notes":
     //             return {
-    //                 name: constants.modules.note,
-    //                 filterViewKey: constants.filters.views.noteGrid as UserFilters,
+    //                 name: "Note",
+    //                 filterViewKey: projectConstants.filters.views.noteGrid as UserFilters,
     //             };
     //         case "/project":
     //             return {
-    //                 name: constants.modules.project,
-    //                 filterViewKey: constants.filters.views.projectGrid as UserFilters,
+    //                 name: "Project",
+    //                 filterViewKey: projectConstants.filters.views.projectGrid as UserFilters,
     //             };
     //         case "/lifelog":
     //             return {
@@ -61,32 +62,32 @@ export const useGridAutoRegisterHelper = () => {
 
     const getGridConfigFromModuleName = (moduleName: string) => {
         switch (moduleName) {
-            case constants.modules.workspace:
+            case "Workspace":
                 return {
-                    // name: constants.modules.workspace,
-                    filterViewKey: constants.filters.views.workspace as UserFilters,
+                    // name: "Workspace",
+                    filterViewKey: projectConstants.filters.views.workspace as UserFilters,
                 };
-            case constants.modules.k:
+            case "K":
                 return {
-                    // name: constants.modules.k,
-                    filterViewKey: constants.filters.views.k as UserFilters,
+                    // name: "K",
+                    filterViewKey: projectConstants.filters.views.k as UserFilters,
                 };
-            case constants.modules.ws:
+            case "Ws":
                 return {
-                    // name: constants.modules.ws,
-                    filterViewKey: constants.filters.views.wsGrid as UserFilters,
+                    // name: "Ws",
+                    filterViewKey: projectConstants.filters.views.wsGrid as UserFilters,
                 };
-            case constants.modules.note:
+            case "Note":
                 return {
-                    // name: constants.modules.note,
-                    filterViewKey: constants.filters.views.noteGrid as UserFilters,
+                    // name: "Note",
+                    filterViewKey: projectConstants.filters.views.noteGrid as UserFilters,
                 };
-            case constants.modules.project:
+            case "Project":
                 return {
-                    // name: constants.modules.project,
-                    filterViewKey: constants.filters.views.projectGrid as UserFilters,
+                    // name: "Project",
+                    filterViewKey: projectConstants.filters.views.projectGrid as UserFilters,
                 };
-            case constants.modules.lifeLog:
+            case "LifeLog":
                 return {
                     // name: "LifeLog",
                     filterViewKey: null,
@@ -126,3 +127,8 @@ export const useGridAutoRegisterHelper = () => {
         registerGrid
     }
 };
+
+
+
+
+

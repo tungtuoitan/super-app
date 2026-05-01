@@ -1,9 +1,10 @@
-
+﻿
 // ============================================
 // TREE NODE TYPE (for react-arborist)
 // ============================================
 
 import {KDTO} from "../../types/K-dto.types";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {KItemV2} from "../../types/K-v2.types";
 import {kconstants} from "../../utils/K.Constants";
 
@@ -44,13 +45,13 @@ export function $checkSubtree(node: KTreeNode, targetId: number): boolean {
 /**
  * Filter KTreeNode tree by search text (V2 structure)
  * Includes node if it or any descendant matches.
- * Respects kconstants.workspace.search.mode.
+ * Respects workspaceConstants.search.mode.
  */
 export function $filterTreeBySearchV2(nodes: KTreeNode[], searchText: string): KTreeNode[] {
     if (!searchText || !searchText.trim()) return nodes;
 
     const query = searchText.toLowerCase().trim();
-    const searchMode = kconstants.workspace.search.mode;
+    const searchMode = workspaceConstants.search.mode;
     const results: KTreeNode[] = [];
 
     for (const node of nodes) {
@@ -132,7 +133,7 @@ function $sortChildrenRecursively(nodes: KTreeNode[]) {
 /**
  * Build hierarchical KTreeNode structure from flat V2 list.
  *
- * k_items.id   = primary key (used as parentId reference — self-referencing)
+ * k_items.id   = primary key (used as parentId reference â€” self-referencing)
  * entityId     = entity ID (k_nodes.id)
  * parentId     = parent's k_items.id (null = root)
  */
@@ -164,7 +165,7 @@ export function buildTreeFromV2Items(items: KItemV2[]): KTreeNode[] {
             if (parent) {
                 parent.children!.push(node);
             } else {
-                console.warn(`⚠️ Parent k_items.id ${item.parentId} not found for item ${item.id}, treating as root`);
+                console.warn(`âš ï¸ Parent k_items.id ${item.parentId} not found for item ${item.id}, treating as root`);
                 rootNodes.push(node);
             }
         }
@@ -177,7 +178,7 @@ export function buildTreeFromV2Items(items: KItemV2[]): KTreeNode[] {
 }
 
 // ============================================
-// TRANSFORM DTO → TREE DATA
+// TRANSFORM DTO â†’ TREE DATA
 // ============================================
 
 /**
@@ -194,10 +195,10 @@ export function transformToTreeData(data: KDTO | null | undefined, searchText: s
     }
 
     const kRootNode: KTreeNode = {
-        id: `${kconstants.workspace.root.workspaceItemId}`,
+        id: `${workspaceConstants.root.workspaceItemId}`,
         name: data.name,
         data: {
-            id: kconstants.workspace.root.workspaceItemId,
+            id: workspaceConstants.root.workspaceItemId,
             knowledgeId: data.id,
             parentId: null,
             name: data.name,
@@ -325,3 +326,6 @@ export const KtreeMiniHelper = {
     expandPathToItem,
     $removeItems,
 };
+
+
+

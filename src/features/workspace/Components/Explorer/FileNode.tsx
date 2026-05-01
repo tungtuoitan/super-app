@@ -1,4 +1,5 @@
-import React from "react";
+﻿import React from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
@@ -159,7 +160,7 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
         const _currentItem = currentWorkspace?.flatData.find((i: any) => i.entityId === entityId);
 
         // Open file-specific context menu (V2 structure)
-        showContextMenu(e, constants.workspace.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });
+        showContextMenu(e, workspaceConstants.itemTypes.file, { ...fileItem, parentId: _currentItem?.parentId ?? null });
     };
 
     return (
@@ -221,3 +222,4 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
         </div>
     );
 }
+

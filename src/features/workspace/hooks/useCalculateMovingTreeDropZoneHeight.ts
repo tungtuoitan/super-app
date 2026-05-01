@@ -1,9 +1,10 @@
-/**
+﻿/**
  * CalculateMovingTreeDropZoneHeight - Headless component for drop zone height calculation
  * Uses treeRef to get accurate visible node count and calculate remaining space
  */
 
 import { useEffect } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import type { TreeApi } from "react-arborist";
 import { TreeFolder } from "./tree.miniHelper";
 import { constants } from "@/shared";
@@ -32,7 +33,7 @@ export function CalculateMovingTreeDropZoneHeight({ treeData, containerHeight, t
                 const node = tree.visibleNodes[i];
                 const entityId = (node.data.data as any)?.entityId;
 
-                if (entityId !== constants.workspace.root.entityId && entityId !== constants.workspace.dropZone.entityId) {
+                if (entityId !== workspaceConstants.root.entityId && entityId !== workspaceConstants.dropZone.entityId) {
                     visibleCount++;
                 }
             }
@@ -49,3 +50,4 @@ export function CalculateMovingTreeDropZoneHeight({ treeData, containerHeight, t
 
     return null;
 }
+

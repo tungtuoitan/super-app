@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Task Timeline Helper
  * Callbacks only (useCallback). Handles date changes, scroll, zoom, and API calls.
- * Gets projectId from useProjectDetailStore — NO params.
+ * Gets projectId from useProjectDetailStore â€” NO params.
  */
 
 import type { Task } from "@/features/taskDetail";
+import { shellConstants } from "@/shell/shell.constants";
 import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/shared";
@@ -80,7 +81,7 @@ export const useTaskTimelineHelper = () => {
             setOpenTabs((prev) =>
                 prev.map((tab) => {
                     if (
-                        tab.type === constants.vscode.tab.tabTypes.task &&
+                        tab.type === shellConstants.vscode.tab.tabTypes.task &&
                         (tab.data as Task).id === taskId
                     ) {
                         const updated: Task = {
@@ -203,3 +204,5 @@ export const useTaskTimelineHelper = () => {
         checkTodayVisibility,
     };
 };
+
+

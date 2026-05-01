@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+﻿import React, { useEffect } from "react";
+import { shellConstants } from "@/shell/shell.constants";
 import { flexRender } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/shared";
@@ -17,7 +18,7 @@ import {useEditorTabBarStore} from "@/shell";
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
  */
-export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { source?: string; disabledRowIds?: Set<number> } = {}) {
+export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string; disabledRowIds?: Set<number> } = {}) {
     const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef, noteGridPagination, totalCount } = useNoteGridStore();
     const { openTab } = useEditorTabHelper();
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
@@ -67,7 +68,7 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
                 onContextMenu={(e) => {
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest("tr[data-row]");
-                    if (!isClickedOnRow && source === constants.modules.note) {
+                    if (!isClickedOnRow && source === "Note") {
                         openNoteContextMenu(e);
                     }
                 }}
@@ -87,13 +88,13 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
                     <tbody>
                         {table.getRowModel().rows.map((row) => {
                             const activeTab = openTabs.length > 0 && activeTabId ? openTabs.find((t: BaseTab) => t.id === activeTabId) : null;
-                            const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
-                            const isSelected = activeNote?.id === row.original.id && source === constants.modules.note;
+                            const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+                            const isSelected = activeNote?.id === row.original.id && source === "Note";
 
                             const handleRowClick = () => {
-                                if (source === constants.modules.note) {
-                                    openTab(row.original, constants.vscode.tab.tabTypes.note);
-                                } else if (source === constants.modules.workspace && !disabledRowIds?.has(row.original.id)) {
+                                if (source === "Note") {
+                                    openTab(row.original, shellConstants.vscode.tab.tabTypes.note);
+                                } else if (source === "Workspace" && !disabledRowIds?.has(row.original.id)) {
                                     row.toggleSelected();
                                 }
                             };
@@ -159,3 +160,7 @@ export function NoteGrid({ source = constants.modules.note, disabledRowIds }: { 
         </div>
     );
 }
+
+
+
+

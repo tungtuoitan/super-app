@@ -1,9 +1,9 @@
-import { Boxes, Box, BarChart3, ArrowRightLeft } from "lucide-react";
+﻿import { Boxes, Box, BarChart3, ArrowRightLeft } from "lucide-react";
 import { WorkspaceView } from "../Components/WorkspaceView";
 import { WsEditorPanel } from "../Components/WsEditorPanel";
 import { MovingTab } from "../Components/VSPanel/MovingTab";
 import { constants, menuContextRegistry } from "@/shared";
-import type { ModuleDefinition } from "@/shell";
+import { shellConstants, type ModuleDefinition } from "@/shell";
 import { WorkspaceFolderNodeMenu } from "../contexts/menus/WorkspaceFolderNodeMenu";
 import { WorkspaceChildNodeMenu } from "../contexts/menus/WorkspaceChildNodeMenu";
 import { WorkspaceSelectorMenu } from "../contexts/menus/WorkspaceSelectorMenu";
@@ -17,24 +17,24 @@ menuContextRegistry.register({ handles: ["workspace-grid"],                 comp
 const MovingTabAdapter = () => <MovingTab />;
 
 const TAB_COLORS: Record<string, string> = {
-    [constants.vscode.tab.tabTypes.workspace]: "#a78bfa",
-    [constants.vscode.tab.tabTypes.trackingGraph]: "#22c55e",
+    [shellConstants.vscode.tab.tabTypes.workspace]: "#a78bfa",
+    [shellConstants.vscode.tab.tabTypes.trackingGraph]: "#22c55e",
 };
 
 export const workspaceModule: ModuleDefinition = {
-    id: constants.modules.workspace,
+    id: "Workspace",
     icon: Boxes,
-    label: constants.vscode.displayNames.workspace,
+    label: "Workspace",
 
     SidebarView: WorkspaceView,
 
     editorPanels: {
-        [constants.vscode.tab.tabTypes.workspace]: WsEditorPanel,
+        [shellConstants.vscode.tab.tabTypes.workspace]: WsEditorPanel,
     },
 
     getTabMeta: (tab) => {
         const color = TAB_COLORS[tab.type] ?? "#9ca3af";
-        const Icon = tab.type === constants.vscode.tab.tabTypes.trackingGraph ? BarChart3 : Box;
+        const Icon = tab.type === shellConstants.vscode.tab.tabTypes.trackingGraph ? BarChart3 : Box;
         return { icon: <Icon className="w-4 h-4" style={{ color }} />, color };
     },
 
@@ -47,3 +47,7 @@ export const workspaceModule: ModuleDefinition = {
         },
     ],
 };
+
+
+
+

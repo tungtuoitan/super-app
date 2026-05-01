@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Grid Control Store
  * Centralized state management for grid controls (search, filter)
  * Shared between sidebar header and grid components
@@ -6,7 +6,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
-import { constants } from "../../shared/constants";
+import { shellConstants } from "@/shell/shell.constants";
 import {STORAGE_KEYS, storageService} from "@/shared";
 import {UserFilters, ViewFilter} from "../genericFilter/filter.types";
 
@@ -45,7 +45,7 @@ export const useSideBarStore = () => useContext(SideBarStore);
 
 export const SideBarProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [moduleName, setModuleName] = useState<string>(storageService.get<string>(`${STORAGE_KEYS.MODULE_NAME}`) ?? constants.modules.project);
+    const [moduleName, setModuleName] = useState<string>(storageService.get<string>(`${STORAGE_KEYS.MODULE_NAME}`) ?? "Project");
 
     const [filterViewKey, setFilterViewKey] = useState<keyof UserFilters | null>(null);
     const [uiFilters, setUIFilters] = useState<ViewFilter>({});
@@ -67,3 +67,6 @@ export const SideBarProvider: React.FC<React.PropsWithChildren<unknown>> = ({ ch
         </SideBarStore.Provider>
     );
 };
+
+
+

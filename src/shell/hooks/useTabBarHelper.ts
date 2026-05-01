@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+﻿import React, { useEffect, useState, useRef } from "react";
 import { useEditorTabHelper } from "./useEditorTab.helper";
 import { useWorkspaceStore } from "@/features/workspace";
-import { useSideBarStore } from "@/shell";
+import { shellConstants, useSideBarStore } from "@/shell";
 import { useNoteGridStore } from "@/features/note";
 import { useWsStore } from "@/features/workspace";
 import { useConfirmationPopoverHelper } from "@/shared";
@@ -47,26 +47,26 @@ export function useTabBarHelper() {
      */
     const isInCurrentModule = (tab: any) => {
         // Check based on moduleName from GridControl
-        if (moduleName === constants.modules.note) {
+        if (moduleName === "Note") {
             // NoteGrid view - check if note exists in notes array
-            if (tab.type === constants.vscode.tab.tabTypes.note) {
+            if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
                 const note = tab.data;
                 return notes.some((n) => n.id === note.id);
             }
-        } else if (moduleName === constants.modules.ws) {
+        } else if (moduleName === "Ws") {
             // WsGrid view - check if workspace exists in workspaces array
-            if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+            if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {
                 const ws = tab.data;
                 return workspaces.some((w) => w.id === ws.id);
             }
-        } else if (moduleName === constants.modules.workspace) {
+        } else if (moduleName === "Workspace") {
             // Workspace tree view - check if note/workspace exists in currentWorkspace.flatData
             if (!currentWorkspace?.flatData) return false;
 
-            if (tab.type === constants.vscode.tab.tabTypes.note) {
+            if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
                 const note = tab.data;
                 return currentWorkspace.flatData.some((item: any) => item.entityType === 3 && item.entityId === note.id);
-            } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+            } else if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {
                 const ws = tab.data;
                 return ws.id === currentWorkspace.id;
             }
@@ -99,7 +99,7 @@ export function useTabBarHelper() {
                         closeTab(tabId);
                     } catch (error) {
                         console.error("Failed to save:", error);
-                        // Không đóng tab nếu save thất bại
+                        // KhÃ´ng Ä‘Ã³ng tab náº¿u save tháº¥t báº¡i
                     }
                 },
                 onThirdButton: () => {
@@ -255,3 +255,7 @@ export function useTabBarHelper() {
         getActiveTab,
     };
 }
+
+
+
+

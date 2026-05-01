@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Open Tabs Sync Component
  * Handles localStorage persistence for open editor tabs
  * - Saves tabs to localStorage when they change
@@ -11,7 +11,7 @@ import { useNoteGridStore } from "@/features/note";
 import { useWsStore } from "@/features/workspace";
 import { useProjectStore } from "@/features/project";
 import type { Task } from "@/features/taskDetail";
-import { BaseTab, MultiProjectTabData } from "@/shell";
+import { BaseTab, MultiProjectTabData, shellConstants } from "@/shell";
 import { constants, useAuthStore } from "@/shared";
 import { Note, NoteDTO } from "@/features/note";
 import { noteService } from "@/features/note";
@@ -124,11 +124,11 @@ export const useOpenTabSync = () => {
                 const sortedTabs = [...data.tabs].sort((a, b) => a.index - b.index);
 
                 // Separate by type
-                const noteTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.note);
-                const wsTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.workspace);
-                const projectTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.project);
-                const taskTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.task);
-                const multiProjectTabs = sortedTabs.filter((t) => t.type === constants.vscode.tab.tabTypes.multiProject);
+                const noteTabs = sortedTabs.filter((t) => t.type === shellConstants.vscode.tab.tabTypes.note);
+                const wsTabs = sortedTabs.filter((t) => t.type === shellConstants.vscode.tab.tabTypes.workspace);
+                const projectTabs = sortedTabs.filter((t) => t.type === shellConstants.vscode.tab.tabTypes.project);
+                const taskTabs = sortedTabs.filter((t) => t.type === shellConstants.vscode.tab.tabTypes.task);
+                const multiProjectTabs = sortedTabs.filter((t) => t.type === shellConstants.vscode.tab.tabTypes.multiProject);
 
                 // Collect missing IDs
                 const missingNoteIds: number[] = [];
@@ -253,7 +253,7 @@ export const useOpenTabSync = () => {
                 const getAllProjects = () => [...projects, ...fetchedProjects];
 
                 for (const tabStorage of sortedTabs) {
-                    if (tabStorage.type === constants.vscode.tab.tabTypes.note) {
+                    if (tabStorage.type === shellConstants.vscode.tab.tabTypes.note) {
                         // Try grid first, then fetched data
                         let noteData = notes.find((n) => n.id === tabStorage.dataId);
                         if (!noteData) {
@@ -263,14 +263,14 @@ export const useOpenTabSync = () => {
                         if (noteData) {
                             restoredTabs.push({
                                 id: tabStorage.tabId,
-                                type: constants.vscode.tab.tabTypes.note,
+                                type: shellConstants.vscode.tab.tabTypes.note,
                                 data: noteData,
                                 data0: noteData,
-                                title: noteData.name || constants.vscode.tabTitles.unsavedNote,
+                                title: noteData.name || shellConstants.vscode.tabTitles.unsavedNote,
                                 hasUnsavedChanges: false,
                             });
                         }
-                    } else if (tabStorage.type === constants.vscode.tab.tabTypes.workspace) {
+                    } else if (tabStorage.type === shellConstants.vscode.tab.tabTypes.workspace) {
                         // Try grid first, then fetched data
                         let wsData = workspaces.find((w) => w.id === tabStorage.dataId);
                         if (!wsData) {
@@ -280,14 +280,14 @@ export const useOpenTabSync = () => {
                         if (wsData) {
                             restoredTabs.push({
                                 id: tabStorage.tabId,
-                                type: constants.vscode.tab.tabTypes.workspace,
+                                type: shellConstants.vscode.tab.tabTypes.workspace,
                                 data: wsData,
                                 data0: wsData,
-                                title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
+                                title: wsData.name || shellConstants.vscode.tabTitles.unsavedWorkspace,
                                 hasUnsavedChanges: false,
                             });
                         }
-                    } else if (tabStorage.type === constants.vscode.tab.tabTypes.project) {
+                    } else if (tabStorage.type === shellConstants.vscode.tab.tabTypes.project) {
                         // Try store first, then fetched data
                         let projectData = projects.find((p) => p.id === tabStorage.dataId);
                         if (!projectData) {
@@ -297,14 +297,14 @@ export const useOpenTabSync = () => {
                         if (projectData) {
                             restoredTabs.push({
                                 id: tabStorage.tabId,
-                                type: constants.vscode.tab.tabTypes.project,
+                                type: shellConstants.vscode.tab.tabTypes.project,
                                 data: projectData,
                                 data0: projectData,
-                                title: projectData.name || constants.vscode.tabTitles.unsavedProject,
+                                title: projectData.name || shellConstants.vscode.tabTitles.unsavedProject,
                                 hasUnsavedChanges: false,
                             });
                         }
-                    } else if (tabStorage.type === constants.vscode.tab.tabTypes.task) {
+                    } else if (tabStorage.type === shellConstants.vscode.tab.tabTypes.task) {
                         // Try store first, then fetched data
                         let taskData = tasks.find((t) => t.id === tabStorage.dataId);
                         if (!taskData) {
@@ -314,14 +314,14 @@ export const useOpenTabSync = () => {
                         if (taskData) {
                             restoredTabs.push({
                                 id: tabStorage.tabId,
-                                type: constants.vscode.tab.tabTypes.task,
+                                type: shellConstants.vscode.tab.tabTypes.task,
                                 data: taskData,
                                 data0: taskData,
-                                title: taskData.title || constants.vscode.tabTitles.unsavedTask,
+                                title: taskData.title || shellConstants.vscode.tabTitles.unsavedTask,
                                 hasUnsavedChanges: false,
                             });
                         }
-                    } else if (tabStorage.type === constants.vscode.tab.tabTypes.multiProject) {
+                    } else if (tabStorage.type === shellConstants.vscode.tab.tabTypes.multiProject) {
                         // Parse project IDs from comma-separated string
                         const projectIds = (tabStorage.dataId as string).split(',').map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
                         const allProjects = getAllProjects();
@@ -335,7 +335,7 @@ export const useOpenTabSync = () => {
                             };
                             restoredTabs.push({
                                 id: tabStorage.tabId,
-                                type: constants.vscode.tab.tabTypes.multiProject,
+                                type: shellConstants.vscode.tab.tabTypes.multiProject,
                                 data: tabData,
                                 data0: tabData,
                                 title: "Multiple-Projects",
@@ -370,15 +370,15 @@ export const useOpenTabSync = () => {
                 .map((tab, index) => {
                     let dataId: number | string = 0;
 
-                    if (tab.type === constants.vscode.tab.tabTypes.note) {
+                    if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
                         dataId = (tab.data as Note).id;
-                    } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+                    } else if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {
                         dataId = (tab.data as Ws).id;
-                    } else if (tab.type === constants.vscode.tab.tabTypes.project) {
+                    } else if (tab.type === shellConstants.vscode.tab.tabTypes.project) {
                         dataId = (tab.data as Project).id;
-                    } else if (tab.type === constants.vscode.tab.tabTypes.task) {
+                    } else if (tab.type === shellConstants.vscode.tab.tabTypes.task) {
                         dataId = (tab.data as Task).id;
-                    } else if (tab.type === constants.vscode.tab.tabTypes.multiProject) {
+                    } else if (tab.type === shellConstants.vscode.tab.tabTypes.multiProject) {
                         // Store as comma-separated project IDs string
                         dataId = (tab.data as MultiProjectTabData).projectIds.join(',');
                     }
@@ -410,3 +410,4 @@ export const useOpenTabSync = () => {
     // This component doesn't render anything
     return null;
 };
+

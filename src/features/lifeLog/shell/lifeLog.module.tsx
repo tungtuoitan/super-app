@@ -1,4 +1,5 @@
-import { Shell, BarChart3, FileText } from "lucide-react";
+﻿import { Shell, BarChart3, FileText } from "lucide-react";
+import { shellConstants } from "@/shell/shell.constants";
 import { LifeLogView } from "../Components/LifeLogView";
 import { LogEditorPanel } from "../Components/LogEditorPanel";
 import { LifeLogGraphPanel } from "../Components/LifeLogGraphPanel";
@@ -25,10 +26,10 @@ function LifeLogTabIcon({ tab }: { tab: BaseTab }) {
     const { tracks } = useLifeLogStore();
     const className = "w-4 h-4";
 
-    if (tab.type === constants.vscode.tab.tabTypes.lifeLogGraph) {
+    if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogGraph) {
         return <BarChart3 className={className} style={{ color: "#6366f1" }} />;
     }
-    if (tab.type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+    if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
         const track = tab.data as LifeLogLog & { emoji?: string; color?: string };
         return <TrackIconDisplay value={track.emoji} trackColor={track.color} size="sm" />;
     }
@@ -53,22 +54,22 @@ function getLifeLogTabMeta(tab: BaseTab): TabMeta {
 }
 
 export const lifeLogModule: ModuleDefinition = {
-    id: constants.modules.lifeLog,
+    id: "LifeLog",
     icon: Shell,
-    label: constants.vscode.displayNames.lifeLog,
+    label: "LifeLog",
 
     SidebarView: LifeLogView,
 
     editorPanels: {
-        [constants.vscode.tab.tabTypes.lifeLog]: LogEditorPanel,
-        [constants.vscode.tab.tabTypes.lifeLogGraph]: LifeLogGraphPanelAdapter,
-        [constants.vscode.tab.tabTypes.lifeLogTrack]: TrackEditorPanel,
+        [shellConstants.vscode.tab.tabTypes.lifeLog]: LogEditorPanel,
+        [shellConstants.vscode.tab.tabTypes.lifeLogGraph]: LifeLogGraphPanelAdapter,
+        [shellConstants.vscode.tab.tabTypes.lifeLogTrack]: TrackEditorPanel,
     },
 
     getTabMeta: getLifeLogTabMeta,
 };
 
-// ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
+// â”€â”€â”€ Keyword Navigator Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const lifeLogKeywordPlugin: KeywordPlugin = {
     handles: ["log", "track"],
@@ -81,7 +82,7 @@ export const lifeLogKeywordPlugin: KeywordPlugin = {
         if (parsed.type === "log" && parsed.logId) {
             try {
                 const existingTab = ctx.openTabs.find(
-                    (t) => t.type === constants.vscode.tab.tabTypes.lifeLog && (t.data as LifeLogLog).id === parsed.logId
+                    (t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLog && (t.data as LifeLogLog).id === parsed.logId
                 );
                 if (existingTab) {
                     if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
@@ -106,7 +107,7 @@ export const lifeLogKeywordPlugin: KeywordPlugin = {
                         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
                         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                     };
-                    ctx.openTab(log, constants.vscode.tab.tabTypes.lifeLog, openedBy);
+                    ctx.openTab(log, shellConstants.vscode.tab.tabTypes.lifeLog, openedBy);
                 } else {
                     ctx.log.error("Log not found");
                 }
@@ -119,7 +120,7 @@ export const lifeLogKeywordPlugin: KeywordPlugin = {
         if (parsed.type === "track" && parsed.trackId) {
             try {
                 const existingTab = ctx.openTabs.find(
-                    (t) => t.type === constants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === parsed.trackId
+                    (t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === parsed.trackId
                 );
                 if (existingTab) {
                     if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
@@ -142,7 +143,7 @@ export const lifeLogKeywordPlugin: KeywordPlugin = {
                         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
                         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                     };
-                    ctx.openTab(track, constants.vscode.tab.tabTypes.lifeLogTrack, openedBy);
+                    ctx.openTab(track, shellConstants.vscode.tab.tabTypes.lifeLogTrack, openedBy);
                 } else {
                     ctx.log.error("Track not found");
                 }
@@ -167,3 +168,7 @@ export const lifeLogKeywordPlugin: KeywordPlugin = {
         return undefined;
     },
 };
+
+
+
+

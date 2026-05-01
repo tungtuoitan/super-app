@@ -1,10 +1,11 @@
-/**
+﻿/**
  * KTab Helper Hook
  * Opens knowledge editor tabs (create new / edit existing)
  */
 
 
 import { constants } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 import type { BaseTab } from "@/shell";
 import type { KWsResponse } from "../types/K.types";
 import { useKStore } from "../store/K.store";
@@ -17,10 +18,10 @@ export function useKTabHelper() {
     /** Open existing knowledge editor tab (reuse single tab) */
     const openKnowledgeTab = (knowledge: KWsResponse) => {
         const existing = openTabs.find(
-            (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge
+            (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge
         );
         if (existing) {
-            // Reuse — swap data to the new knowledge
+            // Reuse â€” swap data to the new knowledge
             const isSame = (existing.data as KWsResponse).id === knowledge.id;
             if (!isSame) {
                 setOpenTabs((prev) =>
@@ -35,7 +36,7 @@ export function useKTabHelper() {
         } else {
             const newTab: BaseTab = {
                 id: `k-knowledge-tab-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.kKnowledge,
+                type: shellConstants.vscode.tab.tabTypes.kKnowledge,
                 data: knowledge,
                 data0: knowledge,
                 title: knowledge.name || "Knowledge",
@@ -64,7 +65,7 @@ export function useKTabHelper() {
         setAllK((prev: KWsResponse[]) => [...prev, tempKnowledge]);
 
         const existing = openTabs.find(
-            (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge
+            (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge
         );
         if (existing) {
             setOpenTabs((prev) =>
@@ -78,7 +79,7 @@ export function useKTabHelper() {
         } else {
             const newTab: BaseTab = {
                 id: `k-knowledge-tab-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.kKnowledge,
+                type: shellConstants.vscode.tab.tabTypes.kKnowledge,
                 data: tempKnowledge,
                 data0: tempKnowledge,
                 title: "New Knowledge",
@@ -89,17 +90,17 @@ export function useKTabHelper() {
         }
     }
 
-    /** Open global daily review tab (singleton — reuse if already open) */
+    /** Open global daily review tab (singleton â€” reuse if already open) */
     const openGlobalDailyReviewTab = () => {
         const existing = openTabs.find(
-            (t) => t.type === constants.vscode.tab.tabTypes.kDailyReview
+            (t) => t.type === shellConstants.vscode.tab.tabTypes.kDailyReview
         );
         if (existing) {
             setActiveTabId(existing.id);
         } else {
             const newTab: BaseTab = {
                 id: `k-daily-review-tab`,
-                type: constants.vscode.tab.tabTypes.kDailyReview,
+                type: shellConstants.vscode.tab.tabTypes.kDailyReview,
                 data: null,
                 data0: null,
                 title: "Daily Review",
@@ -112,4 +113,6 @@ export function useKTabHelper() {
 
     return { openKnowledgeTab, openNewKnowledgeTab, openGlobalDailyReviewTab };
 }
+
+
 

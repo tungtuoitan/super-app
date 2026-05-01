@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Workspace Mapper - Transform backend response to frontend types
  *
  *
@@ -6,15 +6,16 @@
  */
 
 import { KWorkspaceItem, FolderItem, NoteItem, FileItem, KFolderMetadata, KNoteMetadata, KFileMetadata } from "../types/K.types";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {kconstants} from "./K.Constants";
 
 /**
  * Type aliases for backend API types
  */
 export type BackendItemType = 
-    | typeof kconstants.workspace.itemTypes.note
-    | typeof kconstants.workspace.itemTypes.file
-    | typeof kconstants.workspace.itemTypes.folder;
+    | typeof workspaceConstants.itemTypes.note
+    | typeof workspaceConstants.itemTypes.file
+    | typeof workspaceConstants.itemTypes.folder;
 
 /**
  * Backend WorkspaceItem response format
@@ -49,8 +50,8 @@ export interface BackendWorkspaceItem {
  */
 function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
     return {
-        id: item.id || item.childId!, // ✅ folder ID (prefer 'id', fallback 'childId')
-        type: kconstants.workspace.itemTypes.folder, // ✅ type = 'folder'
+        id: item.id || item.childId!, // âœ… folder ID (prefer 'id', fallback 'childId')
+        type: workspaceConstants.itemTypes.folder, // âœ… type = 'folder'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -77,8 +78,8 @@ function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
  */
 function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
     return {
-        id: item.id || item.childId!, // ✅ note ID (prefer 'id', fallback 'childId')
-        type: kconstants.workspace.itemTypes.note, // ✅ type = 'note'
+        id: item.id || item.childId!, // âœ… note ID (prefer 'id', fallback 'childId')
+        type: workspaceConstants.itemTypes.note, // âœ… type = 'note'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -105,8 +106,8 @@ function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
  */
 function transformToFileItem(item: BackendWorkspaceItem): FileItem {
     return {
-        id: item.id || item.childId!, // ✅ file ID (prefer 'id', fallback 'childId')
-        type: kconstants.workspace.itemTypes.file, // ✅ type = 'file'
+        id: item.id || item.childId!, // âœ… file ID (prefer 'id', fallback 'childId')
+        type: workspaceConstants.itemTypes.file, // âœ… type = 'file'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -136,13 +137,13 @@ export function transformBackendItem(item: BackendWorkspaceItem): KWorkspaceItem
 
     switch (itemType) {
         case "tag":
-        case kconstants.workspace.itemTypes.folder:
+        case workspaceConstants.itemTypes.folder:
             return transformToFolderItem(item);
 
-        case kconstants.workspace.itemTypes.note:
+        case workspaceConstants.itemTypes.note:
             return transformToNoteItem(item);
 
-        case kconstants.workspace.itemTypes.file:
+        case workspaceConstants.itemTypes.file:
             return transformToFileItem(item);
 
         default:
@@ -164,7 +165,7 @@ export function transformBackendItems(items: BackendWorkspaceItem[]): KWorkspace
  */
 export function transformToBackendItem(item: KWorkspaceItem): Partial<BackendWorkspaceItem> {
     return {
-        type: (item.type === kconstants.workspace.itemTypes.folder ? "folder" : item.type) as BackendItemType,
+        type: (item.type === workspaceConstants.itemTypes.folder ? "folder" : item.type) as BackendItemType,
         id: item.id,
         childId: item.id, // Legacy field for backward compatibility
         userId: item.userId,
@@ -187,3 +188,6 @@ export function transformToBackendItem(item: KWorkspaceItem): Partial<BackendWor
         children: "children" in item ? (item?.children?.map(transformToBackendItem) as BackendWorkspaceItem[]) : [],
     };
 }
+
+
+

@@ -63,3 +63,6 @@ export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
 // export { ConfirmCloseDialog } from "./components/ConfirmCloseDialog";
 // export { EditorToolbar } from "./components/main/EditorToolbar";
 // export { ConfirmationPopoverContainer } from "../shared/confirmPopover/ConfirmationPopoverContainer";
+
+
+export {shellConstants} from "./shell.constants";

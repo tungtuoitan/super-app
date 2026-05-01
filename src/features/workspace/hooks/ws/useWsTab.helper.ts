@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Workspace Tab Helper
  * Helper functions for managing workspace editor tabs
  */
 
-import { BaseTab } from "@/shell";
-import { constants } from "@/shared";
+import { BaseTab, shellConstants } from "@/shell";
+import { constants, standardRegistryConstants } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
@@ -32,7 +32,7 @@ export const useWsTabHelper = () => {
             id: tempId,
             name,
             description: "",
-            statusCode: constants.standardRegistryFE.activeStatus.active,
+            statusCode: standardRegistryConstants.activeStatus.active,
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
@@ -40,7 +40,7 @@ export const useWsTabHelper = () => {
         };
 
         setWorkspaces([newWorkspace, ...workspaces]);
-        openTab(newWorkspace, constants.vscode.tab.tabTypes.workspace);
+        openTab(newWorkspace, shellConstants.vscode.tab.tabTypes.workspace);
         setShouldFocusWsName(true);
     };
 
@@ -50,7 +50,7 @@ export const useWsTabHelper = () => {
      */
     const openWorkspaceTab = (workspace: Ws | WsResponse) => {
         // Check if tab already exists for this workspace
-        const existingTab = openTabs.find((tab) => tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspace.id);
+        const existingTab = openTabs.find((tab) => tab.type === shellConstants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspace.id);
 
         if (existingTab) {
             // Tab already exists, just activate it
@@ -70,7 +70,7 @@ export const useWsTabHelper = () => {
             // Create new workspace tab
             const newTab: BaseTab = {
                 id: `workspace-tab-${workspace.id}-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.workspace,
+                type: shellConstants.vscode.tab.tabTypes.workspace,
                 data: wsData,
                 data0: wsData,
                 title: workspace.name || "Unsaved Workspace",
@@ -112,7 +112,7 @@ export const useWsTabHelper = () => {
     const updateWorkspaceInTabs = (workspaceId: number, updatedWorkspace: Partial<Ws>) => {
         setOpenTabs((prev) =>
             prev.map((tab) => {
-                if (tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspaceId) {
+                if (tab.type === shellConstants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspaceId) {
                     const wsData = tab.data as Ws;
                     return {
                         ...tab,
@@ -134,3 +134,4 @@ export const useWsTabHelper = () => {
         updateWorkspaceInTabs,
     };
 };
+

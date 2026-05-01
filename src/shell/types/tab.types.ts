@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Generic Tab Types for Editor Area
  * Supports multiple tab types: Note, Folder, etc.
  */
@@ -9,13 +9,13 @@ import { Task } from "@/features/taskDetail";
 import { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
 import { KWsResponse } from "@/features/K";
 import { KItemV2 } from "@/features/K";
-import { constants } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { WikiTabData } from "@/features/Wiki";
 import {Ws} from "@/features/workspace";
 import {Project} from "@/features/project";
 
-export type TabType = typeof constants.vscode.tab.tabTypes.note | typeof constants.vscode.tab.tabTypes.workspace | typeof constants.vscode.tab.tabTypes.trackingGraph | typeof constants.vscode.tab.tabTypes.project | typeof constants.vscode.tab.tabTypes.multiProject | typeof constants.vscode.tab.tabTypes.task | typeof constants.vscode.tab.tabTypes.lifeLog | typeof constants.vscode.tab.tabTypes.lifeLogGraph | typeof constants.vscode.tab.tabTypes.lifeLogTrack | typeof constants.vscode.tab.tabTypes.kKnowledge | typeof constants.vscode.tab.tabTypes.kNode | typeof constants.vscode.tab.tabTypes.kDailyReview | typeof constants.vscode.tab.tabTypes.wikiInfo | "folder" | "settings";
+export type TabType = typeof shellConstants.vscode.tab.tabTypes.note | typeof shellConstants.vscode.tab.tabTypes.workspace | typeof shellConstants.vscode.tab.tabTypes.trackingGraph | typeof shellConstants.vscode.tab.tabTypes.project | typeof shellConstants.vscode.tab.tabTypes.multiProject | typeof shellConstants.vscode.tab.tabTypes.task | typeof shellConstants.vscode.tab.tabTypes.lifeLog | typeof shellConstants.vscode.tab.tabTypes.lifeLogGraph | typeof shellConstants.vscode.tab.tabTypes.lifeLogTrack | typeof shellConstants.vscode.tab.tabTypes.kKnowledge | typeof shellConstants.vscode.tab.tabTypes.kNode | typeof shellConstants.vscode.tab.tabTypes.kDailyReview | typeof shellConstants.vscode.tab.tabTypes.wikiInfo | "folder" | "settings";
 
 /**
  * Data type for multi-project tab
@@ -81,3 +81,4 @@ export interface EditorState {
     openTabs: BaseTab[];
     activeTabId: string | null;
 }
+

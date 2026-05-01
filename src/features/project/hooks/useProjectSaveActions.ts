@@ -1,4 +1,5 @@
-import { constants } from "@/shared";
+﻿import { constants } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/taskDetail";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";
@@ -13,13 +14,13 @@ export function useProjectSaveActions(): SaveActions {
     const { createTaskFolder } = useProjectTaskFolderHelper();
     const debugLog = useDebugLog();
     const handles = (tabType: string) =>
-        tabType === constants.vscode.tab.tabTypes.project ||
-        tabType === constants.vscode.tab.tabTypes.task;
+        tabType === shellConstants.vscode.tab.tabTypes.project ||
+        tabType === shellConstants.vscode.tab.tabTypes.task;
 
     const onSave = async (tab: BaseTab) => {
-        if (tab.type === constants.vscode.tab.tabTypes.project) {
+        if (tab.type === shellConstants.vscode.tab.tabTypes.project) {
             await upsertProject(tab.id);
-        } else if (tab.type === constants.vscode.tab.tabTypes.task) {
+        } else if (tab.type === shellConstants.vscode.tab.tabTypes.task) {
             const isNewTask = (tab.data as Task).id <= 0;
             debugLog.log("task-upsert", "toolbar-save-task", {
                 taskId: (tab.data as Task).id,
@@ -36,3 +37,5 @@ export function useProjectSaveActions(): SaveActions {
 
     return { handles, onSave };
 }
+
+

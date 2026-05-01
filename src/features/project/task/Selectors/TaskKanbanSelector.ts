@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Task Kanban Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
- * Gets projectId from useProjectDetailStore — NO params.
+ * Gets projectId from useProjectDetailStore â€” NO params.
  */
 
 import type { Task } from "@/features/taskDetail";
+import { projectConstants } from "@/features/project/project.constants";
 import { constants, useGetStandardRegistry } from "@/shared";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {usePTaskStore} from "../../store/usePTask.store";
@@ -23,8 +24,8 @@ export const useTaskKanbanSelector = () => {
             }))
             .sort(
                 (a:any, b:any) =>
-                    (constants.optionOrder.taskStatuses[a.label] ?? 999) -
-                    (constants.optionOrder.taskStatuses[b.label] ?? 999),
+                    (projectConstants.optionOrder.taskStatuses[a.label] ?? 999) -
+                    (projectConstants.optionOrder.taskStatuses[b.label] ?? 999),
             );
     })();
 
@@ -61,3 +62,5 @@ export const useTaskKanbanSelector = () => {
         tasksByStatus,
     };
 };
+
+

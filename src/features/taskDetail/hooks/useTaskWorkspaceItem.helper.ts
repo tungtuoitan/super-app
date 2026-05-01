@@ -1,11 +1,12 @@
-/**
+﻿/**
  * Task Workspace Item Helper
- * Functions only — managing notes linked to a task via workspace folder.
+ * Functions only â€” managing notes linked to a task via workspace folder.
  * State lives in useTaskStore.
  */
 
 
-import { useAuthStore } from "@/shared";
+import { standardRegistryConstants, useAuthStore } from "@/shared";
+import { shellConstants } from "@/shell";
 import type { Note } from "@/features/note";
 import { type Task } from "../types/task.types";
 import { type TaskFolderItem } from "../types/taskDetail.types";
@@ -81,7 +82,7 @@ export const useTaskWorkspaceItemHelper = () => {
             updatedAt: item.noteData.updatedAt ? new Date(item.noteData.updatedAt) : undefined,
             deletedAt: item.noteData.deletedAt ? new Date(item.noteData.deletedAt) : null,
         };
-        openTab(note, constants.vscode.tab.tabTypes.note);
+        openTab(note, shellConstants.vscode.tab.tabTypes.note);
     }
 
     /**
@@ -91,7 +92,7 @@ export const useTaskWorkspaceItemHelper = () => {
      */
     const createTaskNote = (task: Task) => {
         const existingIds = openTabs
-            .filter((t) => t.type === constants.vscode.tab.tabTypes.note)
+            .filter((t) => t.type === shellConstants.vscode.tab.tabTypes.note)
             .map((t) => (t.data as Note).id);
         const tempNoteId = generateTempId(existingIds);
         const name = generateUnsavedName(tempNoteId);
@@ -102,7 +103,7 @@ export const useTaskWorkspaceItemHelper = () => {
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: constants.standardRegistryFE.activeStatus.active,
+            statusCode: standardRegistryConstants.activeStatus.active,
             createdAt: new Date(),
             updatedAt: new Date(),
             createdBy: $user.userName || "Unknown",
@@ -112,7 +113,7 @@ export const useTaskWorkspaceItemHelper = () => {
         const tabId = `note-${tempNoteId}-${Date.now()}`;
         setOpenTabs((prev) => [...prev, {
             id: tabId,
-            type: constants.vscode.tab.tabTypes.note,
+            type: shellConstants.vscode.tab.tabTypes.note,
             data: newNote,
             data0: newNote,
             title: name,
@@ -134,3 +135,6 @@ export const useTaskWorkspaceItemHelper = () => {
         createTaskNote,
     };
 };
+
+
+

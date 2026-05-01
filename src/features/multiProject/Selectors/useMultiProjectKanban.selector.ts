@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Multi-Project Kanban Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
- * Gets projectIds from useMultiTimelineStore — NO params.
+ * Gets projectIds from useMultiTimelineStore â€” NO params.
  */
 
 import { useMemo } from "react";
+import { projectConstants } from "@/features/project/project.constants";
 import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useGetStandardRegistry,  } from "@/shared";
@@ -25,8 +26,8 @@ export const useMultiProjectKanbanSelector = () => {
             }))
             .sort(
                 (a:any, b:any) =>
-                    (constants.optionOrder.taskStatuses[a.label] ?? 999) -
-                    (constants.optionOrder.taskStatuses[b.label] ?? 999),
+                    (projectConstants.optionOrder.taskStatuses[a.label] ?? 999) -
+                    (projectConstants.optionOrder.taskStatuses[b.label] ?? 999),
             );
     }, [taskStatuses]);
 
@@ -63,3 +64,5 @@ export const useMultiProjectKanbanSelector = () => {
         tasksByStatus,
     };
 };
+
+

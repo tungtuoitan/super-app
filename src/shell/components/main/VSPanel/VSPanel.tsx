@@ -1,8 +1,8 @@
-import { X, Terminal, ArrowRightLeft, FileText } from "lucide-react";
+﻿import { X, Terminal, ArrowRightLeft, FileText } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
 import { useMovingTreeStore } from "@/features/workspace";
-import { useEditorTabHelper } from "@/shell";
+import { shellConstants, useEditorTabHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
 import { useSideBarStore } from "@/shell";
 import { moduleRegistry, type PanelTabDefinition } from "@/shell";
@@ -19,7 +19,7 @@ interface VSPanelProps {
 }
 
 /**
- * VSPanel — bottom panel.
+ * VSPanel â€” bottom panel.
  * Panel tabs are contributed by the active module via the registry.
  */
 export function VSPanel({ onClose }: VSPanelProps) {
@@ -29,7 +29,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const { isMobile } = useDeviceStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
-    const isNoteTab = activeTab?.type === constants.vscode.tab.tabTypes.note;
+    const isNoteTab = activeTab?.type === shellConstants.vscode.tab.tabTypes.note;
 
     const changeTab = (id: string) => {
         if (id !== "moving") setTargetWorkspace(null);
@@ -96,3 +96,4 @@ export function VSPanel({ onClose }: VSPanelProps) {
         </Panel>
     );
 }
+

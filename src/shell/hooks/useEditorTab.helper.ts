@@ -1,7 +1,8 @@
-import { Note } from "@/features/note";
+﻿import { Note } from "@/features/note";
 import { useNoteGridStore } from "@/features/note";
 import { BaseTab, TabType } from "@/shell";
-import { constants, useKeywordSelector } from "@/shared";
+import { useKeywordSelector } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useSideBarStore } from "@/shell";
 import { WorkspaceItemV2 } from "@/features/workspace";
@@ -29,23 +30,23 @@ export const useEditorTabHelper = () => {
     const { setLogs, setTracks } = useLifeLogStore();
 
     /**
-     * Helper: Tìm workspace item ID dựa trên entity (note hoặc workspace)
+     * Helper: TÃ¬m workspace item ID dá»±a trÃªn entity (note hoáº·c workspace)
      * @param entityType - 2 (folder), 3 (note), 4 (file)
-     * @param entityId - ID của entity (note.id, workspace.id, file.id)
-     * @returns workspace_items.id hoặc null nếu không tìm thấy
+     * @param entityId - ID cá»§a entity (note.id, workspace.id, file.id)
+     * @returns workspace_items.id hoáº·c null náº¿u khÃ´ng tÃ¬m tháº¥y
      */
     const findWorkspaceItemId = (entityType: 2 | 3 | 4, entityId: number): number | null => {
         if (!currentWorkspace?.flatData) {
-            console.warn("⚠️ findWorkspaceItemId: No currentWorkspace or flatData");
+            console.warn("âš ï¸ findWorkspaceItemId: No currentWorkspace or flatData");
             return null;
         }
 
-        // Tìm trong flatData dựa trên entityType và entityId
+        // TÃ¬m trong flatData dá»±a trÃªn entityType vÃ  entityId
         const item = currentWorkspace.flatData.find((item) => item.entityType === entityType && item.entityId === entityId);
 
         if (item) {
         } else {
-            console.warn(`❌ Not found in workspace: entityType=${entityType}, entityId=${entityId}`);
+            console.warn(`âŒ Not found in workspace: entityType=${entityType}, entityId=${entityId}`);
         }
 
         return item?.id || null; // workspace_items.id
@@ -61,7 +62,7 @@ export const useEditorTabHelper = () => {
      */
     const generateBreadcrumbForTab = (data: Note | Ws, type: string): BreadcrumbItem[] | undefined => {
         // Only generate breadcrumb for note tabs
-        if (type !== constants.vscode.tab.tabTypes.note) {
+        if (type !== shellConstants.vscode.tab.tabTypes.note) {
             return undefined;
         }
 
@@ -153,58 +154,58 @@ export const useEditorTabHelper = () => {
         if (newActiveTabId) {
             const activeTab = tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId);
 
-            if (activeTab?.type === constants.vscode.tab.tabTypes.note) {
+            if (activeTab?.type === shellConstants.vscode.tab.tabTypes.note) {
                 const noteData = activeTab.data as Note;
 
-                // ⭐ Select item trong workspace tree nếu note này có trong workspace
+                // â­ Select item trong workspace tree náº¿u note nÃ y cÃ³ trong workspace
                 const workspaceItemId = findWorkspaceItemId(3, noteData.id); // 3 = note entity type
                 if (workspaceItemId) {
                     setSelectedItemIds([workspaceItemId]);
                     // Scroll to item trong tree
                     if (_treeRef.current) {
-                        // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
+                        // Expand parent folders TRÆ¯á»šC KHI get node (vÃ¬ node chá»‰ exist khi Ä‘Æ°á»£c render)
                         _treeRef.current.openParents(workspaceItemId.toString());
 
-                        // Scroll to node để đảm bảo nó visible
+                        // Scroll to node Ä‘á»ƒ Ä‘áº£m báº£o nÃ³ visible
                         _treeRef.current.scrollTo(workspaceItemId.toString());
 
-                        // Bây giờ get node sau khi parents đã expand
+                        // BÃ¢y giá» get node sau khi parents Ä‘Ã£ expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
                             // Use focus() to scroll the node into view (react-arborist API)
                             node.focus();
                         } else {
-                            console.warn("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                            console.warn("âš ï¸ Node not found in tree after openParents:", workspaceItemId.toString());
                         }
                     } else {
-                        console.warn("⚠️ Tree ref not available");
+                        console.warn("âš ï¸ Tree ref not available");
                     }
                 }
-            } else if (activeTab?.type === constants.vscode.tab.tabTypes.workspace) {
+            } else if (activeTab?.type === shellConstants.vscode.tab.tabTypes.workspace) {
                 const wsData = activeTab.data as Ws;
 
-                // ⭐ Select workspace folder item trong tree (workspace type = folder type 2)
+                // â­ Select workspace folder item trong tree (workspace type = folder type 2)
                 const workspaceItemId = findWorkspaceItemId(2, wsData.id); // 2 = folder entity type
                 if (workspaceItemId) {
                     setSelectedItemIds([workspaceItemId]);
                     // Scroll to item trong tree
                     if (_treeRef.current) {
-                        // Expand parent folders TRƯỚC KHI get node (vì node chỉ exist khi được render)
+                        // Expand parent folders TRÆ¯á»šC KHI get node (vÃ¬ node chá»‰ exist khi Ä‘Æ°á»£c render)
                         _treeRef.current.openParents(workspaceItemId.toString());
 
-                        // Scroll to node để đảm bảo nó visible
+                        // Scroll to node Ä‘á»ƒ Ä‘áº£m báº£o nÃ³ visible
                         _treeRef.current.scrollTo(workspaceItemId.toString());
 
-                        // Bây giờ get node sau khi parents đã expand
+                        // BÃ¢y giá» get node sau khi parents Ä‘Ã£ expand
                         const node = _treeRef.current.get(workspaceItemId.toString());
                         if (node) {
                             // Use focus() to scroll the node into view (react-arborist API)
                             node.focus();
                         } else {
-                            console.warn("⚠️ Node not found in tree after openParents:", workspaceItemId.toString());
+                            console.warn("âš ï¸ Node not found in tree after openParents:", workspaceItemId.toString());
                         }
                     } else {
-                        console.warn("⚠️ Tree ref not available");
+                        console.warn("âš ï¸ Tree ref not available");
                     }
                 }
             }
@@ -223,24 +224,24 @@ export const useEditorTabHelper = () => {
         // ===================================
         let existingTab: BaseTab | undefined;
 
-        if (type === constants.vscode.tab.tabTypes.note) {
+        if (type === shellConstants.vscode.tab.tabTypes.note) {
             const noteData = data as Note;
-            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.note && (tab.data as Note).id === noteData.id);
-        } else if (type === constants.vscode.tab.tabTypes.workspace) {
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === shellConstants.vscode.tab.tabTypes.note && (tab.data as Note).id === noteData.id);
+        } else if (type === shellConstants.vscode.tab.tabTypes.workspace) {
             const wsData = data as Ws;
-            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === wsData.id);
-        } else if (type === constants.vscode.tab.tabTypes.project) {
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === shellConstants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === wsData.id);
+        } else if (type === shellConstants.vscode.tab.tabTypes.project) {
             const d = data as Project;
-            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === d.id);
-        } else if (type === constants.vscode.tab.tabTypes.task) {
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === shellConstants.vscode.tab.tabTypes.project && (tab.data as Project).id === d.id);
+        } else if (type === shellConstants.vscode.tab.tabTypes.task) {
             const d = data as Task;
-            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === d.id);
-        } else if (type === constants.vscode.tab.tabTypes.lifeLog) {
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === d.id);
+        } else if (type === shellConstants.vscode.tab.tabTypes.lifeLog) {
             const d = data as LifeLogLog;
-            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.lifeLog && (tab.data as LifeLogLog).id === d.id);
-        } else if (type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === shellConstants.vscode.tab.tabTypes.lifeLog && (tab.data as LifeLogLog).id === d.id);
+        } else if (type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
             const d = data as LifeLogTrack;
-            existingTab = openTabs.find((tab: BaseTab) => tab.type === constants.vscode.tab.tabTypes.lifeLogTrack && (tab.data as LifeLogTrack).id === d.id);
+            existingTab = openTabs.find((tab: BaseTab) => tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack && (tab.data as LifeLogTrack).id === d.id);
         }
 
         // ===================================
@@ -255,70 +256,70 @@ export const useEditorTabHelper = () => {
             // ===================================
             let newTab: BaseTab;
 
-            if (type === constants.vscode.tab.tabTypes.note) {
+            if (type === shellConstants.vscode.tab.tabTypes.note) {
                 const noteData = data as Note;
                 const breadcrumb = generateBreadcrumbForTab(noteData, type);
 
                 newTab = {
                     id: `note-${noteData.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.note,
+                    type: shellConstants.vscode.tab.tabTypes.note,
                     data: noteData,
                     data0: noteData,
-                    title: noteData.name || constants.vscode.tabTitles.unsavedNote,
+                    title: noteData.name || shellConstants.vscode.tabTitles.unsavedNote,
                     hasUnsavedChanges: false,
                     breadcrumb,
                     openedBy,
                 };
-            } else if (type === constants.vscode.tab.tabTypes.workspace) {
+            } else if (type === shellConstants.vscode.tab.tabTypes.workspace) {
                 const wsData = data as Ws;
 
                 newTab = {
                     id: `workspace-${wsData.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.workspace,
+                    type: shellConstants.vscode.tab.tabTypes.workspace,
                     data: wsData,
                     data0: wsData,
-                    title: wsData.name || constants.vscode.tabTitles.unsavedWorkspace,
+                    title: wsData.name || shellConstants.vscode.tabTitles.unsavedWorkspace,
                     hasUnsavedChanges: false,
                     openedBy,
                 };
-            } else if (type === constants.vscode.tab.tabTypes.project) {
+            } else if (type === shellConstants.vscode.tab.tabTypes.project) {
                 const d = data as Project;
                 newTab = {
                     id: `project-${d.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.project,
+                    type: shellConstants.vscode.tab.tabTypes.project,
                     data: d,
                     data0: d,
                     title: d.name,
                     hasUnsavedChanges: false,
                     openedBy,
                 };
-            } else if (type === constants.vscode.tab.tabTypes.task) {
+            } else if (type === shellConstants.vscode.tab.tabTypes.task) {
                 const d = data as Task;
                 newTab = {
                     id: `task-${d.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.task,
+                    type: shellConstants.vscode.tab.tabTypes.task,
                     data: d,
                     data0: d,
                     title: d.title,
                     hasUnsavedChanges: false,
                     openedBy,
                 };
-            } else if (type === constants.vscode.tab.tabTypes.lifeLog) {
+            } else if (type === shellConstants.vscode.tab.tabTypes.lifeLog) {
                 const d = data as LifeLogLog;
                 newTab = {
                     id: `lifelog-${d.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.lifeLog,
+                    type: shellConstants.vscode.tab.tabTypes.lifeLog,
                     data: d,
                     data0: d,
                     title: d.title || `Log ${d.id}`,
                     hasUnsavedChanges: false,
                     openedBy,
                 };
-            } else if (type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+            } else if (type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
                 const d = data as LifeLogTrack;
                 newTab = {
                     id: `lifelogtrack-${d.id}-${Date.now()}`,
-                    type: constants.vscode.tab.tabTypes.lifeLogTrack,
+                    type: shellConstants.vscode.tab.tabTypes.lifeLogTrack,
                     data: d,
                     data0: d,
                     title: d.name,
@@ -331,7 +332,7 @@ export const useEditorTabHelper = () => {
                     type: type as TabType,
                     data: data,
                     data0: data,
-                    title: constants.vscode.tabTitles.unknownTab,
+                    title: shellConstants.vscode.tabTitles.unknownTab,
                     hasUnsavedChanges: false,
                     openedBy,
                 };
@@ -357,14 +358,14 @@ export const useEditorTabHelper = () => {
         // ===================================
         // 1. Type-specific cleanup logic
         // ===================================
-        if (tab.type === constants.vscode.tab.tabTypes.note) {
+        if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
             // Cleanup for Note tabs
             const noteData = tab.data as Note;
 
             // Remove temporary notes (negative ID) from grid
             if (noteData.id < 0) {
                 setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteData.id));
-                if (moduleName === constants.modules.workspace) {
+                if (moduleName === "Workspace") {
                     setCurrentWorkspace((prevWs) => {
                         if (!prevWs || !prevWs.flatData) return prevWs;
                         return {
@@ -373,7 +374,7 @@ export const useEditorTabHelper = () => {
                         };
                     });
                 }
-            } else if (moduleName === constants.modules.workspace) {
+            } else if (moduleName === "Workspace") {
                 // For existing notes (positive ID) in workspace module,
                 // remove the workspace item if closing without saving
                 // This handles the case where user clicks "Don't Save" on the confirmation
@@ -392,7 +393,7 @@ export const useEditorTabHelper = () => {
             }
 
             // Additional note-specific cleanup can go here...
-        } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+        } else if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {
             // Cleanup for Workspace tabs
             const wsData = tab.data as Ws;
 
@@ -403,12 +404,12 @@ export const useEditorTabHelper = () => {
             }
 
             // Additional workspace-specific cleanup can go here...
-        } else if (tab.type === constants.vscode.tab.tabTypes.lifeLog) {
+        } else if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLog) {
             const logData = tab.data as LifeLogLog;
             if (logData.id < 0) {
                 setLogs((prev) => prev.filter((l) => l.id !== logData.id));
             }
-        } else if (tab.type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+        } else if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
             const trackData = tab.data as LifeLogTrack;
             if (trackData.id < 0) {
                 setTracks((prev) => prev.filter((t) => t.id !== trackData.id));
@@ -452,14 +453,14 @@ export const useEditorTabHelper = () => {
         const workspaceItemIdsToRemove = new Set<number>();
 
         tabsToClose.forEach((tab) => {
-            if (tab.type === constants.vscode.tab.tabTypes.note) {
+            if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
                 const noteData = tab.data as Note;
 
                 // Temporary notes
                 if (noteData.id < 0) {
                     noteIdsToRemove.add(noteData.id);
 
-                    if (moduleName === constants.modules.workspace) {
+                    if (moduleName === "Workspace") {
                         currentWorkspace?.flatData?.forEach((item) => {
                             if (item.entityType === 3 && item.entityId === noteData.id) {
                                 workspaceItemIdsToRemove.add(item.id);
@@ -468,7 +469,7 @@ export const useEditorTabHelper = () => {
                     }
                 }
                 // Existing notes but new workspace items
-                else if (moduleName === constants.modules.workspace) {
+                else if (moduleName === "Workspace") {
                     const workspaceItem = currentWorkspace?.flatData?.find((item) => item.entityType === 3 && item.entityId === noteData.id);
 
                     if (workspaceItem && workspaceItem.id < 0) {
@@ -478,7 +479,7 @@ export const useEditorTabHelper = () => {
             }
 
             // Workspace tab cleanup (future)
-            // else if (tab.type === constants.vscode.tab.tabTypes.workspace) {}
+            // else if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {}
         });
 
         // ===================================
@@ -488,7 +489,7 @@ export const useEditorTabHelper = () => {
             setNotes((prev) => prev.filter((note) => !noteIdsToRemove.has(note.id)));
         }
 
-        if (moduleName === constants.modules.workspace && workspaceItemIdsToRemove.size > 0) {
+        if (moduleName === "Workspace" && workspaceItemIdsToRemove.size > 0) {
             setCurrentWorkspace((prevWs) => {
                 if (!prevWs || !prevWs.flatData) return prevWs;
 
@@ -517,11 +518,11 @@ export const useEditorTabHelper = () => {
     // CONVENIENCE METHODS - Specific tab type openers
     // ================================================================
     // const openNoteTab = (note: Note) => {
-    //     openTab(note, constants.vscode.tab.tabTypes.note);
+    //     openTab(note, shellConstants.vscode.tab.tabTypes.note);
     // };
 
     // const openWorkspaceTab = (ws: Ws) => {
-    //     openTab(ws, constants.vscode.tab.tabTypes.workspace);
+    //     openTab(ws, shellConstants.vscode.tab.tabTypes.workspace);
     // };
 
     /**
@@ -540,7 +541,7 @@ export const useEditorTabHelper = () => {
     const setNewTabAnd = (newActiveTabId: string | null) => {
         setActiveTabId(newActiveTabId);
         const newTab = openTabs.find((tab: BaseTab) => tab.id === newActiveTabId);
-        if (newTab && newTab.type === constants.vscode.tab.tabTypes.note) {
+        if (newTab && newTab.type === shellConstants.vscode.tab.tabTypes.note) {
             const noteId = (newTab.data as { id: number }).id;
             const item: WorkspaceItemV2 | undefined = currentWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === noteId);
             if (item && item.id) {
@@ -585,3 +586,7 @@ export const useEditorTabHelper = () => {
         setNewTabAnd,
     };
 };
+
+
+
+

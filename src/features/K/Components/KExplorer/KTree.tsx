@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from "react";
+﻿import React, { useEffect, useMemo } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
@@ -27,7 +28,7 @@ export function KTree() {
     useCalculateKTreeContainerHeight()
     useScrollToHighlightItem()
 
-    // Always hide question nodes and their descendants — only entity nodes in the tree
+    // Always hide question nodes and their descendants â€” only entity nodes in the tree
     const filteredK = useMemo(() => {
         if (!currentK) return currentK;
         const questionIds = new Set([]);
@@ -56,11 +57,11 @@ export function KTree() {
                 name: "",
                 data: {
                     // V2 structure - WorkspaceItemV2
-                    id: kconstants.workspace.dropZone.workspaceItemId, // workspace_items.id
+                    id: workspaceConstants.dropZone.workspaceItemId, // workspace_items.id
                     knowledgeId: currentK.id,
                     parentId: null,
                     entityType: 2 as const,
-                    entityId: kconstants.workspace.dropZone.entityId, // folders.id (entity ID)
+                    entityId: workspaceConstants.dropZone.entityId, // folders.id (entity ID)
                     createdAt: new Date().toISOString(),
                     updatedAt: undefined,
                     deletedAt: null,
@@ -70,7 +71,7 @@ export function KTree() {
                     isOriginal: true,
                     data: {
                         // FolderData - entity data
-                        id: kconstants.workspace.dropZone.entityId, // folders.id (entity ID)
+                        id: workspaceConstants.dropZone.entityId, // folders.id (entity ID)
                         userId: currentK.userId,
                         name: "",
                         description: undefined,
@@ -103,7 +104,7 @@ export function KTree() {
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = KtreeMiniHelper.getAllVisibleNodeIds(treeData)
-    // ── Mark helpers ────────────────────────────────────────────────────────────
+    // â”€â”€ Mark helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /** Collect the numeric IDs of a node and all its descendants */
     function collectSubtreeIds(node: KTreeNode, out: Set<number>) {
@@ -136,10 +137,10 @@ export function KTree() {
         setMarkedNodeId(saved ?? null);
     }, [currentK?.id]);
 
-    // When mark is set: close all → open path to node → expand full subtree → scroll
+    // When mark is set: close all â†’ open path to node â†’ expand full subtree â†’ scroll
     useEffect(() => {
         if (!markedNodeId || !_treeRef.current) return;
-        const nodeId = markedNodeId; // narrow to number — TypeScript loses narrowing inside async
+        const nodeId = markedNodeId; // narrow to number â€” TypeScript loses narrowing inside async
 
         const waitForRender = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -217,11 +218,11 @@ export function KTree() {
         };
     }, [allVisibleFolderIds]);
 
-    // Auto-expand workspace root on init — show direct children of root
+    // Auto-expand workspace root on init â€” show direct children of root
     useEffect(() => {
         if (!_treeRef.current || !currentK?.id || treeData.length === 0) return;
         const timer = setTimeout(async () => {
-            const rootId = kconstants.workspace.root.workspaceItemId;
+            const rootId = workspaceConstants.root.workspaceItemId;
             await KtreeMiniHelper.expandPathToItem(_treeRef, treeData, rootId);
         }, 100);
         return () => clearTimeout(timer);
@@ -302,9 +303,9 @@ export function KTree() {
                         const item = node.data.data;
 
                         // Check workspace root and drop zone by ENTITY ID (entityId)
-                        // Special IDs: kconstants.workspace.root.entityId = workspace root, kconstants.workspace.dropZone.entityId = drop zone
-                        // const isWorkspaceRoot = (item as any).entityId === kconstants.workspace.root.entityId;
-                        const isDropZone = (item as any).entityId === kconstants.workspace.dropZone.entityId;
+                        // Special IDs: workspaceConstants.root.entityId = workspace root, workspaceConstants.dropZone.entityId = drop zone
+                        // const isWorkspaceRoot = (item as any).entityId === workspaceConstants.root.entityId;
+                        const isDropZone = (item as any).entityId === workspaceConstants.dropZone.entityId;
 
                         // Render different node types based on item type
                         return (
@@ -362,3 +363,6 @@ export function KTree() {
         </>
     );
 }
+
+
+

@@ -1,9 +1,10 @@
-/**
+﻿/**
  * MovingTree - Tree component for MovingTab
  * Displays target workspace tree structure for drag & drop operations
  */
 
 import React, { useMemo } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { KNode } from "../KExplorer/KNode";
@@ -28,7 +29,7 @@ export function KMovingTree() {
                 id: `drop-zone-root-${targetWorkspace.id}`,
                 name: "",
                 data: {
-                    id: kconstants.workspace.dropZone.workspaceItemId,
+                    id: workspaceConstants.dropZone.workspaceItemId,
                     knowledgeId: targetWorkspace.id,
                     parentId: null,
                     name: "",
@@ -76,7 +77,7 @@ export function KMovingTree() {
                     const item = node.data.data;
 
                     // Drop zone node (invisible spacer at bottom)
-                    const isDropZone = item?.id === kconstants.workspace.dropZone.workspaceItemId;
+                    const isDropZone = item?.id === workspaceConstants.dropZone.workspaceItemId;
                     if (isDropZone) {
                         return (
                             <div
@@ -86,7 +87,7 @@ export function KMovingTree() {
                         );
                     }
 
-                    // All K items are nodes — render root differently from children
+                    // All K items are nodes â€” render root differently from children
                     // if (node.level === 0) {
                     //     return <KRootNode node={node} treeData={targetTreeData} style={style} dragHandle={dragHandle} treeType="targetTree" />;
                     // }
@@ -96,3 +97,6 @@ export function KMovingTree() {
         </div>
     );
 }
+
+
+

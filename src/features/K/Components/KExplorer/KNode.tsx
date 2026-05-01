@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/kTree/useKTreeHelper2";
@@ -14,7 +14,7 @@ import type { KWsResponse } from "../../types/K.types";
 import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
 import { useDrop } from "react-dnd";
 import { KTestService } from "../../service/kTest.service";
-import {useEditorTabBarStore} from "@/shell";
+import {shellConstants, useEditorTabBarStore} from "@/shell";
 import {KTreeNode} from "../../hooks/kTree/Ktree.miniHelper";
 import {useSideBarStore} from "@/shell";
 
@@ -72,7 +72,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     // Check if deleted (including inherited from parent)
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(nodeItem);
 
-    // Knowledge imageBase64 — used for workspace root node icon
+    // Knowledge imageBase64 â€” used for workspace root node icon
     const knowledgeImage = isWorkspaceRoot
         ? allK.find((k) => k.id === nodeItem.knowledgeId)?.imageBase64 ?? null
         : null;
@@ -82,7 +82,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const isDimmed = !!markedVisibleIds && !markedVisibleIds.has(nodeId);
     const isHovered = hoveredNodeId === nodeId;
 
-    // ── Native drag tracking for test-panel drop zone ─────────────────────────
+    // â”€â”€ Native drag tracking for test-panel drop zone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Use native addEventListener (not React synthetic or state) to avoid
     // conflicting with react-arborist's DnD system. Writes to a module-level
     // variable (kTestDrag) so NO React re-render happens during drag.
@@ -107,7 +107,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         };
     }, []);
 
-    // ── Drop zone for kanban test columns ────────────────────────────────────
+    // â”€â”€ Drop zone for kanban test columns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const [{ isTestOver }, testDropRef] = useDrop<KanbanTestToTreeItem, void, { isTestOver: boolean }>(() => ({
         accept: KANBAN_TEST_TO_TREE,
         canDrop: () => !isWorkspaceRoot,
@@ -133,7 +133,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         }
     };
 
-    // Expand/collapse subtree — 3-state cycle: expand(1 lvl) → expand all → collapse
+    // Expand/collapse subtree â€” 3-state cycle: expand(1 lvl) â†’ expand all â†’ collapse
     // 0 = collapsed, 1 = expanded 1 level, 2 = expanded all
     const [expandPhase, setExpandPhase] = useState<0 | 1 | 2>(0);
     const [isDraftHovered, setIsDraftHovered] = useState(false);
@@ -176,16 +176,16 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         const currentPhase = !node.isOpen ? 0 : expandPhase === 0 ? 1 : expandPhase;
 
         if (currentPhase === 0) {
-            // Collapsed → expand 1 level: open this node only
+            // Collapsed â†’ expand 1 level: open this node only
             _treeRef.current.get(subtree.id)?.open();
             (subtree.children ?? []).forEach(child => _treeRef.current?.get(child.id)?.close());
             setExpandPhase(1);
         } else if (currentPhase === 1) {
-            // Expanded 1 level → expand ALL descendants (level-by-level for virtualization)
+            // Expanded 1 level â†’ expand ALL descendants (level-by-level for virtualization)
             openSubtreeLevelByLevel(subtree);
             setExpandPhase(2);
         } else {
-            // Expanded all → collapse (close this node + all descendants)
+            // Expanded all â†’ collapse (close this node + all descendants)
             collectAllTreeIds(subtree).forEach(id => _treeRef.current?.get(id)?.close());
             setExpandPhase(0);
         }
@@ -272,16 +272,16 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 node.select();
             }
         } else {
-            // Regular click: Single selection + open node tab (no toggle — icon handles toggle)
+            // Regular click: Single selection + open node tab (no toggle â€” icon handles toggle)
             setSelectedItemIds([nodeId]);
             setLastSelectedItemId(nodeId);
             node.select();
             // 1. Find or create the single k-knowledge editor tab
             const kTab = openTabs.find(
-                (t) => t.type === constants.vscode.tab.tabTypes.kKnowledge
+                (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge
             );
             if (kTab) {
-                // Reuse — swap data if different knowledge
+                // Reuse â€” swap data if different knowledge
                 const tabKId = (kTab.data as KWsResponse).id;
                 if (tabKId !== currentK?.id && currentK) {
                     const ks = allK.find((k) => k.id === currentK.id);
@@ -297,12 +297,12 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 }
                 setActiveTabId(kTab.id);
             } else if (currentK) {
-                // No tab open yet — find the KWsResponse from allK and create one
+                // No tab open yet â€” find the KWsResponse from allK and create one
                 const ks = allK.find((k) => k.id === currentK.id);
                 if (ks) {
                     const newTab = {
                         id:                `k-knowledge-tab-${Date.now()}`,
-                        type:              constants.vscode.tab.tabTypes.kKnowledge,
+                        type:              shellConstants.vscode.tab.tabTypes.kKnowledge,
                         data:              ks,
                         data0:             ks,
                         title:             ks.name || "Knowledge",
@@ -436,7 +436,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         <KHighlightText
                             text={`${nodeName}`}
                             // text={`${nodeName} - ${nodeId} - ${entityId}`}
-                            highlight={treeType === "workspaceTree" ? searchQuery : ""} // Only highlight in workspaceTree, tạm thời chưa làm cho targetTree có search
+                            highlight={treeType === "workspaceTree" ? searchQuery : ""} // Only highlight in workspaceTree, táº¡m thá»i chÆ°a lÃ m cho targetTree cÃ³ search
                             className={`
                             text-sm truncate
                             ${hasChildren ? "font-semibold" : "font-normal"}
@@ -445,7 +445,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
                         `}
                         />
-                        {/* Draft badge — hover to see "Keep it", click to activate */}
+                        {/* Draft badge â€” hover to see "Keep it", click to activate */}
                         {nodeItem.statusCode === "draft" && treeType === "workspaceTree" && (
                             <button
                                 onMouseEnter={() => setIsDraftHovered(true)}
@@ -470,7 +470,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                     </div>
                 </div>
 
-                {/* Mark button — visible on hover or when this node is marked */}
+                {/* Mark button â€” visible on hover or when this node is marked */}
                 {!isWorkspaceRoot && treeType === "workspaceTree" && (isHovered || isMarked) && (
                     <button
                         onClick={handleToggleMark}
@@ -481,7 +481,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                     </button>
                 )}
 
-                {/* Expand/collapse subtree — 3-state, shown on hover for any node with children */}
+                {/* Expand/collapse subtree â€” 3-state, shown on hover for any node with children */}
                 {hasChildren && isHovered && (() => {
                     const phase = !node.isOpen ? 0 : expandPhase === 0 ? 1 : expandPhase;
                     const titles = ["Expand children", "Expand all descendants", "Collapse all"];
@@ -501,6 +501,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         </div>
     );
 }
+
 
 
 

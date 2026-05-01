@@ -1,5 +1,6 @@
-
+﻿
 import { constants } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogStore } from "../store/useLifeLog.store";
@@ -16,11 +17,11 @@ export function useLifeLogSaveActions(): SaveActions {
     const { setOpenTabs, setActiveTabId } = useEditorTabBarStore();
 
     const handles = (tabType: string) =>
-        tabType === constants.vscode.tab.tabTypes.lifeLog ||
-        tabType === constants.vscode.tab.tabTypes.lifeLogTrack;
+        tabType === shellConstants.vscode.tab.tabTypes.lifeLog ||
+        tabType === shellConstants.vscode.tab.tabTypes.lifeLogTrack;
 
     const onSave = async (tab: BaseTab) => {
-        if (tab.type === constants.vscode.tab.tabTypes.lifeLog) {
+        if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLog) {
             const log = tab.data as LifeLogLog;
             const isNew = log.id <= 0;
             const tempId = log.id;
@@ -51,7 +52,7 @@ export function useLifeLogSaveActions(): SaveActions {
                     );
                 }
             }
-        } else if (tab.type === constants.vscode.tab.tabTypes.lifeLogTrack) {
+        } else if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
             const track = tab.data as LifeLogTrack;
             const isNew = track.id <= 0;
             const tempId = track.id;
@@ -85,3 +86,5 @@ export function useLifeLogSaveActions(): SaveActions {
     
     return { handles, onSave };
 }
+
+

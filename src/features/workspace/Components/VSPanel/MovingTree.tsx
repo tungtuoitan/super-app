@@ -1,9 +1,10 @@
-/**
+﻿/**
  * MovingTree - Tree component for MovingTab
  * Displays target workspace tree structure for drag & drop operations
  */
 
 import React, { useEffect, useMemo } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
@@ -34,11 +35,11 @@ export function MovingTree() {
                 name: "",
                 data: {
                     // V2 structure - WorkspaceItemV2
-                    id: constants.workspace.dropZone.workspaceItemId, // workspace_items.id
+                    id: workspaceConstants.dropZone.workspaceItemId, // workspace_items.id
                     workspaceId: targetWorkspace.id,
                     parentId: null,
                     entityType: 2 as const,
-                    entityId: constants.workspace.dropZone.entityId, // folders.id (entity ID)
+                    entityId: workspaceConstants.dropZone.entityId, // folders.id (entity ID)
                     createdAt: new Date().toISOString(),
                     updatedAt: undefined,
                     deletedAt: null,
@@ -48,7 +49,7 @@ export function MovingTree() {
                     isOriginal: true,
                     data: {
                         // FolderData - entity data
-                        id: constants.workspace.dropZone.entityId, // folders.id (entity ID)
+                        id: workspaceConstants.dropZone.entityId, // folders.id (entity ID)
                         userId: targetWorkspace.userId,
                         name: "",
                         description: undefined,
@@ -103,7 +104,7 @@ export function MovingTree() {
                     const isDuplicate = item && highlightedDuplicateIds.has(item.entityId);
 
                     // Check if this is the drop zone
-                    const isDropZone = item?.entityId === constants.workspace.dropZone.entityId;
+                    const isDropZone = item?.entityId === workspaceConstants.dropZone.entityId;
 
                     // Render drop zone differently
                     if (isDropZone) {
@@ -158,7 +159,7 @@ export function MovingTree() {
                     // Highlight duplicates with yellow background (temporarily for 10s)
                     // if (isDuplicate) {
                     //     return (
-                    //         <div className="relative" title="⚠️ Item already exists in target workspace">
+                    //         <div className="relative" title="âš ï¸ Item already exists in target workspace">
                     //             <div className="absolute inset-0 bg-yellow-100 dark:bg-yellow-900/30 opacity-50 pointer-events-none rounded" />
                     //             {nodeContent}
                     //         </div>
@@ -171,3 +172,4 @@ export function MovingTree() {
         </div>
     );
 }
+

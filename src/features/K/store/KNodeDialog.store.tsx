@@ -1,4 +1,5 @@
-import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+﻿import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { kconstants } from "../utils/K.Constants";
 import {ICON_COLORS, IconKey} from "@/shared";
 
@@ -10,7 +11,7 @@ export interface NodeDialogFormErrors {
 }
 
 export type DialogMode = "create" | "edit";
-export type NodeItemType = typeof kconstants.workspace.itemTypes.node;
+export type NodeItemType = typeof workspaceConstants.itemTypes.node;
 export type KNodeType = "entity" | "question";
 
 export interface NodeDialogContextData {
@@ -49,7 +50,7 @@ export interface NodeDialogContextData {
     setIsLoadingTree: Dispatch<SetStateAction<boolean>>;
 }
 
-// @deprecated aliases — remove after all consumers updated
+// @deprecated aliases â€” remove after all consumers updated
 export interface FolderDialogFormErrors extends NodeDialogFormErrors {}
 export interface FolderDialogContextData extends NodeDialogContextData {}
 
@@ -58,7 +59,7 @@ const nodeDialogContextDefaultValue: NodeDialogContextData = {
     setIsNodeDialogOpen: () => {},
     mode: "create",
     setMode: () => {},
-    itemType: kconstants.workspace.itemTypes.node,
+    itemType: workspaceConstants.itemTypes.node,
     setItemType: () => {},
     editingNode: null,
     setEditingNode: () => {},
@@ -105,7 +106,7 @@ export const KuseFolderDialogStore = useNodeDialogStore;
 export const KNodeDialogProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [isNodeDialogOpen, setIsNodeDialogOpen] = useState<boolean>(false);
     const [mode, setMode] = useState<DialogMode>("create");
-    const [itemType, setItemType] = useState<NodeItemType>(kconstants.workspace.itemTypes.node);
+    const [itemType, setItemType] = useState<NodeItemType>(workspaceConstants.itemTypes.node);
     const [editingNode, setEditingNode] = useState<any | null>(null);
     const [parentNode, setParentNode] = useState<any | null>(null);
 
@@ -159,3 +160,6 @@ export const KNodeDialogProvider: React.FC<React.PropsWithChildren<unknown>> = (
 
 // @deprecated alias
 export const KFolderDialogProvider = KNodeDialogProvider;
+
+
+

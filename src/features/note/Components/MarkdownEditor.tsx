@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MarkdownEditor Component
  * Monaco-based editor with keyword highlighting and autocomplete
  */
@@ -11,7 +11,9 @@ import { useKeywordNavigationHelper } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
 import { useTreeStatusHelper } from "@/features/workspace";
-import { constants, useKeywordSelector } from "@/shared";
+import { useKeywordSelector } from "@/shared";
+import { shellConstants } from "@/shell";
+import { richTextEditorConstants } from "@/shared";
 import { Loader2 } from "lucide-react";
 import {
     convertToDisplayVersion,
@@ -43,7 +45,7 @@ export function MarkdownEditor() {
 
     // Get active tab and note
     const activeTab = getActiveTab();
-    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
     const currentNoteId = activeNote?.id;
 
     // Check if note is disabled (deleted or has deleted ancestor)
@@ -55,11 +57,11 @@ export function MarkdownEditor() {
     // Handle internal changes: Convert to original version before saving
     const handleDisplayChange = (newDisplayDesc: string | undefined) => {
         if (newDisplayDesc === undefined) {
-            console.warn("⚠️ [EDITOR] New content is undefined, skipping");
+            console.warn("âš ï¸ [EDITOR] New content is undefined, skipping");
             return;
         }
 
-        // CRITICAL: Update displayDesc state IMMEDIATELY để đảm bảo UI sync
+        // CRITICAL: Update displayDesc state IMMEDIATELY Ä‘á»ƒ Ä‘áº£m báº£o UI sync
         setDisplayDesc(newDisplayDesc);
 
         // Convert [name][nameIndewx] -> [[id]] before saving
@@ -69,7 +71,7 @@ export function MarkdownEditor() {
         handleNoteFieldChange("description", originalValue ?? activeNote?.description ?? "");
 
         // CRITICAL: Update decorations IMMEDIATELY sau khi text change
-        // Đảm bảo editor instance tồn tại trước khi update
+        // Äáº£m báº£o editor instance tá»“n táº¡i trÆ°á»›c khi update
         // if (editorRef.current && !((editorRef.current as any)._isDisposed)) {
         //     updateDecorations(editorRef.current, newDisplayDesc, _allKeywords, decorationsRef);
         // }
@@ -112,7 +114,7 @@ export function MarkdownEditor() {
         ];
 
         // Setup Ctrl key tracking for hover effect
-        // Khi Ctrl được giữ → thêm class 'ctrl-pressed' vào editor để CSS apply hover effect
+        // Khi Ctrl Ä‘Æ°á»£c giá»¯ â†’ thÃªm class 'ctrl-pressed' vÃ o editor Ä‘á»ƒ CSS apply hover effect
         const editorDomNode = editor.getDomNode();
         if (editorDomNode) {
             const handleKeyDown = (e: KeyboardEvent) => {
@@ -127,7 +129,7 @@ export function MarkdownEditor() {
                 }
             };
 
-            // Xử lý trường hợp blur (editor mất focus khi đang giữ Ctrl)
+            // Xá»­ lÃ½ trÆ°á»ng há»£p blur (editor máº¥t focus khi Ä‘ang giá»¯ Ctrl)
             const handleBlur = () => {
                 editorDomNode.classList.remove("ctrl-pressed");
             };
@@ -136,7 +138,7 @@ export function MarkdownEditor() {
             window.addEventListener("keyup", handleKeyUp);
             window.addEventListener("blur", handleBlur);
 
-            // Cleanup function sẽ được gọi khi component unmount
+            // Cleanup function sáº½ Ä‘Æ°á»£c gá»i khi component unmount
             disposablesRef.current.push({
                 dispose: () => {
                     window.removeEventListener("keydown", handleKeyDown);
@@ -153,8 +155,8 @@ export function MarkdownEditor() {
     };
 
     // Re-setup providers when keywords change (fix stale closures)
-    // * ta phải re-setup vì closure:
-    // * tức các providers đã được tạo lúc đầu sẽ "nhớ" giá trị keywords cũ,..., không cập nhật khi keywords thay đổi
+    // * ta pháº£i re-setup vÃ¬ closure:
+    // * tá»©c cÃ¡c providers Ä‘Ã£ Ä‘Æ°á»£c táº¡o lÃºc Ä‘áº§u sáº½ "nhá»›" giÃ¡ trá»‹ keywords cÅ©,..., khÃ´ng cáº­p nháº­t khi keywords thay Ä‘á»•i
     useEffect(() => {
         const editor = editorRef.current;
 
@@ -229,17 +231,17 @@ export function MarkdownEditor() {
 
     return (
         <div className="relative w-full h-[calc(100%-118px)]">
-            {/* //* phải mounted thì mới có editor để gắn listener */}
+            {/* //* pháº£i mounted thÃ¬ má»›i cÃ³ editor Ä‘á»ƒ gáº¯n listener */}
 
 
             <Editor
                 height={"100%"}
                 defaultLanguage="markdown"
-                theme={constants.markdown.theme.name}
+                theme={richTextEditorConstants.markdown.theme.name}
                 value={displayDesc ?? ""}
                 onChange={handleDisplayChange}
                 onMount={handleEditorDidMount}
-                options={constants.markdown.editor.options(disabled, displayDesc ?? "")}
+                options={richTextEditorConstants.markdown.editor.options(disabled, displayDesc ?? "")}
             />
 
             {/* Loading Overlay */}
@@ -251,3 +253,4 @@ export function MarkdownEditor() {
         </div>
     );
 }
+

@@ -1,4 +1,5 @@
-import { useKStore } from "../store/K.store";
+﻿import { useKStore } from "../store/K.store";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { KService } from "../service/K.service";
 import { KItemAction } from "../types/K.types";
 import { isFolder } from "../types/K-v2.types";
@@ -131,7 +132,7 @@ export const useKNodeDialogHelper = () => {
 
                 await KService._upsertWorkspaceItems(token, selectedKId, [{
                     action: KItemAction.Create,
-                    parentId: parentWorkspaceItemId, // ✅ Use parent's workspace_items.id (NOT entityId!)
+                    parentId: parentWorkspaceItemId, // âœ… Use parent's workspace_items.id (NOT entityId!)
                     nodeData: {
                         name: newNodeName.trim(),
                         description: description.trim() || undefined,
@@ -203,7 +204,7 @@ export const useKNodeDialogHelper = () => {
      * @param folder - For edit mode: folder to edit (required). For create mode: unused
      * @param parentNode - For create mode: parent folder (optional). For edit mode: unused
      */
-    const openNodeDialog = (dialogMode: "create" | "edit", type: NodeItemType = kconstants.workspace.itemTypes.folder, folder?: Folder | null, parentNode?: Folder | null) => {
+    const openNodeDialog = (dialogMode: "create" | "edit", type: NodeItemType = workspaceConstants.itemTypes.folder, folder?: Folder | null, parentNode?: Folder | null) => {
         setMode(dialogMode);
         setItemType(type);
 
@@ -256,7 +257,7 @@ export const useKNodeDialogHelper = () => {
     };
 
     /**
-     * Activate a draft node — sets statusCode to null (active)
+     * Activate a draft node â€” sets statusCode to null (active)
      */
     const activateDraftNode = async (nodeItem: KItemV2) => {
         if (!selectedKId) return;
@@ -291,5 +292,8 @@ export const useKNodeDialogHelper = () => {
         activateDraftNode,
     };
 };
+
+
+
 
 

@@ -1,13 +1,14 @@
-/**
+﻿/**
  * Task Detail Selector
  * Derived / computed values from global store state.
- * No functions, no side effects — only useMemo & direct derivations.
+ * No functions, no side effects â€” only useMemo & direct derivations.
  *
  * Provides: tab resolution, project context, disabled flags, dropdown options,
  *           current selected values, date limit bounds.
  */
 
 import { Task } from "../types/task.types";
+import { projectConstants } from "@/features/project/project.constants";
 import { constants, useStandardRegistrySelector } from "@/shared";
 import { IStatusOption } from "@/shared";
 import { usePTaskStore } from "@/features/project";
@@ -20,18 +21,18 @@ export const useTaskDetailSelector = () => {
     const { tasks } = usePTaskStore();
     const { registriesByType } = useStandardRegistrySelector();
 
-    // ── Tab & task ────────────────────────────────────────────────────────────
+    // â”€â”€ Tab & task â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const taskTab = openTabs.find((tab) => tab.id === activeTabId);
 
     const selectedTask = taskTab ? (taskTab.data as Task) : undefined;
 
-    // ── Project ───────────────────────────────────────────────────────────────
+    // â”€â”€ Project â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const currentProject = selectedTask?.projectId
             ? (allProjects.find((p) => p.id === selectedTask.projectId) ?? null)
             : null
-    // ── Disabled flags ────────────────────────────────────────────────────────
+    // â”€â”€ Disabled flags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const isDeleted = selectedTask?.deletedAt != null;
 
@@ -46,11 +47,11 @@ export const useTaskDetailSelector = () => {
 
     const isDisabled = isDeleted || isCompleted || isProjectInactive;
 
-    // ── Subtask check ─────────────────────────────────────────────────────────
+    // â”€â”€ Subtask check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const hasSubtasks = selectedTask ? tasks.some((t) => t.parentTaskId === selectedTask.id) : false
 
-    // ── Dropdown options ──────────────────────────────────────────────────────
+    // â”€â”€ Dropdown options â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const taskTypeOptions: IStatusOption[] = (registriesByType["taskType"] ?? []).map((reg:any) => ({
                 id: reg.code,
@@ -60,7 +61,7 @@ export const useTaskDetailSelector = () => {
                 textColor: "",
             }))
 
-    const colors = (code: string) => constants.optionColor.taskStatus.colors[code] ?? constants.optionColor.taskStatus.default;
+    const colors = (code: string) => projectConstants.optionColor.taskStatus.colors[code] ?? projectConstants.optionColor.taskStatus.default;
     const statusOptions: IStatusOption[] = (() => {
         return (registriesByType["task_status"] ?? [])
             .map((reg:any) => ({
@@ -72,8 +73,8 @@ export const useTaskDetailSelector = () => {
             }))
             .sort(
                 (a:any, b:any) =>
-                    (constants.optionOrder.taskStatuses[a.label] ?? 999) -
-                    (constants.optionOrder.taskStatuses[b.label] ?? 999),
+                    (projectConstants.optionOrder.taskStatuses[a.label] ?? 999) -
+                    (projectConstants.optionOrder.taskStatuses[b.label] ?? 999),
             );
     })()
 
@@ -88,12 +89,12 @@ export const useTaskDetailSelector = () => {
             }))
             .sort(
                 (a:any, b:any) =>
-                    (constants.optionOrder.taskPriorities[a.label] ?? 999) -
-                    (constants.optionOrder.taskPriorities[b.label] ?? 999),
+                    (projectConstants.optionOrder.taskPriorities[a.label] ?? 999) -
+                    (projectConstants.optionOrder.taskPriorities[b.label] ?? 999),
             );
     })()
 
-    // ── Current selected option values ────────────────────────────────────────
+    // â”€â”€ Current selected option values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const currentStatusValue: IStatusOption | null =
         statusOptions.find((o:any) => o.code === selectedTask?.status) ?? null;
@@ -104,7 +105,7 @@ export const useTaskDetailSelector = () => {
     const currentTaskTypeValue: IStatusOption | null =
         taskTypeOptions.find((o:any) => o.code === selectedTask?.taskType) ?? null;
 
-    // ── Date limit bounds (for DateRangePicker warnings) ──────────────────────
+    // â”€â”€ Date limit bounds (for DateRangePicker warnings) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const limitDates = (() => {
         if (selectedTask?.parentTaskId) {
@@ -119,7 +120,7 @@ export const useTaskDetailSelector = () => {
         };
     })()
 
-    // ── Return ────────────────────────────────────────────────────────────────
+    // â”€â”€ Return â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     return {
         // tab resolution
@@ -145,3 +146,7 @@ export const useTaskDetailSelector = () => {
         limitDates,
     };
 };
+
+
+
+

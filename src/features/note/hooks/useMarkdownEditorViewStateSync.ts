@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Markdown Editor ViewState Sync
  * Syncs Monaco editor scroll + cursor position with tab ViewState
  * - Saves editor position when switching away from tab
@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import { shellConstants } from "@/shell/shell.constants";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
@@ -86,7 +87,7 @@ export function useMarkdownEditorViewStateSync() {
         }
 
         // Only restore for note tabs
-        if (activeTab.type !== constants.vscode.tab.tabTypes.note) {
+        if (activeTab.type !== shellConstants.vscode.tab.tabTypes.note) {
             return;
         }
 
@@ -132,8 +133,8 @@ export function useMarkdownEditorViewStateSync() {
     }, [activeTabId]);
 
     // Restore when editor is freshly mounted from a non-note tab (editorMountCount changes).
-    // For note→note switches, MarkdownEditorSync restores scroll directly after setValue.
-    // At this point editorRef.current is the new instance but layout hasn't run yet → need one rAF
+    // For noteâ†’note switches, MarkdownEditorSync restores scroll directly after setValue.
+    // At this point editorRef.current is the new instance but layout hasn't run yet â†’ need one rAF
     useEffect(() => {
         if (editorMountCount === 0) return; // skip initial render
 
@@ -141,7 +142,7 @@ export function useMarkdownEditorViewStateSync() {
         const activeTab = getActiveTab();
 
         if (!editor || (editor as any)._isDisposed || !activeTab) return;
-        if (activeTab.type !== constants.vscode.tab.tabTypes.note) return;
+        if (activeTab.type !== shellConstants.vscode.tab.tabTypes.note) return;
 
         const scrollToRestore = activeTab.viewState?.editorScrollPosition;
         // console.log("editor mounted, restoring scroll:", activeTab.title,scrollToRestore);
@@ -209,3 +210,5 @@ export function useMarkdownEditorViewStateSync() {
 
     return null;
 }
+
+

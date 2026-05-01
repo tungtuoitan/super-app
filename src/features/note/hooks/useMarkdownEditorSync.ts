@@ -1,9 +1,10 @@
-/**
+﻿/**
  * MarkdownEditor Component
  * Monaco-based editor with keyword highlighting and autocomplete
  */
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { shellConstants } from "@/shell/shell.constants";
 import { useEditorTabHelper } from "@/shell";
 import { constants, useKeywordSelector } from "@/shared";
 import { convertToDisplayVersion, updateDecorations } from "@/features/note/utils/markdown.utils";
@@ -17,7 +18,7 @@ export function useMarkdownEditorSync({$mi}: { $mi: any }) {
 
     // Get active tab and note
     const activeTab = getActiveTab();
-    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
 
     // Track previous note ID to detect tab switches
     const prevNoteIdRef = useRef<number | null>(null);
@@ -68,7 +69,7 @@ export function useMarkdownEditorSync({$mi}: { $mi: any }) {
         }
 
         // Check if this is a tab switch (different note ID)
-        // prevNoteIdRef.current === null means first mount (coming from non-note tab) — treat as tab switch
+        // prevNoteIdRef.current === null means first mount (coming from non-note tab) â€” treat as tab switch
         const isTabSwitch = prevNoteIdRef.current !== activeNote?.id;
         prevNoteIdRef.current = activeNote?.id ?? null;
 
@@ -113,3 +114,5 @@ export function useMarkdownEditorSync({$mi}: { $mi: any }) {
 
     return null;
 }
+
+

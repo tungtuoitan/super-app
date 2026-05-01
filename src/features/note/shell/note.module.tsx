@@ -1,4 +1,5 @@
-import { FileText } from "lucide-react";
+﻿import { FileText } from "lucide-react";
+import { shellConstants } from "@/shell/shell.constants";
 import { NoteGrid } from "../Components/NoteGrid";
 import { NoteEditorPanel } from "../Components/NoteEditorPanel";
 import { constants, menuContextRegistry } from "@/shared";
@@ -19,14 +20,14 @@ function getNoteTabIcon(tab: BaseTab) {
 }
 
 export const noteModule: ModuleDefinition = {
-    id: constants.modules.note,
+    id: "Note",
     icon: FileText,
-    label: constants.vscode.displayNames.notes,
+    label: "Notes",
 
     SidebarView: NoteGrid,
 
     editorPanels: {
-        [constants.vscode.tab.tabTypes.note]: NoteEditorPanel,
+        [shellConstants.vscode.tab.tabTypes.note]: NoteEditorPanel,
     },
 
     getTabMeta: (tab) => ({
@@ -43,3 +44,8 @@ export const noteModule: ModuleDefinition = {
     //     },
     // ],
 };
+
+
+
+
+

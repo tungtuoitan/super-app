@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Auth Helper Hook
  * Business logic for authentication operations
  * Pattern: Separate business logic from store (similar to useTagUIHelper)
@@ -20,6 +20,7 @@ import { debugLog } from "../debug/useDebugLog";
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { acquireRefreshToken } from "../fetch/apiClient";
 import {STORAGE_KEYS} from "../localStorage/storage.config";
+import {projectConstants} from "@/features/project";
 
 const DEFAULT_USER: User = {
     userId: null,
@@ -187,7 +188,7 @@ export function useAuthHelper() {
                 throw new Error("Email hoanhtungle2@gmail.com is not allowed in the production environment");
             }
 
-            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : constants.filters.defaults;
+            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : projectConstants.filters.defaults;
             const userProfile: User = {
                 userId: response.user.id,
                 userName: response.user.email || "",
@@ -303,3 +304,5 @@ export function useAuthHelper() {
         initAuthFromStorageToken,
     };
 }
+
+

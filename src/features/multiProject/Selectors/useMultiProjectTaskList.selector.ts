@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Multi-Project Task List Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
- * Gets projectIds from useMultiTimelineStore — NO params.
+ * Gets projectIds from useMultiTimelineStore â€” NO params.
  */
 
 import { useMemo } from "react";
+import { projectConstants } from "@/features/project/project.constants";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useProjectStore } from "@/features/project";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
@@ -42,7 +43,7 @@ export const useMultiProjectTaskListSelector = () => {
                     textColor: colors.text,
                 };
             })
-            .sort((a:any, b:any) => (constants.optionOrder.taskStatuses[a.label] ?? 999) - (constants.optionOrder.taskStatuses[b.label] ?? 999));
+            .sort((a:any, b:any) => (projectConstants.optionOrder.taskStatuses[a.label] ?? 999) - (projectConstants.optionOrder.taskStatuses[b.label] ?? 999));
     }, [taskStatuses]);
 
     const taskPriorities = useGetStandardRegistry("task_priority") || [];
@@ -59,7 +60,7 @@ export const useMultiProjectTaskListSelector = () => {
                     textColor: colors.text,
                 };
             })
-            .sort((a:any, b:any) => (constants.optionOrder.taskPriorities[a.label] ?? 999) - (constants.optionOrder.taskPriorities[b.label] ?? 999));
+            .sort((a:any, b:any) => (projectConstants.optionOrder.taskPriorities[a.label] ?? 999) - (projectConstants.optionOrder.taskPriorities[b.label] ?? 999));
     }, [taskPriorities]);
 
     // Filter tasks by projectIds and search query
@@ -89,3 +90,5 @@ export const useMultiProjectTaskListSelector = () => {
         sortedTasks,
     };
 };
+
+

@@ -1,9 +1,10 @@
-/**
+﻿/**
  * Project Detail Helper
  * Business logic for project detail operations
  */
 
 import { projectService, ProjectDTO } from "../service/project.service";
+import { shellConstants } from "@/shell/shell.constants";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
@@ -236,7 +237,7 @@ export const useProjectDetailHelper = () => {
         if (!selectedProject?.workspaceId) return;
         await saveNewsBeforeNavigate();
         setSelectedWorkspaceId(selectedProject.workspaceId);
-        setModuleName(constants.modules.workspace);
+        setModuleName("Workspace");
     };
 
     // Field-specific change handlers for ProjectGeneral form
@@ -282,3 +283,6 @@ export const useProjectDetailHelper = () => {
         handleImageChange,
     };
 };
+
+
+

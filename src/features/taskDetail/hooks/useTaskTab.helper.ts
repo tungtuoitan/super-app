@@ -1,9 +1,10 @@
-/**
+﻿/**
  * Task Tab Helper
  * Helper functions for managing task editor tabs
  */
 
 import { Task } from "../types/task.types";
+import { shellConstants } from "@/shell/shell.constants";
 import { BaseTab } from "@/shell";
 import { constants } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
@@ -30,7 +31,7 @@ export const useTaskTabHelper = () => {
     const openTaskTab = (task: Task, openedBy?: { link: string; label: string }) => {
         // Check if tab already exists for this task
         const existingTab = openTabs.find(
-            (tab) => tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === task.id
+            (tab) => tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === task.id
         );
 
         if (existingTab) {
@@ -48,10 +49,10 @@ export const useTaskTabHelper = () => {
 
             const newTab: BaseTab = {
                 id: `task-tab-${task.id}-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.task,
+                type: shellConstants.vscode.tab.tabTypes.task,
                 data: task,
                 data0: task,
-                title: task.title || constants.vscode.tabTitles.unsavedTask,
+                title: task.title || shellConstants.vscode.tabTitles.unsavedTask,
                 hasUnsavedChanges: false,
                 openedBy: resolvedOpenedBy,
             };
@@ -91,7 +92,7 @@ export const useTaskTabHelper = () => {
     const updateTaskInTabs = (taskId: number, updatedTask: Partial<Task>) => {
         setOpenTabs((prev) =>
             prev.map((tab) => {
-                if (tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === taskId) {
+                if (tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === taskId) {
                     const taskData = tab.data as Task;
                     return {
                         ...tab,
@@ -110,3 +111,5 @@ export const useTaskTabHelper = () => {
         updateTaskInTabs,
     };
 };
+
+

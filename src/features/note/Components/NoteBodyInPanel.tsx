@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Note Detail Tab Component
  */
 
 import React, { useEffect } from "react";
-import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker, useGetStandardRegistry } from "@/shared";
+import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker, standardRegistryConstants, useGetStandardRegistry } from "@/shared";
 import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
@@ -11,12 +11,12 @@ import { useNoteDetailHelper } from "../hooks/useNoteDetail.helper";
 import { formatNoteDate } from "../utils/note.utils";
 import { useEditorTabHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
-import { constants } from "@/shared";
 import { useTreeStatusHelper } from "@/features/workspace";
 import { useMonaco } from "@monaco-editor/react";
 import {useEditorTabBarStore} from "@/shell";
 import { IconKey } from "@/shared";
 import {useStandardRegistrySelector} from "@/shared";
+import {shellConstants} from "@/shell";
 
 export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -27,11 +27,11 @@ export function NoteBodyInPanel() {
     const { getItemStatus } = useTreeStatusHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
-    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
 
-    const noteStatus = useGetStandardRegistry(constants.standardRegistryFE.types.noteStatus);
+    const noteStatus = useGetStandardRegistry(standardRegistryConstants.types.noteStatus);
     const { registriesLoading } = useStandardRegistrySelector();
 
     let isDeleted = activeNote?.deletedAt !== null;
@@ -135,3 +135,4 @@ export function NoteBodyInPanel() {
         </div>
     );
 }
+

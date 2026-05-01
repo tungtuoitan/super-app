@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Temporary ID Generator for Unsaved Items
  *
  * Generates sequential negative IDs for new unsaved items (workspaces, notes, folders, etc.)
@@ -7,6 +7,7 @@
  */
 
 import {KItemV2} from "../types/K-v2.types";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {kconstants} from "./K.Constants";
 
 
@@ -57,10 +58,10 @@ export const generateUnsavedName = (tempId: number, prefix: string = "Unsaved"):
 };
 
 export const SPECIAL_IDS = [
-    kconstants.workspace.root.workspaceItemId,
-    kconstants.workspace.root.entityId,
-    kconstants.workspace.dropZone.workspaceItemId,
-    kconstants.workspace.dropZone.entityId,
+    workspaceConstants.root.workspaceItemId,
+    workspaceConstants.root.entityId,
+    workspaceConstants.dropZone.workspaceItemId,
+    workspaceConstants.dropZone.entityId,
 ] as number[];
 
 /**
@@ -105,7 +106,7 @@ export const collectIdsFromTree = (flatData: KItemV2[]): {
         // Collect workspace_items.id (always present)
         workspaceItemIds.push(item.id);
 
-        // All K items are nodes — push id to folderEntityIds for backward compat
+        // All K items are nodes â€” push id to folderEntityIds for backward compat
         folderEntityIds.push(item.id);
     });
 
@@ -116,3 +117,6 @@ export const collectIdsFromTree = (flatData: KItemV2[]): {
         folderEntityIds,
     };
 };
+
+
+

@@ -1,19 +1,20 @@
-/**
- * Module Registry — VSCode Shell Extension Points
+﻿/**
+ * Module Registry â€” VSCode Shell Extension Points
  *
  * Shell (ActivityBar, VSSideBar, VSEditorArea, VSPanel, TabBar) does NOT import features directly.
  * Instead, each feature registers a ModuleDefinition here.
  * Shell reads from this registry at render time.
  *
  * Dependency direction:
- *   features/xxx/shell/xxx.module.tsx  →  moduleRegistry  ←  shell components
+ *   features/xxx/shell/xxx.module.tsx  â†’  moduleRegistry  â†  shell components
  */
 
 import type { ComponentType, ReactNode } from "react";
+import { shellConstants } from "@/shell/shell.constants";
 import type { LucideIcon } from "lucide-react";
 import type { BaseTab } from "@/shell";
 
-// ─── Contract ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Contract â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface PanelTabDefinition {
     id: string;
@@ -32,10 +33,10 @@ export interface TabMeta {
 }
 
 export interface ModuleDefinition {
-    /** Unique module ID — must match constants.modules.* value */
+    /** Unique module ID â€” must match shellConstants.modules.* value */
     id: string;
 
-    // ── ActivityBar ──────────────────────────────────────────────────────────
+    // â”€â”€ ActivityBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     icon: LucideIcon;
     label: string;
     /**
@@ -44,12 +45,12 @@ export interface ModuleDefinition {
      */
     useBadge?: () => number;
 
-    // ── VSSideBar ────────────────────────────────────────────────────────────
+    // â”€â”€ VSSideBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     /** Component rendered inside the sidebar when this module is active */
     SidebarView: ComponentType;
 
-    // ── VSEditorArea ─────────────────────────────────────────────────────────
-    /** Map of tab.type → EditorPanel component */
+    // â”€â”€ VSEditorArea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    /** Map of tab.type â†’ EditorPanel component */
     editorPanels: Partial<Record<string, ComponentType<{ tab: BaseTab }>>>;
 
     /**
@@ -58,11 +59,11 @@ export interface ModuleDefinition {
      */
     keepAliveTabTypes?: string[];
 
-    // ── VSPanel ──────────────────────────────────────────────────────────────
+    // â”€â”€ VSPanel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     /** Bottom-panel tabs contributed by this module */
     panelTabs?: PanelTabDefinition[];
 
-    // ── TabBar ───────────────────────────────────────────────────────────────
+    // â”€â”€ TabBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     /**
      * Returns the visual metadata (icon + color) for a tab button.
      * Called for every tab whose type belongs to this module's editorPanels.
@@ -73,20 +74,20 @@ export interface ModuleDefinition {
     /**
      * If this tab acts as a group header (e.g. a Task tab groups its child note/ws tabs),
      * return a unique group key string. Return null/undefined otherwise.
-     * Child membership is already encoded in tab.openedBy.link — TabBar matches them automatically.
+     * Child membership is already encoded in tab.openedBy.link â€” TabBar matches them automatically.
      */
     getTabGroupKey?: (tab: BaseTab) => string | null;
 
-    // ── EditorToolbar ────────────────────────────────────────────────────────
+    // â”€â”€ EditorToolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     /**
      * Derive a back button for a tab that doesn't have tab.openedBy set.
-     * Pure function — receives tab + context (e.g. projects array).
+     * Pure function â€” receives tab + context (e.g. projects array).
      * Return null if this module doesn't provide a back button.
      */
     getBackButton?: (tab: BaseTab, context: { projects: any[] }) => { link: string; label: string } | null;
 }
 
-// ─── Registry ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const _registry: ModuleDefinition[] = [];
 
@@ -157,3 +158,5 @@ export const moduleRegistry = {
         return null;
     },
 };
+
+

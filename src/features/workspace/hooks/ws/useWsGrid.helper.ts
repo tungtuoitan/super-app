@@ -1,8 +1,8 @@
-import { wsService, WsDTO } from "@/features/workspace/service/ws.service";
+﻿import { wsService, WsDTO } from "@/features/workspace/service/ws.service";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
-import { useEditorTabHelper } from "@/shell";
+import { shellConstants, useEditorTabHelper } from "@/shell";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { constants } from "@/shared";
+import { constants, standardRegistryConstants } from "@/shared";
 import { BaseTab } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
@@ -51,7 +51,7 @@ export const useWsGridHelper = () => {
             id: tempId,
             name: name,
             description: "",
-            statusCode: constants.standardRegistryFE.activeStatus.active, // Default to active status
+            statusCode: standardRegistryConstants.activeStatus.active, // Default to active status
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
@@ -62,9 +62,9 @@ export const useWsGridHelper = () => {
         setWorkspaces([newWorkspace, ...workspaces]);
 
         // Open workspace tab for editing
-        openTab(newWorkspace, constants.vscode.tab.tabTypes.workspace);
+        openTab(newWorkspace, shellConstants.vscode.tab.tabTypes.workspace);
 
-        // Focus vào Workspace Name field sau khi tab mở
+        // Focus vÃ o Workspace Name field sau khi tab má»Ÿ
         setShouldFocusWsName(true);
     };
 
@@ -124,7 +124,7 @@ export const useWsGridHelper = () => {
 
                 // Update opened tabs
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === constants.vscode.tab.tabTypes.workspace && persistedWsIds.includes((tab.data as Ws).id)) {
+                    if (tab.type === shellConstants.vscode.tab.tabTypes.workspace && persistedWsIds.includes((tab.data as Ws).id)) {
                         const wsData = tab.data as Ws;
                         return {
                             ...tab,
@@ -183,7 +183,7 @@ export const useWsGridHelper = () => {
 
                 // Mark opened tabs as hard deleted
                 const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === constants.vscode.tab.tabTypes.workspace && persistedWsIds.includes((tab.data as Ws).id)) {
+                    if (tab.type === shellConstants.vscode.tab.tabTypes.workspace && persistedWsIds.includes((tab.data as Ws).id)) {
                         const wsData = tab.data as Ws;
                         return { ...tab, data: { ...wsData, deletedAt: new Date(), isHardDeleted: true } };
                     }
@@ -291,3 +291,4 @@ export const useWsGridHelper = () => {
         loadWorkspaces,
     };
 };
+

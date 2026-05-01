@@ -1,9 +1,10 @@
-/**
- * MultiProject Task Flow — utility functions
+﻿/**
+ * MultiProject Task Flow â€” utility functions
  * Pure tree-layout algorithm: no external deps required.
  */
 
 import type { Node, Edge } from "@xyflow/react";
+import { projectConstants } from "@/features/project/project.constants";
 import { graphlib, layout as dagreLayout } from "@dagrejs/dagre";
 import type { Task } from "@/features/taskDetail";
 import type { TaskFlowNodeData } from "../types/multiProjectTaskFlow.type";
@@ -15,7 +16,7 @@ const H_GAP = 60;
 const V_GAP = 90;
 const PROJECT_GROUP_GAP = 120;
 
-// ── Tree layout helpers ───────────────────────────────────────────────────────
+// â”€â”€ Tree layout helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function getSubtreeWidth(id: number, childrenMap: Map<number, number[]>): number {
     const children = childrenMap.get(id) ?? [];
@@ -51,11 +52,11 @@ function assignPositions(
     }
 }
 
-// ── Status/priority color helpers ────────────────────────────────────────────
+// â”€â”€ Status/priority color helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function getStatusBorderColor(status: string): string {
-    const colors = constants.optionColor.taskStatus.colors[status];
-    return (colors ?? constants.optionColor.taskStatus.default).bg;
+    const colors = projectConstants.optionColor.taskStatus.colors[status];
+    return (colors ?? projectConstants.optionColor.taskStatus.default).bg;
 }
 
 /** Very muted background for node body based on status */
@@ -73,10 +74,10 @@ export function getStatusNodeBackground(status: string): string {
 }
 
 export function getPriorityStyle(priority: string): { bg: string; text: string } {
-    return constants.optionColor.taskPriority.colors[priority] ?? constants.optionColor.taskPriority.default;
+    return projectConstants.optionColor.taskPriority.colors[priority] ?? projectConstants.optionColor.taskPriority.default;
 }
 
-// ── Main layout builder ───────────────────────────────────────────────────────
+// â”€â”€ Main layout builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Build React Flow nodes + edges from a flat task list.
@@ -133,7 +134,7 @@ export function buildTaskFlowLayout(
     return { nodes, edges: [] };
 }
 
-// ── Smart Wand ────────────────────────────────────────────────────────────────
+// â”€â”€ Smart Wand â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Status column order for orphan node grouping */
 const STATUS_ORDER: string[] = [
@@ -143,8 +144,8 @@ const STATUS_ORDER: string[] = [
 
 /** Estimate rendered height of a node based on its task content. */
 export function estimateNodeHeight(task: Task): number {
-    const PADDING = 24; // py-3 × 2
-    const LINE_H = 20;  // text-sm leading-snug ≈ 20px per line
+    const PADDING = 24; // py-3 Ã— 2
+    const LINE_H = 20;  // text-sm leading-snug â‰ˆ 20px per line
     const CHARS_PER_LINE = 25; // ~176px content width / ~7px per char
     const titleLen = task.title?.length ?? 5;
     const titleLines = Math.min(3, Math.max(1, Math.ceil(titleLen / CHARS_PER_LINE)));
@@ -170,10 +171,10 @@ export function smartWand(
     const connectedNodes = nodes.filter((n) => connectedIds.has(n.id));
     const orphanNodes    = nodes.filter((n) => !connectedIds.has(n.id));
 
-    // Connected nodes are never touched — user positioned them intentionally.
+    // Connected nodes are never touched â€” user positioned them intentionally.
     if (orphanNodes.length === 0) return nodes;
 
-    // ── Group orphan nodes into status columns ─────────────────────────────
+    // â”€â”€ Group orphan nodes into status columns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Place below the center of in-progress / background_progress nodes.
     // If none exist, fall back to the bottom of all connected nodes.
     const ACTIVE_STATUSES = new Set(["in_progress", "background_progress"]);
@@ -246,7 +247,7 @@ export function smartWand(
     });
 }
 
-// ── Nearest handle pair ──────────────────────────────────────────────────────
+// â”€â”€ Nearest handle pair â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Given two nodes, compute the most natural source/target handle pair
@@ -269,7 +270,7 @@ export function nearestHandlePair(
     }
 }
 
-const SNAP_THRESHOLD = 40; // px — snap when centers are within this distance
+const SNAP_THRESHOLD = 40; // px â€” snap when centers are within this distance
 
 /**
  * Snap dragged nodes' centers to align with their connected neighbors' centers.
@@ -298,7 +299,7 @@ export function snapToNeighborCenter(
         return { x: p.x + NODE_WIDTH / 2, y: p.y + h / 2 };
     };
 
-    // Build adjacency: dragged node → neighbor IDs
+    // Build adjacency: dragged node â†’ neighbor IDs
     const neighbors = new Map<string, string[]>();
     for (const e of edges) {
         if (draggedIds.has(e.source) && !draggedIds.has(e.target)) {
@@ -320,8 +321,8 @@ export function snapToNeighborCenter(
         const dc = center(draggedId);
         if (!dc) continue;
 
-        let bestDeltaX: number | null = null;   // best (smallest |ΔX|) neighbor snap
-        let bestDeltaY: number | null = null;   // best (smallest |ΔY|) neighbor snap
+        let bestDeltaX: number | null = null;   // best (smallest |Î”X|) neighbor snap
+        let bestDeltaY: number | null = null;   // best (smallest |Î”Y|) neighbor snap
 
         for (const nbrId of nbrs) {
             const nc = center(nbrId);
@@ -340,9 +341,9 @@ export function snapToNeighborCenter(
         const h = heightMap.get(draggedId) ?? NODE_HEIGHT;
         let { x, y } = p;
 
-        // Snap center-X → move node left/right so its center aligns with neighbor
+        // Snap center-X â†’ move node left/right so its center aligns with neighbor
         if (bestDeltaX !== null) x = dc.x + bestDeltaX - NODE_WIDTH / 2;
-        // Snap center-Y → move node up/down so its center aligns with neighbor
+        // Snap center-Y â†’ move node up/down so its center aligns with neighbor
         if (bestDeltaY !== null) y = dc.y + bestDeltaY - h / 2;
 
         snappedPositions.set(draggedId, { x, y });
@@ -374,7 +375,7 @@ export function tidySelection(
     // Subgraph edges: only those connecting two selected nodes
     const subEdges = edges.filter((e) => selectedIds.has(e.source) && selectedIds.has(e.target));
 
-    // ── Bounding-box centroid of current selection (to restore after layout) ─
+    // â”€â”€ Bounding-box centroid of current selection (to restore after layout) â”€
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const n of selected) {
         const h = estimateNodeHeight((n.data as TaskFlowNodeData).task);
@@ -386,7 +387,7 @@ export function tidySelection(
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
 
-    // ── Dagre graph setup ────────────────────────────────────────────────────
+    // â”€â”€ Dagre graph setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const g = new graphlib.Graph();
     g.setDefaultEdgeLabel(() => ({}));
     g.setGraph({
@@ -407,7 +408,7 @@ export function tidySelection(
 
     dagreLayout(g);
 
-    // ── Read Dagre results ───────────────────────────────────────────────────
+    // â”€â”€ Read Dagre results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Dagre positions are center-based; convert to top-left
     const dagrePositions = new Map<string, { x: number; y: number }>();
     for (const n of selected) {
@@ -420,7 +421,7 @@ export function tidySelection(
         }
     }
 
-    // ── Compute Dagre bounding-box centroid ──────────────────────────────────
+    // â”€â”€ Compute Dagre bounding-box centroid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let dMinX = Infinity, dMinY = Infinity, dMaxX = -Infinity, dMaxY = -Infinity;
     for (const n of selected) {
         const pos = dagrePositions.get(n.id);
@@ -434,7 +435,7 @@ export function tidySelection(
     const dCenterX = (dMinX + dMaxX) / 2;
     const dCenterY = (dMinY + dMaxY) / 2;
 
-    // ── Translate Dagre positions so centroid matches original centroid ───────
+    // â”€â”€ Translate Dagre positions so centroid matches original centroid â”€â”€â”€â”€â”€â”€â”€
     const offsetX = centerX - dCenterX;
     const offsetY = centerY - dCenterY;
 
@@ -470,7 +471,7 @@ function dist(a: { x: number; y: number }, b: { x: number; y: number }): number 
 
 /**
  * For each edge, pick the source/target handle pair that gives the shortest distance.
- * Returns a map: edgeId → { sourceHandle, targetHandle }.
+ * Returns a map: edgeId â†’ { sourceHandle, targetHandle }.
  */
 export function computeOptimalHandles(
     nodes: Node<TaskFlowNodeData>[],
@@ -507,3 +508,6 @@ export function computeOptimalHandles(
 
     return result;
 }
+
+
+

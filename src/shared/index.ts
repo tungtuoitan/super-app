@@ -81,6 +81,7 @@ export { ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopove
 // export type { ConfirmationPopoverOptions } from "./confirmPopover/ConfirmationPopover.store";
 export { ConfirmationPopoverContainer } from "./confirmPopover/ConfirmationPopoverContainer";
 export type { ConfirmMessage, DeleteType } from "./confirmPopover/types";
+export { richTextEditorConstants } from "./components/RichTextEditor/richTextEditor.constants";
 
 // ── console ───────────────────────────────────────────────────────────────
 export { ConsoleProvider } from "./console/useConsole.store";
@@ -156,7 +157,7 @@ export { useGetStandardRegistry } from "./standardRegistry/useGetStandardRegistr
 export { standardRegistryService } from "./standardRegistry/standardRegistry.service";
 // export type { RegistryType, StandardRegistry, StandardRegistryDTO, StandardRegistryResponse, GetStandardRegistryParams } from "./standardRegistry/standardRegistry.types";
 export type { StandardRegistry } from "./standardRegistry/standardRegistry.types";
-
+export { standardRegistryConstants } from "./standardRegistry/standardRegistryConstants";
 // ── styles ────────────────────────────────────────────────────────────────
 // export { Grow } from "./styles/commonStyles";
 

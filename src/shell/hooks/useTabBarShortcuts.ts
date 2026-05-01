@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Tab Keyboard Shortcuts Hook
  * Handles VSCode-style keyboard shortcuts for tab operations
  *
@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { useEditorTabBarStore } from "@/shell";
+import { shellConstants, useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useLifeLogTabHelper } from "@/features/lifeLog";
 import { constants } from "@/shared";
@@ -49,7 +49,7 @@ export const useTabBarShortcuts = () => {
                     // Block pin/unpin for group children
                     const isChild = activeTab.openedBy?.link
                         ? openTabs.some((t) => {
-                              if (t.type !== constants.vscode.tab.tabTypes.task) return false;
+                              if (t.type !== shellConstants.vscode.tab.tabTypes.task) return false;
                               const task = t.data as Task;
                               return `sa/p${task.projectId}/t${task.id}` === activeTab.openedBy!.link;
                           })
@@ -59,7 +59,7 @@ export const useTabBarShortcuts = () => {
                     const newPinned = !activeTab.isPinned;
                     // If task tab, also toggle children
                     const groupLink =
-                        activeTab.type === constants.vscode.tab.tabTypes.task
+                        activeTab.type === shellConstants.vscode.tab.tabTypes.task
                             ? `sa/p${(activeTab.data as Task).projectId}/t${(activeTab.data as Task).id}`
                             : null;
 
@@ -115,3 +115,4 @@ export const useTabBarShortcuts = () => {
         };
     }, [openTabs, activeTabId]);
 };
+

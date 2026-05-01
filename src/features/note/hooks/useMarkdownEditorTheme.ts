@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
-import { constants } from "@/shared";
+import { richTextEditorConstants } from "@/shared/components/RichTextEditor/richTextEditor.constants";
 
 export function useMarkdownEditorTheme({ $mi }: { $mi: any }) {
     useEffect(() => {
         if ($mi) {
-            $mi.editor.defineTheme(constants.markdown.theme.name, constants.markdown.theme.config);
+            $mi.editor.defineTheme(richTextEditorConstants.markdown.theme.name, richTextEditorConstants.markdown.theme.config);
         }
     }, [$mi]);
 

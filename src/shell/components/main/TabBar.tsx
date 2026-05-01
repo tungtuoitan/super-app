@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+﻿import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordSelector } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { shellConstants, useEditorTabHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useTabBarShortcuts } from "@/shell";
 import { useTabBarHelper } from "@/shell";
@@ -12,11 +12,11 @@ import type { Note } from "@/features/note";
 import {Ws} from "@/features/workspace";
 import {useEditorTabBarStore} from "@/shell";
 
-// ─── Tab Icon ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Tab Icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Resolves the tab icon by asking the registry.
- * Each feature's module provides getTabMeta — TabBar has zero knowledge of tab types.
+ * Each feature's module provides getTabMeta â€” TabBar has zero knowledge of tab types.
  */
 function TabIcon({ tab, isDeleted, isActive }: { tab: BaseTab; isDeleted: boolean; isActive: boolean }) {
     const meta = moduleRegistry.getTabMeta(tab);
@@ -34,7 +34,7 @@ function TabIcon({ tab, isDeleted, isActive }: { tab: BaseTab; isDeleted: boolea
     });
 }
 
-// ─── TabBar ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TabBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function TabBar() {
     const {
@@ -59,7 +59,7 @@ export function TabBar() {
 
     useTabBarShortcuts();
 
-    // ── Task grouping (driven by registry, not hardcoded) ────────────────────
+    // â”€â”€ Task grouping (driven by registry, not hardcoded) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Group leader: any tab where moduleRegistry.getTabGroupKey returns a key
     // Group child: any tab where tab.openedBy.link matches a leader's group key
 
@@ -77,7 +77,7 @@ export function TabBar() {
     const childTabIds = new Set<string>();
     groupKeyToLeader.forEach(({ children }) => children.forEach((c) => childTabIds.add(c.id)));
 
-    // ── Pinned state from localStorage ───────────────────────────────────────
+    // â”€â”€ Pinned state from localStorage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     useEffect(() => {
         const savedState = localStorage.getItem("tabPinnedState");
         if (savedState && openTabs.length > 0) {
@@ -101,11 +101,11 @@ export function TabBar() {
         }
     }, [openTabs.length]);
 
-    // ── Breadcrumb update (note tabs only — via registry could be generalised later) ──
+    // â”€â”€ Breadcrumb update (note tabs only â€” via registry could be generalised later) â”€â”€
     useEffect(() => {
         if (currentWorkspace && openTabs.length > 0 && allKeywords.length > 0) {
             const newTabs = openTabs.map((tab) => {
-                if (tab.type === constants.vscode.tab.tabTypes.note) {
+                if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
                     return { ...tab, breadcrumb: generateBreadcrumbForTab(tab.data as Note | Ws, tab.type) };
                 }
                 return tab;
@@ -114,7 +114,7 @@ export function TabBar() {
         }
     }, [allKeywords, openTabs.length, currentWorkspace?.id]);
 
-    // ── Render ────────────────────────────────────────────────────────────────
+    // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const renderTab = (tab: BaseTab, isPinned: boolean = false) => {
         const isDeleted = !!(tab.data as any)?.deletedAt;
@@ -124,7 +124,7 @@ export function TabBar() {
         const isActive = activeTabId === tab.id;
 
         // kNode tabs: never show deleted strikethrough
-        const showDeletedStyle = isDeleted && tab.type !== constants.vscode.tab.tabTypes.kNode;
+        const showDeletedStyle = isDeleted && tab.type !== shellConstants.vscode.tab.tabTypes.kNode;
 
         return (
             <button
@@ -159,7 +159,7 @@ export function TabBar() {
 
                 <span className={`text-[13px] whitespace-nowrap ${showDeletedStyle ? "text-muted-foreground/40 line-through" : ""}`}>
                     {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
-                    {tab.type !== constants.vscode.tab.tabTypes.kNode
+                    {tab.type !== shellConstants.vscode.tab.tabTypes.kNode
                         ? isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""
                         : ""}
                 </span>
@@ -229,3 +229,4 @@ export function TabBar() {
         </div>
     );
 }
+

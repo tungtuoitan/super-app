@@ -1,4 +1,5 @@
-import { MenuItem, MenuDivider } from "@szhsin/react-menu";
+﻿import { MenuItem, MenuDivider } from "@szhsin/react-menu";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {
     Plus as AddIcon,
     Edit as EditIcon,
@@ -38,7 +39,7 @@ export function KNodeMenu() {
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
 
     const addMenuItems = [
-        { type: kconstants.workspace.itemTypes.folder, icon: AddIcon, label: "New Card", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: workspaceConstants.itemTypes.folder, icon: AddIcon, label: "New Card", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
     ];
 
     const handleImportMarkdown = () => {
@@ -55,7 +56,7 @@ export function KNodeMenu() {
             {addMenuItems.map((item) => {
                 const Icon = item.icon;
                 const handleClick = () => {
-                    if (item.type === kconstants.workspace.itemTypes.folder) {
+                    if (item.type === workspaceConstants.itemTypes.folder) {
                         createFolder(item.type, contextData);
                     }
                     // Other types not implemented yet
@@ -82,7 +83,7 @@ export function KNodeMenu() {
                     {/* Import from Markdown */}
                     <MenuItem onClick={handleImportMarkdown} disabled={_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
                         <ImportMarkdownIcon className="w-4 h-4 mr-2" />
-                        Import từ Markdown
+                        Import tá»« Markdown
                     </MenuItem>
 
                     {/* Delete/Restore options */}
@@ -91,7 +92,7 @@ export function KNodeMenu() {
                         if (_ITEMSTATUS.isDirectlyDeleted) {
                             return (
                                 <>
-                                    {/* //*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
+                                    {/* //*Táº M THá»œI DISABLE VÃŒ CHÆ¯A TRIá»‚N KHAI  */}
                                     {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
                                     <HardDeleteIcon className="w-4 h-4 mr-2" />
                                     Hard Delete
@@ -105,7 +106,7 @@ export function KNodeMenu() {
                         }
                         // If item is deleted but not directly (inherited from parent), only show Hard Delete
                         // Don't show if multiple selected and any item is still active
-                        //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
+                        //* Táº M THá»œI áº¨N VÃŒ CHÆ¯A TRIá»‚N KHAI
                         // else if (isDeleted && !isDirectlyDeleted && !(isMultipleSelected && hasAnyNormalItem)) {
                         //     return (
                         //         <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
@@ -133,3 +134,6 @@ export function KNodeMenu() {
         </>
     );
 }
+
+
+

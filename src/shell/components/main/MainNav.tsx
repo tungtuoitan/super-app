@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate } from "react-router-dom";
+﻿import { Route, Routes, Navigate } from "react-router-dom";
 
 import { useNavigationStore } from "../../../contexts/NavigationContext";
 import { TopNav } from "./TopNav";
@@ -6,6 +6,7 @@ import { AuthCallback, constants } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 import {useDeviceStore} from "@/shared";
 import {VSCodeLayout} from "./VSCodeLayout";
+import {shellConstants} from "@/shell";
 
 /**
  * Main navigation component.
@@ -56,15 +57,15 @@ export default function MainNav() {
                 <div className={`side-tabs height-[100%]`}>
                     <div id="bodyWrapper" ref={bodyWrapperRef} className={`w-full ${isMobile ? 'h-screen': 'h-[calc(100vh-36px)]'}`}>
                         <Routes>
-                            {/* <Route path={constants.navigation.path.home} element={<Navigate to={constants.navigation.path.home} replace />} /> */}
-                            <Route path={constants.navigation.path.home} element={<VSCodeLayout />} />
-                            {/* <Route path={constants.navigation.path.ws} element={<VSCodeLayout />} />
-                            <Route path={constants.navigation.path.workspace} element={<VSCodeLayout />} />
-                            <Route path={constants.navigation.path.k} element={<VSCodeLayout />} />
-                            <Route path="/Kworkspace" element={<Navigate to={constants.navigation.path.k} replace />} />
-                            <Route path={constants.navigation.path.notes} element={<VSCodeLayout />} />
-                            <Route path={constants.navigation.path.project} element={<VSCodeLayout />} />
-                            <Route path={constants.navigation.path.lifeLog} element={<VSCodeLayout />} /> */}
+                            {/* <Route path={shellConstants.navigation.path.home} element={<Navigate to={shellConstants.navigation.path.home} replace />} /> */}
+                            <Route path={shellConstants.navigation.path.home} element={<VSCodeLayout />} />
+                            {/* <Route path={shellConstants.navigation.path.ws} element={<VSCodeLayout />} />
+                            <Route path={shellConstants.navigation.path.workspace} element={<VSCodeLayout />} />
+                            <Route path={shellConstants.navigation.path.k} element={<VSCodeLayout />} />
+                            <Route path="/Kworkspace" element={<Navigate to={shellConstants.navigation.path.k} replace />} />
+                            <Route path={shellConstants.navigation.path.notes} element={<VSCodeLayout />} />
+                            <Route path={shellConstants.navigation.path.project} element={<VSCodeLayout />} />
+                            <Route path={shellConstants.navigation.path.lifeLog} element={<VSCodeLayout />} /> */}
                             <Route path="/auth/callback" element={<AuthCallback />} />
                         </Routes>
                     </div>
@@ -73,3 +74,5 @@ export default function MainNav() {
         </div>
     );
 }
+
+

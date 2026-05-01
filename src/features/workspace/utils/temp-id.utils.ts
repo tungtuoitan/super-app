@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Temporary ID Generator for Unsaved Items
  *
  * Generates sequential negative IDs for new unsaved items (workspaces, notes, folders, etc.)
@@ -6,11 +6,12 @@
  * Names: Unsaved-1, Unsaved-2, Unsaved-3, ...
  */
 
-import type { BaseTab } from "@/shell";
+import { shellConstants, type BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
 import { constants } from "../../../shared/constants";
 import type { WorkspaceItemV2 } from "@/features/workspace";
 import type { Ws } from "@/features/workspace";
+import {workspaceConstants} from "../workspace.constants";
 
 /**
  * Collect all IDs from open tabs
@@ -20,10 +21,10 @@ export const collectIdsFromTabs = (openTabs: BaseTab[]): number[] => {
     const ids: number[] = [];
 
     openTabs.forEach((tab) => {
-        if (tab.type === constants.vscode.tab.tabTypes.note) {
+        if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
             const noteData = tab.data as Note;
             ids.push(noteData.id);
-        } else if (tab.type === constants.vscode.tab.tabTypes.workspace) {
+        } else if (tab.type === shellConstants.vscode.tab.tabTypes.workspace) {
             const wsData = tab.data as Ws;
             ids.push(wsData.id);
         }
@@ -80,10 +81,10 @@ export const generateUnsavedName = (tempId: number, prefix: string = "Unsaved"):
 };
 
 export const SPECIAL_IDS = [
-    constants.workspace.root.workspaceItemId,
-    constants.workspace.root.entityId,
-    constants.workspace.dropZone.workspaceItemId,
-    constants.workspace.dropZone.entityId,
+    workspaceConstants.root.workspaceItemId,
+    workspaceConstants.root.entityId,
+    workspaceConstants.dropZone.workspaceItemId,
+    workspaceConstants.dropZone.entityId,
 ] as number[];
 
 /**
@@ -148,3 +149,4 @@ export const collectIdsFromTree = (flatData: WorkspaceItemV2[]): {
         folderEntityIds,
     };
 };
+

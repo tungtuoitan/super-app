@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Navigation Context
  * Global navigation state management for sidebar navigation, body wrapper,
  * routing, and selected menu items across the application
@@ -7,7 +7,8 @@
 import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { PropsWithChildren } from "react";
-import { constants, ActivityBarView } from "@/shared";
+import { ActivityBarView } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 
 /**
  * Helper function to get view from route path
@@ -16,18 +17,18 @@ import { constants, ActivityBarView } from "@/shared";
 //     switch (pathname) {
 //         case "/":
 //         case "/workspace":
-//             return constants.navigation.views.workspace;
+//             return shellConstants.navigation.views.workspace;
 //         case "/k":
 //         case "/Kworkspace":
-//             return constants.navigation.views.k;
+//             return shellConstants.navigation.views.k;
 //         case "/ws":
-//             return constants.navigation.views.ws;
+//             return shellConstants.navigation.views.ws;
 //         case "/notes":
-//             return constants.navigation.views.note;
+//             return shellConstants.navigation.views.note;
 //         case "/project":
-//             return constants.navigation.views.project;
+//             return shellConstants.navigation.views.project;
 //         case "/lifelog":
-//             return constants.navigation.views.lifeLog;
+//             return shellConstants.navigation.views.lifeLog;
 //         default:
 //             return null;
 //     }
@@ -38,17 +39,17 @@ import { constants, ActivityBarView } from "@/shared";
  */
 const getRouteFromView = (view: string): string => {
     switch (view) {
-        case constants.navigation.views.workspace:
+        case shellConstants.navigation.views.workspace:
             return "/workspace";
-        case constants.navigation.views.k:
+        case shellConstants.navigation.views.k:
             return "/k";
-        case constants.navigation.views.ws:
+        case shellConstants.navigation.views.ws:
             return "/ws";
-        case constants.navigation.views.note:
+        case shellConstants.navigation.views.note:
             return "/notes";
-        case constants.navigation.views.project:
+        case shellConstants.navigation.views.project:
             return "/project";
-        case constants.navigation.views.lifeLog:
+        case shellConstants.navigation.views.lifeLog:
             return "/lifelog";
         default:
             return "/lifelog";
@@ -78,7 +79,7 @@ export const NAVIGATION_CONTEXT_DEFAULT_VALUE: NavigationContextValue = {
     toggleNavigation: () => {},
     selectedItemId: null,
     setSelectedItemId: () => {},
-    // activeView: constants.navigation.views.workspace,
+    // activeView: shellConstants.navigation.views.workspace,
     navigateToView: () => {},
 };
 
@@ -107,7 +108,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const bodyWrapperRef = useRef<HTMLDivElement>(null);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-    // const [activeView, setActiveView] = useState<ActivityBarView>(constants.modules.lifeLog);
+    // const [activeView, setActiveView] = useState<ActivityBarView>("LifeLog");
     // const { moduleName } = useSideBarStore();
 
     const location = useLocation();
@@ -150,3 +151,7 @@ export const NavProvider: React.FC<PropsWithChildren> = ({ children }) => {
         </NavigationContext.Provider>
     );
 };
+
+
+
+

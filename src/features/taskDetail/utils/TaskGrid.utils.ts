@@ -1,16 +1,16 @@
-/**
+﻿/**
  * Task Grid Utilities
- * Pure functions — no hooks, no React.
+ * Pure functions â€” no hooks, no React.
  * Shared validation, sorting, color helpers, and timeline utilities for task grid views.
  */
 
-import { constants } from "@/shared";
 import {DropValidation} from "../types/taskGrid.types";
 import {Task} from "../types/task.types";
+import {projectConstants} from "@/features/project";
 
-// ──────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Timeline Constants
-// ──────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const TIMELINE_ROW_HEIGHT = 36;
 export const TIMELINE_HEADER_HEIGHT = 60;
 export const TIMELINE_TASK_BAR_HEIGHT = 28;
@@ -28,11 +28,11 @@ export const WEEKEND_STRIPE_BG = `repeating-linear-gradient(
     hsl(var(--muted-foreground) / 0.15) 6px
 )`;
 
-// ──────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Timeline Utility Functions
-// ──────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-/** Format month for timeline header — "Oct 2025" */
+/** Format month for timeline header â€” "Oct 2025" */
 export function formatMonthHeader(date: Date): string {
     return new Intl.DateTimeFormat("en-US", {
         month: "short",
@@ -51,7 +51,7 @@ export function generateDateRange(startDate: Date, endDate: Date): Date[] {
     return dates;
 }
 
-/** Format date for day header — "Mo 20", "Tu 21" */
+/** Format date for day header â€” "Mo 20", "Tu 21" */
 export function formatDateHeader(date: Date): string {
     const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
     const dayOfWeek = dayNames[date.getDay()];
@@ -80,14 +80,14 @@ export function isFirstDayOfMonth(date: Date): boolean {
     return date.getDate() === 1;
 }
 
-// ──────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // TaskBar Color/Status Utilities
-// ──────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Get task bar colors from constants.timelineTask based on status */
 export function getTaskBarColors(status: string) {
-    const colors = constants.optionColor.timelineTask.colors[status];
-    return colors || constants.optionColor.timelineTask.default;
+    const colors = projectConstants.optionColor.timelineTask.colors[status];
+    return colors || projectConstants.optionColor.timelineTask.default;
 }
 
 /** Check if task status is non-draggable (dropped, completed, cancelled) */
@@ -97,15 +97,15 @@ export function isStatusNonDraggable(status: string): boolean {
 
 /** Get task status colors with border (for kanban column header) */
 export function getTaskStatusColorsWithBorder(status: string) {
-    const colors = constants.optionColor.taskStatus.colors[status];
-    const base = colors || constants.optionColor.taskStatus.default;
+    const colors = projectConstants.optionColor.taskStatus.colors[status];
+    const base = colors || projectConstants.optionColor.taskStatus.default;
     return { ...base, border: base.bg };
 }
 
 /** Get task priority colors (for kanban priority dot) */
 export function getTaskPriorityDotColor(priority: string) {
-    const colors = constants.optionColor.taskPriority.colors[priority];
-    const base = colors || constants.optionColor.taskPriority.default;
+    const colors = projectConstants.optionColor.taskPriority.colors[priority];
+    const base = colors || projectConstants.optionColor.taskPriority.default;
     return { dot: base.bg };
 }
 
@@ -256,3 +256,5 @@ export function getSubtasksOutsideRange(
 
     return outsideSubtasks;
 }
+
+

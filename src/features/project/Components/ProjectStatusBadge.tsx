@@ -1,9 +1,10 @@
-/**
+﻿/**
  * ProjectStatusBadge Component
  * Displays project status with color coding (GitHub-style)
  */
 
 import { constants } from "@/shared";
+import { projectConstants } from "@/features/project/project.constants";
 
 interface ProjectStatusBadgeProps {
     status: string;
@@ -15,8 +16,8 @@ interface ProjectStatusBadgeProps {
  * Get status colors from constants
  */
 export const getProjectStatusColors = (status: string) => {
-    const colors = constants.optionColor.projectStatus.colors[status];
-    return colors || constants.optionColor.projectStatus.default;
+    const colors = projectConstants.optionColor.projectStatus.colors[status];
+    return colors || projectConstants.optionColor.projectStatus.default;
 };
 
 export function ProjectStatusBadge({ status, label, size = "md" }: ProjectStatusBadgeProps) {
@@ -38,3 +39,6 @@ export function ProjectStatusBadge({ status, label, size = "md" }: ProjectStatus
         </span>
     );
 }
+
+
+

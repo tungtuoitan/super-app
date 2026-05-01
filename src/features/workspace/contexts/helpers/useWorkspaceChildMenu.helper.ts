@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Workspace Child Menu Helper Hook
  * Business logic for note and file context menu operations
  * Shared helper for both note and file nodes in workspace tree
  */
 
 import { useWorkspaceStore } from "../../store/Workspace.store";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { useConfirmationPopoverHelper, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { getWorkspaceConfirmMessage } from "../../utils/confirmMessage";
@@ -32,8 +33,8 @@ export const useWorkspaceChildMenuHelper = () => {
     const { loadTree } = useWorkspaceLoader();
     const { processTabAfterDelete } = useEditorTabHelper();
 
-    const isNote = contextType === constants.workspace.itemTypes.note;
-    const isFile = contextType === constants.workspace.itemTypes.file;
+    const isNote = contextType === workspaceConstants.itemTypes.note;
+    const isFile = contextType === workspaceConstants.itemTypes.file;
 
     // Multi-select check
     const selectedCount = selectedItemIds.length;
@@ -60,7 +61,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ---------
         const noteEntityId = noteData?.entityId ?? noteData?.data?.id;
         if (!noteEntityId) {
-            console.error("❌ Cannot delete note: missing entityId");
+            console.error("âŒ Cannot delete note: missing entityId");
             _console.error("Cannot delete note: missing note information");
             return;
         }
@@ -71,7 +72,7 @@ export const useWorkspaceChildMenuHelper = () => {
         try {
             const token = $user.userToken;
 
-            // ✅ Use entityId (notes.id) for note service
+            // âœ… Use entityId (notes.id) for note service
             const result = await noteService._deleteNote(token ?? "", noteEntityId.toString());
             // ---------
             // STEP 3: Handle success response
@@ -87,7 +88,7 @@ export const useWorkspaceChildMenuHelper = () => {
             // ---------
             // STEP 4: Handle error
             // ---------
-            console.error("❌ Failed to delete note:", error);
+            console.error("âŒ Failed to delete note:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
                 _console.error("Unauthorized. Please login again.");
@@ -109,7 +110,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ---------
         const workspaceItemId = fileData?.id;
         if (!workspaceItemId) {
-            console.error("❌ Cannot delete file: missing workspace item id");
+            console.error("âŒ Cannot delete file: missing workspace item id");
             _console.error("Cannot delete file: missing file information");
             return;
         }
@@ -121,7 +122,7 @@ export const useWorkspaceChildMenuHelper = () => {
             const token = $user.userToken;
             const workspaceId = currentWorkspace?.id || 1;
 
-            // ✅ Use workspace_items.id for workspace service
+            // âœ… Use workspace_items.id for workspace service
             const result = await workspaceService._deleteWorkspaceItems(token ?? "", workspaceId, {
                 items: [{ id: workspaceItemId, type: 4 as const }], // type 4 = file
                 cascade: true,
@@ -139,14 +140,14 @@ export const useWorkspaceChildMenuHelper = () => {
                 // Reload page to refresh data
                 window.location.reload();
             } else {
-                console.error("❌ Delete failed:", result.message);
+                console.error("âŒ Delete failed:", result.message);
                 _console.error(`Failed to delete file: ${result.message}`);
             }
         } catch (error) {
             // ---------
             // STEP 4: Handle error
             // ---------
-            console.error("❌ Failed to delete file:", error);
+            console.error("âŒ Failed to delete file:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
                 _console.error("Unauthorized. Please login again.");
@@ -165,13 +166,13 @@ export const useWorkspaceChildMenuHelper = () => {
         // ===== STEP 1: Get selected items =====
         const selectedIds = ids ?? selectedItemIds;
         if (selectedIds.length === 0) {
-            console.warn("⚠️ No items selected");
+            console.warn("âš ï¸ No items selected");
             return;
         }
 
         // ===== STEP 2: Validate tree data =====
         if (!currentWorkspace?.flatData) {
-            console.error("❌ Cannot delete: no tree data");
+            console.error("âŒ Cannot delete: no tree data");
             return;
         }
 
@@ -183,7 +184,7 @@ export const useWorkspaceChildMenuHelper = () => {
             const topLevelIds = filterTopLevelParents(selectedIds, treeData);
 
             if (topLevelIds.length === 0) {
-                console.warn("⚠️ No valid items after filtering");
+                console.warn("âš ï¸ No valid items after filtering");
                 return;
             }
 
@@ -198,7 +199,7 @@ export const useWorkspaceChildMenuHelper = () => {
             }
 
             if (selectedItems.length === 0) {
-                console.warn("⚠️ No valid items to process");
+                console.warn("âš ï¸ No valid items to process");
                 return;
             }
 
@@ -223,7 +224,7 @@ export const useWorkspaceChildMenuHelper = () => {
             const batchRequests: UpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {
                 return {
                     action: type === "soft-delete" ? WorkspaceItemAction.Delete : WorkspaceItemAction.Restore,
-                    id: item.id, // ✅ workspace_items.id
+                    id: item.id, // âœ… workspace_items.id
                 };
             });
 
@@ -266,7 +267,7 @@ export const useWorkspaceChildMenuHelper = () => {
             }
 
         } catch (error) {
-            console.error("❌ Failed to update items:", error);
+            console.error("âŒ Failed to update items:", error);
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
@@ -359,3 +360,4 @@ export const useWorkspaceChildMenuHelper = () => {
         editNote,
     };
 };
+

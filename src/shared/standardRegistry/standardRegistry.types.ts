@@ -3,11 +3,10 @@
  * Domain models and DTOs for standard registry data
  */
 
-import { constants } from "@/shared";
-
+import { constants, standardRegistryConstants } from "@/shared";
 
 // Standard Registry Types
-export type RegistryType = typeof constants.standardRegistryFE.types.hashtag | typeof constants.standardRegistryFE.types.entity | typeof constants.standardRegistryFE.types.workspaceStatus | typeof constants.standardRegistryFE.types.noteStatus | string;
+export type RegistryType = typeof standardRegistryConstants.types.hashtag | typeof standardRegistryConstants.types.entity | typeof standardRegistryConstants.types.workspaceStatus | typeof standardRegistryConstants.types.noteStatus | string;
 
 // Domain Model (what we use in the app)
 export interface StandardRegistry {

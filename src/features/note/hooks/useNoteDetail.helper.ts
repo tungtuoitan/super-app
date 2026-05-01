@@ -1,5 +1,6 @@
-
+﻿
 import { noteService } from "../service/note.service";
+import { shellConstants } from "@/shell/shell.constants";
 import { transformANote } from "../utils/note.utils";
 import { Note, UpsertNoteDTO } from "../types/note.types";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
@@ -27,7 +28,7 @@ export const useNoteDetailHelper = () => {
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
         const activeTab = getActiveTab();
-        if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
+        if (!activeTab || activeTab.type !== shellConstants.vscode.tab.tabTypes.note) {
             return;
         }
 
@@ -63,8 +64,8 @@ export const useNoteDetailHelper = () => {
     const upsertNote = 
         async (tabId?: string): Promise<Note | null> => {
             const activeTab = getActiveTab();
-            if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.note) {
-                _console.warning("⚠️ No note tab active to upsert");
+            if (!activeTab || activeTab.type !== shellConstants.vscode.tab.tabTypes.note) {
+                _console.warning("âš ï¸ No note tab active to upsert");
                 return null;
             }
 
@@ -124,9 +125,9 @@ export const useNoteDetailHelper = () => {
                     );
                 }
 
-                if (moduleName === constants.modules.note) {
+                if (moduleName === "Note") {
                     loadNotes();
-                } else if (moduleName === constants.modules.workspace) {
+                } else if (moduleName === "Workspace") {
                     loadTree();
                 }
 
@@ -134,7 +135,7 @@ export const useNoteDetailHelper = () => {
 
                 return transformedNote;
             } catch (error) {
-                console.error("❌ Failed to save note:", error);
+                console.error("âŒ Failed to save note:", error);
                 const errorMessage = await parseApiError(error);
 
                 if (isUnauthorizedError(error)) {
@@ -189,3 +190,7 @@ export const useNoteDetailHelper = () => {
         handleHashTagsChange,
     };
 };
+
+
+
+

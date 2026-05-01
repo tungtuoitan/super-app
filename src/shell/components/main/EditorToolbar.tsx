@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Editor Toolbar
  * Shared toolbar for all editor panel types (Note, Workspace, etc.)
  * Displays status info and action buttons based on tab type and state
@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Save, RotateCcw, Undo2 } from "lucide-react";
 import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
-import { useEditorTabHelper } from "@/shell";
+import { shellConstants, useEditorTabHelper } from "@/shell";
 import { useEditorToolbarHelper } from "@/shell";
 import { useGlobalShortcut } from "@/shared";
 import { constants } from "@/shared";
@@ -28,7 +28,7 @@ export function EditorToolbar() {
 
     const activeTab = getActiveTab();
 
-    // ── Back button via registry (sync) + async fallback ─────────────────────
+    // â”€â”€ Back button via registry (sync) + async fallback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const registryBackButton = activeTab && !activeTab.openedBy
         ? moduleRegistry.getBackButton(activeTab, { projects })
         : null;
@@ -40,8 +40,8 @@ export function EditorToolbar() {
             setAsyncBackButton(undefined);
             return;
         }
-        // Only project module uses getBackButton — if it returned null, project might not be loaded yet
-        if (!activeTab || activeTab.type !== constants.vscode.tab.tabTypes.task) {
+        // Only project module uses getBackButton â€” if it returned null, project might not be loaded yet
+        if (!activeTab || activeTab.type !== shellConstants.vscode.tab.tabTypes.task) {
             setAsyncBackButton(undefined);
             return;
         }
@@ -57,10 +57,10 @@ export function EditorToolbar() {
 
     const effectiveOpenedBy = activeTab?.openedBy ?? registryBackButton ?? asyncBackButton;
 
-    // ── Toolbar actions ──────────────────────────────────────────────────────
+    // â”€â”€ Toolbar actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { upsertOrchestraitor, commonCancel } = useEditorToolbarHelper();
 
-    // ── Keyboard shortcut: Ctrl+S / Alt+S → save ────────────────────────────
+    // â”€â”€ Keyboard shortcut: Ctrl+S / Alt+S â†’ save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const activeTabRef = useRef(activeTab);
     const isSavingRef = useRef(isSaving);
     const upsertRef = useRef(upsertOrchestraitor);
@@ -68,7 +68,7 @@ export function EditorToolbar() {
     isSavingRef.current = isSaving;
     upsertRef.current = upsertOrchestraitor;
 
-    // Default handler (priority 0) — saves current tab when no inline editor is active.
+    // Default handler (priority 0) â€” saves current tab when no inline editor is active.
     // No `enabled` condition: always registered so browser default is always suppressed.
     // The callback guards internally with refs to avoid stale closure.
     useGlobalShortcut("ctrl+s", { id: "editor-toolbar-save" }, () => {
@@ -169,3 +169,4 @@ export function EditorToolbar() {
         </div>
     );
 }
+

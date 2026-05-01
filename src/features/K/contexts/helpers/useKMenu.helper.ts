@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Workspace Folder Menu Helper Hook
  * Business logic for folder context menu operations
  * Extracted from useMenuContextHelper for folder-specific logic
  */
 
 import {useKStore} from "../../store/K.store";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {KService} from "../../service/K.service";
 import {KItemV2} from "../../types/K-v2.types";
 import {KUpsertWorkspaceItemRequest, KItemAction} from "../../types/K.types";
@@ -136,7 +137,7 @@ export const useKMenuHelper = () => {
         // Determine item type and open edit dialog
         // ----------------
         if (itemData) {
-            const itemType: NodeItemType = itemData.type || kconstants.workspace.itemTypes.folder;
+            const itemType: NodeItemType = itemData.type || workspaceConstants.itemTypes.folder;
             openNodeDialog("edit", itemType, itemData, null);
         }
     };
@@ -149,7 +150,7 @@ export const useKMenuHelper = () => {
         // STEP 1: Validate folder ID
         // ----------------
         if (!folder.id) {
-            console.error("❌ Cannot remove folder: missing folder ID");
+            console.error("âŒ Cannot remove folder: missing folder ID");
             _console.error("Cannot remove folder: missing folder information");
             return;
         }
@@ -181,7 +182,7 @@ export const useKMenuHelper = () => {
 
         const foldersToDelete = allFolders.filter((f) => {
             if (!f.id) {
-                console.warn(`⚠️ Skipping folder without ID: ${f.name}`);
+                console.warn(`âš ï¸ Skipping folder without ID: ${f.name}`);
                 return false;
             }
             return true;
@@ -219,7 +220,7 @@ export const useKMenuHelper = () => {
                     }
                 }
 
-                _console.success(`✅ Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`);
+                _console.success(`âœ… Folder${isMultipleSelected ? "s" : ""} ${isHardDelete ? "permanently " : ""}deleted successfully`);
             } else {
                 throw new Error("Failed to delete folders");
             }
@@ -227,7 +228,7 @@ export const useKMenuHelper = () => {
             // ----------------
             // STEP 6: Handle errors
             // ----------------
-            console.error("❌ Failed to delete folders:", error);
+            console.error("âŒ Failed to delete folders:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
                 _console.error("Unauthorized. Please login again.");
@@ -245,7 +246,7 @@ export const useKMenuHelper = () => {
         // STEP 1: Validate tree data
         // ----------------
         if (!currentK?.flatData) {
-            console.error("❌ Cannot delete: no tree data");
+            console.error("âŒ Cannot delete: no tree data");
             return;
         }
 
@@ -258,7 +259,7 @@ export const useKMenuHelper = () => {
             if (folder) {
                 // Check if this is a workspace root node (negative ID)
                 if (folder.id < 0) {
-                    console.warn("⚠️ Skipping workspace root node:", folder.id);
+                    console.warn("âš ï¸ Skipping workspace root node:", folder.id);
                     continue;
                 }
                 selectedFolders.push(folder);
@@ -266,7 +267,7 @@ export const useKMenuHelper = () => {
         }
 
         if (selectedFolders.length === 0) {
-            console.warn("⚠️ No valid folders to delete");
+            console.warn("âš ï¸ No valid folders to delete");
             return;
         }
 
@@ -355,7 +356,7 @@ export const useKMenuHelper = () => {
             // ----------------
             // STEP 7: Handle errors
             // ----------------
-            console.error("❌ Failed to bulk delete folders:", error);
+            console.error("âŒ Failed to bulk delete folders:", error);
             const errorMessage = await parseApiError(error);
             if (isUnauthorizedError(error)) {
                 _console.error("Unauthorized. Please login again.");
@@ -378,7 +379,7 @@ export const useKMenuHelper = () => {
 
         // Check if this is a workspace root node (negative ID)
         if (contextData.tagId < 0) {
-            console.warn("⚠️ Cannot delete workspace root node");
+            console.warn("âš ï¸ Cannot delete workspace root node");
             setIsMenuContextOpen(false);
             return;
         }
@@ -463,16 +464,16 @@ export const useKMenuHelper = () => {
      * Pattern: 100% follows NotesController batch pattern
      */
     const __deleteRestore_SelectedItems = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
-        // ===== STEP 1: Get selected items (giống __deleteRestore_SelectedNotes) =====
+        // ===== STEP 1: Get selected items (giá»‘ng __deleteRestore_SelectedNotes) =====
         const selectedIds = ids ?? selectedItemIds;
         if (selectedIds.length === 0) {
-            console.warn("⚠️ No items selected");
+            console.warn("âš ï¸ No items selected");
             return;
         }
 
         // ===== STEP 2: Validate tree data =====
         if (!currentK?.flatData) {
-            console.error("❌ Cannot delete: no tree data");
+            console.error("âŒ Cannot delete: no tree data");
             return;
         }
 
@@ -484,7 +485,7 @@ export const useKMenuHelper = () => {
             const topLevelIds = KtreeMiniHelper.filterTopLevelParents(selectedIds, treeData);
 
             if (topLevelIds.length === 0) {
-                console.warn("⚠️ No valid items after filtering");
+                console.warn("âš ï¸ No valid items after filtering");
                 return;
             }
 
@@ -499,7 +500,7 @@ export const useKMenuHelper = () => {
             }
 
             if (selectedItems.length === 0) {
-                console.warn("⚠️ No valid items to process");
+                console.warn("âš ï¸ No valid items to process");
                 return;
             }
 
@@ -524,21 +525,21 @@ export const useKMenuHelper = () => {
             const batchRequests: KUpsertWorkspaceItemRequest[] = itemsToUpdate.map((item) => {
                 return {
                     action: type === "soft-delete" ? KItemAction.Delete : KItemAction.Restore,
-                    id: item.id, // ✅ workspace_items.id
+                    id: item.id, // âœ… workspace_items.id
                 };
             });
 
-            // ===== STEP 8: Call batch upsert API (giống __deleteRestore_SelectedNotes) =====
+            // ===== STEP 8: Call batch upsert API (giá»‘ng __deleteRestore_SelectedNotes) =====
             const result = await KService._upsertWorkspaceItems(token ?? "", currentK.id, batchRequests);
 
             if (!result.success) {
                 throw new Error(result.message || "Batch update failed");
             }
 
-            // ===== STEP 9: Post-processing (giống __deleteRestore_SelectedNotes) =====
+            // ===== STEP 9: Post-processing (giá»‘ng __deleteRestore_SelectedNotes) =====
 
             if (type === "soft-delete") {
-                // All items are nodes — close their tabs
+                // All items are nodes â€” close their tabs
                 const nodeIds = itemsToUpdate.map((item) => item.id);
 
                 if (nodeIds.length > 0) {
@@ -546,11 +547,11 @@ export const useKMenuHelper = () => {
                 }
             }
 
-            // Reload workspace tree (giống __deleteRestore_SelectedNotes: await loadNotes())
+            // Reload workspace tree (giá»‘ng __deleteRestore_SelectedNotes: await loadNotes())
             const res = await KService._getWorkspaceTreeV2(token ?? "", currentK.id);
             if(res && res.success){
                 setCurrentK(res.object as KDTO);
-                // ===== STEP 10: Clear selection (giống __deleteRestore_SelectedNotes) =====
+                // ===== STEP 10: Clear selection (giá»‘ng __deleteRestore_SelectedNotes) =====
                 setSelectedItemIds([]);
                 setLastSelectedItemId(null);
     
@@ -562,7 +563,7 @@ export const useKMenuHelper = () => {
             }
 
         } catch (error) {
-            console.error("❌ Failed to update items:", error);
+            console.error("âŒ Failed to update items:", error);
             const errorMessage = await parseApiError(error);
 
             if (isUnauthorizedError(error)) {
@@ -607,3 +608,6 @@ export const useKMenuHelper = () => {
         dhr_items
     };
 };
+
+
+

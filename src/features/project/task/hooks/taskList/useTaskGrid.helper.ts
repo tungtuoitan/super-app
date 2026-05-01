@@ -1,10 +1,11 @@
-
+﻿
 /**
  * Task Grid Helper Hook
  * Business logic for task grid operations
  */
 
 import { taskService } from "@/features/taskDetail";
+import { projectConstants } from "@/features/project/project.constants";
 import type { TaskDTO, Task } from "@/features/taskDetail";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
@@ -283,7 +284,7 @@ export const useTaskGridHelper = () => {
             const token = $user.userToken;
 
             // Read task filters from userProfile (persisted), fall back to defaults
-            const taskGridFilters = $user.filters?.taskGrid || constants.filters.defaults.taskGrid;
+            const taskGridFilters = $user.filters?.taskGrid || projectConstants.filters.defaults.taskGrid;
 
             const filterParams: { projectIds?: string; deletedAt?: string; status?: string; priority?: string } = {
                 deletedAt: "null", // Only active tasks by default
@@ -390,3 +391,6 @@ export const useTaskGridHelper = () => {
         saveTask,
     };
 };
+
+
+

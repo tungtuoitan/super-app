@@ -1,9 +1,10 @@
-/**
+﻿/**
  * Project Tab Helper
  * Helper functions for managing project editor tabs
  */
 
 import { BaseTab, MultiProjectTabData } from "@/shell";
+import { shellConstants } from "@/shell/shell.constants";
 import { constants } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import {useEditorTabBarStore} from "@/shell";
@@ -20,7 +21,7 @@ export const useProjectTabHelper = () => {
      */
     const openProjectTab = (project: Project) => {
         // Check if tab already exists for this project
-        const existingTab = openTabs.find((tab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === project.id);
+        const existingTab = openTabs.find((tab) => tab.type === shellConstants.vscode.tab.tabTypes.project && (tab.data as Project).id === project.id);
 
         if (existingTab) {
             // Tab already exists, just activate it
@@ -29,7 +30,7 @@ export const useProjectTabHelper = () => {
             // Create new project tab
             const newTab: BaseTab = {
                 id: `project-tab-${project.id}-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.project,
+                type: shellConstants.vscode.tab.tabTypes.project,
                 data: project,
                 data0: project,
                 title: project.name || "Unsaved Project",
@@ -71,7 +72,7 @@ export const useProjectTabHelper = () => {
     const updateProjectInTabs = (projectId: number, updatedProject: Partial<Project>) => {
         setOpenTabs((prev) =>
             prev.map((tab) => {
-                if (tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId) {
+                if (tab.type === shellConstants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId) {
                     const projectData = tab.data as Project;
                     return {
                         ...tab,
@@ -92,7 +93,7 @@ export const useProjectTabHelper = () => {
      */
     const openMultiProjectTab = (projects: Project[]) => {
         // Check if multi-project tab already exists (singleton)
-        const existingTab = openTabs.find((tab) => tab.type === constants.vscode.tab.tabTypes.multiProject);
+        const existingTab = openTabs.find((tab) => tab.type === shellConstants.vscode.tab.tabTypes.multiProject);
 
         const projectIds = projects.map((p) => p.id);
         const tabData: MultiProjectTabData = {
@@ -104,17 +105,17 @@ export const useProjectTabHelper = () => {
             // Tab exists - update its data and activate it
             setOpenTabs((prev) =>
                 prev.map((tab) =>
-                    tab.type === constants.vscode.tab.tabTypes.multiProject
+                    tab.type === shellConstants.vscode.tab.tabTypes.multiProject
                         ? { ...tab, data: tabData, data0: tabData }
                         : tab
                 )
             );
             updateActiveTab(existingTab.id);
         } else {
-            // Create new multi-project tab — pinned at first position
+            // Create new multi-project tab â€” pinned at first position
             const newTab: BaseTab = {
                 id: `multi-project-tab-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.multiProject,
+                type: shellConstants.vscode.tab.tabTypes.multiProject,
                 data: tabData,
                 data0: tabData,
                 title: "Multiple-Projects",
@@ -134,7 +135,7 @@ export const useProjectTabHelper = () => {
      * Tab stays open even with empty selection (shows empty state)
      */
     const updateMultiProjectTabIfOpen = (projects: Project[]) => {
-        const existingTab = openTabs.find((tab) => tab.type === constants.vscode.tab.tabTypes.multiProject);
+        const existingTab = openTabs.find((tab) => tab.type === shellConstants.vscode.tab.tabTypes.multiProject);
 
         if (!existingTab) return; // No multi-project tab open, do nothing
 
@@ -147,7 +148,7 @@ export const useProjectTabHelper = () => {
 
         setOpenTabs((prev) =>
             prev.map((tab) =>
-                tab.type === constants.vscode.tab.tabTypes.multiProject
+                tab.type === shellConstants.vscode.tab.tabTypes.multiProject
                     ? { ...tab, data: tabData, data0: tabData }
                     : tab
             )
@@ -162,3 +163,5 @@ export const useProjectTabHelper = () => {
         updateProjectInTabs,
     };
 };
+
+

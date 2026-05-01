@@ -1,6 +1,6 @@
-import { Panel, PanelGroup } from "react-resizable-panels";
+﻿import { Panel, PanelGroup } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
-import { constants } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 import { useDeviceStore } from "@/shared";
 import { Console } from "../../../shared/console/Console";
 import { moduleRegistry } from "@/shell";
@@ -12,8 +12,8 @@ interface VSSideBarProps {
 }
 
 /**
- * VSSideBar — sidebar content for VS Code style layout.
- * Reads SidebarView from the module registry — no direct feature imports.
+ * VSSideBar â€” sidebar content for VS Code style layout.
+ * Reads SidebarView from the module registry â€” no direct feature imports.
  */
 export function VSSideBar({ moduleName }: VSSideBarProps) {
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
@@ -44,10 +44,10 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
                             {/* Header */}
                             <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                 <span>{viewTitle}</span>
-                                <RightSideBar hideFilter={moduleName === constants.modules.lifeLog} />
+                                <RightSideBar hideFilter={moduleName === "LifeLog"} />
                             </div>
 
-                            {/* Content — delegated to feature module */}
+                            {/* Content â€” delegated to feature module */}
                             <div className="flex-1 overflow-hidden">
                                 {SidebarView ? <SidebarView /> : null}
                             </div>
@@ -62,3 +62,6 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
         </Panel>
     );
 }
+
+
+

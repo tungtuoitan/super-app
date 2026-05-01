@@ -1,9 +1,10 @@
-/**
+﻿/**
  * WorkspaceLinksCell - Displays workspace links count with tooltip
  * Used in NoteGrid to show which workspaces reference a note
  */
 
 import React, { useState } from "react";
+import { shellConstants } from "@/shell/shell.constants";
 import type { WorkspaceLink } from "../types/note.types";
 import { constants } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace";
@@ -44,18 +45,18 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
                                 <div
                                     key={link.workspaceItemId}
                                     onClick={(e) => {
-                                        if (source === constants.modules.note) {
+                                        if (source === "Note") {
                                             e.stopPropagation();
                                             onWorkspaceClick?.(link.workspaceId, link.workspaceItemId);
                                         }
                                     }}
-                                    className={`${source === constants.modules.note ? "text-blue-400 hover:underline cursor-pointer" : "text-gray-400"}`}
+                                    className={`${source === "Note" ? "text-blue-400 hover:underline cursor-pointer" : "text-gray-400"}`}
                                 >
-                                    • {link.workspaceName} {selectedWorkspaceId === link.workspaceId ? "(current)" : ""}
+                                    â€¢ {link.workspaceName} {selectedWorkspaceId === link.workspaceId ? "(current)" : ""}
                                 </div>
                             ))}
                         </div>
-                        {source === constants.modules.note && <div className="text-gray-400 text-xs mt-2 italic border-t border-gray-700 pt-1">Click to navigate to workspace</div>}
+                        {source === "Note" && <div className="text-gray-400 text-xs mt-2 italic border-t border-gray-700 pt-1">Click to navigate to workspace</div>}
                     </div>
                     <div
                         className={`absolute ${isTop ? "top-full -mt-[1px]" : "bottom-full -mb-[1px]"} right-3`}
@@ -68,3 +69,6 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
         </div>
     );
 }
+
+
+

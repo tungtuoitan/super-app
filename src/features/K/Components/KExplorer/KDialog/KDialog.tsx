@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FolderDialog - Dialog for creating new folders in workspace
  * Migrated from MUI to shadcn/ui
  *
@@ -6,6 +6,8 @@
  */
 
 import React, { useEffect } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
+import { shellConstants } from "@/shell/shell.constants";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, getAllIconLabel, IconKey } from "@/shared";
 import { Button } from "@/shared";
@@ -45,7 +47,7 @@ export function KDialog() {
 
     // Auto-select icon based on folder name (only in create mode and only for folders)
     // useEffect(() => {
-    //     if (mode === "create" && itemType === kconstants.workspace.itemTypes.folder && !hasManuallySelectedIcon.current) {
+    //     if (mode === "create" && itemType === workspaceConstants.itemTypes.folder && !hasManuallySelectedIcon.current) {
     //         const matchedIcon = findBestIconMatch(newNodeName);
     //         setIcon(matchedIcon);
     //         // Also set the color based on the matched icon's default color
@@ -74,7 +76,7 @@ export function KDialog() {
         // For creating at root, parentId would be null or the workspace root id
         return currentK.flatData.filter(
             (item: KItemV2) =>
-                // ✅ Use type guard and entityId field
+                // âœ… Use type guard and entityId field
                 isFolder(item) &&
                 // Same parent (siblings)
                 item.parentId === parentFolderId &&
@@ -131,8 +133,8 @@ export function KDialog() {
     // Dynamic labels based on itemType
     const getItemLabel = () => {
         switch (itemType) {
-            case kconstants.workspace.itemTypes.folder:
-                return kconstants.vscode.displayNames.folder;
+            case workspaceConstants.itemTypes.folder:
+                return "Node";
             default:
                 return "Item";
         }
@@ -149,7 +151,7 @@ export function KDialog() {
 
                 <div className="space-y-6">
                     {/* Folder name with suggestions dropdown for folders */}
-                    {itemType === kconstants.workspace.itemTypes.folder && mode === "create" ? (
+                    {itemType === workspaceConstants.itemTypes.folder && mode === "create" ? (
                         <div className="space-y-2">
                             <div className="flex gap-2">
                                 <div className="flex-1">
@@ -248,7 +250,7 @@ export function KDialog() {
                     </div>
 
                     {/* Icon picker */}
-                    {itemType === kconstants.workspace.itemTypes.folder && (
+                    {itemType === workspaceConstants.itemTypes.folder && (
                         <div>
                             <IconPicker
                                 value={icon}
@@ -275,5 +277,12 @@ export function KDialog() {
         </Dialog>
     );
 }
+
+
+
+
+
+
+
 
 

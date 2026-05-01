@@ -1,4 +1,5 @@
-import { Cuboid, Layers, CheckSquare } from "lucide-react";
+﻿import { Cuboid, Layers, CheckSquare } from "lucide-react";
+import { shellConstants } from "@/shell/shell.constants";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
 import type { ModuleDefinition } from "@/shell";
@@ -25,40 +26,40 @@ const MultiProjectEditorPanelAdapter = () => <MultiProjectEditorPanel />;
 const TaskEditorPanelAdapter = () => <TaskEditorPanel />;
 
 const TAB_COLORS: Record<string, string> = {
-    [constants.vscode.tab.tabTypes.project]: "#f97316",
-    [constants.vscode.tab.tabTypes.multiProject]: "#f97316",
-    [constants.vscode.tab.tabTypes.task]: "#10b981",
+    [shellConstants.vscode.tab.tabTypes.project]: "#f97316",
+    [shellConstants.vscode.tab.tabTypes.multiProject]: "#f97316",
+    [shellConstants.vscode.tab.tabTypes.task]: "#10b981",
 };
 
 export const projectModule: ModuleDefinition = {
-    id: constants.modules.project,
+    id: "Project",
     icon: Cuboid,
-    label: constants.vscode.displayNames.project,
+    label: "Projects",
 
     SidebarView: ProjectView,
 
     editorPanels: {
-        [constants.vscode.tab.tabTypes.project]: ProjectEditorPanelAdapter,
-        [constants.vscode.tab.tabTypes.multiProject]: MultiProjectEditorPanelAdapter,
-        [constants.vscode.tab.tabTypes.task]: TaskEditorPanelAdapter,
+        [shellConstants.vscode.tab.tabTypes.project]: ProjectEditorPanelAdapter,
+        [shellConstants.vscode.tab.tabTypes.multiProject]: MultiProjectEditorPanelAdapter,
+        [shellConstants.vscode.tab.tabTypes.task]: TaskEditorPanelAdapter,
     },
 
     getTabMeta: (tab) => {
         const color = TAB_COLORS[tab.type] ?? "#9ca3af";
         const Icon =
-            tab.type === constants.vscode.tab.tabTypes.task ? CheckSquare :
-            tab.type === constants.vscode.tab.tabTypes.multiProject ? Layers : Cuboid;
+            tab.type === shellConstants.vscode.tab.tabTypes.task ? CheckSquare :
+            tab.type === shellConstants.vscode.tab.tabTypes.multiProject ? Layers : Cuboid;
         return { icon: <Icon className="w-4 h-4" style={{ color }} />, color };
     },
 
     getTabGroupKey: (tab) => {
-        if (tab.type !== constants.vscode.tab.tabTypes.task) return null;
+        if (tab.type !== shellConstants.vscode.tab.tabTypes.task) return null;
         const task = tab.data as Task;
         return `sa/p${task.projectId}/t${task.id}`;
     },
 
     getBackButton: (tab, { projects }) => {
-        if (tab.type !== constants.vscode.tab.tabTypes.task || tab.openedBy) return null;
+        if (tab.type !== shellConstants.vscode.tab.tabTypes.task || tab.openedBy) return null;
         const task = tab.data as Task;
         const project = projects.find((p: any) => p.id === task.projectId);
         if (!project) return null;
@@ -66,7 +67,7 @@ export const projectModule: ModuleDefinition = {
     },
 };
 
-// ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
+// â”€â”€â”€ Keyword Navigator Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const projectKeywordPlugin: KeywordPlugin = {
     handles: ["project", "task"],
@@ -79,7 +80,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
         if (parsed.type === "project" && parsed.projectId) {
             try {
                 const existingTab = ctx.openTabs.find(
-                    (t) => t.type === constants.vscode.tab.tabTypes.project && (t.data as Project).id === parsed.projectId
+                    (t) => t.type === shellConstants.vscode.tab.tabTypes.project && (t.data as Project).id === parsed.projectId
                 );
                 if (existingTab) {
                     if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
@@ -102,7 +103,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
                         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
                         workspaceId: dto.workspaceId,
                     };
-                    ctx.openTab(project, constants.vscode.tab.tabTypes.project, openedBy);
+                    ctx.openTab(project, shellConstants.vscode.tab.tabTypes.project, openedBy);
                 } else {
                     ctx.log.error("Project not found");
                 }
@@ -115,7 +116,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
         if (parsed.type === "task" && parsed.taskId) {
             try {
                 const existingTab = ctx.openTabs.find(
-                    (t) => t.type === constants.vscode.tab.tabTypes.task && (t.data as Task).id === parsed.taskId
+                    (t) => t.type === shellConstants.vscode.tab.tabTypes.task && (t.data as Task).id === parsed.taskId
                 );
                 if (existingTab) {
                     if (openedBy) ctx.setOpenTabs((prev) => prev.map((t) => t.id === existingTab.id ? { ...t, openedBy } : t));
@@ -147,7 +148,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
                         processJson: dto.processJson ?? null,
                         customTabsJson: dto.customTabsJson ?? null,
                     };
-                    ctx.openTab(task, constants.vscode.tab.tabTypes.task, openedBy);
+                    ctx.openTab(task, shellConstants.vscode.tab.tabTypes.task, openedBy);
                 } else {
                     ctx.log.error("Task not found");
                 }
@@ -175,3 +176,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
         return undefined;
     },
 };
+
+
+
+

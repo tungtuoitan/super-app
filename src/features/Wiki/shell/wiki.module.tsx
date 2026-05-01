@@ -1,4 +1,5 @@
-import { BookOpen } from "lucide-react";
+﻿import { BookOpen } from "lucide-react";
+import { shellConstants } from "@/shell/shell.constants";
 import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
 import type { BaseTab } from "@/shell";
@@ -12,20 +13,24 @@ const WikiInfoPanelAdapter = ({ tab }: { tab: BaseTab }) => (
 );
 
 export const wikiModule: ModuleDefinition = {
-    id: constants.modules.wiki,
+    id: "Wiki",
     icon: BookOpen,
-    label: constants.vscode.displayNames.wiki,
+    label: "Wiki",
 
     SidebarView: WikiGraphView,
 
     editorPanels: {
-        [constants.vscode.tab.tabTypes.wikiInfo]: WikiInfoPanelAdapter,
+        [shellConstants.vscode.tab.tabTypes.wikiInfo]: WikiInfoPanelAdapter,
     },
 
-    keepAliveTabTypes: [constants.vscode.tab.tabTypes.wikiInfo],
+    keepAliveTabTypes: [shellConstants.vscode.tab.tabTypes.wikiInfo],
 
     getTabMeta: () => ({
         icon: <BookOpen className="w-4 h-4" style={{ color: WIKI_COLOR }} />,
         color: WIKI_COLOR,
     }),
 };
+
+
+
+

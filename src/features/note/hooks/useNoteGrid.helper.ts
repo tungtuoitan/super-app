@@ -1,10 +1,11 @@
-import { noteService } from "../service/note.service";
+﻿import { noteService } from "../service/note.service";
+import { shellConstants } from "@/shell";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { transformNotes } from "../utils/note.utils";
 import { Note } from "../types/note.types";
 import { useEditorTabHelper } from "@/shell";
-import { constants } from "@/shared";
+import { constants, standardRegistryConstants } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
@@ -38,7 +39,7 @@ export const useNoteGridHelper = () => {
             userId: $user.userId || 0,
             description: "",
             hashtags: "",
-            statusCode: constants.standardRegistryFE.activeStatus.active,
+            statusCode: standardRegistryConstants.activeStatus.active,
             type: "idea",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -47,7 +48,7 @@ export const useNoteGridHelper = () => {
         };
 
         setNotes([newNote, ...notes]);
-        openTab(newNote, constants.vscode.tab.tabTypes.note);
+        openTab(newNote, shellConstants.vscode.tab.tabTypes.note);
         setShouldFocusNoteName(true);
     };
 
@@ -227,3 +228,6 @@ export const useNoteGridHelper = () => {
         loadNotes,
     };
 };
+
+
+

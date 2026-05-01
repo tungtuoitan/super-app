@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GenericFilterPopup - Reusable filter popup for grid components
  * Supports multi-field filtering with checkboxes, date ranges, and standard registry options
  * Filters are stored in userProfile and applied on backend
@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from "react";
+import { projectConstants } from "@/features/project/project.constants";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Checkbox, RadioGroup, RadioGroupItem, Slider, Label, constants, useAuthStore, useStandardRegistrySelector } from "@/shared";
 import { useGenericFilterHelper } from "./useGenericFilterHelper";
@@ -219,7 +220,7 @@ export function GenericFilterPopup() {
     };
 
     /**
-     * Render a single field based on its type/key — no hard-coded view names
+     * Render a single field based on its type/key â€” no hard-coded view names
      */
     const renderField = (group: FilterFieldConfig) => {
         if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
@@ -231,7 +232,7 @@ export function GenericFilterPopup() {
 
     /**
      * Render fields for a specific filterViewKey using registry.
-     * Falls back to constants.filters.groups when view is not registered
+     * Falls back to projectConstants.filters.groups when view is not registered
      * (handles projectGrid and any view not yet migrated to registry).
      */
     const renderFieldsByView = () => {
@@ -240,13 +241,13 @@ export function GenericFilterPopup() {
         const registryGroups = filterRegistry.getFieldConfigs(filterViewKey);
         const groups: readonly FilterFieldConfig[] = registryGroups.length > 0
             ? registryGroups
-            : (constants.filters.groups as any)[filterViewKey] ?? [];
+            : (projectConstants.filters.groups as any)[filterViewKey] ?? [];
 
         return groups.map(renderField);
     };
 
     // Check if UI filters differ from default filters
-    const defaultFilters = filterViewKey ? (constants.filters.defaults[filterViewKey] as ViewFilter) : {};
+    const defaultFilters = filterViewKey ? (projectConstants.filters.defaults[filterViewKey] as ViewFilter) : {};
 
     const hasDiff = (() => {
         if (!filterViewKey) return false;
@@ -261,9 +262,9 @@ export function GenericFilterPopup() {
 
     useEffect(() => {
         // When popup opens, load current user filters into UI
-        //* bắt buộc phải update ngay mỗi khi userFilters thay đổi, thì khi vào web ta mới thấy chấm trắng bên cạnh FilterIcon nếu có filter áp dụng
+        //* báº¯t buá»™c pháº£i update ngay má»—i khi userFilters thay Ä‘á»•i, thÃ¬ khi vÃ o web ta má»›i tháº¥y cháº¥m tráº¯ng bÃªn cáº¡nh FilterIcon náº¿u cÃ³ filter Ã¡p dá»¥ng
         if (filterViewKey) {
-            setUIFilters($user.filters?.[filterViewKey] || constants.filters.defaults[filterViewKey] as ViewFilter);
+            setUIFilters($user.filters?.[filterViewKey] || projectConstants.filters.defaults[filterViewKey] as ViewFilter);
         }
     }, [filterViewKey, $user.filters]);
 
@@ -273,7 +274,7 @@ export function GenericFilterPopup() {
 
         // When opening, load current user filters into UI
         if (newOpen && filterViewKey) {
-            setUIFilters($user.filters?.[filterViewKey] || constants.filters.defaults[filterViewKey] as ViewFilter);
+            setUIFilters($user.filters?.[filterViewKey] || projectConstants.filters.defaults[filterViewKey] as ViewFilter);
         }
     };
 
@@ -332,3 +333,6 @@ export function GenericFilterPopup() {
         </Popover>
     );
 }
+
+
+

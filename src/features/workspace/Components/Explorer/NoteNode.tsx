@@ -1,4 +1,6 @@
-import React, { useCallback } from "react";
+﻿import React, { useCallback } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
+import { shellConstants } from "@/shell/shell.constants";
 import { NodeApi } from "react-arborist";
 import { FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -202,7 +204,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
             setLastSelectedItemId(workspaceItemId);
             node.select();
 
-            // ✅ Open note in editor tab (convert WorkspaceNoteItem to Note)
+            // âœ… Open note in editor tab (convert WorkspaceNoteItem to Note)
             const note: Note = {
                 id: noteItem.data.id,
                 name: noteItem.data.name,
@@ -219,7 +221,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                 userId: noteItem.data.userId,
             };
 
-            openTab(note, constants.vscode.tab.tabTypes.note);
+            openTab(note, shellConstants.vscode.tab.tabTypes.note);
         }
     };
 
@@ -231,7 +233,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
         const _currentItem = currentWorkspace?.flatData.find((i: any) => i.entityId === entityId);
 
         // Open note-specific context menu (V2 structure)
-        showContextMenu(e, constants.workspace.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });
+        showContextMenu(e, workspaceConstants.itemTypes.note, { ...noteItem, parentId: _currentItem?.parentId ?? null });
     };
 
     return (
@@ -299,7 +301,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                             _ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""
                         }`}
                     />
-                    {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
+                    {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">ðŸ“Œ</span>} */}
                     <StatusDot
                         isUnsaved={isUnsaved}
                         isDuplicate={isDuplicate}
@@ -314,3 +316,6 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
         </div>
     );
 }
+
+
+

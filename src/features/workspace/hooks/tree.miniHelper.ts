@@ -3,6 +3,7 @@ import { WorkspaceItemV2, WorkspaceFolderItem, isFolder as isFolderV2, canHaveCh
 import { constants } from "@/shared";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import {Folder} from "../types/folder.types";
+import {workspaceConstants} from "../workspace.constants";
 
 // ============================================
 // RECURSIVE HELPER FUNCTIONS (prefix with $)
@@ -91,7 +92,7 @@ export function $filterTreeBySearch(nodes: Folder[], searchText: string): Folder
  * Includes node if it matches OR any descendant matches
  * Shows matching nodes WITH all their ancestors (parent, grandparent, etc.)
  *
- * Search modes (configured in constants.workspace.search.mode):
+ * Search modes (configured in workspaceConstants.search.mode):
  * - "showAllDescendants": When node X matches → show X + ALL children/grandchildren
  * - "exactMatchOnly": When node X matches → show only X (hide children unless they also match)
  *
@@ -103,7 +104,7 @@ export function $filterTreeBySearchV2(nodes: TreeFolder[], searchText: string): 
     if (!searchText || !searchText.trim()) return nodes;
 
     const query = searchText.toLowerCase().trim();
-    const searchMode = constants.workspace.search.mode;
+    const searchMode = workspaceConstants.search.mode;
     const results: TreeFolder[] = [];
 
     for (const node of nodes) {
@@ -507,15 +508,15 @@ export function transformToTreeData(
 
     // Create workspace root node from WorkspaceDTO
     const workspaceRootV2: TreeFolder = {
-        id: `${constants.workspace.root.workspaceItemId}`,
+        id: `${workspaceConstants.root.workspaceItemId}`,
         name: data.name,
         data: {
             // WorkspaceItemV2 structure
-            id: constants.workspace.root.workspaceItemId, // workspace_items.id
+            id: workspaceConstants.root.workspaceItemId, // workspace_items.id
             workspaceId: data.id,
             parentId: null,
             entityType: 2, // folder
-            entityId: constants.workspace.root.entityId, // folders.id (entity ID)
+            entityId: workspaceConstants.root.entityId, // folders.id (entity ID)
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             deletedAt: null,
@@ -525,7 +526,7 @@ export function transformToTreeData(
             isOriginal: true,
             data: {
                 // FolderData - entity data
-                id: constants.workspace.root.entityId, // folders.id (entity ID)
+                id: workspaceConstants.root.entityId, // folders.id (entity ID)
                 userId: data.userId,
                 name: data.name,
                 description: data.description,

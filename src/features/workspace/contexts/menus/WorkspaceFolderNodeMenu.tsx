@@ -1,4 +1,5 @@
-import React from "react";
+﻿import React from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import {
     Plus as AddIcon,
@@ -39,9 +40,9 @@ export function WorkspaceFolderNodeMenu() {
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
     
     const addMenuItems = [
-        { type: constants.workspace.itemTypes.folder, icon: AddIcon, label: "New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
-        { type: constants.workspace.itemTypes.note, icon: AddIcon, label: "New Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
-        { type: constants.workspace.itemTypes.file, icon: AddIcon, label: "New File", disabled: true },
+        { type: workspaceConstants.itemTypes.folder, icon: AddIcon, label: "New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: workspaceConstants.itemTypes.note, icon: AddIcon, label: "New Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: workspaceConstants.itemTypes.file, icon: AddIcon, label: "New File", disabled: true },
     ];
 
     return (
@@ -50,9 +51,9 @@ export function WorkspaceFolderNodeMenu() {
             {addMenuItems.map((item) => {
                 const Icon = item.icon;
                 const handleClick = () => {
-                    if (item.type === constants.workspace.itemTypes.note) {
+                    if (item.type === workspaceConstants.itemTypes.note) {
                         createNewNote(contextData);
-                    } else if (item.type === constants.workspace.itemTypes.folder) {
+                    } else if (item.type === workspaceConstants.itemTypes.folder) {
                         createFolder(item.type, contextData);
                     }
                     // Other types not implemented yet
@@ -82,7 +83,7 @@ export function WorkspaceFolderNodeMenu() {
                         if (_ITEMSTATUS.isDirectlyDeleted) {
                             return (
                                 <>
-                                    {/* //*TẠM THỜI DISABLE VÌ CHƯA TRIỂN KHAI  */}
+                                    {/* //*Táº M THá»œI DISABLE VÃŒ CHÆ¯A TRIá»‚N KHAI  */}
                                     {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
                                     <HardDeleteIcon className="w-4 h-4 mr-2" />
                                     Hard Delete
@@ -96,7 +97,7 @@ export function WorkspaceFolderNodeMenu() {
                         }
                         // If item is deleted but not directly (inherited from parent), only show Hard Delete
                         // Don't show if multiple selected and any item is still active
-                        //* TẠM THỜI ẨN VÌ CHƯA TRIỂN KHAI
+                        //* Táº M THá»œI áº¨N VÃŒ CHÆ¯A TRIá»‚N KHAI
                         // else if (isDeleted && !isDirectlyDeleted && !(isMultipleSelected && hasAnyNormalItem)) {
                         //     return (
                         //         <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
@@ -124,3 +125,4 @@ export function WorkspaceFolderNodeMenu() {
         </>
     );
 }
+

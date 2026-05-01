@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Workspace View - Workspace tree navigation
  * Extracted from VSSideBar for better separation of concerns
  */
 
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { constants } from "@/shared";
-import { useEditorTabBarStore } from "@/shell";
+import { shellConstants, useEditorTabBarStore } from "@/shell";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import { BaseTab } from "@/shell";
@@ -26,7 +26,7 @@ export function useWorkspaceHelper() {
     // Handle workspace selection change
     const saveNewsBeforeNavigate = async (): Promise<boolean> => {
         const unsavedTabs = openTabs.filter((tab: BaseTab) => {
-            if (tab.type !== constants.vscode.tab.tabTypes.note) return false;
+            if (tab.type !== shellConstants.vscode.tab.tabTypes.note) return false;
             const note = tab.data as Note;
             const belongsToCurrentWorkspace = currentWorkspace && findNoteByEntityId(currentWorkspace, note.id);
             return belongsToCurrentWorkspace && note.id < 0;
@@ -57,3 +57,4 @@ export function useWorkspaceHelper() {
         saveNewsBeforeNavigate,
     };
 }
+

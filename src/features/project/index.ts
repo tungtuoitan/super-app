@@ -42,3 +42,5 @@ export { projectModule, projectKeywordPlugin } from "./shell/project.module";
 // Context menus
 export { TaskGridMenu } from "./task/contexts/menus/TaskGridMenu";
 export { TaskFlowMenu } from "./task/contexts/menus/TaskFlowMenu";
+
+export { projectConstants } from "./project.constants";

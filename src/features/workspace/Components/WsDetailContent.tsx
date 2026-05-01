@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from "react";
-import { GenericTextField, GenericAutoComplete, IAutoCompleteOptions } from "@/shared";
+import { GenericTextField, GenericAutoComplete, IAutoCompleteOptions, standardRegistryConstants } from "@/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared";
 import { Textarea } from "@/shared";
 import { ScrollArea } from "@/shared";
@@ -52,8 +52,8 @@ export function WsDetailContent() {
 
     // Create current active value for autocomplete
     const currentActiveValue: IAutoCompleteOptions | null = isDeleted
-        ? constants.standardRegistryFE.activeStatusOptions.find((option) => option.code === constants.standardRegistryFE.activeStatus.inactive) || null
-        : constants.standardRegistryFE.activeStatusOptions.find((option) => option.code === constants.standardRegistryFE.activeStatus.active) || null;
+        ? standardRegistryConstants.activeStatusOptions.find((option) => option.code === standardRegistryConstants.activeStatus.inactive) || null
+        : standardRegistryConstants.activeStatusOptions.find((option) => option.code === standardRegistryConstants.activeStatus.active) || null;
 
     // Handlers for form interactions
     const handleFieldChange = (field: keyof Ws, value: any) => {
@@ -61,7 +61,7 @@ export function WsDetailContent() {
     };
 
     const handleActiveChange = (event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
-        const isActiveSelected = newValue?.code === constants.standardRegistryFE.activeStatus.active;
+        const isActiveSelected = newValue?.code === standardRegistryConstants.activeStatus.active;
         const newDeletedAt = isActiveSelected ? null : new Date();
         handleWsFieldChange('deletedAt', newDeletedAt);
     };
@@ -102,7 +102,7 @@ export function WsDetailContent() {
                         <GenericAutoComplete
                             value={currentActiveValue}
                             onChange={handleActiveChange}
-                            allOptions={constants.standardRegistryFE.activeStatusOptions as unknown as IAutoCompleteOptions[]}
+                            allOptions={standardRegistryConstants.activeStatusOptions as unknown as IAutoCompleteOptions[]}
                             inputProps={{
                                 name: "activeStatus",
                                 label: "Status",

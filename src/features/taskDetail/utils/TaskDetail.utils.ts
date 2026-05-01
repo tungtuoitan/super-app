@@ -1,23 +1,24 @@
-/**
+﻿/**
  * Task Detail Utilities
- * Pure functions — no hooks, no React.
- * Colors, date formatting, DTO → domain transform.
+ * Pure functions â€” no hooks, no React.
+ * Colors, date formatting, DTO â†’ domain transform.
  */
 
 import { constants } from "@/shared";
+import { projectConstants } from "@/features/project/project.constants";
 import { parseAsLocalDate } from "@/shared";
 import {Task, TaskDTO} from "../types/task.types";
 
 /** Task status bg/text colors from constants */
 export const getTaskStatusColors = (status: string) => {
-    const colors = constants.optionColor.taskStatus.colors[status];
-    return colors ?? constants.optionColor.taskStatus.default;
+    const colors = projectConstants.optionColor.taskStatus.colors[status];
+    return colors ?? projectConstants.optionColor.taskStatus.default;
 };
 
 /** Task priority bg/text colors from constants */
 export const getTaskPriorityColors = (priority: string) => {
-    const colors = constants.optionColor.taskPriority.colors[priority];
-    return colors ?? constants.optionColor.taskPriority.default;
+    const colors = projectConstants.optionColor.taskPriority.colors[priority];
+    return colors ?? projectConstants.optionColor.taskPriority.default;
 };
 
 /** Format a Date for UI display */
@@ -62,3 +63,6 @@ export const transformTaskData = (dtos: TaskDTO[]): Task[] =>
         parentStartDate: parseAsLocalDate(dto.parentStartDate),
         parentEndDate: parseAsLocalDate(dto.parentEndDate),
     }));
+
+
+

@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Task List Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
- * Gets projectId from useProjectDetailStore — NO params.
+ * Gets projectId from useProjectDetailStore â€” NO params.
  */
 
 import { IStatusOption, useGetStandardRegistry } from "@/shared";
+import { projectConstants } from "@/features/project/project.constants";
 import { getTaskStatusColors, getTaskPriorityColors, sortTasksHierarchically } from "@/features/taskDetail";
 import { constants } from "@/shared";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
@@ -33,7 +34,7 @@ export const useTaskListSelector = () => {
                     textColor: colors.text,
                 };
             })
-            .sort((a:any, b:any) => (constants.optionOrder.taskStatuses[a.label] ?? 999) - (constants.optionOrder.taskStatuses[b.label] ?? 999));
+            .sort((a:any, b:any) => (projectConstants.optionOrder.taskStatuses[a.label] ?? 999) - (projectConstants.optionOrder.taskStatuses[b.label] ?? 999));
     })()
 
     // Get priority options from registriesByType with colors
@@ -50,7 +51,7 @@ export const useTaskListSelector = () => {
                     textColor: colors.text,
                 };
             })
-            .sort((a:any, b:any) => (constants.optionOrder.taskPriorities[a.label] ?? 999) - (constants.optionOrder.taskPriorities[b.label] ?? 999));
+            .sort((a:any, b:any) => (projectConstants.optionOrder.taskPriorities[a.label] ?? 999) - (projectConstants.optionOrder.taskPriorities[b.label] ?? 999));
     })()
 
     // Filter tasks by projectId and search query
@@ -78,3 +79,5 @@ export const useTaskListSelector = () => {
         sortedTasks,
     };
 };
+
+

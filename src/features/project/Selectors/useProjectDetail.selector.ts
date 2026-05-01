@@ -1,10 +1,12 @@
-/**
+﻿/**
  * ProjectDetail Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
- * Reads from stores directly — NO params.
+ * Reads from stores directly â€” NO params.
  */
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
+import { projectConstants } from "@/features/project/project.constants";
+import { shellConstants } from "@/shell/shell.constants";
 import { constants, useGetStandardRegistry } from "@/shared";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared";
@@ -25,7 +27,7 @@ export const useProjectDetailSelector = () => {
     // Get project data from the open tab
     const selectedProject = (() => {
         const projectTab = openTabs.find(
-            (tab) => tab.type === constants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId,
+            (tab) => tab.type === shellConstants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId,
         );
         return projectTab ? (projectTab.data as Project) : undefined;
     })()
@@ -49,7 +51,7 @@ export const useProjectDetailSelector = () => {
                 };
             })
             .sort((a:any, b:any) =>
-                (constants.optionOrder.projectStatuses[a.label] ?? 999) - (constants.optionOrder.projectStatuses[b.label] ?? 999),
+                (projectConstants.optionOrder.projectStatuses[a.label] ?? 999) - (projectConstants.optionOrder.projectStatuses[b.label] ?? 999),
             );
     })()
 
@@ -79,3 +81,7 @@ export const useProjectDetailSelector = () => {
         isDeleted,
     };
 };
+
+
+
+

@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from "react";
+﻿import React, { useEffect, useMemo } from "react";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
@@ -30,7 +31,7 @@ export function WorkspaceTree() {
     const { allWorkspaces, isLoadingWorkspaces, isLoadingTree, setIsLoadingTree, setIsLoadingWorkspaces } = useWorkspaceStore();
 
     // Transform workspace data to tree format
-    // Handles: extract folders → filter by search → wrap in workspace root → convert to TreeFolder
+    // Handles: extract folders â†’ filter by search â†’ wrap in workspace root â†’ convert to TreeFolder
     const treeData = useMemo(() => {
         const baseTree = treeMiniHelper.transformToTreeData(currentWorkspace, searchQuery);
 
@@ -41,11 +42,11 @@ export function WorkspaceTree() {
                 name: "",
                 data: {
                     // V2 structure - WorkspaceItemV2
-                    id: constants.workspace.dropZone.workspaceItemId, // workspace_items.id
+                    id: workspaceConstants.dropZone.workspaceItemId, // workspace_items.id
                     workspaceId: currentWorkspace.id,
                     parentId: null,
                     entityType: 2 as const,
-                    entityId: constants.workspace.dropZone.entityId, // folders.id (entity ID)
+                    entityId: workspaceConstants.dropZone.entityId, // folders.id (entity ID)
                     createdAt: new Date().toISOString(),
                     updatedAt: undefined,
                     deletedAt: null,
@@ -55,7 +56,7 @@ export function WorkspaceTree() {
                     isOriginal: true,
                     data: {
                         // FolderData - entity data
-                        id: constants.workspace.dropZone.entityId, // folders.id (entity ID)
+                        id: workspaceConstants.dropZone.entityId, // folders.id (entity ID)
                         userId: currentWorkspace.userId,
                         name: "",
                         description: undefined,
@@ -193,9 +194,9 @@ export function WorkspaceTree() {
                         const item = node.data.data;
 
                         // Check workspace root and drop zone by ENTITY ID (entityId)
-                        // Special IDs: constants.workspace.root.entityId = workspace root, constants.workspace.dropZone.entityId = drop zone
-                        const isWorkspaceRoot = (item as any).entityId === constants.workspace.root.entityId;
-                        const isDropZone = (item as any).entityId === constants.workspace.dropZone.entityId;
+                        // Special IDs: workspaceConstants.root.entityId = workspace root, workspaceConstants.dropZone.entityId = drop zone
+                        const isWorkspaceRoot = (item as any).entityId === workspaceConstants.root.entityId;
+                        const isDropZone = (item as any).entityId === workspaceConstants.dropZone.entityId;
 
                         // Render different node types based on item type
                         return (
@@ -261,3 +262,4 @@ export function WorkspaceTree() {
         </>
     );
 }
+

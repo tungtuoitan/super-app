@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Tab Bar Menu Helper Hook
  * Business logic for tab context menu operations
  * Handles pin/unpin, close all, and close all but pinned operations
  */
 
-import { useEditorTabBarStore } from "@/shell";
+import { shellConstants, useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
@@ -13,7 +13,7 @@ import type { BaseTab } from "@/shell";
 
 /** Returns the task group link for a task tab, or null if not a task tab */
 const getTaskGroupLink = (tab: BaseTab): string | null => {
-    if (tab.type !== constants.vscode.tab.tabTypes.task) return null;
+    if (tab.type !== shellConstants.vscode.tab.tabTypes.task) return null;
     const task = tab.data as Task;
     return `sa/p${task.projectId}/t${task.id}`;
 };
@@ -135,3 +135,4 @@ export const useTabBarMenuHelper = () => {
         closeSavedTabsButPinned,
     };
 };
+

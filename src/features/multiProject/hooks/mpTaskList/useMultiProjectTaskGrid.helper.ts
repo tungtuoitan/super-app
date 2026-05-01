@@ -1,9 +1,10 @@
-/**
+﻿/**
  * Multi-Project Task Grid Helper Hook
  * Business logic for task grid operations across multiple projects
  */
 
 import { taskService } from "@/features/taskDetail";
+import { projectConstants } from "@/features/project/project.constants";
 import type { TaskDTO, Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useAuthStore } from "@/shared";
@@ -265,7 +266,7 @@ export const useMultiProjectTaskGridHelper = () => {
                 return;
             }
 
-            const taskGridFilters = $user.filters?.taskGrid || constants.filters.defaults.taskGrid;
+            const taskGridFilters = $user.filters?.taskGrid || projectConstants.filters.defaults.taskGrid;
             const filterParams = {
                 projectIds: validProjectIds.join(","),
                 deletedAt: "null",
@@ -318,3 +319,6 @@ export const useMultiProjectTaskGridHelper = () => {
         deleteRestoreTasks,
     };
 };
+
+
+

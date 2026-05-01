@@ -16,6 +16,7 @@ import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {useConsoleHelper} from "@/shared";
 import {Folder} from "../types/folder.types";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
+import {workspaceConstants} from "../workspace.constants";
 
 export const useTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentWorkspace } = useWorkspaceStore();
@@ -53,7 +54,7 @@ export const useTreeHelper = () => {
 
             // ---- Filter out the drop zone node and root node (virtual nodes with special IDs) ----
             const validNodes = allNodes.filter((node) => {
-                return node.data.id !== constants.workspace.dropZone.workspaceItemId && node.data.id !== constants.workspace.root.workspaceItemId;
+                return node.data.id !== workspaceConstants.dropZone.workspaceItemId && node.data.id !== workspaceConstants.root.workspaceItemId;
             });
 
             let selectedItemIds = args.dragIds
@@ -63,7 +64,7 @@ export const useTreeHelper = () => {
                 })
                 .filter((id): id is number => {
                     // Filter out undefined, drop zone ID, and root ID
-                    return id !== undefined && id !== constants.workspace.dropZone.workspaceItemId && id !== constants.workspace.root.workspaceItemId;
+                    return id !== undefined && id !== workspaceConstants.dropZone.workspaceItemId && id !== workspaceConstants.root.workspaceItemId;
                 });
 
             // ---- get only top-level parents from selected items ----
@@ -95,7 +96,7 @@ export const useTreeHelper = () => {
                 if (!targetNode) {
                     // ---- Check if it's the drop zone node ----
                     const dropZoneNode = allNodes.find((t) => t.id === args.parentId);
-                    if (dropZoneNode && dropZoneNode.data.id === constants.workspace.dropZone.workspaceItemId) {
+                    if (dropZoneNode && dropZoneNode.data.id === workspaceConstants.dropZone.workspaceItemId) {
                         newParentId = undefined;
 
                         // ---- VALIDATION: If all items already root-level, prevent drop ----
@@ -152,7 +153,7 @@ export const useTreeHelper = () => {
             // -------------------------------------------------------
             // STEP 3: VALIDATION - PREVENT INVALID MOVES
             // -------------------------------------------------------
-            const hasWorkspaceRoot = selectedItemIds.some((id) => id === constants.workspace.root.workspaceItemId);
+            const hasWorkspaceRoot = selectedItemIds.some((id) => id === workspaceConstants.root.workspaceItemId);
             if (hasWorkspaceRoot) {
                 console.warn("⚠️ Cannot move workspace root node");
                 setIsDragging(false);
@@ -187,7 +188,7 @@ export const useTreeHelper = () => {
                 ? targetNode.children || []
                 : treeData.filter((t) => {
                       const workspaceItemId = t.data.id;
-                      return workspaceItemId > 0 && workspaceItemId !== constants.workspace.dropZone.workspaceItemId;
+                      return workspaceItemId > 0 && workspaceItemId !== workspaceConstants.dropZone.workspaceItemId;
                   });
 
             // ---- VALIDATION: Check same parent - different logic for single vs multi-select ----
@@ -395,7 +396,7 @@ export const useTreeHelper = () => {
         const folders = treeMiniHelper.$traverse(treeData).map((t) => t.data);
         const parentFolder = parentId ? treeMiniHelper.$findFolderById((folders || []) as unknown as Folder[], parentId) : undefined;
 
-        openFolderDialog("create", constants.workspace.itemTypes.folder, null, parentFolder);
+        openFolderDialog("create", workspaceConstants.itemTypes.folder, null, parentFolder);
     };
 
     return {

@@ -1,10 +1,11 @@
-/**
+﻿/**
  * LifeLog Tab Helper Hook
  * Manages opening/closing log editor tabs
  */
 
 
 import { constants } from "@/shared";
+import { shellConstants } from "@/shell/shell.constants";
 import type { BaseTab } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { useLifeLogStore } from "../store/useLifeLog.store";
@@ -16,14 +17,14 @@ export function useLifeLogTabHelper() {
 
     const openLogTab = (log: LifeLogLog) => {
         const existing = openTabs.find(
-            (t) => t.type === constants.vscode.tab.tabTypes.lifeLog && (t.data as LifeLogLog).id === log.id
+            (t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLog && (t.data as LifeLogLog).id === log.id
         );
         if (existing) {
             setActiveTabId(existing.id);
         } else {
             const newTab: BaseTab = {
                 id: `lifelog-tab-${log.id}-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.lifeLog,
+                type: shellConstants.vscode.tab.tabTypes.lifeLog,
                 data: log,
                 data0: log,
                 title: log.title || log.type || "Log",
@@ -35,7 +36,7 @@ export function useLifeLogTabHelper() {
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
     }
 
-    /** Create temp log (negative ID), push to store, open tab — no API call */
+    /** Create temp log (negative ID), push to store, open tab â€” no API call */
     const openNewLogTab = () => {
         const tempId = -Date.now();
         const now = new Date();
@@ -55,7 +56,7 @@ export function useLifeLogTabHelper() {
         setLogs((prev) => [tempLog, ...prev]);
         const newTab: BaseTab = {
             id: `lifelog-tab-${tempId}`,
-            type: constants.vscode.tab.tabTypes.lifeLog,
+            type: shellConstants.vscode.tab.tabTypes.lifeLog,
             data: tempLog,
             data0: tempLog,
             title: "New Log",
@@ -68,14 +69,14 @@ export function useLifeLogTabHelper() {
 
     const openTrackTab = (track: LifeLogTrack) => {
         const existing = openTabs.find(
-            (t) => t.type === constants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === track.id
+            (t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === track.id
         );
         if (existing) {
             setActiveTabId(existing.id);
         } else {
             const newTab: BaseTab = {
                 id: `lifelog-track-tab-${track.id}-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.lifeLogTrack,
+                type: shellConstants.vscode.tab.tabTypes.lifeLogTrack,
                 data: track,
                 data0: track,
                 title: track.name || "Track",
@@ -87,7 +88,7 @@ export function useLifeLogTabHelper() {
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
     }
 
-    /** Create temp track (negative ID), push to store, open tab — no API call */
+    /** Create temp track (negative ID), push to store, open tab â€” no API call */
     const openNewTrackTab = () => {
         const tempId = -Date.now();
         const now = new Date();
@@ -105,7 +106,7 @@ export function useLifeLogTabHelper() {
         setTracks((prev) => [tempTrack, ...prev]);
         const newTab: BaseTab = {
             id: `lifelog-track-tab-${tempId}`,
-            type: constants.vscode.tab.tabTypes.lifeLogTrack,
+            type: shellConstants.vscode.tab.tabTypes.lifeLogTrack,
             data: tempTrack,
             data0: tempTrack,
             title: "New Track",
@@ -117,13 +118,13 @@ export function useLifeLogTabHelper() {
     }
 
     const openGraphTab = () => {
-        const existing = openTabs.find((t) => t.type === constants.vscode.tab.tabTypes.lifeLogGraph);
+        const existing = openTabs.find((t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLogGraph);
         if (existing) {
             setActiveTabId(existing.id);
         } else {
             const newTab: BaseTab = {
                 id: `lifelog-graph-tab-${Date.now()}`,
-                type: constants.vscode.tab.tabTypes.lifeLogGraph,
+                type: shellConstants.vscode.tab.tabTypes.lifeLogGraph,
                 data: {} as any,
                 data0: {} as any,
                 title: "Track Activity",
@@ -142,7 +143,7 @@ export function useLifeLogTabHelper() {
     const updateLogInTabs = (logId: number, updatedFields: Partial<LifeLogLog>) => {
         setOpenTabs((prev) =>
             prev.map((t) => {
-                if (t.type !== constants.vscode.tab.tabTypes.lifeLog) return t;
+                if (t.type !== shellConstants.vscode.tab.tabTypes.lifeLog) return t;
                 const log = t.data as LifeLogLog;
                 if (log.id !== logId) return t;
                 const updated = { ...log, ...updatedFields };
@@ -153,3 +154,5 @@ export function useLifeLogTabHelper() {
 
     return { openLogTab, openNewLogTab, openTrackTab, openNewTrackTab, openGraphTab, closeLogTab, updateLogInTabs };
 }
+
+

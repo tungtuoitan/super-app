@@ -1,4 +1,5 @@
-import { useFolderDialogStore } from "../store/FolderDialog.store";
+﻿import { useFolderDialogStore } from "../store/FolderDialog.store";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import type { ItemType } from "../store/FolderDialog.store";
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { useAuthStore } from "@/shared";
@@ -129,7 +130,7 @@ export const useFolderDialogHelper = () => {
                 await workspaceService._upsertWorkspaceItems(token, selectedWorkspaceId, [{
                     action: WorkspaceItemAction.Create,
                     entityType: 2, // Folder
-                    parentId: parentWorkspaceItemId, // ✅ Use parent's workspace_items.id (NOT entityId!)
+                    parentId: parentWorkspaceItemId, // âœ… Use parent's workspace_items.id (NOT entityId!)
                     folderData: {
                         name: newFolderName.trim(),
                         description: description.trim() || undefined,
@@ -200,7 +201,7 @@ export const useFolderDialogHelper = () => {
      * @param folder - For edit mode: folder to edit (required). For create mode: unused
      * @param parentFolder - For create mode: parent folder (optional). For edit mode: unused
      */
-    const openFolderDialog = (dialogMode: "create" | "edit", type: ItemType = constants.workspace.itemTypes.folder, folder?: Folder | null, parentFolder?: Folder | null) => {
+    const openFolderDialog = (dialogMode: "create" | "edit", type: ItemType = workspaceConstants.itemTypes.folder, folder?: Folder | null, parentFolder?: Folder | null) => {
         setMode(dialogMode);
         setItemType(type);
 
@@ -261,3 +262,4 @@ export const useFolderDialogHelper = () => {
         submitFolder,
     };
 };
+

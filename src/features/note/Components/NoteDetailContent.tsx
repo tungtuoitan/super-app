@@ -1,8 +1,9 @@
-/**
+﻿/**
  * Note Detail Dialog Content Component
  */
 
 import React, { useEffect } from "react";
+import { shellConstants } from "@/shell/shell.constants";
 import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
@@ -18,7 +19,7 @@ export function NoteDetailContent() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { getActiveTab } = useEditorTabHelper();
     const activeTab = getActiveTab();
-    const activeNote = activeTab?.type === constants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
+    const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
     useMarkdownEditorTheme({$mi: $miRef.current});
@@ -58,3 +59,5 @@ export function NoteDetailContent() {
         </div>
     );
 }
+
+

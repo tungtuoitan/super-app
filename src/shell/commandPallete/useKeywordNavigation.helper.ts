@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hook for handling keyword navigation in markdown editor
  */
 
@@ -6,7 +6,7 @@ import { useWorkspaceStore } from "@/features/workspace";
 import { useAuthStore } from "@/shared";
 import { useEditorTabHelper } from "../hooks/useEditorTab.helper";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
-import { useSideBarStore } from "@/shell";
+import { shellConstants, useSideBarStore } from "@/shell";
 import { noteService } from "@/features/note";
 import { parseKeywordLink, constants, isValidUrl } from "@/shared";
 import type { Keyword } from "@/shared";
@@ -69,8 +69,8 @@ export const useKeywordNavigationHelper = () => {
             // Workspace-based navigation (workspace / folder / note)
             if (!parsed.workspaceId) return;
 
-            if (moduleName !== constants.modules.workspace) {
-                setModuleName(constants.modules.workspace);
+            if (moduleName !== "Workspace") {
+                setModuleName("Workspace");
             }
 
             let targetWorkspace: WorkspaceDTO | null = currentWorkspace;
@@ -137,7 +137,7 @@ export const useKeywordNavigationHelper = () => {
                         userId: noteItem.data.userId,
                     };
 
-                    openTab(note, constants.vscode.tab.tabTypes.note, openedBy);
+                    openTab(note, shellConstants.vscode.tab.tabTypes.note, openedBy);
                     setSelectedItemIds([noteItem.id]);
                     setLastSelectedItemId(noteItem.id);
 
@@ -170,7 +170,7 @@ export const useKeywordNavigationHelper = () => {
                             deletedAt: noteData.deletedAt ? new Date(noteData.deletedAt) : null,
                             userId: noteData.userId,
                         };
-                        openTab(note, constants.vscode.tab.tabTypes.note, openedBy);
+                        openTab(note, shellConstants.vscode.tab.tabTypes.note, openedBy);
                     } else {
                         _console.warning("Note not found");
                     }
@@ -210,3 +210,7 @@ export function findNoteByEntityId(workspace: any, noteEntityId: number): Worksp
     );
     return item as WorkspaceNoteItem | null;
 }
+
+
+
+

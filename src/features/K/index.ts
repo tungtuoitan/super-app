@@ -1,4 +1,4 @@
-// Types
+﻿// Types
 export type { KWsResponse } from "./types/K.types";
 export type { KItemV2 } from "./types/K-v2.types";
 
@@ -6,7 +6,6 @@ export type { KItemV2 } from "./types/K-v2.types";
 export { KProviders } from "./store/KProviders";
 
 // shell module
-export { kModule } from "./shell/k.module";
 
 // Context menus
 export { KNodeMenu } from "./contexts/menu/KNodeMenu";
@@ -16,3 +15,4 @@ export { KTestFlowMenu } from "./contexts/menu/KTestFlowMenu";
 export { KNodePanelBlankMenu } from "./contexts/menu/KNodePanelBlankMenu";
 
 export { useKLoader } from "./hooks/kTree/useK.loader";export { registerKFilters } from "./shell/k.filterConfig";
+

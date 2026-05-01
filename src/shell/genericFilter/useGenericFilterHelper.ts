@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Generic Filter Helper Hook
  * Business logic for managing generic filter operations
  * Pattern: Separate business logic from component
@@ -15,6 +15,7 @@ import {useConsoleHelper} from "@/shared";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "./filter.types";
 import { filterRegistry } from "./filterRegistry";
 import {useSideBarStore} from "@/shell";
+import {projectConstants} from "@/features/project/project.constants";
 
 /**
  * Generic filter helper hook for filter operations
@@ -47,9 +48,9 @@ export function useGenericFilterHelper() {
             if (!token) {
                 throw new Error("User not authenticated");
             }
-            const newUserFilters: UserFilters = $user.filters || (constants.filters.defaults as UserFilters);
+            const newUserFilters: UserFilters = $user.filters || (projectConstants.filters.defaults as UserFilters);
             newUserFilters[filterViewKey as keyof UserFilters] = usingDefaultFilter
-                ? (constants.filters.defaults[filterViewKey] as ViewFilter) || (constants.filters.defaults as ViewFilter)
+                ? (projectConstants.filters.defaults[filterViewKey] as ViewFilter) || (projectConstants.filters.defaults as ViewFilter)
                 : uiFilters;
 
             // Update backend - will upsert profile if not exists
@@ -67,7 +68,7 @@ export function useGenericFilterHelper() {
                 filters: newFilters ? JSON.parse(newFilters) : undefined,
             };
             set$User(updatedUser);
-            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || (constants.filters.defaults[filterViewKey] as ViewFilter));
+            setUIFilters(updatedUser.filters?.[filterViewKey as keyof UserFilters] || (projectConstants.filters.defaults[filterViewKey] as ViewFilter));
 
             // In dev environment, update localStorage with new filters
             // if (envConfig.NODE_ENV === constants.environments.development) {
@@ -151,7 +152,7 @@ export function useGenericFilterHelper() {
         const registryConfigs = filterRegistry.getFieldConfigs(filterViewKey);
         const fieldConfigs: readonly FilterFieldConfig[] = registryConfigs.length > 0
             ? registryConfigs
-            : (constants.filters.groups as any)[filterViewKey] ?? [];
+            : (projectConstants.filters.groups as any)[filterViewKey] ?? [];
 
         fieldConfigs.forEach((fieldConfig) => {
             const filterValue = (uiFilters as any)[fieldConfig.key];
@@ -202,3 +203,5 @@ export function useGenericFilterHelper() {
         isApplyDisabled,
     };
 }
+
+

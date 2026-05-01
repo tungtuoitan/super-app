@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TaskFilterPopup - Filter popup for task views (taskList, kanban, timeline)
  * Self-contained, always operates on "taskGrid" filters in userProfile
  */
@@ -16,9 +16,10 @@ import {parseApiError} from "@/shared";
 import {UserFilters, ViewFilter} from "@/shell";
 import {useAuthStore} from "@/shared";
 import {TaskFilterGroup} from "./TaskFilterGroup";
+import {projectConstants} from "@/features/project";
 
-const DEFAULT_FILTERS = constants.filters.defaults.taskGrid as ViewFilter;
-const GROUPS = constants.filters.taskGroups;
+const DEFAULT_FILTERS = projectConstants.filters.defaults.taskGrid as ViewFilter;
+const GROUPS = projectConstants.filters.taskGroups;
 
 export function TaskFilterPopup() {
     const { $user, set$User } = useAuthStore();
@@ -130,3 +131,5 @@ export function TaskFilterPopup() {
         </Popover>
     );
 }
+
+

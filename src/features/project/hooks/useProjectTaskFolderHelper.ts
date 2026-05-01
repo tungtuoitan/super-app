@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Cross-feature helper: Task folder creation & note-to-folder assignment.
  * Owned by project feature because project/task controls the workspace folder lifecycle.
  * Consumed by useProjectSaveActions (task save) and useNoteSaveActions (note-from-task save).
  */
 
 import { useRef, useEffect } from "react";
+import { shellConstants } from "@/shell/shell.constants";
 import { useAuthStore } from "@/shared";
 import { useProjectStore } from "../store/useProject.store";
 import type { Task } from "@/features/taskDetail";
@@ -85,7 +86,7 @@ export function useProjectTaskFolderHelper() {
 
             const project = await resolveProject(savedTask.projectId);
             if (!project) {
-                _console.error("Project not found — cannot create task folder");
+                _console.error("Project not found â€” cannot create task folder");
                 return;
             }
 
@@ -165,7 +166,7 @@ export function useProjectTaskFolderHelper() {
                     t.id === savedTask.id ? { ...t, folderWorkspaceItemId } : t
                 ));
                 setOpenTabs((prev) => prev.map((tab) => {
-                    if (tab.type === constants.vscode.tab.tabTypes.task && (tab.data as Task).id === savedTask.id) {
+                    if (tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === savedTask.id) {
                         return { ...tab, data: { ...tab.data as Task, folderWorkspaceItemId }, data0: { ...tab.data0 as Task, folderWorkspaceItemId } };
                     }
                     return tab;
@@ -192,7 +193,7 @@ export function useProjectTaskFolderHelper() {
 
             const folderWorkspaceItemId = activeTab.metadata?.folderWorkspaceItemId as number | null | undefined;
             if (!folderWorkspaceItemId) {
-                _console.error("Task has no folder — folder should have been created when the task was saved");
+                _console.error("Task has no folder â€” folder should have been created when the task was saved");
                 return;
             }
 
@@ -233,3 +234,5 @@ export function useProjectTaskFolderHelper() {
 
     return { createTaskFolder, addNoteToTaskFolder };
 }
+
+

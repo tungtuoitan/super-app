@@ -1,5 +1,5 @@
-import React from "react";
-import { useEditorTabHelper } from "@/shell";
+﻿import React from "react";
+import { shellConstants, useEditorTabHelper } from "@/shell";
 import { constants } from "@/shared";
 import { useOpenTabSync } from "../../hooks/useOpenTabsSync";
 import { TabBar } from "./TabBar";
@@ -10,8 +10,8 @@ import {EditorToolbar} from "./EditorToolbar";
 import {ConfirmCloseDialog} from "../ConfirmCloseDialog";
 
 /**
- * VSEditorArea — main editor area.
- * Renders editor panels via the module registry — no direct feature imports.
+ * VSEditorArea â€” main editor area.
+ * Renders editor panels via the module registry â€” no direct feature imports.
  */
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, editorAreaRef } = useEditorTabBarStore();
@@ -38,7 +38,7 @@ export function VSEditorArea() {
 
             <TabBar />
 
-            {activeTab && activeTab.type !== constants.vscode.tab.tabTypes.trackingGraph && (
+            {activeTab && activeTab.type !== shellConstants.vscode.tab.tabTypes.trackingGraph && (
                 <EditorToolbar />
             )}
 
@@ -60,7 +60,7 @@ export function VSEditorArea() {
                         );
                     })}
 
-                {/* Active tab panel (skip keep-alive types — already rendered above) */}
+                {/* Active tab panel (skip keep-alive types â€” already rendered above) */}
                 {activeTab && !keepAliveTabTypes.includes(activeTab.type) ? (
                     <ActivePanel tab={activeTab} />
                 ) : !activeTab ? (
@@ -88,9 +88,12 @@ function WelcomeState() {
     return (
         <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
             <div className="text-center">
-                <h2 className="text-xl font-semibold mb-1">Welcome to {constants.vscode.displayNames.notes}</h2>
+                <h2 className="text-xl font-semibold mb-1">Welcome to {"Notes"}</h2>
                 <p className="text-sm">Select a note from the sidebar to view its details</p>
             </div>
         </div>
     );
 }
+
+
+
