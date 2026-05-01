@@ -7,7 +7,7 @@
 
 import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, getAllIconLabel, IconKey } from "@/shared";
 import { Button } from "@/shared";
 import { GenericTextField, IconPicker } from "@/shared";
 import { useKNodeDialogHelper as useKFolderDialogHelper } from "../../../hooks/useKNodeDialog.helper";
@@ -15,8 +15,6 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import {useKStore} from "../../../store/K.store";
 import {isFolder, KItemV2} from "../../../types/K-v2.types";
 import {kconstants} from "../../../utils/K.Constants";
-import {getAllIconLabel} from "../../../shared/icons/icon.utils";
-import {KIconKey} from "../../../shared/icons/icon.types";
 import {useNodeDialogStore} from "../../../store/KNodeDialog.store";
 import { getIconDefaultColor } from "@/shared";
 import { useGlobalShortcut } from "@/shared";
@@ -39,8 +37,8 @@ export function KDialog() {
     useEffect(() => {
         if (isNodeDialogOpen && mode === "create") {
             hasManuallySelectedIcon.current = false;
-            setIcon(KIconKey.LIBRARIES);
-            setColor(getIconDefaultColor(KIconKey.LIBRARIES));
+            setIcon(IconKey.LIBRARIES);
+            setColor(getIconDefaultColor(IconKey.LIBRARIES));
             setNodeType("entity");
         }
     }, [isNodeDialogOpen, mode]);
@@ -108,7 +106,7 @@ export function KDialog() {
 
 
     // Handle icon selection from IconPicker
-    const handleIconChange = (iconType: KIconKey | null, defaultColor: string) => {
+    const handleIconChange = (iconType: IconKey | null, defaultColor: string) => {
         hasManuallySelectedIcon.current = true;
         setIcon(iconType);
         setColor(defaultColor);

@@ -38,7 +38,18 @@ export { StatusAutoComplete, type StatusAutoCompleteProps, type IStatusOption } 
 export { Dialog, DialogPortal, DialogOverlay, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./components/ui/dialog";
 export { Checkbox } from "./components/ui/checkbox";
 export { Popover, PopoverTrigger, PopoverContent } from "./components/ui/popover";
-export { Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton } from "./components/ui/select";
+export {
+    Select,
+    SelectGroup,
+    SelectValue,
+    SelectTrigger,
+    SelectContent,
+    SelectLabel,
+    SelectItem,
+    SelectSeparator,
+    SelectScrollUpButton,
+    SelectScrollDownButton,
+} from "./components/ui/select";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 export { Badge, badgeVariants } from "./components/ui/badge";
 export { Input } from "./components/ui/input";
@@ -86,7 +97,7 @@ export { apiFetch } from "./fetch/apiClient";
 
 // ── file ──────────────────────────────────────────────────────────────────
 export { fileService } from "./file/file.service";
-export { _isImageFile, _blobToBase64} from "./file/file.utils";
+export { _isImageFile, _blobToBase64 } from "./file/file.utils";
 export type { UploadContext } from "./file/file.types";
 
 // ── flow ──────────────────────────────────────────────────────────────────
@@ -118,11 +129,10 @@ export type { TargetKeywordTargetType } from "./keyword/targetKeyword.service";
 // ── icons ─────────────────────────────────────────────────────────────────
 export { IconKey } from "./icons/icon.types";
 export type { IconCategory, IconProps } from "./icons/icon.types";
-export { ICON_COLORS, ICON_MAP, ICON_GROUPS, ICON_CONFIG } from "./icons/icon.config";
-export type { IconColorKey, IconColorValue, IconGroupId } from "./icons/icon.config";
-export { getActiveIcons, getIconOptions, getIconsGrouped, getAllIconKeywords, getAllIconLabel, findBestIconMatch, 
-    getIconDefaultColor, getIconComponent, getIconConfig, getIconByType, renderIconWithDefaultColor } from "./icons/icon.utils";
-export type { IconOption } from "./icons/icon.utils";
+export { ICON_COLORS, ICON_MAP } from "./icons/icon.config";
+export { getAllIconLabel } from "./icons/icon.utils";
+// export type { IconColorKey, IconColorValue, IconGroupId } from "./icons/icon.config";
+export { getIconDefaultColor } from "./icons/icon.utils";
 
 // ── localStorage ──────────────────────────────────────────────────────────
 export { storageService, STORAGE_KEYS } from "./localStorage/storage.service";
@@ -144,10 +154,10 @@ export { useStandardRegistrySelector } from "./standardRegistry/useStandardRegis
 export { useGetStandardRegistry } from "./standardRegistry/useGetStandardRegistry";
 export { standardRegistryService } from "./standardRegistry/standardRegistry.service";
 // export type { RegistryType, StandardRegistry, StandardRegistryDTO, StandardRegistryResponse, GetStandardRegistryParams } from "./standardRegistry/standardRegistry.types";
-export type { StandardRegistry} from "./standardRegistry/standardRegistry.types";
+export type { StandardRegistry } from "./standardRegistry/standardRegistry.types";
 
 // ── styles ────────────────────────────────────────────────────────────────
-export { Grow, GroupIconContainer, StyledAppBar } from "./styles/commonStyles";
+export { Grow } from "./styles/commonStyles";
 
 // ── types ─────────────────────────────────────────────────────────────────
 export type { ResultOptions } from "./types/resultOptions.types";

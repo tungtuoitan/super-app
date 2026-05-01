@@ -4,15 +4,13 @@ import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
 import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
-import { IconPicker } from "@/shared";
-import type { KIconKey } from "../../shared/icons/icon.types";
-import { ICON_MAP } from "../../shared/icons/icon.config";
+import { ICON_MAP, IconKey, IconPicker } from "@/shared";
 
 export function InlineNewNodeCard() {
     const { inlineNewParentId } = useKNodeEditorStore();
     const { handleInlineCreate, handleCancelInline } = useKNodeEditorLoader();
 
-    const [draft, setDraft] = useState({ name: "", description: "", icon: 'LIBRARIES' as KIconKey | null, color: 'GREY' as string | null });
+    const [draft, setDraft] = useState({ name: "", description: "", icon: 'LIBRARIES' as IconKey | null, color: 'GREY' as string | null });
     const [showIconPicker, setShowIconPicker] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -33,12 +31,12 @@ export function InlineNewNodeCard() {
         return () => document.removeEventListener("mousedown", handler);
     }, [showIconPicker]);
 
-    const handleIconChange = (iconType: KIconKey | null, defaultColor: string) => {
+    const handleIconChange = (iconType: IconKey | null, defaultColor: string) => {
         setDraft(prev => ({ ...prev, icon: iconType, color: defaultColor }));
         setShowIconPicker(false);
     };
 
-    const IconComponent = draft.icon && ICON_MAP[draft.icon as KIconKey] ? ICON_MAP[draft.icon as KIconKey] : null;
+    const IconComponent = draft.icon && ICON_MAP[draft.icon as IconKey] ? ICON_MAP[draft.icon as IconKey] : null;
 
     return (
         <div
@@ -66,7 +64,7 @@ export function InlineNewNodeCard() {
                 {!isQuestion && showIconPicker && (
                     <div className="absolute top-6 left-0 z-50 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl" style={{ width: 280 }}>
                         <IconPicker
-                            value={draft.icon as KIconKey | null}
+                            value={draft.icon as IconKey | null}
                             onChange={handleIconChange}
                             columns={4}
                             maxHeight="240px"

@@ -3,6 +3,9 @@
  * Used across the application for folder icons, note icons, etc.
  */
 
+import {LucideIcon} from "lucide-react";
+import {IconGroupId} from "./icon.config";
+
 export enum IconKey {
     BIN = "BIN",
     FOLDER = "FOLDER",
@@ -107,4 +110,15 @@ export interface IconProps {
     code: string;
     type?: IconCategory;
     props?: any;
+}
+
+/**
+ * Icon option type for dropdowns/pickers
+ */
+export interface IconOption {
+    value: IconKey;
+    label: string;
+    Icon: LucideIcon;
+    defaultColor: string;
+    group: IconGroupId;
 }

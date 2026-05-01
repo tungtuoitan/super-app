@@ -6,9 +6,7 @@ import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKStore } from "../../store/K.store";
 import { DND_TYPE, CARD_HEIGHT, isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
-import type { KIconKey } from "../../shared/icons/icon.types";
-import { ICON_MAP } from "../../shared/icons/icon.config";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { ICON_MAP, IconKey, useOrchestratorContextMenuHelper } from "@/shared";
 import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
 import { storageService, STORAGE_KEYS } from "@/shared";
@@ -109,7 +107,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
     const level = isRoot ? 0 : (node.pathDepth ?? 1);
     const parentNode = !isRoot && node.parentId != null ? allNodes.find((n) => n.id === node.parentId) : null;
 
-    const nodeIcon = node.icon as KIconKey | undefined;
+    const nodeIcon = node.icon as   IconKey | undefined;
     const IconComponent = nodeIcon && ICON_MAP[nodeIcon] ? ICON_MAP[nodeIcon] : null;
 
     // Resolved icon rendering helpers

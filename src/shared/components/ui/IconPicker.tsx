@@ -12,12 +12,11 @@ import { cn } from "@/lib/utils";
 import {
     ICON_MAP,
     ICON_COLORS,
-    ICON_CONFIG,
-    getIconsGrouped,
     getIconDefaultColor
 } from "@/shared";
-import { IconKey } from "../../icons/icon.types";
-import {IconOption} from "@/shared";
+import { IconKey, IconOption } from "../../icons/icon.types";
+import {getIconsGrouped} from "@/shared/icons/icon.utils";
+import {ICON_CONFIG} from "@/shared/icons/icon.config";
 
 export interface IconPickerProps {
     /** Currently selected icon type */

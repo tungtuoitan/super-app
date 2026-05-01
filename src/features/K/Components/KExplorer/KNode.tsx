@@ -2,13 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/kTree/useKTreeHelper2";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { ICON_MAP, IconKey, useOrchestratorContextMenuHelper } from "@/shared";
 import { KHighlightText } from "./KHighlightText";
 import { useKStore } from "../../store/K.store";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
 import { kconstants } from "../../utils/K.Constants";
-import { KIconKey } from "../../shared/icons/icon.types";
-import { ICON_MAP } from "../../shared/icons/icon.config";
 import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import { constants } from "@/shared";
@@ -60,7 +58,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const nodeId = nodeItem.id; // workspace_items.id (unique)
     const nodeName = nodeItem.name;
     const nodeColor = nodeItem.color;
-    const nodeIcon = nodeItem.icon as KIconKey | undefined;
+    const nodeIcon = nodeItem.icon as IconKey | undefined;
     const hasChildren = node.data.children && node.data.children.length > 0;
     const isSelected = isNodeSelected(nodeId);
     const isWorkspaceRoot = nodeItem.id < 0;

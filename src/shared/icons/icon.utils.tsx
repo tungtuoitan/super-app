@@ -6,24 +6,14 @@
 import React from "react";
 import type { LucideIcon } from "lucide-react";
 import { fuzzyMatchWithDiacritics } from "../utils/fuzzy-search.utils";
-import { IconKey } from "./icon.types";
+import { IconKey, IconOption } from "./icon.types";
 import { ICON_MAP, ICON_CONFIG, ICON_COLORS, ICON_GROUPS, IconConfig, IconGroupId } from "./icon.config";
 
-/**
- * Icon option type for dropdowns/pickers
- */
-export interface IconOption {
-    value: IconKey;
-    label: string;
-    Icon: LucideIcon;
-    defaultColor: string;
-    group: IconGroupId;
-}
 
 /**
  * Grouped icons structure for picker
  */
-export interface IconGroup {
+ interface IconGroup {
     id: IconGroupId;
     label: string;
     order: number;
@@ -33,7 +23,7 @@ export interface IconGroup {
 /**
  * Get all active icons for pickers
  */
-export function getActiveIcons(): Array<{ type: IconKey; Icon: LucideIcon; config: IconConfig }> {
+function getActiveIcons(): Array<{ type: IconKey; Icon: LucideIcon; config: IconConfig }> {
     return Object.entries(ICON_CONFIG)
         .filter(([_, config]) => config.isActive)
         .map(([type, config]) => ({
