@@ -7,7 +7,7 @@ import type { WikiInfo, WikiKeyword } from "../../types/wiki.type";
 import { WIKI_MENTION } from "../../utils/wiki.constants";
 import MentionText from "./MentionText";
 import { WikiSelectionTooltip, WikiKeywordTooltip } from "./WikiSelectionKeywordButton";
-import { useKeyboardShortcut } from "@/shared";
+import { useGlobalShortcut } from "@/shared";
 
 interface CardProps {
     info: WikiInfo;
@@ -50,8 +50,8 @@ export function WikiInfoCard({ info, keywords, onDelete, searchQuery = "" }: Car
 
     const handleCancel = () => { setEditing(false); setEditTitle(info.title); setEditContent(info.content); };
 
-    useKeyboardShortcut({ key: "s", ctrl: true, enabled: editing, callback: handleSave });
-    useKeyboardShortcut({ key: "Escape",         enabled: editing, callback: handleCancel });
+    useGlobalShortcut("ctrl+s",  { id: "wiki-info-card-save",   priority: 100, enabled: editing }, handleSave);
+    useGlobalShortcut("escape",  { id: "wiki-info-card-cancel", priority: 100, enabled: editing }, handleCancel);
 
     const plainContent = info.content.replace(/^#{1,6}\s/gm, "").replace(/[*`_~]/g, "").trim();
 

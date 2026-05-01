@@ -124,7 +124,6 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
     // Ctrl+S — save while editing (priority 100 matches NodeCard)
     useGlobalShortcut("ctrl+s", { id: "kflow-node-save", priority: 100, enabled: isEditing }, () => {
         handleRenameConfirm(idRef.current, draftQRef.current, draftARef.current);
-        return true;
     });
 
     const isDraft = !isDeleted && (!question.answer?.trim() || question.answer.trim().includes("DRAFT"));

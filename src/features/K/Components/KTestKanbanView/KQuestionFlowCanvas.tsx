@@ -63,7 +63,6 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
     const selectedEdgeIds = flowEdges.filter((e) => e.selected).map((e) => e.id);
     useGlobalShortcut("delete", { id: "kflow-delete-edge", priority: 65, enabled: selectedEdgeIds.length > 0 }, () => {
         selectedEdgeIds.forEach((id) => handleEdgeDelete(id));
-        return true;
     });
     // Delete selected nodes (only when no edges are selected)
     const selectedNodeIds = flowNodes
@@ -71,7 +70,6 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         .map((n) => parseInt(n.id, 10));
     useGlobalShortcut("delete", { id: "kflow-delete-nodes", priority: 60, enabled: selectedNodeIds.length > 0 && selectedEdgeIds.length === 0 }, () => {
         selectedNodeIds.forEach((id) => handleDeleteQuestion(id));
-        return true;
     });
 
     const isDragSelecting = useRef(false);

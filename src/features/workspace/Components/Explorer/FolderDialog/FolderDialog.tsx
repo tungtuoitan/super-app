@@ -18,7 +18,7 @@ import { useFolderDialogHelper } from "../../../hooks/useFolderDialog.helper";
 import { constants } from "@/shared";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { getAllIconLabel, IconKey } from "@/shared";
-import { useKeyboardShortcut } from "@/shared";
+import { useGlobalShortcut } from "@/shared";
 
 export function FolderDialog() {
     // Get state from ExplorerStore
@@ -99,17 +99,8 @@ export function FolderDialog() {
     };
 
     // Keyboard Shortcuts
-    useKeyboardShortcut({
-        key: "Enter",
-        enabled: isFolderDialogOpen && !isSubmitting && !!newFolderName.trim(),
-        callback: submitFolder,
-    });
-
-    useKeyboardShortcut({
-        key: "Escape",
-        enabled: isFolderDialogOpen && !isSubmitting,
-        callback: handleClose,
-    });
+    useGlobalShortcut("enter",  { id: "folder-dialog-submit", priority: 100, enabled: isFolderDialogOpen && !isSubmitting && !!newFolderName.trim() }, submitFolder);
+    useGlobalShortcut("escape", { id: "folder-dialog-close",  priority: 100, enabled: isFolderDialogOpen && !isSubmitting }, handleClose);
 
 
     // Handle icon selection from IconPicker

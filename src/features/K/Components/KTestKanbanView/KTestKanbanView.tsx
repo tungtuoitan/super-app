@@ -830,10 +830,7 @@ function KanbanQuestionInlineForm({ knowledgeId, testId, onDone, onCancel }: Kan
     };
 
     // Ctrl+S saves — same pattern as NodeCard (priority 100 beats EditorToolbar's 50)
-    useGlobalShortcut("ctrl+s", { id: "kanban-new-question-save", priority: 100, enabled: !saving }, () => {
-        handleSave();
-        return true;
-    });
+    useGlobalShortcut("ctrl+s", { id: "kanban-new-question-save", priority: 100, enabled: !saving }, handleSave);
 
     return (
         <div

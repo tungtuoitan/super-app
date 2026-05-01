@@ -94,7 +94,7 @@ export { flowService } from "./flow/flow.service";
 export type { FlowEdgeDTO, FlowNodePositionDTO } from "./flow/flow.types";
 
 // ── globalShortcut ────────────────────────────────────────────────────────
-export { useGlobalShortcut } from "./globalShortcut/useGlobalShortcut";
+export { useGlobalShortcut } from "./shortcut/useGlobalShortcut";
 
 // ── keyword ───────────────────────────────────────────────────────────────
 // Services
@@ -103,7 +103,6 @@ export { targetKeywordService } from "./keyword/targetKeyword.service";
 // Store
 export { useKeywordStore } from "./keyword/Keyword.store";
 // Hooks
-export { useKeyboardShortcut, useInputShortcuts, SHORTCUTS } from "./hooks/useKeyboardShortcut";
 export { useKeywordHelper } from "./keyword/useKeyword.helper";
 // Utils
 export { parseKeywordLink } from "./keyword/keyword-link.utils";

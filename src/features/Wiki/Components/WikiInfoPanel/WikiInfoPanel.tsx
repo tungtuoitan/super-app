@@ -9,7 +9,7 @@ import { MONO_ACCENT } from "../../utils/wiki.graph.utils";
 import { WikiInfoCard } from "../small/WikiInfoCard";
 import WikiInsertModal from "./WikiInsertModal";
 import WikiInsertKeywordModal from "./WikiInsertKeywordModal";
-import { useKeyboardShortcut } from "@/shared";
+import { useGlobalShortcut } from "@/shared";
 
 interface Props {
     tab: BaseTab;
@@ -53,14 +53,10 @@ export default function WikiInfoPanel({ tab }: Props) {
     const [quickSaving, setQuickSaving] = useState(false);
 
     // ── Shift+F → focus quick insert (skip when already inside an input) ──────
-    useKeyboardShortcut({
-        key: "f",
-        shift: true,
-        callback: () => {
-            const active = document.activeElement;
-            if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
-            quickRef.current?.focus();
-        },
+    useGlobalShortcut("shift+f", { id: "wiki-info-panel-focus-quick", priority: 50 }, () => {
+        const active = document.activeElement;
+        if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
+        quickRef.current?.focus();
     });
 
     const handleQuickChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

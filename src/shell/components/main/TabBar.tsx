@@ -3,7 +3,7 @@ import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordStore } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
-import { useTabKeyboardShortcuts } from "@/shell";
+import { useTabBarShortcuts } from "@/shell";
 import { useTabBarHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
 import { moduleRegistry } from "@/shell";
@@ -58,7 +58,7 @@ export function TabBar() {
         useTabBarHelper();
     const { isMobile } = useDeviceStore();
 
-    useTabKeyboardShortcuts();
+    useTabBarShortcuts();
 
     // ── Task grouping (driven by registry, not hardcoded) ────────────────────
     // Group leader: any tab where moduleRegistry.getTabGroupKey returns a key

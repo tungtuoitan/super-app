@@ -39,23 +39,9 @@ export function useTaskSectionHeadless() {
     handleSectionSaveRef.current = handleSectionSave;
     handleSectionDiscardRef.current = handleSectionDiscard;
 
-    useGlobalShortcut("ctrl+shift+s", { id: "task-section-save", priority: 100 }, () => {
-        if (isSectionDirtyRef.current) handleSectionSaveRef.current();
-        return true;
-    });
-
-    useGlobalShortcut("ctrl+alt+s", { id: "task-section-save-alt", priority: 100 }, () => {
-        if (isSectionDirtyRef.current) handleSectionSaveRef.current();
-        return true;
-    });
-
-    useGlobalShortcut("escape", { id: "task-section-discard", priority: 50 }, () => {
-        if (isSectionDirtyRef.current) {
-            handleSectionDiscardRef.current();
-            return true;
-        }
-        return false;
-    });
+    useGlobalShortcut("ctrl+shift+s", { id: "task-section-save",     priority: 100, enabled: isSectionDirty }, () => { handleSectionSaveRef.current(); });
+    useGlobalShortcut("ctrl+alt+s",   { id: "task-section-save-alt", priority: 100, enabled: isSectionDirty }, () => { handleSectionSaveRef.current(); });
+    useGlobalShortcut("escape",        { id: "task-section-discard",  priority:  50, enabled: isSectionDirty }, () => { handleSectionDiscardRef.current(); });
 
     useEffect(() => {
         if (isSectionDirty) handleSectionDiscard();

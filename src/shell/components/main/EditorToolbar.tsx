@@ -68,18 +68,19 @@ export function EditorToolbar() {
     isSavingRef.current = isSaving;
     upsertRef.current = upsertOrchestraitor;
 
-    useGlobalShortcut("ctrl+s", { id: "editor-toolbar-save", priority: 50 }, () => {
+    // Default handler (priority 0) — saves current tab when no inline editor is active.
+    // No `enabled` condition: always registered so browser default is always suppressed.
+    // The callback guards internally with refs to avoid stale closure.
+    useGlobalShortcut("ctrl+s", { id: "editor-toolbar-save" }, () => {
         if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
             upsertRef.current();
         }
-        return true;
     });
 
-    useGlobalShortcut("alt+s", { id: "editor-toolbar-save-alt", priority: 50 }, () => {
+    useGlobalShortcut("alt+s", { id: "editor-toolbar-save-alt" }, () => {
         if (activeTabRef.current?.hasUnsavedChanges && !isSavingRef.current) {
             upsertRef.current();
         }
-        return true;
     });
 
     return (

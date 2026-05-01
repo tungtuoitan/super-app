@@ -22,15 +22,12 @@ export { useTabBarHelper } from "./hooks/useTabBarHelper";
 // export { useTabBarMenuHelper } from "./hooks/useTabBarMenu.helper";
 export { useEditorToolbarHelper } from "./hooks/useEditorToolbar.helper";
 export { useGridAutoRegisterHelper } from "./hooks/useGridAutoRegister.helper";
-export { useTabKeyboardShortcuts } from "./hooks/useTabKeyboardShortcuts";
+export { useTabBarShortcuts } from "./hooks/useTabBarShortcuts";
 export { findNoteByEntityId, useKeywordNavigationHelper } from "./commandPallete/useKeywordNavigation.helper";
 export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithColors, buildBreadcrumbFromTree } from "./utils/breadcrumb.utils";
 export { transformWs } from "./utils/ws.utils";
 
 
-// ── Keyword (re-exported from shared for backward compat) ──────────────────
-// export { keywordService, targetKeywordService, useKeywordStore, useKeyboardShortcut, parseKeywordLink, isValidUrl, useKeywordHelper } from "@/shared";
-// export type { Keyword, KeywordType, KeywordSyncItem, KeywordSyncReport, UpsertExternalKeywordRequest, TargetKeywordTargetType } from "@/shared";
 
 
 // ── Types ─────────────────────────────────────────────────────────────────

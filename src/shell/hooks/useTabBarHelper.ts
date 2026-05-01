@@ -7,7 +7,7 @@ import { useWsStore } from "@/features/workspace";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
-import { useTabKeyboardShortcuts } from "./useTabKeyboardShortcuts";
+import { useTabBarShortcuts } from "./useTabBarShortcuts";
 import { BaseTab } from "@/shell";
 import { constants } from "@/shared";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
@@ -39,7 +39,7 @@ export function useTabBarHelper() {
     const { showContextMenu } = useOrchestratorContextMenuHelper();
 
     // Enable keyboard shortcuts
-    useTabKeyboardShortcuts();
+    useTabBarShortcuts();
 
     /**
      * Check if tab exists in current module's data source

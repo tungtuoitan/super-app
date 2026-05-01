@@ -19,7 +19,7 @@ import {getAllIconLabel} from "../../../shared/icons/icon.utils";
 import {KIconKey} from "../../../shared/icons/icon.types";
 import {useNodeDialogStore} from "../../../store/KNodeDialog.store";
 import { getIconDefaultColor } from "@/shared";
-import { useKeyboardShortcut } from "@/shared";
+import { useGlobalShortcut } from "@/shared";
 
 export function KDialog() {
     // Get state from ExplorerStore
@@ -103,17 +103,8 @@ export function KDialog() {
     };
 
     // Keyboard Shortcuts
-    useKeyboardShortcut({
-        key: "Enter",
-        enabled: isNodeDialogOpen && !isSubmitting && !!newNodeName.trim(),
-        callback: submitNode,
-    });
-
-    useKeyboardShortcut({
-        key: "Escape",
-        enabled: isNodeDialogOpen && !isSubmitting,
-        callback: handleClose,
-    });
+    useGlobalShortcut("enter",  { id: "k-dialog-submit", priority: 100, enabled: isNodeDialogOpen && !isSubmitting && !!newNodeName.trim() }, submitNode);
+    useGlobalShortcut("escape", { id: "k-dialog-close",  priority: 100, enabled: isNodeDialogOpen && !isSubmitting }, handleClose);
 
 
     // Handle icon selection from IconPicker

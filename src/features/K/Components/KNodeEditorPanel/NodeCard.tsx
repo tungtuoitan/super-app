@@ -183,7 +183,6 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
 
     useGlobalShortcut("ctrl+s", { id: "k-node-save", priority: 100, enabled: isEditing }, () => {
         submitEdit(nodeRef.current, editDraftRef.current);
-        return true;
     });
 
     // Detect click outside while editing — compare with original before showing prompt

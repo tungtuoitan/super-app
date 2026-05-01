@@ -15,7 +15,7 @@ import { constants } from "@/shared";
 import type { Task } from "@/features/taskDetail";
 import type { BaseTab } from "@/shell";
 
-export const useTabKeyboardShortcuts = () => {
+export const useTabBarShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabBarStore();
     const { closeTabs } = useEditorTabHelper();
     const { openNewLogTab } = useLifeLogTabHelper();

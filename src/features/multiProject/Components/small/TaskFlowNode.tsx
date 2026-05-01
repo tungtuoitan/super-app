@@ -198,7 +198,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") handleRenameConfirm(id, editValue);
+        if (e.key === "Enter" || (e.key.toLowerCase() === "s" && e.ctrlKey)) handleRenameConfirm(id, editValue);
         if (e.key === "Escape") {
             if (isTempNode) {
                 handleRenameConfirm(id, "");
