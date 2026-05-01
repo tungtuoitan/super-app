@@ -8,7 +8,7 @@ import type { TaskDTO, Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
@@ -45,7 +45,7 @@ export const useMultiProjectTaskGridHelper = () => {
     const { $user } = useAuthStore();
     const { tasks, setTasks, setAllTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } =
         useMpTaskStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const _console = useConsoleHelper();
 
     /**

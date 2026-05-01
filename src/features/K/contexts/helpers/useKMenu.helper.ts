@@ -1,7 +1,7 @@
 /**
  * Workspace Folder Menu Helper Hook
  * Business logic for folder context menu operations
- * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
+ * Extracted from useMenuContextHelper for folder-specific logic
  */
 
 import {useKStore} from "../../store/K.store";
@@ -13,7 +13,7 @@ import {kconstants} from "../../utils/K.Constants";
 import {isUnauthorizedError, parseApiError} from "../../utils/api-error.utils";
 import {NodeItemType} from "../../store/KNodeDialog.store";
 import { useEditorTabHelper} from "@/shell";
-import {useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useOrchestratorContextMenuStore} from "@/shared";
+import {useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useMenuContext, useMenuContextHelper} from "@/shared";
 import { getKConfirmMessage } from "../../utils/confirmMessage";
 import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
 import {useKNodeDialogHelper} from "../../hooks/useKNodeDialog.helper";
@@ -101,7 +101,8 @@ const $removeItems = (items: any[], idsToRemove: Set<number>): any[] => {
 export const useKMenuHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentK, setCurrentK } = useKStore();
     const { openNodeDialog } = useKNodeDialogHelper();
@@ -119,7 +120,7 @@ export const useKMenuHelper = () => {
         // ----------------
         // Close context menu and open create dialog
         // ----------------
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         openNodeDialog("create", itemType, null, parentTag);
     };
 
@@ -130,7 +131,7 @@ export const useKMenuHelper = () => {
         // ----------------
         // Close context menu
         // ----------------
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
 
         // ----------------
         // Determine item type and open edit dialog
@@ -379,11 +380,11 @@ export const useKMenuHelper = () => {
         // Check if this is a workspace root node (negative ID)
         if (contextData.tagId < 0) {
             console.warn("⚠️ Cannot delete workspace root node");
-            setIsContextMenuOpen(false);
+            setIsMenuContextOpen(false);
             return;
         }
 
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
 
         // ----------------
         // STEP 2: Extract anchor element for popover positioning

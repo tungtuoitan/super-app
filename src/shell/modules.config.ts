@@ -12,6 +12,9 @@ import { kModule } from "@/features/K";
 import { projectModule } from "@/features/project";
 import { lifeLogModule } from "@/features/lifeLog";
 import { noteModule } from "@/features/note";
+import { menuContextRegistry } from "@/shared";
+import { WikiGraphNodeMenu } from "@/features/Wiki";
+import { TabBarMenu } from "./components/TabBarMenu";
 
 // Filter registrations — features register their filter configs
 import { registerWorkspaceFilters } from "@/features/workspace";
@@ -35,3 +38,9 @@ registerWorkspaceFilters();
 registerKFilters();
 registerNoteFilters();
 registerTaskFilters();
+
+// ── Context Menu Registration (shell-level) ────────────────────────────────────
+// Feature context menus are registered as side effects in their own module files above.
+// Only shell-owned and disabled-module menus are registered here.
+menuContextRegistry.register({ handles: ["wiki-graph-node"], component: WikiGraphNodeMenu });
+menuContextRegistry.register({ handles: ["tab"],             component: TabBarMenu });

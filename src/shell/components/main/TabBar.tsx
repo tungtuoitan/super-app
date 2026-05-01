@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
-import { constants, useKeywordStore } from "@/shared";
+import { constants, useKeywordSelector } from "@/shared";
 import { useEditorTabHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useTabBarShortcuts } from "@/shell";
@@ -52,7 +52,7 @@ export function TabBar() {
     } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, generateBreadcrumbForTab } = useEditorTabHelper();
     const { currentWorkspace } = useWorkspaceStore();
-    const { allKeywords } = useKeywordStore();
+    const { allKeywords } = useKeywordSelector();
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();
     const { isMobile } = useDeviceStore();

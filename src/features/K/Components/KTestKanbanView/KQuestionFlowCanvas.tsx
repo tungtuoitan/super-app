@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
 import { useKTestFlowHelper } from "@/features/K/hooks/test/useKTestFlow.helper";
 import { useKTestFlowHeadless } from "@/features/K/hooks/test/useKTestFlow.headless";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { QuestionFlowNode } from "./small/QuestionFlowNode";
 import { KQuestionFlowEdge } from "./small/KQuestionFlowEdge";
 import { constants } from "@/shared";
@@ -57,7 +57,7 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         handleDeleteQuestion,
         handleEdgeDelete
     } = useKTestFlowHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     // Delete selected edges with Delete/Backspace (higher priority)
     const selectedEdgeIds = flowEdges.filter((e) => e.selected).map((e) => e.id);
@@ -162,7 +162,7 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
 
             showContextMenu(
                 event as React.MouseEvent,
-                constants.contextMenu.contextMenuTypes.kTestFlow,
+                "k-test-flow",
                 {
                     onAddQuestion: () => {
                         if (!selectedTestId) return;

@@ -1,7 +1,7 @@
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContext } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 
 /**
  * WorkspaceSelectorMenu
@@ -14,8 +14,8 @@ import { useOrchestratorContextMenuHelper } from "@/shared";
  *   hasSelected: boolean  — whether a workspace is currently selected
  */
 export function WorkspaceSelectorMenu() {
-    const { contextData } = useOrchestratorContextMenuStore();
-    const { executeDirectly, openConfirmDialog } = useOrchestratorContextMenuHelper();
+    const { contextData } = useMenuContext();
+    const { executeDirectly, openConfirmDialog } = useMenuContextHelper();
 
     return (
         <>

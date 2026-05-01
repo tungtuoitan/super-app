@@ -1,10 +1,10 @@
-import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus as AddIcon, Trash2 as DeleteIcon, AlertTriangle as HardDeleteIcon, RotateCcw as RestoreIcon } from "lucide-react";
-import { useMenuContext } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 
 export function WsGridMenu() {
-    const { contextData, openConfirmDialog, executeDirectly } = useMenuContext();
+    const { contextData } = useMenuContext();
+    const { openConfirmDialog, executeDirectly } = useMenuContextHelper();
 
     const wsGridSelectedCount = contextData?.selectedIds?.length || 0;
     const allSelectedAreTempWs = contextData?.selectedIds?.every((id: number) => id < 0) ?? false;

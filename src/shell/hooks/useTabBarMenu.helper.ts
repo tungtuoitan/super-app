@@ -6,7 +6,7 @@
 
 import { useEditorTabBarStore } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import type { Task } from "@/features/taskDetail";
 import type { BaseTab } from "@/shell";
@@ -29,7 +29,8 @@ const isGroupChild = (tab: BaseTab, allTabs: BaseTab[]): boolean => {
 export const useTabBarMenuHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
     const { closeTabs } = useEditorTabHelper();
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
 
     // Get the context tab ID from the context menu store
     const contextTabId = contextData?.tabId || null;
@@ -74,7 +75,7 @@ export const useTabBarMenuHelper = () => {
 
         setOpenTabs(newTabs);
         savePinnedStateToStorage(newTabs);
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
     };
 
     /**
@@ -101,7 +102,7 @@ export const useTabBarMenuHelper = () => {
 
         setOpenTabs(newTabs);
         savePinnedStateToStorage(newTabs);
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
     };
 
     /**
@@ -111,7 +112,7 @@ export const useTabBarMenuHelper = () => {
         const savedTabs = openTabs.filter((tab) => !tab.hasUnsavedChanges);
         const tabIds = savedTabs.map((tab) => tab.id);
         closeTabs(tabIds);
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
     };
 
     /**
@@ -121,7 +122,7 @@ export const useTabBarMenuHelper = () => {
         const savedTabs = openTabs.filter((tab) => !tab.hasUnsavedChanges && !tab.isPinned);
         const tabIds = savedTabs.map((tab) => tab.id);
         closeTabs(tabIds);
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
     };
 
     return {

@@ -2,24 +2,24 @@ import React from "react";
 import { ControlledMenu } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
-import { useOrchestratorContextMenuStore } from "@/shared";
-import { contextMenuRegistry } from "./contextMenu.registry";
+import {menuContextRegistry} from "./menuContext.registry";
+import {useMenuContextStore} from "./MenuContext.store";
 
 interface ContextMenuProviderProps {
     children: React.ReactNode;
 }
 
-export function OrchestratorContextMenu({ children }: ContextMenuProviderProps) {
-    const { isContextMenuOpen, anchorPoint, contextType, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
-    const Component = contextMenuRegistry.get(contextType);
+export function MenuContext({ children }: ContextMenuProviderProps) {
+    const { isMenuContextOpen, anchorPoint, contextType, setIsMenuContextOpen } = useMenuContextStore();
+    const Component = menuContextRegistry.get(contextType);
 
     return (
         <>
             {children}
             <ControlledMenu
-                state={isContextMenuOpen ? "open" : "closed"}
+                state={isMenuContextOpen ? "open" : "closed"}
                 anchorPoint={anchorPoint}
-                onClose={() => setIsContextMenuOpen(false)}
+                onClose={() => setIsMenuContextOpen(false)}
                 menuClassName="context-menu"
                 transition
             >

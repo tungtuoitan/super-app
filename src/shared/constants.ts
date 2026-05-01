@@ -103,33 +103,6 @@ export const constants = {
         },
     },
 
-    contextMenu: {
-        contextMenuTypes: {
-            default: "default",
-            note: "note",
-            file: "file",
-            folder: "folder",
-            noteGrid: "note-grid",
-            workspaceGrid: "workspace-grid",
-            projectGrid: "project-grid",
-            taskGrid: "task-grid",
-            tab: "tab",
-            lifeLogLog: "lifelog-log",
-            lifeLogTrack: "lifelog-track",
-            kNode: "k-node",
-            kNote: "k-note",
-            kFile: "k-file",
-            kKnowledgeSelector: "k-knowledge-selector",
-            kNodePanelBlank: "k-node-panel-blank",
-            kNodePanelCard: "k-node-panel-card",
-            workspaceSelector: "workspace-selector",
-            taskFlow: "task-flow",
-            kTestFlow: "k-test-flow",
-            richTextEditor: "richtext-editor",
-            wikiGraphNode: "wiki-graph-node",
-        } as const,
-    },
-
     pagination: {
         defaultPageSize: 25,
         pageSizeOptions: [25, 50, 100],

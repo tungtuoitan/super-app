@@ -4,7 +4,7 @@ import { LogTypeBadge } from "./LogTypeBadge";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { SensitiveOverlay } from "./SensitiveOverlay";
 import { cn } from "@/lib/utils";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
@@ -48,13 +48,13 @@ export function formatLogTime(log: LifeLogLog): string {
 }
 
 export function LogItem({ log, trackEmoji, trackColor, onClick, onDelete }: LogItemProps) {
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const didLongPressRef = useRef(false);
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
     const openMenu = (e: React.MouseEvent) => {
-        showContextMenu(e, constants.contextMenu.contextMenuTypes.lifeLogLog, {
+        showContextMenu(e, "lifelog-log", {
             onDelete: () => onDelete?.(log),
         });
     }

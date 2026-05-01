@@ -1,12 +1,13 @@
+import {useMenuContext, useMenuContextHelper} from "@/shared";
 import { MenuItem } from "@szhsin/react-menu";
 import { Plus } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/shared";
 
 export function KNodePanelBlankMenu() {
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
 
     const handleNewCard = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         window.dispatchEvent(new CustomEvent("k-node-inline-create", {
             detail: { knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null },
         }));

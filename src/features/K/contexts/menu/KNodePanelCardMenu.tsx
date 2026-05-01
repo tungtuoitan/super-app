@@ -2,17 +2,18 @@ import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus, Trash2, RotateCcw } from "lucide-react";
 import { useKMenuHelper } from "../helpers/useKMenu.helper";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
-import {useOrchestratorContextMenuStore} from "@/shared";
+import {useMenuContext, useMenuContextHelper} from "@/shared";
 
 export function KNodePanelCardMenu() {
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { dhr_items } = useKMenuHelper();
     const _TREESTATUS = useKTreeStatusHelper();
 
     const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
 
     const handleNewCard = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         window.dispatchEvent(new CustomEvent("k-node-inline-create", {
             detail: { knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null },
         }));

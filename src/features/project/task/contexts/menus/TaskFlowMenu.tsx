@@ -1,10 +1,11 @@
 import React from "react";
 import { MenuItem } from "@szhsin/react-menu";
 import { Plus as AddIcon } from "lucide-react";
-import { useMenuContext } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 
 export function TaskFlowMenu() {
-    const { contextData, executeDirectly } = useMenuContext();
+    const { contextData } = useMenuContext();
+    const { executeDirectly } = useMenuContextHelper();
 
     return (
         <>

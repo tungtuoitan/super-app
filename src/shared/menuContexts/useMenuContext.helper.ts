@@ -1,6 +1,6 @@
 import { useConfirmationPopoverHelper } from "@/shared";
-import { OrchestratorContextMenuType, useOrchestratorContextMenuStore } from "@/shared";
 import { getGenericConfirmMessage } from "../confirmPopover/confirmMessage.utils";
+import {MenuContextType, useMenuContextStore} from "./MenuContext.store";
 
 interface OpenConfirmDialogParams {
     type: "soft-delete" | "hard-delete";
@@ -15,12 +15,12 @@ interface ExecuteDirectlyParams {
     callback: () => void;
 }
 
-export const useOrchestratorContextMenuHelper = () => {
+export const useMenuContextHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { setIsContextMenuOpen, setAnchorPoint, setContextType, setContextData } = useOrchestratorContextMenuStore();
+    const { setIsMenuContextOpen, setAnchorPoint, setContextType, setContextData } = useMenuContextStore();
 
     const openConfirmDialog = ({ type, entityType, count, allAreTempItems, onConfirm, event }: OpenConfirmDialogParams) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
 
         if (allAreTempItems) {
             onConfirm();
@@ -47,22 +47,23 @@ export const useOrchestratorContextMenuHelper = () => {
     };
 
     const executeDirectly = ({ callback }: ExecuteDirectlyParams) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         callback();
     };
 
-    const showContextMenu = (event: React.MouseEvent, type: OrchestratorContextMenuType = "default", data?: any) => {
+    const showContextMenu = (event: React.MouseEvent, type: MenuContextType = "default", data?: any) => {
         event.preventDefault();
         event.stopPropagation();
         setAnchorPoint({ x: event.clientX, y: event.clientY });
         setContextType(type);
         setContextData(data || null);
-        setIsContextMenuOpen(true);
+        setIsMenuContextOpen(true);
     };
 
     return {
         openConfirmDialog,
         executeDirectly,
         showContextMenu,
+        setIsMenuContextOpen
     };
 };

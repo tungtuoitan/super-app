@@ -8,7 +8,7 @@ import { Layers, FileText } from "lucide-react";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { useKeywordNavigationHelper } from "../commandPallete/useKeywordNavigation.helper";
 import { useWorkspaceStore } from "@/features/workspace";
-import { ICON_MAP, IconKey } from "@/shared";
+import { ICON_MAP, IconKey, useKeywordSelector } from "@/shared";
 import { FolderIconWithBadge } from "@/shared";
 import {Keyword} from "../../shared/keyword/keyword.types";
 import {useKeywordStore} from "../../shared/keyword/Keyword.store";
@@ -19,7 +19,7 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
     const { navigateLink } = useKeywordNavigationHelper();
-    const { allKeywords } = useKeywordStore();
+    const { allKeywords } = useKeywordSelector();
     const { currentWorkspace } = useWorkspaceStore();
 
     if (!items || items.length === 0) {

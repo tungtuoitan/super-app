@@ -13,7 +13,7 @@ import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceNoteItem } from "@/features/workspace/types/workspace-v2.types";
 import { Note } from "@/features/note";
 import { constants } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { StatusDot } from "./StatusDot";
 import { HighlightText } from "./HighlightText";
 // import { useLogger } from "store/debug/DebugLogger.store";
@@ -31,7 +31,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
         useWorkspaceStore();
     const { searchQuery } = useSideBarStore();
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { isFolderSelected, getVisibleNodeIds, selectItem } = useTreeHelper2();
     const { openTab } = useEditorTabHelper();
     const _TREESTATUS = useTreeStatusHelper();

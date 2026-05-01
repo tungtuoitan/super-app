@@ -7,7 +7,7 @@ import { useEditorTabHelper } from "@/shell";
 import { constants } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { filterUtils } from "@/shell";
 import { useSideBarStore } from "@/shell";
 import { useConsoleHelper } from "@/shared";
@@ -19,7 +19,7 @@ export const useNoteGridHelper = () => {
     const { searchQuery } = useSideBarStore();
 
     const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection, noteGridPagination, setNoteGridPagination, setTotalCount } = useNoteGridStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     const { openTab, processTabAfterDelete } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabBarStore();

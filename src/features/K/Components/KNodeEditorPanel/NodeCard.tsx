@@ -6,7 +6,7 @@ import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKStore } from "../../store/K.store";
 import { DND_TYPE, CARD_HEIGHT, isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
-import { ICON_MAP, IconKey, useOrchestratorContextMenuHelper } from "@/shared";
+import { ICON_MAP, IconKey, useMenuContextHelper } from "@/shared";
 import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTabHelper";
 import { storageService, STORAGE_KEYS } from "@/shared";
@@ -32,7 +32,7 @@ export function NodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItemV
         }
         return handleSubmitEdit(n, draft);
     };
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { openKNodeTab } = useKNodeTabHelper();
     const { hoveredNodeId, setHoveredNodeId, markedNodeId, setMarkedNodeId, currentK } = useKStore();
     const { searchQuery } = useSideBarStore();

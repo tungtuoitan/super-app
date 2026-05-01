@@ -110,24 +110,11 @@ export const kconstants = {
 
     contextMenu: {
         contextMenuTypes: {
-            default: "default",
-            note: "note",
-            file: "file",
-            folder: "folder",
-            noteGrid: "note-grid",
-            workspaceGrid: "workspace-grid",
-            projectGrid: "project-grid",
-            taskGrid: "task-grid",
-            tab: "tab",
-            lifeLogLog: "lifelog-log",
-            lifeLogTrack: "lifelog-track",
             kNode: "k-node",
             kNodePanelBlank: "k-node-panel-blank",
             kNodePanelCard: "k-node-panel-card",
-            // @deprecated aliases — remove after Phase 3
-            kFolder: "k-node",
-            kNote: "k-note",
-            kFile: "k-file",
+            kKnowledgeSelector: "k-knowledge-selector",
+            kTestFlow: "k-test-flow",
         } as const,
     },
     standardRegistryFE: {

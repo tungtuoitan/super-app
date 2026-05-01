@@ -1,8 +1,7 @@
-import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, Layers as MultiProjectIcon } from "lucide-react";
-import { useOrchestratorContextMenuHelper } from "@/shared";
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
+import { useMenuContext } from "@/shared";
 
 /**
  * ProjectGridMenu
@@ -14,8 +13,8 @@ import { useOrchestratorContextMenuStore } from "@/shared";
  * - Restore - only shown if projects ARE deleted
  */
 export function ProjectGridMenu() {
-    const { contextData } = useOrchestratorContextMenuStore();
-    const { openConfirmDialog, executeDirectly } = useOrchestratorContextMenuHelper();
+    const { contextData } = useMenuContext();
+    const { openConfirmDialog, executeDirectly } = useMenuContextHelper();
 
     // Calculate derived values from contextData
     const projectGridSelectedCount = contextData?.selectedIds?.length || 0;

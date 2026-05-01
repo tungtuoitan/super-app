@@ -13,8 +13,8 @@ import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {KtreeMiniHelper, KTreeNode} from "./Ktree.miniHelper";
 import {useKLoader} from "./useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
-import {useKeywordHelper} from "@/shared";
 import {Folder} from "../../types/folder.types";
+import {useKeywordHelper} from "@/shared";
 
 export const KuseTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();

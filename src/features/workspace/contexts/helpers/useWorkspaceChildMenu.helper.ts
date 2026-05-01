@@ -5,13 +5,13 @@
  */
 
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useConfirmationPopoverHelper } from "@/shared";
+import { useConfirmationPopoverHelper, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { getWorkspaceConfirmMessage } from "../../utils/confirmMessage";
 import { noteService } from "@/features/note";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext } from "@/shared";
 import {workspaceService} from "../../service/workspace.service";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader";
 import { filterTopLevelParents, buildTreeFromV2Items } from "../../hooks/tree.miniHelper";
@@ -26,7 +26,8 @@ export const useWorkspaceChildMenuHelper = () => {
     const { $user } = useAuthStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const _console = useConsoleHelper();
-    const { contextType, contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextType, contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
     const { processTabAfterDelete } = useEditorTabHelper();
@@ -287,7 +288,7 @@ export const useWorkspaceChildMenuHelper = () => {
         if (!contextData) return;
 
         // Close context menu
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
 
         // ----------------
         // STEP 2: Extract anchor element for popover positioning

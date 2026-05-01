@@ -12,7 +12,7 @@ import { useKMenuHelper } from "../helpers/useKMenu.helper";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
 import { useKTabHelper } from "../../hooks/useKTab.helper";
 import { kconstants } from "../../utils/K.Constants";
-import {useOrchestratorContextMenuStore} from "@/shared";
+import {useMenuContext} from "@/shared";
 
 /**
  * WorkspaceFolderNodeMenu
@@ -24,7 +24,7 @@ import {useOrchestratorContextMenuStore} from "@/shared";
  * - Delete / Hard Delete
  */
 export function KNodeMenu() {
-    const { contextData } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
     const { selectedItemIds, currentK, allK, setPendingImportNodeId } = useKStore();
     const { createFolder, editFolder, dhr_items } = useKMenuHelper();
     const { openKnowledgeTab } = useKTabHelper();

@@ -1,13 +1,13 @@
 /**
  * Workspace Folder Menu Helper Hook
  * Business logic for folder context menu operations
- * Extracted from useOrchestratorContextMenuHelper for folder-specific logic
+ * Extracted from useMenuContextHelper for folder-specific logic
  */
 
 import React from "react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useFolderDialogHelper } from "../../hooks/useFolderDialog.helper";
-import { useConfirmationPopoverHelper } from "@/shared";
+import { useConfirmationPopoverHelper, useMenuContextHelper } from "@/shared";
 import { getWorkspaceConfirmMessage } from "../../utils/confirmMessage";
 import { constants } from "@/shared";
 import type { ItemType } from "../../store/FolderDialog.store";
@@ -15,7 +15,7 @@ import { Folder } from "@/features/workspace/types/folder.types";
 import { workspaceService } from "../../service/workspace.service";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext } from "@/shared";
 import { filterTopLevelParents, transformItemsToTreeData, buildTreeFromV2Items, treeMiniHelper } from "../../hooks/tree.miniHelper";
 import type { WorkspaceItem, UpsertWorkspaceItemRequest } from "../../types/workspace.types";
 import { isFolder, WorkspaceItemAction } from "../../types/workspace.types";
@@ -109,7 +109,8 @@ const $removeItems = (items: any[], idsToRemove: Set<number>): any[] => {
 export const useWorkspaceFolderMenuHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
     const { openFolderDialog } = useFolderDialogHelper();
@@ -225,7 +226,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         // Close context menu and open create dialog
         // ----------------
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         openFolderDialog("create", itemType, null, parentTag);
     };
 
@@ -236,7 +237,7 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         // Close context menu
         // ----------------
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
 
         // ----------------
         // Determine item type and open edit dialog
@@ -528,11 +529,11 @@ export const useWorkspaceFolderMenuHelper = () => {
         // Check if this is a workspace root node (negative ID)
         if (contextData.tagId < 0) {
             console.warn("⚠️ Cannot delete workspace root node");
-            setIsContextMenuOpen(false);
+            setIsMenuContextOpen(false);
             return;
         }
 
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
 
         // ----------------
         // STEP 2: Extract anchor element for popover positioning

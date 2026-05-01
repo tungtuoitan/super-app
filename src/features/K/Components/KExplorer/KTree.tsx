@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useKStore } from "../../store/K.store";
 import { useSideBarStore } from "@/shell";
 import { KuseTreeHelper } from "../../hooks/kTree/useKTreeHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
@@ -22,7 +22,7 @@ export function KTree() {
     const { searchQuery } = useSideBarStore();
     const { handleSelectionChange, handleKeyDown } = KuseTreeHelper2();
     const { handleMove } = KuseTreeHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const manager = useDragDropManager();
     useCalculateKTreeContainerHeight()
     useScrollToHighlightItem()

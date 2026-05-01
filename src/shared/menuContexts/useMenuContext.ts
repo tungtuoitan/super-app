@@ -1,8 +1,7 @@
-import { useOrchestratorContextMenuStore } from "./ContextMenu.store";
-import { useOrchestratorContextMenuHelper } from "./useOrchestratorContextMenu.helper";
+import {useMenuContextStore} from "./MenuContext.store";
 
 export function useMenuContext() {
-    const store = useOrchestratorContextMenuStore();
-    const helper = useOrchestratorContextMenuHelper();
-    return { ...store, ...helper };
+    const {contextData, contextType, } = useMenuContextStore();
+    // const helper = useMenuContextHelper();
+    return { contextData, contextType };
 }

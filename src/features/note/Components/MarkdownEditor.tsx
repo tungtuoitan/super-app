@@ -11,7 +11,7 @@ import { useKeywordNavigationHelper } from "@/shell";
 import { useEditorTabHelper } from "@/shell";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
 import { useTreeStatusHelper } from "@/features/workspace";
-import { constants } from "@/shared";
+import { constants, useKeywordSelector } from "@/shared";
 import { Loader2 } from "lucide-react";
 import {
     convertToDisplayVersion,
@@ -27,10 +27,9 @@ import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";
 import {useEditorTabBarStore} from "@/shell";
-import {useKeywordStore} from "@/shared";
 
 export function MarkdownEditor() {
-    const { allKeywords } = useKeywordStore();
+    const { allKeywords } = useKeywordSelector();
     const { navigateLink } = useKeywordNavigationHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const { getActiveTab } = useEditorTabHelper();

@@ -6,7 +6,7 @@ import { useNoteGridStore } from "@/features/note";
 import { useWsStore } from "@/features/workspace";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { useTabBarShortcuts } from "./useTabBarShortcuts";
 import { BaseTab } from "@/shell";
 import { constants } from "@/shared";
@@ -36,7 +36,7 @@ export function useTabBarHelper() {
     const { workspaces } = useWsStore();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { upsertOrchestraitor } = useEditorToolbarHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     // Enable keyboard shortcuts
     useTabBarShortcuts();

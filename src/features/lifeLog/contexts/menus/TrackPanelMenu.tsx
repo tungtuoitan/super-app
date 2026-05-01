@@ -1,11 +1,11 @@
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Pencil, Trash2 } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContext } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 
 export function TrackPanelMenu() {
-    const { contextData } = useOrchestratorContextMenuStore();
-    const { executeDirectly } = useOrchestratorContextMenuHelper();
+    const { contextData } = useMenuContext();
+    const { executeDirectly } = useMenuContextHelper();
 
     return (
         <>

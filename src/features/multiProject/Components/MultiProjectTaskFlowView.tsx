@@ -24,7 +24,7 @@ import { useMultiProjectTaskFlowHeadless } from "../hooks/mpTaskFlow/useMultiPro
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
 import { useMultiProjectTaskFlowNodeHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { cn } from "@/lib/utils";
 import { storageService, STORAGE_KEYS } from "@/shared";
@@ -43,7 +43,7 @@ function TaskFlowCanvas() {
     const { isTaskFlowLoading, lockOldNodes, setLockOldNodes } = useMultiTaskFlowStore();
     const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout, loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
     const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const rfInstance = useReactFlow();
     const containerRef = useRef<HTMLDivElement>(null);
     const isDragSelecting = useRef(false);
@@ -77,7 +77,7 @@ function TaskFlowCanvas() {
             const flowPos = rfInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
             showContextMenu(
                 event as React.MouseEvent,
-                constants.contextMenu.contextMenuTypes.taskFlow,
+                "task-flow",
                 { onAddTask: () => handleAddTaskAtPosition(flowPos.x, flowPos.y) },
             );
         };

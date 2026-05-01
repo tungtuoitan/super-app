@@ -4,14 +4,12 @@ Validate all new/modified code against these rules before committing.
 
 ## Module Structure
 
-- Each module has 5-10 corresponding files: UI, helper, utils, store, selector, headless, constants, service, type
+- Each module has 5-10 corresponding files: UI, helper, utils, store, selector, constants, service, type
 - When a module grows too large, split into submodules
   - Example: module `Task` -> submodules: `TaskLinked`, `TaskChecklist`, `TaskComment`
-- if file is small UI component, leave them on /small folder
 - File naming convention:
   - **UI**: `ModuleName.tsx` (PascalCase)
   - **helper**: `useModuleName.helper.ts`
-  - **headless**: `useModuleName.headless.ts`
   - **selector**: `useModuleName.selector.ts`
   - **store**: `useModuleName.store.ts`
   - **service**: `moduleName.service.ts`

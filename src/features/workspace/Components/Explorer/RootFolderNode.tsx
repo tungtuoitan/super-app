@@ -7,7 +7,7 @@ import { useTreeHelper } from "../../hooks/useTreeHelper";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader"; 
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { FolderItem } from "../../types/workspace.types";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { HighlightText } from "./HighlightText";
 
@@ -29,7 +29,7 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
     const { addNewFolder } = useTreeHelper();
     const { _treeRef } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     const folderItem = node.data.data as FolderItem;
     const hasChildren = node.data.children && node.data.children.length > 0;
@@ -42,7 +42,7 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
         e.preventDefault();
         
         // Show root workspace context menu with Add Folder/Note/File options
-        showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, {
+        showContextMenu(e, "folder", {
             ...node.data.data,
             parentId: null,
         });

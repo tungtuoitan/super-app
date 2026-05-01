@@ -3,7 +3,7 @@ import { Search, RefreshCw, Plus, ScanLine, Bookmark, BookmarkCheck } from "luci
 import { useWikiStore } from "../../store/useWiki.store";
 import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
 import { useWikiTabHelper } from "../../hooks/useWikiTab.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { wikiService } from "../../service/wiki.service";
 import {
@@ -30,7 +30,7 @@ export default function WikiGraphView() {
     const { keywords, infos, isLoading, searchText, setSearchText, setSelectedKeywordIds, selectedKeywordIds, markedKeywordIds, setMarkedKeywordIds, focusKeywordId, setFocusKeywordId } = useWikiStore();
     const { loadAll }          = useWikiLoader();
     const { openWikiTab }      = useWikiTabHelper();
-    const { showContextMenu }  = useOrchestratorContextMenuHelper();
+    const { showContextMenu }  = useMenuContextHelper();
 
     const canvasRef           = useRef<HTMLCanvasElement>(null);
     const nodesRef            = useRef<GraphNode[]>([]);
@@ -541,7 +541,7 @@ export default function WikiGraphView() {
         if (!node) return;
         const kw = keywords.find(k => k.id === node.id);
         if (!kw) return;
-        showContextMenu(e, constants.contextMenu.contextMenuTypes.wikiGraphNode, {
+        showContextMenu(e, "wiki-graph-node", {
             keyword: kw,
             onDelete: () => handleDeleteKeyword(kw.id),
         });

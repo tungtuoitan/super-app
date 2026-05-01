@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { KuseTreeHelper2 as useKTreeHelper2 } from "../../hooks/kTree/useKTreeHelper2";
-import { ICON_MAP, IconKey, useOrchestratorContextMenuHelper } from "@/shared";
+import { ICON_MAP, IconKey, useMenuContextHelper } from "@/shared";
 import { KHighlightText } from "./KHighlightText";
 import { useKStore } from "../../store/K.store";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
@@ -46,7 +46,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, setPendingQuizTabSwitch } = useKStore();    
     const { searchQuery } = useSideBarStore();
     const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();
     const _TREESTATUS = useKTreeStatusHelper();
     const { activateDraftNode } = useKNodeDialogHelper();

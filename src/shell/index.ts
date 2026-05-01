@@ -57,7 +57,7 @@ export type { FilterValue, ViewFilter, UserFilters, FilterFieldConfig } from "./
 
 
 // ── Components ────────────────────────────────────────────────────────────
-export { Main } from "./Main";
+export { Main } from "../Main";
 export { KeywordIconRenderer } from "./commandPallete/KeywordIconRenderer";
 // export { CommandPalette } from "./commandPallete/CommandPalette";
 // export { ConfirmCloseDialog } from "./components/ConfirmCloseDialog";

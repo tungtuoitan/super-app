@@ -1,11 +1,16 @@
 import { FileText } from "lucide-react";
 import { NoteGrid } from "../Components/NoteGrid";
 import { NoteEditorPanel } from "../Components/NoteEditorPanel";
-import { constants } from "@/shared";
+import { constants, menuContextRegistry } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
+import { NoteGridMenu } from "../contexts/menus/NoteGridMenu";
+import { RichTextEditorMenu } from "../contexts/menus/RichTextEditorMenu";
 import type { Note } from "../types/note.types";
 import type { BaseTab } from "@/shell";
 import { ICON_MAP, IconKey } from "@/shared";
+
+menuContextRegistry.register({ handles: ["note-grid"],      component: NoteGridMenu });
+menuContextRegistry.register({ handles: ["richtext-editor"], component: RichTextEditorMenu });
 
 function getNoteTabIcon(tab: BaseTab) {
     const note = tab.data0 as Note | undefined;

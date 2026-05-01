@@ -1,7 +1,7 @@
 import { Note } from "@/features/note";
 import { useNoteGridStore } from "@/features/note";
 import { BaseTab, TabType } from "@/shell";
-import { constants, useKeywordStore } from "@/shared";
+import { constants, useKeywordSelector } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useSideBarStore } from "@/shell";
 import { WorkspaceItemV2 } from "@/features/workspace";
@@ -25,7 +25,7 @@ export const useEditorTabHelper = () => {
     const { currentWorkspace, setCurrentWorkspace, setSelectedItemIds, _treeRef } = useWorkspaceStore();
     const { moduleName } = useSideBarStore();
     const { isDragging, setLastSelectedItemId } = useWorkspaceStore();
-    const { allKeywords } = useKeywordStore();
+    const { allKeywords } = useKeywordSelector();
     const { setLogs, setTracks } = useLifeLogStore();
 
     /**

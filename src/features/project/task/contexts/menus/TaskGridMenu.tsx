@@ -1,10 +1,11 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, GitBranch as SubTaskIcon } from "lucide-react";
-import { useMenuContext } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 
 export function TaskGridMenu() {
-    const { contextData, openConfirmDialog, executeDirectly } = useMenuContext();
+    const { contextData } = useMenuContext();
+    const { openConfirmDialog, executeDirectly } = useMenuContextHelper();
 
     const taskGridSelectedCount = contextData?.selectedIds?.length || 0;
     const allSelectedAreTempTasks = contextData?.selectedIds?.every((id: number) => id < 0) ?? false;

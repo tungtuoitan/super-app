@@ -8,7 +8,7 @@ import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFolderItem } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { HighlightText } from "./HighlightText";
 import { ICON_MAP, IconKey } from "@/shared";
 
@@ -39,7 +39,7 @@ export default Folder2;
 export function FolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FolderNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef,setScrollToItem } = useWorkspaceStore();
     const { searchQuery } = useSideBarStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();
 
@@ -177,7 +177,7 @@ export function FolderNode({ node, style, dragHandle, treeData, treeType = "work
 
         // Open folder-specific context menu with folder data (V2 structure)
         const contextData = { ...folderItem, parentId: _currentFolder?.parentId ?? null };
-        showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, contextData);
+        showContextMenu(e, "folder", contextData);
     };
 
     return (

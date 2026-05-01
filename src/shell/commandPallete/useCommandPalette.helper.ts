@@ -4,7 +4,7 @@
  * Single entry point for all keyword data and navigation within commandPallete.
  */
 
-import { useAuthStore, fuzzyMatchWithDiacritics, targetKeywordService, useKeywordStore } from "@/shared";
+import { useAuthStore, fuzzyMatchWithDiacritics, targetKeywordService, useKeywordSelector } from "@/shared";
 import type { Keyword, KeywordType } from "@/shared";
 import { Layers, Folder, FileText, Link, Hash, Cuboid, SquareCheckBig, ScrollText, Shell } from "lucide-react";
 import { useCommandPaletteStore } from "./useCommandPalette.store";
@@ -14,7 +14,7 @@ import { useKeywordNavigationHelper } from "./useKeywordNavigation.helper";
 const ALL_KEYWORD_TYPES: KeywordType[] = ["workspace", "folder", "note", "file", "external", "project", "task", "log", "track"];
 
 export const useCommandPaletteHelper = () => {
-    const { allKeywords } = useKeywordStore();
+    const { allKeywords } = useKeywordSelector();
     const { setIsOpen, setSearchQuery, setSelectedIndex, setOnLinkKeyword, setAlreadyLinkedIds } = useCommandPaletteStore();
     const { navigateLink } = useKeywordNavigationHelper();
     const { $user } = useAuthStore();

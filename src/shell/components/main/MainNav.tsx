@@ -3,7 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { useNavigationStore } from "../../../contexts/NavigationContext";
 import { TopNav } from "./TopNav";
 import { AuthCallback, constants } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import {useDeviceStore} from "@/shared";
 import {VSCodeLayout} from "./VSCodeLayout";
 
@@ -26,7 +26,7 @@ import {VSCodeLayout} from "./VSCodeLayout";
  */
 export default function MainNav() {
     const { bodyWrapperRef } = useNavigationStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { isMobile } = useDeviceStore();
     
 

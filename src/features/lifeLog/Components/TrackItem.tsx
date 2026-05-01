@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { useDeviceStore } from "@/shared";
 import { useLifeLogStore } from "../store/useLifeLog.store";
@@ -29,7 +29,7 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
     const { createLog } = useLifeLogLogHelper();
     const { deleteTrack } = useLifeLogTrackHelper();
     const { openTrackTab } = useLifeLogTabHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { isMobile } = useDeviceStore();
     const { logs } = useLifeLogStore();
     const [flashing, setFlashing] = useState(false);
@@ -40,7 +40,7 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
     const openMenu = (e: React.MouseEvent) => {
-        showContextMenu(e, constants.contextMenu.contextMenuTypes.lifeLogTrack, {
+        showContextMenu(e, "lifelog-track", {
             onEdit: () => openTrackTab(track),
             onDelete: () => deleteTrack(track.id),
         });

@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
 import { useAuthStore } from "@/shared";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 
@@ -25,7 +25,7 @@ export function WorkspaceView() {
     const { loadAllWorkspaces, loadTree, softDeleteWorkspace } = useWorkspaceLoader();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
     const { openNewWorkspaceTab, openWorkspaceTab } = useWsTabHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     // Load workspaces on mount
     useEffect(() => {
@@ -74,7 +74,7 @@ export function WorkspaceView() {
             e.preventDefault();
             e.stopPropagation();
             const selected = selectedWorkspaceId != null ? allWorkspaces.find((ws) => ws.id === selectedWorkspaceId) : undefined;
-            showContextMenu(e, constants.contextMenu.contextMenuTypes.workspaceSelector, {
+            showContextMenu(e, "workspace-selector", {
                 hasSelected: selected != null,
                 onAdd: () => openNewWorkspaceTab(),
                 onEdit: () => { if (selected) openWorkspaceTab(selected); },

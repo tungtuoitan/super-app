@@ -1,11 +1,11 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { Trash2 } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContext } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 
 export function LogListMenu() {
-    const { contextData } = useOrchestratorContextMenuStore();
-    const { executeDirectly } = useOrchestratorContextMenuHelper();
+    const { contextData } = useMenuContext();
+    const { executeDirectly } = useMenuContextHelper();
 
     return (
         <MenuItem

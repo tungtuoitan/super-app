@@ -1,16 +1,17 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { Trash2 } from "lucide-react";
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
 
 export function WikiGraphNodeMenu() {
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation }                  = useConfirmationPopoverHelper();
 
     const name = contextData?.keyword?.name ?? "this keyword";
 
     const handleDelete = (e: any) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         const anchor = ((e.syntheticEvent ?? e) as MouseEvent).target as HTMLElement;
         showConfirmation({
             anchorEl:     anchor,

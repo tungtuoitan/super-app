@@ -1,9 +1,10 @@
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { useMenuContext } from "@/shared";
+import { useMenuContextHelper, useMenuContext } from "@/shared";
 
 export function KKnowledgeMenu() {
-    const { contextData, executeDirectly, openConfirmDialog } = useMenuContext();
+    const { contextData } = useMenuContext();
+    const { executeDirectly, openConfirmDialog } = useMenuContextHelper();
 
     return (
         <>

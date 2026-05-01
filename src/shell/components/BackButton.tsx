@@ -4,7 +4,7 @@
  */
 
 import { Cuboid, CheckSquare, FileText, Box, Layers, Activity } from "lucide-react";
-import { Keyword, useKeywordStore } from "@/shared";
+import { Keyword, useKeywordSelector } from "@/shared";
 import { useKeywordNavigationHelper } from "@/shell";
 
 interface BackButtonProps {
@@ -49,7 +49,7 @@ function BackIcon({ type, className }: { type: string; className: string }) {
 }
 
 export function BackButton({ openedBy }: BackButtonProps) {
-    const { allKeywords } = useKeywordStore();
+    const { allKeywords } = useKeywordSelector();
     const { navigateLink } = useKeywordNavigationHelper();
 
     const type = getTypeFromLink(openedBy.link);

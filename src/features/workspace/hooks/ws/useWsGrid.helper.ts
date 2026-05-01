@@ -6,7 +6,7 @@ import { constants } from "@/shared";
 import { BaseTab } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { filterUtils } from "@/shell";
 import {useConsoleHelper} from "@/shared";
 import {Ws} from "../../types/workspace.types";
@@ -32,7 +32,7 @@ export const useWsGridHelper = () => {
     const { $user } = useAuthStore();
 
     const { workspaces, setWorkspaces, setWsGridIsLoading, setWsGridError, wsGridRowSelection, setWsGridRowSelection, wsGridPagination, setTotalCount } = useWsStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     const { openTab } = useEditorTabHelper();
     const { openTabs, setOpenTabs } = useEditorTabBarStore();

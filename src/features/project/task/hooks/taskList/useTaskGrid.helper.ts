@@ -8,7 +8,7 @@ import { taskService } from "@/features/taskDetail";
 import type { TaskDTO, Task } from "@/features/taskDetail";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
@@ -52,7 +52,7 @@ export const useTaskGridHelper = () => {
     const { $user } = useAuthStore();
     const { tasks, setTasks, setAllTasks, setTaskGridIsLoading, setTaskGridError, taskGridRowSelection, setTaskGridRowSelection, setTaskTotalCount } = usePTaskStore();
 
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const _console = useConsoleHelper();
 
     /**

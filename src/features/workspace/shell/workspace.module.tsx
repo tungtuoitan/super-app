@@ -2,8 +2,17 @@ import { Boxes, Box, BarChart3, ArrowRightLeft } from "lucide-react";
 import { WorkspaceView } from "../Components/WorkspaceView";
 import { WsEditorPanel } from "../Components/WsEditorPanel";
 import { MovingTab } from "../Components/VSPanel/MovingTab";
-import { constants } from "@/shared";
+import { constants, menuContextRegistry } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
+import { WorkspaceFolderNodeMenu } from "../contexts/menus/WorkspaceFolderNodeMenu";
+import { WorkspaceChildNodeMenu } from "../contexts/menus/WorkspaceChildNodeMenu";
+import { WorkspaceSelectorMenu } from "../contexts/menus/WorkspaceSelectorMenu";
+import { WsGridMenu } from "../contexts/menus/WsGridMenu";
+
+menuContextRegistry.register({ handles: ["folder"],                         component: WorkspaceFolderNodeMenu });
+menuContextRegistry.register({ handles: ["note", "file"],                   component: WorkspaceChildNodeMenu });
+menuContextRegistry.register({ handles: ["workspace-selector"],             component: WorkspaceSelectorMenu });
+menuContextRegistry.register({ handles: ["workspace-grid"],                 component: WsGridMenu });
 
 const MovingTabAdapter = () => <MovingTab />;
 

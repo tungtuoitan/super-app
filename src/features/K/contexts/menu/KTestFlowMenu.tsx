@@ -1,10 +1,11 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus, Trash2 } from "lucide-react";
-import { useMenuContext } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 
 export function KTestFlowMenu() {
-    const { contextData, executeDirectly } = useMenuContext();
+    const { contextData } = useMenuContext();
+    const { executeDirectly } = useMenuContextHelper();
 
     const hasSelected = !!(contextData?.selectedIds?.length);
 

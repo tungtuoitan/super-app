@@ -7,7 +7,7 @@ import { projectService, ProjectDTO } from "../service/project.service";
 import {  useProjectStore } from "../store/useProject.store";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
@@ -46,7 +46,7 @@ export const useProjectGridHelper = () => {
         setProjectGridRowSelection,
         setTotalCount,
     } = useProjectStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const _console = useConsoleHelper();
     const { openProjectTab, openMultiProjectTab } = useProjectTabHelper();
     const { setShouldFocusProjectName } = useProjectDetailStore();

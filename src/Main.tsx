@@ -14,17 +14,17 @@ import { TaskSectionProvider } from "@/features/taskDetail";
 import { MultiTimelineProvider } from "@/features/multiProject";
 import { LifeLogProvider } from "@/features/lifeLog";
 import { WikiProvider } from "@/features/Wiki/";
-import { OrchestratorContextMenu } from "@/shared";
+import { MenuContext } from "@/shared";
 import { ConfirmationPopoverProvider } from "@/shared";
-import MainNav from "./components/main/MainNav";
+import MainNav from "./shell/components/main/MainNav";
 import { NavProvider } from "@/contexts/NavigationContext";
 
-import { OrchestratorContextMenuStoreProvider } from "@/shared";
+import { MenuContextStoreProvider } from "@/shared";
 import { DeviceProvider } from "@/shared";
 import { DebugLoggerProvider } from "@/shared";
-import { ShellProvider } from "./store/ShellProvider";
+import { ShellProvider } from "./shell/store/ShellProvider";
 import { StandardRegistryProvider } from "@/shared";
-import { CommandPaletteProvider } from "./commandPallete/useCommandPalette.store";
+import { CommandPaletteProvider } from "./shell/commandPallete/useCommandPalette.store";
 import { PTaskProvider } from "@/features/project";
 import { AuthCallbackProvider } from "@/shared";
 import { AuthStoreProvider } from "@/shared";
@@ -39,7 +39,7 @@ import {ConfirmationPopoverContainer} from "@/shared";
  * - Infrastructure: BrowserRouter, Nav, Mobile, DebugLogger, Auth, Console
  * - App shell: General, CommandPalette, NavigationHistory
  * - Feature stores: Workspace, K, Ws, Project, Task, Note, Editor
- * - UI layer: Dialog, ContextMenu, ConfirmationPopover, AuthGuard
+ * - UI layer: Dialog, MenuContext, ConfirmationPopover, AuthGuard
  *
  * IMPORTANT: DndProvider MUST stay here — both react-arborist and
  * react-mosaic-component require a shared DnD context.
@@ -56,7 +56,7 @@ export function Main() {
                                     <DndProvider backend={HTML5Backend}>
                                         <StandardRegistryProvider>
                                             <CommandPaletteProvider>
-                                                <OrchestratorContextMenuStoreProvider>
+                                                <MenuContextStoreProvider>
                                                     <ConfirmationPopoverProvider>
                                                         <AuthCallbackProvider>
                                                             <AuthStoreProvider>
@@ -75,9 +75,9 @@ export function Main() {
                                                                                                                 <LifeLogProvider>
                                                                                                                     <WikiProvider>
                                                                                                                         <NoteProviders>
-                                                                                                                            <OrchestratorContextMenu>
+                                                                                                                            <MenuContext>
                                                                                                                                 <MainNav />
-                                                                                                                            </OrchestratorContextMenu>
+                                                                                                                            </MenuContext>
                                                                                                                         </NoteProviders>
                                                                                                                     </WikiProvider>
                                                                                                                 </LifeLogProvider>
@@ -96,7 +96,7 @@ export function Main() {
                                                         </AuthCallbackProvider>
                                                         <ConfirmationPopoverContainer />
                                                     </ConfirmationPopoverProvider>
-                                                </OrchestratorContextMenuStoreProvider>
+                                                </MenuContextStoreProvider>
                                             </CommandPaletteProvider>
                                         </StandardRegistryProvider>
                                     </DndProvider>

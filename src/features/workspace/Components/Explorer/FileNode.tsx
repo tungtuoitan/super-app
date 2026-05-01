@@ -9,7 +9,7 @@ import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFileItem } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/shared";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { StatusDot } from "./StatusDot";
 import { HighlightText } from "./HighlightText";
 
@@ -53,7 +53,7 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef,setScrollToItem } = useWorkspaceStore();
     const { searchQuery } = useSideBarStore();
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();
 

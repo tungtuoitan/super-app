@@ -6,7 +6,7 @@ import { useWorkspaceStore } from "../../store/Workspace.store";
 import { useSideBarStore } from "@/shell";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { FolderNode } from "./FolderNode";
 import { RootFolderNode } from "./RootFolderNode";
@@ -25,7 +25,7 @@ export function WorkspaceTree() {
     const { searchQuery } = useSideBarStore();
     const { handleSelectionChange, handleKeyDown } = useTreeHelper2();
     const { handleMove } = useTreeHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const manager = useDragDropManager();
     const { allWorkspaces, isLoadingWorkspaces, isLoadingTree, setIsLoadingTree, setIsLoadingWorkspaces } = useWorkspaceStore();
 
@@ -135,7 +135,7 @@ export function WorkspaceTree() {
         // Get root workspace data
         if (treeData && treeData.length > 0) {
             const rootData = treeData[0].data; // Root is first item in treeData
-            showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, {
+            showContextMenu(e, "folder", {
                 ...rootData,
                 parentId: null,
             });
@@ -235,7 +235,7 @@ export function WorkspaceTree() {
                                             // Show root workspace context menu for drop zone
                                             if (treeData && treeData.length > 0) {
                                                 const rootData = treeData[0].data; // Root is first item
-                                                showContextMenu(e, constants.contextMenu.contextMenuTypes.folder, {
+                                                showContextMenu(e, "folder", {
                                                     ...rootData,
                                                     parentId: null,
                                                 });

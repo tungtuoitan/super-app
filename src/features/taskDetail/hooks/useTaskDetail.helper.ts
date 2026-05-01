@@ -14,8 +14,8 @@ import React from "react";
 import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { taskService } from "../service/task.service";
-import { useAuthStore } from "@/shared";
-import { parseApiError, isUnauthorizedError, useKeywordStore } from "@/shared";
+import { useAuthStore, useKeywordSelector } from "@/shared";
+import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
@@ -41,7 +41,7 @@ export const useTaskDetailHelper = () => {
     const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
     const { setTasks } = usePTaskStore();
     const { linkedKeywords, folderItems } = useTaskDetailStore();
-    const { allKeywords } = useKeywordStore();
+    const { allKeywords } = useKeywordSelector();
     const debugLog = useDebugLog();
     const { selectedTask } = useTaskDetailSelector();
 
@@ -55,7 +55,7 @@ export const useTaskDetailHelper = () => {
         if (!selectedTask) return;
         const linkedIds = new Set(linkedKeywords.map((lk) => lk.keywordId));
         const folderWsItemIds = new Set(folderItems.map((fi) => fi.workspaceItemId));
-        allKeywords.forEach((kw) => {
+        allKeywords.forEach((kw: { workspaceItemId?: number; id: number }) => {
             if (kw.workspaceItemId !== undefined && folderWsItemIds.has(kw.workspaceItemId)) {
                 linkedIds.add(kw.id);
             }

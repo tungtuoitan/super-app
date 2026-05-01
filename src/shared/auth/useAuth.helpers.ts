@@ -6,7 +6,7 @@
 
 import { useAuthStore } from "./Auth.store";
 import type { User } from "./auth.types";
-import { storageService, STORAGE_KEYS } from "../localStorage/storage.service";
+import { storageService } from "../localStorage/storage.service";
 import { authApi } from "./auth.service";
 import { envConfig } from "config/env.config";
 import { constants } from "../constants";
@@ -19,6 +19,7 @@ import { parseApiError, isUnauthorizedError } from "../utils/api-error.utils";
 import { debugLog } from "../debug/useDebugLog";
 import { getDeviceFingerprint } from "../utils/deviceFingerprint";
 import { acquireRefreshToken } from "../fetch/apiClient";
+import {STORAGE_KEYS} from "../localStorage/storage.config";
 
 const DEFAULT_USER: User = {
     userId: null,

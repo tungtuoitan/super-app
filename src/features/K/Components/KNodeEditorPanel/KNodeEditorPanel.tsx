@@ -8,7 +8,7 @@ import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEdito
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { NodeCard } from "./NodeCard";
 import { InlineNewNodeCard } from "./InlineNewNodeCard";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { kconstants } from "../../utils/K.Constants";
@@ -22,7 +22,7 @@ function KNodeEditorContent() {
     const { rootNode, breadcrumb, setBreadcrumb, setEditingNodeId, setParentPickerNodeId, inlineNewParentId, setInlineNewParentId, showDeleted, setShowDeleted, showAllChild, setShowAllChild, editingNodeId, unsavedPromptNodeId, setPromptFlashTick } = useKNodeEditorStore();
     const { currentK, allK, setSelectedItemIds, setLastSelectedItemId, setScrollToItem, markedNodeId, _treeRef, treeData } = useKStore();
     const { scopedNodes, allNodes } = useKNodeEditorLoader();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const { warning } = useConsoleHelper();
     const { searchQuery } = useSideBarStore();
 
@@ -119,7 +119,7 @@ function KNodeEditorContent() {
     const handleGridContextMenu = (e: React.MouseEvent) => {
         if ((e.target as HTMLElement).closest("[data-node-card]")) return;
         e.preventDefault();
-        showContextMenu(e, constants.contextMenu.contextMenuTypes.kNodePanelBlank, currentScopeNode);
+        showContextMenu(e, "k-node-panel-blank", currentScopeNode);
     };
 
     const sortedNodes = [...scopedNodes].sort((a, b) => (a.pathDepth ?? 0) - (b.pathDepth ?? 0))

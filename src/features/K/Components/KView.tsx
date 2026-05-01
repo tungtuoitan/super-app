@@ -11,7 +11,7 @@ import { useKStore } from "../store/K.store";
 import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";
 import { KDialog } from "./KExplorer/KDialog/KDialog";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import {useKLoader} from "../hooks/kTree/useK.loader";
 
@@ -23,7 +23,7 @@ export function KView() {
     const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount } = useKStore();
     const { loadAllK, loadTree, softDeleteKnowledge, loadDailyReviewCount } = useKLoader();
     const { openNewKnowledgeTab, openKnowledgeTab, openGlobalDailyReviewTab } = useKTabHelper();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     // Load workspaces + daily review count on mount
     useEffect(() => {
@@ -60,7 +60,7 @@ export function KView() {
             e.preventDefault();
             e.stopPropagation();
             const selected = selectedKId != null ? allK.find((k) => k.id === selectedKId) : undefined;
-            showContextMenu(e, constants.contextMenu.contextMenuTypes.kKnowledgeSelector, {
+            showContextMenu(e, "k-knowledge-selector", {
                 hasSelected: selected != null,
                 onAdd: () => openNewKnowledgeTab(),
                 onEdit: () => { if (selected) openKnowledgeTab(selected); },

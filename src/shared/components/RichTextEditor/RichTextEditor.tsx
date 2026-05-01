@@ -35,7 +35,7 @@ import { _isImageFile, fileService, UploadContext, useAuthStore, useConsoleHelpe
 import { FileAttachment } from "./FileAttachmentExtension";
 import { ProxyImage } from "./ProxyImageExtension";
 import { useProxyImageLoader } from "./useProxyImageLoader";
-import { useOrchestratorContextMenuHelper } from "@/shared";
+import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import "./RichTextEditor.css";
 
@@ -115,7 +115,7 @@ export function RichTextEditor({
     enableCopyPlainText = false,
 }: RichTextEditorProps) {
     const { $user } = useAuthStore();
-    const { showContextMenu } = useOrchestratorContextMenuHelper();
+    const { showContextMenu } = useMenuContextHelper();
     const [isUploading, setIsUploading] = useState(false);
     const onEnterRef = useRef<(() => void) | undefined>(onEnter);
     useLayoutEffect(() => { onEnterRef.current = onEnter; }, [onEnter]);
@@ -236,7 +236,7 @@ export function RichTextEditor({
     };
 
     const handleContextMenu = (e: React.MouseEvent) => {
-        showContextMenu(e, constants.contextMenu.contextMenuTypes.richTextEditor, {
+        showContextMenu(e, "richtext-editor", {
             onCopyPlainText: handleCopyPlainText,
         });
     };
