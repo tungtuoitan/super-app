@@ -1,4 +1,4 @@
-
+﻿
 
 // Providers / Stores
 export { LifeLogProvider, useLifeLogStore } from "./store/useLifeLog.store";
@@ -14,7 +14,6 @@ export { TrackIconPicker } from "./Components/TrackIconPicker";
 export { useLifeLogSaveActions } from "./hooks/useLifeLogSaveActions";
 
 // shell module
-export { lifeLogModule, lifeLogKeywordPlugin } from "./shell/lifeLog.module";
 
 export { useLifeLogTabHelper } from "./hooks/useLifeLogTab.helper";
 

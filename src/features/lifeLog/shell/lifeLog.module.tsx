@@ -8,17 +8,12 @@ import { LogTypeIcon } from "../Components/LogTypeIcon";
 import { TrackIconDisplay } from "../Components/TrackIconDisplay";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 import { lifeLogService } from "../service/lifeLog.service";
-import { constants, menuContextRegistry } from "@/shared";
-import { LogListMenu } from "../contexts/menus/LogListMenu";
-import { TrackPanelMenu } from "../contexts/menus/TrackPanelMenu";
 import type { LifeLogLog, LifeLogTrack } from "../types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { KeywordPlugin } from "@/shell";
 import { parseKeywordLink } from "@/shared";
 
-menuContextRegistry.register({ handles: ["lifelog-log"],   component: LogListMenu });
-menuContextRegistry.register({ handles: ["lifelog-track"], component: TrackPanelMenu });
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
 
@@ -168,6 +163,7 @@ export const lifeLogKeywordPlugin: KeywordPlugin = {
         return undefined;
     },
 };
+
 
 
 

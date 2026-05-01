@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Project Feature Public API
  * Only import from this file when crossing feature boundaries.
  * Internal imports within the project feature should use relative paths.
@@ -37,7 +37,6 @@ export { ProjectProviders } from "./store/ProjectProviders";
 export { PTaskProvider } from "./store/usePTask.store";
 
 // shell module
-export { projectModule, projectKeywordPlugin } from "./shell/project.module";
 
 // Context menus
 export { TaskGridMenu } from "./task/contexts/menus/TaskGridMenu";

@@ -6,7 +6,7 @@
 
 import {DropValidation} from "../types/taskGrid.types";
 import {Task} from "../types/task.types";
-import {projectConstants} from "@/features/project";
+import {projectConstants} from "@/features/project/project.constants";
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Timeline Constants

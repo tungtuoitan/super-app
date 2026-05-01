@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Note Feature - Public API
  * Only export what other features/layers need to use.
  * Internal implementation details stay private.
@@ -34,8 +34,8 @@ export { NoteProviders } from "./store/NoteProviders";
 export { useNoteSaveActions } from "./hooks/useNoteSaveActions";
 
 // shell module
-export { noteModule } from "./shell/note.module";
 
 // Context menus
 export { NoteGridMenu } from "./contexts/menus/NoteGridMenu";
 export { RichTextEditorMenu } from "./contexts/menus/RichTextEditorMenu";export { registerNoteFilters } from "./shell/note.filterConfig";
+

@@ -5,19 +5,9 @@ import { KKnowledgeEditorPanel } from "../Components/KKnowledgeEditorPanel";
 import { KNodeEditorPanel } from "../Components/KNodeEditorPanel/KNodeEditorPanel";
 import { KMovingTab } from "../Components/KMovingTree/KMovingTab";
 import { useKStore } from "../store/K.store";
-import { constants, menuContextRegistry } from "@/shared";
+import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
-import { KNodeMenu } from "../contexts/menu/KNodeMenu";
-import { KNodePanelCardMenu } from "../contexts/menu/KNodePanelCardMenu";
-import { KKnowledgeMenu } from "../contexts/menu/KKnowledgeMenu";
-import { KTestFlowMenu } from "../contexts/menu/KTestFlowMenu";
-import { KNodePanelBlankMenu } from "../contexts/menu/KNodePanelBlankMenu";
 
-menuContextRegistry.register({ handles: ["k-node"],               component: KNodeMenu });
-menuContextRegistry.register({ handles: ["k-node-panel-card"],    component: KNodePanelCardMenu });
-menuContextRegistry.register({ handles: ["k-knowledge-selector"], component: KKnowledgeMenu });
-menuContextRegistry.register({ handles: ["k-test-flow"],          component: KTestFlowMenu });
-menuContextRegistry.register({ handles: ["k-node-panel-blank"],   component: KNodePanelBlankMenu });
 
 const KMovingTabAdapter = () => <KMovingTab />;
 
@@ -56,6 +46,7 @@ export const kModule: ModuleDefinition = {
         },
     ],
 };
+
 
 
 

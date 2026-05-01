@@ -7,40 +7,60 @@
  */
 
 import { moduleRegistry } from "./moduleRegistry";
-import { workspaceModule } from "@/features/workspace";
-import { kModule } from "@/features/K";
-import { projectModule } from "@/features/project";
-import { lifeLogModule } from "@/features/lifeLog";
-import { noteModule } from "@/features/note";
+// Module files are imported directly (not via barrel) to avoid circular deps.
+// Each *.module file may import from other feature barrels; keeping them out
+// of their own barrel breaks the init cycle during HMR and initial load.
+import { workspaceModule } from "@/features/workspace/shell/workspace.module";
+import { kModule }         from "@/features/K/shell/k.module";
+import { projectModule }   from "@/features/project/shell/project.module";
+import { lifeLogModule }   from "@/features/lifeLog/shell/lifeLog.module";
+import { noteModule }      from "@/features/note/shell/note.module";
 import { menuContextRegistry } from "@/shared";
+
+// ── Menu components ───────────────────────────────────────────────────────────
+import { WorkspaceFolderNodeMenu, WorkspaceChildNodeMenu, WorkspaceSelectorMenu, WsGridMenu } from "@/features/workspace";
+import { NoteGridMenu, RichTextEditorMenu } from "@/features/note";
+import { ProjectGridMenu, TaskGridMenu, TaskFlowMenu } from "@/features/project";
+import { LogListMenu, TrackPanelMenu } from "@/features/lifeLog";
+import { KNodeMenu, KNodePanelCardMenu, KKnowledgeMenu, KTestFlowMenu, KNodePanelBlankMenu } from "@/features/K";
 import { WikiGraphNodeMenu } from "@/features/Wiki";
 import { TabBarMenu } from "./components/TabBarMenu";
 
-// Filter registrations — features register their filter configs
+// ── Filter registrations ──────────────────────────────────────────────────────
 import { registerWorkspaceFilters } from "@/features/workspace";
 import { registerKFilters } from "@/features/K";
 import { registerNoteFilters } from "@/features/note";
 import { registerTaskFilters } from "@/features/taskDetail";
 
-// Registration order = ActivityBar display order
+// ── Module registration (ActivityBar display order) ───────────────────────────
 moduleRegistry.register(workspaceModule);
 moduleRegistry.register(projectModule);
 moduleRegistry.register(kModule);
 moduleRegistry.register(lifeLogModule);
-// moduleRegistry.register(wikiModule);
-// noteModule and workspaceModule are available but not shown in ActivityBar by default
-// (they can still have editor panels registered for tab rendering)
 moduleRegistry.register(noteModule);
 
-// ── Filter Configuration Registration ────────────────────────────────────────
-// Register feature-specific filter configurations for genericFilter
+// ── Filter configuration ──────────────────────────────────────────────────────
 registerWorkspaceFilters();
 registerKFilters();
 registerNoteFilters();
 registerTaskFilters();
 
-// ── Context Menu Registration (shell-level) ────────────────────────────────────
-// Feature context menus are registered as side effects in their own module files above.
-// Only shell-owned and disabled-module menus are registered here.
-menuContextRegistry.register({ handles: ["wiki-graph-node"], component: WikiGraphNodeMenu });
-menuContextRegistry.register({ handles: ["tab"],             component: TabBarMenu });
+// ── Context menu registration ─────────────────────────────────────────────────
+menuContextRegistry.register({ handles: ["folder"],                component: WorkspaceFolderNodeMenu });
+menuContextRegistry.register({ handles: ["note", "file"],          component: WorkspaceChildNodeMenu });
+menuContextRegistry.register({ handles: ["workspace-selector"],    component: WorkspaceSelectorMenu });
+menuContextRegistry.register({ handles: ["workspace-grid"],        component: WsGridMenu });
+menuContextRegistry.register({ handles: ["note-grid"],             component: NoteGridMenu });
+menuContextRegistry.register({ handles: ["richtext-editor"],       component: RichTextEditorMenu });
+menuContextRegistry.register({ handles: ["project-grid"],          component: ProjectGridMenu });
+menuContextRegistry.register({ handles: ["task-grid"],             component: TaskGridMenu });
+menuContextRegistry.register({ handles: ["task-flow"],             component: TaskFlowMenu });
+menuContextRegistry.register({ handles: ["lifelog-log"],           component: LogListMenu });
+menuContextRegistry.register({ handles: ["lifelog-track"],         component: TrackPanelMenu });
+menuContextRegistry.register({ handles: ["k-node"],                component: KNodeMenu });
+menuContextRegistry.register({ handles: ["k-node-panel-card"],     component: KNodePanelCardMenu });
+menuContextRegistry.register({ handles: ["k-knowledge-selector"],  component: KKnowledgeMenu });
+menuContextRegistry.register({ handles: ["k-test-flow"],           component: KTestFlowMenu });
+menuContextRegistry.register({ handles: ["k-node-panel-blank"],    component: KNodePanelBlankMenu });
+menuContextRegistry.register({ handles: ["wiki-graph-node"],       component: WikiGraphNodeMenu });
+menuContextRegistry.register({ handles: ["tab"],                   component: TabBarMenu });

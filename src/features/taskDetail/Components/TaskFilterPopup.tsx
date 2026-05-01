@@ -16,7 +16,7 @@ import {parseApiError} from "@/shared";
 import {UserFilters, ViewFilter} from "@/shell";
 import {useAuthStore} from "@/shared";
 import {TaskFilterGroup} from "./TaskFilterGroup";
-import {projectConstants} from "@/features/project";
+import {projectConstants} from "@/features/project/project.constants";
 
 const DEFAULT_FILTERS = projectConstants.filters.defaults.taskGrid as ViewFilter;
 const GROUPS = projectConstants.filters.taskGroups;

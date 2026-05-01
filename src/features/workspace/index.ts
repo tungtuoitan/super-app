@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Workspace Feature - Public API
  * Only export what other features/layers need to use.
  * Internal implementation details stay private.
@@ -33,7 +33,6 @@ export { useWorkspaceHelper } from "./hooks/useWorkspaceHelper";
 export { useWsSaveActions } from "./hooks/ws/useWsSaveActions";
 
 // shell module
-export { workspaceModule } from "./shell/workspace.module";
 
 export type { WorkspaceNoteItem, WorkspaceFolderItem } from './types/workspace-v2.types'
 export type { WorkspaceDTO } from './types/workspace-dto.types'
@@ -50,3 +49,4 @@ export { WsGridMenu } from "./contexts/menus/WsGridMenu";
 export { generateTempId, collectIdsFromTabs, generateUnsavedName, collectIdsFromTree, SPECIAL_IDS } from "./utils/temp-id.utils";
 
 export { registerWorkspaceFilters } from "./shell/workspace.filterConfig";
+

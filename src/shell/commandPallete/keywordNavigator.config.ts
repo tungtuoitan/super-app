@@ -10,8 +10,8 @@
  */
 
 import { keywordNavigatorRegistry } from "./keywordNavigator.registry";
-import { projectKeywordPlugin } from "@/features/project";
-import { lifeLogKeywordPlugin } from "@/features/lifeLog";
+import { projectKeywordPlugin } from "@/features/project/shell/project.module";
+import { lifeLogKeywordPlugin } from "@/features/lifeLog/shell/lifeLog.module";
 
 keywordNavigatorRegistry.register(projectKeywordPlugin);
 keywordNavigatorRegistry.register(lifeLogKeywordPlugin);

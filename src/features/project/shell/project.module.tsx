@@ -3,10 +3,7 @@ import { shellConstants } from "@/shell/shell.constants";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
 import type { ModuleDefinition } from "@/shell";
-import { constants, menuContextRegistry } from "@/shared";
-import { ProjectGridMenu } from "../contexts/ProjectGridMenu";
-import { TaskGridMenu } from "../task/contexts/menus/TaskGridMenu";
-import { TaskFlowMenu } from "../task/contexts/menus/TaskFlowMenu";
+import { constants } from "@/shared";
 import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
 // eslint-disable-next-line no-restricted-imports
@@ -17,9 +14,6 @@ import { projectService } from "../service/project.service";
 import { taskService } from "@/features/taskDetail";
 import type { Project } from "..";
 
-menuContextRegistry.register({ handles: ["project-grid"], component: ProjectGridMenu });
-menuContextRegistry.register({ handles: ["task-grid"],    component: TaskGridMenu });
-menuContextRegistry.register({ handles: ["task-flow"],    component: TaskFlowMenu });
 
 const ProjectEditorPanelAdapter = () => <ProjectEditorPanel />;
 const MultiProjectEditorPanelAdapter = () => <MultiProjectEditorPanel />;
@@ -176,6 +170,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
         return undefined;
     },
 };
+
 
 
 
