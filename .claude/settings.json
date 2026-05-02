@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash(npx tsc --noEmit*)",
+      "Bash(tsc --noEmit*)",
+      "Bash(npx eslint*)",
+      "PowerShell(npx tsc --noEmit*)",
+      "PowerShell(Set-Location * ; npx tsc --noEmit*)",
+      "PowerShell(cd * ; npx tsc --noEmit*)"
+    ]
+  }
+}
