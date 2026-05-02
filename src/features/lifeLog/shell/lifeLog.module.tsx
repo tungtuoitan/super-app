@@ -54,6 +54,7 @@ export const lifeLogModule: ModuleDefinition = {
     id: "LifeLog",
     icon: Shell,
     label: "LifeLog",
+    hideRightSideBarFilter: true,
 
     useSaveActions: useLifeLogSaveActions,
 

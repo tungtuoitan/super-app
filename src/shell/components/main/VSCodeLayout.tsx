@@ -61,7 +61,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                             <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col">
                                 <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                     <span>{moduleName}</span>
-                                    {moduleName === "LifeLog" && (
+                                    {moduleRegistry.getById(moduleName)?.hideRightSideBarFilter && (
                                         <RightSideBar hideFilter />
                                     )}
                                 </div>

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GenericFilterPopup - Reusable filter popup for grid components
  * Supports multi-field filtering with checkboxes, date ranges, and standard registry options
  * Filters are stored in userProfile and applied on backend
@@ -13,6 +13,206 @@ import { useSideBarStore } from "../store/SideBar.store";
 import { filterRegistry } from "./filterRegistry";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/shared";
 import { FilterFieldConfig, ViewFilter } from "./filter.types";
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+interface FilterFieldErrorProps {
+    label: string;
+    error?: string;
+}
+
+function FilterFieldHeader({ label, error }: FilterFieldErrorProps) {
+    return (
+        <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+            {error && <span className="text-xs text-red-500 font-medium">{error}</span>}
+        </div>
+    );
+}
+
+interface FilterStandardRegistryFieldProps {
+    group: FilterFieldConfig;
+    options: Array<{ code: string; description?: string }>;
+    error?: string;
+    isValueActive: (key: string, value: string) => boolean;
+    onToggle: (key: string, value: string) => void;
+}
+
+/**
+ * Standard registry field (e.g. Status) rendered as checkboxes.
+ * Used for: statusCode in noteGrid, wsGrid, workspace.
+ */
+function FilterStandardRegistryField({ group, options, error, isValueActive, onToggle }: FilterStandardRegistryFieldProps) {
+    return (
+        <div className="space-y-2 pb-2">
+            <FilterFieldHeader label={group.label} error={error} />
+            <div className="space-y-1.5">
+                {options.map((option) => {
+                    const isChecked = isValueActive(group.key, option.code);
+                    return (
+                        <div key={option.code} className="flex items-center space-x-2">
+                            <Checkbox
+                                id={`${group.key}-${option.code}`}
+                                checked={isChecked}
+                                onCheckedChange={() => onToggle(group.key, option.code)}
+                            />
+                            <label
+                                htmlFor={`${group.key}-${option.code}`}
+                                className={`text-sm font-normal cursor-pointer ${isChecked ? "text-foreground" : "text-gray-400"}`}
+                            >
+                                {option.description || option.code}
+                            </label>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+interface FilterDeletedAtRadioProps {
+    group: FilterFieldConfig;
+    currentValue: string;
+    error?: string;
+    onChange: (field: string, value: string) => void;
+}
+
+/**
+ * deletedAt field rendered as radio buttons (mutually exclusive).
+ * User can select ONLY ONE: Existing OR Deleted.
+ * Used for: noteGrid, wsGrid.
+ */
+function FilterDeletedAtRadio({ group, currentValue, error, onChange }: FilterDeletedAtRadioProps) {
+    return (
+        <div className="space-y-2 pb-2">
+            <FilterFieldHeader label={group.label} error={error} />
+            <RadioGroup value={currentValue} onValueChange={(value) => onChange("deletedAt", value)} className="">
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="null" id="deletedAt-null" />
+                    <label
+                        htmlFor="deletedAt-null"
+                        className={`text-sm font-normal cursor-pointer ${currentValue === "null" ? "text-foreground" : "text-gray-400"}`}
+                    >
+                        Existing
+                    </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="notNull" id="deletedAt-notNull" />
+                    <label
+                        htmlFor="deletedAt-notNull"
+                        className={`text-sm font-normal cursor-pointer ${currentValue === "notNull" ? "text-foreground" : "text-gray-400"}`}
+                    >
+                        Deleted
+                    </label>
+                </div>
+            </RadioGroup>
+        </div>
+    );
+}
+
+interface FilterDeletedAtCheckboxProps {
+    group: FilterFieldConfig;
+    error?: string;
+    isValueActive: (key: string, value: string) => boolean;
+    onToggle: (key: string, value: string) => void;
+}
+
+/**
+ * deletedAt field rendered as checkboxes (multi-select).
+ * User can select BOTH Existing AND/OR Deleted.
+ * VALIDATION: must always include "Existing" (null).
+ * Used for: workspace.
+ */
+function FilterDeletedAtCheckbox({ group, error, isValueActive, onToggle }: FilterDeletedAtCheckboxProps) {
+    return (
+        <div className="space-y-2">
+            <FilterFieldHeader label={group.label} error={error} />
+            <div className="space-y-1.5 ml-2">
+                <div className="flex items-center space-x-2">
+                    <Checkbox
+                        id="deletedAt-null"
+                        checked={isValueActive("deletedAt", "null")}
+                        onCheckedChange={() => onToggle("deletedAt", "null")}
+                    />
+                    <label
+                        htmlFor="deletedAt-null"
+                        className={`text-sm font-normal cursor-pointer ${
+                            isValueActive("deletedAt", "null") ? "text-foreground" : "text-gray-400"
+                        }`}
+                    >
+                        Existing
+                    </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Checkbox
+                        id="deletedAt-notNull"
+                        checked={isValueActive("deletedAt", "notNull")}
+                        onCheckedChange={() => onToggle("deletedAt", "notNull")}
+                    />
+                    <label
+                        htmlFor="deletedAt-notNull"
+                        className={`text-sm font-normal cursor-pointer ${
+                            isValueActive("deletedAt", "notNull") ? "text-foreground" : "text-gray-400"
+                        }`}
+                    >
+                        Deleted
+                    </label>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+interface FilterDateRangeProps {
+    group: FilterFieldConfig;
+    filterValue: string;
+    error?: string;
+    onChange: (key: string, from: string, to: string) => void;
+}
+
+/**
+ * Date range slider.
+ * Range: 24 months ago to current month + 1.
+ * Used for: createdAt in noteGrid, wsGrid.
+ */
+function FilterDateRange({ group, filterValue, error, onChange }: FilterDateRangeProps) {
+    const [fromMonth, toMonth] = filterValue ? filterValue.split(",") : ["", ""];
+
+    // Default to full range if not set
+    const fromIndex = fromMonth ? getIndexFromMonth(fromMonth) : 0;
+    const toIndex = toMonth ? getIndexFromMonth(toMonth) : 25;
+    const displayFrom = fromMonth || getMonthFromIndex(0);
+    const displayTo = toMonth || getMonthFromIndex(25);
+
+    const handleValueChange = (values: number[]) => {
+        let [from, to] = values;
+        if (from > to) [from, to] = [to, from];
+        onChange(group.key, getMonthFromIndex(from), getMonthFromIndex(to));
+    };
+
+    return (
+        <div className="space-y-3 pb-2">
+            <FilterFieldHeader label={group.label} error={error} />
+            <div className="space-y-2">
+                <Slider
+                    min={0}
+                    max={25}
+                    step={1}
+                    minStepsBetweenThumbs={1}
+                    value={[fromIndex, toIndex]}
+                    onValueChange={handleValueChange}
+                    className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{formatMonthLabel(displayFrom)}</span>
+                    <span>{formatMonthLabel(displayTo)}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ── GenericFilterPopup ────────────────────────────────────────────────────────
 
 export function GenericFilterPopup() {
     const {
@@ -32,241 +232,26 @@ export function GenericFilterPopup() {
     const applyDisabled = isApplyDisabled();
     const { registriesByType } = useStandardRegistrySelector();
 
-    // ============================================================
-    // RENDER HELPERS - Extracted for clarity
-    // ============================================================
-
-    /**
-     * Render standard registry field (Status) - Radio or Checkbox
-     * Used for: statusCode in noteGrid, wsGrid, workspace
-     */
-    const renderStandardRegistryField = (group: FilterFieldConfig) => {
-        const options = registriesByType[group.standardRegistryType!] || [];
-        const hasError = !!fieldErrors[group.key];
-
-        return (
-            <div key={group.key} className="space-y-2 pb-2">
-                <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                </div>
-                <div className="space-y-1.5">
-                    {options.map((option) => {
-                        const isChecked = isPendingValueActive(group.key, option.code);
-
-                        return (
-                            <div key={option.code} className="flex items-center space-x-2">
-                                <Checkbox
-                                    id={`${group.key}-${option.code}`}
-                                    checked={isChecked}
-                                    onCheckedChange={() => handleCheckboxToggle(group.key, option.code)}
-                                />
-                                <label
-                                    htmlFor={`${group.key}-${option.code}`}
-                                    className={`text-sm font-normal cursor-pointer ${isChecked ? "text-foreground" : "text-gray-400"}`}
-                                >
-                                    {option.description || option.code}
-                                </label>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        );
-    };
-
-    /**
-     * Render deletedAt field with RADIO buttons
-     * Used for: noteGrid, wsGrid
-     * User can select ONLY ONE: Existing OR Deleted
-     */
-    const renderDeletedAtRadio = (group: FilterFieldConfig) => {
-        const currentValue = (uiFilters as any)[group.key] || "";
-        const hasError = !!fieldErrors[group.key];
-
-        return (
-            <div key={group.key} className="space-y-2 pb-2">
-                <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                </div>
-                <RadioGroup value={currentValue} onValueChange={(value) => handleRadioChange("deletedAt", value)} className="">
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="null" id="deletedAt-null" />
-                        <label
-                            htmlFor="deletedAt-null"
-                            className={`text-sm font-normal cursor-pointer ${currentValue === "null" ? "text-foreground" : "text-gray-400"}`}
-                        >
-                            Existing
-                        </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="notNull" id="deletedAt-notNull" />
-                        <label
-                            htmlFor="deletedAt-notNull"
-                            className={`text-sm font-normal cursor-pointer ${currentValue === "notNull" ? "text-foreground" : "text-gray-400"}`}
-                        >
-                            Deleted
-                        </label>
-                    </div>
-                </RadioGroup>
-            </div>
-        );
-    };
-
-    /**
-     * Render deletedAt field with CHECKBOXES
-     * Used for: workspace
-     * User can select BOTH: Existing AND/OR Deleted
-     * VALIDATION: Must always include "Existing" (null)
-     */
-    const renderDeletedAtCheckbox = (group: FilterFieldConfig) => {
-        const hasError = !!fieldErrors[group.key];
-
-        return (
-            <div key={group.key} className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                </div>
-                <div className="space-y-1.5 ml-2">
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="deletedAt-null"
-                            checked={isPendingValueActive("deletedAt", "null")}
-                            onCheckedChange={() => handleCheckboxToggle("deletedAt", "null")}
-                        />
-                        <label
-                            htmlFor="deletedAt-null"
-                            className={`text-sm font-normal cursor-pointer ${
-                                isPendingValueActive("deletedAt", "null") ? "text-foreground" : "text-gray-400"
-                            }`}
-                        >
-                            Existing
-                        </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="deletedAt-notNull"
-                            checked={isPendingValueActive("deletedAt", "notNull")}
-                            onCheckedChange={() => handleCheckboxToggle("deletedAt", "notNull")}
-                        />
-                        <label
-                            htmlFor="deletedAt-notNull"
-                            className={`text-sm font-normal cursor-pointer ${
-                                isPendingValueActive("deletedAt", "notNull") ? "text-foreground" : "text-gray-400"
-                            }`}
-                        >
-                            Deleted
-                        </label>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    /**
-     * Render date range slider
-     * Used for: createdAt in noteGrid, wsGrid
-     * Range: 24 months ago to current month + 1
-     */
-    const renderDateRange = (group: FilterFieldConfig) => {
-        const filterValue = (uiFilters as any)[group.key] || "";
-        const [fromMonth, toMonth] = filterValue ? filterValue.split(",") : ["", ""];
-        const hasError = !!fieldErrors[group.key];
-
-        // Default to full range if not set
-        const fromIndex = fromMonth ? getIndexFromMonth(fromMonth) : 0;
-        const toIndex = toMonth ? getIndexFromMonth(toMonth) : 25;
-
-        const displayFrom = fromMonth || getMonthFromIndex(0);
-        const displayTo = toMonth || getMonthFromIndex(25);
-
-        return (
-            <div key={group.key} className="space-y-3 pb-2">
-                <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                    {hasError && <span className="text-xs text-red-500 font-medium">{fieldErrors[group.key]}</span>}
-                </div>
-                <div className="space-y-2">
-                    <Slider
-                        min={0}
-                        max={25}
-                        step={1}
-                        minStepsBetweenThumbs={1}
-                        value={[fromIndex, toIndex]}
-                        onValueChange={(values) => {
-                            let [from, to] = values;
-
-                            // Ensure from is always <= to
-                            if (from > to) {
-                                [from, to] = [to, from];
-                            }
-
-                            const fromMonthStr = getMonthFromIndex(from);
-                            const toMonthStr = getMonthFromIndex(to);
-                            handleDateRangeChange(group.key, fromMonthStr, toMonthStr);
-                        }}
-                        className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{formatMonthLabel(displayFrom)}</span>
-                        <span>{formatMonthLabel(displayTo)}</span>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    /**
-     * Render a single field based on its type/key â€” no hard-coded view names
-     */
-    const renderField = (group: FilterFieldConfig) => {
-        if (group.type === "checkbox" && group.standardRegistryType) return renderStandardRegistryField(group);
-        if (group.type === "radio" && group.key === "deletedAt") return renderDeletedAtRadio(group);
-        if (group.type === "checkbox" && group.key === "deletedAt") return renderDeletedAtCheckbox(group);
-        if (group.type === "dateRange") return renderDateRange(group);
-        return null;
-    };
-
-    /**
-     * Render fields for a specific filterViewKey using registry.
-     * Falls back to projectConstants.filters.groups when view is not registered
-     * (handles projectGrid and any view not yet migrated to registry).
-     */
-    const renderFieldsByView = () => {
-        if (!filterViewKey) return null;
-
-        return filterRegistry.getFieldConfigs(filterViewKey).map(renderField);
-    };
-
     // Check if UI filters differ from default filters
     const defaultFilters = filterViewKey ? filterRegistry.getDefaultFilters(filterViewKey) : {};
-
-    const hasDiff = (() => {
-        if (!filterViewKey) return false;
-
-        // Compare each field in uiFilters with defaultFilters
-        return Object.keys(uiFilters).some((key) => {
-            const uiValue = (uiFilters as any)[key];
-            const defaultValue = (defaultFilters as any)[key];
-            return uiValue !== defaultValue;
-        });
-    })()
+    const hasDiff = filterViewKey
+        ? Object.keys(uiFilters).some((key) => {
+              const uiValue = (uiFilters as Record<string, unknown>)[key];
+              const defaultValue = (defaultFilters as Record<string, unknown>)[key];
+              return uiValue !== defaultValue;
+          })
+        : false;
 
     useEffect(() => {
-        // When popup opens, load current user filters into UI
-        //* báº¯t buá»™c pháº£i update ngay má»—i khi userFilters thay Ä‘á»•i, thÃ¬ khi vÃ o web ta má»›i tháº¥y cháº¥m tráº¯ng bÃªn cáº¡nh FilterIcon náº¿u cÃ³ filter Ã¡p dá»¥ng
+        // Must update immediately whenever userFilters change so the dot indicator
+        // next to FilterIcon reflects the applied filter when the page loads.
         if (filterViewKey) {
             setUIFilters($user.filters?.[filterViewKey] || filterRegistry.getDefaultFilters(filterViewKey) as ViewFilter);
         }
     }, [filterViewKey, $user.filters]);
 
-    // Handle popover open/close - reset filters when closing
     const togglePopup = (newOpen: boolean) => {
         setOpen(newOpen);
-
-        // When opening, load current user filters into UI
         if (newOpen && filterViewKey) {
             setUIFilters($user.filters?.[filterViewKey] || filterRegistry.getDefaultFilters(filterViewKey) as ViewFilter);
         }
@@ -276,6 +261,8 @@ export function GenericFilterPopup() {
     if (!filterViewKey) {
         return null;
     }
+
+    const fields = filterRegistry.getFieldConfigs(filterViewKey);
 
     return (
         <Popover open={open} onOpenChange={togglePopup}>
@@ -320,13 +307,59 @@ export function GenericFilterPopup() {
 
                     {/* Filter Fields */}
                     <div className="space-y-4 max-h-96 overflow-y-auto overflow-x-hidden">
-                        {renderFieldsByView()}
+                        {fields.map((group) => {
+                            const error = fieldErrors[group.key];
+
+                            if (group.type === "checkbox" && group.standardRegistryType) {
+                                return (
+                                    <FilterStandardRegistryField
+                                        key={group.key}
+                                        group={group}
+                                        options={registriesByType[group.standardRegistryType] || []}
+                                        error={error}
+                                        isValueActive={isPendingValueActive}
+                                        onToggle={handleCheckboxToggle}
+                                    />
+                                );
+                            }
+                            if (group.type === "radio" && group.key === "deletedAt") {
+                                return (
+                                    <FilterDeletedAtRadio
+                                        key={group.key}
+                                        group={group}
+                                        currentValue={(uiFilters as Record<string, string>)[group.key] || ""}
+                                        error={error}
+                                        onChange={handleRadioChange}
+                                    />
+                                );
+                            }
+                            if (group.type === "checkbox" && group.key === "deletedAt") {
+                                return (
+                                    <FilterDeletedAtCheckbox
+                                        key={group.key}
+                                        group={group}
+                                        error={error}
+                                        isValueActive={isPendingValueActive}
+                                        onToggle={handleCheckboxToggle}
+                                    />
+                                );
+                            }
+                            if (group.type === "dateRange") {
+                                return (
+                                    <FilterDateRange
+                                        key={group.key}
+                                        group={group}
+                                        filterValue={(uiFilters as Record<string, string>)[group.key] || ""}
+                                        error={error}
+                                        onChange={handleDateRangeChange}
+                                    />
+                                );
+                            }
+                            return null;
+                        })}
                     </div>
                 </div>
             </PopoverContent>
         </Popover>
     );
 }
-
-
-

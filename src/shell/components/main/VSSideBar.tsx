@@ -43,7 +43,7 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
                             {/* Header */}
                             <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                 <span>{viewTitle}</span>
-                                <RightSideBar hideFilter={moduleName === "LifeLog"} />
+                                <RightSideBar hideFilter={module?.hideRightSideBarFilter ?? false} />
                             </div>
 
                             {/* Content â€” delegated to feature module */}

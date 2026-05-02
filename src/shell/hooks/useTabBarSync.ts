@@ -12,7 +12,6 @@ import { useEffect } from "react";
 import type { BaseTab, OpenTabsStorage, TabStorage } from "@/shell";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import { useAuthStore } from "@/shared";
-import { useEditorTabBarHelper } from "./useEditorTabBar.helper";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
 
 // ── Storage key ───────────────────────────────────────────────────────────────
@@ -25,11 +24,12 @@ export const getStorageKey = (userId: number | null | undefined): string | null 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
 export const useTabBarSync = () => {
-    const { openTabs, setOpenTabs, isLoadingTabs, setIsLoadingTabs } = useEditorTabBarStore();
+    const { openTabs, setOpenTabs, isLoadingTabs, setIsLoadingTabs, setActiveTabId } = useEditorTabBarStore();
     const { $user } = useAuthStore();
-    const { _setActiveTabId } = useEditorTabBarHelper();
 
     // ── Restore tabs from localStorage on mount / userId change ───────────────
+    // Uses setActiveTabId from the store directly (stable Zustand setter — safe to
+    // call inside an effect without adding to the dependency array).
 
     useEffect(() => {
         const restoreTabs = async () => {
@@ -38,7 +38,7 @@ export const useTabBarSync = () => {
             const storageKey = getStorageKey($user.userId);
             if (!storageKey) {
                 setOpenTabs([]);
-                _setActiveTabId(null);
+                setActiveTabId(null);
                 return;
             }
 
@@ -81,19 +81,19 @@ export const useTabBarSync = () => {
 
                 setOpenTabs(restoredTabs);
                 if (restoredTabs.length > 0) {
-                    _setActiveTabId(restoredTabs[restoredTabs.length - 1].id);
+                    setActiveTabId(restoredTabs[restoredTabs.length - 1].id);
                 }
             } catch (error) {
                 console.error("Failed to restore tabs from localStorage:", error);
                 setOpenTabs([]);
-                _setActiveTabId(null);
+                setActiveTabId(null);
             } finally {
                 setIsLoadingTabs(false);
             }
         };
 
         restoreTabs();
-    }, [$user.userId]);
+    }, [$user.userId]); // eslint-disable-line react-hooks/exhaustive-deps -- setActiveTabId is a stable Zustand setter
 
     // ── Persist tabs to localStorage whenever they change ─────────────────────
 

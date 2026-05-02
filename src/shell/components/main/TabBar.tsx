@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from "react";
+import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordSelector } from "@/shared";
 import { useDeviceStore } from "@/shared";
@@ -8,7 +8,13 @@ import { BaseTab, getTabDeleteState } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabBarHelper } from "@/shell/hooks/useEditorTabBar.helper";
 import { shellConstants } from "@/shell/shell.constants";
+import { sortByPinnedFirst } from "@/shell/utils/tabBar.utils";
 // useTabBarShortcuts is registered inside useTabBarHelper — no separate call needed here.
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const TAB_TITLE_MAX_LENGTH = 50;
+const TAB_TITLE_TRUNCATED_LENGTH = 17;
 
 // ── Breadcrumb trigger key ────────────────────────────────────────────────────
 // TabBar is the only component that needs this reactivity, so module
@@ -20,11 +26,11 @@ function useBreadcrumbTriggerKey(): string {
     return modules.map((m) => String(m.useBreadcrumbTrigger!())).join(",");
 }
 
-// â”€â”€â”€ Tab Icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Tab Icon ──────────────────────────────────────────────────────────────────
 
 /**
  * Resolves the tab icon by asking the registry.
- * Each feature's module provides getTabMeta â€” TabBar has zero knowledge of tab types.
+ * Each feature's module provides getTabMeta — TabBar has zero knowledge of tab types.
  */
 function TabIcon({ tab, isDeleted, isActive }: { tab: BaseTab; isDeleted: boolean; isActive: boolean }) {
     const meta = moduleRegistry.getTabMeta(tab);
@@ -42,7 +48,113 @@ function TabIcon({ tab, isDeleted, isActive }: { tab: BaseTab; isDeleted: boolea
     });
 }
 
-// â”€â”€â”€ TabBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Tab Button ────────────────────────────────────────────────────────────────
+
+interface TabButtonProps {
+    tab: BaseTab;
+    isPinned: boolean;
+    isInCurrentModule: boolean;
+    onDragStart: (e: React.DragEvent) => void;
+    onDragEnd: (e: React.DragEvent) => void;
+    onDragEnter: (e: React.DragEvent) => void;
+    onDragLeave: (e: React.DragEvent) => void;
+    onDragOver: (e: React.DragEvent) => void;
+    onDrop: (e: React.DragEvent) => void;
+    onClick: () => void;
+    onContextMenu: (e: React.MouseEvent) => void;
+    onClose: (e: React.MouseEvent) => void;
+}
+
+function TabButton({
+    tab,
+    isPinned,
+    isInCurrentModule,
+    onDragStart,
+    onDragEnd,
+    onDragEnter,
+    onDragLeave,
+    onDragOver,
+    onDrop,
+    onClick,
+    onContextMenu,
+    onClose,
+}: TabButtonProps) {
+    const { activeTabId, draggedTabId, dragOverTabId, dragOverPosition } = useEditorTabBarStore();
+    const { isDeleted, isPermanentlyDeleted: isHardDeleted } = getTabDeleteState(tab);
+
+    const isDragging = draggedTabId === tab.id;
+    const isDropTarget = dragOverTabId === tab.id && !isDragging;
+    const isActive = activeTabId === tab.id;
+
+    const { noDeletedStyle } = moduleRegistry.getTabFlags(tab.type);
+    const showDeletedStyle = isDeleted && !noDeletedStyle;
+
+    const title = tab.title.length > TAB_TITLE_MAX_LENGTH
+        ? tab.title.slice(0, TAB_TITLE_TRUNCATED_LENGTH) + "..."
+        : tab.title;
+
+    const deletedLabel = !noDeletedStyle
+        ? isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""
+        : "";
+
+    return (
+        <button
+            draggable
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onClick={onClick}
+            onContextMenu={onContextMenu}
+            className={`
+                group h-[35px] pl-3 pr-1.5 flex items-center gap-2
+                border-r border-b relative transition-all duration-150
+                ${isDragging ? "opacity-50" : ""}
+                ${isActive
+                    ? `bg-editor-bg text-editor-fg border-b-transparent border-t-2 ${isInCurrentModule ? "border-t-blue-500" : "border-t-gray-400"}`
+                    : "bg-transparent text-muted-foreground border-t border-t-transparent text-gray-600"
+                }
+            `}
+        >
+            {isDropTarget && dragOverPosition === "left" && (
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
+            )}
+            {isDropTarget && dragOverPosition === "right" && (
+                <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
+            )}
+
+            <TabIcon tab={tab} isDeleted={isDeleted} isActive={isActive} />
+
+            <span className={`text-[13px] whitespace-nowrap ${showDeletedStyle ? "text-muted-foreground/40 line-through" : ""}`}>
+                {title}{deletedLabel}
+            </span>
+
+            <button
+                onClick={onClose}
+                className={`relative pl-0.5 py-0.5 hover:bg-gray-500/20 rounded transition-opacity duration-150 group/close w-5 h-5 ${
+                    isPinned || tab.hasUnsavedChanges ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                }`}
+            >
+                {isPinned ? (
+                    <div className="w-4 h-4 flex items-center justify-center">
+                        <Pin className="w-3 h-3 rotate-45" />
+                    </div>
+                ) : tab.hasUnsavedChanges ? (
+                    <>
+                        <div className="w-1.5 h-1.5 ml-1 rounded-full bg-white group-hover/close:hidden" />
+                        <X className="w-4 h-4 hidden group-hover/close:block absolute inset-0 m-auto" />
+                    </>
+                ) : (
+                    <X className="w-4 h-4" />
+                )}
+            </button>
+        </button>
+    );
+}
+
+// ── TabBar ────────────────────────────────────────────────────────────────────
 
 export function TabBar() {
     const {
@@ -50,13 +162,6 @@ export function TabBar() {
         setOpenTabs,
         activeTabId,
         isLoadingTabs,
-        draggedTabId,
-        setDraggedTabId,
-        dragOverTabId,
-        setDragOverTabId,
-        dragOverPosition,
-        setDragOverPosition,
-        dragCounterRef,
     } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, generateBreadcrumbForTab } = useEditorTabBarHelper();
     const breadcrumbTriggerKey = useBreadcrumbTriggerKey();
@@ -66,7 +171,7 @@ export function TabBar() {
     const { isMobile } = useDeviceStore();
     // useTabBarShortcuts is already called inside useTabBarHelper above.
 
-    // â”€â”€ Task grouping (driven by registry, not hardcoded) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Task grouping (driven by registry, not hardcoded) ──────────────────────
     // Group leader: any tab where moduleRegistry.getTabGroupKey returns a key
     // Group child: any tab where tab.openedBy.link matches a leader's group key
 
@@ -84,7 +189,7 @@ export function TabBar() {
     const childTabIds = new Set<string>();
     groupKeyToLeader.forEach(({ children }) => children.forEach((c) => childTabIds.add(c.id)));
 
-    // â”€â”€ Pinned state from localStorage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Pinned state from localStorage ────────────────────────────────────────
     useEffect(() => {
         const savedState = localStorage.getItem(shellConstants.storage.tabPinnedState);
         if (savedState && openTabs.length > 0) {
@@ -99,8 +204,7 @@ export function TabBar() {
                     return tab;
                 });
                 if (hasChanges) {
-                    updatedTabs.sort((a, b) => (a.isPinned && !b.isPinned ? -1 : !a.isPinned && b.isPinned ? 1 : 0));
-                    setOpenTabs(updatedTabs);
+                    setOpenTabs(sortByPinnedFirst(updatedTabs));
                 }
             } catch (e) {
                 console.error("Failed to parse tabPinnedState:", e);
@@ -108,7 +212,7 @@ export function TabBar() {
         }
     }, [openTabs.length]);
 
-    // â”€â”€ Breadcrumb update (note tabs only â€” via registry could be generalised later) â”€â”€
+    // ── Breadcrumb update (note tabs only — via registry could be generalised later) ──
     useEffect(() => {
         if (openTabs.length === 0 || allKeywords.length === 0) return;
         const hasNoteTabs = openTabs.some((tab) => tab.type === shellConstants.vscode.tab.tabTypes.note);
@@ -122,101 +226,24 @@ export function TabBar() {
         setOpenTabs(newTabs);
     }, [allKeywords, openTabs.length, breadcrumbTriggerKey]);
 
-    // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Helpers for binding tab-specific handlers ──────────────────────────────
 
-    const renderTab = (tab: BaseTab, isPinned: boolean = false) => {
-        const { isDeleted, isPermanentlyDeleted: isHardDeleted } = getTabDeleteState(tab);
-        const isDragging = draggedTabId === tab.id;
-        const isDropTarget = dragOverTabId === tab.id && !isDragging;
-        const isActive = activeTabId === tab.id;
+    const makeTabProps = (tab: BaseTab, isPinned: boolean): TabButtonProps => ({
+        tab,
+        isPinned,
+        isInCurrentModule: isInCurrentModule(tab),
+        onDragStart: (e) => handleDragStart(e, tab.id, isPinned),
+        onDragEnd: handleDragEnd,
+        onDragEnter: (e) => handleDragEnter(e, tab.id),
+        onDragLeave: handleDragLeave,
+        onDragOver: (e) => handleDragOver(e, tab.id),
+        onDrop: (e) => handleDrop(e, tab.id, isPinned),
+        onClick: () => updateActiveTab(tab.id),
+        onContextMenu: (e) => handleTabRightClick(e, tab.id),
+        onClose: (e) => handleCloseTab(e, tab.id),
+    });
 
-        const { noDeletedStyle } = moduleRegistry.getTabFlags(tab.type);
-        const showDeletedStyle = isDeleted && !noDeletedStyle;
-
-        return (
-            <button
-                key={tab.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, tab.id, isPinned)}
-                onDragEnd={handleDragEnd}
-                onDragEnter={(e) => handleDragEnter(e, tab.id)}
-                onDragLeave={handleDragLeave}
-                onDragOver={(e) => handleDragOver(e, tab.id)}
-                onDrop={(e) => handleDrop(e, tab.id, isPinned)}
-                onClick={() => updateActiveTab(tab.id)}
-                onContextMenu={(e) => handleTabRightClick(e, tab.id)}
-                className={`
-                    group h-[35px] pl-3 pr-1.5 flex items-center gap-2
-                    border-r border-b relative transition-all duration-150
-                    ${isDragging ? "opacity-50" : ""}
-                    ${isActive
-                        ? `bg-editor-bg text-editor-fg border-b-transparent border-t-2 ${isInCurrentModule(tab) ? "border-t-blue-500" : "border-t-gray-400"}`
-                        : "bg-transparent text-muted-foreground border-t border-t-transparent text-gray-600"
-                    }
-                `}
-            >
-                {isDropTarget && dragOverPosition === "left" && (
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
-                )}
-                {isDropTarget && dragOverPosition === "right" && (
-                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
-                )}
-
-                <TabIcon tab={tab} isDeleted={isDeleted} isActive={isActive} />
-
-                <span className={`text-[13px] whitespace-nowrap ${showDeletedStyle ? "text-muted-foreground/40 line-through" : ""}`}>
-                    {tab.title.length > 50 ? tab.title.slice(0, 17) + "..." : tab.title}
-                    {!noDeletedStyle
-                        ? isHardDeleted ? " [Permanently Deleted]" : isDeleted ? " [Deleted]" : ""
-                        : ""}
-                </span>
-
-                <button
-                    onClick={(e) => handleCloseTab(e, tab.id)}
-                    className={`relative pl-0.5 py-0.5 hover:bg-gray-500/20 rounded transition-opacity duration-150 group/close w-5 h-5 ${
-                        isPinned || tab.hasUnsavedChanges ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                    }`}
-                >
-                    {isPinned ? (
-                        <div className="w-4 h-4 flex items-center justify-center">
-                            <Pin className="w-3 h-3 rotate-45" />
-                        </div>
-                    ) : tab.hasUnsavedChanges ? (
-                        <>
-                            <div className="w-1.5 h-1.5 ml-1 rounded-full bg-white group-hover/close:hidden" />
-                            <X className="w-4 h-4 hidden group-hover/close:block absolute inset-0 m-auto" />
-                        </>
-                    ) : (
-                        <X className="w-4 h-4" />
-                    )}
-                </button>
-            </button>
-        );
-    };
-
-    const renderAllTabs = () =>
-        openTabs.map((tab) => {
-            if (childTabIds.has(tab.id)) return null; // rendered inside group below
-
-            const isPinned = !!tab.isPinned;
-            const groupKey = moduleRegistry.getTabGroupKey(tab);
-            const group = groupKey ? groupKeyToLeader.get(groupKey) : null;
-
-            if (group && group.children.length > 0) {
-                return (
-                    <div key={tab.id} className="flex items-stretch">
-                        <div className="w-0.5 bg-emerald-500/40 flex-shrink-0" />
-                        <div className="flex flex-wrap">
-                            {renderTab(tab, isPinned)}
-                            {group.children.map((child) => renderTab(child, !!child.isPinned))}
-                        </div>
-                        <div className="w-0.5 bg-emerald-500/20 flex-shrink-0" />
-                    </div>
-                );
-            }
-
-            return renderTab(tab, isPinned);
-        });
+    // ── Render ─────────────────────────────────────────────────────────────────
 
     return (
         <div className={`min-h-[35px] flex items-start border-b ${isMobile ? "bg-black" : "bg-editor-sidebar"}`}>
@@ -227,7 +254,32 @@ export function TabBar() {
                     <div className="h-4 w-20 bg-muted/20 animate-pulse rounded" />
                 </div>
             ) : openTabs.length > 0 ? (
-                <div className="flex-1 flex flex-wrap">{renderAllTabs()}</div>
+                <div className="flex-1 flex flex-wrap">
+                    {openTabs.map((tab) => {
+                        if (childTabIds.has(tab.id)) return null; // rendered inside group below
+
+                        const isPinned = !!tab.isPinned;
+                        const groupKey = moduleRegistry.getTabGroupKey(tab);
+                        const group = groupKey ? groupKeyToLeader.get(groupKey) : null;
+
+                        if (group && group.children.length > 0) {
+                            return (
+                                <div key={tab.id} className="flex items-stretch">
+                                    <div className="w-0.5 bg-emerald-500/40 flex-shrink-0" />
+                                    <div className="flex flex-wrap">
+                                        <TabButton key={tab.id} {...makeTabProps(tab, isPinned)} />
+                                        {group.children.map((child) => (
+                                            <TabButton key={child.id} {...makeTabProps(child, !!child.isPinned)} />
+                                        ))}
+                                    </div>
+                                    <div className="w-0.5 bg-emerald-500/20 flex-shrink-0" />
+                                </div>
+                            );
+                        }
+
+                        return <TabButton key={tab.id} {...makeTabProps(tab, isPinned)} />;
+                    })}
+                </div>
             ) : (
                 <div className="px-4 w-full h-[35px] flex items-center">
                     <p className="text-[13px] text-muted-foreground/70 italic">No tabs open</p>
@@ -236,4 +288,3 @@ export function TabBar() {
         </div>
     );
 }
-

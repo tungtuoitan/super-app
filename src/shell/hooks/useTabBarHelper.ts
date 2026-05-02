@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef } from "react";
+﻿import React from "react";
 import { useEditorTabBarHelper } from "./useEditorTabBar.helper";
 import { moduleRegistry } from "@/shell";
 import { useConfirmationPopoverHelper } from "@/shared";
@@ -6,9 +6,8 @@ import { useEditorToolbarHelper } from "./useEditorToolbar.helper";
 import { useMenuContextHelper } from "@/shared";
 import { useTabBarShortcuts } from "./useTabBarShortcuts";
 import { BaseTab } from "@/shell";
-import { constants } from "@/shared";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
-import { shellConstants } from "../shell.constants";
+import { savePinnedStateToStorage } from "../utils/tabBar.utils";
 
 /**
  * TabBar - VS Code style tab bar component
@@ -95,7 +94,6 @@ export function useTabBarHelper() {
         setDraggedTabId(tabId);
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", tabId);
-        e.dataTransfer.setData("isPinned", isPinned.toString());
 
         // Add dragging class for visual feedback
         if (e.currentTarget instanceof HTMLElement) {
@@ -194,21 +192,11 @@ export function useTabBarHelper() {
         newTabs.splice(insertIndex, 0, updatedTab);
         setOpenTabs(newTabs);
 
-        // Save pinned state to localStorage
-        savePinnedState(newTabs);
+        savePinnedStateToStorage(newTabs);
 
         setDraggedTabId(null);
         setDragOverTabId(null);
         setDragOverPosition(null);
-    };
-
-    // Save pinned state to localStorage
-    const savePinnedState = (tabs: BaseTab[]) => {
-        const pinnedState: Record<string, boolean> = {};
-        tabs.forEach((tab) => {
-            pinnedState[tab.id] = !!tab.isPinned;
-        });
-        localStorage.setItem(shellConstants.storage.tabPinnedState, JSON.stringify(pinnedState));
     };
 
     return {

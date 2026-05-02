@@ -14,7 +14,7 @@ export function useLifeLogSaveActions(): SaveActions {
     const { upsertLog } = useLifeLogLogHelper();
     const { upsertTrack } = useLifeLogTrackHelper();
     const { setLogs, setTracks } = useLifeLogStore();
-    const { patchTab, _setActiveTabId } = useEditorTabBarHelper();
+    const { patchTab, setActiveTabIdSilently } = useEditorTabBarHelper();
 
     const handles = (tabType: string) =>
         tabType === shellConstants.vscode.tab.tabTypes.lifeLog ||
@@ -40,7 +40,7 @@ export function useLifeLogSaveActions(): SaveActions {
                     const newTabId = `lifelog-tab-${saved.id}-${Date.now()}`;
                     setLogs((prev) => prev.map((l) => l.id === tempId ? saved : l));
                     patchTab(tab.id, { id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false });
-                    _setActiveTabId(newTabId);
+                    setActiveTabIdSilently(newTabId);
                 } else {
                     patchTab(tab.id, (cur) => ({ data0: cur.data, hasUnsavedChanges: false }));
                 }
@@ -62,7 +62,7 @@ export function useLifeLogSaveActions(): SaveActions {
                     const newTabId = `lifelog-track-tab-${saved.id}-${Date.now()}`;
                     setTracks((prev) => prev.map((t) => t.id === tempId ? saved : t));
                     patchTab(tab.id, { id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false });
-                    _setActiveTabId(newTabId);
+                    setActiveTabIdSilently(newTabId);
                 } else {
                     patchTab(tab.id, (cur) => ({ data0: cur.data, hasUnsavedChanges: false }));
                 }

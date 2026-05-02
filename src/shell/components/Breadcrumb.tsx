@@ -9,7 +9,7 @@ import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { useKeywordNavigationHelper } from "../commandPallete/useKeywordNavigation.helper";
 import { ICON_MAP, IconKey, useKeywordSelector } from "@/shared";
 import { FolderIconWithBadge } from "@/shared";
-import {Keyword} from "../../shared/keyword/keyword.types";
+import type { Keyword } from "@/shared";
 
 interface BreadcrumbProps {
     items: BreadcrumbItem[];
@@ -36,17 +36,21 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
     return (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
             {items.map((item, index) => {
-                const disable = !!item.disabled
+                const isDisabled = !!item.disabled;
                 const isLast = index === items.length - 1;
+                const NoteIcon = item.icon && ICON_MAP[item.icon as IconKey]
+                    ? ICON_MAP[item.icon as IconKey]
+                    : FileText;
+
                 return (
                     <React.Fragment key={item.link}>
                         {/* Breadcrumb Item */}
                         <button
                             onClick={() => handleClick(item, index)}
-                            disabled={disable}
+                            disabled={isDisabled}
                             className={`
                                 flex items-center gap-1.5 px-1.5 py-0.5 rounded
-                                ${disable
+                                ${isDisabled
                                     ? "cursor-default"
                                     : "cursor-pointer hover:underline decoration-white/60 hover:text-white"
                                 }
@@ -68,18 +72,10 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                                 />
                             )}
                             {item.type === "note" && (
-                                (() => {
-                                    // Use custom icon if available, otherwise default to FileText
-                                    const IconComponent = item.icon && ICON_MAP[item.icon as IconKey]
-                                        ? ICON_MAP[item.icon as IconKey]
-                                        : FileText;
-                                    return (
-                                        <IconComponent
-                                            className="w-3.5 h-3.5"
-                                            style={{ color: item.isNew ? "#a78bfa" : (item.color || (disable ? "#4FC3F7" : "#75beff")) }}
-                                        />
-                                    );
-                                })()
+                                <NoteIcon
+                                    className="w-3.5 h-3.5"
+                                    style={{ color: item.isNew ? "#a78bfa" : (item.color || (isDisabled ? "#4FC3F7" : "#75beff")) }}
+                                />
                             )}
 
                             {/* Name */}
@@ -87,7 +83,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                                 className={`text-xs truncate max-w-[200px] ${
                                     item.isNew
                                         ? "text-purple-400"
-                                        : (disable ? "text-editor-fg" : "text-muted-foreground")
+                                        : (isDisabled ? "text-editor-fg" : "text-muted-foreground")
                                 }`}
                             >
                                 {item.name}

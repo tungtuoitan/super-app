@@ -1,8 +1,24 @@
 import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { moduleRegistry } from "../moduleRegistry";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
-import {BaseTab, TabOpenMeta, TabType} from "../types/tab.types";
+import { BaseTab, TabOpenMeta, TabType } from "../types/tab.types";
 import { shellConstants } from "../shell.constants";
+
+// ── Module-level helpers (pure, no hooks) ─────────────────────────────────────
+
+/**
+ * Infer a tab title from meta + entity data.
+ * Priority: meta.title → data.name → data.title → empty string.
+ */
+function inferTabTitle(data: unknown, meta: TabOpenMeta): string {
+    if (meta.title !== undefined) return meta.title;
+    const d = data as Record<string, unknown> | null;
+    if (typeof d?.name === "string") return d.name;
+    if (typeof d?.title === "string") return d.title;
+    return "";
+}
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export const useEditorTabBarHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId, isLoadingTab, setIsLoadingTab } = useEditorTabBarStore();
@@ -25,10 +41,11 @@ export const useEditorTabBarHelper = () => {
     // ── Tab activation ────────────────────────────────────────────────────────
 
     /**
-     * Set active tab id only — no feature side-effects.
-     * Use for programmatic switches (restore, close-and-switch).
+     * Programmatic tab switch — does NOT fire onTabActivate module handlers.
+     * Use for restore, close-and-switch, or any code-driven navigation where
+     * feature side-effects (e.g. tree selection/scroll) are not desired.
      */
-    const _setActiveTabId = (newActiveTabId: string | null) => {
+    const setActiveTabIdSilently = (newActiveTabId: string | null) => {
         setActiveTabId(newActiveTabId);
     };
 
@@ -38,7 +55,7 @@ export const useEditorTabBarHelper = () => {
      */
     const updateActiveTab = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
         const tabsToSearch = tabs ?? openTabs;
-        _setActiveTabId(newActiveTabId);
+        setActiveTabIdSilently(newActiveTabId);
         const activeTab = newActiveTabId
             ? (tabsToSearch.find((t: BaseTab) => t.id === newActiveTabId) ?? null)
             : null;
@@ -69,18 +86,14 @@ export const useEditorTabBarHelper = () => {
             return;
         }
 
-        const inferredTitle =
-            meta.title ??
-            (data as Record<string, unknown>).name as string ??
-            (data as Record<string, unknown>).title as string ??
-            '';
-
         const newTab: BaseTab = {
             id: meta.tabId ?? `${tabType}-${data.id}-${Date.now()}`,
             type: tabType as TabType,
             data,
+            // data0 is the initial snapshot used by "Discard Changes" to reset data back.
+            // It is set once on creation and never mutated — treat it as immutable.
             data0: data,
-            title: inferredTitle,
+            title: inferTabTitle(data, meta),
             hasUnsavedChanges: meta.hasUnsavedChanges ?? false,
             isPinned: meta.isPinned,
             openedBy: meta.openedBy,
@@ -106,7 +119,7 @@ export const useEditorTabBarHelper = () => {
         tabType: string,
         meta: TabOpenMeta,
         data?: unknown,
-        options?: { position?: 'first' | 'last' },
+        options?: { position?: "first" | "last" },
     ) => {
         const existing = openTabs.find((t) => t.type === tabType);
 
@@ -129,19 +142,21 @@ export const useEditorTabBarHelper = () => {
             return;
         }
 
+        const resolvedData = data ?? null;
         const newTab: BaseTab = {
             id: meta.tabId ?? `${tabType}-tab`,
             type: tabType as TabType,
-            data: data ?? null,
-            data0: data ?? null,
-            title: meta.title ?? '',
+            data: resolvedData,
+            // data0 is the initial snapshot used by "Discard Changes" (see openTab above).
+            data0: resolvedData,
+            title: meta.title ?? "",
             hasUnsavedChanges: meta.hasUnsavedChanges ?? false,
             isPinned: meta.isPinned,
             openedBy: meta.openedBy,
         };
 
         const newTabs =
-            options?.position === 'first'
+            options?.position === "first"
                 ? [newTab, ...openTabs]
                 : [...openTabs, newTab];
 
@@ -188,7 +203,7 @@ export const useEditorTabBarHelper = () => {
      * Sync an entity's latest data into any open tabs that show it.
      * Call this after saving/editing an entity so open tabs stay in sync.
      *
-     * `newData` can be:
+     * `dataOrUpdater` can be:
      * - A plain value  → replaces tab.data entirely.
      * - A function     → receives current tab.data and returns the next value.
      *                    Use this when you only have a partial patch and need to merge.
@@ -202,14 +217,14 @@ export const useEditorTabBarHelper = () => {
     const updateTabData = (
         tabType: string,
         entityId: number | string,
-        newData: unknown | ((current: unknown) => unknown),
+        dataOrUpdater: unknown | ((current: unknown) => unknown),
         newTitle?: string,
     ) => {
         setOpenTabs((prev) =>
             prev.map((t) => {
                 if (t.type !== tabType) return t;
                 if ((t.data as { id: number | string })?.id !== entityId) return t;
-                const nextData = typeof newData === 'function' ? newData(t.data) : newData;
+                const nextData = typeof dataOrUpdater === "function" ? dataOrUpdater(t.data) : dataOrUpdater;
                 return {
                     ...t,
                     data: nextData,
@@ -253,7 +268,7 @@ export const useEditorTabBarHelper = () => {
      * @example — update inner-tab metadata (needs spread)
      *   patchTab(tabId, (cur) => ({ metadata: { ...cur.metadata, activeTab: "general" } }));
      *
-     * @example — replace data after save
+     * @example — replace data after save, also reset the undo snapshot
      *   patchTab(tabId, { data: saved, data0: saved, hasUnsavedChanges: false });
      */
     const patchTab = (
@@ -263,7 +278,7 @@ export const useEditorTabBarHelper = () => {
         setOpenTabs((prev) =>
             prev.map((t) => {
                 if (t.id !== tabId) return t;
-                const p = typeof patch === 'function' ? patch(t) : patch;
+                const p = typeof patch === "function" ? patch(t) : patch;
                 return { ...t, ...p };
             }),
         );
@@ -286,7 +301,7 @@ export const useEditorTabBarHelper = () => {
         setOpenTabs((prev) =>
             prev.map((t) => {
                 if (t.type !== tabType) return t;
-                const p = typeof patch === 'function' ? patch(t) : patch;
+                const p = typeof patch === "function" ? patch(t) : patch;
                 return { ...t, ...p };
             }),
         );
@@ -325,7 +340,6 @@ export const useEditorTabBarHelper = () => {
         getActiveTab,
         updateActiveTab,
         processTabAfterDelete,
-        /** Programmatic tab switch — does NOT fire onTabActivate module handlers. */
-        _setActiveTabId,
+        setActiveTabIdSilently,
     };
 };

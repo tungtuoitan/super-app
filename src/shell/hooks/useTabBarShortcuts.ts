@@ -14,7 +14,7 @@ import { useEffect, useRef } from "react";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { useEditorTabBarHelper } from "@/shell";
 import { moduleRegistry } from "../moduleRegistry";
-import { shellConstants } from "../shell.constants";
+import { savePinnedStateToStorage, sortByPinnedFirst, isGroupChild } from "../utils/tabBar.utils";
 
 export const useTabBarShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabBarStore();
@@ -46,33 +46,27 @@ export const useTabBarShortcuts = () => {
                 event.preventDefault();
                 ctrlKPressedRef.current = false;
 
-                if (activeTabId) {
-                    const activeTab = openTabs.find((t) => t.id === activeTabId);
-                    if (!activeTab) return;
+                if (!activeTabId) return;
 
-                    // Check if this tab is a group child (its openedBy.link matches a leader's group key)
-                    const isChild = activeTab.openedBy?.link
-                        ? openTabs.some((t) => moduleRegistry.getTabGroupKey(t) === activeTab.openedBy!.link)
-                        : false;
-                    if (isChild) return;
+                const activeTab = openTabs.find((t) => t.id === activeTabId);
+                if (!activeTab) return;
 
-                    const newPinned = !activeTab.isPinned;
-                    // If this tab is a group leader, pin/unpin its children too
-                    const groupLink = moduleRegistry.getTabGroupKey(activeTab);
+                // Group children cannot be pinned/unpinned directly — only via their leader
+                if (isGroupChild(activeTab, openTabs)) return;
 
-                    const newTabs = openTabs.map((tab) => {
-                        if (tab.id === activeTabId) return { ...tab, isPinned: newPinned };
-                        if (groupLink && tab.openedBy?.link === groupLink) return { ...tab, isPinned: newPinned };
-                        return tab;
-                    });
+                const newPinned = !activeTab.isPinned;
+                // If this tab is a group leader, pin/unpin its children too
+                const groupLink = moduleRegistry.getTabGroupKey(activeTab);
 
-                    newTabs.sort((a, b) => (a.isPinned && !b.isPinned ? -1 : !a.isPinned && b.isPinned ? 1 : 0));
-                    setOpenTabs(newTabs);
+                const updated = openTabs.map((tab) => {
+                    if (tab.id === activeTabId) return { ...tab, isPinned: newPinned };
+                    if (groupLink && tab.openedBy?.link === groupLink) return { ...tab, isPinned: newPinned };
+                    return tab;
+                });
 
-                    const pinnedState: Record<string, boolean> = {};
-                    newTabs.forEach((tab) => { pinnedState[tab.id] = !!tab.isPinned; });
-                    localStorage.setItem(shellConstants.storage.tabPinnedState, JSON.stringify(pinnedState));
-                }
+                const newTabs = sortByPinnedFirst(updated);
+                setOpenTabs(newTabs);
+                savePinnedStateToStorage(newTabs);
                 return;
             }
 

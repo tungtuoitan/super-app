@@ -15,12 +15,16 @@ export interface BreadcrumbItem {
     disabled?: boolean;
 }
 
+// Workspace item entity type codes — defined by the backend schema
+const ENTITY_TYPE_FOLDER = 2;
+const ENTITY_TYPE_NOTE = 3;
+
 /**
  * Parse keyword longLink + link into breadcrumb items.
  *
  * Example:
  *   link:     "sa/w77/f183/n185"
- *   longLink: "Workspace A/Folder B/Note C"
+ *   longLink: "Workspace A[77]/Folder B[183]/Note C[185]"
  *
  * Returns:
  *   [
@@ -50,6 +54,7 @@ export function parseBreadcrumbFromKeyword(keyword: Keyword): BreadcrumbItem[] {
         const longLinkSegment = longLinkSegments[i];
         const linkSegment = linkSegments[i];
 
+        // longLink segments are formatted as "Name[id]" — extract just the name
         const nameMatch = longLinkSegment.match(/^(.+?)\[\d+\]$/);
         const name = nameMatch ? nameMatch[1] : longLinkSegment;
 
@@ -98,35 +103,20 @@ export function enrichBreadcrumbWithColors(
     if (!allKeywords || allKeywords.length === 0) return breadcrumbs;
 
     return breadcrumbs.map(item => {
-        if (item.type === "folder") {
-            const folderMatch = item.link.match(/\/f(\d+)$/);
-            if (!folderMatch) return item;
+        if (item.type !== "folder" && item.type !== "note") return item;
 
-            const folderWorkspaceItemId = parseInt(folderMatch[1], 10);
-            const folderKeyword = allKeywords.find(
-                k => k.type === "folder" && k.workspaceItemId === folderWorkspaceItemId
-            );
+        const prefix = item.type === "folder" ? "f" : "n";
+        const match = item.link.match(new RegExp(`\\/${prefix}(\\d+)$`));
+        if (!match) return item;
 
-            return folderKeyword
-                ? { ...item, color: folderKeyword.color ?? item.color, icon: folderKeyword.icon ?? item.icon }
-                : item;
-        }
+        const workspaceItemId = parseInt(match[1], 10);
+        const keyword = allKeywords.find(
+            k => k.type === item.type && k.workspaceItemId === workspaceItemId
+        );
 
-        if (item.type === "note") {
-            const noteMatch = item.link.match(/\/n(\d+)$/);
-            if (!noteMatch) return item;
-
-            const noteWorkspaceItemId = parseInt(noteMatch[1], 10);
-            const noteKeyword = allKeywords.find(
-                k => k.type === "note" && k.workspaceItemId === noteWorkspaceItemId
-            );
-
-            return noteKeyword
-                ? { ...item, color: noteKeyword.color ?? item.color, icon: noteKeyword.icon ?? item.icon }
-                : item;
-        }
-
-        return item;
+        return keyword
+            ? { ...item, color: keyword.color ?? item.color, icon: keyword.icon ?? item.icon }
+            : item;
     });
 }
 
@@ -141,29 +131,31 @@ export function buildBreadcrumbFromTree(
     workspaceId: number,
     workspaceName: string
 ): BreadcrumbItem[] {
-    const breadcrumbs: BreadcrumbItem[] = [];
     const itemsMap = new Map(workspaceFlatData.map(item => [item.id, item]));
 
     const noteItem = itemsMap.get(noteWorkspaceItemId);
     if (!noteItem) {
+        // Note not yet in the tree (e.g. just created) — show workspace + note only
         return [
             { type: "workspace", name: workspaceName, link: `sa/w${workspaceId}` },
             { type: "note", name: noteName, link: `sa/w${workspaceId}/n${noteWorkspaceItemId}`, isNew: noteId < 0 },
         ];
     }
 
+    // Walk up the tree to collect the full ancestor chain
     const pathItems: any[] = [];
     let current = noteItem;
-
     while (current) {
         pathItems.unshift(current);
         current = current.parentId ? itemsMap.get(current.parentId) : null;
     }
 
-    breadcrumbs.push({ type: "workspace", name: workspaceName, link: `sa/w${workspaceId}` });
+    const breadcrumbs: BreadcrumbItem[] = [
+        { type: "workspace", name: workspaceName, link: `sa/w${workspaceId}` },
+    ];
 
     for (const item of pathItems) {
-        if (item.entityType === 2) {
+        if (item.entityType === ENTITY_TYPE_FOLDER) {
             breadcrumbs.push({
                 type: "folder",
                 name: item.data.name,
@@ -171,7 +163,7 @@ export function buildBreadcrumbFromTree(
                 color: item.data.color,
                 icon: item.data.icon,
             });
-        } else if (item.entityType === 3) {
+        } else if (item.entityType === ENTITY_TYPE_NOTE) {
             breadcrumbs.push({
                 type: "note",
                 name: item.data.name,

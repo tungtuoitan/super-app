@@ -7,16 +7,8 @@
 import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { useEditorTabBarHelper } from "@/shell";
 import { useMenuContext, useMenuContextHelper } from "@/shared";
-import type { BaseTab } from "@/shell";
-import { shellConstants } from "../shell.constants";
 import { moduleRegistry } from "../moduleRegistry";
-
-/** Returns true if this tab is a child of a tab group (its openedBy.link matches a leader's group key) */
-const isGroupChild = (tab: BaseTab, allTabs: BaseTab[]): boolean => {
-    const link = tab.openedBy?.link;
-    if (!link) return false;
-    return allTabs.some((t) => moduleRegistry.getTabGroupKey(t) === link);
-};
+import { savePinnedStateToStorage, sortByPinnedFirst, isGroupChild } from "../utils/tabBar.utils";
 
 export const useTabBarMenuHelper = () => {
     const { openTabs, setOpenTabs } = useEditorTabBarStore();
@@ -29,12 +21,6 @@ export const useTabBarMenuHelper = () => {
     const isPinned = contextTab?.isPinned || false;
     const isChild = contextTab ? isGroupChild(contextTab, openTabs) : false;
 
-    const savePinnedStateToStorage = (tabs: typeof openTabs) => {
-        const pinnedState: Record<string, boolean> = {};
-        tabs.forEach((tab) => { pinnedState[tab.id] = !!tab.isPinned; });
-        localStorage.setItem(shellConstants.storage.tabPinnedState, JSON.stringify(pinnedState));
-    };
-
     /**
      * Pin the context tab (and its group children if it's a group leader).
      */
@@ -43,14 +29,13 @@ export const useTabBarMenuHelper = () => {
 
         const groupLink = contextTab ? moduleRegistry.getTabGroupKey(contextTab) : null;
 
-        const newTabs = openTabs.map((tab) => {
+        const updated = openTabs.map((tab) => {
             if (tab.id === contextTabId) return { ...tab, isPinned: true };
             if (groupLink && tab.openedBy?.link === groupLink) return { ...tab, isPinned: true };
             return tab;
         });
 
-        newTabs.sort((a, b) => (a.isPinned && !b.isPinned ? -1 : !a.isPinned && b.isPinned ? 1 : 0));
-
+        const newTabs = sortByPinnedFirst(updated);
         setOpenTabs(newTabs);
         savePinnedStateToStorage(newTabs);
         setIsMenuContextOpen(false);
@@ -64,14 +49,13 @@ export const useTabBarMenuHelper = () => {
 
         const groupLink = contextTab ? moduleRegistry.getTabGroupKey(contextTab) : null;
 
-        const newTabs = openTabs.map((tab) => {
+        const updated = openTabs.map((tab) => {
             if (tab.id === contextTabId) return { ...tab, isPinned: false };
             if (groupLink && tab.openedBy?.link === groupLink) return { ...tab, isPinned: false };
             return tab;
         });
 
-        newTabs.sort((a, b) => (a.isPinned && !b.isPinned ? -1 : !a.isPinned && b.isPinned ? 1 : 0));
-
+        const newTabs = sortByPinnedFirst(updated);
         setOpenTabs(newTabs);
         savePinnedStateToStorage(newTabs);
         setIsMenuContextOpen(false);

@@ -10,6 +10,8 @@ import {useAuthStore} from "@/shared";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];
+/** Fallback sort index for types not in TYPE_ORDER — sorts them after all known types. */
+const UNKNOWN_TYPE_SORT_ORDER = TYPE_ORDER.length + 1;
 
 export function SettingsDialog() {
     const { theme, setTheme } = useTheme();
@@ -46,7 +48,7 @@ export function SettingsDialog() {
         ? Object.entries(syncReport.countByType).sort(([a], [b]) => {
               const ai = TYPE_ORDER.indexOf(a);
               const bi = TYPE_ORDER.indexOf(b);
-              return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+              return (ai === -1 ? UNKNOWN_TYPE_SORT_ORDER : ai) - (bi === -1 ? UNKNOWN_TYPE_SORT_ORDER : bi);
           })
         : [];
 
