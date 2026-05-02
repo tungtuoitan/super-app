@@ -1,11 +1,30 @@
 /**
- * Editor Tab Context
- * Centralized state management for all editor tabs
- * Supports multiple tab types: Note, etc.
+ * Editor Tab Store (Zustand)
+ *
+ * Centralized state for all editor tabs (note, workspace, project, task, etc.).
+ *
+ * Migrated from React Context → Zustand to enable imperative access from
+ * outside React (module registry handlers can call `getEditorTabBarState()`
+ * synchronously without being inside a component).
+ *
+ * Public API is intentionally unchanged from the Context version:
+ *   const { openTabs, setOpenTabs, activeTabId, ... } = useEditorTabBarStore();
+ *
+ * Setters mimic React's `Dispatch<SetStateAction<T>>` so existing
+ * `setOpenTabs(prev => ...)` and `setOpenTabs(arr)` call sites work as-is.
+ *
+ * Refs (`editorAreaRef`, `dragCounterRef`) are stored as module-level mutable
+ * objects — they never trigger re-renders, just like the React refs they
+ * replace.
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useCallback, RefObject, useRef, MutableRefObject } from "react";
-import type { BaseTab, TabViewState } from "../types/tab.types";
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import type { Dispatch, SetStateAction, RefObject, MutableRefObject } from "react";
+import { zSetter } from "@/shared";
+import type { BaseTab } from "../types/tab.types";
+
+// ── Public state shape (matches the old Context contract exactly) ──────────────
 
 export interface EditorTabBarContextData {
     openTabs: BaseTab[];
@@ -30,74 +49,53 @@ export interface EditorTabBarContextData {
     setIsSaving: Dispatch<SetStateAction<boolean>>;
 }
 
-export const editorTabBarContextDefaultValue: EditorTabBarContextData = {
+// ── Module-level refs (stable, do not participate in re-renders) ───────────────
+
+const _editorAreaRef: RefObject<HTMLDivElement> = { current: null };
+const _dragCounterRef: MutableRefObject<number> = { current: 0 };
+
+// ── Internal Zustand store ─────────────────────────────────────────────────────
+
+const _store = create<EditorTabBarContextData>((set, get) => ({
     openTabs: [],
-    setOpenTabs: () => {},
+    setOpenTabs: zSetter("openTabs", set, get),
     activeTabId: null,
-    setActiveTabId: () => {},
+    setActiveTabId: zSetter("activeTabId", set, get),
     confirmCloseTabId: null,
-    setConfirmCloseTabId: () => {},
+    setConfirmCloseTabId: zSetter("confirmCloseTabId", set, get),
     isLoadingTabs: false,
-    setIsLoadingTabs: () => {},
-    editorAreaRef: undefined,
+    setIsLoadingTabs: zSetter("isLoadingTabs", set, get),
+    editorAreaRef: _editorAreaRef,
     draggedTabId: null,
-    setDraggedTabId: () => {},
+    setDraggedTabId: zSetter("draggedTabId", set, get),
     dragOverTabId: null,
-    setDragOverTabId: () => {},
+    setDragOverTabId: zSetter("dragOverTabId", set, get),
     dragOverPosition: null,
-    setDragOverPosition: () => {},
-    dragCounterRef: { current: 0 },
+    setDragOverPosition: zSetter("dragOverPosition", set, get),
+    dragCounterRef: _dragCounterRef,
     isLoadingTab: false,
-    setIsLoadingTab: () => {},
+    setIsLoadingTab: zSetter("isLoadingTab", set, get),
     isSaving: false,
-    setIsSaving: () => {}
+    setIsSaving: zSetter("isSaving", set, get),
+}));
 
-};
+// ── Public API ─────────────────────────────────────────────────────────────────
 
-export const EditorTabBarStore = createContext<EditorTabBarContextData>(editorTabBarContextDefaultValue);
+/**
+ * React hook — returns the entire store snapshot, shallow-compared.
+ * Re-renders the calling component when any top-level field changes.
+ * Existing destructure usage continues to work unchanged.
+ */
+export const useEditorTabBarStore = () => _store(useShallow((s) => s));
 
-export const useEditorTabBarStore = () => useContext(EditorTabBarStore);
+/** Imperative accessor — read state from outside React. */
+export const getEditorTabBarState = () => _store.getState();
 
-export const EditorTabBarProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [openTabs, setOpenTabs] = useState<BaseTab[]>([]);
-    const [activeTabId, setActiveTabId] = useState<string | null>(null);
-    const [confirmCloseTabId, setConfirmCloseTabId] = useState<string | null>(null);
-    const [isLoadingTabs, setIsLoadingTabs] = useState<boolean>(false);
-    const editorAreaRef = useRef<HTMLDivElement>(null);
-    const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
-    const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
-    const [dragOverPosition, setDragOverPosition] = useState<"left" | "right" | null>(null);
-    const dragCounterRef = useRef(0);
-    const [isLoadingTab, setIsLoadingTab] = useState<boolean>(false);
-    const [isSaving, setIsSaving] = useState<boolean>(false);
+/** Imperative subscribe — listen to state changes outside React. */
+export const subscribeEditorTabBarState = _store.subscribe;
 
-    return (
-        <EditorTabBarStore.Provider
-            value={{
-                openTabs,
-                setOpenTabs,
-                activeTabId,
-                setActiveTabId,
-                confirmCloseTabId,
-                setConfirmCloseTabId,
-                isLoadingTabs,
-                setIsLoadingTabs,
-                editorAreaRef,
-                draggedTabId,
-                setDraggedTabId,
-                dragOverTabId,
-                setDragOverTabId,
-                dragOverPosition,
-                setDragOverPosition,
-                dragCounterRef,
-                isLoadingTab,
-                setIsLoadingTab,
-                isSaving,
-                setIsSaving
-
-            }}
-        >
-            {children}
-        </EditorTabBarStore.Provider>
-    );
-};
+/**
+ * Raw store — escape hatch for slice subscriptions:
+ *   const openTabs = useEditorTabBarStoreSlice(s => s.openTabs);
+ */
+export const useEditorTabBarStoreSlice = _store;

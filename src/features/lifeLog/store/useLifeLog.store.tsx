@@ -1,58 +1,46 @@
 /**
- * LifeLog Context Store
- * Manages tracks and logs state
+ * LifeLog Store (Zustand)
+ *
+ * Migrated from React Context → Zustand. Public hook API unchanged.
  */
 
-import React, { createContext, useContext, useState, Dispatch, SetStateAction } from "react";
+import React from "react";
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import type { Dispatch, SetStateAction } from "react";
+import { zSetter } from "@/shared";
 import type { LifeLogTrack, LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 
 export interface LifeLogContextData {
-    // Data
     tracks: LifeLogTrack[];
     setTracks: Dispatch<SetStateAction<LifeLogTrack[]>>;
-
     logs: LifeLogLog[];
     setLogs: Dispatch<SetStateAction<LifeLogLog[]>>;
-
-    // Loading / Error
     isLoading: boolean;
     setIsLoading: Dispatch<SetStateAction<boolean>>;
     error: string | null;
     setError: Dispatch<SetStateAction<string | null>>;
-
-    // Navigation selection
     selectedTrackId: number | null;
     setSelectedTrackId: Dispatch<SetStateAction<number | null>>;
     selectedLogId: number | null;
     setSelectedLogId: Dispatch<SetStateAction<number | null>>;
 }
 
-const LifeLogContext = createContext<LifeLogContextData | null>(null);
+const _store = create<LifeLogContextData>((set, get) => ({
+    tracks: [],
+    setTracks: zSetter("tracks", set, get),
+    logs: [],
+    setLogs: zSetter("logs", set, get),
+    isLoading: false,
+    setIsLoading: zSetter("isLoading", set, get),
+    error: null,
+    setError: zSetter("error", set, get),
+    selectedTrackId: null,
+    setSelectedTrackId: zSetter("selectedTrackId", set, get),
+    selectedLogId: null,
+    setSelectedLogId: zSetter("selectedLogId", set, get),
+}));
 
-export function useLifeLogStore() {
-    const ctx = useContext(LifeLogContext);
-    if (!ctx) throw new Error("useLifeLogStore must be used within LifeLogProvider");
-    return ctx;
-}
-
-export function LifeLogProvider({ children }: React.PropsWithChildren) {
-    const [tracks, setTracks] = useState<LifeLogTrack[]>([]);
-    const [logs, setLogs] = useState<LifeLogLog[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [selectedTrackId, setSelectedTrackId] = useState<number | null>(null);
-    const [selectedLogId, setSelectedLogId] = useState<number | null>(null);
-
-    return (
-        <LifeLogContext.Provider value={{
-            tracks, setTracks,
-            logs, setLogs,
-            isLoading, setIsLoading,
-            error, setError,
-            selectedTrackId, setSelectedTrackId,
-            selectedLogId, setSelectedLogId,
-        }}>
-            {children}
-        </LifeLogContext.Provider>
-    );
-}
+export const useLifeLogStore = () => _store(useShallow((s) => s));
+export const getLifeLogState = () => _store.getState();
+export const subscribeLifeLogState = _store.subscribe;

@@ -119,6 +119,16 @@ export function RichTextEditor({
     const [isUploading, setIsUploading] = useState(false);
     const onEnterRef = useRef<(() => void) | undefined>(onEnter);
     useLayoutEffect(() => { onEnterRef.current = onEnter; }, [onEnter]);
+
+    // Track the latest external `value` prop and the latest HTML we emitted
+    // upward via onChange. TipTap fires `onUpdate` on a number of internal
+    // transactions (placeholders, decorations, image-src patches) — even when
+    // `emitUpdate: false` is passed to `setContent`. Guarding here ensures
+    // we never push HTML upward that the parent already knows about, which
+    // would otherwise cause an infinite tab→state→prop→editor→onUpdate loop.
+    const valueRef = useRef<string>(value);
+    useLayoutEffect(() => { valueRef.current = value; }, [value]);
+    const lastEmittedRef = useRef<string>("");
     const [showBubbleMenu, setShowBubbleMenu] = useState(false);
     const [bubbleMenuPosition, setBubbleMenuPosition] = useState({ top: 0, left: 0 });
     const [showColorPicker, setShowColorPicker] = useState(false);
@@ -213,11 +223,13 @@ export function RichTextEditor({
         editable: !disabled,
         autofocus: autoFocus ? "end" : false,
         onUpdate: ({ editor }) => {
-            // Get HTML and clean blob URLs before saving
-            // Blob URLs are session-specific and won't work after reload
-            // Images with data-file-id will be reloaded via proxy
             let html = editor.getHTML();
             html = html.replace(/src="blob:[^"]*"/g, 'src=""');
+            // Suppress synthetic onUpdate echoes that match either the parent's
+            // current `value` prop or the HTML we last emitted upward.
+            if (html === valueRef.current) return;
+            if (html === lastEmittedRef.current) return;
+            lastEmittedRef.current = html;
             onChange(html);
         },
     });
@@ -407,9 +419,14 @@ export function RichTextEditor({
         const currentClean = cleanBlobUrls(editor.getHTML());
         const valueClean = cleanBlobUrls(value);
 
-        // Only update if the actual content (excluding blob URLs) is different
+        // Only update if the actual content (excluding blob URLs) is different.
+        // CRITICAL: pass `{ emitUpdate: false }` (TipTap v3 API) so TipTap
+        // does NOT fire its onUpdate event in response to this programmatic
+        // content sync. Without this, TipTap's HTML normalisation produces a
+        // synthetic onChange that races with the parent's setState and
+        // creates an infinite render loop on tab mount.
         if (currentClean !== valueClean) {
-            editor.commands.setContent(value);
+            editor.commands.setContent(value, { emitUpdate: false });
         }
     }, [value, editor]);
 

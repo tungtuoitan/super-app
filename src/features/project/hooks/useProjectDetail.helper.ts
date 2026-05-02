@@ -95,6 +95,10 @@ export const useProjectDetailHelper = () => {
             prev.map((t: BaseTab) => {
                 if (t.id === activeTabId) {
                     const projectData = t.data as Project;
+                    // Skip no-op updates — prevents infinite loops driven by editors
+                    // that fire onUpdate with normalised HTML that differs from the
+                    // currently-stored value only superficially.
+                    if (projectData[field] === value) return t;
                     return {
                         ...t,
                         data: { ...projectData, [field]: value },

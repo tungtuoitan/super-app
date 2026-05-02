@@ -6,7 +6,7 @@ import { LifeLogGraphPanel } from "../Components/LifeLogGraphPanel";
 import { TrackEditorPanel } from "../Components/TrackEditorPanel";
 import { LogTypeIcon } from "../Components/LogTypeIcon";
 import { TrackIconDisplay } from "../Components/TrackIconDisplay";
-import { useLifeLogStore } from "../store/useLifeLog.store";
+import { useLifeLogStore, getLifeLogState } from "../store/useLifeLog.store";
 import { lifeLogService } from "../service/lifeLog.service";
 import type { LifeLogLog, LifeLogTrack, LogType } from "../types/lifeLog.types";
 import type { ModuleDefinition, TabMeta } from "@/shell";
@@ -64,17 +64,15 @@ export const lifeLogModule: ModuleDefinition = {
         ];
     },
 
-    useOnTabClose: () => {
-        const { setLogs, setTracks } = useLifeLogStore();
-        return (tab: BaseTab) => {
-            if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLog) {
-                const log = tab.data as LifeLogLog;
-                if (log.id < 0) setLogs((prev) => prev.filter((l) => l.id !== log.id));
-            } else if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
-                const track = tab.data as LifeLogTrack;
-                if (track.id < 0) setTracks((prev) => prev.filter((t) => t.id !== track.id));
-            }
-        };
+    onTabClose: (tab: BaseTab) => {
+        const { setLogs, setTracks } = getLifeLogState();
+        if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLog) {
+            const log = tab.data as LifeLogLog;
+            if (log.id < 0) setLogs((prev) => prev.filter((l) => l.id !== log.id));
+        } else if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
+            const track = tab.data as LifeLogTrack;
+            if (track.id < 0) setTracks((prev) => prev.filter((t) => t.id !== track.id));
+        }
     },
 
     SidebarView: LifeLogView,

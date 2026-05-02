@@ -4,50 +4,26 @@ import { shellConstants } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
 import type { Task } from "@/features/taskDetail";
 import type { Ws } from "@/features/workspace";
-import {useEditorTabBarStore} from "../store/EditorTab.store";
+import { useEditorTabBarStore } from "../store/EditorTab.store";
 import type { Project } from "@/features/project";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
-import { moduleRegistry } from "@/shell/moduleRegistry";
+import { moduleRegistry } from "../moduleRegistry";
 
 export const useEditorTabBarHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
-
-    // ── Registry hook collections ─────────────────────────────────────────────
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
-    const tabCloseHandlers = moduleRegistry.getAll()
-        .filter((m) => m.useOnTabClose != null)
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((m) => m.useOnTabClose!());
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
-    const tabActivateHandlers = moduleRegistry.getAll()
-        .filter((m) => m.useOnTabActivate != null)
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((m) => m.useOnTabActivate!());
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
-    const breadcrumbBuilders = moduleRegistry.getAll()
-        .filter((m) => m.useBuildBreadcrumb != null)
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((m) => m.useBuildBreadcrumb!());
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
-    const breadcrumbTriggerKey = moduleRegistry.getAll()
-        .filter((m) => m.useBreadcrumbTrigger != null)
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((m) => String(m.useBreadcrumbTrigger!()))
-        .join(",");
 
     // ── Breadcrumb ────────────────────────────────────────────────────────────
 
     /**
      * Generate breadcrumb for a tab by delegating to registered module builders.
      * Each module decides whether it handles the given tab type.
+     * Builders are plain functions that read store state imperatively — calling
+     * them does NOT cause this hook's consumers to subscribe to feature stores.
      */
     const generateBreadcrumbForTab = (data: Note | Ws, type: string): BreadcrumbItem[] | undefined => {
         const fakeTab = { data, type } as BaseTab;
-        for (const builder of breadcrumbBuilders) {
-            const result = builder(fakeTab);
+        for (const m of moduleRegistry.getAll()) {
+            const result = m.buildBreadcrumb?.(fakeTab);
             if (result !== undefined) return result;
         }
         return undefined;
@@ -76,7 +52,7 @@ export const useEditorTabBarHelper = () => {
         const activeTab = newActiveTabId
             ? (tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId) ?? null)
             : null;
-        tabActivateHandlers.forEach((h) => h(activeTab));
+        moduleRegistry.getAll().forEach((m) => m.onTabActivate?.(activeTab));
     };
 
     // ── Open tab ──────────────────────────────────────────────────────────────
@@ -197,7 +173,7 @@ export const useEditorTabBarHelper = () => {
         const tab = openTabs.find((t: BaseTab) => t.id === tabId);
         if (!tab) return;
 
-        tabCloseHandlers.forEach((h) => h(tab));
+        moduleRegistry.getAll().forEach((m) => m.onTabClose?.(tab));
 
         const newTabs = openTabs.filter((t: BaseTab) => t.id !== tabId);
         setOpenTabs(newTabs);
@@ -213,7 +189,8 @@ export const useEditorTabBarHelper = () => {
         const tabsToClose = openTabs.filter((t) => tabIds.includes(t.id));
         if (tabsToClose.length === 0) return;
 
-        tabsToClose.forEach((tab) => tabCloseHandlers.forEach((h) => h(tab)));
+        const modules = moduleRegistry.getAll();
+        tabsToClose.forEach((tab) => modules.forEach((m) => m.onTabClose?.(tab)));
 
         const newTabs = openTabs.filter((t) => !tabIds.includes(t.id));
         setOpenTabs(newTabs);
@@ -248,10 +225,5 @@ export const useEditorTabBarHelper = () => {
         updateActiveTab,
         processTabAfterDelete,
         setNewTabAnd,
-        /**
-         * Serialized trigger key — changes when any module's breadcrumb-relevant state changes.
-         * Use as a TabBar effect dependency to know when to regenerate breadcrumbs.
-         */
-        breadcrumbTriggerKey,
     };
 };

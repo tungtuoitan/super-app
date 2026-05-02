@@ -12,7 +12,7 @@ export { NoteBodyInPanel } from "./Components/NoteBodyInPanel";
 
 // Stores/Providers (used by Main.tsx)
 export { NoteDetailProvider, useNoteDetailStore } from "./store/useNoteDetail.store";
-export { NoteGridProvider, useNoteGridStore } from "./store/useNoteGrid.store";
+export { useNoteGridStore, getNoteGridState, subscribeNoteGridState } from "./store/useNoteGrid.store";
 
 // Hooks (used by workspace feature - NoteGridPopup helper)
 export { useNoteGridHelper } from "./hooks/useNoteGrid.helper";

@@ -12,7 +12,7 @@ import { TaskDetailProvider } from "@/features/taskDetail";
 import { TaskDetailSectionProvider } from "@/features/taskDetail";
 import { TaskSectionProvider } from "@/features/taskDetail";
 import { MultiTimelineProvider } from "@/features/multiProject";
-import { LifeLogProvider } from "@/features/lifeLog";
+// LifeLog store is Zustand-based — no Provider needed.
 import { WikiProvider } from "@/features/Wiki/";
 import { MenuContext } from "@/shared";
 import { ConfirmationPopoverProvider } from "@/shared";
@@ -72,16 +72,14 @@ export function Main() {
                                                                                                     <TaskSectionProvider>
                                                                                                         <TaskDetailSectionProvider>
                                                                                                             <MultiTimelineProvider>
-                                                                                                                <LifeLogProvider>
-                                                                                                                    <WikiProvider>
-                                                                                                                        <NoteProviders>
-                                                                                                                            <MenuContext>
-                                                                                                                                <WorkspaceKeywordPluginInit />
-                                                                                                                                <MainNav />
-                                                                                                                            </MenuContext>
-                                                                                                                        </NoteProviders>
-                                                                                                                    </WikiProvider>
-                                                                                                                </LifeLogProvider>
+                                                                                                                <WikiProvider>
+                                                                                                                    <NoteProviders>
+                                                                                                                        <MenuContext>
+                                                                                                                            <WorkspaceKeywordPluginInit />
+                                                                                                                            <MainNav />
+                                                                                                                        </MenuContext>
+                                                                                                                    </NoteProviders>
+                                                                                                                </WikiProvider>
                                                                                                             </MultiTimelineProvider>
                                                                                                         </TaskDetailSectionProvider>
                                                                                                     </TaskSectionProvider>

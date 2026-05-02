@@ -59,6 +59,59 @@ Validate all new/modified code against these rules before committing.
 ## UI file rule
 - each UI file contain max 1 big component
 
+## State Management
+
+Two patterns are used in this codebase. Pick the right one:
+
+### Zustand — for stores read outside React or shared cross-feature
+
+Use Zustand when ANY of these apply:
+- The store is read by module-registry handlers (`onTabActivate`, `onTabClose`, `buildBreadcrumb`) or other code that runs outside a React component
+- Multiple features depend on the same store (cross-feature)
+- The store is large/frequently-updated and Provider re-render storms would hurt
+- You need an imperative `getState()` / `subscribe()` API
+
+Pattern (see `src/shell/store/EditorTab.store.tsx` as reference):
+
+```ts
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import { zSetter } from "@/shared";
+
+const _store = create<MyStoreData>((set, get) => ({
+    foo: 0,
+    setFoo: zSetter("foo", set, get),  // mimics Dispatch<SetStateAction<T>>
+    // ...
+}));
+
+export const useMyStore = () => _store(useShallow((s) => s));
+export const getMyState = () => _store.getState();
+export const subscribeMyState = _store.subscribe;
+```
+
+- Hook destructure works unchanged: `const { foo, setFoo } = useMyStore();`
+- `useShallow(s => s)` returns whole state shallow-compared — re-renders only when a top-level field changes
+- `zSetter` (from `@/shared`) preserves the `Dispatch<SetStateAction<T>>` API so `setX(value)` and `setX(prev => next)` both work
+- Refs (DOM refs, ref objects passed across components) live as **module-level mutable objects**, NOT in Zustand state — they should never trigger re-renders
+- **No Provider needed** — do NOT wrap children in any provider for Zustand stores
+
+### React Context — for narrow-scope local state
+
+Keep using React Context only for:
+- Theme / locale / auth (low-frequency, app-wide config)
+- Truly local state (e.g. a wizard's step state) where a specific subtree is the natural scope
+
+If you find yourself writing `getXState` / `subscribe` workarounds for a Context store, that's a signal to migrate it to Zustand.
+
+## Module Registry Handlers
+
+Modules contribute behaviour to the shell via `ModuleDefinition` (see `src/shell/types/moduleRegistry.type.ts`). Handlers come in two flavours:
+
+- **Plain functions** (`onTabActivate`, `onTabClose`, `buildBreadcrumb`): run **outside** React. Read store state via Zustand `getXState()` accessors. Easy to unit-test, no React lifecycle to worry about.
+- **Hooks** (`useGlobalInit`, `useShortcuts`, `useIsInModule`, `useGetBackButton`, `useSaveActions`, `usePanelTabs`, `useBreadcrumbTrigger`, `useOnBeforeModuleSwitch`): run **inside** React, one isolated `<ModuleHandlerRunner>`-style component per module.
+
+When adding a new handler type, prefer the plain-function form unless you genuinely need React lifecycle (subscriptions, refs, render-time DOM access).
+
 ## Import Architecture (enforced by ESLint)
 
 Dependency direction: `features → shell`, `features → shared`, `shell → shared`

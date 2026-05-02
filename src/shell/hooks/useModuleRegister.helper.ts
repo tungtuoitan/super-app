@@ -5,7 +5,6 @@ import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { UserFilters } from "@/shell";
 
 export const useModuleRegisterHelper = () => {
-    const location = useLocation();
     const { setModuleName, moduleName, setFilterViewKey, setSearchQuery } = useSideBarStore();
 
     const getGridConfigFromModuleName = (name: string) => {

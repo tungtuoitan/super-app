@@ -173,6 +173,7 @@ export const projectModule: ModuleDefinition = {
         const { projectGridPagination } = useProjectStore();
         const { loadProjects } = useProjectGridHelper();
         const { openMultiProjectTab } = useProjectTabHelper();
+        
 
         // Auto-open pinned MultiProject tab on mount
         useEffect(() => {

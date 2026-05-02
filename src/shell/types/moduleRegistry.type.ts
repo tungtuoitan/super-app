@@ -84,16 +84,16 @@ export interface ModuleDefinition {
     useSaveActions?: () => SaveActions;
 
     // -- TabPersistence -------------------------------------------------------
-    /** Serialize / restore tabs for this module. Plain object — no React hooks. */
+    /** Serialize / restore tabs for this module. Plain object ï¿½ no React hooks. */
     tabPersistence?: TabPersistence;
 
     // -- Tab close ------------------------------------------------------------
     /**
-     * Hook returning a per-tab-close callback.
-     * Called once per render; the returned callback fires for every tab that closes.
-     * Each handler should guard on `tab.type` and only act on its own types.
+     * Plain function called when ANY tab closes. Guard on `tab.type` and only
+     * act on types this module owns. Read store state imperatively via the
+     * Zustand `getXState()` accessors â€” no hooks here, this runs outside React.
      */
-    useOnTabClose?: () => (tab: BaseTab) => void;
+    onTabClose?: (tab: BaseTab) => void;
 
     // -- Tab flags ------------------------------------------------------------
     /**
@@ -114,7 +114,7 @@ export interface ModuleDefinition {
 
     // -- IsInModule -----------------------------------------------------------
     /**
-     * Hook returning a predicate: “is this tab currently active in the sidebar module?”
+     * Hook returning a predicate: ï¿½is this tab currently active in the sidebar module?ï¿½
      * Used by TabBar to highlight tabs that belong to the current module view.
      * Each handler should return false for tab types it doesn't own.
      */
@@ -122,19 +122,21 @@ export interface ModuleDefinition {
 
     // -- TabActivate ----------------------------------------------------------
     /**
-     * Hook returning a callback fired when the active tab changes (via updateActiveTab).
+     * Plain function called when the active tab changes via `updateActiveTab`.
      * Use for feature-specific side-effects: e.g. workspace tree selection + scroll.
      * `tab` is null when all tabs are closed.
-     * NOT called by setNewTabAnd (programmatic switches without UI side-effects).
+     * NOT called by `setNewTabAnd` (programmatic switches without UI side-effects).
+     * Read store state via Zustand `getXState()` accessors.
      */
-    useOnTabActivate?: () => (tab: BaseTab | null) => void;
+    onTabActivate?: (tab: BaseTab | null) => void;
 
     // -- BreadcrumbBuilder ----------------------------------------------------
     /**
-     * Hook returning a breadcrumb builder for this module's tab types.
-     * Return undefined to skip (shell tries the next module, then produces nothing).
+     * Plain function: build a breadcrumb for a tab. Return undefined to skip
+     * (shell tries the next module, then produces nothing).
+     * Read store state via Zustand `getXState()` accessors.
      */
-    useBuildBreadcrumb?: () => (tab: BaseTab) => import("../utils/breadcrumb.utils").BreadcrumbItem[] | undefined;
+    buildBreadcrumb?: (tab: BaseTab) => import("../utils/breadcrumb.utils").BreadcrumbItem[] | undefined;
 
     /**
      * Hook returning a scalar that signals "breadcrumbs must be regenerated".
@@ -172,14 +174,14 @@ export interface ModuleDefinition {
     // -- BackButton (hook-based) ----------------------------------------------
     /**
      * Hook returning a synchronous back-button resolver for the active tab.
-     * Called with hook access — can read from stores (e.g. projects list).
+     * Called with hook access ï¿½ can read from stores (e.g. projects list).
      * Return null if this module doesn't own the active tab.
      */
     useGetBackButton?: () => (tab: BaseTab) => { link: string; label: string } | null;
 
     /**
      * Plain async fallback for back-button resolution when store data is not yet loaded.
-     * No React hooks — receives userToken, fetches from API, returns result or null.
+     * No React hooks ï¿½ receives userToken, fetches from API, returns result or null.
      */
     getBackButtonAsync?: (tab: BaseTab, userToken: string) => Promise<{ link: string; label: string } | null>;
 

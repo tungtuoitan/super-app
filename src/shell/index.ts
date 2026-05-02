@@ -10,7 +10,7 @@
 export { useEditorTabBarStore } from "./store/EditorTab.store";
 // export { useActivityBarStore } from "./store/ActivityBar.store";
 // export { useCommandPaletteStore } from "./commandPallete/useCommandPalette.store";
-export { useSideBarStore } from "./store/SideBar.store";
+export { useSideBarStore, getSideBarState, subscribeSideBarState } from "./store/SideBar.store";
 
 
 // ── Hooks ─────────────────────────────────────────────────────────────────

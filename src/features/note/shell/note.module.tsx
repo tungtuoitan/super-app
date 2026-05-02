@@ -10,7 +10,7 @@ import { ICON_MAP, IconKey } from "@/shared";
 import { useNoteSaveActions } from "../hooks/useNoteSaveActions";
 import { noteService } from "../service/note.service";
 import { transformNotes } from "../utils/note.utils";
-import { useNoteGridStore } from "../store/useNoteGrid.store";
+import { useNoteGridStore, getNoteGridState } from "../store/useNoteGrid.store";
 import { useSideBarStore } from "@/shell";
 
 
@@ -58,16 +58,13 @@ export const noteModule: ModuleDefinition = {
         };
     },
 
-    useOnTabClose: () => {
-        const { setNotes } = useNoteGridStore();
-        return (tab: BaseTab) => {
-            if (tab.type !== shellConstants.vscode.tab.tabTypes.note) return;
-            const noteData = tab.data as Note;
-            // Remove temp notes (negative ID) from the note grid
-            if (noteData.id < 0) {
-                setNotes((prev) => prev.filter((n) => n.id !== noteData.id));
-            }
-        };
+    onTabClose: (tab: BaseTab) => {
+        if (tab.type !== shellConstants.vscode.tab.tabTypes.note) return;
+        const noteData = tab.data as Note;
+        // Remove temp notes (negative ID) from the note grid
+        if (noteData.id < 0) {
+            getNoteGridState().setNotes((prev) => prev.filter((n) => n.id !== noteData.id));
+        }
     },
 
     SidebarView: NoteGrid,

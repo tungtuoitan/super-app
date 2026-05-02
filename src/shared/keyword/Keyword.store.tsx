@@ -1,54 +1,33 @@
 /**
- * Standard Registry Store
- * Centralized state management for standard registry data
- * Pattern: Similar to NoteGridStore - React Context with useState
+ * Keyword Store (Zustand)
+ *
+ * Migrated from React Context → Zustand. Public hook API unchanged.
  */
 
-import { useContext, createContext, Dispatch, SetStateAction, useState, useMemo } from "react";
-import {Keyword} from "./keyword.types";
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import type { Dispatch, SetStateAction } from "react";
+import { zSetter } from "../zustand-utils";
+import type { Keyword } from "./keyword.types";
 
 export interface KeywordContextData {
     allKeywords: Keyword[];
     setAllKeywords: Dispatch<SetStateAction<Keyword[]>>;
-
-    // Keywords loading state
     keywordsLoading: boolean;
     setKeywordsLoading: Dispatch<SetStateAction<boolean>>;
-
     keywordsError: Error | null;
     setKeywordsError: Dispatch<SetStateAction<Error | null>>;
 }
 
-export const standardRegistryContextDefaultValue: KeywordContextData = {
+const _store = create<KeywordContextData>((set, get) => ({
     allKeywords: [],
-    setAllKeywords: () => {},
+    setAllKeywords: zSetter("allKeywords", set, get),
     keywordsLoading: true,
-    setKeywordsLoading: () => {},
+    setKeywordsLoading: zSetter("keywordsLoading", set, get),
     keywordsError: null,
-    setKeywordsError: () => {},
-};
+    setKeywordsError: zSetter("keywordsError", set, get),
+}));
 
-export const KeywordStore = createContext<KeywordContextData>(standardRegistryContextDefaultValue);
-
-export const useKeywordStore = () => useContext(KeywordStore);
-
-export const KeywordProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [allKeywords, setAllKeywords] = useState<Keyword[]>([]);
-    const [keywordsLoading, setKeywordsLoading] = useState<boolean>(true);
-    const [keywordsError, setKeywordsError] = useState<Error | null>(null);
-
-    return (
-        <KeywordStore.Provider
-            value={{
-                allKeywords,
-                setAllKeywords,
-                keywordsLoading,
-                setKeywordsLoading,
-                keywordsError,
-                setKeywordsError,
-            }}
-        >
-            {children}
-        </KeywordStore.Provider>
-    );
-};
+export const useKeywordStore = () => _store(useShallow((s) => s));
+export const getKeywordState = () => _store.getState();
+export const subscribeKeywordState = _store.subscribe;

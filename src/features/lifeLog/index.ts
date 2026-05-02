@@ -1,7 +1,7 @@
 ﻿
 
-// Providers / Stores
-export { LifeLogProvider, useLifeLogStore } from "./store/useLifeLog.store";
+// Stores
+export { useLifeLogStore, getLifeLogState, subscribeLifeLogState } from "./store/useLifeLog.store";
 
 // Types
 export type { LifeLogLog, LifeLogTrack, LogType } from "./types/lifeLog.types";

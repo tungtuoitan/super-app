@@ -8,6 +8,9 @@
 // NOTE: must remain FIRST — other shared files import constants via @/shared barrel
 export { constants } from "./constants";
 
+// ── zustand utilities ─────────────────────────────────────────────────────
+export { zSetter } from "./zustand-utils";
+
 // ── auth ──────────────────────────────────────────────────────────────────
 // NOTE: must remain SECOND — no internal @/shared deps; consumed early by shell/features
 export { AuthCallbackProvider, useAuthCallbackStore } from "./auth/AuthCallback.store";
@@ -115,6 +118,7 @@ export { keywordService } from "./keyword/keyword.service";
 export { targetKeywordService } from "./keyword/targetKeyword.service";
 // Hooks
 export { useKeywordSelector } from "./keyword/useKeywordSelector";
+export { useKeywordStore, getKeywordState, subscribeKeywordState } from "./keyword/Keyword.store";
 export { useKeywordHelper } from "./keyword/useKeyword.helper";
 // Utils
 export { parseKeywordLink } from "./keyword/keyword-link.utils";

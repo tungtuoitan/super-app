@@ -1,11 +1,16 @@
 /**
- * Note Grid Panel Store
- * Centralized state management for note grid panel
+ * Note Grid Store (Zustand)
+ *
+ * Migrated from React Context → Zustand. Public hook API unchanged.
  */
 
-import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
-import { Note } from "../types/note.types";
+import React from "react";
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import type { Dispatch, SetStateAction, RefObject } from "react";
+import { zSetter } from "@/shared";
 import { RowSelectionState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
+import { Note } from "../types/note.types";
 
 export interface PaginationState {
     pageIndex: number;
@@ -34,69 +39,30 @@ export interface NoteGridContextData {
     setContainerWidth: Dispatch<SetStateAction<number>>;
 }
 
-export const noteGridContextDefaultValue: NoteGridContextData = {
+const _containerRef: RefObject<HTMLDivElement> = { current: null };
+
+const _store = create<NoteGridContextData>((set, get) => ({
     notes: [],
+    setNotes: zSetter("notes", set, get),
     totalCount: 0,
+    setTotalCount: zSetter("totalCount", set, get),
     noteGridIsLoading: true,
+    setNoteGridIsLoading: zSetter("noteGridIsLoading", set, get),
     noteGridError: null,
+    setNoteGridError: zSetter("noteGridError", set, get),
     noteGridSorting: [],
+    setNoteGridSorting: zSetter("noteGridSorting", set, get),
     noteGridPagination: { pageIndex: 0, pageSize: 50 },
+    setNoteGridPagination: zSetter("noteGridPagination", set, get),
     noteGridRowSelection: {},
+    setNoteGridRowSelection: zSetter("noteGridRowSelection", set, get),
     noteGridColumnFilters: [],
-    containerRef: { current: null },
+    setNoteGridColumnFilters: zSetter("noteGridColumnFilters", set, get),
+    containerRef: _containerRef,
     containerWidth: 0,
-    setNotes: () => {},
-    setTotalCount: () => {},
-    setNoteGridIsLoading: () => {},
-    setNoteGridError: () => {},
-    setNoteGridSorting: () => {},
-    setNoteGridPagination: () => {},
-    setNoteGridRowSelection: () => {},
-    setNoteGridColumnFilters: () => {},
-    setContainerWidth: () => {},
-};
+    setContainerWidth: zSetter("containerWidth", set, get),
+}));
 
-export const NoteGridStore = createContext<NoteGridContextData>(noteGridContextDefaultValue);
-
-export const useNoteGridStore = () => useContext(NoteGridStore);
-
-export const NoteGridProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
-    const [notes, setNotes] = useState<Note[]>([]);
-    const [totalCount, setTotalCount] = useState<number>(0);
-    const [noteGridIsLoading, setNoteGridIsLoading] = useState<boolean>(true);
-    const [noteGridError, setNoteGridError] = useState<Error | null>(null);
-    const [noteGridSorting, setNoteGridSorting] = useState<SortingState>([]);
-    const [noteGridPagination, setNoteGridPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
-    const [noteGridRowSelection, setNoteGridRowSelection] = useState<RowSelectionState>({});
-    const [noteGridColumnFilters, setNoteGridColumnFilters] = useState<ColumnFiltersState>([]);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [containerWidth, setContainerWidth] = useState<number>(0);
-
-    return (
-        <NoteGridStore.Provider
-            value={{
-                notes,
-                setNotes,
-                totalCount,
-                setTotalCount,
-                noteGridIsLoading,
-                setNoteGridIsLoading,
-                noteGridError,
-                setNoteGridError,
-                noteGridSorting,
-                setNoteGridSorting,
-                noteGridPagination,
-                setNoteGridPagination,
-                noteGridRowSelection,
-                setNoteGridRowSelection,
-                noteGridColumnFilters,
-                setNoteGridColumnFilters,
-                containerRef,
-                containerWidth,
-                setContainerWidth,
-            }}
-        >
-            {children}
-        </NoteGridStore.Provider>
-    );
-};
+export const useNoteGridStore = () => _store(useShallow((s) => s));
+export const getNoteGridState = () => _store.getState();
+export const subscribeNoteGridState = _store.subscribe;

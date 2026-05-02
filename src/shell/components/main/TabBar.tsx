@@ -11,6 +11,16 @@ import {useEditorTabBarStore} from "@/shell";
 import {useTabBarHelper} from "@/shell/hooks/useTabBarHelper";
 import {useTabBarShortcuts} from "@/shell/hooks/useTabBarShortcuts";
 
+// ── Breadcrumb trigger key ────────────────────────────────────────────────────
+// TabBar is the only component that needs this reactivity, so module
+// useBreadcrumbTrigger hooks are called here rather than inside
+// useEditorTabBarHelper (which is used by 30+ components).
+function useBreadcrumbTriggerKey(): string {
+    const modules = moduleRegistry.getAll().filter((m) => m.useBreadcrumbTrigger != null);
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
+    return modules.map((m) => String(m.useBreadcrumbTrigger!())).join(",");
+}
+
 // â”€â”€â”€ Tab Icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
@@ -49,7 +59,8 @@ export function TabBar() {
         setDragOverPosition,
         dragCounterRef,
     } = useEditorTabBarStore();
-    const { closeTab, updateActiveTab, generateBreadcrumbForTab, breadcrumbTriggerKey } = useEditorTabBarHelper();
+    const { closeTab, updateActiveTab, generateBreadcrumbForTab } = useEditorTabBarHelper();
+    const breadcrumbTriggerKey = useBreadcrumbTriggerKey();
     const { allKeywords } = useKeywordSelector();
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();
@@ -101,15 +112,16 @@ export function TabBar() {
 
     // â”€â”€ Breadcrumb update (note tabs only â€” via registry could be generalised later) â”€â”€
     useEffect(() => {
-        if (openTabs.length > 0 && allKeywords.length > 0) {
-            const newTabs = openTabs.map((tab) => {
-                if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
-                    return { ...tab, breadcrumb: generateBreadcrumbForTab(tab.data as Note | Ws, tab.type) };
-                }
-                return tab;
-            });
-            setOpenTabs(newTabs);
-        }
+        if (openTabs.length === 0 || allKeywords.length === 0) return;
+        const hasNoteTabs = openTabs.some((tab) => tab.type === shellConstants.vscode.tab.tabTypes.note);
+        if (!hasNoteTabs) return;
+        const newTabs = openTabs.map((tab) => {
+            if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
+                return { ...tab, breadcrumb: generateBreadcrumbForTab(tab.data as Note | Ws, tab.type) };
+            }
+            return tab;
+        });
+        setOpenTabs(newTabs);
     }, [allKeywords, openTabs.length, breadcrumbTriggerKey]);
 
     // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
