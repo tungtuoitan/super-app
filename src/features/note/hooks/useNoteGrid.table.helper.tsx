@@ -5,7 +5,14 @@ import { Note } from "../types/note.types";
 import { WorkspaceLinksCell } from "../Components/WorkspaceLinksCell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { constants, useGetStandardRegistry } from "@/shared";
+import type { StandardRegistry } from "@/shared";
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+    NOTE_COL_WORKSPACE_MIN_WIDTH,
+    NOTE_COL_STATUS_MIN_WIDTH,
+    NOTE_COL_CREATED_DATE_MIN_WIDTH,
+    NOTE_COL_DELETED_MIN_WIDTH,
+} from "../note.constants";
 
 export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<number>) {
     const {
@@ -39,16 +46,16 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         }
     }
     
-    const showWorkspaceLinksColumn = containerWidth >= 462;
-    const showStatusColumn = containerWidth >= 572;
-    const showCreatedDateColumn = containerWidth >= 682;
-    const showDeletedColumn = containerWidth >= 742;
+    const showWorkspaceLinksColumn = containerWidth >= NOTE_COL_WORKSPACE_MIN_WIDTH;
+    const showStatusColumn = containerWidth >= NOTE_COL_STATUS_MIN_WIDTH;
+    const showCreatedDateColumn = containerWidth >= NOTE_COL_CREATED_DATE_MIN_WIDTH;
+    const showDeletedColumn = containerWidth >= NOTE_COL_DELETED_MIN_WIDTH;
 
     const noteStatus = useGetStandardRegistry("noteStatus");
     const columns = useMemo<ColumnDef<Note>[]>(() => {
         const getStatusDescription = (statusCode: string | undefined): string => {
             if (!statusCode) return "-";
-            const status = noteStatus.find((r:any) => r.code === statusCode);
+            const status = noteStatus.find((r: StandardRegistry) => r.code === statusCode);
             return status?.description || statusCode;
         };
 

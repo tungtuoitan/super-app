@@ -31,7 +31,7 @@ export function useProjectSaveActions(): SaveActions {
                 folderWorkspaceItemId: (tab.data as Task).folderWorkspaceItemId,
                 source: "useProjectSaveActions",
             });
-            // TODO: tại sao lại upsert task ở đây nhỉ?
+            // TODO: tại sao lại upsert task ở đây nhỉ? -> là vì saveAction dc đăng kí trong registry, và upsertTask chỉ dc đăng kí trong project.module
             const savedTask = await upsertTask(tab.id);
             if (isNewTask && savedTask) {
                 const workspaceId = await resolveWorkspaceId(savedTask.projectId);

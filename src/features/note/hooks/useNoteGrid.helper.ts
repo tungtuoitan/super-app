@@ -26,7 +26,7 @@ export const useNoteGridHelper = () => {
     const { setShouldFocusNoteName } = useNoteDetailStore();
 
     // Create new note (temporary with negative ID)
-    const __createNewNote = () => {
+    const createNewNote = () => {
         const existingIds = collectIdsFromTabs(openTabs);
         const tempId = generateTempId(existingIds);
         const name = generateUnsavedName(tempId);
@@ -53,7 +53,7 @@ export const useNoteGridHelper = () => {
     /**
      * Toggle delete/restore for selected notes (soft delete)
      */
-    const __deleteRestore_SelectedNotes = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+    const deleteRestoreSelectedNotes = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         const selectedIds = ids ?? Object.keys(noteGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
@@ -89,7 +89,7 @@ export const useNoteGridHelper = () => {
                     };
                 });
 
-                const result = await noteService._upsertNotes(token, batchRequests);
+                const result = await noteService.upsertNotes(token, batchRequests);
 
                 if (!result.success) {
                     throw new Error(result.message || `Failed to ${type === "soft-delete" ? "delete" : "restore"} notes`);
@@ -120,7 +120,7 @@ export const useNoteGridHelper = () => {
     /**
      * Permanently delete selected notes (hard delete)
      */
-    const __hardDeleteSelectedNotes = async (ids?: number[]) => {
+    const hardDeleteSelectedNotes = async (ids?: number[]) => {
         const selectedIds = ids ?? Object.keys(noteGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
@@ -130,7 +130,7 @@ export const useNoteGridHelper = () => {
             const token = $user.userToken;
 
             if (persistedNoteIds.length > 0) {
-                const result = await noteService._deleteNote(token, persistedNoteIds.join(","));
+                const result = await noteService.deleteNote(token, persistedNoteIds.join(","));
 
                 if (!result.success) {
                     throw new Error(result.message || "Failed to hard delete notes");
@@ -156,7 +156,7 @@ export const useNoteGridHelper = () => {
         }
     };
 
-    const openNoteContextMenu = (event: React.MouseEvent, row?: any) => {
+    const openNoteContextMenu = (event: React.MouseEvent, row?: { id: string }) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -172,10 +172,10 @@ export const useNoteGridHelper = () => {
         showContextMenu(event, "note-grid", {
             selectedNotes,
             selectedIds,
-            onSoftDelete: () => __deleteRestore_SelectedNotes(selectedIds, "soft-delete"),
-            onHardDelete: () => __hardDeleteSelectedNotes(selectedIds),
-            onRestore: () => __deleteRestore_SelectedNotes(selectedIds, "restore"),
-            onAddNote: __createNewNote,
+            onSoftDelete: () => deleteRestoreSelectedNotes(selectedIds, "soft-delete"),
+            onHardDelete: () => hardDeleteSelectedNotes(selectedIds),
+            onRestore: () => deleteRestoreSelectedNotes(selectedIds, "restore"),
+            onAddNote: createNewNote,
         });
     };
 
@@ -199,7 +199,7 @@ export const useNoteGridHelper = () => {
                 pageSize: noteGridPagination.pageSize,
             };
 
-            const result = await noteService._getNotes(token, filterParams);
+            const result = await noteService.getNotes(token, filterParams);
 
             if (!result.success) {
                 throw new Error(result.message || "Failed to load notes");

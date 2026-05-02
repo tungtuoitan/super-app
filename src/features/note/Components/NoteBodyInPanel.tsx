@@ -4,6 +4,7 @@
 
 import React, { useEffect } from "react";
 import { GenericAutoComplete, GenericTextField, IAutoCompleteOptions, IconPicker, standardRegistryConstants, useGetStandardRegistry } from "@/shared";
+import type { StandardRegistry } from "@/shared";
 import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
@@ -16,6 +17,7 @@ import { useMonaco } from "@monaco-editor/react";
 import { IconKey } from "@/shared";
 import {useStandardRegistrySelector} from "@/shared";
 import {shellConstants} from "@/shell";
+import { NOTE_ENTITY_TYPE, NOTE_FOCUS_DELAY_MS } from "../note.constants";
 
 export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
@@ -24,7 +26,7 @@ export function NoteBodyInPanel() {
     const activeTab = getActiveTab();
     const { getItemStatus } = useTreeStatusHelper();
     const { currentWorkspace } = useWorkspaceStore();
-    const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === 3));
+    const _itemStatus = getItemStatus(currentWorkspace?.flatData?.find((i) => i.entityId === (activeTab?.data as Note)?.id && i.entityType === NOTE_ENTITY_TYPE));
     const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef } = useNoteDetailStore();
     $miRef.current = useMonaco();
@@ -37,8 +39,8 @@ export function NoteBodyInPanel() {
     const isDisabled = isDeleted || isHardDeleted || _itemStatus.hasDeletedAncestor;
 
     const noteStatusOptions = noteStatus
-        .filter((r:any) => r.isActive)
-        .map((item:any) => ({
+        .filter((r: StandardRegistry) => r.isActive)
+        .map((item: StandardRegistry) => ({
             id: item.code,
             label: item.description || item.code,
             desc: item.description || item.code,
@@ -56,7 +58,7 @@ export function NoteBodyInPanel() {
             setTimeout(() => {
                 noteNameRef.current?.focus();
                 setShouldFocusNoteName(false);
-            }, 100);
+            }, NOTE_FOCUS_DELAY_MS);
         }
     }, [shouldFocusNoteName, noteNameRef]);
 

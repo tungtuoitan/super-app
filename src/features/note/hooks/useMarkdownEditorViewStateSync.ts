@@ -11,6 +11,11 @@ import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabBarHelper } from "@/shell";
 import { constants } from "@/shared";
 import type * as _monaco from "monaco-editor";
+import { EDITOR_RESTORE_DELAY_MS } from "../note.constants";
+
+function isEditorDisposed(editor: _monaco.editor.IStandaloneCodeEditor): boolean {
+    return (editor as unknown as { _isDisposed: boolean })._isDisposed === true;
+}
 
 export function useMarkdownEditorViewStateSync() {
     const { editorRef, editorMountCount,isMounted } = useNoteDetailStore();
@@ -29,7 +34,7 @@ export function useMarkdownEditorViewStateSync() {
             return;
         }
         const editor = editorRef.current;
-        if (!editor || (editor as any)._isDisposed) {
+        if (!editor || isEditorDisposed(editor)) {
             return;
         }
 
@@ -66,7 +71,7 @@ export function useMarkdownEditorViewStateSync() {
         const editor = editorRef.current;
         const activeTab = getActiveTab();
 
-        if (!editor || (editor as any)._isDisposed || !activeTab) {
+        if (!editor || isEditorDisposed(editor) || !activeTab) {
             return;
         }
 
@@ -93,7 +98,6 @@ export function useMarkdownEditorViewStateSync() {
             try {
                 // Only restore scroll position (no cursor/focus)
                 if (viewState.editorScrollPosition) {
-                    // console.log("activeTabId.scroll position:", activeTab.title, viewState.editorScrollPosition);
                     editor.setScrollPosition(
                         {
                             scrollTop: viewState.editorScrollPosition.scrollTop,
@@ -111,7 +115,7 @@ export function useMarkdownEditorViewStateSync() {
                 setIsLoadingTab(false);
                 isRestoringRef.current = false;
             }
-        }, 50); // Small delay to ensure MarkdownEditorSync runs first
+        }, EDITOR_RESTORE_DELAY_MS);
 
         return () => clearTimeout(restoreTimer);
     }, [activeTabId]);
@@ -125,17 +129,16 @@ export function useMarkdownEditorViewStateSync() {
         const editor = editorRef.current;
         const activeTab = getActiveTab();
 
-        if (!editor || (editor as any)._isDisposed || !activeTab) return;
+        if (!editor || isEditorDisposed(editor) || !activeTab) return;
         if (activeTab.type !== shellConstants.vscode.tab.tabTypes.note) return;
 
         const scrollToRestore = activeTab.viewState?.editorScrollPosition;
-        // console.log("editor mounted, restoring scroll:", activeTab.title,scrollToRestore);
         if (!scrollToRestore || (scrollToRestore.scrollTop === 0 && scrollToRestore.scrollLeft === 0)) return;
-        setIsLoadingTab(true)
-        
+        setIsLoadingTab(true);
+
         isRestoringRef.current = true;
         requestAnimationFrame(() => {
-            if (editor && !(editor as any)._isDisposed) {
+            if (editor && !isEditorDisposed(editor)) {
                 editor.setScrollPosition(
                     { scrollTop: scrollToRestore.scrollTop, scrollLeft: scrollToRestore.scrollLeft },
                     1
@@ -151,7 +154,7 @@ export function useMarkdownEditorViewStateSync() {
         const editor = editorRef.current;
         const activeTab = getActiveTab();
 
-        if (!editor || (editor as any)._isDisposed || !activeTab) {
+        if (!editor || isEditorDisposed(editor) || !activeTab) {
             return;
         }
 

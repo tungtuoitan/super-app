@@ -7,6 +7,7 @@
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef } from "react";
 import type * as _monaco from "monaco-editor";
+import type { Monaco } from "@monaco-editor/react";
 
 export interface NoteDetailContextData {
     // Container refs
@@ -25,7 +26,7 @@ export interface NoteDetailContextData {
     editorRef: React.MutableRefObject<_monaco.editor.IStandaloneCodeEditor | null>;
     decorationsRef: React.MutableRefObject<string[]>;
     disposablesRef: React.MutableRefObject<_monaco.IDisposable[]>;
-    $miRef: any;
+    $miRef: React.MutableRefObject<Monaco | null>;
     isMounted: boolean;
     setIsMounted: Dispatch<SetStateAction<boolean>>;
     editorMountCount: number;
@@ -49,7 +50,7 @@ export const noteDetailContextDefaultValue: NoteDetailContextData = {
     editorRef: { current: null },
     decorationsRef: { current: [] },
     disposablesRef: { current: [] },
-    $miRef: null,
+    $miRef: { current: null },
     isMounted: false,
     setIsMounted: () => {},
     editorMountCount: 0,
@@ -74,7 +75,7 @@ export const NoteDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const editorRef = useRef<_monaco.editor.IStandaloneCodeEditor | null>(null);
     const decorationsRef = useRef<string[]>([]);
     const disposablesRef = useRef<_monaco.IDisposable[]>([]);
-    const $miRef = useRef<any>(null);
+    const $miRef = useRef<Monaco | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [editorMountCount, setEditorMountCount] = useState(0);
 

@@ -7,6 +7,7 @@ import React, { useEffect, useRef } from "react";
 import type { BaseTab } from "@/shell";
 import { NoteDetailContent } from "./NoteDetailContent";
 import { useEditorTabBarHelper } from "@/shell";
+import { SCROLL_SAVE_DEBOUNCE_MS } from "../note.constants";
 
 interface NoteEditorPanelProps {
     tab: BaseTab;
@@ -60,7 +61,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
 
         scrollTimeoutRef.current = setTimeout(() => {
             patchTab(tab.id, (cur) => ({ viewState: { ...cur.viewState, scrollTop } }));
-        }, 100);
+        }, SCROLL_SAVE_DEBOUNCE_MS);
     }
 
 

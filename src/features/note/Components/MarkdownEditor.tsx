@@ -14,16 +14,11 @@ import { useKeywordSelector } from "@/shared";
 import { shellConstants } from "@/shell";
 import { richTextEditorConstants } from "@/shared";
 import { Loader2 } from "lucide-react";
-import {
-    convertToDisplayVersion,
-    convertToOriginalVersion,
-    setupAutocomplete,
-    setupDefinitionProvider,
-    setupHoverProvider,
-    setupLinkProvider,
-    setupMarkdownFolding,
-    updateDecorations,
-} from "@/features/note/utils/markdown.utils";
+import { convertToDisplayVersion, convertToOriginalVersion } from "@/features/note/utils/markdown.conversion";
+import { updateDecorations } from "@/features/note/utils/markdown.decorations";
+import { setupAutocomplete } from "@/features/note/utils/markdown.autocomplete";
+import { setupDefinitionProvider, setupMarkdownFolding, setupHoverProvider } from "@/features/note/utils/markdown.providers";
+import { setupLinkProvider } from "@/features/note/utils/markdown.link";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";

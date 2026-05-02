@@ -5,6 +5,7 @@ import { transformANote } from "../utils/note.utils";
 import { Note, UpsertNoteDTO } from "../types/note.types";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
 import { constants, useGetStandardRegistry } from "@/shared";
+import type { StandardRegistry } from "@/shared";
 import { useWorkspaceLoader } from "@/features/workspace";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
@@ -23,7 +24,7 @@ export const useNoteDetailHelper = () => {
     const { moduleName } = useSideBarHelper();
     const { loadKeywords } = useKeywordHelper();
 
-    const handleNoteFieldChange = (field: keyof Note, value: any) => {
+    const handleNoteFieldChange = (field: keyof Note, value: unknown) => {
         const activeTab = getActiveTab();
         if (!activeTab || activeTab.type !== shellConstants.vscode.tab.tabTypes.note) {
             return;
@@ -31,9 +32,9 @@ export const useNoteDetailHelper = () => {
 
         const activeNote = activeTab.data as Note;
 
-        let _value;
+        let _value: unknown;
         if (field === "statusCode") {
-            _value = value?.target?.value?.id || null;
+            _value = (value as { target?: { value?: { id?: string } } })?.target?.value?.id || null;
         } else {
             _value = value;
         }
@@ -42,14 +43,11 @@ export const useNoteDetailHelper = () => {
             _value = _value.charAt(0).toUpperCase() + _value.slice(1);
         }
 
-        if (field === 'icon') {
-            const _value = value.iconType;
-            const defaultColor = value.defaultColor;
-        }
         let updated = { ...activeNote, [field]: _value };
 
         if (field === 'icon') {
-            updated = { ...activeNote, icon: value.iconType, color: value.defaultColor };
+            const iconValue = value as { iconType: string; defaultColor: string };
+            updated = { ...activeNote, icon: iconValue.iconType, color: iconValue.defaultColor };
         }
 
         patchTab(activeTab.id, { data: updated });
@@ -90,7 +88,7 @@ export const useNoteDetailHelper = () => {
                     deletedAt: isRestoreMode ? null : undefined,
                 };
 
-                const result = await noteService._upsertNotes(token, [upsertData]);
+                const result = await noteService.upsertNotes(token, [upsertData]);
                 if (!result.success) {
                     throw new Error(result.message || "Failed to save note");
                 }
@@ -136,8 +134,8 @@ export const useNoteDetailHelper = () => {
 
     const hastags = useGetStandardRegistry("hashtag");
     const hashtagOptions = hastags
-        .filter((r:any) => r.isActive)
-        .map((item:any) => ({
+        .filter((r: StandardRegistry) => r.isActive)
+        .map((item: StandardRegistry) => ({
             id: item.code,
             label: item.code,
             desc: item.description || item.code,

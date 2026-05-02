@@ -34,7 +34,7 @@ export const noteModule: ModuleDefinition = {
             return note.id > 0 ? note.id : null;
         },
         restoreTab: async (persisted: TabStorage, userToken: string) => {
-            const result = await noteService._getNotes(userToken, { ids: String(persisted.dataId) });
+            const result = await noteService.getNotes(userToken, { ids: String(persisted.dataId) });
             if (!result.success || !result.data?.length) return null;
             const noteData = transformNotes(result.data as NoteDTO[])[0];
             if (!noteData) return null;

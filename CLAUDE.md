@@ -56,9 +56,6 @@ Validate all new/modified code against these rules before committing.
 ## Performance
 - Do NOT wrap functions in `memo`/`useMemo` inside helper files unless truly necessary
 
-## UI file rule
-- each UI file contain max 1 big component
-
 ## State Management
 
 Two patterns are used in this codebase. Pick the right one:

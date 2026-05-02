@@ -7,11 +7,18 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from "react"
 import { shellConstants } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
 import { constants, useKeywordSelector } from "@/shared";
-import { convertToDisplayVersion, updateDecorations } from "@/features/note/utils/markdown.utils";
+import { convertToDisplayVersion } from "@/features/note/utils/markdown.conversion";
+import { updateDecorations } from "@/features/note/utils/markdown.decorations";
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
+import type { Monaco } from "@monaco-editor/react";
+import type * as _monaco from "monaco-editor";
 
-export function useMarkdownEditorSync({$mi}: { $mi: any }) {
+function isEditorDisposed(editor: _monaco.editor.IStandaloneCodeEditor): boolean {
+    return (editor as unknown as { _isDisposed: boolean })._isDisposed === true;
+}
+
+export function useMarkdownEditorSync({$mi}: { $mi: Monaco | null }) {
     const { getActiveTab, openTab } = useEditorTabBarHelper();
     const { allKeywords } = useKeywordSelector();
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc } = useNoteDetailStore();
@@ -64,7 +71,7 @@ export function useMarkdownEditorSync({$mi}: { $mi: any }) {
         if (!$mi) return;
         const editor = editorRef.current;
 
-        if (!editor || (editor as any)._isDisposed) {
+        if (!editor || isEditorDisposed(editor)) {
             return;
         }
 
