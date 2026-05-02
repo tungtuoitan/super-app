@@ -13,7 +13,6 @@ import { useEditorTabBarHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useTreeStatusHelper } from "@/features/workspace";
 import { useMonaco } from "@monaco-editor/react";
-import {useEditorTabBarStore} from "@/shell";
 import { IconKey } from "@/shared";
 import {useStandardRegistrySelector} from "@/shared";
 import {shellConstants} from "@/shell";
@@ -21,7 +20,6 @@ import {shellConstants} from "@/shell";
 export function NoteBodyInPanel() {
     const { noteNameRef, shouldFocusNoteName, setShouldFocusNoteName, nameError, setNameError } = useNoteDetailStore();
     const { handleNoteFieldChange, handleHashTagsChange } = useNoteDetailHelper();
-    const { activeTabId } = useEditorTabBarStore();
     const { getActiveTab } = useEditorTabBarHelper();
     const activeTab = getActiveTab();
     const { getItemStatus } = useTreeStatusHelper();

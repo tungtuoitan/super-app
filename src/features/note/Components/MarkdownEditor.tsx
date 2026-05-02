@@ -28,16 +28,14 @@ import {
 import { Note } from "@/features/note/types/note.types";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStateSync";
-import {useEditorTabBarStore} from "@/shell";
 
 export function MarkdownEditor() {
     const { allKeywords } = useKeywordSelector();
     const { navigateLink } = useKeywordNavigationHelper();
     const { currentWorkspace } = useWorkspaceStore();
-    const { getActiveTab } = useEditorTabBarHelper();
+    const { getActiveTab, isLoadingTab } = useEditorTabBarHelper();
     const { handleNoteFieldChange } = useNoteDetailHelper();
     const { getItemStatus } = useTreeStatusHelper();
-    const { isLoadingTab } = useEditorTabBarStore();
 
     // const $mi = useMonaco(); // Monaco instance
     const { editorRef, decorationsRef, disposablesRef, displayDesc, setDisplayDesc, $miRef, isMounted, setIsMounted, editorMountCount, setEditorMountCount } = useNoteDetailStore();

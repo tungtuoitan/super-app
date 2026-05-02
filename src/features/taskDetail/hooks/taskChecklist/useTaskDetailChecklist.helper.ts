@@ -4,7 +4,7 @@
  *
  * Race-condition fix (rapid toggle):
  *   handleChecklistChange accepts a transform fn (current → next).
- *   The transform is applied inside setOpenTabs' functional updater, which always
+ *   The transform is applied inside patchTab's functional updater, which always
  *   receives the latest state — eliminating the stale-closure overwrite problem.
  *   Server saves are debounced (300 ms) so rapid toggles produce one network call.
  */
@@ -15,10 +15,9 @@ import { usePTaskStore } from "@/features/project";
 import { taskService } from "../../service/task.service";
 import { standardRegistryService } from "@/shared";
 import { useAuthStore } from "@/shared";
-import { BaseTab } from "@/shell";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 export type ChecklistUpdater = ChecklistJSON | ((current: ChecklistJSON) => ChecklistJSON);
 
@@ -31,7 +30,7 @@ function parseChecklist(raw: string | null | undefined): ChecklistJSON {
 
 export const useTaskDetailChecklistHelper = () => {
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { setTasks } = usePTaskStore();
     const { selectedTask } = useTaskDetailSelector();
 
@@ -53,18 +52,12 @@ export const useTaskDetailChecklistHelper = () => {
             if (task.id <= 0 || !$user.userToken) return;
             const newChecklistJson = JSON.stringify(json);
             await taskService._patchTask($user.userToken, task.id, { checklistJson: newChecklistJson });
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) =>
-                    t.id === activeTabId
-                        ? {
-                              ...t,
-                              data: { ...(t.data as Task), checklistJson: newChecklistJson },
-                              data0: { ...(t.data as Task), checklistJson: newChecklistJson },
-                              hasUnsavedChanges: false,
-                          }
-                        : t,
-                ),
-            );
+            const activeTabId = getActiveTab()?.id;
+            if (activeTabId) patchTab(activeTabId, (cur) => ({
+                data: { ...(cur.data as Task), checklistJson: newChecklistJson },
+                data0: { ...(cur.data as Task), checklistJson: newChecklistJson },
+                hasUnsavedChanges: false,
+            }));
         };
 
     /** Schedule a debounced flush of the latest pending checklist to the server */
@@ -93,22 +86,20 @@ export const useTaskDetailChecklistHelper = () => {
             const task = selectedTaskRef.current;
             if (!task) return;
             const isNewTask = task.id <= 0;
+            const activeTabId = getActiveTab()?.id;
+            if (!activeTabId) return;
 
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) => {
-                    if (t.id !== activeTabId) return t;
-                    const currentTask = t.data as Task;
-                    const current = parseChecklist(currentTask.checklistJson);
-                    const updated = typeof updater === "function" ? updater(current) : updater;
-                    // Capture the latest value so the debounced save uses the final state
-                    if (!isNewTask) pendingChecklistRef.current = updated;
-                    return {
-                        ...t,
-                        data: { ...currentTask, checklistJson: JSON.stringify(updated) },
-                        hasUnsavedChanges: isNewTask,
-                    };
-                }),
-            );
+            patchTab(activeTabId, (cur) => {
+                const currentTask = cur.data as Task;
+                const current = parseChecklist(currentTask.checklistJson);
+                const updated = typeof updater === "function" ? updater(current) : updater;
+                // Capture the latest value so the debounced save uses the final state
+                if (!isNewTask) pendingChecklistRef.current = updated;
+                return {
+                    data: { ...currentTask, checklistJson: JSON.stringify(updated) },
+                    hasUnsavedChanges: isNewTask,
+                };
+            });
 
             if (!isNewTask) scheduleSave();
         };

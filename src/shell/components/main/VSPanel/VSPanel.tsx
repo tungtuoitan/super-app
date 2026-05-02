@@ -1,13 +1,14 @@
 import { X, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
-import { useSideBarStore } from "@/shell";
-import { moduleRegistry, type PanelTabDefinition } from "@/shell";
 import { ConsoleTab } from "../../../../shared/console/ConsoleTab";
 import { TabNameList } from "./TabNameList";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
+import {useSideBarStore} from "@/shell/store/SideBar.store";
+import {useEditorTabBarHelper} from "@/shell/hooks/useEditorTabBar.helper";
+import {moduleRegistry} from "@/shell/moduleRegistry";
+import {PanelTabDefinition} from "@/shell/types/moduleRegistry.type";
 
 interface VSPanelProps {
     onClose: () => void;

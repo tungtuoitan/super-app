@@ -10,7 +10,7 @@ import { Button } from "@/shared";
 import { Checkbox } from "@/shared";
 import { Alert, AlertDescription } from "@/shared";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import {useWsGridHelper} from "../hooks/ws/useWsGrid.helper";
 import {useWsTabHelper} from "../hooks/ws/useWsTab.helper";
 import {Ws} from "../types/workspace.types";
@@ -40,7 +40,7 @@ export function WsGrid() {
 
     const { loadWorkspaces, openWsContextMenu } = useWsGridHelper();
     const { openWorkspaceTab } = useWsTabHelper();
-    const { searchQuery,filterViewKey } = useSideBarStore();
+    const { searchQuery,filterViewKey } = useSideBarHelper();
     const { $user } = useAuthStore();
 
     // Define columns for the data table

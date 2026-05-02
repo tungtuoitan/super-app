@@ -1,27 +1,26 @@
-﻿/**
+/**
  * Workspace Tab Helper
- * Helper functions for managing workspace editor tabs
+ * Helper functions for managing workspace editor tabs.
+ * Delegates all tab lifecycle to shell — never builds BaseTab directly.
  */
 
-import { BaseTab, shellConstants } from "@/shell";
-import { constants, standardRegistryConstants } from "@/shared";
+import { shellConstants } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import {Ws, WsResponse} from "../../types/workspace.types";
-import {useEditorTabBarStore} from "@/shell";
-import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "../../utils/temp-id.utils";
+import { standardRegistryConstants } from "@/shared";
+import type { Ws, WsResponse } from "../../types/workspace.types";
+import { collectIdsFromTabs, generateTempId, generateUnsavedName } from "../../utils/temp-id.utils";
+
+const TAB_TYPE = shellConstants.vscode.tab.tabTypes.workspace;
 
 export const useWsTabHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
-    const { updateActiveTab } = useEditorTabBarHelper();
-    const { setNewTabAnd } = useEditorTabBarHelper();
-    const { openTab } = useEditorTabBarHelper();
+    const { openTab, openTabs, closeTab, updateTabData } = useEditorTabBarHelper();
     const { setShouldFocusWsName } = useWsDetailStore();
     const { workspaces, setWorkspaces } = useWsStore();
 
     /**
-     * Create a new temporary workspace and open its tab
+     * Create a new temporary workspace and open its tab.
      */
     const openNewWorkspaceTab = () => {
         const existingIds = collectIdsFromTabs(openTabs);
@@ -40,92 +39,51 @@ export const useWsTabHelper = () => {
         };
 
         setWorkspaces([newWorkspace, ...workspaces]);
-        openTab(newWorkspace, shellConstants.vscode.tab.tabTypes.workspace);
+        openTab(newWorkspace, TAB_TYPE, { title: name });
         setShouldFocusWsName(true);
     };
 
     /**
-     * Open workspace in editor tab
-     * If tab already exists, activate it; otherwise create new tab
+     * Open workspace in editor tab.
+     * If tab already exists → activate it. Otherwise → create new tab.
      */
     const openWorkspaceTab = (workspace: Ws | WsResponse) => {
-        // Check if tab already exists for this workspace
-        const existingTab = openTabs.find((tab) => tab.type === shellConstants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspace.id);
-
-        if (existingTab) {
-            // Tab already exists, just activate it
-            updateActiveTab(existingTab.id);
-        } else {
-            // Normalize WsResponse (string dates) to Ws (Date objects)
-            const wsData: Ws = {
-                id: workspace.id,
-                name: workspace.name,
-                description: workspace.description,
-                createdAt: workspace.createdAt instanceof Date ? workspace.createdAt : new Date(workspace.createdAt),
-                updatedAt: workspace.updatedAt ? (workspace.updatedAt instanceof Date ? workspace.updatedAt : new Date(workspace.updatedAt)) : null,
-                deletedAt: workspace.deletedAt ? (workspace.deletedAt instanceof Date ? workspace.deletedAt : new Date(workspace.deletedAt)) : null,
-                userId: workspace.userId,
-            };
-
-            // Create new workspace tab
-            const newTab: BaseTab = {
-                id: `workspace-tab-${workspace.id}-${Date.now()}`,
-                type: shellConstants.vscode.tab.tabTypes.workspace,
-                data: wsData,
-                data0: wsData,
-                title: workspace.name || "Unsaved Workspace",
-                hasUnsavedChanges: false,
-            };
-
-            const newTabs = [...openTabs, newTab];
-            setOpenTabs(newTabs);
-            updateActiveTab(newTab.id, newTabs);
-        }
+        // Normalise WsResponse (string dates) → Ws (Date objects)
+        const wsData: Ws = {
+            id: workspace.id,
+            name: workspace.name,
+            description: workspace.description,
+            statusCode: (workspace as Ws).statusCode,
+            createdAt: workspace.createdAt instanceof Date ? workspace.createdAt : new Date(workspace.createdAt),
+            updatedAt: workspace.updatedAt
+                ? workspace.updatedAt instanceof Date ? workspace.updatedAt : new Date(workspace.updatedAt)
+                : null,
+            deletedAt: workspace.deletedAt
+                ? workspace.deletedAt instanceof Date ? workspace.deletedAt : new Date(workspace.deletedAt)
+                : null,
+            userId: workspace.userId,
+        };
+        openTab(wsData, TAB_TYPE, { title: wsData.name || "Unsaved Workspace" });
     };
 
     /**
-     * Close workspace tab
+     * Close workspace tab — fires onTabClose module callbacks via shell.
      */
     const closeWorkspaceTab = (tabId: string) => {
-        setOpenTabs((prev) => {
-            const newTabs = prev.filter((t) => t.id !== tabId);
-
-            // If closing active tab, switch to another tab
-            if (activeTabId === tabId) {
-                if (newTabs.length > 0) {
-                    // Switch to the last tab
-                    const lastTab = newTabs[newTabs.length - 1];
-                    setNewTabAnd(lastTab.id);
-                } else {
-                    setNewTabAnd(null);
-                }
-            }
-
-            return newTabs;
-        });
+        closeTab(tabId);
     };
 
     /**
-     * Update workspace in all tabs
-     * When workspace is updated, sync it across all open tabs
+     * Sync updated workspace data into any open tabs showing this workspace.
      */
     const updateWorkspaceInTabs = (workspaceId: number, updatedWorkspace: Partial<Ws>) => {
-        setOpenTabs((prev) =>
-            prev.map((tab) => {
-                if (tab.type === shellConstants.vscode.tab.tabTypes.workspace && (tab.data as Ws).id === workspaceId) {
-                    const wsData = tab.data as Ws;
-                    return {
-                        ...tab,
-                        data: { ...wsData, ...updatedWorkspace },
-                        title: updatedWorkspace.name || tab.title,
-                    };
-                }
-                return tab;
-            })
+        updateTabData(
+            TAB_TYPE,
+            workspaceId,
+            (current: Ws) => ({ ...(current as Ws), ...updatedWorkspace }),
+            updatedWorkspace.name,
         );
     };
-
-
 
     return {
         openNewWorkspaceTab,
@@ -134,4 +92,3 @@ export const useWsTabHelper = () => {
         updateWorkspaceInTabs,
     };
 };
-

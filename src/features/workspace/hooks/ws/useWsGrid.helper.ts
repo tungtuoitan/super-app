@@ -2,15 +2,13 @@
 import { useWsDetailStore } from "@/features/workspace/store/ws/useWsDetail.store";
 import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
-import { constants, standardRegistryConstants } from "@/shared";
-import { BaseTab } from "@/shell";
+import { standardRegistryConstants } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 import { filterUtils } from "@/shell";
 import {useConsoleHelper} from "@/shared";
-import {Ws} from "../../types/workspace.types";
-import {useEditorTabBarStore} from "@/shell";
+import type {Ws} from "../../types/workspace.types";
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "../../utils/temp-id.utils";
 
 /**
@@ -34,8 +32,7 @@ export const useWsGridHelper = () => {
     const { workspaces, setWorkspaces, setWsGridIsLoading, setWsGridError, wsGridRowSelection, setWsGridRowSelection, wsGridPagination, setTotalCount } = useWsStore();
     const { showContextMenu } = useMenuContextHelper();
 
-    const { openTab } = useEditorTabBarHelper();
-    const { openTabs, setOpenTabs } = useEditorTabBarStore();
+    const { openTabs, openTab, updateTabData } = useEditorTabBarHelper();
     const _console = useConsoleHelper();
     const { setShouldFocusWsName } = useWsDetailStore();
 
@@ -123,20 +120,13 @@ export const useWsGridHelper = () => {
                 _console.success(`Successfully ${type === "soft-delete" ? "soft deleted" : "restored"} ${persistedWsIds.length} workspace(s)`);
 
                 // Update opened tabs
-                const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === shellConstants.vscode.tab.tabTypes.workspace && persistedWsIds.includes((tab.data as Ws).id)) {
-                        const wsData = tab.data as Ws;
-                        return {
-                            ...tab,
-                            data: {
-                                ...wsData,
-                                deletedAt: type === "soft-delete" ? new Date() : null,
-                            },
-                        };
-                    }
-                    return tab;
-                });
-                setOpenTabs(updatedTabs);
+                for (const wsId of persistedWsIds) {
+                    updateTabData(
+                        shellConstants.vscode.tab.tabTypes.workspace,
+                        wsId,
+                        (cur: Ws) => ({ ...(cur as Ws), deletedAt: type === "soft-delete" ? new Date() : null }),
+                    );
+                }
 
                 // Reload workspaces from API
                 await loadWorkspaces();
@@ -182,14 +172,13 @@ export const useWsGridHelper = () => {
                 _console.success(`Successfully permanently deleted ${persistedWsIds.length} workspace(s)`);
 
                 // Mark opened tabs as hard deleted
-                const updatedTabs = openTabs.map((tab: BaseTab) => {
-                    if (tab.type === shellConstants.vscode.tab.tabTypes.workspace && persistedWsIds.includes((tab.data as Ws).id)) {
-                        const wsData = tab.data as Ws;
-                        return { ...tab, data: { ...wsData, deletedAt: new Date(), isHardDeleted: true } };
-                    }
-                    return tab;
-                });
-                setOpenTabs(updatedTabs);
+                for (const wsId of persistedWsIds) {
+                    updateTabData(
+                        shellConstants.vscode.tab.tabTypes.workspace,
+                        wsId,
+                        (cur: Ws) => ({ ...(cur as Ws), deletedAt: new Date(), isHardDeleted: true }),
+                    );
+                }
 
                 // Reload workspaces from API
                 await loadWorkspaces();

@@ -125,7 +125,7 @@ export interface ModuleDefinition {
      * Plain function called when the active tab changes via `updateActiveTab`.
      * Use for feature-specific side-effects: e.g. workspace tree selection + scroll.
      * `tab` is null when all tabs are closed.
-     * NOT called by `setNewTabAnd` (programmatic switches without UI side-effects).
+     * NOT called by `_setActiveTabId` (programmatic switches without UI side-effects).
      * Read store state via Zustand `getXState()` accessors.
      */
     onTabActivate?: (tab: BaseTab | null) => void;

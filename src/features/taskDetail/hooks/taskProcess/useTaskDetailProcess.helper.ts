@@ -12,11 +12,10 @@ import { Task } from "../../types/task.types";
 import { usePTaskStore } from "@/features/project";
 import { taskService } from "../../service/task.service";
 import { useAuthStore } from "@/shared";
-import { BaseTab } from "@/shell";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
-import {useEditorTabBarStore} from "@/shell";
-import {isChecklistAllDone} from "../../utils/checklist.utils";
+import { useEditorTabBarHelper } from "@/shell";
+import { isChecklistAllDone } from "../../utils/checklist.utils";
 
 export type ProcessUpdater = ChecklistJSON | ((current: ChecklistJSON) => ChecklistJSON);
 
@@ -29,7 +28,7 @@ function parseProcess(raw: string | null | undefined): ChecklistJSON {
 
 export const useTaskDetailProcessHelper = () => {
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { setTasks } = usePTaskStore();
     const { selectedTask } = useTaskDetailSelector();
 
@@ -58,18 +57,12 @@ export const useTaskDetailProcessHelper = () => {
                 status: newStatus,
             });
 
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) =>
-                    t.id === activeTabId
-                        ? {
-                              ...t,
-                              data: { ...(t.data as Task), processJson: newProcessJson, status: newStatus },
-                              data0: { ...(t.data as Task), processJson: newProcessJson, status: newStatus },
-                              hasUnsavedChanges: false,
-                          }
-                        : t,
-                ),
-            );
+            const activeTabId = getActiveTab()?.id;
+            if (activeTabId) patchTab(activeTabId, (cur) => ({
+                data: { ...(cur.data as Task), processJson: newProcessJson, status: newStatus },
+                data0: { ...(cur.data as Task), processJson: newProcessJson, status: newStatus },
+                hasUnsavedChanges: false,
+            }));
 
             setTasks((prev) =>
                 prev.map((t) =>
@@ -94,26 +87,24 @@ export const useTaskDetailProcessHelper = () => {
      * Apply a process update (optimistic) and schedule a debounced server save.
      * Accepts a ChecklistJSON (edit-mode save) or a transform fn (toggle).
      */
-    const handleProcessChange = 
+    const handleProcessChange =
         (updater: ProcessUpdater) => {
             const task = selectedTaskRef.current;
             if (!task) return;
             const isNewTask = task.id <= 0;
+            const activeTabId = getActiveTab()?.id;
+            if (!activeTabId) return;
 
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) => {
-                    if (t.id !== activeTabId) return t;
-                    const currentTask = t.data as Task;
-                    const current = parseProcess(currentTask.processJson);
-                    const updated = typeof updater === "function" ? updater(current) : updater;
-                    if (!isNewTask) pendingProcessRef.current = updated;
-                    return {
-                        ...t,
-                        data: { ...currentTask, processJson: JSON.stringify(updated) },
-                        hasUnsavedChanges: isNewTask,
-                    };
-                }),
-            );
+            patchTab(activeTabId, (cur) => {
+                const currentTask = cur.data as Task;
+                const current = parseProcess(currentTask.processJson);
+                const updated = typeof updater === "function" ? updater(current) : updater;
+                if (!isNewTask) pendingProcessRef.current = updated;
+                return {
+                    data: { ...currentTask, processJson: JSON.stringify(updated) },
+                    hasUnsavedChanges: isNewTask,
+                };
+            });
 
             if (!isNewTask) scheduleSave();
         }

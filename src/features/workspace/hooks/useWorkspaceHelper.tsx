@@ -5,10 +5,10 @@
 
 import { useWorkspaceStore } from "../store/Workspace.store";
 import { constants } from "@/shared";
-import { shellConstants, useEditorTabBarStore } from "@/shell";
+import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useSnackbar } from "notistack";
 import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
-import { BaseTab } from "@/shell";
+import type { BaseTab } from "@/shell";
 import { findNoteByEntityId } from "../utils/workspace.find.utils";
 import type { Note } from "@/features/note";
 import { WorkspaceItemAction } from "../types/workspace.types";
@@ -19,7 +19,7 @@ import {useConsoleHelper} from "@/shared";
  */
 export function useWorkspaceHelper() {
     const { currentWorkspace } = useWorkspaceStore();
-    const { openTabs } = useEditorTabBarStore();
+    const { openTabs } = useEditorTabBarHelper();
     const { upsertWorkspaceItem } = useWorkspaceItemHelper();
     const _console = useConsoleHelper();
 

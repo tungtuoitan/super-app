@@ -31,10 +31,20 @@ export const useKeywordNavigationHelper = () => {
                 return;
             }
 
+            // Adapt new openTab(data, type, meta) to legacy NavigationContext signature
+            // (data: any, type: string, openedBy?: { link, label })
+            const openTabForCtx = (
+                data: any,
+                type: string,
+                openedBy?: { link: string; label: string },
+            ) => {
+                openTab(data, type, { openedBy });
+            };
+
             const ctx = {
                 userToken: $user.userToken,
                 openTabs,
-                openTab,
+                openTab: openTabForCtx,
                 updateActiveTab,
                 setOpenTabs,
                 log: {

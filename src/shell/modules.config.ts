@@ -10,7 +10,6 @@ import { moduleRegistry } from "./moduleRegistry";
 import { FileText } from "lucide-react";
 import React from "react";
 import { NoteBodyInPanel } from "@/features/note";
-import { shellConstants } from "@/shell";
 // Module files are imported directly (not via barrel) to avoid circular deps.
 // Each *.module file may import from other feature barrels; keeping them out
 // of their own barrel breaks the init cycle during HMR and initial load.
@@ -36,6 +35,7 @@ import { registerKFilters } from "@/features/K";
 import { registerNoteFilters } from "@/features/note";
 import { registerTaskFilters } from "@/features/taskDetail";
 import { registerProjectFilters } from "@/features/project";
+import {shellConstants} from "./shell.constants";
 
 // ── Global panel tabs ─────────────────────────────────────────────────────────
 const NoteBodyInPanelContent = () => React.createElement(NoteBodyInPanel);

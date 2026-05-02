@@ -1,26 +1,18 @@
-import type { Note } from "@/features/note";
-import { BaseTab, TabType } from "@/shell";
-import { shellConstants } from "@/shell";
-import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
-import type { Task } from "@/features/taskDetail";
-import type { Ws } from "@/features/workspace";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
-import type { Project } from "@/features/project";
-import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { moduleRegistry } from "../moduleRegistry";
+import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
+import {BaseTab, TabOpenMeta, TabType} from "../types/tab.types";
 
 export const useEditorTabBarHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
+    const { openTabs, setOpenTabs, activeTabId, setActiveTabId, isLoadingTab, setIsLoadingTab } = useEditorTabBarStore();
 
     // ── Breadcrumb ────────────────────────────────────────────────────────────
 
     /**
-     * Generate breadcrumb for a tab by delegating to registered module builders.
-     * Each module decides whether it handles the given tab type.
-     * Builders are plain functions that read store state imperatively — calling
-     * them does NOT cause this hook's consumers to subscribe to feature stores.
+     * Delegate breadcrumb building to whichever module handles this tab type.
+     * Builders are plain functions — calling this does NOT subscribe to feature stores.
      */
-    const generateBreadcrumbForTab = (data: Note | Ws, type: string): BreadcrumbItem[] | undefined => {
+    const generateBreadcrumbForTab = (data: unknown, type: string): BreadcrumbItem[] | undefined => {
         const fakeTab = { data, type } as BaseTab;
         for (const m of moduleRegistry.getAll()) {
             const result = m.buildBreadcrumb?.(fakeTab);
@@ -32,144 +24,133 @@ export const useEditorTabBarHelper = () => {
     // ── Tab activation ────────────────────────────────────────────────────────
 
     /**
-     * Set the active tab ID only — no feature side-effects.
-     * Used for programmatic switches (tab restore, close-and-switch) where
-     * tree sync / scroll animations are undesirable.
+     * Set active tab id only — no feature side-effects.
+     * Use for programmatic switches (restore, close-and-switch).
      */
-    const setNewTabAnd = (newActiveTabId: string | null) => {
+    const _setActiveTabId = (newActiveTabId: string | null) => {
         setActiveTabId(newActiveTabId);
     };
 
     /**
-     * Set the active tab and fire all registered module activate handlers
-     * (e.g. workspace tree selection + scroll).
-     * Use this for user-initiated tab switches.
+     * Set active tab and fire all registered module onTabActivate handlers.
+     * Use for user-initiated tab switches.
      */
     const updateActiveTab = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
-        const tabsToSearch = tabs || openTabs;
-        setNewTabAnd(newActiveTabId);
-
+        const tabsToSearch = tabs ?? openTabs;
+        _setActiveTabId(newActiveTabId);
         const activeTab = newActiveTabId
-            ? (tabsToSearch.find((tab: BaseTab) => tab.id === newActiveTabId) ?? null)
+            ? (tabsToSearch.find((t: BaseTab) => t.id === newActiveTabId) ?? null)
             : null;
         moduleRegistry.getAll().forEach((m) => m.onTabActivate?.(activeTab));
     };
 
-    // ── Open tab ──────────────────────────────────────────────────────────────
+    // ── Open tab (standard — find by type + data.id) ──────────────────────────
 
+    /**
+     * Open a tab for an entity.
+     * - If a tab with the same type + data.id already exists → activate it.
+     * - Otherwise → create a new tab and activate it.
+     *
+     * Features never build BaseTab directly; they pass data + TabOpenMeta.
+     * `meta` is optional — title falls back to data.name / data.title if omitted.
+     */
     const openTab = (
-        data: Note | Ws | Project | Task | LifeLogLog | LifeLogTrack,
+        data: { id: number | string },
         tabType: string,
-        openedBy?: { link: string; label: string },
+        meta: TabOpenMeta = {},
     ) => {
-        const type = tabType;
+        const existing = openTabs.find(
+            (t) => t.type === tabType && (t.data as { id: number | string })?.id === data.id,
+        );
 
-        // 1. Check for existing tab
-        let existingTab: BaseTab | undefined;
-        if (type === shellConstants.vscode.tab.tabTypes.note) {
-            existingTab = openTabs.find((t) => t.type === type && (t.data as Note).id === (data as Note).id);
-        } else if (type === shellConstants.vscode.tab.tabTypes.workspace) {
-            existingTab = openTabs.find((t) => t.type === type && (t.data as Ws).id === (data as Ws).id);
-        } else if (type === shellConstants.vscode.tab.tabTypes.project) {
-            existingTab = openTabs.find((t) => t.type === type && (t.data as Project).id === (data as Project).id);
-        } else if (type === shellConstants.vscode.tab.tabTypes.task) {
-            existingTab = openTabs.find((t) => t.type === type && (t.data as Task).id === (data as Task).id);
-        } else if (type === shellConstants.vscode.tab.tabTypes.lifeLog) {
-            existingTab = openTabs.find((t) => t.type === type && (t.data as LifeLogLog).id === (data as LifeLogLog).id);
-        } else if (type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
-            existingTab = openTabs.find((t) => t.type === type && (t.data as LifeLogTrack).id === (data as LifeLogTrack).id);
-        }
-
-        // 2. Activate existing tab
-        if (existingTab) {
-            updateActiveTab(existingTab.id);
+        if (existing) {
+            updateActiveTab(existing.id);
             return;
         }
 
-        // 3. Create new tab
-        let newTab: BaseTab;
+        const inferredTitle =
+            meta.title ??
+            (data as Record<string, unknown>).name as string ??
+            (data as Record<string, unknown>).title as string ??
+            '';
 
-        if (type === shellConstants.vscode.tab.tabTypes.note) {
-            const d = data as Note;
-            newTab = {
-                id: `note-${d.id}-${Date.now()}`,
-                type,
-                data: d, data0: d,
-                title: d.name || shellConstants.vscode.tabTitles.unsavedNote,
-                hasUnsavedChanges: false,
-                breadcrumb: generateBreadcrumbForTab(d, type),
-                openedBy,
-            };
-        } else if (type === shellConstants.vscode.tab.tabTypes.workspace) {
-            const d = data as Ws;
-            newTab = {
-                id: `workspace-${d.id}-${Date.now()}`,
-                type,
-                data: d, data0: d,
-                title: d.name || shellConstants.vscode.tabTitles.unsavedWorkspace,
-                hasUnsavedChanges: false,
-                openedBy,
-            };
-        } else if (type === shellConstants.vscode.tab.tabTypes.project) {
-            const d = data as Project;
-            newTab = {
-                id: `project-${d.id}-${Date.now()}`,
-                type,
-                data: d, data0: d,
-                title: d.name,
-                hasUnsavedChanges: false,
-                openedBy,
-            };
-        } else if (type === shellConstants.vscode.tab.tabTypes.task) {
-            const d = data as Task;
-            newTab = {
-                id: `task-${d.id}-${Date.now()}`,
-                type,
-                data: d, data0: d,
-                title: d.title,
-                hasUnsavedChanges: false,
-                openedBy,
-            };
-        } else if (type === shellConstants.vscode.tab.tabTypes.lifeLog) {
-            const d = data as LifeLogLog;
-            newTab = {
-                id: `lifelog-${d.id}-${Date.now()}`,
-                type,
-                data: d, data0: d,
-                title: d.title || `Log ${d.id}`,
-                hasUnsavedChanges: false,
-                openedBy,
-            };
-        } else if (type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
-            const d = data as LifeLogTrack;
-            newTab = {
-                id: `lifelogtrack-${d.id}-${Date.now()}`,
-                type,
-                data: d, data0: d,
-                title: d.name,
-                hasUnsavedChanges: false,
-                openedBy,
-            };
-        } else {
-            newTab = {
-                id: `unknown-${Date.now()}`,
-                type: type as TabType,
-                data, data0: data,
-                title: shellConstants.vscode.tabTitles.unknownTab,
-                hasUnsavedChanges: false,
-                openedBy,
-            };
+        const newTab: BaseTab = {
+            id: meta.tabId ?? `${tabType}-${data.id}-${Date.now()}`,
+            type: tabType as TabType,
+            data,
+            data0: data,
+            title: inferredTitle,
+            hasUnsavedChanges: meta.hasUnsavedChanges ?? false,
+            isPinned: meta.isPinned,
+            openedBy: meta.openedBy,
+            breadcrumb: generateBreadcrumbForTab(data, tabType),
+            ...(meta.metadata !== undefined && { metadata: meta.metadata }),
+        };
+
+        const newTabs = [...openTabs, newTab];
+        setOpenTabs(newTabs);
+        updateActiveTab(newTab.id, newTabs);
+    };
+
+    // ── Open singleton tab (find by type only) ────────────────────────────────
+
+    /**
+     * Open a singleton tab (at most one per tabType).
+     * - If a tab of this type already exists → swap data if provided, then activate.
+     * - Otherwise → create a new tab and activate it.
+     *
+     * @param position  'last' (default) | 'first' — where to insert when creating.
+     */
+    const openSingletonTab = (
+        tabType: string,
+        meta: TabOpenMeta,
+        data?: unknown,
+        options?: { position?: 'first' | 'last' },
+    ) => {
+        const existing = openTabs.find((t) => t.type === tabType);
+
+        if (existing) {
+            if (data !== undefined) {
+                setOpenTabs((prev) =>
+                    prev.map((t) =>
+                        t.id === existing.id
+                            ? {
+                                  ...t,
+                                  data,
+                                  ...(meta.title !== undefined && { title: meta.title }),
+                                  hasUnsavedChanges: meta.hasUnsavedChanges ?? t.hasUnsavedChanges,
+                              }
+                            : t,
+                    ),
+                );
+            }
+            updateActiveTab(existing.id);
+            return;
         }
 
-        // 4. Add and activate
-        const newTabs = [...openTabs, newTab];
+        const newTab: BaseTab = {
+            id: meta.tabId ?? `${tabType}-tab`,
+            type: tabType as TabType,
+            data: data ?? null,
+            data0: data ?? null,
+            title: meta.title ?? '',
+            hasUnsavedChanges: meta.hasUnsavedChanges ?? false,
+            isPinned: meta.isPinned,
+            openedBy: meta.openedBy,
+        };
+
+        const newTabs =
+            options?.position === 'first'
+                ? [newTab, ...openTabs]
+                : [...openTabs, newTab];
+
         setOpenTabs(newTabs);
         updateActiveTab(newTab.id, newTabs);
     };
 
     // ── Close tab(s) ──────────────────────────────────────────────────────────
 
-    const closeTab = (tabId: string, force = false) => {
+    const closeTab = (tabId: string, _force = false) => {
         const tab = openTabs.find((t: BaseTab) => t.id === tabId);
         if (!tab) return;
 
@@ -200,12 +181,122 @@ export const useEditorTabBarHelper = () => {
         }
     };
 
+    // ── Update tab data ───────────────────────────────────────────────────────
+
+    /**
+     * Sync an entity's latest data into any open tabs that show it.
+     * Call this after saving/editing an entity so open tabs stay in sync.
+     *
+     * `newData` can be:
+     * - A plain value  → replaces tab.data entirely.
+     * - A function     → receives current tab.data and returns the next value.
+     *                    Use this when you only have a partial patch and need to merge.
+     *
+     * @example — partial patch (merge)
+     *   updateTabData(TAB_TYPE, taskId, (cur) => ({ ...(cur as Task), ...patch }), patch.title);
+     *
+     * @example — full replacement
+     *   updateTabData(TAB_TYPE, taskId, updatedTask, updatedTask.title);
+     */
+    const updateTabData = (
+        tabType: string,
+        entityId: number | string,
+        newData: unknown | ((current: unknown) => unknown),
+        newTitle?: string,
+    ) => {
+        setOpenTabs((prev) =>
+            prev.map((t) => {
+                if (t.type !== tabType) return t;
+                if ((t.data as { id: number | string })?.id !== entityId) return t;
+                const nextData = typeof newData === 'function' ? newData(t.data) : newData;
+                return {
+                    ...t,
+                    data: nextData,
+                    ...(newTitle !== undefined && { title: newTitle }),
+                };
+            }),
+        );
+    };
+
+    /**
+     * Update the data of a singleton tab (identified by type, not entity id).
+     * Does nothing if the singleton is not currently open.
+     */
+    const updateSingletonData = (
+        tabType: string,
+        newData: unknown,
+        newTitle?: string,
+    ) => {
+        setOpenTabs((prev) =>
+            prev.map((t) => {
+                if (t.type !== tabType) return t;
+                return {
+                    ...t,
+                    data: newData,
+                    ...(newTitle !== undefined && { title: newTitle }),
+                };
+            }),
+        );
+    };
+
+    /**
+     * Update arbitrary fields on a specific tab (by id).
+     *
+     * Pass a plain patch object OR a function that receives the current tab
+     * and returns a partial patch — use the function form when you need to
+     * spread existing nested fields (e.g. metadata).
+     *
+     * @example — mark unsaved changes
+     *   patchTab(tabId, { hasUnsavedChanges: true });
+     *
+     * @example — update inner-tab metadata (needs spread)
+     *   patchTab(tabId, (cur) => ({ metadata: { ...cur.metadata, activeTab: "general" } }));
+     *
+     * @example — replace data after save
+     *   patchTab(tabId, { data: saved, data0: saved, hasUnsavedChanges: false });
+     */
+    const patchTab = (
+        tabId: string,
+        patch: Partial<BaseTab> | ((current: BaseTab) => Partial<BaseTab>),
+    ) => {
+        setOpenTabs((prev) =>
+            prev.map((t) => {
+                if (t.id !== tabId) return t;
+                const p = typeof patch === 'function' ? patch(t) : patch;
+                return { ...t, ...p };
+            }),
+        );
+    };
+
+    /**
+     * Update arbitrary fields on a singleton tab (by type, not id).
+     * Does nothing if no tab of this type is open.
+     *
+     * @example — update title only
+     *   patchSingletonTab('kNode', { title: newName });
+     *
+     * @example — update nested metadata
+     *   patchSingletonTab('kKnowledge', (cur) => ({ metadata: { ...cur.metadata, activeTab: 'general' } }));
+     */
+    const patchSingletonTab = (
+        tabType: string,
+        patch: Partial<BaseTab> | ((current: BaseTab) => Partial<BaseTab>),
+    ) => {
+        setOpenTabs((prev) =>
+            prev.map((t) => {
+                if (t.type !== tabType) return t;
+                const p = typeof patch === 'function' ? patch(t) : patch;
+                return { ...t, ...p };
+            }),
+        );
+    };
+
     // ── Misc ──────────────────────────────────────────────────────────────────
 
     const getActiveTab = (tabId?: string): BaseTab | null => {
-        if (tabId) return openTabs.find((tab: BaseTab) => tab.id === tabId) || null;
+        if (tabId) return openTabs.find((t: BaseTab) => t.id === tabId) ?? null;
         if (!activeTabId) return null;
-        return openTabs.find((tab: BaseTab) => tab.id === activeTabId) || null;
+        return openTabs.find((t: BaseTab) => t.id === activeTabId) ?? null;
     };
 
     const processTabAfterDelete = (deletedIds: number[], type: string) => {
@@ -217,13 +308,23 @@ export const useEditorTabBarHelper = () => {
     };
 
     return {
+        openTabs,
+        activeTabId,
+        isLoadingTab,
+        setIsLoadingTab,
         openTab,
-        generateBreadcrumbForTab,
+        openSingletonTab,
         closeTab,
         closeTabs,
+        updateTabData,
+        updateSingletonData,
+        patchTab,
+        patchSingletonTab,
+        generateBreadcrumbForTab,
         getActiveTab,
         updateActiveTab,
         processTabAfterDelete,
-        setNewTabAnd,
+        /** Programmatic tab switch — does NOT fire onTabActivate module handlers. */
+        _setActiveTabId,
     };
 };

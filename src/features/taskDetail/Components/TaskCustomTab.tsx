@@ -16,7 +16,6 @@ import { useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskSectionStore } from "../store/useTaskSection.store";
 import { taskService } from "../service/task.service";
 import { Task } from "../types/task.types";
-import { BaseTab } from "@/shell";
 import { type CustomTab } from "../types/customTab.types";
 import {
     parseCustomTabs,
@@ -24,7 +23,7 @@ import {
     extractNameVersion,
     validateCustomTabFormat,
 } from "../utils/customTab.utils";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 /** Loop-rendered: accepts only the tabId identifier. */
 export function TaskCustomTab({ tabId }: { tabId: string }) {
@@ -32,7 +31,7 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
     const { handleFieldChange } = useTaskDetailFormHelper();
     const { submitVersionComment } = useTaskCommentHelper();
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { activeSection } = useTaskDetailSectionStore();
     const { customFocusTrigger, customTabHandlersRef, setCustomTabDirty } = useTaskSectionStore();
 
@@ -85,12 +84,11 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
             handleFieldChange("customTabsJson", json);
         } else {
             await taskService._patchTask($user.userToken, selectedTask.id, { customTabsJson: json });
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) => t.id === activeTabId
-                    ? { ...t, data: { ...(t.data as Task), customTabsJson: json }, data0: { ...(t.data as Task), customTabsJson: json } }
-                    : t,
-                ),
-            );
+            const activeTabId = getActiveTab()?.id;
+            if (activeTabId) patchTab(activeTabId, (cur) => ({
+                data: { ...(cur.data as Task), customTabsJson: json },
+                data0: { ...(cur.data as Task), customTabsJson: json },
+            }));
         }
 
         if (oldContent !== editContent) {

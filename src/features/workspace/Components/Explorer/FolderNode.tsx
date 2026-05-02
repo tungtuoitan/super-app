@@ -2,7 +2,7 @@ import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon, Layers, Dot, Circle, ChevronUp } from "lucide-react";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
@@ -38,7 +38,7 @@ export default Folder2;
 
 export function FolderNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: FolderNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef,setScrollToItem } = useWorkspaceStore();
-    const { searchQuery } = useSideBarStore();
+    const { searchQuery } = useSideBarHelper();
     const { showContextMenu } = useMenuContextHelper();
     const { isFolderSelected, getVisibleNodeIds } = useTreeHelper2();
     const _TREESTATUS = useTreeStatusHelper();

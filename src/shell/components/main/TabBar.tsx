@@ -1,15 +1,14 @@
 ﻿import React, { useEffect } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordSelector } from "@/shared";
-import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
-import { moduleRegistry } from "@/shell";
-import type { BaseTab } from "@/shell";
-import type { Note } from "@/features/note";
-import type { Ws } from "@/features/workspace";
-import {useEditorTabBarStore} from "@/shell";
 import {useTabBarHelper} from "@/shell/hooks/useTabBarHelper";
 import {useTabBarShortcuts} from "@/shell/hooks/useTabBarShortcuts";
+import {moduleRegistry} from "@/shell/moduleRegistry";
+import {BaseTab} from "@/shell/types/tab.types";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {useEditorTabBarHelper} from "@/shell/hooks/useEditorTabBar.helper";
+import {shellConstants} from "@/shell/shell.constants";
 
 // ── Breadcrumb trigger key ────────────────────────────────────────────────────
 // TabBar is the only component that needs this reactivity, so module
@@ -117,7 +116,7 @@ export function TabBar() {
         if (!hasNoteTabs) return;
         const newTabs = openTabs.map((tab) => {
             if (tab.type === shellConstants.vscode.tab.tabTypes.note) {
-                return { ...tab, breadcrumb: generateBreadcrumbForTab(tab.data as Note | Ws, tab.type) };
+                return { ...tab, breadcrumb: generateBreadcrumbForTab(tab.data, tab.type) };
             }
             return tab;
         });

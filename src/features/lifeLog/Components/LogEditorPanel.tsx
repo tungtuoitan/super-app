@@ -6,25 +6,19 @@ import { useEffect } from "react";
 import { LogDetailContent } from "./LogDetailContent";
 import type { BaseTab } from "@/shell";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 interface LogEditorPanelProps {
     tab: BaseTab;
 }
 
 export function LogEditorPanel({ tab }: LogEditorPanelProps) {
-    const { setOpenTabs } = useEditorTabBarStore();
+    const { patchTab } = useEditorTabBarHelper();
     const log = tab.data as LifeLogLog;
 
     // Track unsaved changes
     useEffect(() => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tab.id
-                    ? { ...t, hasUnsavedChanges: JSON.stringify(t.data) !== JSON.stringify(t.data0) }
-                    : t
-            )
-        );
+        patchTab(tab.id, { hasUnsavedChanges: JSON.stringify(tab.data) !== JSON.stringify(tab.data0) });
     }, [tab.data, tab.id]);
 
     return (

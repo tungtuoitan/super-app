@@ -4,33 +4,30 @@
  * Reads from stores directly — NO params.
  */
 
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import type { TabType } from "../../types/multiProjectDetail.type";
 
 export const useMultiProjectDetailHelper = () => {
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { availableProjects } = useMultiProjectDetailSelector();
 
     // Update inner tab in editor tab metadata
     const setActiveTab = (newTab: TabType) => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === activeTabId ? { ...t, metadata: { ...t.metadata, innerTab: newTab } } : t,
-            ),
-        );
+        const activeTabId = getActiveTab()?.id;
+        if (!activeTabId) return;
+        patchTab(activeTabId, (cur) => ({ metadata: { ...cur.metadata, innerTab: newTab } }));
     };
 
     // Update selected project IDs in editor tab metadata
     const setSelectedProjectIds = (updater: number[] | ((prev: number[]) => number[])) => {
-        setOpenTabs((prev) =>
-            prev.map((t) => {
-                if (t.id !== activeTabId) return t;
-                const currentSelected = (t.metadata?.selectedProjectIds as number[]) || [];
-                const newSelected = typeof updater === "function" ? updater(currentSelected) : updater;
-                return { ...t, metadata: { ...t.metadata, selectedProjectIds: newSelected } };
-            }),
-        );
+        const activeTabId = getActiveTab()?.id;
+        if (!activeTabId) return;
+        patchTab(activeTabId, (cur) => {
+            const currentSelected = (cur.metadata?.selectedProjectIds as number[]) || [];
+            const newSelected = typeof updater === "function" ? updater(currentSelected) : updater;
+            return { metadata: { ...cur.metadata, selectedProjectIds: newSelected } };
+        });
     };
 
     // Toggle a single project

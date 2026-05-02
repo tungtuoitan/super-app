@@ -8,14 +8,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { Save, RotateCcw, Undo2 } from "lucide-react";
 import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
-import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useGlobalShortcut } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { Breadcrumb } from "../Breadcrumb";
 import { BackButton } from "../BackButton";
-import { moduleRegistry } from "@/shell";
-import {useEditorTabBarStore} from "@/shell";
 import {useEditorToolbarHelper} from "@/shell/hooks/useEditorToolbar.helper";
+import {useEditorTabBarHelper} from "@/shell/hooks/useEditorTabBar.helper";
+import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
+import {moduleRegistry} from "@/shell/moduleRegistry";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabBarHelper();

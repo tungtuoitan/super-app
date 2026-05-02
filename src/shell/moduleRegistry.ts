@@ -10,8 +10,8 @@
  */
 
 import type { ComponentType, ReactNode } from "react";
-import type { BaseTab } from "@/shell";
 import {ModuleDefinition, PanelTabDefinition, TabMeta, TabPersistence} from "./types/moduleRegistry.type";
+import {BaseTab} from "./types/tab.types";
 
 
 const _registry: ModuleDefinition[] = [];

@@ -16,10 +16,9 @@ import { useConfirmationPopoverHelper } from "@/shared";
 import { taskService } from "../../service/task.service";
 import { serializeCustomTabs, generateTabId, generateDefaultContent } from "../../utils/customTab.utils";
 import { isCustomTab, getCustomTabId } from "../../utils/taskDetailSection.utils";
-import { BaseTab } from "@/shell";
 import { Task } from "../../types/task.types";
 import type { SectionTab } from "../../store/useTaskDetailSection.store";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 export const useTaskSectionHelper = () => {
     const { activeSection, setActiveSection } = useTaskDetailSectionStore();
@@ -27,7 +26,7 @@ export const useTaskSectionHelper = () => {
     const { customTabs } = useTaskCustomTabSelector();
     const { isSectionDirty } = useTaskSectionSelector();
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { submitVersionComment, submitComment } = useTaskCommentHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
 
@@ -39,11 +38,9 @@ export const useTaskSectionHelper = () => {
 
     /** Update a field in the active editor tab's data without marking hasUnsavedChanges */
     const updateTabDataSilent = (field: string, value: unknown) => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) =>
-                t.id === activeTabId ? { ...t, data: { ...(t.data as Task), [field]: value } } : t,
-            ),
-        );
+        const activeTabId = getActiveTab()?.id;
+        if (!activeTabId) return;
+        patchTab(activeTabId, (cur) => ({ data: { ...(cur.data as Task), [field]: value } }));
     }
 
     const handleDescChange = (value: string) => {
@@ -56,9 +53,8 @@ export const useTaskSectionHelper = () => {
         const currentNote = selectedTask.note ?? "";
         const oldNote = savedNoteRef.current;
         await taskService._patchTask($user.userToken, selectedTask.id, { note: currentNote });
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) => t.id === activeTabId ? { ...t, data0: { ...(t.data as Task) } } : t),
-        );
+        const activeTabId = getActiveTab()?.id;
+        if (activeTabId) patchTab(activeTabId, (cur) => ({ data0: { ...(cur.data as Task) } }));
         if (oldNote !== currentNote) submitVersionComment("desc", oldNote, currentNote);
         savedNoteRef.current = currentNote;
         setDescDirty(false);
@@ -94,9 +90,8 @@ export const useTaskSectionHelper = () => {
     }
     const doSwitchTab = (key: SectionTab) => {
         setActiveSection(key);
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) => t.id === activeTabId ? { ...t, metadata: { ...t.metadata, activeSection: key } } : t),
-        );
+        const activeTabId = getActiveTab()?.id;
+        if (activeTabId) patchTab(activeTabId, (cur) => ({ metadata: { ...cur.metadata, activeSection: key } }));
         if (key === "desc") triggerDescFocus();
         if (key === "comment") { triggerCommentFocus(); triggerCommentLoad(); }
         if (isCustomTab(key)) triggerCustomFocus();

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useSideBarStore } from "@/shell";
+import { useSideBarStore } from "../store/SideBar.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import type { UserFilters } from "@/shell";
 

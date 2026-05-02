@@ -12,7 +12,7 @@ import { TrackIconPicker } from "./TrackIconPicker";
 import { TRACK_COLORS } from "./trackColors";
 import { Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 interface TrackGeneralProps {
     trackId: number;
@@ -20,12 +20,12 @@ interface TrackGeneralProps {
 }
 
 export function TrackGeneral({ trackId, tabId }: TrackGeneralProps) {
-    const { openTabs, setOpenTabs } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { upsertTrack } = useLifeLogTrackHelper();
     const [colorOpen, setColorOpen] = useState(false);
     const colorRef = useRef<HTMLDivElement>(null);
 
-    const tab = openTabs.find((t) => t.id === tabId);
+    const tab = getActiveTab(tabId);
     const track = tab?.data as LifeLogTrack | undefined;
 
     useEffect(() => {
@@ -37,13 +37,11 @@ export function TrackGeneral({ trackId, tabId }: TrackGeneralProps) {
     }, []);
 
     const handleFieldChange = <K extends keyof LifeLogTrack>(field: K, value: LifeLogTrack[K]) => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tabId
-                    ? { ...t, data: { ...(t.data as LifeLogTrack), [field]: value }, title: field === "name" ? (value as string) || "Track" : t.title, hasUnsavedChanges: true }
-                    : t,
-            ),
-        );
+        patchTab(tabId, {
+            data: { ...(track as LifeLogTrack), [field]: value },
+            ...(field === "name" ? { title: (value as string) || "Track" } : {}),
+            hasUnsavedChanges: true,
+        });
     };
 
     if (!track) return null;

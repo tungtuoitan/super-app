@@ -8,13 +8,13 @@ import { toLocalISOString } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import {SaveActions} from "@/shell";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 export function useLifeLogSaveActions(): SaveActions {
     const { upsertLog } = useLifeLogLogHelper();
     const { upsertTrack } = useLifeLogTrackHelper();
     const { setLogs, setTracks } = useLifeLogStore();
-    const { setOpenTabs, setActiveTabId } = useEditorTabBarStore();
+    const { patchTab, _setActiveTabId } = useEditorTabBarHelper();
 
     const handles = (tabType: string) =>
         tabType === shellConstants.vscode.tab.tabTypes.lifeLog ||
@@ -39,17 +39,10 @@ export function useLifeLogSaveActions(): SaveActions {
                 if (isNew) {
                     const newTabId = `lifelog-tab-${saved.id}-${Date.now()}`;
                     setLogs((prev) => prev.map((l) => l.id === tempId ? saved : l));
-                    setOpenTabs((prev) =>
-                        prev.map((t) => t.id === tab.id
-                            ? { ...t, id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false }
-                            : t
-                        )
-                    );
-                    setActiveTabId(newTabId);
+                    patchTab(tab.id, { id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false });
+                    _setActiveTabId(newTabId);
                 } else {
-                    setOpenTabs((prev) =>
-                        prev.map((t) => t.id === tab.id ? { ...t, data0: t.data, hasUnsavedChanges: false } : t)
-                    );
+                    patchTab(tab.id, (cur) => ({ data0: cur.data, hasUnsavedChanges: false }));
                 }
             }
         } else if (tab.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack) {
@@ -68,22 +61,15 @@ export function useLifeLogSaveActions(): SaveActions {
                 if (isNew) {
                     const newTabId = `lifelog-track-tab-${saved.id}-${Date.now()}`;
                     setTracks((prev) => prev.map((t) => t.id === tempId ? saved : t));
-                    setOpenTabs((prev) =>
-                        prev.map((t) => t.id === tab.id
-                            ? { ...t, id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false }
-                            : t
-                        )
-                    );
-                    setActiveTabId(newTabId);
+                    patchTab(tab.id, { id: newTabId, data: saved, data0: saved, hasUnsavedChanges: false });
+                    _setActiveTabId(newTabId);
                 } else {
-                    setOpenTabs((prev) =>
-                        prev.map((t) => t.id === tab.id ? { ...t, data0: t.data, hasUnsavedChanges: false } : t)
-                    );
+                    patchTab(tab.id, (cur) => ({ data0: cur.data, hasUnsavedChanges: false }));
                 }
             }
         }
     }
-    
+
     return { handles, onSave };
 }
 

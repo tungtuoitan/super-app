@@ -11,10 +11,9 @@
  */
 
 import { useEffect, useRef } from "react";
-import { shellConstants, useEditorTabBarStore } from "@/shell";
+import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { useEditorTabBarHelper } from "@/shell";
-import type { Task } from "@/features/taskDetail";
-import { moduleRegistry } from "@/shell/moduleRegistry";
+import { moduleRegistry } from "../moduleRegistry";
 
 export const useTabBarShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabBarStore();
@@ -23,7 +22,8 @@ export const useTabBarShortcuts = () => {
 
     // Collect feature shortcuts from all registered modules
     // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
-    const moduleShortcuts = moduleRegistry.getAll()
+    const moduleShortcuts = moduleRegistry
+        .getAll()
         .filter((m) => m.useShortcuts != null)
         // eslint-disable-next-line react-hooks/rules-of-hooks
         .flatMap((m) => m.useShortcuts!());
@@ -49,20 +49,15 @@ export const useTabBarShortcuts = () => {
                     const activeTab = openTabs.find((t) => t.id === activeTabId);
                     if (!activeTab) return;
 
+                    // Check if this tab is a group child (its openedBy.link matches a leader's group key)
                     const isChild = activeTab.openedBy?.link
-                        ? openTabs.some((t) => {
-                              if (t.type !== shellConstants.vscode.tab.tabTypes.task) return false;
-                              const task = t.data as Task;
-                              return `sa/p${task.projectId}/t${task.id}` === activeTab.openedBy!.link;
-                          })
+                        ? openTabs.some((t) => moduleRegistry.getTabGroupKey(t) === activeTab.openedBy!.link)
                         : false;
                     if (isChild) return;
 
                     const newPinned = !activeTab.isPinned;
-                    const groupLink =
-                        activeTab.type === shellConstants.vscode.tab.tabTypes.task
-                            ? `sa/p${(activeTab.data as Task).projectId}/t${(activeTab.data as Task).id}`
-                            : null;
+                    // If this tab is a group leader, pin/unpin its children too
+                    const groupLink = moduleRegistry.getTabGroupKey(activeTab);
 
                     const newTabs = openTabs.map((tab) => {
                         if (tab.id === activeTabId) return { ...tab, isPinned: newPinned };
@@ -84,8 +79,7 @@ export const useTabBarShortcuts = () => {
             if (ctrlKPressedRef.current && event.key === "w") {
                 event.preventDefault();
                 ctrlKPressedRef.current = false;
-                const savedTabs = openTabs.filter((tab) => !tab.hasUnsavedChanges);
-                closeTabs(savedTabs.map((tab) => tab.id));
+                closeTabs(openTabs.filter((tab) => !tab.hasUnsavedChanges).map((tab) => tab.id));
                 return;
             }
 

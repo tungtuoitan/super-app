@@ -12,18 +12,18 @@ import { projectConstants } from "@/features/project/project.constants";
 import { constants, useStandardRegistrySelector } from "@/shared";
 import { IStatusOption } from "@/shared";
 import { usePTaskStore } from "@/features/project";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {useTaskDetailStore} from "../store/useTaskDetail.store";
 
 export const useTaskDetailSelector = () => {
-    const { openTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { allProjects } = useTaskDetailStore();
     const { tasks } = usePTaskStore();
     const { registriesByType } = useStandardRegistrySelector();
 
     // ── Tab & task ────────────────────────────────────────────────────────────
 
-    const taskTab = openTabs.find((tab) => tab.id === activeTabId);
+    const taskTab = getActiveTab();
 
     const selectedTask = taskTab ? (taskTab.data as Task) : undefined;
 

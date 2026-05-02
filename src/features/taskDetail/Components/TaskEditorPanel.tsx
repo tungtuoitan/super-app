@@ -6,16 +6,13 @@
  */
 
 import React from "react";
-import type { BaseTab } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDetailContent } from "./TaskDetailContent";
 import { useTaskDetailHeadless } from "../hooks/useTaskDetail.headless";
-import {useEditorTabBarStore} from "@/shell";
 
 export function TaskEditorPanel() {
-    const { setOpenTabs } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabBarHelper();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { taskDetailContentRef } = useTaskDetailStore();
     useTaskDetailHeadless();
 
@@ -26,7 +23,7 @@ export function TaskEditorPanel() {
     // Save scroll position when scrolling
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const scrollTop = e.currentTarget.scrollTop;
-        setOpenTabs((prev: BaseTab[]) => prev.map((t) => (t.id === activeTab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t)));
+        patchTab(activeTab.id, (cur) => ({ viewState: { ...cur.viewState, scrollTop } }));
     };
 
     return (

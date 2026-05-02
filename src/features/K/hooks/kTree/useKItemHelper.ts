@@ -5,16 +5,14 @@ import { useKStore } from "../../store/K.store";
 import { KService } from "../../service/K.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";
 import { isNumber } from "lodash";
-import {useConsoleHelper} from "@/shared";
-import {SPECIAL_IDS} from "../../utils/temp-id.utils";
-import {Note} from "../../types/note.types";
-import {useKLoader} from "./useK.loader";
-import {useEditorTabBarStore} from "@/shell";
+import { useConsoleHelper } from "@/shared";
+import { SPECIAL_IDS } from "../../utils/temp-id.utils";
+import { Note } from "../../types/note.types";
+import { useKLoader } from "./useK.loader";
 
 export const KuseWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
-    const { getActiveTab } = useEditorTabBarHelper();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { $user } = useAuthStore();
     const { currentK } = useKStore();
     const { loadTree } = useKLoader();
@@ -106,37 +104,25 @@ export const KuseWorkspaceItemHelper = () => {
                     // Update all tabs with real IDs from response
                     // =====================================
                     if (result.data && result.data.length > 0) {
-                        setOpenTabs((prev) =>
-                            prev.map((tab) => {
-                                const tabInfo = tabWorkspaceItemMap.get(tab.id);
-                                if (!tabInfo) return tab;
+                        for (const [tabId] of tabWorkspaceItemMap.entries()) {
+                            // Find corresponding created item in response (first item since K has no entityType)
+                            const createdItem = result.data?.[0];
+                            if (!createdItem) continue;
 
-                                // Find corresponding created item in response (first item since K has no entityType)
-                                const createdItem = result.data?.[0];
+                            // Find workspace item from reloaded data by id
+                            const workspaceItemFromDB = newWorkspace?.flatData.find((item: any) => item.id === createdItem.id);
+                            if (!workspaceItemFromDB) continue;
 
-                                if (!createdItem) return tab;
-
-                                // Find workspace item from reloaded data by id
-                                const workspaceItemFromDB = newWorkspace?.flatData.find((item:any) => item.id === createdItem.id);
-
-                                if (!workspaceItemFromDB) return tab;
-
-                                // Update tab with real data from K node
+                            // Update tab with real data from K node
+                            patchTab(tabId, (cur) => {
                                 const updatedNote: Note = {
-                                    ...(tab.data as Note),
+                                    ...(cur.data as Note),
                                     id: workspaceItemFromDB.id,
                                     name: workspaceItemFromDB.name,
                                 };
-
-                                return {
-                                    ...tab,
-                                    data: updatedNote,
-                                    data0: updatedNote, // Set data0 to saved state after creation
-                                    title: updatedNote.name,
-                                    // hasUnsavedChanges will be auto-calculated
-                                };
-                            })
-                        );
+                                return { data: updatedNote, data0: updatedNote, title: updatedNote.name };
+                            });
+                        }
 
                         const count = result.data.length;
                         _console.success(count === 1 ? "Note created successfully" : `${count} notes created successfully`);

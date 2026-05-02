@@ -4,7 +4,7 @@ import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useKStore } from "../../store/K.store";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { KuseTreeHelper } from "../../hooks/kTree/useKTreeHelper";
 import { useMenuContextHelper } from "@/shared";
 
@@ -20,7 +20,7 @@ import {KuseTreeHelper2} from "../../hooks/kTree/useKTreeHelper2";
 
 export function KTree() {
     const { isDragging, currentK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, markedNodeId, setMarkedNodeId, treeData: _storeTD, setTreeData } = useKStore();
-    const { searchQuery } = useSideBarStore();
+    const { searchQuery } = useSideBarHelper();
     const { handleSelectionChange, handleKeyDown } = KuseTreeHelper2();
     const { handleMove } = KuseTreeHelper();
     const { showContextMenu } = useMenuContextHelper();

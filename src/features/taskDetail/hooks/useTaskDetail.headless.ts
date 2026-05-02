@@ -6,7 +6,6 @@ import { useTaskLinkedKeywordsHelper } from "./useTaskLinkedKeywords.helper";
 import { useTaskWorkspaceItemHelper } from "./useTaskWorkspaceItem.helper";
 import { useEditorTabBarHelper } from "@/shell";
 import type { BaseTab } from "@/shell";
-import {useEditorTabBarStore} from "@/shell";
 
 export function useTaskDetailHeadless() {
     const { selectedTask, currentProject } = useTaskDetailSelector();
@@ -14,10 +13,7 @@ export function useTaskDetailHeadless() {
     const { loadLinkedKeywords } = useTaskLinkedKeywordsHelper();
     const { loadFolderItems } = useTaskWorkspaceItemHelper();
     const { setParentTaskOptions, taskDetailContentRef } = useTaskDetailStore();
-    const { setOpenTabs, openTabs } = useEditorTabBarStore();
-    const openTabsRef = useRef(openTabs);
-    openTabsRef.current = openTabs;
-    const { getActiveTab } = useEditorTabBarHelper();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
 
     const tab = getActiveTab();
 
@@ -50,27 +46,22 @@ export function useTaskDetailHeadless() {
     // because those are saved independently via section Save buttons.
     useEffect(() => {
         if (!tab) return;
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) => {
-                if (t.id !== tab.id) return t;
-                const sectionKeys = ["note", "checklistJson", "processJson", "customTabsJson"];
-                const stripSections = (obj: any) => {
-                    if (!obj) return obj;
-                    const copy = { ...obj };
-                    for (const k of sectionKeys) delete copy[k];
-                    return copy;
-                };
-                const hasChanges = tab.data && tab.data0
-                    ? JSON.stringify(stripSections(tab.data)) !== JSON.stringify(stripSections(tab.data0))
-                    : false;
-                return { ...t, hasUnsavedChanges: hasChanges };
-            }),
-        );
+        const sectionKeys = ["note", "checklistJson", "processJson", "customTabsJson"];
+        const stripSections = (obj: any) => {
+            if (!obj) return obj;
+            const copy = { ...obj };
+            for (const k of sectionKeys) delete copy[k];
+            return copy;
+        };
+        const hasChanges = tab.data && tab.data0
+            ? JSON.stringify(stripSections(tab.data)) !== JSON.stringify(stripSections(tab.data0))
+            : false;
+        patchTab(tab.id, { hasUnsavedChanges: hasChanges });
     }, [tab?.id, tab?.data]);
 
     useEffect(() => {
         if (!tab || !taskDetailContentRef?.current) return;
-        const viewState = openTabsRef.current.find((t: BaseTab) => t.id === tab.id)?.viewState;
+        const viewState = tab.viewState;
         if (viewState?.scrollTop !== undefined) {
             taskDetailContentRef.current.scrollTop = viewState.scrollTop;
         }

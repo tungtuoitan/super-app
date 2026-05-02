@@ -6,16 +6,13 @@
  */
 
 import React from "react";
-import type { BaseTab } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
 import { ProjectDetailContent } from "./ProjectDetailContent";
 import {useProjectDetailStore} from "../store/useProjectDetail.store";
 import {useProjectEditorPanelHeadless} from "../hooks/ProjectEditorPanel.headless";
-import {useEditorTabBarStore} from "@/shell";
 
 export function ProjectEditorPanel() {
-    const { setOpenTabs } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabBarHelper();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { contentRef } = useProjectDetailStore();
     useProjectEditorPanelHeadless()
 
@@ -26,7 +23,7 @@ export function ProjectEditorPanel() {
     // Save scroll position when scrolling
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const scrollTop = e.currentTarget.scrollTop;
-        setOpenTabs((prev: BaseTab[]) => prev.map((t) => (t.id === activeTab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t)));
+        patchTab(activeTab.id, (cur) => ({ viewState: { ...cur.viewState, scrollTop } }));
     };
 
     return (

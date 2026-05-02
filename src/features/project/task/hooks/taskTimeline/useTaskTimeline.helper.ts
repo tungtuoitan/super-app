@@ -14,14 +14,14 @@ import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
-import {useAuthStore} from "@/shared";
-import {useEditorTabBarStore} from "@/shell";
-import {usePTaskStore} from "@/features/project/store/usePTask.store";
+import { useAuthStore } from "@/shared";
+import { useEditorTabBarHelper } from "@/shell";
+import { usePTaskStore } from "@/features/project/store/usePTask.store";
 
 export const useTaskTimelineHelper = () => {
     const { setTasks } = usePTaskStore();
     const { $user } = useAuthStore();
-    const { setOpenTabs } = useEditorTabBarStore();
+    const { openTabs, patchTab } = useEditorTabBarHelper();
     const { projectId } = useProjectDetailStore();
     const _console = useConsoleHelper();
 
@@ -78,23 +78,14 @@ export const useTaskTimelineHelper = () => {
             );
 
             // Sync open task tab immediately
-            setOpenTabs((prev) =>
-                prev.map((tab) => {
-                    if (
-                        tab.type === shellConstants.vscode.tab.tabTypes.task &&
-                        (tab.data as Task).id === taskId
-                    ) {
-                        const updated: Task = {
-                            ...(tab.data as Task),
-                            startDate,
-                            endDate,
-                            updatedAt: new Date(),
-                        };
-                        return { ...tab, data: updated, data0: updated, hasUnsavedChanges: false };
-                    }
-                    return tab;
-                })
-            );
+            for (const tab of openTabs) {
+                if (tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === taskId) {
+                    patchTab(tab.id, (cur) => {
+                        const updated: Task = { ...(cur.data as Task), startDate, endDate, updatedAt: new Date() };
+                        return { data: updated, data0: updated, hasUnsavedChanges: false };
+                    });
+                }
+            }
 
             try {
                 const upsertData = {

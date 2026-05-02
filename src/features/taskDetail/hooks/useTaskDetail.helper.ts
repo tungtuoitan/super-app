@@ -16,7 +16,7 @@ import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { taskService } from "../service/task.service";
 import { useAuthStore, useKeywordSelector } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { BaseTab } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
 import { useTaskLinkedKeywordsHelper } from "../hooks/useTaskLinkedKeywords.helper";
@@ -26,7 +26,6 @@ import { useConfirmationPopoverHelper } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useDebugLog } from "@/shared";
 import { usePTaskStore } from "@/features/project";
-import {useEditorTabBarStore} from "@/shell";
 
 // Re-export utils for backward compatibility
 export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../utils/TaskDetail.utils";
@@ -38,7 +37,7 @@ export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskDa
 export const useTaskDetailHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { setTasks } = usePTaskStore();
     const { linkedKeywords, folderItems } = useTaskDetailStore();
     const { allKeywords } = useKeywordSelector();
@@ -89,7 +88,7 @@ export const useTaskDetailHelper = () => {
     // ── Save task (upsert) ────────────────────────────────────────────────────
 
     const upsertTask = async (tabId?: string): Promise<Task | null> => {
-            const activeTab = openTabs.find((tab) => tab.id === (tabId ?? activeTabId));
+            const activeTab = getActiveTab(tabId);
             const taskToSave = activeTab?.data as Task | undefined;
 
             if (!taskToSave) {
@@ -189,13 +188,12 @@ export const useTaskDetailHelper = () => {
                 debugLog.flush();
 
                 if (tabId) {
-                    setOpenTabs((prev) =>
-                        prev.map((tab: BaseTab) =>
-                            tab.id === tabId
-                                ? { ...tab, title: transformedTask.title || "Unsaved Task", data: transformedTask, data0: transformedTask, hasUnsavedChanges: false }
-                                : tab,
-                        ),
-                    );
+                    patchTab(tabId, {
+                        title: transformedTask.title || "Unsaved Task",
+                        data: transformedTask,
+                        data0: transformedTask,
+                        hasUnsavedChanges: false,
+                    });
                 }
 
                 setTasks((prev) => prev.map((t) => (t.id === transformedTask.id ? transformedTask : t)));
@@ -210,23 +208,23 @@ export const useTaskDetailHelper = () => {
 
     /**
      * @deprecated Use handleFieldChange instead.
-     * Targets the active tab via store's activeTabId — kept for backward compatibility.
+     * Targets the active tab — kept for backward compatibility.
      */
-    const handleTaskFieldChange = (field: keyof Task, value: any) => {
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t: BaseTab) => {
-                    if (t.id !== activeTabId) return t;
-                    return { ...t, data: { ...(t.data as Task), [field]: value }, hasUnsavedChanges: true };
-                }),
-            );
-        };
+    // const handleTaskFieldChange = (field: keyof Task, value: any) => {
+    //         const activeTabId = getActiveTab()?.id;
+    //         if (!activeTabId) return;
+    //         patchTab(activeTabId, (cur) => ({
+    //             data: { ...(cur.data as Task), [field]: value },
+    //             hasUnsavedChanges: true,
+    //         }));
+    //     };
 
     // ── Return ────────────────────────────────────────────────────────────────
     return {
         // save
         upsertTask,
         /** @deprecated */
-        handleTaskFieldChange,
+        // handleTaskFieldChange,
 
         // keyword handlers (own functions — compose from sub-helpers internally)
         handleOpenLinkPalette,

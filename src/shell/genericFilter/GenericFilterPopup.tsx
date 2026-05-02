@@ -9,7 +9,7 @@ import React, { useEffect } from "react";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Checkbox, RadioGroup, RadioGroupItem, Slider, Label, constants, useAuthStore, useStandardRegistrySelector } from "@/shared";
 import { useGenericFilterHelper } from "./useGenericFilterHelper";
-import { useSideBarStore } from "@/shell";
+import { useSideBarStore } from "../store/SideBar.store";
 import { filterRegistry } from "./filterRegistry";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/shared";
 import { FilterFieldConfig, ViewFilter } from "./filter.types";

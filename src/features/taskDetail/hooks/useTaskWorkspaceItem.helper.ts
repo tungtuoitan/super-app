@@ -16,13 +16,11 @@ import { constants } from "@/shared";
 import { generateTempId, generateUnsavedName, workspaceService } from "@/features/workspace";
 import { WorkspaceNoteItem, WorkspaceFileItem } from "@/features/workspace";
 import { useEditorTabBarHelper } from "@/shell";
-import {useEditorTabBarStore} from "@/shell";
 
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
+    const { openTabs, openTab } = useEditorTabBarHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
-    const { openTab } = useEditorTabBarHelper();
     const { setFolderItems, setIsLoadingFolderItems } = useTaskDetailStore();
 
     /**
@@ -111,13 +109,8 @@ export const useTaskWorkspaceItemHelper = () => {
         };
 
         const tabId = `note-${tempNoteId}-${Date.now()}`;
-        setOpenTabs((prev) => [...prev, {
-            id: tabId,
-            type: shellConstants.vscode.tab.tabTypes.note,
-            data: newNote,
-            data0: newNote,
-            title: name,
-            hasUnsavedChanges: false,
+        openTab(newNote, shellConstants.vscode.tab.tabTypes.note, {
+            tabId,
             metadata: {
                 taskId: task.id,
                 taskTitle: task.title,
@@ -125,8 +118,7 @@ export const useTaskWorkspaceItemHelper = () => {
                 // folderWorkspaceItemId tells upsertOrchestraitor where to place the note
                 folderWorkspaceItemId: task.folderWorkspaceItemId ?? null,
             },
-        }]);
-        setActiveTabId(tabId);
+        });
         setShouldFocusNoteName(true);
     }
     return {

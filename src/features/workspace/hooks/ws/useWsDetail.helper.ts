@@ -1,46 +1,36 @@
 
-import { useSnackbar } from "notistack";
 import { useWsStore } from "@/features/workspace/store/ws/useWs.store";
 import { wsService } from "@/features/workspace/service/ws.service";
 import { useWsGridHelper } from "./useWsGrid.helper";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { BaseTab } from "@/shell";
 import { useConsoleHelper } from "@/shared";
-import {Ws} from "../../types/workspace.types";
-import {useEditorTabBarStore} from "@/shell";
+import type {Ws} from "../../types/workspace.types";
+import { useEditorTabBarHelper } from "@/shell";
 
 export const useWsDetailHelper = () => {
     const { $user } = useAuthStore();
-    const { setWsGridPagination } = useWsStore();
     const { loadWorkspaces } = useWsGridHelper();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
 
     const handleWsFieldChange = (field: keyof Ws, value: any) => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t: BaseTab) => {
-                if (t.id === activeTabId) {
-                    const wsData = t.data as Ws;
-                    return {
-                        ...t,
-                        data: { ...wsData, [field]: value },
-                        hasUnsavedChanges: true,
-                    };
-                }
-                return t;
-            })
-        );
+        const activeTabId = getActiveTab()?.id;
+        if (!activeTabId) return;
+        patchTab(activeTabId, (cur) => ({
+            data: { ...(cur.data as Ws), [field]: value },
+            hasUnsavedChanges: true,
+        }));
     };
 
     /**
      * Save current workspace (create or update using Upsert pattern)
      * @param tabId - Current tab ID to update after save
      */
-    const upsertWorkspace = 
+    const upsertWorkspace =
         async (tabId?: string): Promise<Ws | null> => {
             // Get workspace data from active tab
-            const activeTab = openTabs.find((tab) => tab.id === (tabId || activeTabId));
+            const activeTab = getActiveTab(tabId);
             const selectedWs = activeTab?.data as Ws | undefined;
 
             if (!selectedWs) {
@@ -114,19 +104,11 @@ export const useWsDetailHelper = () => {
                 // ============================================================
                 _console.success(isCreateMode ? "Workspace created successfully" : "Workspace saved successfully");
                 if (tabId) {
-                    setOpenTabs((prev) =>
-                        prev.map((tab: BaseTab) => {
-                            if (tab.id === tabId) {
-                                return {
-                                    ...tab,
-                                    title: transformedWs.name || "Unsaved Workspace",
-                                    data: transformedWs,
-                                    data0: transformedWs, // Update data0 to new saved state
-                                };
-                            }
-                            return tab;
-                        })
-                    );
+                    patchTab(tabId, {
+                        title: transformedWs.name || "Unsaved Workspace",
+                        data: transformedWs,
+                        data0: transformedWs,
+                    });
                 }
 
                 // Reload workspaces immediately to show the newly saved workspace

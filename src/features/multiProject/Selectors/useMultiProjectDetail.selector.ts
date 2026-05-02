@@ -7,16 +7,14 @@
 import { useMemo } from "react";
 import { useProjectStore } from "@/features/project";
 import type { TabType } from "../types/multiProjectDetail.type";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 export const useMultiProjectDetailSelector = () => {
-    const { openTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab } = useEditorTabBarHelper();
     const { projects } = useProjectStore();
 
     // Current editor tab
-    const currentTab = useMemo(() => {
-        return openTabs.find((t) => t.id === activeTabId) || null;
-    }, [openTabs, activeTabId]);
+    const currentTab = getActiveTab();
 
     // Active inner tab
     const activeTab = useMemo(() => {

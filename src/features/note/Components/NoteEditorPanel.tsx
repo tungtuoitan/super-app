@@ -3,37 +3,33 @@
  * Reuses NoteDetailContent for editor area tabs
  */
 
-import React, { useEffect, useRef, useCallback } from "react";
-import { BaseTab } from "@/shell";
+import React, { useEffect, useRef } from "react";
+import type { BaseTab } from "@/shell";
 import { NoteDetailContent } from "./NoteDetailContent";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 interface NoteEditorPanelProps {
     tab: BaseTab;
 }
 
 export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
-    const { setOpenTabs, openTabs } = useEditorTabBarStore();
+    const { patchTab, getActiveTab } = useEditorTabBarHelper();
     const contentRef = useRef<HTMLDivElement>(null);
     const isRestoringScrollRef = useRef(false);
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Track unsaved changes
     useEffect(() => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) =>
-                t.id === tab.id
-                    ? {
-                          ...t,
-                          hasUnsavedChanges: tab.data && tab.data0 ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0) : false,
-                      }
-                    : t
-            )
-        );
+        patchTab(tab.id, {
+            hasUnsavedChanges: tab.data && tab.data0
+                ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0)
+                : false,
+        });
     }, [tab.id, tab.data]);
 
+    // Restore scroll position when tab becomes active
     useEffect(() => {
-        const currentTab = openTabs.find((t: BaseTab) => t.id === tab.id);
-        const scrollTop = currentTab?.viewState?.scrollTop;
+        const scrollTop = getActiveTab(tab.id)?.viewState?.scrollTop;
 
         if (contentRef.current && scrollTop !== undefined) {
             isRestoringScrollRef.current = true;
@@ -52,7 +48,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
             }
         };
     }, []);
-    
+
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         if (isRestoringScrollRef.current) return;
 
@@ -63,9 +59,7 @@ export function NoteEditorPanel({ tab }: NoteEditorPanelProps) {
         }
 
         scrollTimeoutRef.current = setTimeout(() => {
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) => (t.id === tab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t))
-            );
+            patchTab(tab.id, (cur) => ({ viewState: { ...cur.viewState, scrollTop } }));
         }, 100);
     }
 

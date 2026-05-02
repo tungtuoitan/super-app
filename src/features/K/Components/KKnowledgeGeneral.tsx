@@ -11,7 +11,7 @@ import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
 import { TrackIconPicker } from "@/features/lifeLog";
 import {useKLoader} from "../hooks/kTree/useK.loader";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 interface KKnowledgeGeneralProps {
     knowledgeId: number;
@@ -19,27 +19,20 @@ interface KKnowledgeGeneralProps {
 }
 
 export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps) {
-    const { openTabs, setOpenTabs } = useEditorTabBarStore();
+    const { patchTab, getActiveTab } = useEditorTabBarHelper();
     const { createKnowledge, updateKnowledge } = useKLoader();
     const { setSelectedKId } = useKStore();
 
-    const tab = openTabs.find((t) => t.id === tabId);
+    const tab = getActiveTab(tabId);
     const knowledge = tab?.data as KWsResponse | undefined;
 
     const handleFieldChange = <K extends keyof KWsResponse>(field: K, value: KWsResponse[K]) => {
-            setOpenTabs((prev) =>
-                prev.map((t) =>
-                    t.id === tabId
-                        ? {
-                              ...t,
-                              data: { ...(t.data as KWsResponse), [field]: value },
-                              title: field === "name" ? (value as string) || "Knowledge" : t.title,
-                              hasUnsavedChanges: true,
-                          }
-                        : t,
-                ),
-            );
-        }
+        patchTab(tabId, (cur) => ({
+            data: { ...(cur.data as KWsResponse), [field]: value },
+            title: field === "name" ? (value as string) || "Knowledge" : cur.title,
+            hasUnsavedChanges: true,
+        }));
+    };
 
     const handleSave = async () => {
         if (!knowledge) return;
@@ -53,27 +46,12 @@ export function KKnowledgeGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps
         if (isNew) {
             const created = await createKnowledge(payload);
             if (created) {
-                // Replace temp tab data with the real created entity (keep same tab id)
-                setOpenTabs((prev) =>
-                    prev.map((t) =>
-                        t.id === tabId
-                            ? {
-                                  ...t,
-                                  data: created,
-                                  data0: created,
-                                  title: created.name,
-                                  hasUnsavedChanges: false,
-                              }
-                            : t,
-                    ),
-                );
+                patchTab(tabId, { data: created, data0: created, title: created.name, hasUnsavedChanges: false });
                 setSelectedKId(created.id);
             }
         } else {
             await updateKnowledge(knowledge.id, payload);
-            setOpenTabs((prev) =>
-                prev.map((t) => (t.id === tabId ? { ...t, data0: t.data, hasUnsavedChanges: false } : t)),
-            );
+            patchTab(tabId, (cur) => ({ data0: cur.data, hasUnsavedChanges: false }));
         }
     };
 

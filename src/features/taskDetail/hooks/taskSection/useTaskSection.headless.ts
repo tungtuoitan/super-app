@@ -5,12 +5,12 @@ import { useGlobalShortcut } from "@/shared";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskSectionSelector } from "../../Selectors/TaskSectionSelector";
 import { useTaskSectionHelper } from "./useTaskSection.helper";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 export function useTaskSectionHeadless() {
     const { setActiveSection } = useTaskDetailSectionStore();
     const { selectedTask } = useTaskDetailSelector();
-    const { openTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, activeTabId } = useEditorTabBarHelper();
     const { isSectionDirty } = useTaskSectionSelector();
     const { handleSectionSave, handleSectionDiscard } = useTaskSectionHelper();
     const { savedNoteRef, setDescDirty, setDescKey } = useTaskSectionStore();
@@ -20,7 +20,7 @@ export function useTaskSectionHeadless() {
     useEffect(() => {
         if (!selectedTask || selectedTask.id === lastTaskIdRef.current) return;
         lastTaskIdRef.current = selectedTask.id;
-        const activeTab = openTabs.find((t) => t.id === activeTabId);
+        const activeTab = getActiveTab();
         const savedSection = activeTab?.metadata?.activeSection as SectionTab | undefined;
         setActiveSection(savedSection ?? (selectedTask.id <= 0 ? "desc" : "process"));
     }, [selectedTask?.id]);

@@ -1,40 +1,31 @@
 /**
  * LifeLog Tab Helper Hook
- * Manages opening/closing log editor tabs
+ * Manages opening/closing log editor tabs.
+ * Delegates all tab lifecycle to shell — never builds BaseTab directly.
  */
 
-
-import { constants } from "@/shared";
 import { shellConstants } from "@/shell";
-import type { BaseTab } from "@/shell";
-import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
+import { useEditorTabBarHelper } from "@/shell";
+import type { LifeLogLog, LifeLogTrack } from "../types/lifeLog.types";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import {useEditorTabBarStore} from "@/shell";
+
+const LOG_TYPE   = shellConstants.vscode.tab.tabTypes.lifeLog;
+const TRACK_TYPE = shellConstants.vscode.tab.tabTypes.lifeLogTrack;
+const GRAPH_TYPE = shellConstants.vscode.tab.tabTypes.lifeLogGraph;
+
+const dispatchOpened = () =>
+    window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
 
 export function useLifeLogTabHelper() {
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
+    const { openTab, openSingletonTab, closeTab, updateTabData } = useEditorTabBarHelper();
     const { setLogs, setTracks } = useLifeLogStore();
 
     const openLogTab = (log: LifeLogLog) => {
-        const existing = openTabs.find(
-            (t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLog && (t.data as LifeLogLog).id === log.id
-        );
-        if (existing) {
-            setActiveTabId(existing.id);
-        } else {
-            const newTab: BaseTab = {
-                id: `lifelog-tab-${log.id}-${Date.now()}`,
-                type: shellConstants.vscode.tab.tabTypes.lifeLog,
-                data: log,
-                data0: log,
-                title: log.title || log.type || "Log",
-                hasUnsavedChanges: false,
-            };
-            setOpenTabs((prev) => [...prev, newTab]);
-            setActiveTabId(newTab.id);
-        }
-        window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }
+        openTab(log, LOG_TYPE, {
+            title: log.title || log.type || "Log",
+        });
+        dispatchOpened();
+    };
 
     /** Create temp log (negative ID), push to store, open tab — no API call */
     const openNewLogTab = () => {
@@ -54,39 +45,19 @@ export function useLifeLogTabHelper() {
             deletedAt: null,
         };
         setLogs((prev) => [tempLog, ...prev]);
-        const newTab: BaseTab = {
-            id: `lifelog-tab-${tempId}`,
-            type: shellConstants.vscode.tab.tabTypes.lifeLog,
-            data: tempLog,
-            data0: tempLog,
+        openTab(tempLog, LOG_TYPE, {
             title: "New Log",
             hasUnsavedChanges: true,
-        };
-        setOpenTabs((prev) => [...prev, newTab]);
-        setActiveTabId(newTab.id);
-        window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }
+        });
+        dispatchOpened();
+    };
 
     const openTrackTab = (track: LifeLogTrack) => {
-        const existing = openTabs.find(
-            (t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLogTrack && (t.data as LifeLogTrack).id === track.id
-        );
-        if (existing) {
-            setActiveTabId(existing.id);
-        } else {
-            const newTab: BaseTab = {
-                id: `lifelog-track-tab-${track.id}-${Date.now()}`,
-                type: shellConstants.vscode.tab.tabTypes.lifeLogTrack,
-                data: track,
-                data0: track,
-                title: track.name || "Track",
-                hasUnsavedChanges: false,
-            };
-            setOpenTabs((prev) => [...prev, newTab]);
-            setActiveTabId(newTab.id);
-        }
-        window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }
+        openTab(track, TRACK_TYPE, {
+            title: track.name || "Track",
+        });
+        dispatchOpened();
+    };
 
     /** Create temp track (negative ID), push to store, open tab — no API call */
     const openNewTrackTab = () => {
@@ -104,55 +75,42 @@ export function useLifeLogTabHelper() {
             deletedAt: null,
         };
         setTracks((prev) => [tempTrack, ...prev]);
-        const newTab: BaseTab = {
-            id: `lifelog-track-tab-${tempId}`,
-            type: shellConstants.vscode.tab.tabTypes.lifeLogTrack,
-            data: tempTrack,
-            data0: tempTrack,
+        openTab(tempTrack, TRACK_TYPE, {
             title: "New Track",
             hasUnsavedChanges: true,
-        };
-        setOpenTabs((prev) => [...prev, newTab]);
-        setActiveTabId(newTab.id);
-        window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }
+        });
+        dispatchOpened();
+    };
 
+    /** Singleton graph tab */
     const openGraphTab = () => {
-        const existing = openTabs.find((t) => t.type === shellConstants.vscode.tab.tabTypes.lifeLogGraph);
-        if (existing) {
-            setActiveTabId(existing.id);
-        } else {
-            const newTab: BaseTab = {
-                id: `lifelog-graph-tab-${Date.now()}`,
-                type: shellConstants.vscode.tab.tabTypes.lifeLogGraph,
-                data: {} as any,
-                data0: {} as any,
-                title: "Track Activity",
-                hasUnsavedChanges: false,
-            };
-            setOpenTabs((prev) => [...prev, newTab]);
-            setActiveTabId(newTab.id);
-        }
-        window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
-    }
+        openSingletonTab(GRAPH_TYPE, { title: "Track Activity" });
+        dispatchOpened();
+    };
 
     const closeLogTab = (tabId: string) => {
-        setOpenTabs((prev) => prev.filter((t) => t.id !== tabId));
-    }
+        closeTab(tabId);
+    };
 
+    /**
+     * Sync updated log data into any open tabs showing this log.
+     */
     const updateLogInTabs = (logId: number, updatedFields: Partial<LifeLogLog>) => {
-        setOpenTabs((prev) =>
-            prev.map((t) => {
-                if (t.type !== shellConstants.vscode.tab.tabTypes.lifeLog) return t;
-                const log = t.data as LifeLogLog;
-                if (log.id !== logId) return t;
-                const updated = { ...log, ...updatedFields };
-                return { ...t, data: updated, title: updated.title || updated.type || "Log" };
-            })
+        updateTabData(
+            LOG_TYPE,
+            logId,
+            (current: LifeLogLog) => ({ ...(current as LifeLogLog), ...updatedFields }),
+            updatedFields.title || (updatedFields as LifeLogLog).type || undefined,
         );
-    }
+    };
 
-    return { openLogTab, openNewLogTab, openTrackTab, openNewTrackTab, openGraphTab, closeLogTab, updateLogInTabs };
+    return {
+        openLogTab,
+        openNewLogTab,
+        openTrackTab,
+        openNewTrackTab,
+        openGraphTab,
+        closeLogTab,
+        updateLogInTabs,
+    };
 }
-
-

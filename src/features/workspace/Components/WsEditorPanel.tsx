@@ -7,35 +7,29 @@
 import React, { useEffect } from "react";
 import type { BaseTab } from "@/shell";
 import { WsDetailContent } from "./WsDetailContent";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 interface WsEditorPanelProps {
     tab: BaseTab;
 }
 
 export function WsEditorPanel({ tab }: WsEditorPanelProps) {
-    const { setOpenTabs, openTabs } = useEditorTabBarStore();
+    const { patchTab, getActiveTab } = useEditorTabBarHelper();
 
     const contentRef = React.useRef<HTMLDivElement>(null);
 
-    // Sync hasUnsavedChanges with wsHasChanges
-    //* khi tạo Panel mới thì thêm cái này vào.
+    // Sync hasUnsavedChanges
     useEffect(() => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) =>
-                t.id === tab.id
-                    ? {
-                          ...t,
-                          hasUnsavedChanges: tab.data && tab.data0 ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0) : false,
-                      }
-                    : t
-            )
-        );
+        patchTab(tab.id, {
+            hasUnsavedChanges: tab.data && tab.data0
+                ? JSON.stringify(tab.data) !== JSON.stringify(tab.data0)
+                : false,
+        });
     }, [tab.id, tab.data]);
 
     // Restore scroll position when tab becomes active
     useEffect(() => {
-        const viewState = openTabs.find((t: BaseTab) => t.id === tab.id)?.viewState;
+        const viewState = getActiveTab(tab.id)?.viewState;
         if (contentRef.current && viewState?.scrollTop !== undefined) {
             contentRef.current.scrollTop = viewState.scrollTop;
         }
@@ -44,7 +38,7 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
     // Save scroll position when scrolling
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const scrollTop = e.currentTarget.scrollTop;
-        setOpenTabs((prev: BaseTab[]) => prev.map((t) => (t.id === tab.id ? { ...t, viewState: { ...t.viewState, scrollTop } } : t)));
+        patchTab(tab.id, (cur) => ({ viewState: { ...cur.viewState, scrollTop } }));
     };
 
     return (

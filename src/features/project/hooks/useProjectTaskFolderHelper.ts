@@ -20,14 +20,14 @@ import { useDebugLog } from "@/shared";
 import { constants } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { Note } from "@/features/note";
-import {useEditorTabBarStore} from "@/shell";
-import {Project} from "../types/project.types";
-import {usePTaskStore} from "@/features/project/store/usePTask.store";
+import { useEditorTabBarHelper } from "@/shell";
+import { Project } from "../types/project.types";
+import { usePTaskStore } from "@/features/project/store/usePTask.store";
 
 export function useProjectTaskFolderHelper() {
     const _console = useConsoleHelper();
     const { $user } = useAuthStore();
-    const { setOpenTabs } = useEditorTabBarStore();
+    const { openTabs, patchTab } = useEditorTabBarHelper();
     const { projects, setProjects } = useProjectStore();
     const { setTasks } = usePTaskStore();
     const debugLog = useDebugLog();
@@ -165,12 +165,14 @@ export function useProjectTaskFolderHelper() {
                 setTasks((prev) => prev.map((t) =>
                     t.id === savedTask.id ? { ...t, folderWorkspaceItemId } : t
                 ));
-                setOpenTabs((prev) => prev.map((tab) => {
+                for (const tab of openTabs) {
                     if (tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === savedTask.id) {
-                        return { ...tab, data: { ...tab.data as Task, folderWorkspaceItemId }, data0: { ...tab.data0 as Task, folderWorkspaceItemId } };
+                        patchTab(tab.id, (cur) => ({
+                            data: { ...(cur.data as Task), folderWorkspaceItemId },
+                            data0: cur.data0 ? { ...(cur.data0 as Task), folderWorkspaceItemId } : cur.data0,
+                        }));
                     }
-                    return tab;
-                }));
+                }
             }
         } catch (error) {
             console.error("Failed to create task folder:", error);

@@ -14,9 +14,9 @@ import { containsNormalized, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { kconstants } from "../../utils/K.Constants";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
 
 function KNodeEditorContent() {
@@ -25,7 +25,7 @@ function KNodeEditorContent() {
     const { scopedNodes, allNodes } = useKNodeEditorLoader();
     const { showContextMenu } = useMenuContextHelper();
     const { warning } = useConsoleHelper();
-    const { searchQuery } = useSideBarStore();
+    const { searchQuery } = useSideBarHelper();
 
     const kName = allK.find(k => k.id === rootNode.knowledgeId)?.name ?? "";
 
@@ -82,7 +82,7 @@ function KNodeEditorContent() {
     const lastBreadcrumbId = breadcrumb[breadcrumb.length - 1]?.id ?? null;
     const lastBreadcrumbName = breadcrumb[breadcrumb.length - 1]?.name ?? null;
 
-    const { setOpenTabs } = useEditorTabBarStore();
+    const { patchSingletonTab } = useEditorTabBarHelper();
 
     useEffect(() => {
         if (lastBreadcrumbId && lastBreadcrumbId > 0) {
@@ -95,11 +95,7 @@ function KNodeEditorContent() {
     // Sync kNode singleton tab title in TabBar whenever breadcrumb changes
     useEffect(() => {
         if (!lastBreadcrumbName) return;
-        setOpenTabs(prev => prev.map(t =>
-            t.type === shellConstants.vscode.tab.tabTypes.kNode
-                ? { ...t, title: lastBreadcrumbName }
-                : t
-        ));
+        patchSingletonTab(shellConstants.vscode.tab.tabTypes.kNode, { title: lastBreadcrumbName });
     }, [lastBreadcrumbName]);
 
     useEffect(() => {

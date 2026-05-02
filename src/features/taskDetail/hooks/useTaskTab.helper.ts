@@ -1,115 +1,67 @@
 /**
  * Task Tab Helper
- * Helper functions for managing task editor tabs
+ * Helper functions for managing task editor tabs.
+ * Delegates all tab lifecycle to shell — never builds BaseTab directly.
  */
 
-import { Task } from "../types/task.types";
+import type { Task } from "../types/task.types";
 import { shellConstants } from "@/shell";
-import { BaseTab } from "@/shell";
-import { constants } from "@/shared";
 import { useEditorTabBarHelper } from "@/shell";
 import { usePTaskStore } from "@/features/project";
-import {useEditorTabBarStore} from "@/shell";
-import {useTaskDetailStore} from "../store/useTaskDetail.store";
+import { useTaskDetailStore } from "../store/useTaskDetail.store";
+
+const TAB_TYPE = shellConstants.vscode.tab.tabTypes.task;
 
 export const useTaskTabHelper = () => {
-    const { openTabs, setOpenTabs, activeTabId, setActiveTabId } = useEditorTabBarStore();
-    const { updateActiveTab, setNewTabAnd } = useEditorTabBarHelper();
+    const { openTab, closeTab, updateTabData } = useEditorTabBarHelper();
     const { allProjects } = useTaskDetailStore();
     const { tasks } = usePTaskStore();
 
-    // Create a map for faster project lookups
-    const projectsCache: Record<number, any> = {};
-    allProjects.forEach(p => {
-        projectsCache[p.id] = p;
-    });
-
-    /**
-     * Open task in editor tab (within TabBar of ProjectDetailContent)
-     * If tab already exists, activate it; otherwise create new tab
-     */
-    const openTaskTab = (task: Task, openedBy?: { link: string; label: string }) => {
-        // Check if tab already exists for this task
-        const existingTab = openTabs.find(
-            (tab) => tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === task.id
-        );
-
-        if (existingTab) {
-            updateActiveTab(existingTab.id);
-        } else {
-            // Derive openedBy from real names in store
-            const resolvedOpenedBy = openedBy ?? (() => {
-                if (task.parentTaskId) {
-                    const parent = tasks.find(t => t.id === task.parentTaskId);
-                    return { link: `sa/p${task.projectId}/t${task.parentTaskId}`, label: parent?.title ?? "Parent Task" };
-                }
-                const project = projectsCache[task.projectId];
-                return { link: `sa/p${task.projectId}`, label: project?.name ?? "Project" };
-            })();
-
-            const newTab: BaseTab = {
-                id: `task-tab-${task.id}-${Date.now()}`,
-                type: shellConstants.vscode.tab.tabTypes.task,
-                data: task,
-                data0: task,
-                title: task.title || shellConstants.vscode.tabTitles.unsavedTask,
-                hasUnsavedChanges: false,
-                openedBy: resolvedOpenedBy,
+    const resolveOpenedBy = (task: Task) => {
+        if (task.parentTaskId) {
+            const parent = tasks.find((t) => t.id === task.parentTaskId);
+            return {
+                link: `sa/p${task.projectId}/t${task.parentTaskId}`,
+                label: parent?.title ?? "Parent Task",
             };
-
-            const newTabs = [...openTabs, newTab];
-            setOpenTabs(newTabs);
-            updateActiveTab(newTab.id, newTabs);
         }
+        const project = allProjects.find((p) => p.id === task.projectId);
+        return {
+            link: `sa/p${task.projectId}`,
+            label: project?.name ?? "Project",
+        };
     };
 
     /**
-     * Close task tab
+     * Open task in editor tab.
+     * If tab already exists → activate it. Otherwise → create new tab.
      */
-    const closeTaskTab = (tabId: string) => {
-        setOpenTabs((prev) => {
-            const newTabs = prev.filter((t) => t.id !== tabId);
-
-            // If closing active tab, switch to another tab
-            if (activeTabId === tabId) {
-                if (newTabs.length > 0) {
-                    // Switch to the last tab
-                    const lastTab = newTabs[newTabs.length - 1];
-                    setNewTabAnd(lastTab.id);
-                } else {
-                    setNewTabAnd(null);
-                }
-            }
-
-            return newTabs;
+    const openTaskTab = (task: Task, openedBy?: { link: string; label: string }) => {
+        openTab(task, TAB_TYPE, {
+            title: task.title || shellConstants.vscode.tabTitles.unsavedTask,
+            openedBy: openedBy ?? resolveOpenedBy(task),
         });
     };
 
     /**
-     * Update task in all tabs
-     * When task is updated, sync it across all open tabs
+     * Close task tab — fires onTabClose module callbacks via shell.
+     */
+    const closeTaskTab = (tabId: string) => {
+        closeTab(tabId);
+    };
+
+    /**
+     * Sync updated task data into any open tabs showing this task.
+     * Merges the patch into the existing tab data so no fields are lost.
      */
     const updateTaskInTabs = (taskId: number, updatedTask: Partial<Task>) => {
-        setOpenTabs((prev) =>
-            prev.map((tab) => {
-                if (tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === taskId) {
-                    const taskData = tab.data as Task;
-                    return {
-                        ...tab,
-                        data: { ...taskData, ...updatedTask },
-                        title: updatedTask.title || tab.title,
-                    };
-                }
-                return tab;
-            })
+        updateTabData(
+            TAB_TYPE,
+            taskId,
+            (current: Task) => ({ ...(current as Task), ...updatedTask }),
+            updatedTask.title,
         );
     };
 
-    return {
-        openTaskTab,
-        closeTaskTab,
-        updateTaskInTabs,
-    };
+    return { openTaskTab, closeTaskTab, updateTaskInTabs };
 };
-
-

@@ -7,13 +7,13 @@ import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
 import { useLocation } from "react-router-dom";
 import { useDeviceStore } from "@/shared";
-import { moduleRegistry } from "@/shell";
 import {useDetectDevice} from "../../../shared/device/useDetectDevice";
 import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {RightSideBar} from "./RightSideBar";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useModuleRegisterHelper} from "@/shell/hooks/useModuleRegister.helper";
 import { GlobalModuleInit } from "../GlobalModuleInit";
+import {moduleRegistry} from "@/shell/moduleRegistry";
 
 interface VSCodeLayoutProps {
     className?: string;

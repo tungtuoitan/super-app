@@ -10,20 +10,18 @@ import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 import { filterUtils } from "@/shell";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { useConsoleHelper } from "@/shared";
-import {useEditorTabBarStore} from "@/shell";
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "@/features/workspace";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
-    const { searchQuery } = useSideBarStore();
+    const { searchQuery } = useSideBarHelper();
 
     const { notes, setNotes, setNoteGridIsLoading, setNoteGridError, noteGridRowSelection, setNoteGridRowSelection, noteGridPagination, setNoteGridPagination, setTotalCount } = useNoteGridStore();
     const { showContextMenu } = useMenuContextHelper();
 
-    const { openTab, processTabAfterDelete } = useEditorTabBarHelper();
-    const { openTabs, setOpenTabs } = useEditorTabBarStore();
+    const { openTab, openTabs, processTabAfterDelete } = useEditorTabBarHelper();
     const _console = useConsoleHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
 

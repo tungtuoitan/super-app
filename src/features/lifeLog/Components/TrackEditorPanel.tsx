@@ -6,24 +6,18 @@ import { useEffect } from "react";
 import { TrackGeneral } from "./TrackGeneral";
 import type { BaseTab } from "@/shell";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 interface TrackEditorPanelProps {
     tab: BaseTab;
 }
 
 export function TrackEditorPanel({ tab }: TrackEditorPanelProps) {
-    const { setOpenTabs } = useEditorTabBarStore();
+    const { patchTab } = useEditorTabBarHelper();
     const track = tab.data as LifeLogTrack;
 
     useEffect(() => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tab.id
-                    ? { ...t, hasUnsavedChanges: JSON.stringify(t.data) !== JSON.stringify(t.data0) }
-                    : t
-            )
-        );
+        patchTab(tab.id, { hasUnsavedChanges: JSON.stringify(tab.data) !== JSON.stringify(tab.data0) });
     }, [tab.data, tab.id]);
 
     return (

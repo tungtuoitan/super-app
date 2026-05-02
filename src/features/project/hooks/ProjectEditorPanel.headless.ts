@@ -6,15 +6,12 @@
  */
 
 import { useEffect } from "react";
-import type { BaseTab } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";
 
 export function useProjectEditorPanelHeadless() {
-    const { openTabs, setOpenTabs } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabBarHelper();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { setProjectId, setTabId, contentRef } = useProjectDetailStore();
 
     const activeTab = getActiveTab();
@@ -31,22 +28,17 @@ export function useProjectEditorPanelHeadless() {
     // Effect 2: Sync hasUnsavedChanges
     useEffect(() => {
         if (!activeTab) return;
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t) =>
-                t.id === activeTab.id
-                    ? {
-                          ...t,
-                          hasUnsavedChanges: activeTab.data && activeTab.data0 ? JSON.stringify(activeTab.data) !== JSON.stringify(activeTab.data0) : false,
-                      }
-                    : t
-            )
-        );
+        patchTab(activeTab.id, {
+            hasUnsavedChanges: activeTab.data && activeTab.data0
+                ? JSON.stringify(activeTab.data) !== JSON.stringify(activeTab.data0)
+                : false,
+        });
     }, [activeTab?.id, activeTab?.data]);
 
     // Effect 3: Restore scroll position when tab becomes active
     useEffect(() => {
         if (!activeTab) return;
-        const viewState = openTabs.find((t: BaseTab) => t.id === activeTab.id)?.viewState;
+        const viewState = activeTab.viewState;
         if (contentRef.current && viewState?.scrollTop !== undefined) {
             contentRef.current.scrollTop = viewState.scrollTop;
         }

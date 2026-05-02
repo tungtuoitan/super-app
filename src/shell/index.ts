@@ -7,10 +7,11 @@
 
 
 // ── Stores ────────────────────────────────────────────────────────────────
-export { useEditorTabBarStore } from "./store/EditorTab.store";
+// export { useEditorTabBarStore } from "./store/EditorTab.store";
 // export { useActivityBarStore } from "./store/ActivityBar.store";
 // export { useCommandPaletteStore } from "./commandPallete/useCommandPalette.store";
-export { useSideBarStore, getSideBarState, subscribeSideBarState } from "./store/SideBar.store";
+export { getSideBarState } from "./store/SideBar.store"; // use useSideBarHelper instead
+export { useSideBarHelper } from "./hooks/useSideBar.helper";
 
 
 // ── Hooks ─────────────────────────────────────────────────────────────────
@@ -29,7 +30,7 @@ export { findKeywordForNote, parseBreadcrumbFromKeyword, enrichBreadcrumbWithCol
 
 
 // ── Types ─────────────────────────────────────────────────────────────────
-export type { BaseTab, TabViewState, TabType, MultiProjectTabData } from "./types/tab.types";
+export type { BaseTab, TabViewState, TabType, MultiProjectTabData, TabOpenMeta } from "./types/tab.types";
 export type { ModuleDefinition, TabMeta, PanelTabDefinition, TabStorage, OpenTabsStorage, TabPersistence, ShortcutDefinition } from "./types/moduleRegistry.type";
 export type { BreadcrumbItem } from "./utils/breadcrumb.utils";
 export type { SaveActions } from "./types/actions.types";

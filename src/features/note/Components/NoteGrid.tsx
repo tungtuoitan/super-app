@@ -9,23 +9,20 @@ import { useNoteGridHelper } from "../hooks/useNoteGrid.helper";
 import { useNoteGridTableHelper } from "../hooks/useNoteGrid.table.helper";
 import { Note } from "../types/note.types";
 import { useEditorTabBarHelper } from "@/shell";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { constants } from "@/shared";
-import { BaseTab } from "@/shell";
 import {useAuthStore} from "@/shared";
-import {useEditorTabBarStore} from "@/shell";
 
 /**
  * NoteGrid - A flexible layout panel for displaying notes in a data table
  */
 export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string; disabledRowIds?: Set<number> } = {}) {
     const { notes, noteGridIsLoading, noteGridError, setContainerWidth, containerRef, noteGridPagination, totalCount } = useNoteGridStore();
-    const { openTab } = useEditorTabBarHelper();
+    const { openTab, getActiveTab } = useEditorTabBarHelper();
     const { loadNotes, openNoteContextMenu } = useNoteGridHelper();
     const { $user } = useAuthStore();
     const { table } = useNoteGridTableHelper(source, disabledRowIds);
-    const { filterViewKey, searchQuery } = useSideBarStore();
-    const { openTabs, activeTabId } = useEditorTabBarStore();
+    const { filterViewKey, searchQuery } = useSideBarHelper();
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -87,7 +84,7 @@ export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string;
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => {
-                            const activeTab = openTabs.length > 0 && activeTabId ? openTabs.find((t: BaseTab) => t.id === activeTabId) : null;
+                            const activeTab = getActiveTab();
                             const activeNote = activeTab?.type === shellConstants.vscode.tab.tabTypes.note ? (activeTab.data as Note) : null;
                             const isSelected = activeNote?.id === row.original.id && source === "Note";
 

@@ -7,17 +7,16 @@ import { projectService, ProjectDTO } from "../service/project.service";
 import { shellConstants } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { BaseTab } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import { useWorkspaceStore } from "@/features/workspace";
 import { useWorkspaceHelper } from "@/features/workspace";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useConsoleHelper } from "@/shared";
 import { parseAsLocalDate, toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import type { TabType } from "../types/projectDetail.type";
-import {useEditorTabBarStore} from "@/shell";
 import {Project} from "../types/project.types";
 import {useProjectStore} from "../store/useProject.store";
 
@@ -45,10 +44,10 @@ export const useProjectDetailHelper = () => {
     const { $user } = useAuthStore();
     const { setProjects, setProjectGridIsLoading, setProjectGridError, setTotalCount } = useProjectStore();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId, openTabs } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { setSelectedWorkspaceId } = useWorkspaceStore();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
-    const { setModuleName } = useSideBarStore();
+    const { setModuleName } = useSideBarHelper();
     const { tabId } = useProjectDetailStore();
     const { selectedProject } = useProjectDetailSelector();
 
@@ -91,23 +90,19 @@ export const useProjectDetailHelper = () => {
     };
 
     const handleProjectFieldChange = (field: keyof Project, value: any) => {
-        setOpenTabs((prev: BaseTab[]) =>
-            prev.map((t: BaseTab) => {
-                if (t.id === activeTabId) {
-                    const projectData = t.data as Project;
-                    // Skip no-op updates — prevents infinite loops driven by editors
-                    // that fire onUpdate with normalised HTML that differs from the
-                    // currently-stored value only superficially.
-                    if (projectData[field] === value) return t;
-                    return {
-                        ...t,
-                        data: { ...projectData, [field]: value },
-                        hasUnsavedChanges: true,
-                    };
-                }
-                return t;
-            })
-        );
+        const activeTabId = getActiveTab()?.id;
+        if (!activeTabId) return;
+        patchTab(activeTabId, (cur) => {
+            const projectData = cur.data as Project;
+            // Skip no-op updates — prevents infinite loops driven by editors
+            // that fire onUpdate with normalised HTML that differs from the
+            // currently-stored value only superficially.
+            if (projectData[field] === value) return {};
+            return {
+                data: { ...projectData, [field]: value },
+                hasUnsavedChanges: true,
+            };
+        });
     };
 
     /**
@@ -116,7 +111,7 @@ export const useProjectDetailHelper = () => {
      */
     const upsertProject = async (tabId?: string): Promise<Project | null> => {
         // Get project data from active tab
-        const activeTab = openTabs.find((tab) => tab.id === (tabId || activeTabId));
+        const activeTab = getActiveTab(tabId);
         const selectedProject = activeTab?.data as Project | undefined;
 
         if (!selectedProject) {
@@ -193,19 +188,11 @@ export const useProjectDetailHelper = () => {
             // ============================================================
             _console.success(isCreateMode ? "Project created successfully" : "Project saved successfully");
             if (tabId) {
-                setOpenTabs((prev) =>
-                    prev.map((tab: BaseTab) => {
-                        if (tab.id === tabId) {
-                            return {
-                                ...tab,
-                                title: transformedProject.name || "Unsaved Project",
-                                data: transformedProject,
-                                data0: transformedProject, // Update data0 to new saved state
-                            };
-                        }
-                        return tab;
-                    })
-                );
+                patchTab(tabId, {
+                    title: transformedProject.name || "Unsaved Project",
+                    data: transformedProject,
+                    data0: transformedProject,
+                });
             }
 
             // Reload projects immediately to show the newly saved project
@@ -227,13 +214,8 @@ export const useProjectDetailHelper = () => {
 
     // Update inner tab in editor tab metadata
     const setActiveTab = (newTab: TabType) => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tabId
-                    ? { ...t, metadata: { ...t.metadata, innerTab: newTab } }
-                    : t,
-            ),
-        );
+        if (!tabId) return;
+        patchTab(tabId, (cur) => ({ metadata: { ...cur.metadata, innerTab: newTab } }));
     };
 
     // Navigate to workspace view for this project

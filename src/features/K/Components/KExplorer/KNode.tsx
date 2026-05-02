@@ -14,9 +14,9 @@ import type { KWsResponse } from "../../types/K.types";
 import { kTestDrag, KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
 import { useDrop } from "react-dnd";
 import { KTestService } from "../../service/kTest.service";
-import {shellConstants, useEditorTabBarStore} from "@/shell";
-import {KTreeNode} from "../../hooks/kTree/Ktree.miniHelper";
-import {useSideBarStore} from "@/shell";
+import { shellConstants, useEditorTabBarHelper } from "@/shell";
+import { KTreeNode } from "../../hooks/kTree/Ktree.miniHelper";
+import { useSideBarHelper } from "@/shell";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
@@ -44,8 +44,8 @@ export default Folder2;
 
 export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds, markedNodeId, setMarkedNodeId, currentKId }: NodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentK, allK, _treeRef, setScrollToItem, hoveredNodeId, setHoveredNodeId, setPendingQuizTabSwitch } = useKStore();    
-    const { searchQuery } = useSideBarStore();
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
+    const { searchQuery } = useSideBarHelper();
+    const { openTabs, patchTab, openSingletonTab, updateActiveTab } = useEditorTabBarHelper();
     const { showContextMenu } = useMenuContextHelper();
     const { isNodeSelected, getVisibleNodeIds } = useKTreeHelper2();
     const _TREESTATUS = useKTreeStatusHelper();
@@ -281,35 +281,24 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge
             );
             if (kTab) {
-                // Reuse â€” swap data if different knowledge
+                // Reuse — swap data if different knowledge
                 const tabKId = (kTab.data as KWsResponse).id;
                 if (tabKId !== currentK?.id && currentK) {
                     const ks = allK.find((k) => k.id === currentK.id);
                     if (ks) {
-                        setOpenTabs((prev: any[]) =>
-                            prev.map((t) =>
-                                t.id === kTab.id
-                                    ? { ...t, data: ks, data0: ks, title: ks.name || "Knowledge", hasUnsavedChanges: false }
-                                    : t,
-                            ),
-                        );
+                        patchTab(kTab.id, { data: ks, data0: ks, title: ks.name || 'Knowledge', hasUnsavedChanges: false });
                     }
                 }
-                setActiveTabId(kTab.id);
+                updateActiveTab(kTab.id);
             } else if (currentK) {
-                // No tab open yet â€” find the KWsResponse from allK and create one
+                // No tab open yet — find the KWsResponse from allK and create one
                 const ks = allK.find((k) => k.id === currentK.id);
                 if (ks) {
-                    const newTab = {
-                        id:                `k-knowledge-tab-${Date.now()}`,
-                        type:              shellConstants.vscode.tab.tabTypes.kKnowledge,
-                        data:              ks,
-                        data0:             ks,
-                        title:             ks.name || "Knowledge",
-                        hasUnsavedChanges: false,
-                    };
-                    setOpenTabs((prev: any[]) => [...prev, newTab]);
-                    setActiveTabId(newTab.id);
+                    openSingletonTab(
+                        shellConstants.vscode.tab.tabTypes.kKnowledge,
+                        { title: ks.name || 'Knowledge', tabId: `k-knowledge-tab-${Date.now()}`, hasUnsavedChanges: false },
+                        ks,
+                    );
                 }
             }
             // 2. Signal KKnowledgeEditorPanel to switch to Quiz tab

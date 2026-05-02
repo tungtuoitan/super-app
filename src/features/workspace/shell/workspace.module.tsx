@@ -2,7 +2,7 @@ import { Boxes, Box, BarChart3, ArrowRightLeft } from "lucide-react";
 import { WorkspaceView } from "../Components/WorkspaceView";
 import { WsEditorPanel } from "../Components/WsEditorPanel";
 import { MovingTab } from "../Components/VSPanel/MovingTab";
-import { shellConstants, type ModuleDefinition, useSideBarStore, getSideBarState } from "@/shell";
+import { shellConstants, type ModuleDefinition, useSideBarHelper, getSideBarState } from "@/shell";
 import type { TabStorage } from "@/shell";
 import type { BaseTab } from "@/shell";
 import { useWsSaveActions } from "../hooks/ws/useWsSaveActions";
@@ -68,7 +68,7 @@ export const workspaceModule: ModuleDefinition = {
     },
 
     useIsInModule: () => {
-        const { moduleName } = useSideBarStore();
+        const { moduleName } = useSideBarHelper();
         const { currentWorkspace } = useWorkspaceStore();
         const { workspaces } = useWsStore();
         return (tab: BaseTab) => {

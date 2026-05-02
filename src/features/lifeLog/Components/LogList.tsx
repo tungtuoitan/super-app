@@ -8,7 +8,7 @@ import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 import { LogItem } from "./LogItem";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { useDeviceStore } from "@/shared";
 import type { LifeLogLog } from "@/features/lifeLog/types/lifeLog.types";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
@@ -17,7 +17,7 @@ export function LogList() {
     const { logs, tracks, isLoading } = useLifeLogStore();
     const { loadLogs, deleteLog } = useLifeLogLogHelper();
     const { openLogTab, openNewLogTab } = useLifeLogTabHelper();
-    const { searchQuery } = useSideBarStore();
+    const { searchQuery } = useSideBarHelper();
     const { isMobile } = useDeviceStore();
 
     useEffect(() => {

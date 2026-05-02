@@ -19,7 +19,6 @@ import type { KItemV2 } from "../types/K-v2.types";
 import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
 import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
 import {useEditorTabBarHelper} from "@/shell";
-import {useEditorTabBarStore} from "@/shell";
 
 
 type SessionState = {
@@ -44,9 +43,8 @@ const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export function KKnowledgeEditorPanel() {
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabBarHelper()
-    const tab = getActiveTab(activeTabId ?? undefined)
+    const { getActiveTab, patchTab } = useEditorTabBarHelper()
+    const tab = getActiveTab()
     const knowledge = tab?.data as unknown as KWsResponse;
     const isNew     = knowledge.id < 0;
     const { isMobile } = useDeviceStore();
@@ -79,11 +77,7 @@ export function KKnowledgeEditorPanel() {
     // Persist activeTab to tab?.metadata so it survives unmount/remount
     const setActiveTab = (t: KTab) => {
         setActiveTabLocal(t);
-        setOpenTabs((prev) =>
-            prev.map((tab2) =>
-                tab2.id === tab?.id ? { ...tab2, metadata: { ...tab2.metadata, activeKTab: t } } : tab2
-            ),
-        );
+        if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, activeKTab: t } }));
     };
 
     // When knowledge changes (singleton tab swap), reset state
@@ -92,22 +86,14 @@ export function KKnowledgeEditorPanel() {
         setView({ kind: "none" });
         const defaultTab = isNew ? "general" : "questionFlow";
         setActiveTabLocal(defaultTab);
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tab?.id ? { ...t, metadata: { ...t.metadata, activeKTab: defaultTab } } : t
-            ),
-        );
+        if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, activeKTab: defaultTab } }));
     }, [knowledge.id]);
 
     // Track unsaved changes on tab
     useEffect(() => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tab?.id
-                    ? { ...t, hasUnsavedChanges: JSON.stringify(t.data) !== JSON.stringify(t.data0) }
-                    : t,
-            ),
-        );
+        if (tab?.id) {
+            patchTab(tab.id, { hasUnsavedChanges: JSON.stringify(tab.data) !== JSON.stringify(tab.data0) });
+        }
     }, [tab?.data, tab?.id]);
 
     // pendingQuizTabSwitch set by tree node click → reload tests filtered by that node
@@ -215,12 +201,8 @@ export function KKnowledgeEditorPanel() {
                             } else {
                                 // Different knowledge — swap tab data, then pendingQuizTabSwitch triggers testKanban
                                 const targetK = allK.find(k => k.id === targetKnowledgeId);
-                                if (targetK) {
-                                    setOpenTabs(prev => prev.map(t =>
-                                        t.id === tab?.id
-                                            ? { ...t, data: targetK, data0: targetK, title: targetK.name || "Knowledge", hasUnsavedChanges: false }
-                                            : t
-                                    ));
+                                if (targetK && tab?.id) {
+                                    patchTab(tab.id, { data: targetK, data0: targetK, title: targetK.name || "Knowledge", hasUnsavedChanges: false });
                                     setPendingQuizTabSwitch(null);
                                 }
                             }

@@ -3,11 +3,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shar
 import { SettingsDialog } from "../SettingsDialog";
 import { AccountsDialog } from "../AccountsDialog";
 import { useAuthStore } from "@/shared";
-import { useSideBarStore } from "@/shell";
-import { moduleRegistry, type ModuleDefinition } from "@/shell";
-import type { ActivityBarView } from "@/shell";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useActivityBarHelper} from "@/shell/hooks/useActivityBar.helper";
+import {ModuleDefinition} from "@/shell/types/moduleRegistry.type";
+import {useSideBarStore} from "@/shell/store/SideBar.store";
+import {moduleRegistry} from "@/shell/moduleRegistry";
+import {ActivityBarView} from "@/shell/types/activeBarView";
 
 // ─── Per-module button (own component so hooks inside useBadge work) ─────────
 

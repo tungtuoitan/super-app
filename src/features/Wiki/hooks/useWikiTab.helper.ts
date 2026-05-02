@@ -1,40 +1,24 @@
+/**
+ * Wiki Tab Helper
+ * Opens/updates the singleton wiki tab.
+ * Delegates all tab lifecycle to shell — never builds BaseTab directly.
+ */
 
-import { constants } from "@/shared";
 import { shellConstants } from "@/shell";
-import type { BaseTab } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import type { WikiTabData } from "../types/wiki.type";
-import {useEditorTabBarStore} from "@/shell";
 
-const WIKI_TAB_ID = "wiki-singleton-tab";
+const WIKI_TAB_TYPE = shellConstants.vscode.tab.tabTypes.wikiInfo;
+const WIKI_TAB_ID   = "wiki-singleton-tab";
 
 export const useWikiTabHelper = () => {
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
+    const { openSingletonTab } = useEditorTabBarHelper();
 
-    /** Open (or reuse) the singleton wiki tab, optionally focusing a keyword */
+    /** Open (or reuse) the singleton wiki tab, optionally focusing a keyword. */
     const openWikiTab = (keywordId: number | null = null) => {
         const data: WikiTabData = { keywordId };
-        const existing = openTabs.find(t => t.type === shellConstants.vscode.tab.tabTypes.wikiInfo);
-
-        if (existing) {
-            setOpenTabs(prev => prev.map(t =>
-                t.id === existing.id ? { ...t, data } : t
-            ));
-            setActiveTabId(existing.id);
-        } else {
-            const newTab: BaseTab = {
-                id: WIKI_TAB_ID,
-                type: shellConstants.vscode.tab.tabTypes.wikiInfo,
-                data,
-                data0: data,
-                title: "Wiki",
-                hasUnsavedChanges: false,
-            };
-            setOpenTabs(prev => [...prev, newTab]);
-            setActiveTabId(newTab.id);
-        }
-    }
+        openSingletonTab(WIKI_TAB_TYPE, { title: "Wiki", tabId: WIKI_TAB_ID }, data);
+    };
 
     return { openWikiTab };
 };
-
-

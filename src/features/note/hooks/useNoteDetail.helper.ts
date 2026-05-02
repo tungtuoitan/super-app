@@ -8,12 +8,10 @@ import { constants, useGetStandardRegistry } from "@/shared";
 import { useWorkspaceLoader } from "@/features/workspace";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
-import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions } from "@/shared";
 import { useEditorTabBarHelper } from "@/shell";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { useConsoleHelper } from "@/shared";
-import {useEditorTabBarStore} from "@/shell";
 import {useKeywordHelper} from "@/shared";
 
 export const useNoteDetailHelper = () => {
@@ -21,9 +19,8 @@ export const useNoteDetailHelper = () => {
     const { loadNotes } = useNoteGridHelper();
     const { loadTree } = useWorkspaceLoader();
     const _console = useConsoleHelper();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabBarHelper();
-    const { moduleName } = useSideBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
+    const { moduleName } = useSideBarHelper();
     const { loadKeywords } = useKeywordHelper();
 
     const handleNoteFieldChange = (field: keyof Note, value: any) => {
@@ -55,7 +52,7 @@ export const useNoteDetailHelper = () => {
             updated = { ...activeNote, icon: value.iconType, color: value.defaultColor };
         }
 
-        setOpenTabs((prev: BaseTab[]) => prev.map((t: BaseTab) => (t.id === activeTabId ? { ...t, data: updated } : t)));
+        patchTab(activeTab.id, { data: updated });
     };
 
     /**
@@ -108,21 +105,11 @@ export const useNoteDetailHelper = () => {
                 _console.success(isCreateMode ? "Note created successfully" : "Note saved successfully");
 
                 if (tabId) {
-                    setOpenTabs((prev) =>
-                        prev.map((tab: BaseTab) => {
-                            if (tab.id === tabId) {
-                                return {
-                                    ...tab,
-                                    data: transformedNote,
-                                    data0: transformedNote,
-                                    noteId: transformedNote.id,
-                                    title: transformedNote.name || "Unsaved Note",
-                                    note: transformedNote,
-                                };
-                            }
-                            return tab;
-                        })
-                    );
+                    patchTab(tabId, {
+                        data: transformedNote,
+                        data0: transformedNote,
+                        title: transformedNote.name || "Unsaved Note",
+                    });
                 }
 
                 if (moduleName === "Note") {

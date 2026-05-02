@@ -9,7 +9,8 @@
  * Mounted once in VSCodeLayout and never unmounted.
  */
 
-import { moduleRegistry } from "@/shell";
+import {moduleRegistry} from "../moduleRegistry";
+
 
 // One component per module so each hook obeys Rules of Hooks in isolation.
 function ModuleInitRunner({ useInit }: { useInit: () => void }) {

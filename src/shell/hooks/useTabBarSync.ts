@@ -27,7 +27,7 @@ export const getStorageKey = (userId: number | null | undefined): string | null 
 export const useTabBarSync = () => {
     const { openTabs, setOpenTabs, isLoadingTabs, setIsLoadingTabs } = useEditorTabBarStore();
     const { $user } = useAuthStore();
-    const { setNewTabAnd } = useEditorTabBarHelper();
+    const { _setActiveTabId } = useEditorTabBarHelper();
 
     // ── Restore tabs from localStorage on mount / userId change ───────────────
 
@@ -38,7 +38,7 @@ export const useTabBarSync = () => {
             const storageKey = getStorageKey($user.userId);
             if (!storageKey) {
                 setOpenTabs([]);
-                setNewTabAnd(null);
+                _setActiveTabId(null);
                 return;
             }
 
@@ -81,12 +81,12 @@ export const useTabBarSync = () => {
 
                 setOpenTabs(restoredTabs);
                 if (restoredTabs.length > 0) {
-                    setNewTabAnd(restoredTabs[restoredTabs.length - 1].id);
+                    _setActiveTabId(restoredTabs[restoredTabs.length - 1].id);
                 }
             } catch (error) {
                 console.error("Failed to restore tabs from localStorage:", error);
                 setOpenTabs([]);
-                setNewTabAnd(null);
+                _setActiveTabId(null);
             } finally {
                 setIsLoadingTabs(false);
             }

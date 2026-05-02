@@ -6,7 +6,7 @@ import { FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ICON_MAP, IconKey, ICON_COLORS } from "@/shared";
 import { useWorkspaceStore } from "../../store/Workspace.store";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useEditorTabBarHelper } from "@/shell";
@@ -31,7 +31,7 @@ interface NoteNodeProps {
 export function NoteNode({ node, style, dragHandle, treeData, treeType = "workspaceTree" }: NoteNodeProps) {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, currentWorkspace, _treeRef, setSelectedWorkspaceId, setScrollToItem, scrollToItem } =
         useWorkspaceStore();
-    const { searchQuery } = useSideBarStore();
+    const { searchQuery } = useSideBarHelper();
     const { highlightedDuplicateIds, targetWorkspace } = useMovingTreeStore();
     const { showContextMenu } = useMenuContextHelper();
     const { isFolderSelected, getVisibleNodeIds, selectItem } = useTreeHelper2();

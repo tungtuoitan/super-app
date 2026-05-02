@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { LogTypeIcon } from "./LogTypeIcon";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { SingleDatePicker } from "./SingleDatePicker";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 
 interface LogGeneralProps {
     logId: number;
@@ -18,20 +18,17 @@ interface LogGeneralProps {
 }
 
 export function LogGeneral({ logId, tabId }: LogGeneralProps) {
-    const { openTabs, setOpenTabs } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { tracks } = useLifeLogStore();
 
-    const tab = openTabs.find((t) => t.id === tabId);
+    const tab = getActiveTab(tabId);
     const log = tab?.data as LifeLogLog | undefined;
 
     const handleFieldChange = <K extends keyof LifeLogLog>(field: K, value: LifeLogLog[K]) => {
-        setOpenTabs((prev) =>
-            prev.map((t) =>
-                t.id === tabId
-                    ? { ...t, data: { ...t.data as LifeLogLog, [field]: value }, hasUnsavedChanges: true }
-                    : t
-            )
-        );
+        patchTab(tabId, (cur) => ({
+            data: { ...(cur.data as LifeLogLog), [field]: value },
+            hasUnsavedChanges: true,
+        }));
     }
 
     if (!log) return null;

@@ -1,4 +1,5 @@
-import {ActivityBarView, useSideBarStore} from "@/shell";
+import type { ActivityBarView } from "../types/activeBarView";
+import { useSideBarStore } from "../store/SideBar.store";
 import {STORAGE_KEYS, storageService} from "@/shared";
 import {useActivityBarStore} from "../store/ActivityBar.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";

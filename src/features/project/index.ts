@@ -2,7 +2,13 @@
  * Project Feature Public API
  * Only import from this file when crossing feature boundaries.
  * Internal imports within the project feature should use relative paths.
+ * multiProject and project feature share alot of things, even state
  */
+// Store
+export { useProjectStore } from "./store/useProject.store";
+export { usePTaskStore } from "./store/usePTask.store";
+
+
 // Components
 export { DraggableRow } from "./Components/DraggableRow";
 export { ProjectGridMenu } from "./contexts/ProjectGridMenu";
@@ -16,9 +22,6 @@ export { TaskFilterPopup } from "./task/Components/TaskFilterPopup";
 // Types
 export type { Project } from "./types/project.types";
 
-// Store
-export { useProjectStore } from "./store/useProject.store";
-export { usePTaskStore } from "./store/usePTask.store";
 
 // Hooks
 export { useProjectTabHelper } from "./hooks/useProjectTab.helper";

@@ -11,7 +11,7 @@ import { useNoteSaveActions } from "../hooks/useNoteSaveActions";
 import { noteService } from "../service/note.service";
 import { transformNotes } from "../utils/note.utils";
 import { useNoteGridStore, getNoteGridState } from "../store/useNoteGrid.store";
-import { useSideBarStore } from "@/shell";
+import { useSideBarHelper } from "@/shell";
 
 
 function getNoteTabIcon(tab: BaseTab) {
@@ -50,7 +50,7 @@ export const noteModule: ModuleDefinition = {
 
     useIsInModule: () => {
         const { notes } = useNoteGridStore();
-        const { moduleName } = useSideBarStore();
+        const { moduleName } = useSideBarHelper();
         return (tab: BaseTab) => {
             if (moduleName !== "Note") return false;
             if (tab.type !== shellConstants.vscode.tab.tabTypes.note) return false;

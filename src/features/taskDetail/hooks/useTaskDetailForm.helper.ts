@@ -9,15 +9,14 @@ import { Task } from "../types/task.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { TaskDTO, taskService } from "../service/task.service";
 import { useAuthStore, useGetStandardRegistry } from "@/shared";
-import { BaseTab } from "@/shell";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextToChecklist} from "../utils/checklist.utils";
 
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { patchTab } = useEditorTabBarHelper();
     const { setProjectOptions, setIsLoadingProjects, setParentTaskOptions, setIsLoadingParentTasks } = useTaskDetailStore();
 
     const { taskTab, selectedTask } = useTaskDetailSelector();
@@ -81,18 +80,11 @@ export const useTaskDetailFormHelper = () => {
 
     const handleFieldChange = (field: keyof Task, value: any) => {
             if (!taskTab || !selectedTask) return;
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) =>
-                    t.id === activeTabId
-                        ? {
-                              ...t,
-                              data: { ...selectedTask, [field]: value },
-                              title: field === "title" && value ? value : t.title,
-                              hasUnsavedChanges: true,
-                          }
-                        : t,
-                ),
-            );
+            patchTab(taskTab.id, {
+                data: { ...selectedTask, [field]: value },
+                ...(field === "title" && value ? { title: value } : {}),
+                hasUnsavedChanges: true,
+            });
         };
 
     const handleStatusChange = (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
@@ -120,33 +112,19 @@ export const useTaskDetailFormHelper = () => {
                 const template = getChecklistTemplate(newType, taskTypes);
                 if (template) newChecklistJson = JSON.stringify(parseTextToChecklist(template));
             }
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) =>
-                    t.id === activeTabId
-                        ? {
-                              ...t,
-                              data: { ...selectedTask, taskType: newType, checklistJson: newChecklistJson },
-                              hasUnsavedChanges: true,
-                          }
-                        : t,
-                ),
-            );
+            patchTab(taskTab.id, {
+                data: { ...selectedTask, taskType: newType, checklistJson: newChecklistJson },
+                hasUnsavedChanges: true,
+            });
         };
 
     const handleProjectChange = (_e: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
             if (!newValue || !taskTab || !selectedTask) return;
             const newProjectId = newValue.id as number;
-            setOpenTabs((prev: BaseTab[]) =>
-                prev.map((t) =>
-                    t.id === activeTabId
-                        ? {
-                              ...t,
-                              data: { ...selectedTask, projectId: newProjectId, parentTaskId: null },
-                              hasUnsavedChanges: true,
-                          }
-                        : t,
-                ),
-            );
+            patchTab(taskTab.id, {
+                data: { ...selectedTask, projectId: newProjectId, parentTaskId: null },
+                hasUnsavedChanges: true,
+            });
             loadParentTaskOptions(newProjectId, selectedTask.id);
         };
 

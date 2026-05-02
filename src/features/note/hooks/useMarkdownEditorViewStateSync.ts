@@ -8,16 +8,13 @@
 import { useEffect, useRef } from "react";
 import { shellConstants } from "@/shell";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
-import { useEditorTabBarStore } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
 import { constants } from "@/shared";
 import type * as _monaco from "monaco-editor";
 
 export function useMarkdownEditorViewStateSync() {
     const { editorRef, editorMountCount,isMounted } = useNoteDetailStore();
-    const { activeTabId, setOpenTabs } = useEditorTabBarStore();
-    const { isLoadingTab, setIsLoadingTab } = useEditorTabBarStore();
-    const { getActiveTab } = useEditorTabBarHelper();
+    const { activeTabId, patchTab, isLoadingTab, setIsLoadingTab, getActiveTab } = useEditorTabBarHelper();
     
 
     // Track previous active tab to save state when switching
@@ -46,28 +43,15 @@ export function useMarkdownEditorViewStateSync() {
                 const scrollTop = editor.getScrollTop();
                 const scrollLeft = editor.getScrollLeft();
 
-                setOpenTabs((prev) =>
-                    prev.map((tab) =>
-                        tab.id === prevTabId
-                            ? {
-                                  ...tab,
-                                  viewState: {
-                                      ...tab.viewState,
-                                      editorPosition: position
-                                          ? {
-                                                lineNumber: position.lineNumber,
-                                                column: position.column,
-                                            }
-                                          : undefined,
-                                      editorScrollPosition: {
-                                          scrollTop,
-                                          scrollLeft,
-                                      },
-                                  },
-                              }
-                            : tab
-                    )
-                );
+                patchTab(prevTabId, (cur) => ({
+                    viewState: {
+                        ...cur.viewState,
+                        editorPosition: position
+                            ? { lineNumber: position.lineNumber, column: position.column }
+                            : undefined,
+                        editorScrollPosition: { scrollTop, scrollLeft },
+                    },
+                }));
             } catch (error) {
                 console.warn("[ViewState] Failed to save editor position:", error);
             }
@@ -180,22 +164,12 @@ export function useMarkdownEditorViewStateSync() {
                 const scrollLeft = editor.getScrollLeft();
                 // console.log("save position:", activeTab.title, scrollTop);
 
-                setOpenTabs((prev) =>
-                    prev.map((tab) =>
-                        tab.id === activeTab.id
-                            ? {
-                                  ...tab,
-                                  viewState: {
-                                      ...tab.viewState,
-                                      editorScrollPosition: {
-                                          scrollTop,
-                                          scrollLeft,
-                                      },
-                                  },
-                              }
-                            : tab
-                    )
-                );
+                patchTab(activeTab.id, (cur) => ({
+                    viewState: {
+                        ...cur.viewState,
+                        editorScrollPosition: { scrollTop, scrollLeft },
+                    },
+                }));
             } catch (error) {
                 // Silently ignore errors
             }

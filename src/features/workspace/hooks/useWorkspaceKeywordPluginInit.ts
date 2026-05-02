@@ -2,7 +2,7 @@ import { useWorkspaceStore } from "../store/Workspace.store";
 import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { useWorkspaceHelper } from "./useWorkspaceHelper";
 import { useAuthStore, useConsoleHelper, parseKeywordLink } from "@/shared";
-import { shellConstants, useSideBarStore } from "@/shell";
+import { shellConstants, useSideBarHelper } from "@/shell";
 import { noteService } from "@/features/note";
 import type { Note } from "@/features/note";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
@@ -17,7 +17,7 @@ export function useWorkspaceKeywordPluginInit() {
     const { currentWorkspace, setSelectedWorkspaceId, setSelectedItemIds, setLastSelectedItemId, _treeRef, setIsLoadingTreeByOpeningFolder } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
     const { saveNewsBeforeNavigate } = useWorkspaceHelper();
-    const { setModuleName, moduleName } = useSideBarStore();
+    const { setModuleName, moduleName } = useSideBarHelper();
     const _console = useConsoleHelper();
 
     _setWorkspaceNavigateImpl(async (keyword: Keyword, openedBy: { link: string; label: string } | undefined, ctx: NavigationContext): Promise<boolean> => {

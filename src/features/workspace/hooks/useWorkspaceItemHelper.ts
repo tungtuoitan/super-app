@@ -8,14 +8,13 @@ import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/worksp
 import { useWorkspaceLoader } from "./useWorkspace.loader";
 import { isNumber } from "lodash";
 import {useConsoleHelper} from "@/shared";
-import {useEditorTabBarStore} from "@/shell";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useWorkspaceItemHelper = () => {
     const _console = useConsoleHelper();
-    const { getActiveTab } = useEditorTabBarHelper();
-    const { setOpenTabs, activeTabId } = useEditorTabBarStore();
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { $user } = useAuthStore();
+
     const { currentWorkspace } = useWorkspaceStore();
     const { loadTree } = useWorkspaceLoader();
 
@@ -110,36 +109,28 @@ export const useWorkspaceItemHelper = () => {
                     // Update all tabs with real IDs from response
                     // =====================================
                     if (result.data && result.data.length > 0) {
-                        setOpenTabs((prev) =>
-                            prev.map((tab) => {
-                                const tabInfo = tabWorkspaceItemMap.get(tab.id);
-                                if (!tabInfo) return tab;
+                        for (const [tabId, tabInfo] of tabWorkspaceItemMap.entries()) {
+                            // Find corresponding created item in response
+                            const createdItem = result.data?.find((item: any) => item.entityType === 3 && item.entityId === tabInfo.noteData.id);
+                            if (!createdItem) continue;
 
-                                // Find corresponding created item in response
-                                const createdItem = result.data?.find((item: any) => item.entityType === 3);
+                            // Find workspace item from reloaded data
+                            const workspaceItemFromDB = newWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === createdItem.entityId);
+                            if (!workspaceItemFromDB) continue;
 
-                                if (!createdItem) return tab;
+                            // Update tab with real data
+                            const updatedNote: Note = {
+                                ...(workspaceItemFromDB.data as any as Note),
+                                id: createdItem.entityId,
+                            };
 
-                                // Find workspace item from reloaded data
-                                const workspaceItemFromDB = newWorkspace?.flatData.find((item) => item.entityType === 3 && item.entityId === createdItem.entityId);
-
-                                if (!workspaceItemFromDB) return tab;
-
-                                // Update tab with real data
-                                const updatedNote: Note = {
-                                    ...(workspaceItemFromDB.data as any as Note),
-                                    id: createdItem.entityId,
-                                };
-
-                                return {
-                                    ...tab,
-                                    data: updatedNote,
-                                    data0: updatedNote, // Set data0 to saved state after creation
-                                    title: updatedNote.name,
-                                    // hasUnsavedChanges will be auto-calculated
-                                };
-                            })
-                        );
+                            patchTab(tabId, {
+                                data: updatedNote,
+                                data0: updatedNote, // Set data0 to saved state after creation
+                                title: updatedNote.name,
+                                // hasUnsavedChanges will be auto-calculated
+                            });
+                        }
 
                         const count = result.data.length;
                         _console.success(count === 1 ? "Note created successfully" : `${count} notes created successfully`);

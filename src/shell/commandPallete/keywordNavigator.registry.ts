@@ -18,7 +18,7 @@ export interface NavigationContext {
     userToken: string;
     openTabs: BaseTab[];
     openTab: (data: any, type: string, openedBy?: { link: string; label: string }) => void;
-    updateActiveTab: (tabId: string) => void;
+    updateActiveTab: (tabId: string | null, tabs?: BaseTab[]) => void;
     setOpenTabs: (updater: (prev: BaseTab[]) => BaseTab[]) => void;
     log: {
         error: (msg: string) => void;

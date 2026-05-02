@@ -11,15 +11,15 @@ import { constants, useGetStandardRegistry } from "@/shared";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared";
 import type { TabType } from "../types/projectDetail.type";
-import {useEditorTabBarStore} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import {Project} from "../types/project.types";
 
 export const useProjectDetailSelector = () => {
-    const { openTabs } = useEditorTabBarStore();
+    const { openTabs, getActiveTab } = useEditorTabBarHelper();
     const { projectId, tabId } = useProjectDetailStore();
 
     // Current editor tab
-    const currentTab = openTabs.find((t) => t.id === tabId) || null;
+    const currentTab = getActiveTab(tabId) || null;
 
     // Active inner tab from editor tab metadata
     const activeTab: TabType = (currentTab?.metadata?.innerTab as TabType) || "general";

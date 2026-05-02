@@ -4,7 +4,7 @@ import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
 import type { ModuleDefinition, BaseTab } from "@/shell";
 import type { TabStorage } from "@/shell";
-import type { MultiProjectTabData } from "@/shell/types/tab.types";
+import type { MultiProjectTabData } from "@/shell";
 import { constants } from "@/shared";
 import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";

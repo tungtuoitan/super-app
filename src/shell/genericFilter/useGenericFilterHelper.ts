@@ -5,16 +5,14 @@
  */
 
 import { useAuthStore } from "@/shared";
-import { constants } from "@/shared";
+import { useSideBarStore } from "../store/SideBar.store";
 import { filterUtils } from "./filter.utils";
 import { userProfileService } from "@/shared";
-import { envConfig } from "../../config/env.config";
 import { STORAGE_KEYS, storageService } from "@/shared";
 import { parseApiError } from "../../shared/fetch/api-error.utils";
 import {useConsoleHelper} from "@/shared";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "./filter.types";
 import { filterRegistry } from "./filterRegistry";
-import {useSideBarStore} from "@/shell";
 
 /**
  * Generic filter helper hook for filter operations

@@ -1,48 +1,27 @@
 /**
- * KTab Helper Hook
- * Opens knowledge editor tabs (create new / edit existing)
+ * KNode Tab Helper Hook
+ * Opens the singleton kNode editor tab.
+ * Delegates all tab lifecycle to shell — never builds BaseTab directly.
  */
 
-
-import { constants } from "@/shared";
 import { shellConstants } from "@/shell";
-import type { BaseTab } from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
 import type { KItemV2 } from "../types/K-v2.types";
-import {useEditorTabBarStore} from "@/shell";
 
+const K_NODE_TAB_TYPE = shellConstants.vscode.tab.tabTypes.kNode;
+const K_NODE_TAB_ID   = "k-node-tab";
 
 export function useKNodeTabHelper() {
-    const { openTabs, setOpenTabs, setActiveTabId } = useEditorTabBarStore();
+    const { openSingletonTab } = useEditorTabBarHelper();
 
-    const SINGLETON_ID = "k-node-tab";
-
+    /** Open the singleton kNode tab, swapping in the given node's data. */
     const openKNodeTab = (node: KItemV2) => {
-        const existing = openTabs.find((t) => t.type === shellConstants.vscode.tab.tabTypes.kNode);
-        if (existing) {
-            // Update the singleton tab with the new node data
-            setOpenTabs((prev) =>
-                prev.map((t) =>
-                    t.type === shellConstants.vscode.tab.tabTypes.kNode
-                        ? { ...t, data: node, data0: node, title: node.name }
-                        : t
-                )
-            );
-            setActiveTabId(existing.id);
-        } else {
-            const newTab: BaseTab = {
-                id: SINGLETON_ID,
-                type: shellConstants.vscode.tab.tabTypes.kNode,
-                data: node,
-                data0: node,
-                title: node.name,
-                hasUnsavedChanges: false,
-            };
-            setOpenTabs((prev) => [...prev, newTab]);
-            setActiveTabId(newTab.id);
-        }
+        openSingletonTab(
+            K_NODE_TAB_TYPE,
+            { title: node.name, tabId: K_NODE_TAB_ID },
+            node,
+        );
     };
 
     return { openKNodeTab };
 }
-
-

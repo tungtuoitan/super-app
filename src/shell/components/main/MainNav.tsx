@@ -6,7 +6,7 @@ import { AuthCallback, constants } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 import {useDeviceStore} from "@/shared";
 import {VSCodeLayout} from "./VSCodeLayout";
-import {shellConstants} from "@/shell";
+import {shellConstants} from "@/shell/shell.constants";
 
 /**
  * Main navigation component.
