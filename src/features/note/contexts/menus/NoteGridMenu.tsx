@@ -1,19 +1,14 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { Plus as AddIcon, Trash2 as DeleteIcon, AlertTriangle as HardDeleteIcon, RotateCcw as RestoreIcon } from "lucide-react";
-import { useMenuContext, useMenuContextHelper } from "@/shared";
+import { useNoteGridMenuHelper } from "../helpers/useNoteGridMenu.helper";
 
 export function NoteGridMenu() {
-    const { contextData } = useMenuContext();
-    const { openConfirmDialog, executeDirectly } = useMenuContextHelper();
-
-    const noteGridSelectedCount = contextData?.selectedIds?.length || 0;
-    const allSelectedAreTempNotes = contextData?.selectedIds?.every((id: number) => id < 0) ?? false;
-    const anySelectedDeleted = contextData?.selectedNotes?.some((note: any) => note.deletedAt !== null && note.deletedAt !== undefined) ?? false;
+    const { selectedCount, allAreTempNotes, anySelectedDeleted, addNote, softDelete, hardDelete, restore } = useNoteGridMenuHelper();
 
     return (
         <>
-            <MenuItem onClick={() => executeDirectly({ callback: contextData?.onAddNote! })}>
+            <MenuItem onClick={addNote}>
                 <AddIcon className="w-4 h-4 mr-2" />
                 Add
             </MenuItem>
@@ -21,24 +16,22 @@ export function NoteGridMenu() {
             <MenuDivider />
 
             {!anySelectedDeleted && (
-                <MenuItem
-                    onClick={(e) => openConfirmDialog({ type: "soft-delete", entityType: "note", count: noteGridSelectedCount, allAreTempItems: allSelectedAreTempNotes, onConfirm: contextData?.onSoftDelete!, event: e })}
-                >
+                <MenuItem onClick={(e: any) => softDelete((e.syntheticEvent?.target ?? e.target) as HTMLElement)}>
                     <DeleteIcon className="w-4 h-4 mr-2" />
                     Delete
                 </MenuItem>
             )}
 
-            {anySelectedDeleted && !allSelectedAreTempNotes && (
+            {anySelectedDeleted && !allAreTempNotes && (
                 <>
                     <MenuItem
-                        onClick={(e) => openConfirmDialog({ type: "hard-delete", entityType: "note", count: noteGridSelectedCount, allAreTempItems: false, onConfirm: contextData?.onHardDelete!, event: e })}
+                        onClick={(e: any) => hardDelete((e.syntheticEvent?.target ?? e.target) as HTMLElement)}
                         className="text-red-600 hover:bg-red-50"
                     >
                         <HardDeleteIcon className="w-4 h-4 mr-2" />
                         Hard Delete
                     </MenuItem>
-                    <MenuItem onClick={() => executeDirectly({ callback: contextData?.onRestore! })}>
+                    <MenuItem onClick={restore}>
                         <RestoreIcon className="w-4 h-4 mr-2" />
                         Restore
                     </MenuItem>

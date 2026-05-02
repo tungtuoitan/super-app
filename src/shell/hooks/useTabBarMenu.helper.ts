@@ -17,6 +17,8 @@ export const useTabBarMenuHelper = () => {
     const { setIsMenuContextOpen } = useMenuContextHelper();
 
     const contextTabId = contextData?.tabId || null;
+
+    // Get the context tab (the tab that was right-clicked)
     const contextTab = openTabs.find((tab) => tab.id === contextTabId);
     const isPinned = contextTab?.isPinned || false;
     const isChild = contextTab ? isGroupChild(contextTab, openTabs) : false;

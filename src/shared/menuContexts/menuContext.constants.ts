@@ -4,6 +4,8 @@
  */
 
 export const MENU_CONTEXT_TYPES = {
+    default:            "default",
+
     // Workspace tree
     folder:             "folder",
     note:               "note",

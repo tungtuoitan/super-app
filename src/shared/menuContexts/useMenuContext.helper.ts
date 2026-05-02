@@ -7,12 +7,14 @@ interface OpenConfirmDialogParams {
     entityType: "note" | "workspace" | "folder" | "task";
     count: number;
     allAreTempItems: boolean;
-    onConfirm: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onConfirm?: (...args: any[]) => any;
     event: any;
 }
 
 interface ExecuteDirectlyParams {
-    callback: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    callback?: (...args: any[]) => any;
 }
 
 export const useMenuContextHelper = () => {
@@ -23,7 +25,7 @@ export const useMenuContextHelper = () => {
         setIsMenuContextOpen(false);
 
         if (allAreTempItems) {
-            onConfirm();
+            onConfirm?.();
             return;
         }
 
@@ -42,16 +44,16 @@ export const useMenuContextHelper = () => {
             confirmColor: "destructive",
             buttonVariant: "default",
             zIndex: 20000,
-            onConfirm,
+            onConfirm: () => onConfirm?.(),
         });
     };
 
     const executeDirectly = ({ callback }: ExecuteDirectlyParams) => {
         setIsMenuContextOpen(false);
-        callback();
+        callback?.();
     };
 
-    const showContextMenu = (event: React.MouseEvent, type: MenuContextType = "default", data?: any) => {
+    const showContextMenu = (event: React.MouseEvent, type: MenuContextType = "default", data?: unknown) => {
         event.preventDefault();
         event.stopPropagation();
         setAnchorPoint({ x: event.clientX, y: event.clientY });

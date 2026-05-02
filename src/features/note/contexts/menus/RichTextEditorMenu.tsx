@@ -1,13 +1,15 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { ClipboardCopy } from "lucide-react";
 import { useMenuContext, useMenuContextHelper } from "@/shared";
+import type { RichTextEditorMenuData } from "@/shared";
 
 export function RichTextEditorMenu() {
     const { contextData } = useMenuContext();
     const { setIsMenuContextOpen } = useMenuContextHelper();
+    const data = contextData as RichTextEditorMenuData | null;
 
     const handleCopyPlainText = () => {
-        contextData?.onCopyPlainText?.();
+        data?.onCopyPlainText?.();
         setIsMenuContextOpen(false);
     };
 

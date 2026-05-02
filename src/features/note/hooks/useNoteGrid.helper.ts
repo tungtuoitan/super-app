@@ -13,6 +13,7 @@ import { filterUtils } from "@/shell";
 import { useSideBarHelper } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "@/features/workspace";
+import type { NoteGridMenuData } from "@/shared";
 
 export const useNoteGridHelper = () => {
     const { $user } = useAuthStore();
@@ -169,14 +170,9 @@ export const useNoteGridHelper = () => {
         const selectedNotes = [...notes]
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .filter((note) => selectedIds.includes(note.id));
-        showContextMenu(event, "note-grid", {
-            selectedNotes,
-            selectedIds,
-            onSoftDelete: () => deleteRestoreSelectedNotes(selectedIds, "soft-delete"),
-            onHardDelete: () => hardDeleteSelectedNotes(selectedIds),
-            onRestore: () => deleteRestoreSelectedNotes(selectedIds, "restore"),
-            onAddNote: createNewNote,
-        });
+
+        const data: NoteGridMenuData = { selectedNotes, selectedIds };
+        showContextMenu(event, "note-grid", data);
     };
 
     // Load notes with filters from user state
@@ -224,6 +220,9 @@ export const useNoteGridHelper = () => {
     return {
         openNoteContextMenu,
         loadNotes,
+        createNewNote,
+        deleteRestoreSelectedNotes,
+        hardDeleteSelectedNotes,
     };
 };
 

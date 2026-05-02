@@ -42,7 +42,7 @@ export const useWorkspaceChildMenuHelper = () => {
         }
         try {
             const token = $user.userToken;
-            const result = await noteService._deleteNote(token ?? "", noteEntityId.toString());
+            const result = await noteService.deleteNote(token ?? "", noteEntityId.toString());
             if (result.success) {
                 setSelectedItemIds([]);
                 setLastSelectedItemId(null);

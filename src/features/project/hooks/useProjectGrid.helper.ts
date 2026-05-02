@@ -14,6 +14,7 @@ import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/shared";
 import {Project} from "../types/project.types";
 import {generateTempId, generateUnsavedName} from "@/features/workspace";
+import type { ProjectGridMenuData } from "@/shared";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
@@ -148,7 +149,7 @@ export const useProjectGridHelper = () => {
     };
 
     // Handle context menu
-    const openProjectContextMenu = (event: React.MouseEvent, row?: any) => {
+    const openProjectContextMenu = (event: React.MouseEvent, row?: { id: string }) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -163,23 +164,8 @@ export const useProjectGridHelper = () => {
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .filter((p) => selectedIds.includes(p.id));
 
-        showContextMenu(event, "project-grid", {
-            selectedProjects,
-            selectedIds,
-            onSoftDelete: () => deleteRestoreProjects(selectedIds, "soft-delete"),
-            onRestore: () => deleteRestoreProjects(selectedIds, "restore"),
-            onAddProject: createNewProject,
-            onOpenMultiProjectView: () => {
-                // Open multi-project tab - it will use its own chip selector to choose projects
-                // Default will be all active projects (handled in MultiProjectDetailContent)
-                openMultiProjectTab([]);
-            },
-            onOpenProjectView: () => {
-                if (selectedProjects.length === 1) {
-                    openProjectTab(selectedProjects[0]);
-                }
-            },
-        });
+        const data: ProjectGridMenuData = { selectedProjects, selectedIds };
+        showContextMenu(event, "project-grid", data);
     };
 
     // Load projects with filters
@@ -224,5 +210,8 @@ export const useProjectGridHelper = () => {
         openProjectContextMenu,
         loadProjects,
         createNewProject,
+        deleteRestoreProjects,
+        openProjectTab,
+        openMultiProjectTab,
     };
 };

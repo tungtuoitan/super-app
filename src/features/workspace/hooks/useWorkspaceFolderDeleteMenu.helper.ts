@@ -31,8 +31,8 @@ const $getAllVisibleFolderIds = (items: any[]): number[] => {
 
 const $collectAllDescendants = (folder: Folder): Folder[] => {
     const descendants: Folder[] = [folder];
-    if (folder.children?.length > 0) {
-        for (const child of folder.children) descendants.push(...$collectAllDescendants(child));
+    if ((folder.children?.length ?? 0) > 0) {
+        for (const child of folder.children!) descendants.push(...$collectAllDescendants(child));
     }
     return descendants;
 };
