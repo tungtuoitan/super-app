@@ -50,5 +50,10 @@ export { RichTextEditor } from "./RichTextEditor/RichTextEditor";
 export { DateTimePicker } from "./DateTimePicker/DateTimePicker";
 export { DateRangePicker, type DateRangePickerProps } from "./DateTimePicker/DateRangePicker";
 
+// ── Error Boundary ────────────────────────────────────────────────────────
+export { ErrorBoundary, useErrorBoundary, withErrorBoundary } from "react-error-boundary";
+export type { FallbackProps } from "react-error-boundary";
+export { RootErrorFallback, EditorAreaErrorFallback, TabPanelErrorFallback } from "./ErrorBoundary/ErrorFallback";
+
 // ── Misc Components ───────────────────────────────────────────────────────
 export { HighlightedText } from "./HighlightedText";

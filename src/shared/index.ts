@@ -76,6 +76,9 @@ export { RichTextEditor } from "./components/RichTextEditor/RichTextEditor";
 export { DateTimePicker } from "./components/DateTimePicker/DateTimePicker";
 export { DateRangePicker, type DateRangePickerProps } from "./components/DateTimePicker/DateRangePicker";
 export { HighlightedText } from "./components/HighlightedText";
+export { ErrorBoundary, useErrorBoundary, withErrorBoundary } from "react-error-boundary";
+export type { FallbackProps } from "react-error-boundary";
+export { RootErrorFallback, EditorAreaErrorFallback, TabPanelErrorFallback } from "./components/ErrorBoundary/ErrorFallback";
 
 // ── confirmPopover ────────────────────────────────────────────────────────
 export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";

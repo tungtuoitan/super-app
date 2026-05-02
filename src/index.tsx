@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ErrorBoundary, RootErrorFallback } from "@/shared";
 import { applyShadcnTheme } from "./lib/theme/shadcn";
 
 import "./index.css";
@@ -33,8 +34,10 @@ applyShadcnTheme(document.documentElement);
 // Render the application with all necessary providers
 root.render(
     <React.StrictMode>
-        <ThemeProvider>
-            <App />
-        </ThemeProvider>
+        <ErrorBoundary FallbackComponent={RootErrorFallback}>
+            <ThemeProvider>
+                <App />
+            </ThemeProvider>
+        </ErrorBoundary>
     </React.StrictMode>,
 );

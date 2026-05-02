@@ -1,22 +1,23 @@
-﻿import React from "react";
+import React from "react";
 import { useTabBarSync } from "../../hooks/useTabBarSync";
 import { TabBar } from "./TabBar";
-import {EditorToolbar} from "./EditorToolbar";
-import {ConfirmCloseDialog} from "../ConfirmCloseDialog";
-import {useEditorTabBarHelper} from "@/shell/hooks/useEditorTabBar.helper";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
-import {moduleRegistry} from "@/shell/moduleRegistry";
-import {shellConstants} from "@/shell/shell.constants";
-import {BaseTab} from "@/shell/types/tab.types";
+import { EditorToolbar } from "./EditorToolbar";
+import { ConfirmCloseDialog } from "../ConfirmCloseDialog";
+import { useEditorTabBarHelper } from "@/shell/hooks/useEditorTabBar.helper";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
+import { moduleRegistry } from "@/shell/moduleRegistry";
+import { shellConstants } from "@/shell/shell.constants";
+import { BaseTab } from "@/shell/types/tab.types";
+import { ErrorBoundary, EditorAreaErrorFallback, TabPanelErrorFallback } from "@/shared";
 
 /**
- * VSEditorArea â€” main editor area.
- * Renders editor panels via the module registry â€” no direct feature imports.
+ * VSEditorArea - main editor area.
+ * Renders editor panels via the module registry - no direct feature imports.
  */
 export function VSEditorArea() {
     const { openTabs, activeTabId, confirmCloseTabId, setConfirmCloseTabId, editorAreaRef } = useEditorTabBarStore();
     const { closeTab, getActiveTab } = useEditorTabBarHelper();
-    useTabBarSync()
+    useTabBarSync();
 
     const activeTab = getActiveTab();
     const keepAliveTabTypes = moduleRegistry.getKeepAliveTabTypes();
@@ -34,54 +35,65 @@ export function VSEditorArea() {
     };
 
     return (
-        <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
+        <ErrorBoundary FallbackComponent={EditorAreaErrorFallback}>
+            <div className="w-full h-full bg-editor-bg flex flex-col overflow-hidden">
 
-            <TabBar />
+                <TabBar />
 
-            {activeTab && activeTab.type !== shellConstants.vscode.tab.tabTypes.trackingGraph && (
-                <EditorToolbar />
-            )}
+                {activeTab && activeTab.type !== shellConstants.vscode.tab.tabTypes.trackingGraph && (
+                    <EditorToolbar />
+                )}
 
-            <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">
-                {/* Keep-alive panels: mounted but hidden when not active */}
-                {openTabs
-                    .filter((t) => keepAliveTabTypes.includes(t.type))
-                    .map((t) => {
-                        const Panel = moduleRegistry.getEditorPanel(t.type);
-                        if (!Panel) return null;
-                        return (
-                            <div
-                                key={t.id}
-                                className="w-full h-full overflow-hidden"
-                                style={{ display: t.id === activeTabId ? undefined : "none" }}
-                            >
-                                <Panel tab={t} />
-                            </div>
-                        );
-                    })}
+                <div id="mainContentArea" ref={editorAreaRef} className="flex-1 overflow-hidden flex">
+                    {/* Keep-alive panels: mounted but hidden when not active */}
+                    {openTabs
+                        .filter((t) => keepAliveTabTypes.includes(t.type))
+                        .map((t) => {
+                            const Panel = moduleRegistry.getEditorPanel(t.type);
+                            if (!Panel) return null;
+                            return (
+                                <ErrorBoundary
+                                    key={t.id}
+                                    FallbackComponent={TabPanelErrorFallback}
+                                    resetKeys={[t.id]}
+                                >
+                                    <div
+                                        className="w-full h-full overflow-hidden"
+                                        style={{ display: t.id === activeTabId ? undefined : "none" }}
+                                    >
+                                        <Panel tab={t} />
+                                    </div>
+                                </ErrorBoundary>
+                            );
+                        })}
 
-                {/* Active tab panel (skip keep-alive types â€” already rendered above) */}
-                {activeTab && !keepAliveTabTypes.includes(activeTab.type) ? (
-                    <ActivePanel tab={activeTab} />
-                ) : !activeTab ? (
-                    <WelcomeState />
-                ) : null}
+                    {/* Active tab panel (skip keep-alive types - already rendered above) */}
+                    {activeTab && !keepAliveTabTypes.includes(activeTab.type) ? (
+                        <ActivePanel tab={activeTab} />
+                    ) : !activeTab ? (
+                        <WelcomeState />
+                    ) : null}
+                </div>
+
+                <ConfirmCloseDialog
+                    open={!!confirmCloseTabId}
+                    tabTitle={confirmCloseTabId ? activeTab?.title || "" : ""}
+                    onConfirm={handleConfirmClose}
+                    onCancel={() => setConfirmCloseTabId(null)}
+                />
             </div>
-
-            <ConfirmCloseDialog
-                open={!!confirmCloseTabId}
-                tabTitle={confirmCloseTabId ? activeTab?.title || "" : ""}
-                onConfirm={handleConfirmClose}
-                onCancel={() => setConfirmCloseTabId(null)}
-            />
-        </div>
+        </ErrorBoundary>
     );
 }
 
 function ActivePanel({ tab }: { tab: BaseTab }) {
     const Panel = moduleRegistry.getEditorPanel(tab.type);
     if (!Panel) return <WelcomeState />;
-    return <Panel tab={tab} />;
+    return (
+        <ErrorBoundary FallbackComponent={TabPanelErrorFallback} resetKeys={[tab.id]}>
+            <Panel tab={tab} />
+        </ErrorBoundary>
+    );
 }
 
 function WelcomeState() {
@@ -94,6 +106,3 @@ function WelcomeState() {
         </div>
     );
 }
-
-
-
